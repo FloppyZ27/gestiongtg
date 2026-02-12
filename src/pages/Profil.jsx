@@ -662,10 +662,32 @@ export default function Profil() {
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
                 <div className="flex justify-between items-center">
-                  <div className="text-white font-semibold text-lg">
-                    {viewMode === "week" 
-                      ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                      : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  <div className="flex items-center gap-4">
+                    <div className="text-white font-semibold text-lg">
+                      {viewMode === "week" 
+                        ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                        : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                    </div>
+                    {viewMode === "week" && (() => {
+                      const weekDays = getPointageWeekDays();
+                      const totalWeek = weekDays.reduce((sum, day) => {
+                        const dayPointages = getPointageForDate(day);
+                        return sum + dayPointages.reduce((daySum, p) => {
+                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                            return daySum + (p.duree_heures_modifiee || 0);
+                          } else {
+                            const debut = new Date(p.heure_debut);
+                            const fin = new Date(p.heure_fin);
+                            return daySum + (fin - debut) / (1000 * 60 * 60);
+                          }
+                        }, 0);
+                      }, 0);
+                      return (
+                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm px-3 py-1">
+                          Total semaine: {totalWeek.toFixed(1)}h
+                        </Badge>
+                      );
+                    })()}
                   </div>
                   <div className="flex gap-2 items-center">
                     <Button
@@ -926,13 +948,21 @@ export default function Profil() {
                         }
 
                         const dayPointages = getPointageForDate(day);
-                        const totalHours = getDayTotalHours(day);
+                        const totalModifie = dayPointages.reduce((sum, p) => {
+                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                            return sum + (p.duree_heures_modifiee || 0);
+                          } else {
+                            const debut = new Date(p.heure_debut);
+                            const fin = new Date(p.heure_fin);
+                            return sum + (fin - debut) / (1000 * 60 * 60);
+                          }
+                        }, 0);
                         const isToday = day.toDateString() === new Date().toDateString();
 
                         return (
                           <div
                             key={index}
-                            className={`border rounded-lg p-2 min-h-[80px] ${
+                            className={`border rounded-lg p-2 min-h-[80px] flex flex-col ${
                               isToday 
                                 ? 'border-cyan-500 bg-cyan-500/10' 
                                 : 'border-slate-700 bg-slate-800/30'
@@ -941,13 +971,10 @@ export default function Profil() {
                             <div className={`text-xs font-semibold mb-1 ${isToday ? 'text-cyan-400' : 'text-white'}`}>
                               {format(day, "d")}
                             </div>
-                            {dayPointages.length > 0 && (
-                              <div className="space-y-1">
-                                <div className="text-[10px] text-cyan-400 font-bold">
-                                  {totalHours.toFixed(1)}h
-                                </div>
-                                <div className="text-[9px] text-slate-500">
-                                  {dayPointages.length} entrée{dayPointages.length > 1 ? 's' : ''}
+                            {totalModifie > 0 && (
+                              <div className="text-center flex-1 flex items-center justify-center">
+                                <div className="text-lg text-cyan-400 font-bold">
+                                  {totalModifie.toFixed(1)}h
                                 </div>
                               </div>
                             )}

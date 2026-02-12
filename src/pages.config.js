@@ -63,11 +63,11 @@ import Home from './pages/Home';
 import Lots from './pages/Lots';
 import Notaires from './pages/Notaires';
 import PriseDeMandat from './pages/PriseDeMandat';
-import Profil from './pages/Profil';
 import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import Profil from './pages/Profil';
 import __Layout from './Layout.jsx';
 
 
@@ -88,11 +88,11 @@ export const PAGES = {
     "Lots": Lots,
     "Notaires": Notaires,
     "PriseDeMandat": PriseDeMandat,
-    "Profil": Profil,
     "Recherches": Recherches,
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "Profil": Profil,
 }
 
 export const pagesConfig = {
