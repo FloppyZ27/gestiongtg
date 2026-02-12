@@ -595,11 +595,11 @@ export default function Calendrier() {
                                 </div>
                               )}
                               {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                <div className="flex items-center justify-end gap-1 mt-1 pt-1 border-t border-current/20">
-                                  <span className="text-[10px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
-                                  <Avatar className="w-5 h-5">
+                                <div className="flex items-center justify-end gap-1 pt-1 border-t border-white/20">
+                                  <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
+                                  <Avatar className="w-4 h-4">
                                     <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                    <AvatarFallback className="text-[8px] bg-white/30">
+                                    <AvatarFallback className="text-[7px] bg-white/30">
                                       {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
                                     </AvatarFallback>
                                   </Avatar>
