@@ -749,62 +749,36 @@ export default function Profil() {
                         </div>
 
                         {/* Sous-entête avec totaux */}
-                        <div className="flex border-b-2 border-emerald-500/30 flex-shrink-0">
-                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50 px-2 py-2 text-xs font-bold text-emerald-400">
-                            Total
-                          </div>
-                          {(() => {
-                            let weekTotalInitial = 0;
-                            let weekTotalModifie = 0;
-                            
-                            const dayElements = getPointageWeekDays().map((day, idx) => {
-                              const dayPointages = getPointageForDate(day);
-                              const totalInitial = dayPointages.reduce((sum, p) => {
+                        <div className="flex border-b border-slate-700 flex-shrink-0">
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50"></div>
+                          {getPointageWeekDays().map((day, idx) => {
+                            const dayPointages = getPointageForDate(day);
+                            const totalInitial = dayPointages.reduce((sum, p) => {
+                              const debut = new Date(p.heure_debut);
+                              const fin = new Date(p.heure_fin);
+                              return sum + (fin - debut) / (1000 * 60 * 60);
+                            }, 0);
+                            const totalModifie = dayPointages.reduce((sum, p) => {
+                              if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                return sum + (p.duree_heures_modifiee || 0);
+                              } else {
                                 const debut = new Date(p.heure_debut);
                                 const fin = new Date(p.heure_fin);
                                 return sum + (fin - debut) / (1000 * 60 * 60);
-                              }, 0);
-                              const totalModifie = dayPointages.reduce((sum, p) => {
-                                if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                                  return sum + (p.duree_heures_modifiee || 0);
-                                } else {
-                                  const debut = new Date(p.heure_debut);
-                                  const fin = new Date(p.heure_fin);
-                                  return sum + (fin - debut) / (1000 * 60 * 60);
-                                }
-                              }, 0);
-                              
-                              weekTotalInitial += totalInitial;
-                              weekTotalModifie += totalModifie;
-                              
-                              return (
-                              <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
-                                {totalInitial > 0 && (
-                                  <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
-                                )}
-                                {totalModifie > 0 && (
-                                  <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
-                                )}
-                              </div>
-                              );
-                            });
+                              }
+                            }, 0);
                             
-                            // Ajouter la colonne du total de la semaine à la fin
-                            dayElements.push(
-                              <div key="week-total" className="flex-1 bg-slate-900/70 px-4 py-2 border-l-2 border-emerald-500/50">
-                                <div className="flex flex-col gap-1">
-                                  {weekTotalInitial > 0 && (
-                                    <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-bold">{weekTotalInitial.toFixed(1)}h</span></div>
-                                  )}
-                                  {weekTotalModifie > 0 && (
-                                    <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-bold">{weekTotalModifie.toFixed(1)}h</span></div>
-                                  )}
-                                </div>
-                              </div>
+                            return (
+                            <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
+                              {totalInitial > 0 && (
+                                <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                              )}
+                              {totalModifie > 0 && (
+                                <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                              )}
+                            </div>
                             );
-                            
-                            return dayElements;
-                          })()}
+                          })}
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
@@ -968,8 +942,13 @@ export default function Profil() {
                               {format(day, "d")}
                             </div>
                             {dayPointages.length > 0 && (
-                              <div className="text-sm text-cyan-400 font-bold">
-                                {totalHours.toFixed(1)}h
+                              <div className="space-y-1">
+                                <div className="text-[10px] text-cyan-400 font-bold">
+                                  {totalHours.toFixed(1)}h
+                                </div>
+                                <div className="text-[9px] text-slate-500">
+                                  {dayPointages.length} entrée{dayPointages.length > 1 ? 's' : ''}
+                                </div>
                               </div>
                             )}
                           </div>
