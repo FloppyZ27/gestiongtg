@@ -751,34 +751,85 @@ export default function Profil() {
                         {/* Sous-entête avec totaux */}
                         <div className="flex border-b border-slate-700 flex-shrink-0">
                           <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50"></div>
-                          {getPointageWeekDays().map((day, idx) => {
-                            const dayPointages = getPointageForDate(day);
-                            const totalInitial = dayPointages.reduce((sum, p) => {
-                              const debut = new Date(p.heure_debut);
-                              const fin = new Date(p.heure_fin);
-                              return sum + (fin - debut) / (1000 * 60 * 60);
-                            }, 0);
-                            const totalModifie = dayPointages.reduce((sum, p) => {
-                              if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                                return sum + (p.duree_heures_modifiee || 0);
-                              } else {
+                          {(() => {
+                            let weekTotalInitial = 0;
+                            let weekTotalModifie = 0;
+                            
+                            return getPointageWeekDays().map((day, idx) => {
+                              const dayPointages = getPointageForDate(day);
+                              const totalInitial = dayPointages.reduce((sum, p) => {
                                 const debut = new Date(p.heure_debut);
                                 const fin = new Date(p.heure_fin);
                                 return sum + (fin - debut) / (1000 * 60 * 60);
-                              }
-                            }, 0);
-                            
-                            return (
-                            <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
-                              {totalInitial > 0 && (
-                                <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
-                              )}
-                              {totalModifie > 0 && (
-                                <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
-                              )}
-                            </div>
-                            );
-                          })}
+                              }, 0);
+                              const totalModifie = dayPointages.reduce((sum, p) => {
+                                if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                  return sum + (p.duree_heures_modifiee || 0);
+                                } else {
+                                  const debut = new Date(p.heure_debut);
+                                  const fin = new Date(p.heure_fin);
+                                  return sum + (fin - debut) / (1000 * 60 * 60);
+                                }
+                              }, 0);
+                              
+                              weekTotalInitial += totalInitial;
+                              weekTotalModifie += totalModifie;
+                              
+                              return (
+                              <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
+                                {totalInitial > 0 && (
+                                  <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                                )}
+                                {totalModifie > 0 && (
+                                  <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                                )}
+                              </div>
+                              );
+                            });
+                          })()}
+                        </div>
+
+                        {/* Total de la semaine */}
+                        <div className="flex border-b-2 border-emerald-500/30 flex-shrink-0 bg-slate-900/70">
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50 px-2 py-2 text-xs font-bold text-emerald-400">
+                            Total
+                          </div>
+                          <div className="flex-1 px-4 py-2">
+                            {(() => {
+                              const weekDays = getPointageWeekDays();
+                              let weekTotalInitial = 0;
+                              let weekTotalModifie = 0;
+                              
+                              weekDays.forEach(day => {
+                                const dayPointages = getPointageForDate(day);
+                                weekTotalInitial += dayPointages.reduce((sum, p) => {
+                                  const debut = new Date(p.heure_debut);
+                                  const fin = new Date(p.heure_fin);
+                                  return sum + (fin - debut) / (1000 * 60 * 60);
+                                }, 0);
+                                weekTotalModifie += dayPointages.reduce((sum, p) => {
+                                  if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                    return sum + (p.duree_heures_modifiee || 0);
+                                  } else {
+                                    const debut = new Date(p.heure_debut);
+                                    const fin = new Date(p.heure_fin);
+                                    return sum + (fin - debut) / (1000 * 60 * 60);
+                                  }
+                                }, 0);
+                              });
+                              
+                              return (
+                                <div className="flex gap-6">
+                                  {weekTotalInitial > 0 && (
+                                    <div className="text-sm text-slate-400">Initial: <span className="text-slate-300 font-bold text-base">{weekTotalInitial.toFixed(1)}h</span></div>
+                                  )}
+                                  {weekTotalModifie > 0 && (
+                                    <div className="text-sm text-orange-400">Modifié: <span className="text-orange-300 font-bold text-base">{weekTotalModifie.toFixed(1)}h</span></div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
@@ -942,13 +993,8 @@ export default function Profil() {
                               {format(day, "d")}
                             </div>
                             {dayPointages.length > 0 && (
-                              <div className="space-y-1">
-                                <div className="text-[10px] text-cyan-400 font-bold">
-                                  {totalHours.toFixed(1)}h
-                                </div>
-                                <div className="text-[9px] text-slate-500">
-                                  {dayPointages.length} entrée{dayPointages.length > 1 ? 's' : ''}
-                                </div>
+                              <div className="text-sm text-cyan-400 font-bold">
+                                {totalHours.toFixed(1)}h
                               </div>
                             )}
                           </div>
