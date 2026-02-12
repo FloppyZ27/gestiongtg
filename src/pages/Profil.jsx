@@ -1020,12 +1020,13 @@ export default function Profil() {
                                       >
                                         <Trash2 className="w-2.5 h-2.5" />
                                       </button>
-                                      <div className="truncate text-[8px] opacity-75 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
+                                      <div className="truncate text-[10px] font-bold opacity-90 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
                                       <div className="truncate font-bold">{event.titre}</div>
                                       <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")}</div>
                                       {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
-                                      <div className="truncate text-[8px] opacity-60 mt-0.5 border-t border-white/20 pt-0.5">
-                                        Créé: {format(new Date(event.created_date), "dd/MM/yy")} • Modif: {format(new Date(event.updated_date), "dd/MM/yy")}
+                                      <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
+                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                        <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
                                       </div>
                                     </div>
                                   );
@@ -1092,11 +1093,12 @@ export default function Profil() {
                                 >
                                   <Trash2 className="w-2.5 h-2.5" />
                                 </button>
-                                <div className="text-[9px] opacity-75 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
+                                <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
                                 <div className="font-bold truncate">{event.titre}</div>
                                 {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
-                                <div className="text-[9px] opacity-60 mt-1 pt-1 border-t border-current/20">
-                                  Créé: {format(new Date(event.created_date), "dd/MM/yy")} • Modif: {format(new Date(event.updated_date), "dd/MM/yy")}
+                                <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
+                                  <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                  <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
                                 </div>
                               </div>
                             );
