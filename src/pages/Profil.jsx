@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -1016,13 +1016,17 @@ export default function Profil() {
                                             deleteRendezVousMutation.mutate(event.id);
                                           }
                                         }}
-                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold"
+                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                       >
-                                        ×
+                                        <Trash2 className="w-2.5 h-2.5" />
                                       </button>
+                                      <div className="truncate text-[8px] opacity-75 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
                                       <div className="truncate font-bold">{event.titre}</div>
                                       <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")}</div>
                                       {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
+                                      <div className="truncate text-[8px] opacity-60 mt-0.5 border-t border-white/20 pt-0.5">
+                                        Créé: {format(new Date(event.created_date), "dd/MM/yy")} • Modif: {format(new Date(event.updated_date), "dd/MM/yy")}
+                                      </div>
                                     </div>
                                   );
                                 })}
@@ -1070,7 +1074,7 @@ export default function Profil() {
                             return (
                               <div
                                 key={event.id}
-                                className={`text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate relative group ${
+                                className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group ${
                                   isAbsence
                                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                                     : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
@@ -1084,11 +1088,16 @@ export default function Profil() {
                                       deleteRendezVousMutation.mutate(event.id);
                                     }
                                   }}
-                                  className="absolute top-0 right-0 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded-bl text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold"
+                                  className="absolute top-0 right-0 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded-bl text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                  ×
+                                  <Trash2 className="w-2.5 h-2.5" />
                                 </button>
-                                {event.titre}
+                                <div className="text-[9px] opacity-75 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
+                                <div className="font-bold truncate">{event.titre}</div>
+                                {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
+                                <div className="text-[9px] opacity-60 mt-1 pt-1 border-t border-current/20">
+                                  Créé: {format(new Date(event.created_date), "dd/MM/yy")} • Modif: {format(new Date(event.updated_date), "dd/MM/yy")}
+                                </div>
                               </div>
                             );
                           })}
