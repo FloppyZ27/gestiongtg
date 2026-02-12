@@ -2063,21 +2063,20 @@ export default function Profil() {
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsAddingEvent(false)}
-                    className="border-red-500 text-red-400 hover:bg-red-500/10"
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold border-2 border-purple-400 text-purple-100"
-                  >
-                    {editingEvent ? 'Modifier' : 'Ajouter'}
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddingEvent(false)}
+                  className="border-red-500 text-red-400 hover:bg-red-500/10"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold border-2 border-purple-400 text-purple-100"
+                >
+                  {editingEvent ? 'Modifier' : 'Ajouter'}
+                </Button>
               </div>
             </form>
           </DialogContent>
