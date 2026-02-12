@@ -491,12 +491,15 @@ export default function Calendrier() {
                                     onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                   >
                                     {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                      <Avatar className="w-4 h-4 mb-0.5">
-                                        <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                        <AvatarFallback className="text-[7px] bg-white/30">
-                                          {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
-                                        </AvatarFallback>
-                                      </Avatar>
+                                      <div className="flex items-center gap-0.5 mb-0.5">
+                                        <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
+                                        <Avatar className="w-4 h-4">
+                                          <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                          <AvatarFallback className="text-[7px] bg-white/30">
+                                            {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </div>
                                     )}
                                     <div className="truncate text-[10px] font-bold opacity-90 uppercase">
                                       {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
