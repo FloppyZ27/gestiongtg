@@ -2067,7 +2067,7 @@ export default function Profil() {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold text-base px-6"
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-xl shadow-purple-500/60 font-bold text-lg px-8 py-6 border-2 border-purple-400 hover:scale-105 transition-transform"
                   >
                     {editingEvent ? 'Modifier' : 'Ajouter'}
                   </Button>
