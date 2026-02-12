@@ -67,6 +67,8 @@ export default function Profil() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [infoPersonnellesCollapsed, setInfoPersonnellesCollapsed] = useState(false);
   const [feuilleTempsCollapsed, setFeuilleTempsCollapsed] = useState(false);
+  const [entreeTempsTab, setEntreeTempsTab] = useState("semaine");
+  const [entreeTempsCurrentDate, setEntreeTempsCurrentDate] = useState(new Date());
   
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -392,6 +394,59 @@ export default function Profil() {
   }, {});
 
   const sortedDates = Object.keys(groupedEntrees).sort((a, b) => new Date(b) - new Date(a));
+
+  // Fonctions pour gérer les entrées de temps par semaine/mois
+  const getEntreeTempsWeekDays = () => {
+    const dayOfWeek = entreeTempsCurrentDate.getDay();
+    const monday = new Date(entreeTempsCurrentDate);
+    monday.setDate(entreeTempsCurrentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const getEntreeTempsMonthDays = () => {
+    const year = entreeTempsCurrentDate.getFullYear();
+    const month = entreeTempsCurrentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const days = [];
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+    return days;
+  };
+
+  const goToEntreeTemPrevious = () => {
+    if (entreeTempsTab === "semaine") {
+      setEntreeTempsCurrentDate(new Date(entreeTempsCurrentDate.getFullYear(), entreeTempsCurrentDate.getMonth(), entreeTempsCurrentDate.getDate() - 7));
+    } else if (entreeTempsTab === "mois") {
+      setEntreeTempsCurrentDate(new Date(entreeTempsCurrentDate.getFullYear(), entreeTempsCurrentDate.getMonth() - 1, 1));
+    }
+  };
+
+  const goToEntreeTempsNext = () => {
+    if (entreeTempsTab === "semaine") {
+      setEntreeTempsCurrentDate(new Date(entreeTempsCurrentDate.getFullYear(), entreeTempsCurrentDate.getMonth(), entreeTempsCurrentDate.getDate() + 7));
+    } else if (entreeTempsTab === "mois") {
+      setEntreeTempsCurrentDate(new Date(entreeTempsCurrentDate.getFullYear(), entreeTempsCurrentDate.getMonth() + 1, 1));
+    }
+  };
+
+  const goToEntreeTempsToday = () => {
+    setEntreeTempsCurrentDate(new Date());
+  };
+
+  const getEntreeTempsForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return entreeTemps.filter(e => e.date === dateStr);
+  };
 
   // Fonctions pour générer les jours de la semaine et du mois
   const getCurrentWeekDays = () => {
@@ -1057,72 +1112,258 @@ export default function Profil() {
 
           {!feuilleTempsCollapsed && (
             <CardContent className="p-6">
-              {/* Feuille de temps par jour */}
-              <div className="space-y-4">
-                {sortedDates.map(date => {
-                  const dayEntries = groupedEntrees[date];
-                  const totalHours = calculateTotalHours(date);
-                  
-                  return (
-                    <div key={date} className="border border-slate-700 rounded-lg overflow-hidden">
-                      <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-4 h-4 text-emerald-400" />
-                          <span className="text-white font-semibold">
-                            {format(new Date(date + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
-                          </span>
-                        </div>
-                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                          Total: {totalHours.toFixed(2)}h
-                        </Badge>
+              {/* Navigation et tabs */}
+              <div className="flex justify-between items-center mb-4">
+                <Tabs value={entreeTempsTab} onValueChange={setEntreeTempsTab} className="w-full">
+                  <div className="flex justify-between items-center">
+                    <TabsList className="bg-slate-800/50">
+                      <TabsTrigger value="semaine" className="text-emerald-300">Semaine</TabsTrigger>
+                      <TabsTrigger value="mois" className="text-emerald-300">Mois</TabsTrigger>
+                      <TabsTrigger value="tous" className="text-emerald-300">Tous</TabsTrigger>
+                    </TabsList>
+                    
+                    {entreeTempsTab !== "tous" && (
+                      <div className="flex gap-2 items-center">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={goToEntreeTemPrevious}
+                          className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                        >
+                          ← Précédent
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={goToEntreeTempsToday}
+                          className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
+                        >
+                          Aujourd'hui
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={goToEntreeTempsNext}
+                          className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                        >
+                          Suivant →
+                        </Button>
                       </div>
-                      
-                      <div className="divide-y divide-slate-800">
-                        {dayEntries.map((entree) => {
-                          const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                          return (
-                            <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 space-y-1">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    {dossier && (
-                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                      </Badge>
-                                    )}
-                                    {entree.mandat && (
-                                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                        {entree.mandat}
-                                      </Badge>
-                                    )}
-                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                      {entree.tache}
-                                    </Badge>
+                    )}
+                  </div>
+                </Tabs>
+              </div>
+
+              {/* Vue Semaine */}
+              {entreeTempsTab === "semaine" && (
+                <div className="space-y-4">
+                  <div className="text-white font-semibold mb-3">
+                    {format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au {format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}
+                  </div>
+                  {getEntreeTempsWeekDays().map(day => {
+                    const dayEntries = getEntreeTempsForDate(day);
+                    const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
+                    const dateStr = day.toISOString().split('T')[0];
+                    const isToday = dateStr === new Date().toISOString().split('T')[0];
+                    
+                    return (
+                      <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-4 h-4 text-emerald-400" />
+                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(day, "EEEE d MMMM yyyy", { locale: fr })}
+                            </span>
+                          </div>
+                          {totalHours > 0 && (
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                              Total: {totalHours.toFixed(2)}h
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {dayEntries.length > 0 ? (
+                          <div className="divide-y divide-slate-800">
+                            {dayEntries.map((entree) => {
+                              const dossier = dossiers.find(d => d.id === entree.dossier_id);
+                              return (
+                                <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1 space-y-1">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {dossier && (
+                                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                          </Badge>
+                                        )}
+                                        {entree.mandat && (
+                                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                            {entree.mandat}
+                                          </Badge>
+                                        )}
+                                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                          {entree.tache}
+                                        </Badge>
+                                      </div>
+                                      {entree.description && (
+                                        <p className="text-slate-400 text-sm">{entree.description}</p>
+                                      )}
+                                    </div>
+                                    <div className="text-right">
+                                      <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
+                                    </div>
                                   </div>
-                                  {entree.description && (
-                                    <p className="text-slate-400 text-sm">{entree.description}</p>
-                                  )}
                                 </div>
-                                <div className="text-right">
-                                  <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="p-4 text-center text-slate-500 text-sm">
+                            Aucune entrée
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Vue Mois */}
+              {entreeTempsTab === "mois" && (
+                <div className="space-y-4">
+                  <div className="text-white font-semibold mb-3">
+                    {format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  </div>
+                  {getEntreeTempsMonthDays().map(day => {
+                    const dayEntries = getEntreeTempsForDate(day);
+                    const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
+                    const dateStr = day.toISOString().split('T')[0];
+                    const isToday = dateStr === new Date().toISOString().split('T')[0];
+                    
+                    if (dayEntries.length === 0) return null;
+                    
+                    return (
+                      <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-4 h-4 text-emerald-400" />
+                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(day, "EEEE d MMMM yyyy", { locale: fr })}
+                            </span>
+                          </div>
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                            Total: {totalHours.toFixed(2)}h
+                          </Badge>
+                        </div>
+                        
+                        <div className="divide-y divide-slate-800">
+                          {dayEntries.map((entree) => {
+                            const dossier = dossiers.find(d => d.id === entree.dossier_id);
+                            return (
+                              <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 space-y-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      {dossier && (
+                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                        </Badge>
+                                      )}
+                                      {entree.mandat && (
+                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                          {entree.mandat}
+                                        </Badge>
+                                      )}
+                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                        {entree.tache}
+                                      </Badge>
+                                    </div>
+                                    {entree.description && (
+                                      <p className="text-slate-400 text-sm">{entree.description}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Vue Tous */}
+              {entreeTempsTab === "tous" && (
+                <div className="space-y-4">
+                  {sortedDates.map(date => {
+                    const dayEntries = groupedEntrees[date];
+                    const totalHours = calculateTotalHours(date);
+                    const dateStr = date;
+                    const isToday = dateStr === new Date().toISOString().split('T')[0];
+                    
+                    return (
+                      <div key={date} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="w-4 h-4 text-emerald-400" />
+                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(new Date(date + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                            </span>
+                          </div>
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                            Total: {totalHours.toFixed(2)}h
+                          </Badge>
+                        </div>
+                        
+                        <div className="divide-y divide-slate-800">
+                          {dayEntries.map((entree) => {
+                            const dossier = dossiers.find(d => d.id === entree.dossier_id);
+                            return (
+                              <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 space-y-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      {dossier && (
+                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                        </Badge>
+                                      )}
+                                      {entree.mandat && (
+                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                          {entree.mandat}
+                                        </Badge>
+                                      )}
+                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                        {entree.tache}
+                                      </Badge>
+                                    </div>
+                                    {entree.description && (
+                                      <p className="text-slate-400 text-sm">{entree.description}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {sortedDates.length === 0 && (
+                    <div className="text-center py-12 text-slate-500">
+                      <Clock className="w-12 h-12 mx-auto mb-3 text-slate-600" />
+                      <p className="text-lg">Aucune entrée de temps enregistrée</p>
                     </div>
-                  );
-                })}
-                
-                {sortedDates.length === 0 && (
-                  <div className="text-center py-12 text-slate-500">
-                    <Clock className="w-12 h-12 mx-auto mb-3 text-slate-600" />
-                    <p className="text-lg">Aucune entrée de temps enregistrée</p>
-                    <p className="text-sm text-slate-600 mt-1">Utilisez Punch In/Out pour commencer à tracker votre temps</p>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           )}
         </Card>
