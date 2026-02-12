@@ -1503,7 +1503,7 @@ export default function Profil() {
             </div>
           </div>
 
-          {!entreeTempsCollapsed && (
+          {!feuilleTempsCollapsed && (
             <CardContent className="p-6">
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
@@ -2082,7 +2082,7 @@ export default function Profil() {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600"
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold text-base px-6"
                   >
                     {editingEvent ? 'Modifier' : 'Ajouter'}
                   </Button>
