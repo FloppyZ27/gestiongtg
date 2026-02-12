@@ -944,58 +944,51 @@ export default function Profil() {
                                  </TabsContent>
 
                 <TabsContent value="month" className="space-y-3">
-                  <div className="grid grid-cols-7 gap-2">
-                    {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
-                      <div key={day} className="text-center text-xs font-semibold text-slate-400 pb-2">
-                        {day}
-                      </div>
-                    ))}
-                    {(() => {
-                      const monthDays = getPointageMonthDays();
-                      const firstDayOfWeek = monthDays[0].getDay();
-                      const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-                      const emptyDays = Array(offset).fill(null);
-
-                      return [...emptyDays, ...monthDays].map((day, index) => {
-                        if (!day) {
-                          return <div key={`empty-${index}`} className="border border-transparent"></div>;
+                  <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
+                    {getPointageMonthDays().map((day, index) => {
+                      const dateStr = format(day, "yyyy-MM-dd");
+                      const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+                      const dayPointages = getPointageForDate(day);
+                      const totalModifie = dayPointages.reduce((sum, p) => {
+                        if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                          return sum + (p.duree_heures_modifiee || 0);
+                        } else {
+                          const debut = new Date(p.heure_debut);
+                          const fin = new Date(p.heure_fin);
+                          return sum + (fin - debut) / (1000 * 60 * 60);
                         }
+                      }, 0);
 
-                        const dayPointages = getPointageForDate(day);
-                        const totalModifie = dayPointages.reduce((sum, p) => {
-                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                            return sum + (p.duree_heures_modifiee || 0);
-                          } else {
-                            const debut = new Date(p.heure_debut);
-                            const fin = new Date(p.heure_fin);
-                            return sum + (fin - debut) / (1000 * 60 * 60);
-                          }
-                        }, 0);
-                        const isToday = day.toDateString() === new Date().toDateString();
-
-                        return (
-                          <div
-                            key={index}
-                            className={`border rounded-lg p-2 min-h-[80px] flex flex-col ${
-                              isToday 
-                                ? 'border-cyan-500 bg-cyan-500/10' 
-                                : 'border-slate-700 bg-slate-800/30'
-                            }`}
-                          >
-                            <div className={`text-xs font-semibold mb-1 ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                              {format(day, "d")}
-                            </div>
-                            {totalModifie > 0 && (
-                              <div className="text-center flex-1 flex items-center justify-center">
-                                <div className="text-lg text-cyan-400 font-bold">
-                                  {totalModifie.toFixed(1)}h
+                      return (
+                        <Card 
+                          key={dateStr}
+                          className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} w-full`}
+                        >
+                          <div className="mb-2 w-full">
+                            <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''} w-full`}>
+                              <div className="flex items-center justify-center mb-1">
+                                <div className="flex-1">
+                                  <p className={`text-xs uppercase ${isToday ? 'text-cyan-400' : 'text-slate-400'}`}>
+                                    {format(day, "EEE", { locale: fr })}
+                                  </p>
+                                  <p className={`text-lg font-bold text-white`}>
+                                    {format(day, "d", { locale: fr })}
+                                  </p>
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 flex-1 overflow-y-auto">
+                            {totalModifie > 0 && (
+                              <div className="text-center text-lg text-cyan-400 font-bold">
+                                {totalModifie.toFixed(1)}h
                               </div>
                             )}
                           </div>
-                        );
-                      });
-                    })()}
+                        </Card>
+                      );
+                    })}
                   </div>
                 </TabsContent>
               </Tabs>
