@@ -998,7 +998,7 @@ export default function Profil() {
                                   return (
                                     <div
                                       key={event.id}
-                                      className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity ${
+                                      className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group ${
                                         isAbsence
                                           ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                           : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
@@ -1009,6 +1009,17 @@ export default function Profil() {
                                       }}
                                       onClick={() => handleEditEvent(event)}
                                     >
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (confirm("Supprimer cet événement ?")) {
+                                            deleteRendezVousMutation.mutate(event.id);
+                                          }
+                                        }}
+                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold"
+                                      >
+                                        ×
+                                      </button>
                                       <div className="truncate font-bold">{event.titre}</div>
                                       <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")}</div>
                                       {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
@@ -1059,13 +1070,24 @@ export default function Profil() {
                             return (
                               <div
                                 key={event.id}
-                                className={`text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate ${
+                                className={`text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate relative group ${
                                   isAbsence
                                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                                     : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                                 }`}
                                 onClick={() => handleEditEvent(event)}
                               >
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm("Supprimer cet événement ?")) {
+                                      deleteRendezVousMutation.mutate(event.id);
+                                    }
+                                  }}
+                                  className="absolute top-0 right-0 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded-bl text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold"
+                                >
+                                  ×
+                                </button>
                                 {event.titre}
                               </div>
                             );
@@ -2040,23 +2062,7 @@ export default function Profil() {
                   />
                 </div>
               </div>
-              <div className="flex justify-between gap-3 pt-4">
-                {editingEvent && (
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
-                        deleteRendezVousMutation.mutate(editingEvent.id);
-                        setIsAddingEvent(false);
-                        setEditingEvent(null);
-                      }
-                    }}
-                    className="bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                  >
-                    Supprimer
-                  </Button>
-                )}
-                <div className="flex gap-3 ml-auto">
+              <div className="flex justify-end gap-3 pt-4">
                   <Button
                     type="button"
                     variant="outline"
