@@ -4,22 +4,25 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Filter, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 export default function Calendrier() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('month');
-  const [selectedUser, setSelectedUser] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
-  const [selectedTacheStatus, setSelectedTacheStatus] = useState('all');
+  const [selectedUser, setSelectedUser] = useState([]);
+  const [selectedType, setSelectedType] = useState([]);
+  const [selectedTacheStatus, setSelectedTacheStatus] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -79,11 +82,13 @@ export default function Calendrier() {
     return mapping[arpenteur] || "";
   };
 
+  const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+
   // Filter events
   // This filter applies only to 'rendez-vous' and 'absence' entities from allRendezVous
   const filteredRendezVous = allRendezVous.filter(rdv => {
-    const userMatch = selectedUser === 'all' || rdv.utilisateur_email === selectedUser;
-    const typeMatch = selectedType === 'all' || rdv.type === selectedType;
+    const userMatch = selectedUser.length === 0 || selectedUser.includes(rdv.utilisateur_email);
+    const typeMatch = selectedType.length === 0 || selectedType.includes(rdv.type);
     return userMatch && typeMatch;
   });
 
@@ -135,11 +140,11 @@ export default function Calendrier() {
       
       dossier.mandats?.forEach((mandat, mandatIdx) => {
         // Filter by task status
-        const tacheMatch = selectedTacheStatus === 'all' || mandat.tache_actuelle === selectedTacheStatus;
+        const tacheMatch = selectedTacheStatus.length === 0 || selectedTacheStatus.includes(mandat.tache_actuelle);
         if (!tacheMatch) return;
 
         // Filter by user
-        const userMatch = selectedUser === 'all' || mandat.utilisateur_assigne === selectedUser;
+        const userMatch = selectedUser.length === 0 || selectedUser.includes(mandat.utilisateur_assigne);
         if (!userMatch) return;
 
         const clientsNames = getClientsNames(dossier.clients_ids);
@@ -249,7 +254,7 @@ export default function Calendrier() {
         // Check if the month and day match the current day in the calendar view
         if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
           // Check if this user's birthday should be displayed based on selectedUser filter
-          const userMatch = selectedUser === 'all' || u.email === selectedUser;
+          const userMatch = selectedUser.length === 0 || selectedUser.includes(u.email);
           if (userMatch) {
             events.push({
               id: `birthday-${u.email}-${dayStr}`, // Unique ID for birthday on a specific day for a specific user
@@ -326,154 +331,229 @@ export default function Calendrier() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-emerald-400" />
-                  Filtres
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-300">Utilisateur</Label>
-                  <Select value={selectedUser} onValueChange={setSelectedUser}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Tous les utilisateurs" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.email} value={user.email} className="text-white">
-                          {user.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        {/* Filters and Statistics */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="pb-3">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-white">Filtres et Statistiques</h2>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-slate-300">Type</Label>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Tous les types" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                      <SelectItem value="rendez-vous" className="text-white">Rendez-vous</SelectItem>
-                      <SelectItem value="absence" className="text-white">Absence</SelectItem>
-                      <SelectItem value="livraison" className="text-white">Livraison</SelectItem>
-                      <SelectItem value="terrain" className="text-white">Visite terrain</SelectItem>
-                      <SelectItem value="signature" className="text-white">Signature</SelectItem>
-                      <SelectItem value="rdv_terrain" className="text-white">RDV terrain</SelectItem>
-                      <SelectItem value="limite_leve" className="text-white">Limite levé</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Filtres</span>
+                  {(selectedUser.length > 0 || selectedType.length > 0 || selectedTacheStatus.length > 0) && (
+                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      {selectedUser.length + selectedType.length + selectedTacheStatus.length}
+                    </Badge>
+                  )}
+                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                </Button>
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-slate-300">Statut de tâche</Label>
-                  <Select value={selectedTacheStatus} onValueChange={setSelectedTacheStatus}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Tous les statuts" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
-                      <SelectItem value="Ouverture" className="text-white">Ouverture</SelectItem>
-                      <SelectItem value="Cédule" className="text-white">Cédule</SelectItem>
-                      <SelectItem value="Montage" className="text-white">Montage</SelectItem>
-                      <SelectItem value="Terrain" className="text-white">Terrain</SelectItem>
-                      <SelectItem value="Compilation" className="text-white">Compilation</SelectItem>
-                      <SelectItem value="Reliage" className="text-white">Reliage</SelectItem>
-                      <SelectItem value="Décision/Calcul" className="text-white">Décision/Calcul</SelectItem>
-                      <SelectItem value="Mise en plan" className="text-white">Mise en plan</SelectItem>
-                      <SelectItem value="Analyse" className="text-white">Analyse</SelectItem>
-                      <SelectItem value="Rapport" className="text-white">Rapport</SelectItem>
-                      <SelectItem value="Vérification" className="text-white">Vérification</SelectItem>
-                      <SelectItem value="Facturer" className="text-white">Facturer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                <CollapsibleContent>
+                  <div className="p-3 border border-emerald-500/30 rounded-lg">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-3 h-3 text-emerald-500" />
+                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
+                        </div>
+                        {(selectedUser.length > 0 || selectedType.length > 0 || selectedTacheStatus.length > 0) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser([]);
+                              setSelectedType([]);
+                              setSelectedTacheStatus([]);
+                            }}
+                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                          >
+                            <X className="w-2.5 h-2.5 mr-1" />
+                            Réinitialiser
+                          </Button>
+                        )}
+                      </div>
 
-                <div className="pt-4 border-t border-slate-800">
-                  <h4 className="text-sm font-semibold text-slate-400 mb-3">Légende</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/30"></div>
-                      <span className="text-sm text-slate-300">Rendez-vous</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-red-500/20 border border-red-500/30"></div>
-                      <span className="text-sm text-slate-300">Absence</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-orange-500/20 border border-orange-500/30"></div>
-                      <span className="text-sm text-slate-300">Livraison</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-yellow-500/20 border border-yellow-500/30"></div>
-                      <span className="text-sm text-slate-300">Visite terrain</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-cyan-500/20 border border-cyan-500/30"></div>
-                      <span className="text-sm text-slate-300">Signature</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-blue-500/20 border border-blue-500/30"></div>
-                      <span className="text-sm text-slate-300">Jour férié</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-purple-500/20 border border-purple-500/30"></div>
-                      <span className="text-sm text-slate-300">Anniversaire</span>
+                      <div className="grid grid-cols-3 gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            {users.map((user) => (
+                              <DropdownMenuCheckboxItem
+                                key={user.email}
+                                checked={selectedUser.includes(user.email)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedUser(
+                                    checked
+                                      ? [...selectedUser, user.email]
+                                      : selectedUser.filter((u) => u !== user.email)
+                                  );
+                                }}
+                                className="text-white text-xs"
+                              >
+                                {user.full_name}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Types ({selectedType.length > 0 ? `${selectedType.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {['rendez-vous', 'absence', 'livraison', 'terrain', 'signature', 'rdv_terrain', 'limite_leve'].map((type) => (
+                              <DropdownMenuCheckboxItem
+                                key={type}
+                                checked={selectedType.includes(type)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedType(
+                                    checked
+                                      ? [...selectedType, type]
+                                      : selectedType.filter((t) => t !== type)
+                                  );
+                                }}
+                                className="text-white text-xs"
+                              >
+                                {type === 'rendez-vous' ? 'Rendez-vous' :
+                                 type === 'absence' ? 'Absence' :
+                                 type === 'livraison' ? 'Livraison' :
+                                 type === 'terrain' ? 'Visite terrain' :
+                                 type === 'signature' ? 'Signature' :
+                                 type === 'rdv_terrain' ? 'RDV terrain' :
+                                 'Limite levé'}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Tâches ({selectedTacheStatus.length > 0 ? `${selectedTacheStatus.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            {TACHES.map((tache) => (
+                              <DropdownMenuCheckboxItem
+                                key={tache}
+                                checked={selectedTacheStatus.includes(tache)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedTacheStatus(
+                                    checked
+                                      ? [...selectedTacheStatus, tache]
+                                      : selectedTacheStatus.filter((t) => t !== tache)
+                                  );
+                                }}
+                                className="text-white text-xs"
+                              >
+                                {tache}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="pt-2 border-t border-emerald-500/30">
+                        <h4 className="text-xs font-semibold text-slate-400 mb-2">Légende</h4>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/30"></div>
+                            <span className="text-xs text-slate-300">Rendez-vous</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30"></div>
+                            <span className="text-xs text-slate-300">Absence</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/30"></div>
+                            <span className="text-xs text-slate-300">Livraison</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-yellow-500/20 border border-yellow-500/30"></div>
+                            <span className="text-xs text-slate-300">Visite terrain</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-cyan-500/20 border border-cyan-500/30"></div>
+                            <span className="text-xs text-slate-300">Signature</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/30"></div>
+                            <span className="text-xs text-slate-300">Jour férié</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/30"></div>
+                            <span className="text-xs text-slate-300">Anniversaire</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-                <div className="pt-4 border-t border-slate-800">
-                  <h4 className="text-sm font-semibold text-slate-400 mb-3">Statistiques</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Total événements</span>
-                      <span className="text-white font-semibold">{totalOverallEvents}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Rendez-vous</span>
-                      <span className="text-emerald-400 font-semibold">{totalRdv}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Absences</span>
-                      <span className="text-red-400 font-semibold">{totalAbsences}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Livraisons</span>
-                      <span className="text-orange-400 font-semibold">{totalLivraisons}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Visites terrain</span>
-                      <span className="text-yellow-400 font-semibold">{totalTerrain}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Signatures</span>
-                      <span className="text-cyan-400 font-semibold">{totalSignatures}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Jours fériés</span>
-                      <span className="text-blue-400 font-semibold">{totalHolidays}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Anniversaires</span>
-                      <span className="text-purple-400 font-semibold">{totalBirthdays}</span>
-                    </div>
+              {/* Statistiques toujours visibles */}
+              <div className="pt-3 border-t border-slate-800">
+                <h4 className="text-xs font-semibold text-slate-400 mb-2">Statistiques de la période</h4>
+                <div className="grid grid-cols-4 gap-3 text-xs">
+                  <div className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg">
+                    <span className="text-slate-400">Total</span>
+                    <span className="text-white font-semibold text-base">{totalOverallEvents}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-emerald-500/10 rounded-lg">
+                    <span className="text-slate-400">RDV</span>
+                    <span className="text-emerald-400 font-semibold text-base">{totalRdv}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-red-500/10 rounded-lg">
+                    <span className="text-slate-400">Absences</span>
+                    <span className="text-red-400 font-semibold text-base">{totalAbsences}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-orange-500/10 rounded-lg">
+                    <span className="text-slate-400">Livraisons</span>
+                    <span className="text-orange-400 font-semibold text-base">{totalLivraisons}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-yellow-500/10 rounded-lg">
+                    <span className="text-slate-400">Terrain</span>
+                    <span className="text-yellow-400 font-semibold text-base">{totalTerrain}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-cyan-500/10 rounded-lg">
+                    <span className="text-slate-400">Signatures</span>
+                    <span className="text-cyan-400 font-semibold text-base">{totalSignatures}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-lg">
+                    <span className="text-slate-400">Fériés</span>
+                    <span className="text-blue-400 font-semibold text-base">{totalHolidays}</span>
+                  </div>
+                  <div className="flex flex-col items-center p-2 bg-purple-500/10 rounded-lg">
+                    <span className="text-slate-400">Anniv.</span>
+                    <span className="text-purple-400 font-semibold text-base">{totalBirthdays}</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
 
-          {/* Calendar */}
-          <div className="lg:col-span-3">
+        {/* Calendar */}
+        <div className="w-full">
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
@@ -608,7 +688,6 @@ export default function Calendrier() {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </div>
 
         {/* Event Details Dialog */}
