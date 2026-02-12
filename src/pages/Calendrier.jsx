@@ -420,11 +420,12 @@ export default function Calendrier() {
                     </div>
 
                     {/* Grille horaire */}
-                    <div className="overflow-y-auto flex-1 relative">
-                      <div className="flex relative" style={{ minHeight: '1440px' }}>
-                        {/* Colonne des heures */}
-                        <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
-                          {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                     <div className="overflow-y-auto flex-1 relative">
+                       <div className="flex relative" style={{ minHeight: '1440px' }}>
+                         {/* Colonne des heures */}
+                         <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                           {Array.from({ length: 24 }, (_, i) => i).map((hour) => {
+                             const scrollPos = hour === 7 ? 'auto' : undefined;
                             <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
                               <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
                                 {hour.toString().padStart(2, '0')}:00
