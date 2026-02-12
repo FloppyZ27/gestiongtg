@@ -884,6 +884,16 @@ export default function Profil() {
                                            Confirmer
                                          </button>
                                        )}
+                                       {p.confirme && !isModified && (
+                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
+                                           Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                         </div>
+                                       )}
+                                       {isModified && (
+                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
+                                           Modifié: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                         </div>
+                                       )}
                                      </div>
                                    );
                                  })}
