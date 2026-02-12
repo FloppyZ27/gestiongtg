@@ -581,9 +581,7 @@ export default function Calendrier() {
                               <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">
                                 {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                               </div>
-                              <div className={`font-bold truncate ${
-                                isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
-                              }`}>{event.titre}</div>
+                              <div className="font-bold truncate">{event.titre}</div>
                               {event.date_fin && (
                                 <div className="text-[10px] opacity-90 truncate">{format(new Date(event.date_debut), "HH:mm")} - {format(new Date(event.date_fin), "HH:mm")}</div>
                               )}
