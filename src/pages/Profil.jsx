@@ -1296,14 +1296,14 @@ export default function Profil() {
                       <Button
                         size="sm"
                         onClick={() => setViewMode("week")}
-                        className={viewMode === "week" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                        className={`h-8 ${viewMode === "week" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
                       >
                         Semaine
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => setViewMode("month")}
-                        className={viewMode === "month" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                        className={`h-8 ${viewMode === "month" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
                       >
                         Mois
                       </Button>

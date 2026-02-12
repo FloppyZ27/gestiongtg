@@ -666,6 +666,26 @@ function LayoutContent({ children, currentPageName }) {
           border-bottom-color: rgb(34, 211, 238) !important;
         }
 
+        /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
+        button.timesheet-tab-button {
+          background: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
+          background-color: rgb(0, 184, 212) !important;
+          background-image: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 4px 12px -3px rgba(0, 184, 212, 0.4) !important;
+        }
+
+        button.timesheet-tab-button:hover {
+          background: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
+          background-image: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
+          box-shadow: 0 6px 16px -3px rgba(0, 184, 212, 0.5) !important;
+        }
+
+        button.timesheet-tab-button:active {
+          transform: translateY(1px);
+        }
+
         /* Tabs avec couleur purple */
         button[role="tab"][class*="purple"]:hover,
         [role="tab"][class*="purple"]:hover {
