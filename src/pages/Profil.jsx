@@ -893,7 +893,13 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsAddingEvent(true)}
-                      className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 shadow-lg shadow-purple-500/50 h-8"
+                      className="h-8"
+                      style={{
+                        background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241))',
+                        color: 'white',
+                        boxShadow: '0 10px 15px -3px rgba(168, 85, 247, 0.5)',
+                        border: 'none'
+                      }}
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Ajouter
