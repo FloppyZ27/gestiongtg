@@ -649,9 +649,6 @@ export default function Profil() {
                   <Timer className="w-3 h-3 text-cyan-400" />
                 </div>
                 <h3 className="text-cyan-300 text-sm font-semibold">Feuille de temps</h3>
-                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
-                  {pointages.filter(p => p.statut === 'termine').length} entrées
-                </Badge>
               </div>
               {pointageCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -662,10 +659,49 @@ export default function Profil() {
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
                 <div className="flex justify-between items-center">
-                  <div className="text-white font-semibold text-lg">
-                    {viewMode === "week" 
-                      ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                      : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  <div className="flex items-center gap-3">
+                    <div className="text-white font-semibold text-lg">
+                      {viewMode === "week" 
+                        ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                        : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                    </div>
+                    {viewMode === "month" && (() => {
+                      const monthDays = getPointageMonthDays();
+                      const totalInitial = monthDays.reduce((sum, day) => {
+                        const dayPointages = getPointageForDate(day);
+                        return sum + dayPointages.reduce((daySum, p) => {
+                          const debut = new Date(p.heure_debut);
+                          const fin = new Date(p.heure_fin);
+                          return daySum + (fin - debut) / (1000 * 60 * 60);
+                        }, 0);
+                      }, 0);
+                      const totalModifie = monthDays.reduce((sum, day) => {
+                        const dayPointages = getPointageForDate(day);
+                        return sum + dayPointages.reduce((daySum, p) => {
+                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                            return daySum + (p.duree_heures_modifiee || 0);
+                          } else {
+                            const debut = new Date(p.heure_debut);
+                            const fin = new Date(p.heure_fin);
+                            return daySum + (fin - debut) / (1000 * 60 * 60);
+                          }
+                        }, 0);
+                      }, 0);
+                      return (
+                        <div className="flex gap-3 items-center">
+                          {totalInitial > 0 && (
+                            <Badge className="bg-slate-500/20 text-slate-300 border-slate-500/30">
+                              Initial: {totalInitial.toFixed(1)}h
+                            </Badge>
+                          )}
+                          {totalModifie > 0 && (
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                              Modifié: {totalModifie.toFixed(1)}h
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="flex gap-2 items-center">
                     <Button
