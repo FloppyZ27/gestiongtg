@@ -654,10 +654,18 @@ export default function Profil() {
   };
 
   const getRendezVousForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+    
     return rendezVous.filter(rv => {
-      const eventDate = new Date(rv.date_debut).toISOString().split('T')[0];
-      return eventDate === dateStr;
+      const eventStart = new Date(rv.date_debut);
+      const eventEnd = new Date(rv.date_fin || rv.date_debut);
+      
+      // L'événement chevauche ce jour s'il commence avant la fin du jour 
+      // ET se termine après le début du jour
+      return eventStart <= dayEnd && eventEnd >= dayStart;
     });
   };
 
@@ -986,8 +994,28 @@ export default function Profil() {
 
                                 {/* Événements */}
                                 {dayEvents.map(event => {
-                                  const startTime = new Date(event.date_debut);
-                                  const endTime = new Date(event.date_fin || event.date_debut);
+                                  const eventStart = new Date(event.date_debut);
+                                  const eventEnd = new Date(event.date_fin || event.date_debut);
+                                  
+                                  // Début de la journée actuelle
+                                  const dayStart = new Date(day);
+                                  dayStart.setHours(0, 0, 0, 0);
+                                  
+                                  // Fin de la journée actuelle
+                                  const dayEnd = new Date(day);
+                                  dayEnd.setHours(23, 59, 59, 999);
+                                  
+                                  // Calculer l'heure de début pour cette journée
+                                  const startTime = eventStart < dayStart ? dayStart : eventStart;
+                                  
+                                  // Calculer l'heure de fin pour cette journée
+                                  const endTime = eventEnd > dayEnd ? dayEnd : eventEnd;
+                                  
+                                  // Si l'événement ne touche pas ce jour, on ne l'affiche pas
+                                  if (eventEnd < dayStart || eventStart > dayEnd) {
+                                    return null;
+                                  }
+                                  
                                   const startHour = startTime.getHours();
                                   const startMin = startTime.getMinutes();
                                   const durationMinutes = (endTime - startTime) / (1000 * 60);
