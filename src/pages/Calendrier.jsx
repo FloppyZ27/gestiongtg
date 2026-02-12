@@ -569,12 +569,12 @@ export default function Calendrier() {
                               key={event.id}
                               className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group flex flex-col min-h-[60px] ${
                                 isAbsence
-                                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                  ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                   : isHoliday
-                                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                  ? 'bg-gradient-to-r from-blue-500/60 to-cyan-500/60 border border-blue-500 text-blue-50'
                                   : isBirthday
-                                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                                  : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                                  ? 'bg-gradient-to-r from-purple-500/60 to-pink-500/60 border border-purple-500 text-purple-50'
+                                  : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
                               }`}
                               onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                             >
