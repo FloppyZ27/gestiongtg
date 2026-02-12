@@ -225,15 +225,11 @@ export default function Calendrier() {
           </div>
         </div>
 
-        {/* Filters and Statistics */}
+        {/* Filters - Collapsible Box */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="pb-3">
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-2">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-white">Filtres et Statistiques</h2>
-                </div>
-
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -338,8 +334,6 @@ export default function Calendrier() {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-
-
             </div>
           </CardHeader>
         </Card>
@@ -496,6 +490,14 @@ export default function Calendrier() {
                                     }}
                                     onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                   >
+                                    {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                      <Avatar className="w-4 h-4 mb-0.5">
+                                        <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                        <AvatarFallback className="text-[7px] bg-white/30">
+                                          {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    )}
                                     <div className="truncate text-[10px] font-bold opacity-90 uppercase">
                                       {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                                     </div>
@@ -573,6 +575,17 @@ export default function Calendrier() {
                               }`}
                               onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                             >
+                              {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Avatar className="w-5 h-5">
+                                    <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                    <AvatarFallback className="text-[8px] bg-white/30">
+                                      {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-[8px] opacity-80 truncate">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
+                                </div>
+                              )}
                               <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">
                                 {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                               </div>
