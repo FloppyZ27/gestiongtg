@@ -490,6 +490,17 @@ export default function Calendrier() {
                                     }}
                                     onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                   >
+                                    {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                      <div className="flex items-center gap-0.5 mb-0.5">
+                                        <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
+                                        <Avatar className="w-4 h-4">
+                                          <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                          <AvatarFallback className="text-[7px] bg-white/30">
+                                            {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </div>
+                                    )}
                                     <div className="truncate text-[10px] font-bold opacity-90 uppercase">
                                       {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                                     </div>
@@ -504,17 +515,6 @@ export default function Calendrier() {
                                       <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
                                         <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
                                         <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
-                                      </div>
-                                    )}
-                                    {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                      <div className="flex items-center justify-end gap-0.5 mt-1 pt-0.5 border-t border-white/20">
-                                        <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
-                                        <Avatar className="w-4 h-4">
-                                          <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                          <AvatarFallback className="text-[7px] bg-white/30">
-                                            {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
-                                          </AvatarFallback>
-                                        </Avatar>
                                       </div>
                                     )}
                                   </div>
