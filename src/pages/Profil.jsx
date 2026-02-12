@@ -1038,23 +1038,20 @@ export default function Profil() {
           )}
         </Card>
 
-        {/* Section Feuille de temps */}
+        {/* Section Entrée de temps */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <div 
-            className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20 border-b border-slate-800"
+            className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800"
             onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                  <Clock className="w-3 h-3 text-emerald-400" />
                 </div>
-                <h3 className="text-emerald-300 text-lg font-semibold">Feuille de temps</h3>
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  {entreeTemps.length} entrées
-                </Badge>
+                <h3 className="text-emerald-300 text-sm font-semibold">Entrée de temps</h3>
               </div>
-              {feuilleTempsCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+              {feuilleTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
           </div>
 
