@@ -345,137 +345,261 @@ export default function Calendrier() {
         </Card>
 
         {/* Calendar */}
-        <div className="w-full">
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <CalendarIcon className="w-5 h-5 text-emerald-400" />
-                    Vue {viewMode === 'month' ? 'Mensuelle' : 'Hebdomadaire'}
-                  </CardTitle>
-                  <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1">
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardContent className="p-6">
+            {/* Header avec navigation et contrôles */}
+            <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="text-white font-semibold text-lg">
+                    {viewMode === "week" 
+                      ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
+                      : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  </div>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={previousPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                  >
+                    ← Précédent
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentDate(new Date())}
+                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
+                  >
+                    Aujourd'hui
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={nextPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                  >
+                    Suivant →
+                  </Button>
+                  <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                  <div className="flex gap-1">
                     <Button
                       size="sm"
-                      variant={viewMode === 'month' ? 'default' : 'ghost'}
-                      onClick={() => setViewMode('month')}
-                      className={viewMode === 'month' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
-                    >
-                      Mois
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={viewMode === 'week' ? 'default' : 'ghost'}
-                      onClick={() => setViewMode('week')}
-                      className={viewMode === 'week' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                      onClick={() => setViewMode("week")}
+                      className={`h-8 ${viewMode === "week" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
                     >
                       Semaine
                     </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => setViewMode("month")}
+                      className={`h-8 ${viewMode === "month" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
+                    >
+                      Mois
+                    </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-4">
-                {/* Calendar Header */}
-                <div className="flex justify-between items-center mb-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={previousPeriod}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  <h3 className="text-lg font-semibold text-white">
-                    {getPeriodLabel()}
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={nextPeriod}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
+              </div>
+            </div>
 
-                {/* Day names */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-                    <div key={day} className="text-center text-xs font-semibold text-slate-500 p-2">
-                      {day}
+            {/* Vue Semaine */}
+            {viewMode === "week" && (
+              <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '600px' }}>
+                <div className="overflow-x-auto flex-1 flex flex-col">
+                  <div className="inline-block min-w-full h-full flex flex-col">
+                    {/* En-têtes des jours */}
+                    <div className="flex border-b border-slate-700 flex-shrink-0">
+                      <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
+                      {daysInView.slice(0, 7).map((day, idx) => {
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        return (
+                          <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-purple-500 ring-inset' : 'bg-slate-900/50'}`}>
+                            <div className={`text-xs uppercase ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>
+                              {format(day, "EEE", { locale: fr })}
+                            </div>
+                            <div className={`text-lg font-bold ${isToday ? 'text-purple-400' : 'text-white'}`}>
+                              {format(day, "d", { locale: fr })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
 
-                {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-1">
-                  {daysInView.map((day, index) => {
-                    const events = getEventsForDay(day);
-                    const isCurrentMonth = viewMode === 'month' ? isSameMonth(day, currentDate) : true;
-                    const isToday = isSameDay(day, new Date());
-
-                    return (
-                      <div
-                        key={index}
-                        className={`
-                          ${viewMode === 'week' ? 'min-h-[120px]' : 'min-h-[80px]'} p-2 rounded-lg border transition-colors
-                          ${isCurrentMonth ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-slate-800'}
-                          ${isToday ? 'border-emerald-500 border-2' : ''}
-                        `}
-                      >
-                        <div className={`text-sm mb-1 ${isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
-                          {format(day, 'd')}
-                        </div>
-                        <div className="space-y-1">
-                          {events.map(event => {
-                            const user = event.utilisateur_email ? getUserByEmail(event.utilisateur_email) : null;
-                            const isClickable = event.type === 'rendez-vous' || event.type === 'absence';
-
-                            const eventColors = {
-                              'absence': 'bg-red-500/20 text-red-400 hover:bg-red-500/30',
-                              'rendez-vous': 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30',
-                              'holiday': 'bg-blue-500/20 text-blue-400',
-                              'birthday': 'bg-purple-500/20 text-purple-400'
-                            };
-
-                            return (
-                              <div
-                                key={event.id}
-                                onClick={() => isClickable && handleEventClick(event)}
-                                className={`
-                                  text-xs p-1 rounded flex items-center gap-1
-                                  ${eventColors[event.type] || 'bg-slate-500/20 text-slate-400'}
-                                  ${isClickable ? 'cursor-pointer' : 'cursor-default'}
-                                `}
-                                title={`${event.titre}${user ? ' - ' + user.full_name : ''}`}
-                              >
-                                {(event.type === 'rendez-vous' || event.type === 'absence') && user && (
-                                   <Avatar className="w-4 h-4">
-                                     <AvatarImage src={user?.photo_url} />
-                                     <AvatarFallback className="text-[8px] bg-gradient-to-r from-emerald-500 to-teal-500">
-                                       {getInitials(user?.full_name)}
-                                     </AvatarFallback>
-                                   </Avatar>
-                                 )}
-                                {event.type === 'birthday' && user && (
-                                  <Avatar className="w-4 h-4">
-                                    <AvatarImage src={user?.photo_url} />
-                                    <AvatarFallback className="text-[8px] bg-gradient-to-r from-purple-500 to-pink-500">
-                                      {getInitials(user?.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <span className="truncate flex-1">{event.titre}</span>
+                    {/* Grille horaire */}
+                    <div className="overflow-y-auto flex-1 relative">
+                      <div className="flex relative" style={{ minHeight: '1440px' }}>
+                        {/* Colonne des heures */}
+                        <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                          {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                            <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                              <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
+                                {hour.toString().padStart(2, '0')}:00
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Colonnes des jours */}
+                        {daysInView.slice(0, 7).map((day, dayIdx) => {
+                          const isToday = day.toDateString() === new Date().toDateString();
+                          const dayEvents = getEventsForDay(day);
+
+                          return (
+                            <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-purple-500/10' : 'bg-slate-800/20'}`}>
+                              {/* Grille des heures de fond */}
+                              {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                                <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                              ))}
+
+                              {/* Événements */}
+                              {dayEvents.map(event => {
+                                const eventStart = new Date(event.date_debut);
+                                const eventEnd = new Date(event.date_fin || event.date_debut);
+                                
+                                const dayStart = new Date(day);
+                                dayStart.setHours(0, 0, 0, 0);
+                                
+                                const dayEnd = new Date(day);
+                                dayEnd.setHours(23, 59, 59, 999);
+                                
+                                const startTime = eventStart < dayStart ? dayStart : eventStart;
+                                const endTime = eventEnd > dayEnd ? dayEnd : eventEnd;
+                                
+                                if (eventEnd < dayStart || eventStart > dayEnd) {
+                                  return null;
+                                }
+                                
+                                const startHour = startTime.getHours();
+                                const startMin = startTime.getMinutes();
+                                const durationMinutes = (endTime - startTime) / (1000 * 60);
+                                const topPx = startHour * 60 + startMin;
+
+                                const isAbsence = event.type === "absence";
+                                const isHoliday = event.type === "holiday";
+                                const isBirthday = event.type === "birthday";
+
+                                return (
+                                  <div
+                                    key={event.id}
+                                    className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col ${
+                                      isAbsence
+                                        ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                        : isHoliday
+                                        ? 'bg-gradient-to-r from-blue-500/60 to-cyan-500/60 border border-blue-500 text-blue-50'
+                                        : isBirthday
+                                        ? 'bg-gradient-to-r from-purple-500/60 to-pink-500/60 border border-purple-500 text-purple-50'
+                                        : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                    }`}
+                                    style={{
+                                      height: `${Math.max(20, durationMinutes)}px`,
+                                      top: `${topPx}px`
+                                    }}
+                                    onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
+                                  >
+                                    <div className="truncate text-[10px] font-bold opacity-90 uppercase">
+                                      {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
+                                    </div>
+                                    <div className={`truncate font-bold ${
+                                      isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
+                                    }`}>{event.titre}</div>
+                                    {event.date_fin && (
+                                      <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                    )}
+                                    {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
+                                    {(event.type === 'rendez-vous' || event.type === 'absence') && (
+                                      <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
+                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                        <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Vue Mois */}
+            {viewMode === "month" && (
+              <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
+                {daysInView.map((day, index) => {
+                  const dateStr = format(day, "yyyy-MM-dd");
+                  const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+                  const dayEvents = getEventsForDay(day);
+
+                  return (
+                    <Card 
+                      key={dateStr}
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}
+                    >
+                      <div className="mb-2 w-full">
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}>
+                          <div className="flex items-center justify-center mb-1">
+                            <div className="flex-1">
+                              <p className={`text-xs uppercase ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>
+                                {format(day, "EEE", { locale: fr })}
+                              </p>
+                              <p className={`text-lg font-bold ${isToday ? 'text-purple-400' : 'text-white'}`}>
+                                {format(day, "d", { locale: fr })}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-        </div>
+
+                      <div className="space-y-1 flex-1 overflow-y-auto max-h-24">
+                        {dayEvents.map(event => {
+                          const isAbsence = event.type === "absence";
+                          const isHoliday = event.type === "holiday";
+                          const isBirthday = event.type === "birthday";
+                          
+                          return (
+                            <div
+                              key={event.id}
+                              className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group flex flex-col min-h-[60px] ${
+                                isAbsence
+                                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                  : isHoliday
+                                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                  : isBirthday
+                                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                                  : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                              }`}
+                              onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
+                            >
+                              <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">
+                                {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
+                              </div>
+                              <div className={`font-bold truncate ${
+                                isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
+                              }`}>{event.titre}</div>
+                              {event.date_fin && (
+                                <div className="text-[10px] opacity-90 truncate">{format(new Date(event.date_debut), "HH:mm")} - {format(new Date(event.date_fin), "HH:mm")}</div>
+                              )}
+                              {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
+                              {(event.type === 'rendez-vous' || event.type === 'absence') && (
+                                <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
+                                  <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                  <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Event Details Dialog */}
         <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
