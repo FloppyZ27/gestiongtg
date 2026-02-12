@@ -575,17 +575,6 @@ export default function Calendrier() {
                               }`}
                               onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                             >
-                              {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <Avatar className="w-5 h-5">
-                                    <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                    <AvatarFallback className="text-[8px] bg-white/30">
-                                      {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-[8px] opacity-80 truncate">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
-                                </div>
-                              )}
                               <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">
                                 {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                               </div>
@@ -600,6 +589,11 @@ export default function Calendrier() {
                                 <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
                                   <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
                                   <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                </div>
+                              )}
+                              {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                <div className="flex items-center justify-end mt-1 pt-1 border-t border-current/20">
+                                  <span className="text-[10px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
                                 </div>
                               )}
                             </div>
