@@ -1262,7 +1262,7 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsAddingPointage(true)}
-                      className="h-8 agenda-add-button"
+                      className="h-8 timesheet-add-button"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Ajouter

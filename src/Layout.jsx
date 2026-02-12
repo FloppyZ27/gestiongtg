@@ -686,6 +686,21 @@ function LayoutContent({ children, currentPageName }) {
           transform: translateY(1px);
         }
 
+        /* Bouton "Ajouter" dans la section Feuille de temps */
+        button.timesheet-add-button {
+          background: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
+          background-color: rgb(0, 184, 212) !important;
+          background-image: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 10px 15px -3px rgba(0, 184, 212, 0.5) !important;
+        }
+
+        button.timesheet-add-button:hover {
+          background: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
+          background-image: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
+        }
+
         /* Tabs avec couleur purple */
         button[role="tab"][class*="purple"]:hover,
         [role="tab"][class*="purple"]:hover {
