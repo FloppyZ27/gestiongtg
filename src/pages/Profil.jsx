@@ -398,13 +398,13 @@ export default function Profil() {
   // Fonctions pour gérer les entrées de temps par semaine/mois
   const getEntreeTempsWeekDays = () => {
     const dayOfWeek = entreeTempsCurrentDate.getDay();
-    const monday = new Date(entreeTempsCurrentDate);
-    monday.setDate(entreeTempsCurrentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const saturday = new Date(entreeTempsCurrentDate);
+    saturday.setDate(entreeTempsCurrentDate.getDate() - (dayOfWeek === 0 ? 1 : dayOfWeek + 1));
     
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(monday);
-      day.setDate(monday.getDate() + i);
+      const day = new Date(saturday);
+      day.setDate(saturday.getDate() + i);
       days.push(day);
     }
     return days;
@@ -1112,18 +1112,37 @@ export default function Profil() {
 
           {!feuilleTempsCollapsed && (
             <CardContent className="p-6">
-              {/* Navigation et tabs */}
-              <div className="flex justify-between items-center mb-4">
-                <Tabs value={entreeTempsTab} onValueChange={setEntreeTempsTab} className="w-full">
-                  <div className="flex justify-between items-center">
-                    <TabsList className="bg-slate-800/50">
-                      <TabsTrigger value="semaine" className="text-emerald-300">Semaine</TabsTrigger>
-                      <TabsTrigger value="mois" className="text-emerald-300">Mois</TabsTrigger>
-                      <TabsTrigger value="tous" className="text-emerald-300">Tous</TabsTrigger>
-                    </TabsList>
-                    
+              {/* Header avec navigation et contrôles */}
+              <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="text-white font-semibold text-lg">
+                      {entreeTempsTab === "semaine"
+                        ? `Semaine du ${format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                        : entreeTempsTab === "mois"
+                        ? format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)
+                        : "Toutes les entrées"}
+                    </div>
+                    {entreeTempsTab === "semaine" && (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                        Total: {getEntreeTempsWeekDays().reduce((sum, day) => {
+                          const dayEntries = getEntreeTempsForDate(day);
+                          return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
+                        }, 0).toFixed(1)}h
+                      </Badge>
+                    )}
+                    {entreeTempsTab === "mois" && (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                        Total: {getEntreeTempsMonthDays().reduce((sum, day) => {
+                          const dayEntries = getEntreeTempsForDate(day);
+                          return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
+                        }, 0).toFixed(1)}h
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-center">
                     {entreeTempsTab !== "tous" && (
-                      <div className="flex gap-2 items-center">
+                      <>
                         <Button
                           size="sm"
                           variant="outline"
@@ -1147,26 +1166,39 @@ export default function Profil() {
                         >
                           Suivant →
                         </Button>
-                      </div>
+                        <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                      </>
                     )}
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        onClick={() => setEntreeTempsTab("semaine")}
+                        className={entreeTempsTab === "semaine" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Semaine
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setEntreeTempsTab("mois")}
+                        className={entreeTempsTab === "mois" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Mois
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setEntreeTempsTab("tous")}
+                        className={entreeTempsTab === "tous" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Tous
+                      </Button>
+                    </div>
                   </div>
-                </Tabs>
+                </div>
               </div>
 
               {/* Vue Semaine */}
               {entreeTempsTab === "semaine" && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-white font-semibold text-sm">
-                      {format(getEntreeTempsWeekDays()[0], "d MMM", { locale: fr })} au {format(getEntreeTempsWeekDays()[6], "d MMM yyyy", { locale: fr })}
-                    </div>
-                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                      Total: {getEntreeTempsWeekDays().reduce((sum, day) => {
-                        const dayEntries = getEntreeTempsForDate(day);
-                        return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
-                      }, 0).toFixed(1)}h
-                    </Badge>
-                  </div>
                   {getEntreeTempsWeekDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
                     const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
@@ -1233,17 +1265,6 @@ export default function Profil() {
               {/* Vue Mois */}
               {entreeTempsTab === "mois" && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-white font-semibold text-sm">
-                      {format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                    </div>
-                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                      Total: {getEntreeTempsMonthDays().reduce((sum, day) => {
-                        const dayEntries = getEntreeTempsForDate(day);
-                        return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
-                      }, 0).toFixed(1)}h
-                    </Badge>
-                  </div>
                   {getEntreeTempsMonthDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
                     const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
