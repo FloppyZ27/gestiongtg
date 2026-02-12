@@ -893,13 +893,7 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsAddingEvent(true)}
-                      className="h-8"
-                      style={{
-                        background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241))',
-                        color: 'white',
-                        boxShadow: '0 10px 15px -3px rgba(168, 85, 247, 0.5)',
-                        border: 'none'
-                      }}
+                      className="h-8 agenda-add-button"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Ajouter

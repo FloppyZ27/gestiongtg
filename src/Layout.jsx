@@ -558,6 +558,21 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
+        /* Boutons avec fond plein violet/indigo - exception au transparent */
+        button[class*="agenda-add-button"] {
+          background: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
+          background-color: rgb(168, 85, 247) !important;
+          background-image: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.5) !important;
+        }
+
+        button[class*="agenda-add-button"]:hover {
+          background: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
+          background-image: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
+        }
+
         /* Contours colorés pour les boutons avec gradient emerald/teal */
         button[class*="from-emerald"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
           border: 2px solid rgb(16, 185, 129) !important;
