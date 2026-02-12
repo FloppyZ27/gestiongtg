@@ -1129,7 +1129,7 @@ export default function Profil() {
             </div>
           </div>
 
-          {!feuilleTempsCollapsed && (
+          {!entreeTempsCollapsed && (
             <CardContent className="p-6">
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
