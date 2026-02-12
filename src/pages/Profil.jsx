@@ -91,7 +91,8 @@ export default function Profil() {
   });
 
   // États pour pointage
-  const [pointageCollapsed, setPointageCollapsed] = useState(false);
+  const [pointageCollapsed, setPointageCollapsed] = useState(true);
+  const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
   const [viewMode, setViewMode] = useState("week"); // "week" ou "month"
   const [pointageCurrentDate, setPointageCurrentDate] = useState(new Date());
   const [editingPointage, setEditingPointage] = useState(null);
@@ -851,6 +852,11 @@ export default function Profil() {
           )}
         </Card>
 
+        {/* Section Agenda */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+...
+        </Card>
+
         {/* Section Feuille de temps (Pointage) */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <div 
@@ -1270,11 +1276,11 @@ export default function Profil() {
                 </div>
                 <h3 className="text-emerald-300 text-sm font-semibold">Entrée de temps</h3>
               </div>
-              {feuilleTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+              {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
           </div>
 
-          {!feuilleTempsCollapsed && (
+          {!entreeTempsCollapsed && (
             <CardContent className="p-6">
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
