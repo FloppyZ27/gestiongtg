@@ -49,6 +49,11 @@ const navigationItems = [
     icon: UserCircle,
   },
   {
+    title: "Calendrier",
+    url: createPageUrl("Calendrier"),
+    icon: Calendar,
+  },
+  {
     title: "Communication clients",
     url: createPageUrl("CommunicationClients"),
     icon: MessageCircle,
