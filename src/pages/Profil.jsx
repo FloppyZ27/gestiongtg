@@ -1021,8 +1021,8 @@ export default function Profil() {
                                         <Trash2 className="w-2.5 h-2.5" />
                                       </button>
                                       <div className="truncate text-[10px] font-bold opacity-90 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                      <div className={`truncate font-bold ${isAbsence ? 'text-red-100' : 'text-purple-100'}`}>{event.titre}</div>
-                                      <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")}</div>
+                                      <div className={`truncate font-bold ${isAbsence ? 'text-orange-300' : 'text-purple-300'}`}>{event.titre}</div>
+                                      <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                       {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
                                       <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
                                         <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
@@ -1094,7 +1094,8 @@ export default function Profil() {
                                   <Trash2 className="w-2.5 h-2.5" />
                                 </button>
                                 <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                <div className={`font-bold truncate ${isAbsence ? 'text-red-300' : 'text-purple-300'}`}>{event.titre}</div>
+                                <div className={`font-bold truncate ${isAbsence ? 'text-orange-300' : 'text-purple-300'}`}>{event.titre}</div>
+                                <div className="text-[10px] opacity-90 truncate">{format(new Date(event.date_debut), "HH:mm")} - {format(new Date(event.date_fin || event.date_debut), "HH:mm")}</div>
                                 {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
                                 <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
                                   <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
