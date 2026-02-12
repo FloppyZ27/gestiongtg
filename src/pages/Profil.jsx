@@ -398,13 +398,13 @@ export default function Profil() {
   // Fonctions pour gérer les entrées de temps par semaine/mois
   const getEntreeTempsWeekDays = () => {
     const dayOfWeek = entreeTempsCurrentDate.getDay();
-    const saturday = new Date(entreeTempsCurrentDate);
-    saturday.setDate(entreeTempsCurrentDate.getDate() - (dayOfWeek === 0 ? 1 : dayOfWeek + 1));
+    const sunday = new Date(entreeTempsCurrentDate);
+    sunday.setDate(entreeTempsCurrentDate.getDate() - dayOfWeek);
     
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(saturday);
-      day.setDate(saturday.getDate() + i);
+      const day = new Date(sunday);
+      day.setDate(sunday.getDate() + i);
       days.push(day);
     }
     return days;
