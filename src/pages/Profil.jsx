@@ -1112,11 +1112,11 @@ export default function Profil() {
           )}
         </Card>
 
-        {/* Section Feuille de temps */}
+        {/* Section Entrée de temps */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <div 
             className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800"
-            onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}
+            onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
