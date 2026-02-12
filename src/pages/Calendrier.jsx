@@ -500,12 +500,6 @@ export default function Calendrier() {
                                       <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                     )}
                                     {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
-                                    {(event.type === 'rendez-vous' || event.type === 'absence') && (
-                                      <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
-                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
-                                        <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
-                                      </div>
-                                    )}
                                     {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
                                       <div className="flex items-center justify-end gap-1 mt-1 pt-1 border-t border-white/20">
                                         <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
@@ -515,6 +509,12 @@ export default function Calendrier() {
                                             {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
                                           </AvatarFallback>
                                         </Avatar>
+                                      </div>
+                                    )}
+                                    {(event.type === 'rendez-vous' || event.type === 'absence') && (
+                                      <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
+                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                        <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
                                       </div>
                                     )}
                                   </div>
