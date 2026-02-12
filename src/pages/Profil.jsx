@@ -998,7 +998,7 @@ export default function Profil() {
                                   return (
                                     <div
                                       key={event.id}
-                                      className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group ${
+                                      className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col ${
                                         isAbsence
                                           ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                           : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
@@ -1021,7 +1021,7 @@ export default function Profil() {
                                         <Trash2 className="w-2.5 h-2.5" />
                                       </button>
                                       <div className="truncate text-[10px] font-bold opacity-90 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                      <div className="truncate font-bold">{event.titre}</div>
+                                      <div className={`truncate font-bold ${isAbsence ? 'text-red-100' : 'text-purple-100'}`}>{event.titre}</div>
                                       <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")}</div>
                                       {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
                                       <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
@@ -1075,7 +1075,7 @@ export default function Profil() {
                             return (
                               <div
                                 key={event.id}
-                                className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group ${
+                                className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group flex flex-col min-h-[60px] ${
                                   isAbsence
                                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                                     : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
@@ -1094,7 +1094,7 @@ export default function Profil() {
                                   <Trash2 className="w-2.5 h-2.5" />
                                 </button>
                                 <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                <div className="font-bold truncate">{event.titre}</div>
+                                <div className={`font-bold truncate ${isAbsence ? 'text-red-300' : 'text-purple-300'}`}>{event.titre}</div>
                                 {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
                                 <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
                                   <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
