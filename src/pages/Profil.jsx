@@ -891,7 +891,7 @@ export default function Profil() {
                                        )}
                                        {isModified && (
                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
-                                           Modifié: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                           Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
                                          </div>
                                        )}
                                      </div>
