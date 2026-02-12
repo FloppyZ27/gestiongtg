@@ -662,32 +662,10 @@ export default function Profil() {
               {/* Header avec navigation et contrôles */}
               <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="text-white font-semibold text-lg">
-                      {viewMode === "week" 
-                        ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                        : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                    </div>
-                    {viewMode === "week" && (() => {
-                      const weekDays = getPointageWeekDays();
-                      const totalWeek = weekDays.reduce((sum, day) => {
-                        const dayPointages = getPointageForDate(day);
-                        return sum + dayPointages.reduce((daySum, p) => {
-                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                            return daySum + (p.duree_heures_modifiee || 0);
-                          } else {
-                            const debut = new Date(p.heure_debut);
-                            const fin = new Date(p.heure_fin);
-                            return daySum + (fin - debut) / (1000 * 60 * 60);
-                          }
-                        }, 0);
-                      }, 0);
-                      return (
-                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm px-3 py-1">
-                          Total semaine: {totalWeek.toFixed(1)}h
-                        </Badge>
-                      );
-                    })()}
+                  <div className="text-white font-semibold text-lg">
+                    {viewMode === "week" 
+                      ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                      : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
                   </div>
                   <div className="flex gap-2 items-center">
                     <Button
@@ -772,7 +750,29 @@ export default function Profil() {
 
                         {/* Sous-entête avec totaux */}
                         <div className="flex border-b border-slate-700 flex-shrink-0">
-                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50"></div>
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50 flex items-center justify-center">
+                            {(() => {
+                              const weekDays = getPointageWeekDays();
+                              const totalWeek = weekDays.reduce((sum, day) => {
+                                const dayPointages = getPointageForDate(day);
+                                return sum + dayPointages.reduce((daySum, p) => {
+                                  if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                    return daySum + (p.duree_heures_modifiee || 0);
+                                  } else {
+                                    const debut = new Date(p.heure_debut);
+                                    const fin = new Date(p.heure_fin);
+                                    return daySum + (fin - debut) / (1000 * 60 * 60);
+                                  }
+                                }, 0);
+                              }, 0);
+                              return (
+                                <div className="text-center">
+                                  <div className="text-[9px] text-emerald-400 font-bold">Total</div>
+                                  <div className="text-xs text-emerald-300 font-semibold">{totalWeek.toFixed(1)}h</div>
+                                </div>
+                              );
+                            })()}
+                          </div>
                           {getPointageWeekDays().map((day, idx) => {
                             const dayPointages = getPointageForDate(day);
                             const totalInitial = dayPointages.reduce((sum, p) => {
