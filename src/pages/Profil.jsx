@@ -96,8 +96,15 @@ export default function Profil() {
   const [viewMode, setViewMode] = useState("week"); // "week" ou "month"
   const [pointageCurrentDate, setPointageCurrentDate] = useState(new Date());
   const [editingPointage, setEditingPointage] = useState(null);
+  const [isAddingPointage, setIsAddingPointage] = useState(false);
   const [editPointageForm, setEditPointageForm] = useState({
     date: "",
+    heure_debut: "",
+    heure_fin: "",
+    description: ""
+  });
+  const [addPointageForm, setAddPointageForm] = useState({
+    date: new Date().toISOString().split('T')[0],
     heure_debut: "",
     heure_fin: "",
     description: ""
@@ -242,6 +249,20 @@ export default function Profil() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
       setEditingPointage(null);
+    },
+  });
+
+  const createPointageMutation = useMutation({
+    mutationFn: (data) => base44.entities.Pointage.create({ ...data, utilisateur_email: user?.email, statut: 'termine' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+      setIsAddingPointage(false);
+      setAddPointageForm({
+        date: new Date().toISOString().split('T')[0],
+        heure_debut: "",
+        heure_fin: "",
+        description: ""
+      });
     },
   });
 
@@ -398,6 +419,35 @@ export default function Profil() {
         description: editPointageForm.description,
         confirme: true
       }
+    });
+  };
+
+  const handleSubmitAddPointage = async (e) => {
+    e.preventDefault();
+    
+    if (!addPointageForm.description.trim()) {
+      alert('La description est obligatoire');
+      return;
+    }
+
+    const [heureD, minD] = addPointageForm.heure_debut.split(':');
+    const [heureF, minF] = addPointageForm.heure_fin.split(':');
+    
+    const debut = new Date(addPointageForm.date);
+    debut.setHours(parseInt(heureD), parseInt(minD), 0);
+    
+    const fin = new Date(addPointageForm.date);
+    fin.setHours(parseInt(heureF), parseInt(minF), 0);
+    
+    const dureeHeures = (fin - debut) / (1000 * 60 * 60);
+
+    createPointageMutation.mutate({
+      date: addPointageForm.date,
+      heure_debut: debut.toISOString(),
+      heure_fin: fin.toISOString(),
+      duree_heures: parseFloat(dureeHeures.toFixed(2)),
+      description: addPointageForm.description,
+      confirme: true
     });
   };
 
@@ -1211,6 +1261,15 @@ export default function Profil() {
                   <div className="flex gap-2 items-center">
                     <Button
                       size="sm"
+                      onClick={() => setIsAddingPointage(true)}
+                      className="h-8 agenda-add-button"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
+                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={goToPointagePrevious}
                       className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
@@ -1925,6 +1984,88 @@ export default function Profil() {
                   disabled={changePasswordMutation.isPending}
                 >
                   {changePasswordMutation.isPending ? 'Modification...' : 'Modifier'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Pointage Dialog */}
+        <Dialog open={isAddingPointage} onOpenChange={(open) => {
+          setIsAddingPointage(open);
+          if (!open) {
+            setAddPointageForm({
+              date: new Date().toISOString().split('T')[0],
+              heure_debut: "",
+              heure_fin: "",
+              description: ""
+            });
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Ajouter une entrée de pointage</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmitAddPointage} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
+                <Input
+                  type="date"
+                  value={addPointageForm.date}
+                  onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
+                  className="bg-slate-800 border-slate-700 text-white"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
+                  <Input
+                    type="time"
+                    value={addPointageForm.heure_debut}
+                    onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
+                  <Input
+                    type="time"
+                    value={addPointageForm.heure_fin}
+                    onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                <textarea
+                  value={addPointageForm.description}
+                  onChange={(e) => setAddPointageForm({...addPointageForm, description: e.target.value})}
+                  placeholder="Description de l'activité..."
+                  className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
+                  rows="3"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddingPointage(false)}
+                  disabled={createPointageMutation.isPending}
+                  className="border-red-500 text-red-400 hover:bg-red-500/10"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                  disabled={createPointageMutation.isPending}
+                >
+                  {createPointageMutation.isPending ? 'Ajout...' : 'Ajouter'}
                 </Button>
               </div>
             </form>
