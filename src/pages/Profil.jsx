@@ -1199,6 +1199,14 @@ export default function Profil() {
               {/* Vue Semaine */}
               {entreeTempsTab === "semaine" && (
                 <div className="space-y-2">
+                  {/* En-têtes des colonnes */}
+                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
+                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
+                    <div className="text-xs font-semibold text-slate-400">Client</div>
+                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
+                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
+                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
+                  </div>
                   {getEntreeTempsWeekDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
                     const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
@@ -1226,26 +1234,32 @@ export default function Profil() {
                               const dossier = dossiers.find(d => d.id === entree.dossier_id);
                               return (
                                 <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2 flex-wrap flex-1">
+                                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
+                                    <div>
                                       {dossier && (
                                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
                                           {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                         </Badge>
                                       )}
-                                      {dossier && (
-                                        <span className="text-slate-400 text-xs">- {getClientsNames(dossier.clients_ids)}</span>
-                                      )}
+                                    </div>
+                                    <div className="text-slate-400 text-xs truncate">
+                                      {dossier ? getClientsNames(dossier.clients_ids) : "-"}
+                                    </div>
+                                    <div>
                                       {entree.mandat && (
                                         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
                                           {entree.mandat}
                                         </Badge>
                                       )}
+                                    </div>
+                                    <div>
                                       <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
                                         {entree.tache}
                                       </Badge>
                                     </div>
-                                    <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
+                                    <div className="text-right">
+                                      <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -1265,6 +1279,14 @@ export default function Profil() {
               {/* Vue Mois */}
               {entreeTempsTab === "mois" && (
                 <div className="space-y-2">
+                  {/* En-têtes des colonnes */}
+                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
+                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
+                    <div className="text-xs font-semibold text-slate-400">Client</div>
+                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
+                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
+                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
+                  </div>
                   {getEntreeTempsMonthDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
                     const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
@@ -1325,6 +1347,14 @@ export default function Profil() {
               {/* Vue Tous */}
               {entreeTempsTab === "tous" && (
                 <div className="space-y-2">
+                  {/* En-têtes des colonnes */}
+                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
+                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
+                    <div className="text-xs font-semibold text-slate-400">Client</div>
+                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
+                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
+                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
+                  </div>
                   {sortedDates.map(date => {
                     const dayEntries = groupedEntrees[date];
                     const totalHours = calculateTotalHours(date);
@@ -1349,26 +1379,32 @@ export default function Profil() {
                             const dossier = dossiers.find(d => d.id === entree.dossier_id);
                             return (
                               <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2 flex-wrap flex-1">
+                                <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
+                                  <div>
                                     {dossier && (
                                       <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
                                         {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
                                     )}
-                                    {dossier && (
-                                      <span className="text-slate-400 text-xs">- {getClientsNames(dossier.clients_ids)}</span>
-                                    )}
+                                  </div>
+                                  <div className="text-slate-400 text-xs truncate">
+                                    {dossier ? getClientsNames(dossier.clients_ids) : "-"}
+                                  </div>
+                                  <div>
                                     {entree.mandat && (
                                       <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
                                         {entree.mandat}
                                       </Badge>
                                     )}
+                                  </div>
+                                  <div>
                                     <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
                                       {entree.tache}
                                     </Badge>
                                   </div>
-                                  <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
+                                  <div className="text-right">
+                                    <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
+                                  </div>
                                 </div>
                               </div>
                             );
