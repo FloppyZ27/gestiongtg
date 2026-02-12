@@ -732,7 +732,9 @@ export default function Profil() {
                       <div className="inline-block min-w-full h-full flex flex-col">
                         {/* En-têtes des jours - sticky */}
                         <div className="flex border-b border-slate-700 flex-shrink-0">
-                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50 flex items-center justify-center">
+                            <div className="text-xs font-semibold text-emerald-400">Total</div>
+                          </div>
                           {getPointageWeekDays().map((day, idx) => {
                             const isToday = day.toDateString() === new Date().toDateString();
                             return (
