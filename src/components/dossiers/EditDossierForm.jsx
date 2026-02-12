@@ -173,8 +173,7 @@ export default function EditDossierForm({
     date: new Date().toISOString().split('T')[0],
     mandat: "",
     heures: "",
-    tache: "",
-    description: ""
+    tache: ""
   });
   const [showDeleteMinuteConfirm, setShowDeleteMinuteConfirm] = useState(false);
   const [minuteToDeleteInfo, setMinuteToDeleteInfo] = useState(null);
@@ -2315,7 +2314,7 @@ export default function EditDossierForm({
 
                        {!newEntreeTempsFormCollapsed && (
                          <div className="p-4 border-t border-lime-500/30 space-y-3">
-                           <div className="grid grid-cols-5 gap-3">
+                           <div className="grid grid-cols-4 gap-3">
                              <div className="space-y-1">
                                <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
                                <Input 
@@ -2367,15 +2366,6 @@ export default function EditDossierForm({
                                  </SelectContent>
                                </Select>
                              </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Description</Label>
-                               <Input 
-                                 placeholder="Notes..."
-                                 value={newEntreeTempsForm.description}
-                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, description: e.target.value})}
-                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                               />
-                             </div>
                            </div>
                            <Button 
                              type="button"
@@ -2404,7 +2394,6 @@ export default function EditDossierForm({
                                  mandat: newEntreeTempsForm.mandat,
                                  heures: parseFloat(newEntreeTempsForm.heures),
                                  tache: newEntreeTempsForm.tache,
-                                 description: newEntreeTempsForm.description || "",
                                  utilisateur_email: user?.email || ""
                                });
 
@@ -2413,8 +2402,7 @@ export default function EditDossierForm({
                                  date: new Date().toISOString().split('T')[0],
                                  mandat: "",
                                  heures: "",
-                                 tache: "",
-                                 description: ""
+                                 tache: ""
                                });
                                setNewEntreeTempsFormCollapsed(true);
                              }}
@@ -2435,7 +2423,6 @@ export default function EditDossierForm({
                               <TableHead className="text-slate-300 text-xs">Heures</TableHead>
                               <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
                               <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Description</TableHead>
                               <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
                               <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
                             </TableRow>
@@ -2458,22 +2445,6 @@ export default function EditDossierForm({
                                   <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
                                     {entree.tache || "-"}
                                   </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs max-w-xs">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="truncate cursor-help">
-                                          {entree.description || "-"}
-                                        </div>
-                                      </TooltipTrigger>
-                                      {entree.description && (
-                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
-                                          {entree.description}
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
                                   <div className="flex items-center gap-1.5">
