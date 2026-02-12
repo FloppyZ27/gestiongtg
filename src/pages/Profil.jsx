@@ -753,7 +753,15 @@ export default function Profil() {
                           <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50 flex items-center justify-center">
                             {(() => {
                               const weekDays = getPointageWeekDays();
-                              const totalWeek = weekDays.reduce((sum, day) => {
+                              const totalInitial = weekDays.reduce((sum, day) => {
+                                const dayPointages = getPointageForDate(day);
+                                return sum + dayPointages.reduce((daySum, p) => {
+                                  const debut = new Date(p.heure_debut);
+                                  const fin = new Date(p.heure_fin);
+                                  return daySum + (fin - debut) / (1000 * 60 * 60);
+                                }, 0);
+                              }, 0);
+                              const totalModifie = weekDays.reduce((sum, day) => {
                                 const dayPointages = getPointageForDate(day);
                                 return sum + dayPointages.reduce((daySum, p) => {
                                   if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
@@ -766,9 +774,13 @@ export default function Profil() {
                                 }, 0);
                               }, 0);
                               return (
-                                <div className="text-center">
-                                  <div className="text-[9px] text-emerald-400 font-bold">Total</div>
-                                  <div className="text-xs text-emerald-300 font-semibold">{totalWeek.toFixed(1)}h</div>
+                                <div className="text-center px-1">
+                                  {totalInitial > 0 && (
+                                    <div className="text-[10px] text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                                  )}
+                                  {totalModifie > 0 && (
+                                    <div className="text-[10px] text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                                  )}
                                 </div>
                               );
                             })()}
