@@ -838,7 +838,7 @@ export default function Profil() {
                              const dayPointages = getPointageForDate(day);
 
                              return (
-                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
+                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
                                  {/* Grille des heures de fond */}
                                  {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
                                    <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
@@ -949,6 +949,11 @@ export default function Profil() {
                       const dateStr = format(day, "yyyy-MM-dd");
                       const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
                       const dayPointages = getPointageForDate(day);
+                      const totalInitial = dayPointages.reduce((sum, p) => {
+                        const debut = new Date(p.heure_debut);
+                        const fin = new Date(p.heure_fin);
+                        return sum + (fin - debut) / (1000 * 60 * 60);
+                      }, 0);
                       const totalModifie = dayPointages.reduce((sum, p) => {
                         if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
                           return sum + (p.duree_heures_modifiee || 0);
@@ -962,16 +967,16 @@ export default function Profil() {
                       return (
                         <Card 
                           key={dateStr}
-                          className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} w-full`}
+                          className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}
                         >
                           <div className="mb-2 w-full">
-                            <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''} w-full`}>
+                            <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
                               <div className="flex items-center justify-center mb-1">
                                 <div className="flex-1">
-                                  <p className={`text-xs uppercase ${isToday ? 'text-cyan-400' : 'text-slate-400'}`}>
+                                  <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
                                     {format(day, "EEE", { locale: fr })}
                                   </p>
-                                  <p className={`text-lg font-bold text-white`}>
+                                  <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
                                     {format(day, "d", { locale: fr })}
                                   </p>
                                 </div>
@@ -979,11 +984,12 @@ export default function Profil() {
                             </div>
                           </div>
 
-                          <div className="space-y-2 flex-1 overflow-y-auto">
+                          <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
+                            {totalInitial > 0 && (
+                              <div className="text-xs text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                            )}
                             {totalModifie > 0 && (
-                              <div className="text-center text-lg text-cyan-400 font-bold">
-                                {totalModifie.toFixed(1)}h
-                              </div>
+                              <div className="text-xs text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
                             )}
                           </div>
                         </Card>
