@@ -1108,7 +1108,366 @@ export default function Profil() {
                         ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
                         : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
                     </div>
-...
+                    {viewMode === "month" && (() => {
+                      const monthDays = getPointageMonthDays();
+                      const totalInitial = monthDays.reduce((sum, day) => {
+                        const dayPointages = getPointageForDate(day);
+                        return sum + dayPointages.reduce((daySum, p) => {
+                          const debut = new Date(p.heure_debut);
+                          const fin = new Date(p.heure_fin);
+                          return daySum + (fin - debut) / (1000 * 60 * 60);
+                        }, 0);
+                      }, 0);
+                      const totalModifie = monthDays.reduce((sum, day) => {
+                        const dayPointages = getPointageForDate(day);
+                        return sum + dayPointages.reduce((daySum, p) => {
+                          if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                            return daySum + (p.duree_heures_modifiee || 0);
+                          } else {
+                            const debut = new Date(p.heure_debut);
+                            const fin = new Date(p.heure_fin);
+                            return daySum + (fin - debut) / (1000 * 60 * 60);
+                          }
+                        }, 0);
+                      }, 0);
+                      return (
+                        <div className="flex gap-3 items-center">
+                          {totalInitial > 0 && (
+                            <Badge className="bg-slate-500/20 text-slate-300 border-slate-500/30">
+                              Initial: {totalInitial.toFixed(1)}h
+                            </Badge>
+                          )}
+                          {totalModifie > 0 && (
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                              Modifié: {totalModifie.toFixed(1)}h
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={goToPointagePrevious}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                    >
+                      ← Précédent
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={goToPointageToday}
+                      className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
+                    >
+                      Aujourd'hui
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={goToPointageNext}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                    >
+                      Suivant →
+                    </Button>
+                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        onClick={() => setViewMode("week")}
+                        className={viewMode === "week" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Semaine
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setViewMode("month")}
+                        className={viewMode === "month" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Mois
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Tabs value={viewMode} onValueChange={setViewMode}>
+                <TabsList className="grid w-full grid-cols-2 mb-6" style={{ display: 'none' }}>
+                  <TabsTrigger value="week" className="text-cyan-300">
+                    <CalendarDays className="w-4 h-4 mr-2" />
+                    Semaine
+                  </TabsTrigger>
+                  <TabsTrigger value="month" className="text-cyan-300">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Mois
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="week" className="space-y-3">
+                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '865px' }}>
+                    <div className="overflow-x-auto flex-1 flex flex-col">
+                      <div className="inline-block min-w-full h-full flex flex-col">
+                        <div className="flex border-b border-slate-700 flex-shrink-0">
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50 flex items-center justify-center">
+                            <div className="text-xs font-semibold text-emerald-400">Total</div>
+                          </div>
+                          {getPointageWeekDays().map((day, idx) => {
+                            const isToday = day.toDateString() === new Date().toDateString();
+                            return (
+                            <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-emerald-500 ring-inset' : 'bg-slate-900/50'}`}>
+                              <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                {format(day, "EEE", { locale: fr })}
+                              </div>
+                              <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                                {format(day, "d", { locale: fr })}
+                              </div>
+                            </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex border-b border-slate-700 flex-shrink-0">
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50 flex items-center justify-center">
+                            {(() => {
+                              const weekDays = getPointageWeekDays();
+                              const totalInitial = weekDays.reduce((sum, day) => {
+                                const dayPointages = getPointageForDate(day);
+                                return sum + dayPointages.reduce((daySum, p) => {
+                                  const debut = new Date(p.heure_debut);
+                                  const fin = new Date(p.heure_fin);
+                                  return daySum + (fin - debut) / (1000 * 60 * 60);
+                                }, 0);
+                              }, 0);
+                              const totalModifie = weekDays.reduce((sum, day) => {
+                                const dayPointages = getPointageForDate(day);
+                                return sum + dayPointages.reduce((daySum, p) => {
+                                  if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                    return daySum + (p.duree_heures_modifiee || 0);
+                                  } else {
+                                    const debut = new Date(p.heure_debut);
+                                    const fin = new Date(p.heure_fin);
+                                    return daySum + (fin - debut) / (1000 * 60 * 60);
+                                  }
+                                }, 0);
+                              }, 0);
+                              return (
+                                <div className="text-center px-1">
+                                  {totalInitial > 0 && (
+                                    <div className="text-[10px] text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                                  )}
+                                  {totalModifie > 0 && (
+                                    <div className="text-[10px] text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                          {getPointageWeekDays().map((day, idx) => {
+                            const dayPointages = getPointageForDate(day);
+                            const totalInitial = dayPointages.reduce((sum, p) => {
+                              const debut = new Date(p.heure_debut);
+                              const fin = new Date(p.heure_fin);
+                              return sum + (fin - debut) / (1000 * 60 * 60);
+                            }, 0);
+                            const totalModifie = dayPointages.reduce((sum, p) => {
+                              if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                                return sum + (p.duree_heures_modifiee || 0);
+                              } else {
+                                const debut = new Date(p.heure_debut);
+                                const fin = new Date(p.heure_fin);
+                                return sum + (fin - debut) / (1000 * 60 * 60);
+                              }
+                            }, 0);
+                            
+                            return (
+                            <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
+                              {totalInitial > 0 && (
+                                <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                              )}
+                              {totalModifie > 0 && (
+                                <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                              )}
+                            </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="overflow-y-auto flex-1 relative" ref={weekScrollRef}>
+                         <div className="flex relative" style={{ minHeight: '1440px' }}>
+                           <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                               <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                                 <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
+                                   {hour.toString().padStart(2, '0')}:00
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+
+                            {getPointageWeekDays().map((day, dayIdx) => {
+                             const isToday = day.toDateString() === new Date().toDateString();
+                             const dayEvents = getEventsForDate(day);
+                             const dayPointages = getPointageForDate(day);
+
+                             return (
+                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
+                                 {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                                   <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                                 ))}
+
+                                 {dayEvents.map(event => {
+                                   const startTime = new Date(event.start.dateTime);
+                                   const endTime = new Date(event.end.dateTime);
+                                   const startHour = startTime.getHours();
+                                   const startMin = startTime.getMinutes();
+                                   const durationMinutes = (endTime - startTime) / (1000 * 60);
+                                   const topPx = startHour * 60 + startMin;
+
+                                   return (
+                                     <div
+                                       key={event.id}
+                                       className="absolute left-1 right-1 bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold z-10"
+                                       style={{
+                                         height: `${Math.max(20, durationMinutes)}px`,
+                                         top: `${topPx}px`
+                                       }}
+                                     >
+                                       <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                       <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                     </div>
+                                   );
+                                 })}
+
+                                 {dayPointages.map(p => {
+                                   const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                   
+                                   const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                   const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                   const startHour = startTime.getHours();
+                                   const startMin = startTime.getMinutes();
+                                   const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                   const topPx = startHour * 60 + startMin;
+                                   
+                                   const initialStart = new Date(p.heure_debut);
+                                   const initialEnd = new Date(p.heure_fin);
+                                   const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+
+                                   return (
+                                     <div
+                                       key={`display-${p.id}`}
+                                       className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
+                                         isModified
+                                           ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                           : p.confirme 
+                                           ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                           : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                       }`}
+                                       onClick={() => handleOpenEditPointage(p)}
+                                       style={{
+                                         height: `${totalMinutes}px`,
+                                         top: `${topPx}px`
+                                       }}
+                                       title={p.description || "Cliquer pour éditer"}
+                                     >
+                                       {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
+                                       {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
+                                       <div className="text-[11px] leading-tight">
+                                         <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                         {isModified && (
+                                           <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                         )}
+                                         {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
+                                       </div>
+                                       {!p.confirme && (
+                                         <button
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             handleConfirmPointage(p);
+                                           }}
+                                           className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
+                                         >
+                                           Confirmer
+                                         </button>
+                                       )}
+                                       {p.confirme && !isModified && (
+                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
+                                           Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                         </div>
+                                       )}
+                                       {isModified && (
+                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
+                                           Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                         </div>
+                                       )}
+                                     </div>
+                                   );
+                                 })}
+                                 </div>
+                                 );
+                                 })}
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </TabsContent>
+
+                <TabsContent value="month" className="space-y-3">
+                  <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
+                    {getPointageMonthDays().map((day, index) => {
+                      const dateStr = format(day, "yyyy-MM-dd");
+                      const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+                      const dayPointages = getPointageForDate(day);
+                      const totalInitial = dayPointages.reduce((sum, p) => {
+                        const debut = new Date(p.heure_debut);
+                        const fin = new Date(p.heure_fin);
+                        return sum + (fin - debut) / (1000 * 60 * 60);
+                      }, 0);
+                      const totalModifie = dayPointages.reduce((sum, p) => {
+                        if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
+                          return sum + (p.duree_heures_modifiee || 0);
+                        } else {
+                          const debut = new Date(p.heure_debut);
+                          const fin = new Date(p.heure_fin);
+                          return sum + (fin - debut) / (1000 * 60 * 60);
+                        }
+                      }, 0);
+
+                      return (
+                        <Card 
+                          key={dateStr}
+                          className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}
+                        >
+                          <div className="mb-2 w-full">
+                            <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
+                              <div className="flex items-center justify-center mb-1">
+                                <div className="flex-1">
+                                  <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                    {format(day, "EEE", { locale: fr })}
+                                  </p>
+                                  <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                                    {format(day, "d", { locale: fr })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
+                            {totalInitial > 0 && (
+                              <div className="text-xs text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                            )}
+                            {totalModifie > 0 && (
+                              <div className="text-xs text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
           )}
         </Card>
 
