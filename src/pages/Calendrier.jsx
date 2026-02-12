@@ -131,102 +131,6 @@ export default function Calendrier() {
     const dayStr = format(day, 'yyyy-MM-dd');
     const currentYear = day.getFullYear();
 
-    // Add dossier/mandate events
-    dossiers.forEach(dossier => {
-      if (dossier.statut === "Rejeté") return;
-      
-      dossier.mandats?.forEach((mandat, mandatIdx) => {
-        // Filter by user
-        const userMatch = selectedUser.length === 0 || selectedUser.includes(mandat.utilisateur_assigne);
-        if (!userMatch) return;
-
-        const clientsNames = getClientsNames(dossier.clients_ids);
-        const dossierLabel = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`;
-
-        // Date de livraison
-        if (mandat.date_livraison && isSameDay(new Date(mandat.date_livraison), day)) {
-          events.push({
-            id: `livraison-${dossier.id}-${mandatIdx}`,
-            titre: `📦 Livraison - ${mandat.type_mandat}`,
-            type: 'livraison',
-            date_debut: mandat.date_livraison,
-            dossier_id: dossier.id,
-            dossier_numero: dossierLabel,
-            clients: clientsNames,
-            utilisateur_email: mandat.utilisateur_assigne,
-            tache_actuelle: mandat.tache_actuelle,
-            description: `Livraison du ${mandat.type_mandat} pour ${clientsNames}`
-          });
-        }
-
-        // Date terrain
-        if (mandat.date_terrain && isSameDay(new Date(mandat.date_terrain), day)) {
-          events.push({
-            id: `terrain-${dossier.id}-${mandatIdx}`,
-            titre: `🗺️ Terrain - ${mandat.type_mandat}`,
-            type: 'terrain',
-            date_debut: mandat.date_terrain,
-            dossier_id: dossier.id,
-            dossier_numero: dossierLabel,
-            clients: clientsNames,
-            utilisateur_email: mandat.utilisateur_assigne,
-            equipe: mandat.equipe_assignee,
-            tache_actuelle: mandat.tache_actuelle,
-            description: `Visite terrain pour ${mandat.type_mandat}${mandat.equipe_assignee ? ` - Équipe: ${mandat.equipe_assignee}` : ''}`
-          });
-        }
-
-        // Date signature
-        if (mandat.date_signature && isSameDay(new Date(mandat.date_signature), day)) {
-          events.push({
-            id: `signature-${dossier.id}-${mandatIdx}`,
-            titre: `✍️ Signature - ${mandat.type_mandat}`,
-            type: 'signature',
-            date_debut: mandat.date_signature,
-            dossier_id: dossier.id,
-            dossier_numero: dossierLabel,
-            clients: clientsNames,
-            utilisateur_email: mandat.utilisateur_assigne,
-            tache_actuelle: mandat.tache_actuelle,
-            description: `Signature pour ${mandat.type_mandat}`
-          });
-        }
-
-        // Date limite levé terrain
-        if (mandat.terrain?.date_limite_leve && isSameDay(new Date(mandat.terrain.date_limite_leve), day)) {
-          events.push({
-            id: `limite-leve-${dossier.id}-${mandatIdx}`,
-            titre: `⏰ Limite levé - ${mandat.type_mandat}`,
-            type: 'limite_leve',
-            date_debut: mandat.terrain.date_limite_leve,
-            dossier_id: dossier.id,
-            dossier_numero: dossierLabel,
-            clients: clientsNames,
-            utilisateur_email: mandat.utilisateur_assigne,
-            tache_actuelle: mandat.tache_actuelle,
-            description: `Date limite pour le levé terrain - ${mandat.type_mandat}`
-          });
-        }
-
-        // Date rendez-vous terrain
-        if (mandat.terrain?.date_rendez_vous && isSameDay(new Date(mandat.terrain.date_rendez_vous), day)) {
-          events.push({
-            id: `rdv-terrain-${dossier.id}-${mandatIdx}`,
-            titre: `📅 RDV Terrain - ${mandat.type_mandat}`,
-            type: 'rdv_terrain',
-            date_debut: mandat.terrain.date_rendez_vous,
-            heure: mandat.terrain.heure_rendez_vous,
-            dossier_id: dossier.id,
-            dossier_numero: dossierLabel,
-            clients: clientsNames,
-            utilisateur_email: mandat.utilisateur_assigne,
-            tache_actuelle: mandat.tache_actuelle,
-            description: `Rendez-vous terrain${mandat.terrain.heure_rendez_vous ? ` à ${mandat.terrain.heure_rendez_vous}` : ''} - ${mandat.type_mandat}`
-          });
-        }
-      });
-    });
-
     // Add holidays
     const holidays = getHolidays(currentYear);
     const holiday = holidays.find(h => h.date === dayStr);
@@ -250,11 +154,11 @@ export default function Calendrier() {
           const userMatch = selectedUser.length === 0 || selectedUser.includes(u.email);
           if (userMatch) {
             events.push({
-              id: `birthday-${u.email}-${dayStr}`, // Unique ID for birthday on a specific day for a specific user
+              id: `birthday-${u.email}-${dayStr}`,
               titre: `🎂 Anniversaire de ${u.full_name}`,
               type: 'birthday',
               date_debut: dayStr,
-              utilisateur_email: u.email, // Associate with user for avatar
+              utilisateur_email: u.email,
               description: `Aujourd'hui, c'est l'anniversaire de ${u.full_name} !`,
             });
           }
@@ -304,9 +208,6 @@ export default function Calendrier() {
 
   const totalRdv = allVisibleEvents.filter(e => e.type === 'rendez-vous').length;
   const totalAbsences = allVisibleEvents.filter(e => e.type === 'absence').length;
-  const totalLivraisons = allVisibleEvents.filter(e => e.type === 'livraison').length;
-  const totalTerrain = allVisibleEvents.filter(e => e.type === 'terrain').length;
-  const totalSignatures = allVisibleEvents.filter(e => e.type === 'signature').length;
   const totalHolidays = allVisibleEvents.filter(e => e.type === 'holiday').length;
   const totalBirthdays = allVisibleEvents.filter(e => e.type === 'birthday').length;
   const totalOverallEvents = allVisibleEvents.length;
@@ -527,16 +428,11 @@ export default function Calendrier() {
                         <div className="space-y-1">
                           {events.map(event => {
                             const user = event.utilisateur_email ? getUserByEmail(event.utilisateur_email) : null;
-                            const isClickable = event.type === 'rendez-vous' || event.type === 'absence' || event.type === 'livraison' || event.type === 'terrain' || event.type === 'signature' || event.type === 'rdv_terrain' || event.type === 'limite_leve';
+                            const isClickable = event.type === 'rendez-vous' || event.type === 'absence';
 
                             const eventColors = {
                               'absence': 'bg-red-500/20 text-red-400 hover:bg-red-500/30',
                               'rendez-vous': 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30',
-                              'livraison': 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30',
-                              'terrain': 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30',
-                              'signature': 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30',
-                              'rdv_terrain': 'bg-teal-500/20 text-teal-400 hover:bg-teal-500/30',
-                              'limite_leve': 'bg-pink-500/20 text-pink-400 hover:bg-pink-500/30',
                               'holiday': 'bg-blue-500/20 text-blue-400',
                               'birthday': 'bg-purple-500/20 text-purple-400'
                             };
@@ -552,14 +448,14 @@ export default function Calendrier() {
                                 `}
                                 title={`${event.titre}${user ? ' - ' + user.full_name : ''}`}
                               >
-                                {(event.type === 'rendez-vous' || event.type === 'absence' || event.type === 'livraison' || event.type === 'terrain' || event.type === 'signature' || event.type === 'rdv_terrain' || event.type === 'limite_leve') && user && (
-                                  <Avatar className="w-4 h-4">
-                                    <AvatarImage src={user?.photo_url} />
-                                    <AvatarFallback className="text-[8px] bg-gradient-to-r from-emerald-500 to-teal-500">
-                                      {getInitials(user?.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
+                                {(event.type === 'rendez-vous' || event.type === 'absence') && user && (
+                                   <Avatar className="w-4 h-4">
+                                     <AvatarImage src={user?.photo_url} />
+                                     <AvatarFallback className="text-[8px] bg-gradient-to-r from-emerald-500 to-teal-500">
+                                       {getInitials(user?.full_name)}
+                                     </AvatarFallback>
+                                   </Avatar>
+                                 )}
                                 {event.type === 'birthday' && user && (
                                   <Avatar className="w-4 h-4">
                                     <AvatarImage src={user?.photo_url} />
@@ -613,52 +509,19 @@ export default function Calendrier() {
                   <div>
                     <Label className="text-slate-400">Type</Label>
                     <div>
-                      <Badge className={
-                        selectedEvent.type === 'absence' ? 'bg-red-500/20 text-red-400' :
-                        selectedEvent.type === 'livraison' ? 'bg-orange-500/20 text-orange-400' :
-                        selectedEvent.type === 'terrain' ? 'bg-yellow-500/20 text-yellow-400' :
-                        selectedEvent.type === 'signature' ? 'bg-cyan-500/20 text-cyan-400' :
-                        selectedEvent.type === 'rdv_terrain' ? 'bg-teal-500/20 text-teal-400' :
-                        selectedEvent.type === 'limite_leve' ? 'bg-pink-500/20 text-pink-400' :
-                        'bg-emerald-500/20 text-emerald-400'
-                      }>
-                        {selectedEvent.type === 'livraison' ? 'Livraison' :
-                         selectedEvent.type === 'terrain' ? 'Visite terrain' :
-                         selectedEvent.type === 'signature' ? 'Signature' :
-                         selectedEvent.type === 'rdv_terrain' ? 'RDV terrain' :
-                         selectedEvent.type === 'limite_leve' ? 'Limite levé' :
-                         selectedEvent.type}
-                      </Badge>
+                       <Badge className={
+                         selectedEvent.type === 'absence' ? 'bg-red-500/20 text-red-400' :
+                         selectedEvent.type === 'holiday' ? 'bg-blue-500/20 text-blue-400' :
+                         selectedEvent.type === 'birthday' ? 'bg-purple-500/20 text-purple-400' :
+                         'bg-emerald-500/20 text-emerald-400'
+                       }>
+                         {selectedEvent.type === 'absence' ? 'Absence' :
+                          selectedEvent.type === 'holiday' ? 'Jour férié' :
+                          selectedEvent.type === 'birthday' ? 'Anniversaire' :
+                          'Rendez-vous'}
+                       </Badge>
+                     </div>
                     </div>
-                  </div>
-
-                  {selectedEvent.dossier_numero && (
-                    <div>
-                      <Label className="text-slate-400">N° Dossier</Label>
-                      <p className="text-white font-medium">{selectedEvent.dossier_numero}</p>
-                    </div>
-                  )}
-
-                  {selectedEvent.clients && (
-                    <div>
-                      <Label className="text-slate-400">Clients</Label>
-                      <p className="text-white">{selectedEvent.clients}</p>
-                    </div>
-                  )}
-
-                  {selectedEvent.tache_actuelle && (
-                    <div>
-                      <Label className="text-slate-400">Tâche actuelle</Label>
-                      <Badge className="bg-slate-700 text-slate-300">{selectedEvent.tache_actuelle}</Badge>
-                    </div>
-                  )}
-
-                  {selectedEvent.equipe && (
-                    <div>
-                      <Label className="text-slate-400">Équipe assignée</Label>
-                      <p className="text-white">{selectedEvent.equipe}</p>
-                    </div>
-                  )}
 
                   <div>
                     <Label className="text-slate-400">Date{selectedEvent.heure ? ' et heure' : ''}</Label>
