@@ -893,7 +893,7 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsAddingEvent(true)}
-                      className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
+                      className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 shadow-lg shadow-purple-500/50 h-8"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Ajouter
