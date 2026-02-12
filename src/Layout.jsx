@@ -686,6 +686,26 @@ function LayoutContent({ children, currentPageName }) {
           transform: translateY(1px);
         }
 
+        /* Boutons onglets Agenda (Semaine/Mois) avec dégradé violet/indigo */
+        button.agenda-tab-button {
+          background: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
+          background-color: rgb(168, 85, 247) !important;
+          background-image: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 4px 12px -3px rgba(168, 85, 247, 0.4) !important;
+        }
+
+        button.agenda-tab-button:hover {
+          background: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
+          background-image: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
+          box-shadow: 0 6px 16px -3px rgba(168, 85, 247, 0.5) !important;
+        }
+
+        button.agenda-tab-button:active {
+          transform: translateY(1px);
+        }
+
         /* Bouton "Ajouter" dans la section Feuille de temps */
         button.timesheet-add-button {
           background: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;

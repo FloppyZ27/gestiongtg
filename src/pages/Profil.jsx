@@ -977,14 +977,14 @@ export default function Profil() {
                       <Button
                         size="sm"
                         onClick={() => setAgendaViewMode("semaine")}
-                        className={`h-8 ${agendaViewMode === "semaine" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
+                        className={`h-8 ${agendaViewMode === "semaine" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
                       >
                         Semaine
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => setAgendaViewMode("mois")}
-                        className={`h-8 ${agendaViewMode === "mois" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
+                        className={`h-8 ${agendaViewMode === "mois" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
                       >
                         Mois
                       </Button>
