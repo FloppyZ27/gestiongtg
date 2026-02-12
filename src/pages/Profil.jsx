@@ -761,8 +761,11 @@ export default function Profil() {
                             const totalModifie = dayPointages.reduce((sum, p) => {
                               if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
                                 return sum + (p.duree_heures_modifiee || 0);
+                              } else {
+                                const debut = new Date(p.heure_debut);
+                                const fin = new Date(p.heure_fin);
+                                return sum + (fin - debut) / (1000 * 60 * 60);
                               }
-                              return sum;
                             }, 0);
                             
                             return (
@@ -864,9 +867,9 @@ export default function Profil() {
                                        {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
                                        {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
                                        <div className="text-[11px] leading-tight">
-                                         <div className={p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                         <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
                                          {isModified && (
-                                           <div className="opacity-50 text-slate-300 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                           <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                          )}
                                          {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
                                        </div>
