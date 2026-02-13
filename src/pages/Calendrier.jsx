@@ -488,7 +488,7 @@ export default function Calendrier() {
                                 return (
                                   <div
                                     key={event.id}
-                                    className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col ${
+                                    className={`absolute left-1 right-1 rounded px-3 py-2 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 ${
                                       isAbsence
                                         ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                         : isHoliday
@@ -498,33 +498,33 @@ export default function Calendrier() {
                                         : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
                                     }`}
                                     style={{
-                                      height: `${Math.max(20, durationMinutes)}px`,
+                                      height: `${Math.max(40, durationMinutes * 1.5)}px`,
                                       top: `${topPx}px`
                                     }}
                                     onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                   >
-                                    <div className="truncate text-[10px] font-bold opacity-90 uppercase">
+                                    <div className="truncate text-[11px] font-bold opacity-90 uppercase">
                                       {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                                     </div>
-                                    <div className={`truncate font-bold ${
+                                    <div className={`truncate font-bold text-sm ${
                                       isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
                                     }`}>{event.titre}</div>
                                     {event.date_fin && (
-                                      <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                      <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                     )}
-                                    {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
+                                    {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
                                     {(event.type === 'rendez-vous' || event.type === 'absence') && (
-                                      <div className="text-[8px] opacity-60 pt-0.5 border-t border-white/20">
+                                      <div className="text-[9px] opacity-60 pt-1 border-t border-white/20">
                                         <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
                                         <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
                                       </div>
                                     )}
                                     {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
                                       <div className="flex items-center justify-end gap-1 pt-1 border-t border-white/20">
-                                        <span className="text-[7px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
-                                        <Avatar className="w-4 h-4">
+                                        <span className="text-[8px] font-bold">{getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}</span>
+                                        <Avatar className="w-5 h-5">
                                           <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                          <AvatarFallback className="text-[7px] bg-white/30">
+                                          <AvatarFallback className="text-[8px] bg-white/30">
                                             {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
                                           </AvatarFallback>
                                         </Avatar>
