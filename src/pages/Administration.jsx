@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Search, History, UserCog, CheckCircle, XCircle } from "lucide-react";
+import { Shield, Users, Search, History, UserCog, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import EditUserDialog from "@/components/admin/EditUserDialog";
 import UserHistoryDialog from "@/components/admin/UserHistoryDialog";
+import PermissionsDialog from "@/components/admin/PermissionsDialog";
+import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDialog";
+import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -37,6 +40,10 @@ export default function Administration() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -56,10 +63,23 @@ export default function Administration() {
     initialData: [],
   });
 
+  const { data: templates = [] } = useQuery({
+    queryKey: ['permissionsTemplates'],
+    queryFn: () => base44.entities.PermissionsTemplate.list(),
+    initialData: [],
+  });
+
   const updateUserMutation = useMutation({
     mutationFn: ({ email, data }) => base44.entities.User.update(email, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+
+  const updateTemplateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.PermissionsTemplate.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permissionsTemplates'] });
     },
   });
 
@@ -92,6 +112,82 @@ export default function Administration() {
   const handleViewHistory = (user) => {
     setSelectedUser(user);
     setIsHistoryDialogOpen(true);
+  };
+
+  const handleManagePermissions = (user) => {
+    setSelectedUser(user);
+    setIsPermissionsDialogOpen(true);
+  };
+
+  const handleResetPassword = (user) => {
+    setSelectedUser(user);
+    setIsResetPasswordDialogOpen(true);
+  };
+
+  const handleSavePermissions = async (permissions) => {
+    await updateUserMutation.mutateAsync({
+      email: selectedUser.email,
+      data: permissions
+    });
+
+    await base44.entities.ActionLog.create({
+      utilisateur_email: currentUser?.email,
+      utilisateur_nom: currentUser?.full_name,
+      action: "MODIFICATION_PERMISSIONS",
+      entite: "User",
+      entite_id: selectedUser.email,
+      details: `Modification des permissions pour ${selectedUser.full_name}`
+    });
+
+    queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+    setIsPermissionsDialogOpen(false);
+  };
+
+  const handleResetPasswordSubmit = async (newPassword) => {
+    await updateUserMutation.mutateAsync({
+      email: selectedUser.email,
+      data: { password: newPassword }
+    });
+
+    await base44.entities.ActionLog.create({
+      utilisateur_email: currentUser?.email,
+      utilisateur_nom: currentUser?.full_name,
+      action: "RESET_PASSWORD",
+      entite: "User",
+      entite_id: selectedUser.email,
+      details: `Réinitialisation du mot de passe pour ${selectedUser.full_name}`
+    });
+
+    queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+    setIsResetPasswordDialogOpen(false);
+    alert("Mot de passe réinitialisé avec succès");
+  };
+
+  const handleManageTemplate = (type, nom) => {
+    const existingTemplate = templates.find(t => t.type === type && t.nom === nom);
+    if (existingTemplate) {
+      setSelectedTemplate(existingTemplate);
+    } else {
+      setSelectedTemplate({ type, nom, permissions_pages: [], permissions_informations: [] });
+    }
+    setIsTemplateDialogOpen(true);
+  };
+
+  const handleSaveTemplate = async (permissions) => {
+    if (selectedTemplate.id) {
+      await updateTemplateMutation.mutateAsync({
+        id: selectedTemplate.id,
+        data: permissions
+      });
+    } else {
+      await base44.entities.PermissionsTemplate.create({
+        type: selectedTemplate.type,
+        nom: selectedTemplate.nom,
+        ...permissions
+      });
+      queryClient.invalidateQueries({ queryKey: ['permissionsTemplates'] });
+    }
+    setIsTemplateDialogOpen(false);
   };
 
   const getInitials = (name) => {
@@ -219,6 +315,7 @@ export default function Administration() {
               <TabsList className="bg-slate-800/50 mb-6">
                 <TabsTrigger value="actifs">Utilisateurs actifs ({activeUsers.length})</TabsTrigger>
                 <TabsTrigger value="inactifs">Utilisateurs inactifs ({inactiveUsers.length})</TabsTrigger>
+                <TabsTrigger value="permissions">Permissions par poste/rôle</TabsTrigger>
               </TabsList>
 
               <TabsContent value="actifs">
@@ -271,6 +368,22 @@ export default function Administration() {
                                   className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
                                 >
                                   <History className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleManagePermissions(user)}
+                                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                                >
+                                  <Lock className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleResetPassword(user)}
+                                  className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                                >
+                                  <KeyRound className="w-4 h-4" />
                                 </Button>
                                 <Button
                                   size="sm"
@@ -379,6 +492,72 @@ export default function Administration() {
                   </Table>
                 </div>
               </TabsContent>
+
+              <TabsContent value="permissions">
+                <div className="space-y-6">
+                  {/* Permissions par Poste */}
+                  <Card className="border-slate-700 bg-slate-800/30">
+                    <CardHeader className="pb-3 border-b border-slate-700">
+                      <CardTitle className="text-lg text-white flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-emerald-400" />
+                        Permissions par Poste
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {["Arpenteur-Géomètre", "Technicien Terrain", "Administratif", "Gestionnaire", "Autre"].map(poste => {
+                          const template = templates.find(t => t.type === 'poste' && t.nom === poste);
+                          return (
+                            <Button
+                              key={poste}
+                              onClick={() => handleManageTemplate('poste', poste)}
+                              className="bg-slate-700/50 hover:bg-slate-700 text-white justify-between h-auto py-3"
+                            >
+                              <span>{poste}</span>
+                              {template && (
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                  {(template.permissions_pages?.length || 0) + (template.permissions_informations?.length || 0)} permissions
+                                </Badge>
+                              )}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Permissions par Rôle */}
+                  <Card className="border-slate-700 bg-slate-800/30">
+                    <CardHeader className="pb-3 border-b border-slate-700">
+                      <CardTitle className="text-lg text-white flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-400" />
+                        Permissions par Rôle
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {["admin", "gestionnaire", "user"].map(role => {
+                          const template = templates.find(t => t.type === 'role' && t.nom === role);
+                          return (
+                            <Button
+                              key={role}
+                              onClick={() => handleManageTemplate('role', role)}
+                              className="bg-slate-700/50 hover:bg-slate-700 text-white justify-between h-auto py-3"
+                            >
+                              <span>{getRoleLabel(role)}</span>
+                              {template && (
+                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                  {(template.permissions_pages?.length || 0) + (template.permissions_informations?.length || 0)} permissions
+                                </Badge>
+                              )}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
@@ -401,6 +580,27 @@ export default function Administration() {
         onOpenChange={setIsHistoryDialogOpen}
         user={selectedUser}
         actionLogs={actionLogs}
+      />
+
+      <PermissionsDialog
+        open={isPermissionsDialogOpen}
+        onOpenChange={setIsPermissionsDialogOpen}
+        user={selectedUser}
+        onSave={handleSavePermissions}
+      />
+
+      <ResetPasswordDialog
+        open={isResetPasswordDialogOpen}
+        onOpenChange={setIsResetPasswordDialogOpen}
+        user={selectedUser}
+        onReset={handleResetPasswordSubmit}
+      />
+
+      <TemplatePermissionsDialog
+        open={isTemplateDialogOpen}
+        onOpenChange={setIsTemplateDialogOpen}
+        template={selectedTemplate}
+        onSave={handleSaveTemplate}
       />
     </div>
   );
