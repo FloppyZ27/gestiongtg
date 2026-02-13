@@ -49,6 +49,7 @@
  */
 import Administration from './pages/Administration';
 import AjouterActe from './pages/AjouterActe';
+import Calendrier from './pages/Calendrier';
 import CeduleTerrain from './pages/CeduleTerrain';
 import ChaineDeTitre from './pages/ChaineDeTitre';
 import Clavardage from './pages/Clavardage';
@@ -67,13 +68,13 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import Calendrier from './pages/Calendrier';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Administration": Administration,
     "AjouterActe": AjouterActe,
+    "Calendrier": Calendrier,
     "CeduleTerrain": CeduleTerrain,
     "ChaineDeTitre": ChaineDeTitre,
     "Clavardage": Clavardage,
@@ -92,7 +93,6 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "Calendrier": Calendrier,
 }
 
 export const pagesConfig = {

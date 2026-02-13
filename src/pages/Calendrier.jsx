@@ -124,8 +124,16 @@ export default function Calendrier() {
   const getEventsForDay = (day) => {
     // Start with filtered RendezVous and Absences
     const events = filteredRendezVous.filter(rdv => {
-      const rdvDate = new Date(rdv.date_debut);
-      return isSameDay(rdvDate, day);
+      const rdvStart = new Date(rdv.date_debut);
+      const rdvEnd = rdv.date_fin ? new Date(rdv.date_fin) : rdvStart;
+      
+      // Check if the day falls within the event's date range
+      const dayStart = new Date(day);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(day);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      return rdvStart <= dayEnd && rdvEnd >= dayStart;
     });
 
     const dayStr = format(day, 'yyyy-MM-dd');
