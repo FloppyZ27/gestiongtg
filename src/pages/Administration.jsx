@@ -81,6 +81,12 @@ export default function Administration() {
   });
 
   const handleUpdateUser = async (user, field, value) => {
+    // Ne pas permettre la modification du rôle (champ built-in)
+    if (field === "role") {
+      alert("Le rôle ne peut pas être modifié via cette interface. Veuillez contacter un administrateur système.");
+      return;
+    }
+
     await updateUserMutation.mutateAsync({
       email: user.email,
       data: { [field]: value }
@@ -89,8 +95,6 @@ export default function Administration() {
     let actionLabel = "";
     if (field === "actif") {
       actionLabel = value ? "ACTIVATION_UTILISATEUR" : "DESACTIVATION_UTILISATEUR";
-    } else if (field === "role") {
-      actionLabel = "MODIFICATION_ROLE";
     } else if (field === "poste") {
       actionLabel = "MODIFICATION_POSTE";
     }
