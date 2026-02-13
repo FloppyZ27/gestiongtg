@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings } from "lucide-react";
+import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings, UserCog } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
@@ -317,7 +317,6 @@ export default function Administration() {
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Email</TableHead>
                         <TableHead className="text-slate-300">Poste</TableHead>
                         <TableHead className="text-slate-300">Rôle</TableHead>
                         <TableHead className="text-slate-300">Statut</TableHead>
