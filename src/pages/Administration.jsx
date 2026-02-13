@@ -7,10 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Search, History, UserCog, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings } from "lucide-react";
+import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import EditUserDialog from "@/components/admin/EditUserDialog";
-import UserHistoryDialog from "@/components/admin/UserHistoryDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
 import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDialog";
 import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
@@ -38,8 +37,6 @@ const getRoleLabel = (role) => {
 export default function Administration() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
@@ -83,35 +80,31 @@ export default function Administration() {
     },
   });
 
-  const toggleUserStatus = async (user) => {
-    if (!confirm(`Êtes-vous sûr de vouloir ${user.actif ? 'désactiver' : 'activer'} le compte de ${user.full_name} ?`)) return;
-    
+  const handleUpdateUser = async (user, field, value) => {
     await updateUserMutation.mutateAsync({
       email: user.email,
-      data: { actif: !user.actif }
+      data: { [field]: value }
     });
 
-    // Log l'action
+    let actionLabel = "";
+    if (field === "actif") {
+      actionLabel = value ? "ACTIVATION_UTILISATEUR" : "DESACTIVATION_UTILISATEUR";
+    } else if (field === "role") {
+      actionLabel = "MODIFICATION_ROLE";
+    } else if (field === "poste") {
+      actionLabel = "MODIFICATION_POSTE";
+    }
+
     await base44.entities.ActionLog.create({
       utilisateur_email: currentUser?.email,
       utilisateur_nom: currentUser?.full_name,
-      action: user.actif ? "DESACTIVATION_UTILISATEUR" : "ACTIVATION_UTILISATEUR",
+      action: actionLabel,
       entite: "User",
       entite_id: user.email,
-      details: `${user.actif ? 'Désactivation' : 'Activation'} du compte de ${user.full_name}`
+      details: `Modification de ${user.full_name}: ${field} = ${value}`
     });
 
     queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-  };
-
-  const handleEditUser = (user) => {
-    setSelectedUser(user);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleViewHistory = (user) => {
-    setSelectedUser(user);
-    setIsHistoryDialogOpen(true);
   };
 
   const handleManagePermissions = (user) => {
@@ -343,32 +336,71 @@ export default function Administration() {
                                     {getInitials(user.full_name)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="text-white">{user.full_name}</span>
+                                <div>
+                                  <div className="text-white">{user.full_name}</div>
+                                  <div className="text-xs text-slate-400">{user.email}</div>
+                                </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-slate-300">{user.email}</TableCell>
-                            <TableCell className="text-slate-300">{user.poste || "-"}</TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                {getRoleLabel(user.role)}
-                              </Badge>
+                              <Select 
+                                value={user.poste || ""} 
+                                onValueChange={(value) => handleUpdateUser(user, "poste", value)}
+                              >
+                                <SelectTrigger className="w-48 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
+                                  <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
+                                  <SelectItem value="Administratif">Administratif</SelectItem>
+                                  <SelectItem value="Gestionnaire">Gestionnaire</SelectItem>
+                                  <SelectItem value="Autre">Autre</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell>
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Actif
-                              </Badge>
+                              <Select 
+                                value={user.role} 
+                                onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                              >
+                                <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="admin">Administrateur</SelectItem>
+                                  <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
+                                  <SelectItem value="user">Utilisateur</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Select 
+                                value={user.actif !== false ? "actif" : "inactif"} 
+                                onValueChange={(value) => handleUpdateUser(user, "actif", value === "actif")}
+                                disabled={user.email === currentUser?.email}
+                              >
+                                <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="actif">
+                                    <div className="flex items-center gap-2">
+                                      <CheckCircle className="w-3 h-3 text-green-400" />
+                                      <span>Actif</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="inactif">
+                                    <div className="flex items-center gap-2">
+                                      <XCircle className="w-3 h-3 text-red-400" />
+                                      <span>Inactif</span>
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex gap-2 justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleViewHistory(user)}
-                                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
-                                >
-                                  <History className="w-4 h-4" />
-                                </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -385,30 +417,13 @@ export default function Administration() {
                                 >
                                   <KeyRound className="w-4 h-4" />
                                 </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleEditUser(user)}
-                                  className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                >
-                                  <UserCog className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => toggleUserStatus(user)}
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  disabled={user.email === currentUser?.email}
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                             Aucun utilisateur actif trouvé
                           </TableCell>
                         </TableRow>
@@ -424,7 +439,6 @@ export default function Administration() {
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Email</TableHead>
                         <TableHead className="text-slate-300">Poste</TableHead>
                         <TableHead className="text-slate-300">Rôle</TableHead>
                         <TableHead className="text-slate-300">Statut</TableHead>
@@ -443,39 +457,86 @@ export default function Administration() {
                                     {getInitials(user.full_name)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="text-white">{user.full_name}</span>
+                                <div>
+                                  <div className="text-white">{user.full_name}</div>
+                                  <div className="text-xs text-slate-400">{user.email}</div>
+                                </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-slate-300">{user.email}</TableCell>
-                            <TableCell className="text-slate-300">{user.poste || "-"}</TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                {getRoleLabel(user.role)}
-                              </Badge>
+                              <Select 
+                                value={user.poste || ""} 
+                                onValueChange={(value) => handleUpdateUser(user, "poste", value)}
+                              >
+                                <SelectTrigger className="w-48 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
+                                  <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
+                                  <SelectItem value="Administratif">Administratif</SelectItem>
+                                  <SelectItem value="Gestionnaire">Gestionnaire</SelectItem>
+                                  <SelectItem value="Autre">Autre</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell>
-                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 border">
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Inactif
-                              </Badge>
+                              <Select 
+                                value={user.role} 
+                                onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                              >
+                                <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="admin">Administrateur</SelectItem>
+                                  <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
+                                  <SelectItem value="user">Utilisateur</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Select 
+                                value={user.actif !== false ? "actif" : "inactif"} 
+                                onValueChange={(value) => handleUpdateUser(user, "actif", value === "actif")}
+                                disabled={user.email === currentUser?.email}
+                              >
+                                <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="actif">
+                                    <div className="flex items-center gap-2">
+                                      <CheckCircle className="w-3 h-3 text-green-400" />
+                                      <span>Actif</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="inactif">
+                                    <div className="flex items-center gap-2">
+                                      <XCircle className="w-3 h-3 text-red-400" />
+                                      <span>Inactif</span>
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex gap-2 justify-end">
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => handleViewHistory(user)}
-                                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                  onClick={() => handleManagePermissions(user)}
+                                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
                                 >
-                                  <History className="w-4 h-4" />
+                                  <Lock className="w-4 h-4" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => toggleUserStatus(user)}
-                                  className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                  onClick={() => handleResetPassword(user)}
+                                  className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                                 >
-                                  <CheckCircle className="w-4 h-4" />
+                                  <KeyRound className="w-4 h-4" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -483,7 +544,7 @@ export default function Administration() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                             Aucun utilisateur inactif trouvé
                           </TableCell>
                         </TableRow>
@@ -564,24 +625,6 @@ export default function Administration() {
       </div>
 
       {/* Dialogs */}
-      <EditUserDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        user={selectedUser}
-        currentUser={currentUser}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['users'] });
-          queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-        }}
-      />
-
-      <UserHistoryDialog
-        open={isHistoryDialogOpen}
-        onOpenChange={setIsHistoryDialogOpen}
-        user={selectedUser}
-        actionLogs={actionLogs}
-      />
-
       <PermissionsDialog
         open={isPermissionsDialogOpen}
         onOpenChange={setIsPermissionsDialogOpen}
