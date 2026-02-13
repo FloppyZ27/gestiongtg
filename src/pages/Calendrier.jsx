@@ -455,7 +455,7 @@ export default function Calendrier() {
                             <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-purple-500/10' : 'bg-slate-800/20'}`}>
                               {/* Grille des heures de fond */}
                               {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                                <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                                <div key={hour} className="h-[90px] border-b border-slate-700/50"></div>
                               ))}
 
                               {/* Événements */}
