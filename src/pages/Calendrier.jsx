@@ -503,16 +503,16 @@ export default function Calendrier() {
                                     }}
                                     onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                   >
-                                    <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                    <div className="text-[11px] font-bold opacity-90 uppercase break-words">
                                       {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                                     </div>
-                                    <div className={`truncate font-bold text-sm ${
+                                    <div className={`font-bold text-sm break-words ${
                                       isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
                                     }`}>{event.titre}</div>
                                     {event.date_fin && (
-                                      <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                      <div className="text-[11px] opacity-90 break-words">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                     )}
-                                    {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                    {event.description && <div className="text-[10px] opacity-75 break-words line-clamp-2">{event.description}</div>}
                                     {(event.type === 'rendez-vous' || event.type === 'absence') && (
                                       <div className="text-[9px] opacity-60 pt-1 border-t border-white/20">
                                         <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
