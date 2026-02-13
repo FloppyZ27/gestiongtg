@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -768,8 +769,9 @@ export default function Profil() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
-      <div className="w-full">
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
+        <div className="w-full">
         <div className="flex items-center gap-3 mb-8">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
             Mon Profil
@@ -1017,12 +1019,17 @@ export default function Profil() {
                       </div>
 
                       {/* Grille horaire */}
-                      <div className="overflow-y-auto flex-1 relative">
-                        <div className="flex relative" style={{ minHeight: '1440px' }}>
+                      <div className="overflow-y-auto flex-1 relative" ref={el => {
+                        if (el && !el.dataset.scrolledTo7) {
+                          el.scrollTop = 7 * 90;
+                          el.dataset.scrolledTo7 = 'true';
+                        }
+                      }}>
+                        <div className="flex relative" style={{ minHeight: '2160px' }}>
                           {/* Colonne des heures */}
                           <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                              <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                              <div key={hour} className="h-[90px] border-b border-slate-700/50 flex items-start">
                                 <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
                                   {hour.toString().padStart(2, '0')}:00
                                 </div>
@@ -1039,74 +1046,105 @@ export default function Profil() {
                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-purple-500/10' : 'bg-slate-800/20'}`}>
                                 {/* Grille des heures de fond */}
                                 {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                                  <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                                  <div key={hour} className="h-[90px] border-b border-slate-700/50"></div>
                                 ))}
 
                                 {/* Événements */}
                                 {dayEvents.map(event => {
                                   const eventStart = new Date(event.date_debut);
                                   const eventEnd = new Date(event.date_fin || event.date_debut);
-                                  
-                                  // Début de la journée actuelle
+
                                   const dayStart = new Date(day);
                                   dayStart.setHours(0, 0, 0, 0);
-                                  
-                                  // Fin de la journée actuelle
+
                                   const dayEnd = new Date(day);
                                   dayEnd.setHours(23, 59, 59, 999);
-                                  
-                                  // Calculer l'heure de début pour cette journée
+
                                   const startTime = eventStart < dayStart ? dayStart : eventStart;
-                                  
-                                  // Calculer l'heure de fin pour cette journée
                                   const endTime = eventEnd > dayEnd ? dayEnd : eventEnd;
-                                  
-                                  // Si l'événement ne touche pas ce jour, on ne l'affiche pas
+
                                   if (eventEnd < dayStart || eventStart > dayEnd) {
                                     return null;
                                   }
-                                  
+
                                   const startHour = startTime.getHours();
                                   const startMin = startTime.getMinutes();
                                   const durationMinutes = (endTime - startTime) / (1000 * 60);
-                                  const topPx = startHour * 60 + startMin;
+                                  const topPx = (startHour * 90) + (startMin * 1.5);
 
                                   const isAbsence = event.type === "absence";
 
                                   return (
-                                    <div
-                                      key={event.id}
-                                      className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col ${
-                                        isAbsence
-                                          ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
-                                          : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
-                                      }`}
-                                      style={{
-                                        height: `${Math.max(20, durationMinutes)}px`,
-                                        top: `${topPx}px`
-                                      }}
-                                      onClick={() => handleEditEvent(event)}
-                                    >
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          if (confirm("Supprimer cet événement ?")) {
-                                            deleteRendezVousMutation.mutate(event.id);
-                                          }
-                                        }}
-                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                      >
-                                        <Trash2 className="w-2.5 h-2.5" />
-                                      </button>
-                                      <div className="truncate text-[10px] font-bold opacity-90 uppercase">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                      <div className={`truncate font-bold ${isAbsence ? 'text-orange-300' : 'text-purple-300'}`}>{event.titre}</div>
-                                      <div className="truncate text-[9px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
-                                      {event.description && <div className="truncate text-[9px] opacity-75">{event.description}</div>}
-                                      <div className="text-[8px] opacity-60 mt-auto pt-0.5 border-t border-white/20">
-                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
-                                        <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
-                                      </div>
-                                    </div>
+                                    <Tooltip key={event.id}>
+                                      <TooltipTrigger asChild>
+                                        <div
+                                          className={`absolute left-1 right-1 rounded px-3 py-2 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
+                                            isAbsence
+                                              ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                              : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                          }`}
+                                          style={{
+                                            height: `${Math.max(40, durationMinutes * 1.5)}px`,
+                                            top: `${topPx}px`
+                                          }}
+                                          onClick={() => handleEditEvent(event)}
+                                        >
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              if (confirm("Supprimer cet événement ?")) {
+                                                deleteRendezVousMutation.mutate(event.id);
+                                              }
+                                            }}
+                                            className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                          >
+                                            <Trash2 className="w-2.5 h-2.5" />
+                                          </button>
+                                          <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                            {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                          </div>
+                                          <div className={`truncate font-bold text-sm ${
+                                            isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                          }`}>{event.titre}</div>
+                                          {event.date_fin && (
+                                            <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                          )}
+                                          {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                          {durationMinutes >= 60 && (
+                                            <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
+                                              <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                              {durationMinutes >= 90 && (
+                                                <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
+                                        <div className="space-y-2">
+                                          <div className="text-xs font-bold opacity-90 uppercase">
+                                            {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                          </div>
+                                          <div className={`font-bold text-base ${
+                                            isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                          }`}>{event.titre}</div>
+                                          {event.date_fin && (
+                                            <div className="text-sm opacity-90">
+                                              {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}
+                                            </div>
+                                          )}
+                                          {event.description && (
+                                            <div className="text-sm opacity-75 whitespace-pre-wrap">{event.description}</div>
+                                          )}
+                                          <div className="pt-2 border-t border-white/20">
+                                            <div className="text-xs opacity-60">
+                                              <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
+                                              <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
                                   );
                                 })}
                               </div>
@@ -1114,10 +1152,10 @@ export default function Profil() {
                           })}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+                      </div>
+                      </div>
+                      </div>
+                      )}
 
               {/* Vue Mois */}
               {agendaViewMode === "mois" && (
@@ -1131,6 +1169,7 @@ export default function Profil() {
                       <Card 
                         key={dateStr}
                         className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}
+                        style={{ minHeight: '210px' }}
                       >
                         <div className="mb-2 w-full">
                           <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}>
@@ -1147,39 +1186,84 @@ export default function Profil() {
                           </div>
                         </div>
 
-                        <div className="space-y-1 flex-1 overflow-y-auto max-h-24">
+                        <div className="space-y-1 flex-1 overflow-y-auto" style={{ maxHeight: '170px' }}>
                           {dayEvents.map(event => {
                             const isAbsence = event.type === "absence";
+                            
+                            const eventStart = new Date(event.date_debut);
+                            const eventEnd = event.date_fin ? new Date(event.date_fin) : eventStart;
+                            
+                            const dayStart = new Date(day);
+                            dayStart.setHours(0, 0, 0, 0);
+                            const dayEnd = new Date(day);
+                            dayEnd.setHours(23, 59, 59, 999);
+                            
+                            const displayStart = eventStart < dayStart ? dayStart : eventStart;
+                            const displayEnd = eventEnd > dayEnd ? dayEnd : eventEnd;
+                            
                             return (
-                              <div
-                                key={event.id}
-                                className={`text-xs px-2 py-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity relative group flex flex-col min-h-[60px] ${
-                                  isAbsence
-                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                    : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                                }`}
-                                onClick={() => handleEditEvent(event)}
-                              >
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (confirm("Supprimer cet événement ?")) {
-                                      deleteRendezVousMutation.mutate(event.id);
-                                    }
-                                  }}
-                                  className="absolute top-0 right-0 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded-bl text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2 className="w-2.5 h-2.5" />
-                                </button>
-                                <div className="text-[10px] font-bold opacity-90 uppercase mb-0.5">{isAbsence ? 'Absence' : 'Rendez-vous'}</div>
-                                <div className={`font-bold truncate ${isAbsence ? 'text-orange-300' : 'text-purple-300'}`}>{event.titre}</div>
-                                <div className="text-[10px] opacity-90 truncate">{format(new Date(event.date_debut), "HH:mm")} - {format(new Date(event.date_fin || event.date_debut), "HH:mm")}</div>
-                                {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
-                                <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-current/20">
-                                  <div>Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
-                                  <div>Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
-                                </div>
-                              </div>
+                              <Tooltip key={event.id}>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className={`text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
+                                      isAbsence
+                                        ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                        : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                    }`}
+                                    onClick={() => handleEditEvent(event)}
+                                  >
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (confirm("Supprimer cet événement ?")) {
+                                          deleteRendezVousMutation.mutate(event.id);
+                                        }
+                                      }}
+                                      className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="w-2.5 h-2.5" />
+                                    </button>
+                                    <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                      {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                    </div>
+                                    <div className={`truncate font-bold text-sm ${
+                                      isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                    }`}>{event.titre}</div>
+                                    {event.date_fin && (
+                                      <div className="truncate text-[11px] opacity-90">{format(displayStart, "HH:mm")} - {format(displayEnd, "HH:mm")}</div>
+                                    )}
+                                    {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                    <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
+                                      <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                      <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                    </div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-bold opacity-90 uppercase">
+                                      {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                    </div>
+                                    <div className={`font-bold text-base ${
+                                      isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                    }`}>{event.titre}</div>
+                                    {event.date_fin && (
+                                      <div className="text-sm opacity-90">
+                                        {format(displayStart, "HH:mm")} - {format(displayEnd, "HH:mm")}
+                                      </div>
+                                    )}
+                                    {event.description && (
+                                      <div className="text-sm opacity-75 whitespace-pre-wrap">{event.description}</div>
+                                    )}
+                                    <div className="pt-2 border-t border-white/20">
+                                      <div className="text-xs opacity-60">
+                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
+                                        <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
                             );
                           })}
                         </div>
@@ -2325,7 +2409,8 @@ export default function Profil() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
