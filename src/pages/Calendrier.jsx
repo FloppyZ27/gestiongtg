@@ -479,7 +479,7 @@ export default function Calendrier() {
                                 const startHour = startTime.getHours();
                                 const startMin = startTime.getMinutes();
                                 const durationMinutes = (endTime - startTime) / (1000 * 60);
-                                const topPx = startHour * 60 + startMin;
+                                const topPx = (startHour * 90) + (startMin * 1.5);
 
                                 const isAbsence = event.type === "absence";
                                 const isHoliday = event.type === "holiday";
