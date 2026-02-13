@@ -428,12 +428,12 @@ export default function Calendrier() {
                     </div>
 
                     {/* Grille horaire */}
-                     <div className="overflow-y-auto flex-1 relative" ref={el => {
-                       if (el && !el.dataset.scrolledTo7) {
-                         el.scrollTop = 7 * 60;
-                         el.dataset.scrolledTo7 = 'true';
-                       }
-                     }}>
+                    <div className="overflow-y-auto flex-1 relative" ref={el => {
+                      if (el && !el.dataset.scrolledTo7) {
+                        el.scrollTop = 7 * 90;
+                        el.dataset.scrolledTo7 = 'true';
+                      }
+                    }}>
                        <div className="flex relative" style={{ minHeight: '2160px' }}>
                          {/* Colonne des heures */}
                          <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
