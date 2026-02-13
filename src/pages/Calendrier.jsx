@@ -762,8 +762,8 @@ export default function Calendrier() {
             )}
           </DialogContent>
         </Dialog>
-        </div>
       </div>
+    </div>
     </TooltipProvider>
   );
 }
