@@ -577,6 +577,18 @@ export default function Calendrier() {
                           const isHoliday = event.type === "holiday";
                           const isBirthday = event.type === "birthday";
                           
+                          // Calculer les heures de début et fin pour ce jour spécifique
+                          const eventStart = new Date(event.date_debut);
+                          const eventEnd = event.date_fin ? new Date(event.date_fin) : eventStart;
+                          
+                          const dayStart = new Date(day);
+                          dayStart.setHours(0, 0, 0, 0);
+                          const dayEnd = new Date(day);
+                          dayEnd.setHours(23, 59, 59, 999);
+                          
+                          const displayStart = eventStart < dayStart ? dayStart : eventStart;
+                          const displayEnd = eventEnd > dayEnd ? dayEnd : eventEnd;
+                          
                           return (
                             <div
                               key={event.id}
@@ -596,7 +608,7 @@ export default function Calendrier() {
                               </div>
                               <div className="font-bold truncate">{event.titre}</div>
                               {event.date_fin && (
-                                <div className="text-[10px] opacity-90 truncate">{format(new Date(event.date_debut), "HH:mm")} - {format(new Date(event.date_fin), "HH:mm")}</div>
+                                <div className="text-[10px] opacity-90 truncate">{format(displayStart, "HH:mm")} - {format(displayEnd, "HH:mm")}</div>
                               )}
                               {event.description && <div className="text-[10px] opacity-75 truncate mt-0.5">{event.description}</div>}
                               {(event.type === 'rendez-vous' || event.type === 'absence') && (
