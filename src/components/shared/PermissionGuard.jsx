@@ -53,8 +53,10 @@ export default function PermissionGuard({ children, pageName }) {
     if (user.poste) {
       const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
       
-      if (posteTemplate && posteTemplate.permissions_pages && posteTemplate.permissions_pages.length > 0) {
-        const hasPermission = posteTemplate.permissions_pages.includes(pageName);
+      // Si un template existe pour ce poste, vérifier les permissions
+      if (posteTemplate) {
+        const allowedPages = posteTemplate.permissions_pages || [];
+        const hasPermission = allowedPages.includes(pageName);
         
         if (!hasPermission) {
           setHasAccess(false);
