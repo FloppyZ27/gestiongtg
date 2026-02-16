@@ -48,7 +48,14 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Rôle utilisateur: ${user.role}`);
     console.log(`Poste utilisateur: ${user.poste}`);
 
-    // Vérification PRIORITAIRE par rôle
+    // Admin système a toujours accès (rôle "admin" en minuscule)
+    if (user.role === 'admin') {
+      console.log(`✅ Accès admin système - accès total`);
+      setHasAccess(true);
+      return;
+    }
+
+    // Vérification par rôle
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
     console.log(`Template de rôle trouvé:`, roleTemplate);
     
@@ -56,7 +63,6 @@ export default function PermissionGuard({ children, pageName }) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
       console.log(`Pages autorisées par rôle:`, allowedPagesByRole);
       
-      // Si le rôle n'autorise pas la page, accès refusé immédiatement
       if (!allowedPagesByRole.includes(pageName)) {
         console.log(`❌ Accès refusé par rôle: ${user.role} n'a pas accès à ${pageName}`);
         setHasAccess(false);
@@ -65,10 +71,14 @@ export default function PermissionGuard({ children, pageName }) {
       }
       console.log(`✓ Rôle autorise la page`);
     } else {
-      console.log(`⚠️ Aucun template trouvé pour le rôle: ${user.role}`);
+      console.log(`⚠️ Aucun template trouvé pour le rôle: ${user.role} - accès par défaut refusé`);
+      // Si aucun template de rôle, refuser l'accès par sécurité
+      setHasAccess(false);
+      setShowWarning(true);
+      return;
     }
 
-    // Vérification SECONDAIRE par poste (seulement si le rôle autorise ou n'existe pas)
+    // Vérification par poste
     const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
     console.log(`Template de poste trouvé:`, posteTemplate);
     
@@ -76,7 +86,6 @@ export default function PermissionGuard({ children, pageName }) {
       const allowedPagesByPoste = posteTemplate.permissions_pages || [];
       console.log(`Pages autorisées par poste:`, allowedPagesByPoste);
       
-      // Si le poste n'autorise pas la page, accès refusé
       if (!allowedPagesByPoste.includes(pageName)) {
         console.log(`❌ Accès refusé par poste: ${user.poste} n'a pas accès à ${pageName}`);
         setHasAccess(false);
@@ -85,11 +94,10 @@ export default function PermissionGuard({ children, pageName }) {
       }
       console.log(`✓ Poste autorise la page`);
     } else {
-      console.log(`⚠️ Aucun template trouvé pour le poste: ${user.poste}`);
+      console.log(`⚠️ Aucun template trouvé pour le poste: ${user.poste} - vérification par rôle seulement`);
     }
 
-    console.log(`✅ Accès autorisé à ${pageName} pour ${user.email}`);
-    // Si toutes les vérifications passent, accès autorisé
+    console.log(`✅ Accès autorisé à ${pageName}`);
     setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
