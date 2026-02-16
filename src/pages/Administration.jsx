@@ -350,6 +350,7 @@ export default function Administration() {
                                   variant="ghost"
                                   onClick={() => handleManagePermissions(user)}
                                   className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                                  title="Gérer les permissions"
                                 >
                                   <Lock className="w-4 h-4" />
                                 </Button>
@@ -358,6 +359,7 @@ export default function Administration() {
                                   variant="ghost"
                                   onClick={() => handleResetPassword(user)}
                                   className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                                  title="Réinitialiser le mot de passe"
                                 >
                                   <KeyRound className="w-4 h-4" />
                                 </Button>
