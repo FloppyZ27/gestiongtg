@@ -49,16 +49,26 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Vérifier les permissions par poste
+    // Vérification PRIORITAIRE par rôle
+    const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
+    if (roleTemplate) {
+      const allowedPagesByRole = roleTemplate.permissions_pages || [];
+      // Si le rôle n'autorise pas la page, accès refusé (priorité au rôle)
+      if (!allowedPagesByRole.includes(pageName)) {
+        setHasAccess(false);
+        setShowWarning(true);
+        return;
+      }
+    }
+
+    // Vérification SECONDAIRE par poste (seulement si le rôle autorise)
     if (user.poste) {
       const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
       
-      // Si un template existe pour ce poste, vérifier les permissions
       if (posteTemplate) {
-        const allowedPages = posteTemplate.permissions_pages || [];
-        const hasPermission = allowedPages.includes(pageName);
-        
-        if (!hasPermission) {
+        const allowedPagesByPoste = posteTemplate.permissions_pages || [];
+        // Si le poste n'autorise pas la page, accès refusé
+        if (!allowedPagesByPoste.includes(pageName)) {
           setHasAccess(false);
           setShowWarning(true);
           return;
@@ -66,6 +76,7 @@ export default function PermissionGuard({ children, pageName }) {
       }
     }
 
+    // Si toutes les vérifications passent, accès autorisé
     setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
