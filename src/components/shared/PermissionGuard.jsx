@@ -53,29 +53,29 @@ export default function PermissionGuard({ children, pageName }) {
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
     if (roleTemplate) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
-      // Si le rôle n'autorise pas la page, accès refusé (priorité au rôle)
+      // Si le rôle n'autorise pas la page, accès refusé immédiatement
       if (!allowedPagesByRole.includes(pageName)) {
+        console.log(`Accès refusé par rôle: ${user.role} n'a pas accès à ${pageName}`);
         setHasAccess(false);
         setShowWarning(true);
         return;
       }
     }
 
-    // Vérification SECONDAIRE par poste (seulement si le rôle autorise)
-    if (user.poste) {
-      const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
-      
-      if (posteTemplate) {
-        const allowedPagesByPoste = posteTemplate.permissions_pages || [];
-        // Si le poste n'autorise pas la page, accès refusé
-        if (!allowedPagesByPoste.includes(pageName)) {
-          setHasAccess(false);
-          setShowWarning(true);
-          return;
-        }
+    // Vérification SECONDAIRE par poste (seulement si le rôle autorise ou n'existe pas)
+    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
+    if (posteTemplate) {
+      const allowedPagesByPoste = posteTemplate.permissions_pages || [];
+      // Si le poste n'autorise pas la page, accès refusé
+      if (!allowedPagesByPoste.includes(pageName)) {
+        console.log(`Accès refusé par poste: ${user.poste} n'a pas accès à ${pageName}`);
+        setHasAccess(false);
+        setShowWarning(true);
+        return;
       }
     }
 
+    console.log(`Accès autorisé à ${pageName} pour ${user.email} (rôle: ${user.role}, poste: ${user.poste})`);
     // Si toutes les vérifications passent, accès autorisé
     setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
