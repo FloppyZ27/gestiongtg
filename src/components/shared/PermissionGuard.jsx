@@ -55,6 +55,39 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
+    // Page "Recherches" nécessite permission explicite (utilisateur OU templates)
+    if (pageName === 'Recherches') {
+      console.log(`Page Recherches - permission explicite requise`);
+      
+      // Vérifier permissions utilisateur
+      if (user.permissions_pages && user.permissions_pages.length > 0) {
+        const hasUserAccess = user.permissions_pages.includes(pageName);
+        if (hasUserAccess) {
+          console.log(`✅ Accès Recherches autorisé par permissions utilisateur`);
+          setHasAccess(true);
+          return;
+        }
+      }
+      
+      // Vérifier templates
+      const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
+      const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
+      
+      const roleAllows = roleTemplate?.permissions_pages?.includes(pageName) || false;
+      const posteAllows = posteTemplate?.permissions_pages?.includes(pageName) || false;
+      
+      if (roleAllows && posteAllows) {
+        console.log(`✅ Accès Recherches autorisé par templates`);
+        setHasAccess(true);
+        return;
+      }
+      
+      console.log(`❌ Accès Recherches refusé - permission explicite manquante`);
+      setHasAccess(false);
+      setShowWarning(true);
+      return;
+    }
+
     // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
     if (user.permissions_pages && user.permissions_pages.length > 0) {
       console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
