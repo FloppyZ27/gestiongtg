@@ -67,7 +67,7 @@ export default function Administration() {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: ({ email, data }) => base44.entities.User.update(email, data),
+    mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -88,7 +88,7 @@ export default function Administration() {
     }
 
     await updateUserMutation.mutateAsync({
-      email: user.email,
+      id: user.id,
       data: { [field]: value }
     });
 
@@ -104,7 +104,7 @@ export default function Administration() {
       utilisateur_nom: currentUser?.full_name,
       action: actionLabel,
       entite: "User",
-      entite_id: user.email,
+      entite_id: user.id,
       details: `Modification de ${user.full_name}: ${field} = ${value}`
     });
 
@@ -123,7 +123,7 @@ export default function Administration() {
 
   const handleSavePermissions = async (permissions) => {
     await updateUserMutation.mutateAsync({
-      email: selectedUser.email,
+      id: selectedUser.id,
       data: permissions
     });
 
@@ -132,7 +132,7 @@ export default function Administration() {
       utilisateur_nom: currentUser?.full_name,
       action: "MODIFICATION_PERMISSIONS",
       entite: "User",
-      entite_id: selectedUser.email,
+      entite_id: selectedUser.id,
       details: `Modification des permissions pour ${selectedUser.full_name}`
     });
 
@@ -142,7 +142,7 @@ export default function Administration() {
 
   const handleResetPasswordSubmit = async (newPassword) => {
     await updateUserMutation.mutateAsync({
-      email: selectedUser.email,
+      id: selectedUser.id,
       data: { password: newPassword }
     });
 
@@ -151,7 +151,7 @@ export default function Administration() {
       utilisateur_nom: currentUser?.full_name,
       action: "RESET_PASSWORD",
       entite: "User",
-      entite_id: selectedUser.email,
+      entite_id: selectedUser.id,
       details: `Réinitialisation du mot de passe pour ${selectedUser.full_name}`
     });
 
@@ -441,7 +441,7 @@ export default function Administration() {
                     <TableBody>
                       {activeUsers.length > 0 ? (
                         activeUsers.map((user) => (
-                          <TableRow key={user.email} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800">
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
@@ -552,7 +552,7 @@ export default function Administration() {
                     <TableBody>
                       {inactiveUsers.length > 0 ? (
                         inactiveUsers.map((user) => (
-                          <TableRow key={user.email} className="hover:bg-slate-800/30 border-slate-800 opacity-60">
+                          <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800 opacity-60">
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10 grayscale">
