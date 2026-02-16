@@ -23,22 +23,25 @@ const PAGE_DISPLAY_NAMES = {
 
 export default function PermissionGuard({ children, pageName }) {
   const [showWarning, setShowWarning] = useState(false);
-  const [hasAccess, setHasAccess] = useState(true);
+  const [hasAccess, setHasAccess] = useState(null);
   const navigate = useNavigate();
 
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: templates = [] } = useQuery({
+  const { data: templates = [], isLoading: templatesLoading } = useQuery({
     queryKey: ['permissionsTemplates'],
     queryFn: () => base44.entities.PermissionsTemplate.list(),
     initialData: [],
   });
 
   useEffect(() => {
-    if (!user || !pageName) return;
+    if (userLoading || templatesLoading || !user || !pageName) {
+      setHasAccess(null);
+      return;
+    }
 
     // Admin a toujours accès
     if (user.role === 'admin') {
@@ -50,7 +53,7 @@ export default function PermissionGuard({ children, pageName }) {
     if (user.poste) {
       const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
       
-      if (posteTemplate && posteTemplate.permissions_pages) {
+      if (posteTemplate && posteTemplate.permissions_pages && posteTemplate.permissions_pages.length > 0) {
         const hasPermission = posteTemplate.permissions_pages.includes(pageName);
         
         if (!hasPermission) {
@@ -62,12 +65,24 @@ export default function PermissionGuard({ children, pageName }) {
     }
 
     setHasAccess(true);
-  }, [user, pageName, templates]);
+  }, [user, pageName, templates, userLoading, templatesLoading]);
 
   const handleGoBack = () => {
     setShowWarning(false);
     navigate(createPageUrl("TableauDeBord"));
   };
+
+  // Afficher un écran de chargement si les données ne sont pas prêtes
+  if (hasAccess === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-8">
+        <div className="text-center">
+          <Shield className="w-16 h-16 text-emerald-400 mx-auto mb-4 animate-pulse" />
+          <h2 className="text-2xl font-bold text-white mb-2">Vérification des permissions...</h2>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasAccess) {
     return (
