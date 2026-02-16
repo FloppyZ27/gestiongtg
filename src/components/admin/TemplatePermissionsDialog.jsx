@@ -99,7 +99,7 @@ export default function TemplatePermissionsDialog({ open, onOpenChange, template
                     className="border-slate-600"
                   />
                   <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
-                    {page}
+                    {PAGE_DISPLAY_NAMES[page]}
                   </label>
                 </div>
               ))}
