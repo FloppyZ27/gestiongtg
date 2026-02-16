@@ -6,18 +6,32 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Shield, FileText } from "lucide-react";
 
 const PAGES_DISPONIBLES = [
-  "Tableau de Bord",
+  "TableauDeBord",
   "Profil",
   "Calendrier",
-  "Communication clients",
+  "CommunicationClients",
   "Dossiers",
   "Clients",
-  "Gestion de Mandat",
-  "Cédule Terrain",
+  "GestionDeMandat",
+  "CeduleTerrain",
   "Recherches",
   "SharePoint",
   "Administration"
 ];
+
+const PAGE_DISPLAY_NAMES = {
+  "TableauDeBord": "Tableau de Bord",
+  "Profil": "Profil",
+  "Calendrier": "Calendrier",
+  "CommunicationClients": "Communication clients",
+  "Dossiers": "Dossiers",
+  "Clients": "Clients",
+  "GestionDeMandat": "Gestion de Mandat",
+  "CeduleTerrain": "Cédule Terrain",
+  "Recherches": "Recherches",
+  "SharePoint": "SharePoint",
+  "Administration": "Administration"
+};
 
 const INFORMATIONS_DISPONIBLES = [
   "Données financières",
