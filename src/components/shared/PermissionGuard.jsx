@@ -48,13 +48,6 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Rôle utilisateur: ${user.role}`);
     console.log(`Poste utilisateur: ${user.poste}`);
 
-    // Admin système (rôle "admin") a toujours accès
-    if (user.role === 'admin') {
-      console.log(`✅ Admin système - accès total`);
-      setHasAccess(true);
-      return;
-    }
-
     // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
     if (user.permissions_pages && user.permissions_pages.length > 0) {
       console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
