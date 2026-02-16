@@ -48,6 +48,13 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Rôle utilisateur: ${user.role}`);
     console.log(`Poste utilisateur: ${user.poste}`);
 
+    // Admin a accès à tout sauf "Recherches"
+    if (user.role === 'admin' && pageName !== 'Recherches') {
+      console.log(`✅ Admin - accès automatique (sauf Recherches)`);
+      setHasAccess(true);
+      return;
+    }
+
     // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
     if (user.permissions_pages && user.permissions_pages.length > 0) {
       console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
