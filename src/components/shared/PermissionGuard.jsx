@@ -1,0 +1,121 @@
+import React, { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Shield, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+
+const PAGE_DISPLAY_NAMES = {
+  "TableauDeBord": "Tableau de Bord",
+  "Profil": "Profil",
+  "Calendrier": "Calendrier",
+  "CommunicationClients": "Communication clients",
+  "Dossiers": "Dossiers",
+  "Clients": "Clients",
+  "GestionDeMandat": "Gestion de Mandat",
+  "CeduleTerrain": "Cédule Terrain",
+  "Recherches": "Recherches",
+  "SharePoint": "SharePoint",
+  "Administration": "Administration"
+};
+
+export default function PermissionGuard({ children, pageName }) {
+  const [showWarning, setShowWarning] = useState(false);
+  const [hasAccess, setHasAccess] = useState(true);
+  const navigate = useNavigate();
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ['permissionsTemplates'],
+    queryFn: () => base44.entities.PermissionsTemplate.list(),
+    initialData: [],
+  });
+
+  useEffect(() => {
+    if (!user || !pageName) return;
+
+    // Admin a toujours accès
+    if (user.role === 'admin') {
+      setHasAccess(true);
+      return;
+    }
+
+    // Vérifier les permissions par poste
+    if (user.poste) {
+      const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
+      
+      if (posteTemplate && posteTemplate.permissions_pages) {
+        const hasPermission = posteTemplate.permissions_pages.includes(pageName);
+        
+        if (!hasPermission) {
+          setHasAccess(false);
+          setShowWarning(true);
+          return;
+        }
+      }
+    }
+
+    setHasAccess(true);
+  }, [user, pageName, templates]);
+
+  const handleGoBack = () => {
+    setShowWarning(false);
+    navigate(createPageUrl("TableauDeBord"));
+  };
+
+  if (!hasAccess) {
+    return (
+      <>
+        <Dialog open={showWarning} onOpenChange={setShowWarning}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-yellow-400">
+                <AlertTriangle className="w-6 h-6" />
+                Accès restreint
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <Shield className="w-5 h-5 text-yellow-400 mt-0.5" />
+                <div>
+                  <p className="text-white font-medium mb-1">
+                    Vous n'avez pas accès à cette page
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    Votre poste <span className="text-yellow-400 font-medium">({user?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                  </p>
+                  <p className="text-sm text-slate-400 mt-2">
+                    Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleGoBack}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
+                >
+                  Retour au tableau de bord
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-8">
+          <div className="text-center">
+            <Shield className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Accès restreint</h2>
+            <p className="text-slate-400">Chargement...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return <>{children}</>;
+}

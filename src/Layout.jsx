@@ -36,6 +36,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import NotificationBanner from "@/components/shared/NotificationBanner";
 import NotificationButton from "@/components/shared/NotificationButton";
 import DossierSearchBar from "@/components/shared/DossierSearchBar";
+import PermissionGuard from "@/components/shared/PermissionGuard";
 
 const navigationItems = [
   {
@@ -1792,7 +1793,9 @@ function LayoutContent({ children, currentPageName }) {
           </header>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[73px]">
-            {children}
+            <PermissionGuard pageName={currentPageName}>
+              {children}
+            </PermissionGuard>
           </div>
           </main>
       </div>
