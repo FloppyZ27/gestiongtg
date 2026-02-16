@@ -237,56 +237,7 @@ export default function Administration() {
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Users className="w-8 h-8 text-emerald-400" />
-                <div>
-                  <p className="text-sm text-slate-400">Total utilisateurs</p>
-                  <p className="text-2xl font-bold text-white">{users.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Shield className="w-8 h-8 text-red-400" />
-                <div>
-                  <p className="text-sm text-slate-400">Administrateurs</p>
-                  <p className="text-2xl font-bold text-white">{adminUsers.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <UserCog className="w-8 h-8 text-blue-400" />
-                <div>
-                  <p className="text-sm text-slate-400">Gestionnaires</p>
-                  <p className="text-2xl font-bold text-white">{gestionnaireUsers.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-emerald-400" />
-                <div>
-                  <p className="text-sm text-slate-400">Comptes actifs</p>
-                  <p className="text-2xl font-bold text-white">{users.filter(u => u.actif !== false).length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Main Content */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">

@@ -55,6 +55,24 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
+    // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
+    if (user.permissions_pages && user.permissions_pages.length > 0) {
+      console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
+      const hasUserAccess = user.permissions_pages.includes(pageName);
+      
+      if (!hasUserAccess) {
+        console.log(`❌ Accès refusé par permissions utilisateur spécifiques`);
+        setHasAccess(false);
+        setShowWarning(true);
+        return;
+      }
+      
+      console.log(`✅ Accès autorisé par permissions utilisateur spécifiques`);
+      setHasAccess(true);
+      return;
+    }
+
+    // Priorité 2: Vérifier via les templates (rôle ET poste)
     let hasRoleAccess = true;
     let hasPosteAccess = true;
 
