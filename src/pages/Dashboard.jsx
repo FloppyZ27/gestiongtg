@@ -27,7 +27,7 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  const filteredActes = actes.filter(acte => {
+  const filteredActes = (actes || []).filter(acte => {
     const searchLower = searchTerm.toLowerCase();
     
     // Recherche dans les vendeurs
