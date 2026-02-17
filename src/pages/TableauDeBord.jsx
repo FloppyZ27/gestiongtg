@@ -1248,28 +1248,28 @@ export default function TableauDeBord() {
                                         {/* Bouton réagir au commentaire */}
                                         <div className="flex items-center gap-2 mt-1">
                                         <div className="relative">
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => setShowChatCommentReactions({ ...showChatCommentReactions, [`${message.id}-${idx}`]: !showChatCommentReactions[`${message.id}-${idx}`] })}
-                                            className="text-slate-400 hover:text-cyan-400 text-xs h-5 px-1"
-                                          >
-                                            <Smile className="w-3 h-3" />
-                                          </Button>
-                                          {showChatCommentReactions[`${message.id}-${idx}`] && (
-                                            <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
-                                              {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
-                                                <button
-                                                  key={emoji}
-                                                  onClick={() => handleChatCommentReaction(message, idx, emoji)}
-                                                  className="text-xl hover:scale-125 transition-transform p-1"
-                                                >
-                                                  {emoji}
-                                                </button>
-                                              ))}
-                                            </div>
-                                          )}
-                                        </div>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => setShowCommentReactions({ ...showCommentReactions, [`${post.id}-${idx}`]: !showCommentReactions[`${post.id}-${idx}`] })}
+                                              className="text-slate-400 hover:text-purple-400 text-xs h-5 px-1"
+                                            >
+                                              <Smile className="w-3 h-3" />
+                                            </Button>
+                                            {showCommentReactions[`${post.id}-${idx}`] && (
+                                              <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                                  <button
+                                                    key={emoji}
+                                                    onClick={() => handleCommentReaction(post, idx, emoji)}
+                                                    className="text-xl hover:scale-125 transition-transform p-1"
+                                                  >
+                                                    {emoji}
+                                                  </button>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
                                         <p className="text-xs text-slate-500">
                                           {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
                                           {comment.date_modification && (
