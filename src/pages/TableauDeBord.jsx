@@ -1125,7 +1125,7 @@ export default function TableauDeBord() {
                           </Button>
                         </div>
 
-                        {showChatComments[message.id] && (
+                        {showComments[post.id] && (
                           <>
                             {message.commentaires && message.commentaires.length > 0 && (
                               <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto">
