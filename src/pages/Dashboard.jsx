@@ -153,6 +153,11 @@ export default function Dashboard() {
   ];
 
   const handleExportCSV = () => {
+    if (sortedActes.length === 0) {
+      alert('Aucun acte à exporter');
+      return;
+    }
+
     const csvData = sortedActes.map(acte => ({
       'Numéro acte': acte.numero_acte,
       'Date BPD': acte.date_bpd ? format(new Date(acte.date_bpd), "yyyy-MM-dd", { locale: fr }) : '-',
