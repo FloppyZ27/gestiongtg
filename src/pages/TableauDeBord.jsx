@@ -874,29 +874,95 @@ export default function TableauDeBord() {
             <div className="grid gap-3" style={{ gridTemplateColumns: weekDays.map((date) => isSameDay(date, today) ? '2fr' : '1fr').join(' ') }}>
               {weekDays.map((date) => {
                 const isToday = isSameDay(date, today);
-                const mandats = getMandatsForDay(date);
+                const dossiersList = getMandatsForDay(date);
                 const dayName = format(date, 'EEE', { locale: fr });
                 const dayNum = format(date, 'd');
                 
                 return (
-                  <div key={date.toISOString()} className={`rounded-lg transition-all ${isToday ? 'ring-2 ring-orange-400 bg-orange-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-50'}`}>
-                    <div className={`text-center mb-3 ${isToday ? 'border-b-2 border-orange-400 pb-2' : ''}`}>
-                      <p className={`font-semibold capitalize ${isToday ? 'text-orange-400 text-lg' : 'text-slate-300 text-sm'}`}>
-                        {dayName}
-                      </p>
-                      <p className={`${isToday ? 'text-orange-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>
-                        {dayNum}
-                      </p>
+                  <div key={date.toISOString()}>
+                    <div className={`rounded-lg transition-all mb-3 ${isToday ? 'ring-2 ring-orange-400 bg-orange-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-50'}`}>
+                      <div className={`text-center ${isToday ? 'border-b-2 border-orange-400 pb-2' : ''}`}>
+                        <p className={`font-semibold capitalize ${isToday ? 'text-orange-400 text-lg' : 'text-slate-300 text-sm'}`}>
+                          {dayName}
+                        </p>
+                        <p className={`${isToday ? 'text-orange-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>
+                          {dayNum}
+                        </p>
+                      </div>
                     </div>
                     
-                    {mandats.length > 0 ? (
-                      <div className={`space-y-2 ${isToday ? 'text-sm' : 'text-xs'}`}>
-                        {mandats.map((dossier) => (
-                          <div key={dossier.id} className={`p-2 rounded ${isToday ? 'bg-orange-400/20 border border-orange-400/50' : 'bg-slate-700/50'}`}>
-                            <p className="font-semibold text-white truncate">{dossier.numero_dossier}</p>
-                            <p className="text-slate-400 truncate">{dossier.arpenteur_geometre.split(' ')[0]}</p>
-                          </div>
-                        ))}
+                    {dossiersList.length > 0 ? (
+                      <div className={`space-y-2 ${isToday ? '' : 'opacity-50'}`}>
+                        {dossiersList.map((dossier) => {
+                          const mandat = dossier.mandats?.[0];
+                          if (!mandat) return null;
+                          
+                          const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                          const bgColorClass = arpenteurColor.split(' ')[0];
+                          const clientsNames = getClientsNames(dossier.clients_ids);
+                          const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
+                          
+                          return (
+                            <div 
+                              key={dossier.id}
+                              className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                                <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+                                  {getAbbreviatedMandatType(mandat.type_mandat)}
+                                </Badge>
+                              </div>
+
+                              <div className="flex items-center gap-1 mb-1">
+                                <User className="w-3 h-3 text-white flex-shrink-0" />
+                                <span className="text-xs text-white font-medium truncate">{clientsNames}</span>
+                              </div>
+
+                              {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                                <div className="flex items-start gap-1 mb-1">
+                                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                                  <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
+                                </div>
+                              )}
+
+                              {mandat.tache_actuelle && (
+                                <div className="mb-1">
+                                  <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
+                                    {mandat.tache_actuelle}
+                                  </Badge>
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+                                {mandat.date_livraison ? (
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                    <span className="text-xs text-yellow-300">
+                                      {format(new Date(mandat.date_livraison + "T00:00:00"), "dd MMM", { locale: fr })}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div />
+                                )}
+                                {assignedUser ? (
+                                  <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
+                                    <AvatarImage src={assignedUser.photo_url} />
+                                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                      {getUserInitials(assignedUser.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                    <User className="w-3 h-3 text-emerald-500" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                       <p className={`text-center ${isToday ? 'text-orange-300/60' : 'text-slate-500/60'} text-xs`}>
