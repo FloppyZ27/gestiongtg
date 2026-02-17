@@ -864,7 +864,7 @@ export default function TableauDeBord() {
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex-1">
-                                        <div className="bg-slate-700/50 rounded-lg p-2">
+                                        <div className="bg-slate-700/50 rounded-lg p-2 max-w-full overflow-hidden">
                                           <div className="flex items-center justify-between mb-1">
                                             <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
                                             {isOwnComment && !isEditing && (
@@ -919,7 +919,7 @@ export default function TableauDeBord() {
                                             </div>
                                           ) : (
                                             <>
-                                              {comment.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap">{comment.contenu}</p>}
+                                              {comment.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap overflow-wrap-anywhere max-w-full">{comment.contenu}</p>}
                                               {comment.image_url && (
                                                 <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
                                               )}
@@ -966,8 +966,8 @@ export default function TableauDeBord() {
                                         }
                                       }}
                                       placeholder="Écrivez un commentaire..."
-                                      className="bg-slate-700 border-slate-600 text-white text-sm min-h-[36px] max-h-[120px] resize-none"
-                                      rows={1}
+                                      className="bg-slate-700 border-slate-600 text-white text-sm min-h-[72px] max-h-[200px] resize-none"
+                                      rows={3}
                                     />
                                     <input
                                       type="file"
@@ -1280,14 +1280,8 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreatePost}
                 disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
-                className="h-11 px-6 text-base font-semibold border-none shadow-lg shadow-purple-500/50"
+                className="h-11 px-6 text-base font-semibold bg-transparent border-2 shadow-lg shadow-purple-500/30 hover:bg-purple-500/10"
                 style={{ 
-                  backgroundColor: 'rgb(168, 85, 247)', 
-                  backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
-                  color: 'transparent',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  border: '2px solid',
                   borderImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153)) 1'
                 }}
               >
@@ -1296,7 +1290,8 @@ export default function TableauDeBord() {
                   background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
-                  color: 'transparent'
+                  color: 'transparent',
+                  fontWeight: '600'
                 }}>
                   Publier
                 </span>
