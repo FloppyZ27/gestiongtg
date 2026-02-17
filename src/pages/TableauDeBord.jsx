@@ -16,53 +16,27 @@ import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import confetti from "canvas-confetti";
 
 const ICONS_MAP = {
   Home, FileText, Users, Calendar, FolderOpen, Search, Settings, BarChart, MessageSquare, Compass, Plus
 };
 
 function BirthdayCard({ utilisateur, birthDate, getInitials, today }) {
-  const cardRef = useRef(null);
+  const [confettiPieces, setConfettiPieces] = useState([]);
 
   useEffect(() => {
-    if (!cardRef.current) return;
-
-    const rect = cardRef.current.getBoundingClientRect();
-    const centerX = (rect.left + rect.width / 2) / window.innerWidth;
-    const centerY = (rect.top + rect.height / 2) / window.innerHeight;
-
-    const duration = 3000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 20, spread: 360, ticks: 60, zIndex: 0 };
-
-    function randomInRange(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-    const interval = setInterval(() => {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval);
-      }
-
-      const particleCount = 2;
-
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: centerX, y: centerY },
-        colors: ['#ec4899', '#a855f7', '#f472b6', '#c084fc']
-      });
-    }, 150);
-
-    return () => clearInterval(interval);
+    const pieces = Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 3,
+      duration: 2 + Math.random() * 2,
+      color: ['#ec4899', '#a855f7', '#f472b6', '#c084fc'][Math.floor(Math.random() * 4)]
+    }));
+    setConfettiPieces(pieces);
   }, []);
 
   return (
     <div
-      ref={cardRef}
       className="flex items-center gap-3 p-3 rounded-lg border-2 border-pink-500 relative overflow-hidden"
       style={{
         background: 'linear-gradient(90deg, rgba(236,72,153,0.2) 0%, rgba(168,85,247,0.2) 25%, rgba(236,72,153,0.2) 50%, rgba(168,85,247,0.2) 75%, rgba(236,72,153,0.2) 100%)',
@@ -75,7 +49,32 @@ function BirthdayCard({ utilisateur, birthDate, getInitials, today }) {
           0% { background-position: 0% 50%; }
           100% { background-position: 200% 50%; }
         }
+        @keyframes confettiFall {
+          0% { 
+            transform: translateY(-20px) rotate(0deg);
+            opacity: 1;
+          }
+          100% { 
+            transform: translateY(150px) rotate(720deg);
+            opacity: 0;
+          }
+        }
       `}</style>
+      
+      {confettiPieces.map((piece) => (
+        <div
+          key={piece.id}
+          className="absolute w-2 h-2 rounded-full pointer-events-none"
+          style={{
+            left: `${piece.left}%`,
+            top: '50%',
+            backgroundColor: piece.color,
+            animation: `confettiFall ${piece.duration}s ease-in infinite`,
+            animationDelay: `${piece.delay}s`
+          }}
+        />
+      ))}
+      
       <Avatar className="w-10 h-10 relative z-10">
         <AvatarImage src={utilisateur.photo_url} />
         <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500">
