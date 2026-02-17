@@ -233,28 +233,18 @@ export default function Administration() {
           </div>
         </div>
 
-
-
         {/* Main Content */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-400" />
-                Gestion des utilisateurs
-              </CardTitle>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un utilisateur..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
-                />
-              </div>
-            </div>
-          </CardHeader>
           <CardContent className="p-6">
+            <div className="relative w-64 mb-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input
+                placeholder="Rechercher un utilisateur..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-slate-800 border-slate-700 text-white"
+              />
+            </div>
             <Tabs defaultValue="actifs">
               <TabsList className="bg-slate-800/50 mb-6">
                 <TabsTrigger value="actifs">Utilisateurs actifs ({activeUsers.length})</TabsTrigger>
