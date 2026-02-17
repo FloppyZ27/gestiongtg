@@ -81,12 +81,6 @@ export default function Administration() {
   });
 
   const handleUpdateUser = async (user, field, value) => {
-    // Ne pas permettre la modification du rôle (champ built-in)
-    if (field === "role") {
-      alert("Le rôle ne peut pas être modifié via cette interface. Veuillez contacter un administrateur système.");
-      return;
-    }
-
     await updateUserMutation.mutateAsync({
       id: user.id,
       data: { [field]: value }
@@ -97,6 +91,8 @@ export default function Administration() {
       actionLabel = value ? "ACTIVATION_UTILISATEUR" : "DESACTIVATION_UTILISATEUR";
     } else if (field === "poste") {
       actionLabel = "MODIFICATION_POSTE";
+    } else if (field === "role") {
+      actionLabel = "MODIFICATION_ROLE";
     }
 
     await base44.entities.ActionLog.create({
