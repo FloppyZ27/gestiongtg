@@ -1625,15 +1625,15 @@ export default function TableauDeBord() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleSaveEditPost(post)}
-                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600"
+                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600 text-white"
                                 >
                                   <Check className="w-3 h-3 mr-1" />
                                   Enregistrer
                                 </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
+                                </div>
+                                </div>
+                                ) : (
+                                <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
                           )}
                           <div className="space-y-2">
                             {post.sondage_options?.map((option, idx) => {
