@@ -1409,12 +1409,12 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreatePost}
                 disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
-                className="h-11 px-6 text-base font-semibold bg-transparent border-2 shadow-lg shadow-purple-500/30 hover:bg-purple-500/10"
+                className="bg-transparent border-2 shadow-lg shadow-purple-500/30 hover:bg-purple-500/10"
                 style={{ 
                   borderImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153)) 1'
                 }}
               >
-                <Send className="w-5 h-5 mr-2" style={{ color: 'rgb(168, 85, 247)' }} />
+                <Send className="w-4 h-4 mr-2" style={{ color: 'rgb(168, 85, 247)' }} />
                 <span style={{ 
                   background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
                   backgroundClip: 'text',
