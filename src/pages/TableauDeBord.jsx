@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+
 const ICONS_MAP = {
   Home, FileText, Users, Calendar, FolderOpen, Search, Settings, BarChart, MessageSquare, Compass, Plus
 };
