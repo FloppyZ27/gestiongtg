@@ -248,7 +248,7 @@ export default function EditDossierForm({
   const courtiers = (clients || []).filter(c => c.type_client === 'Courtier immobilier');
   const compagnies = (clients || []).filter(c => c.type_client === 'Compagnie');
 
-  const getClientById = (id) => clients.find(c => c.id === id);
+  const getClientById = (id) => (clients || []).find(c => c.id === id);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
