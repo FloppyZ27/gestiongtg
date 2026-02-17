@@ -1285,139 +1285,116 @@ export default function TableauDeBord() {
                             )}
 
                             <div className="mt-3">
-                              <div className="flex gap-2">
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={user?.photo_url} />
-                                  <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
-                                    {getInitials(user?.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex gap-2">
-                                    <Textarea
-                                      value={chatCommentInputs[message.id] || ""}
-                                      onChange={(e) => setChatCommentInputs({ ...chatCommentInputs, [message.id]: e.target.value })}
-                                      onKeyPress={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                          e.preventDefault();
-                                          handleAddChatComment(message);
-                                        }
-                                      }}
-                                      placeholder="Écrivez un commentaire..."
-                                      className="bg-slate-700 border-slate-600 text-white text-sm min-h-[72px] max-h-[200px] resize-none"
-                                      rows={3}
-                                    />
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      id={`chat-image-upload-${message.id}`}
-                                      className="hidden"
-                                      onChange={(e) => setChatCommentImages({ ...chatCommentImages, [message.id]: e.target.files[0] })}
-                                    />
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => document.getElementById(`chat-image-upload-${message.id}`).click()}
-                                      className="h-8 px-2 text-slate-400 hover:text-cyan-400"
-                                    >
-                                      <Image className="w-4 h-4" />
-                                    </Button>
-                                    {!isChatRecording[message.id] ? (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={async () => {
-                                          try {
-                                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                                            const recorder = new MediaRecorder(stream);
-                                            const chunks = [];
-                                            recorder.ondataavailable = (e) => chunks.push(e.data);
-                                            recorder.onstop = () => {
-                                              const blob = new Blob(chunks, { type: 'audio/webm' });
-                                              setChatCommentAudio({ ...chatCommentAudio, [message.id]: blob });
-                                              stream.getTracks().forEach(track => track.stop());
-                                            };
-                                            recorder.start();
-                                            setMediaRecorder(recorder);
-                                            setIsChatRecording({ ...isChatRecording, [message.id]: true });
-                                          } catch (error) {
-                                            console.error("Erreur d'accès au microphone:", error);
-                                          }
-                                        }}
-                                        className="h-8 px-2 text-slate-400 hover:text-cyan-400"
-                                      >
-                                        <Mic className="w-4 h-4" />
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          if (mediaRecorder && mediaRecorder.state === 'recording') {
-                                            mediaRecorder.stop();
-                                            setIsChatRecording({ ...isChatRecording, [message.id]: false });
-                                            setMediaRecorder(null);
-                                          }
-                                        }}
-                                        className="h-8 px-2 text-red-400 hover:text-red-500 animate-pulse"
-                                      >
-                                        <StopCircle className="w-4 h-4" />
-                                      </Button>
-                                    )}
-                                    <Button
-                                      size="sm"
-                                      onClick={() => handleAddChatComment(message)}
-                                      disabled={!chatCommentInputs[message.id]?.trim() && !chatCommentImages[message.id] && !chatCommentAudio[message.id]}
-                                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/50 h-9 px-4 text-white border-none"
-                                      style={{ backgroundColor: 'rgb(34, 211, 238)', backgroundImage: 'linear-gradient(to right, rgb(34, 211, 238), rgb(59, 130, 246))' }}
-                                    >
-                                      <Send className="w-4 h-4 mr-1 text-white" />
-                                      Envoyer
-                                    </Button>
-                                  </div>
-                                  {chatCommentImages[message.id] && (
-                                    <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Image className="w-4 h-4 text-cyan-400" />
-                                        <span className="text-xs text-slate-300">{chatCommentImages[message.id].name}</span>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setChatCommentImages({ ...chatCommentImages, [message.id]: null })}
-                                          className="h-5 w-5 p-0 ml-auto"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                      <img 
-                                        src={URL.createObjectURL(chatCommentImages[message.id])} 
-                                        alt="Preview" 
-                                        className="rounded-lg max-w-full max-h-32 object-contain"
-                                      />
-                                    </div>
-                                  )}
-                                  {chatCommentAudio[message.id] && (
-                                    <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Mic className="w-4 h-4 text-cyan-400" />
-                                        <span className="text-xs text-slate-300">Enregistrement audio</span>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setChatCommentAudio({ ...chatCommentAudio, [message.id]: null })}
-                                          className="h-5 w-5 p-0 ml-auto"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                      <audio controls className="w-full">
-                                        <source src={URL.createObjectURL(chatCommentAudio[message.id])} type="audio/webm" />
-                                      </audio>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                               <div className="flex gap-2">
+                                 <Avatar className="w-8 h-8">
+                                   <AvatarImage src={user?.photo_url} />
+                                   <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                                     {getInitials(user?.full_name)}
+                                   </AvatarFallback>
+                                 </Avatar>
+                                 <div className="flex-1">
+                                   <div className="flex gap-2">
+                                     <Textarea
+                                       value={commentaireInputs[post.id] || ""}
+                                       onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
+                                       onKeyPress={(e) => {
+                                         if (e.key === 'Enter' && !e.shiftKey) {
+                                           e.preventDefault();
+                                           handleAddComment(post);
+                                         }
+                                       }}
+                                       placeholder="Écrivez un commentaire..."
+                                       className="bg-slate-700 border-slate-600 text-white text-sm min-h-[72px] max-h-[200px] resize-none"
+                                       rows={3}
+                                     />
+                                     <input
+                                       type="file"
+                                       accept="image/*"
+                                       id={`image-upload-${post.id}`}
+                                       className="hidden"
+                                       onChange={(e) => handleImageUpload(post.id, e.target.files[0])}
+                                     />
+                                     <Button
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => document.getElementById(`image-upload-${post.id}`).click()}
+                                       className="h-8 px-2 text-slate-400 hover:text-purple-400"
+                                     >
+                                       <Image className="w-4 h-4" />
+                                     </Button>
+                                     {!isRecording[post.id] ? (
+                                       <Button
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => startRecording(post.id)}
+                                         className="h-8 px-2 text-slate-400 hover:text-purple-400"
+                                       >
+                                         <Mic className="w-4 h-4" />
+                                       </Button>
+                                     ) : (
+                                       <Button
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={stopRecording}
+                                         className="h-8 px-2 text-red-400 hover:text-red-500 animate-pulse"
+                                       >
+                                         <StopCircle className="w-4 h-4" />
+                                       </Button>
+                                     )}
+                                     <Button
+                                       size="sm"
+                                       onClick={() => handleAddComment(post)}
+                                       disabled={!commentaireInputs[post.id]?.trim() && !commentImages[post.id] && !commentAudio[post.id]}
+                                       className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-9 px-4 text-white border-none"
+                                       style={{ backgroundColor: 'rgb(168, 85, 247)', backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))' }}
+                                     >
+                                       <Send className="w-4 h-4 mr-1 text-white" />
+                                       Envoyer
+                                     </Button>
+                                   </div>
+                                   {commentImages[post.id] && (
+                                     <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                       <div className="flex items-center gap-2 mb-2">
+                                         <Image className="w-4 h-4 text-purple-400" />
+                                         <span className="text-xs text-slate-300">{commentImages[post.id].name}</span>
+                                         <Button
+                                           size="sm"
+                                           variant="ghost"
+                                           onClick={() => setCommentImages({ ...commentImages, [post.id]: null })}
+                                           className="h-5 w-5 p-0 ml-auto"
+                                         >
+                                           <X className="w-3 h-3" />
+                                         </Button>
+                                       </div>
+                                       <img 
+                                         src={URL.createObjectURL(commentImages[post.id])} 
+                                         alt="Preview" 
+                                         className="rounded-lg max-w-full max-h-32 object-contain"
+                                       />
+                                     </div>
+                                   )}
+                                   {commentAudio[post.id] && (
+                                     <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                       <div className="flex items-center gap-2 mb-2">
+                                         <Mic className="w-4 h-4 text-purple-400" />
+                                         <span className="text-xs text-slate-300">Enregistrement audio</span>
+                                         <Button
+                                           size="sm"
+                                           variant="ghost"
+                                           onClick={() => setCommentAudio({ ...commentAudio, [post.id]: null })}
+                                           className="h-5 w-5 p-0 ml-auto"
+                                         >
+                                           <X className="w-3 h-3" />
+                                         </Button>
+                                       </div>
+                                       <audio controls className="w-full">
+                                         <source src={URL.createObjectURL(commentAudio[post.id])} type="audio/webm" />
+                                       </audio>
+                                     </div>
+                                   )}
+                                 </div>
+                               </div>
+                             </div>
                           </>
                         )}
                       </div>
