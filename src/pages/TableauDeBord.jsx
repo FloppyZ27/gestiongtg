@@ -1018,29 +1018,22 @@ export default function TableauDeBord() {
                                 </div>
                               )}
 
-                              <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-                                {mandat.date_livraison ? (
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-                                    <span className="text-xs text-yellow-300">
-                                      {format(new Date(mandat.date_livraison + "T00:00:00"), "dd MMM", { locale: fr })}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <div />
-                                )}
-                                {assignedUser ? (
-                                  <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
-                                    <AvatarImage src={assignedUser.photo_url} />
-                                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                      {getUserInitials(assignedUser.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                ) : (
-                                  <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
-                                    <User className="w-3 h-3 text-emerald-500" />
-                                  </div>
-                                )}
+                              <div className="mt-2 space-y-2">
+                                <Progress value={Math.round((TACHES.indexOf(mandat.tache_actuelle || "Ouverture") / TACHES.length) * 100)} className="h-1.5" />
+                                <div className="flex items-center justify-end">
+                                  {assignedUser ? (
+                                    <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
+                                      <AvatarImage src={assignedUser.photo_url} />
+                                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                        {getUserInitials(assignedUser.full_name)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  ) : (
+                                    <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                      <User className="w-3 h-3 text-emerald-500" />
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
