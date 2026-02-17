@@ -681,13 +681,13 @@ export default function TableauDeBord() {
                       {post.type === 'post' ? (
                         <>
                           {editingPostId === post.id ? (
-                            <div className="space-y-2 mb-3">
-                              <Textarea
-                                value={editingPostContent}
-                                onChange={(e) => setEditingPostContent(e.target.value)}
-                                className="bg-slate-800 border-slate-600 text-white text-sm"
-                                rows={3}
-                              />
+                          <div className="space-y-2 mb-3">
+                            <Textarea
+                              value={editingPostContent}
+                              onChange={(e) => setEditingPostContent(e.target.value)}
+                              className="bg-slate-800 border-slate-600 text-white text-sm break-words whitespace-pre-wrap"
+                              rows={3}
+                            />
                               <div className="flex gap-2 justify-end">
                                 <Button
                                   size="sm"
@@ -710,7 +710,7 @@ export default function TableauDeBord() {
                             </div>
                           ) : (
                             <>
-                              {post.contenu && <p className="text-slate-300 mb-3">{post.contenu}</p>}
+                              {post.contenu && <p className="text-slate-300 mb-3 break-words whitespace-pre-wrap">{post.contenu}</p>}
                               {post.image_url && (
                                 <img src={post.image_url} alt="Post" className="mb-3 rounded-lg max-w-full" />
                               )}
@@ -919,7 +919,7 @@ export default function TableauDeBord() {
                                             </div>
                                           ) : (
                                             <>
-                                              {comment.contenu && <p className="text-slate-300 text-sm">{comment.contenu}</p>}
+                                              {comment.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap">{comment.contenu}</p>}
                                               {comment.image_url && (
                                                 <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
                                               )}
@@ -956,7 +956,7 @@ export default function TableauDeBord() {
                                 </Avatar>
                                 <div className="flex-1">
                                   <div className="flex gap-2">
-                                    <Input
+                                    <Textarea
                                       value={commentaireInputs[post.id] || ""}
                                       onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
                                       onKeyPress={(e) => {
@@ -966,7 +966,8 @@ export default function TableauDeBord() {
                                         }
                                       }}
                                       placeholder="Écrivez un commentaire..."
-                                      className="bg-slate-700 border-slate-600 text-white text-sm h-8"
+                                      className="bg-slate-700 border-slate-600 text-white text-sm min-h-[36px] max-h-[120px] resize-none"
+                                      rows={1}
                                     />
                                     <input
                                       type="file"
@@ -1279,11 +1280,26 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreatePost}
                 disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-11 px-6 text-base font-semibold text-white border-none"
-                style={{ backgroundColor: 'rgb(168, 85, 247)', backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))' }}
+                className="h-11 px-6 text-base font-semibold border-none shadow-lg shadow-purple-500/50"
+                style={{ 
+                  backgroundColor: 'rgb(168, 85, 247)', 
+                  backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
+                  color: 'transparent',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  border: '2px solid',
+                  borderImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153)) 1'
+                }}
               >
-                <Send className="w-5 h-5 mr-2 text-white" />
-                Publier
+                <Send className="w-5 h-5 mr-2" style={{ color: 'rgb(168, 85, 247)' }} />
+                <span style={{ 
+                  background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent'
+                }}>
+                  Publier
+                </span>
               </Button>
             </div>
           </div>
