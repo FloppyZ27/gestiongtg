@@ -428,9 +428,8 @@ export default function TableauDeBord() {
         } else {
           return { ...opt, votes: [...votes, user?.email] };
         }
-      } else {
-        return { ...opt, votes: (opt.votes || []).filter(v => v !== user?.email) };
       }
+      return opt;
     });
 
     updatePostMutation.mutate({
@@ -802,27 +801,43 @@ export default function TableauDeBord() {
                               const totalVotes = post.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
                               const percentage = totalVotes > 0 ? ((option.votes?.length || 0) / totalVotes * 100).toFixed(0) : 0;
                               const hasVoted = option.votes?.includes(user?.email);
+                              const votersNames = (option.votes || []).map(voterEmail => {
+                                const voter = users.find(u => u.email === voterEmail);
+                                return voter?.full_name || voterEmail;
+                              }).join(', ');
+                              
                               return (
-                                <button
-                                  key={idx}
-                                  onClick={() => handleVote(post, idx)}
-                                  className={`w-full p-3 rounded-lg text-left transition-all ${
-                                    hasVoted 
-                                      ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-2 border-purple-500' 
-                                      : 'bg-slate-700/50 hover:bg-slate-700'
-                                  }`}
-                                >
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-white">{option.option}</span>
-                                    <span className="text-sm text-slate-400">{percentage}%</span>
-                                  </div>
-                                  <div className="w-full bg-slate-900 rounded-full h-2">
-                                    <div 
-                                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
-                                      style={{ width: `${percentage}%` }}
-                                    />
-                                  </div>
-                                </button>
+                                <TooltipProvider key={idx}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={() => handleVote(post, idx)}
+                                        className={`w-full p-3 rounded-lg text-left transition-all ${
+                                          hasVoted 
+                                            ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-2 border-purple-500' 
+                                            : 'bg-slate-700/50 hover:bg-slate-700'
+                                        }`}
+                                      >
+                                        <div className="flex justify-between items-center mb-1">
+                                          <span className="text-white">{option.option}</span>
+                                          <span className="text-sm text-slate-400">{option.votes?.length || 0} vote{(option.votes?.length || 0) !== 1 ? 's' : ''} • {percentage}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-900 rounded-full h-2">
+                                          <div 
+                                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
+                                            style={{ width: `${percentage}%` }}
+                                          />
+                                        </div>
+                                      </button>
+                                    </TooltipTrigger>
+                                    {option.votes && option.votes.length > 0 && (
+                                      <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                        <p className="text-xs font-semibold mb-1">Ont voté pour cette option:</p>
+                                        <p className="text-xs">{votersNames}</p>
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
                               );
                             })}
                           </div>
