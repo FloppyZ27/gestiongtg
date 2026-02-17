@@ -985,9 +985,10 @@ export default function TableauDeBord() {
                           
                           return (
                             <div 
-                              key={dossier.id}
-                              className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`}
-                            >
+                               key={dossier.id}
+                               className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`}
+                               onClick={() => setEditingDossier(dossier)}
+                             >
                               <div className="flex items-start justify-between gap-2 mb-2">
                                 <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
                                   {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
