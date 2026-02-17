@@ -1217,32 +1217,32 @@ export default function TableauDeBord() {
                                         {/* Réactions du commentaire */}
                                         {comment.reactions && comment.reactions.length > 0 && (
                                         <TooltipProvider>
-                                          <div className="flex gap-1 mt-2">
-                                            {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
-                                              const reactionsForEmoji = comment.reactions?.filter(r => r.emoji === emoji) || [];
-                                              const reactionCount = reactionsForEmoji.length;
-                                              if (reactionCount === 0) return null;
+                                            <div className="flex gap-1 mt-2">
+                                              {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                                const reactionsForEmoji = comment.reactions?.filter(r => r.emoji === emoji) || [];
+                                                const reactionCount = reactionsForEmoji.length;
+                                                if (reactionCount === 0) return null;
 
-                                              const userNames = reactionsForEmoji.map(r => {
-                                                const u = users.find(usr => usr.email === r.utilisateur_email);
-                                                return u?.full_name || r.utilisateur_email;
-                                              }).join(', ');
+                                                const userNames = reactionsForEmoji.map(r => {
+                                                  const u = users.find(usr => usr.email === r.utilisateur_email);
+                                                  return u?.full_name || r.utilisateur_email;
+                                                }).join(', ');
 
-                                              return (
-                                                <Tooltip key={emoji}>
-                                                  <TooltipTrigger asChild>
-                                                    <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
-                                                      {emoji} {reactionCount}
-                                                    </span>
-                                                  </TooltipTrigger>
-                                                  <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
-                                                    <p className="text-xs">{userNames}</p>
-                                                  </TooltipContent>
-                                                </Tooltip>
-                                              );
-                                            })}
-                                          </div>
-                                        </TooltipProvider>
+                                                return (
+                                                  <Tooltip key={emoji}>
+                                                    <TooltipTrigger asChild>
+                                                      <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                                        {emoji} {reactionCount}
+                                                      </span>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                                      <p className="text-xs">{userNames}</p>
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                );
+                                              })}
+                                            </div>
+                                          </TooltipProvider>
                                         )}
 
                                         {/* Bouton réagir au commentaire */}
