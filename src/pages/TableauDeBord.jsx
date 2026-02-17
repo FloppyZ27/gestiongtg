@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle } from "lucide-react";
+import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle, Edit, Trash2, Check } from "lucide-react";
 import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -109,6 +109,8 @@ export default function TableauDeBord() {
   const [commentAudio, setCommentAudio] = useState({});
   const [isRecording, setIsRecording] = useState({});
   const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentContent, setEditingCommentContent] = useState("");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -404,6 +406,42 @@ export default function TableauDeBord() {
     });
   };
 
+  const handleEditComment = (post, commentIdx) => {
+    const comment = post.commentaires[commentIdx];
+    setEditingCommentId(`${post.id}-${commentIdx}`);
+    setEditingCommentContent(comment.contenu);
+  };
+
+  const handleSaveEditComment = (post, commentIdx) => {
+    const updatedCommentaires = [...post.commentaires];
+    updatedCommentaires[commentIdx] = {
+      ...updatedCommentaires[commentIdx],
+      contenu: editingCommentContent
+    };
+
+    updatePostMutation.mutate({
+      id: post.id,
+      data: { ...post, commentaires: updatedCommentaires }
+    });
+
+    setEditingCommentId(null);
+    setEditingCommentContent("");
+  };
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentContent("");
+  };
+
+  const handleDeleteComment = (post, commentIdx) => {
+    const updatedCommentaires = post.commentaires.filter((_, idx) => idx !== commentIdx);
+    
+    updatePostMutation.mutate({
+      id: post.id,
+      data: { ...post, commentaires: updatedCommentaires }
+    });
+  };
+
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
@@ -675,6 +713,10 @@ export default function TableauDeBord() {
                               <div className="mt-3 space-y-2">
                                 {post.commentaires.map((comment, idx) => {
                                   const commentUser = users.find(u => u.email === comment.utilisateur_email);
+                                  const isOwnComment = comment.utilisateur_email === user?.email;
+                                  const isEditing = editingCommentId === `${post.id}-${idx}`;
+                                  const hasMedia = comment.image_url || comment.audio_url;
+                                  
                                   return (
                                     <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
                                       <Avatar className="w-7 h-7">
@@ -686,16 +728,69 @@ export default function TableauDeBord() {
                                       <div className="flex-1">
                                         <div className="bg-slate-700/50 rounded-lg p-2">
                                           <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
-                                          {comment.contenu && <p className="text-slate-300 text-sm">{comment.contenu}</p>}
-                                          {comment.image_url && (
-                                            <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
-                                          )}
-                                          {comment.audio_url && (
-                                            <div className="mt-2 bg-slate-800/50 rounded-lg p-2">
-                                              <audio controls className="w-full">
-                                                <source src={comment.audio_url} type="audio/webm" />
-                                              </audio>
+                                          {isEditing ? (
+                                            <div className="space-y-2 mt-2">
+                                              <Input
+                                                value={editingCommentContent}
+                                                onChange={(e) => setEditingCommentContent(e.target.value)}
+                                                className="bg-slate-800 border-slate-600 text-white text-sm"
+                                              />
+                                              <div className="flex gap-2 justify-end">
+                                                <Button
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={handleCancelEditComment}
+                                                  className="h-6 text-xs text-slate-400 hover:text-white"
+                                                >
+                                                  <X className="w-3 h-3 mr-1" />
+                                                  Annuler
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  onClick={() => handleSaveEditComment(post, idx)}
+                                                  className="h-6 text-xs bg-purple-500 hover:bg-purple-600"
+                                                >
+                                                  <Check className="w-3 h-3 mr-1" />
+                                                  Enregistrer
+                                                </Button>
+                                              </div>
                                             </div>
+                                          ) : (
+                                            <>
+                                              {comment.contenu && <p className="text-slate-300 text-sm">{comment.contenu}</p>}
+                                              {comment.image_url && (
+                                                <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
+                                              )}
+                                              {comment.audio_url && (
+                                                <div className="mt-2 bg-slate-800/50 rounded-lg p-2">
+                                                  <audio controls className="w-full">
+                                                    <source src={comment.audio_url} type="audio/webm" />
+                                                  </audio>
+                                                </div>
+                                              )}
+                                              {isOwnComment && (
+                                                <div className="flex gap-1 justify-end mt-2">
+                                                  {!hasMedia && (
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => handleEditComment(post, idx)}
+                                                      className="h-6 w-6 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
+                                                    >
+                                                      <Edit className="w-3 h-3" />
+                                                    </Button>
+                                                  )}
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteComment(post, idx)}
+                                                    className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                                  >
+                                                    <Trash2 className="w-3 h-3" />
+                                                  </Button>
+                                                </div>
+                                              )}
+                                            </>
                                           )}
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
