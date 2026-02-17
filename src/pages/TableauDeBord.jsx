@@ -774,31 +774,43 @@ export default function TableauDeBord() {
                                     </Button>
                                   </div>
                                   {commentImages[post.id] && (
-                                    <div className="mt-2 flex items-center gap-2 bg-slate-700/30 rounded p-1">
-                                      <Image className="w-4 h-4 text-purple-400" />
-                                      <span className="text-xs text-slate-300">{commentImages[post.id].name}</span>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setCommentImages({ ...commentImages, [post.id]: null })}
-                                        className="h-5 w-5 p-0 ml-auto"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </Button>
+                                    <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Image className="w-4 h-4 text-purple-400" />
+                                        <span className="text-xs text-slate-300">{commentImages[post.id].name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => setCommentImages({ ...commentImages, [post.id]: null })}
+                                          className="h-5 w-5 p-0 ml-auto"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                      <img 
+                                        src={URL.createObjectURL(commentImages[post.id])} 
+                                        alt="Preview" 
+                                        className="rounded-lg max-w-full max-h-32 object-contain"
+                                      />
                                     </div>
                                   )}
                                   {commentAudio[post.id] && (
-                                    <div className="mt-2 flex items-center gap-2 bg-slate-700/30 rounded p-1">
-                                      <Mic className="w-4 h-4 text-purple-400" />
-                                      <span className="text-xs text-slate-300">Enregistrement audio</span>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setCommentAudio({ ...commentAudio, [post.id]: null })}
-                                        className="h-5 w-5 p-0 ml-auto"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </Button>
+                                    <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Mic className="w-4 h-4 text-purple-400" />
+                                        <span className="text-xs text-slate-300">Enregistrement audio</span>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => setCommentAudio({ ...commentAudio, [post.id]: null })}
+                                          className="h-5 w-5 p-0 ml-auto"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                      <audio controls className="w-full">
+                                        <source src={URL.createObjectURL(commentAudio[post.id])} type="audio/webm" />
+                                      </audio>
                                     </div>
                                   )}
                                 </div>
