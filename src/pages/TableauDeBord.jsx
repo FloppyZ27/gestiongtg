@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle, Edit, Trash2, Check, MapPin } from "lucide-react";
+import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, User, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle, Edit, Trash2, Check, MapPin } from "lucide-react";
 import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
