@@ -214,9 +214,9 @@ export default function TableauDeBord() {
         </div>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 pb-4">
+          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">Raccourcis</CardTitle>
+              <CardTitle className="text-white">Raccourcis</CardTitle>
               <Button
                 size="sm"
                 onClick={() => setIsEditRaccourcisOpen(true)}
@@ -255,8 +255,8 @@ export default function TableauDeBord() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800">
-              <CardTitle className="text-transparent bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text flex items-center gap-2">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
+              <CardTitle className="text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-orange-400" />
                 Mandats à sortir aujourd'hui
               </CardTitle>
@@ -278,8 +278,8 @@ export default function TableauDeBord() {
           </Card>
 
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800">
-              <CardTitle className="text-transparent bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text flex items-center gap-2">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
+              <CardTitle className="text-white flex items-center gap-2">
                 <UserX className="w-5 h-5 text-red-400" />
                 Absences aujourd'hui
               </CardTitle>
@@ -314,9 +314,9 @@ export default function TableauDeBord() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl lg:col-span-2">
-            <CardHeader className="border-b border-slate-800">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/20 to-pink-500/20 py-3">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text flex items-center gap-2">
+                <CardTitle className="text-white flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-purple-400" />
                   Club Social
                 </CardTitle>
@@ -416,8 +416,8 @@ export default function TableauDeBord() {
           </Card>
 
           <Card className={`border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl ${hasAnniversaireAujourdhui ? 'ring-2 ring-pink-500 shadow-pink-500/50 shadow-2xl' : ''}`}>
-            <CardHeader className="border-b border-slate-800">
-              <CardTitle className={`text-transparent bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text flex items-center gap-2 ${hasAnniversaireAujourdhui ? 'animate-pulse' : ''}`}>
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-pink-500/20 to-purple-500/20 py-3">
+              <CardTitle className={`text-white flex items-center gap-2 ${hasAnniversaireAujourdhui ? 'animate-pulse' : ''}`}>
                 <Cake className="w-5 h-5 text-pink-400" />
                 Anniversaires ce mois-ci
               </CardTitle>
