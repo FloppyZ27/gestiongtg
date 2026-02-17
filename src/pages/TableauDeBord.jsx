@@ -726,6 +726,20 @@ export default function TableauDeBord() {
     });
   };
 
+  const handleDeleteChatComment = () => {
+    if (!showDeleteChatCommentDialog) return;
+    
+    const { message, commentIdx } = showDeleteChatCommentDialog;
+    const updatedCommentaires = message.commentaires.filter((_, idx) => idx !== commentIdx);
+    
+    updateChatMessageMutation.mutate({
+      id: message.id,
+      data: { ...message, commentaires: updatedCommentaires }
+    });
+    
+    setShowDeleteChatCommentDialog(null);
+  };
+
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
