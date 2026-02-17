@@ -621,10 +621,21 @@ export default function TableauDeBord() {
                 <Button
                   size="sm"
                   onClick={() => setIsNewPostOpen(true)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-600"
+                  className="bg-transparent border-2 shadow-lg shadow-purple-500/30 hover:bg-purple-500/10"
+                  style={{ 
+                    borderImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153)) 1'
+                  }}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Publier
+                  <Plus className="w-4 h-4 mr-2" style={{ color: 'rgb(168, 85, 247)' }} />
+                  <span style={{ 
+                    background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    fontWeight: '600'
+                  }}>
+                    Publier
+                  </span>
                 </Button>
               </div>
             </CardHeader>
