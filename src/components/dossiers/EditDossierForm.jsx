@@ -1691,8 +1691,8 @@ export default function EditDossierForm({
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   {(users || []).map((u) => (
-                                    <SelectItem key={u.email} value={`${u.prenom || ''} ${u.nom || ''}`.trim() || u.full_name} className="text-white text-xs">
-                                      {u.full_name}
+                                    <SelectItem key={u?.email} value={`${u?.prenom || ''} ${u?.nom || ''}`.trim() || u?.full_name} className="text-white text-xs">
+                                      {u?.full_name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
