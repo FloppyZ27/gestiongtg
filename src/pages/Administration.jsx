@@ -263,7 +263,6 @@ export default function Administration() {
               <TabsList className="bg-slate-800/50 mb-6">
                 <TabsTrigger value="actifs">Utilisateurs actifs ({activeUsers.length})</TabsTrigger>
                 <TabsTrigger value="inactifs">Utilisateurs inactifs ({inactiveUsers.length})</TabsTrigger>
-                <TabsTrigger value="permissions-utilisateur">Permissions par utilisateur</TabsTrigger>
                 <TabsTrigger value="permissions">Permissions par poste/rôle</TabsTrigger>
               </TabsList>
 
@@ -378,116 +377,7 @@ export default function Administration() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="actifs">
-                <div className="border border-slate-700 rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Poste</TableHead>
-                        <TableHead className="text-slate-300">Rôle</TableHead>
-                        <TableHead className="text-slate-300">Statut</TableHead>
-                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeUsers.length > 0 ? (
-                        activeUsers.map((user) => (
-                          <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800">
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-10 h-10">
-                                  <AvatarImage src={user.photo_url} />
-                                  <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-500">
-                                    {getInitials(user.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="text-white">{user.full_name}</div>
-                                  <div className="text-xs text-slate-400">{user.email}</div>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
-                                value={user.poste || ""} 
-                                onValueChange={(value) => handleUpdateUser(user, "poste", value)}
-                              >
-                                <SelectTrigger className="w-48 bg-slate-800 border-slate-700 text-white">
-                                  <SelectValue placeholder="Sélectionner" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
-                                  <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
-                                  <SelectItem value="Administratif">Administratif</SelectItem>
-                                  <SelectItem value="Gestionnaire">Gestionnaire</SelectItem>
-                                  <SelectItem value="Autre">Autre</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                {getRoleLabel(user.role)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
-                                value={user.actif !== false ? "actif" : "inactif"} 
-                                onValueChange={(value) => handleUpdateUser(user, "actif", value === "actif")}
-                                disabled={user.email === currentUser?.email}
-                              >
-                                <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="actif">
-                                    <div className="flex items-center gap-2">
-                                      <CheckCircle className="w-3 h-3 text-green-400" />
-                                      <span>Actif</span>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="inactif">
-                                    <div className="flex items-center gap-2">
-                                      <XCircle className="w-3 h-3 text-red-400" />
-                                      <span>Inactif</span>
-                                    </div>
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleManagePermissions(user)}
-                                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-                                >
-                                  <Lock className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleResetPassword(user)}
-                                  className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
-                                >
-                                  <KeyRound className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                            Aucun utilisateur actif trouvé
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
+
 
               <TabsContent value="inactifs">
                 <div className="border border-slate-700 rounded-lg overflow-hidden">
@@ -600,82 +490,7 @@ export default function Administration() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="permissions-utilisateur">
-                <div className="border border-slate-700 rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Poste</TableHead>
-                        <TableHead className="text-slate-300">Rôle</TableHead>
-                        <TableHead className="text-slate-300">Pages accessibles</TableHead>
-                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeUsers.length > 0 ? (
-                        activeUsers.map((user) => {
-                          const userPagesCount = user.permissions_pages?.length || 0;
-                          const userInfosCount = user.permissions_informations?.length || 0;
-                          return (
-                            <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800">
-                              <TableCell className="font-medium">
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="w-10 h-10">
-                                    <AvatarImage src={user.photo_url} />
-                                    <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-500">
-                                      {getInitials(user.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <div className="text-white">{user.full_name}</div>
-                                    <div className="text-xs text-slate-400">{user.email}</div>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="bg-slate-700/20 text-slate-300 border-slate-600">
-                                  {user.poste || "Non défini"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                  {getRoleLabel(user.role)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {userPagesCount > 0 ? (
-                                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                                    {userPagesCount} pages • {userInfosCount} infos
-                                  </Badge>
-                                ) : (
-                                  <span className="text-slate-500 text-sm">Via templates</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleManagePermissions(user)}
-                                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                                >
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Gérer les permissions
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                            Aucun utilisateur trouvé
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
+
 
               <TabsContent value="permissions">
                 <div className="space-y-6">

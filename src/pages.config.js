@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Administration from './pages/Administration';
 import AjouterActe from './pages/AjouterActe';
 import Calendrier from './pages/Calendrier';
 import CeduleTerrain from './pages/CeduleTerrain';
@@ -68,11 +67,11 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import Administration from './pages/Administration';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Administration": Administration,
     "AjouterActe": AjouterActe,
     "Calendrier": Calendrier,
     "CeduleTerrain": CeduleTerrain,
@@ -93,6 +92,7 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "Administration": Administration,
 }
 
 export const pagesConfig = {
