@@ -880,18 +880,37 @@ export default function TableauDeBord() {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <p className="font-semibold text-white text-sm">{message.utilisateur_nom}</p>
-                            {message.utilisateur_email === user?.email && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowDeleteChatMessageDialog(message.id)}
-                                className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            )}
-                          </div>
+                             <p className="font-semibold text-white text-sm">{message.utilisateur_nom}</p>
+                             {message.utilisateur_email === user?.email && (
+                               <div className="flex gap-1">
+                                 {(!message.image_url && !message.audio_url) && (
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     onClick={() => {
+                                       setEditingChatMessageId(message.id);
+                                       if (message.type === 'post') {
+                                         setEditingChatMessageContent(message.contenu || "");
+                                       } else {
+                                         setEditingChatMessageContent(message.sondage_question || "");
+                                       }
+                                     }}
+                                     className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                                   >
+                                     <Edit className="w-3 h-3" />
+                                   </Button>
+                                 )}
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => setShowDeleteChatMessageDialog(message.id)}
+                                   className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                 >
+                                   <Trash2 className="w-3 h-3" />
+                                 </Button>
+                               </div>
+                             )}
+                           </div>
                           <p className="text-xs text-slate-400">
                             {format(new Date(message.created_date), "dd MMM 'à' HH:mm", { locale: fr })}
                           </p>
