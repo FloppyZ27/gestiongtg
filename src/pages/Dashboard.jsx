@@ -144,7 +144,7 @@ export default function Dashboard() {
     },
     {
       title: "Types d'actes",
-      value: new Set(actes.map(a => a.type_acte)).size,
+      value: new Set((actes || []).map(a => a.type_acte)).size,
       icon: TrendingUp,
       gradient: "from-purple-500 to-pink-600",
       iconBg: "bg-purple-500/20",
