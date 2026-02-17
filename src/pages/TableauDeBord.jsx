@@ -869,14 +869,16 @@ export default function TableauDeBord() {
                 </Button>
               </div>
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {chatMessages.filter(m => {
+                {(chatTab === "clubsocial" ? posts : chatMessages.filter(m => {
                   if (m.canal === "generale") return true;
                   if (m.canal === "equipe" && user?.equipe) {
                     const messageUser = users.find(u => u.email === m.utilisateur_email);
                     return messageUser?.equipe === user.equipe;
                   }
                   return false;
-                }).map((message) => {
+                })).map((item) => {
+                  const message = chatTab === "clubsocial" ? null : item;
+                  const post = chatTab === "clubsocial" ? item : null;
                   const messageUser = users.find(u => u.email === message.utilisateur_email);
                   return (
                     <div key={message.id} className="p-3 bg-slate-800/50 rounded-lg">
