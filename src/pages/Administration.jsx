@@ -313,6 +313,7 @@ export default function Administration() {
                               <Select 
                                 value={user.role || "user"} 
                                 onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                                disabled={user.email === currentUser?.email}
                               >
                                 <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
@@ -448,6 +449,7 @@ export default function Administration() {
                               <Select 
                                 value={user.role || "user"} 
                                 onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                                disabled={user.email === currentUser?.email}
                               >
                                 <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
