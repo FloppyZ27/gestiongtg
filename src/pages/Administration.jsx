@@ -269,6 +269,7 @@ export default function Administration() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Utilisateur</TableHead>
                         <TableHead className="text-slate-300">Poste</TableHead>
+                        <TableHead className="text-slate-300">Date d'embauche</TableHead>
                         <TableHead className="text-slate-300">Rôle</TableHead>
                         <TableHead className="text-slate-300">Statut</TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
