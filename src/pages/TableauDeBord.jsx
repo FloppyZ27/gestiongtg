@@ -1579,16 +1579,16 @@ export default function TableauDeBord() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleSaveEditPost(post)}
-                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600"
+                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600 text-white"
                                 >
                                   <Check className="w-3 h-3 mr-1" />
                                   Enregistrer
                                 </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              {post.contenu && <p className="text-slate-300 mb-3 break-words whitespace-pre-wrap">{post.contenu}</p>}
+                                </div>
+                                </div>
+                                ) : (
+                                <>
+                                {post.contenu && <p className="text-slate-300 mb-3 break-words whitespace-pre-wrap">{post.contenu}</p>}
                               {post.image_url && (
                                 <img src={post.image_url} alt="Post" className="mb-3 rounded-lg max-w-full" />
                               )}
