@@ -823,7 +823,7 @@ export default function TableauDeBord() {
             </CardContent>
           </Card>
 
-          {/* Chat fusionné - Placeholder pour maintenant */}
+          {/* Chat fusionné avec 3 tabs */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 py-2">
               <div className="flex justify-between items-center">
@@ -857,7 +857,15 @@ export default function TableauDeBord() {
                   onClick={() => setChatTab("equipe")}
                   className={`flex-1 rounded-none ${chatTab === "equipe" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
                 >
-                  Équipe {user?.equipe && `${user.equipe}`}
+                  Équipe
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setChatTab("clubsocial")}
+                  className={`flex-1 rounded-none ${chatTab === "clubsocial" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
+                >
+                  Club Social
                 </Button>
               </div>
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
