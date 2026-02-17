@@ -3003,7 +3003,7 @@ export default function EditDossierForm({
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {users.map((u) => (
+                    {(users || []).map((u) => (
                       <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3031,7 +3031,7 @@ export default function EditDossierForm({
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {users.map((u) => (
+                    {(users || []).map((u) => (
                       <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
                     ))}
                   </SelectContent>
