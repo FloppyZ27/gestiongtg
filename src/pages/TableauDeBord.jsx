@@ -106,6 +106,7 @@ export default function TableauDeBord() {
   const [commentaireInputs, setCommentaireInputs] = useState({});
   const [showReactions, setShowReactions] = useState({});
   const [showComments, setShowComments] = useState({});
+  const [showCommentReactions, setShowCommentReactions] = useState({});
   const [commentImages, setCommentImages] = useState({});
   const [commentAudio, setCommentAudio] = useState({});
   const [isRecording, setIsRecording] = useState({});
@@ -315,6 +316,32 @@ export default function TableauDeBord() {
     setShowReactions({ ...showReactions, [post.id]: false });
   };
 
+  const handleCommentReaction = (post, commentIdx, emoji) => {
+    const updatedCommentaires = [...post.commentaires];
+    const comment = updatedCommentaires[commentIdx];
+    const existingReactions = comment.reactions || [];
+    const userReaction = existingReactions.find(r => r.utilisateur_email === user?.email);
+    
+    let newReactions;
+    if (userReaction && userReaction.emoji === emoji) {
+      newReactions = existingReactions.filter(r => r.utilisateur_email !== user?.email);
+    } else if (userReaction) {
+      newReactions = existingReactions.map(r => 
+        r.utilisateur_email === user?.email ? { ...r, emoji } : r
+      );
+    } else {
+      newReactions = [...existingReactions, { utilisateur_email: user?.email, emoji }];
+    }
+
+    updatedCommentaires[commentIdx] = { ...comment, reactions: newReactions };
+
+    updatePostMutation.mutate({
+      id: post.id,
+      data: { ...post, commentaires: updatedCommentaires }
+    });
+    setShowCommentReactions({ ...showCommentReactions, [`${post.id}-${commentIdx}`]: false });
+  };
+
   const handleAddComment = async (post) => {
     const commentText = commentaireInputs[post.id];
     const imageFile = commentImages[post.id];
@@ -342,7 +369,8 @@ export default function TableauDeBord() {
       contenu: commentText?.trim() || "",
       date: new Date().toISOString(),
       image_url: imageUrl,
-      audio_url: audioUrl
+      audio_url: audioUrl,
+      reactions: []
     };
 
     const existingComments = post.commentaires || [];
@@ -960,19 +988,77 @@ export default function TableauDeBord() {
                                               )}
                                             </>
                                           )}
-                                        </div>
-                                        <p className="text-xs text-slate-500 mt-1">
-                                          {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
-                                          {comment.date_modification && (
-                                            <span className="text-slate-600 ml-1">(modifié)</span>
+                                          </div>
+
+                                          {/* Réactions du commentaire */}
+                                          {comment.reactions && comment.reactions.length > 0 && (
+                                          <TooltipProvider>
+                                            <div className="flex gap-1 mt-2">
+                                              {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                                const reactionsForEmoji = comment.reactions?.filter(r => r.emoji === emoji) || [];
+                                                const reactionCount = reactionsForEmoji.length;
+                                                if (reactionCount === 0) return null;
+
+                                                const userNames = reactionsForEmoji.map(r => {
+                                                  const u = users.find(usr => usr.email === r.utilisateur_email);
+                                                  return u?.full_name || r.utilisateur_email;
+                                                }).join(', ');
+
+                                                return (
+                                                  <Tooltip key={emoji}>
+                                                    <TooltipTrigger asChild>
+                                                      <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                                        {emoji} {reactionCount}
+                                                      </span>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                                      <p className="text-xs">{userNames}</p>
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                );
+                                              })}
+                                            </div>
+                                          </TooltipProvider>
                                           )}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
+
+                                          {/* Bouton réagir au commentaire */}
+                                          <div className="flex items-center gap-2 mt-1">
+                                          <div className="relative">
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => setShowCommentReactions({ ...showCommentReactions, [`${post.id}-${idx}`]: !showCommentReactions[`${post.id}-${idx}`] })}
+                                              className="text-slate-400 hover:text-purple-400 text-xs h-5 px-1"
+                                            >
+                                              <Smile className="w-3 h-3" />
+                                            </Button>
+                                            {showCommentReactions[`${post.id}-${idx}`] && (
+                                              <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                                  <button
+                                                    key={emoji}
+                                                    onClick={() => handleCommentReaction(post, idx, emoji)}
+                                                    className="text-xl hover:scale-125 transition-transform p-1"
+                                                  >
+                                                    {emoji}
+                                                  </button>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <p className="text-xs text-slate-500">
+                                            {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                            {comment.date_modification && (
+                                              <span className="text-slate-600 ml-1">(modifié)</span>
+                                            )}
+                                          </p>
+                                          </div>
+                                          </div>
+                                          </div>
+                                          );
+                                          })}
+                                          </div>
+                                          )}
 
                             <div className="mt-3">
                               <div className="flex gap-2">
