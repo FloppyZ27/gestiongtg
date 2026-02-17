@@ -1196,7 +1196,7 @@ export default function TableauDeBord() {
                                                     setEditingChatCommentId(null);
                                                     setEditingChatCommentContent("");
                                                   }}
-                                                  className="h-6 text-xs bg-cyan-500 hover:bg-cyan-600"
+                                                  className="h-6 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
                                                 >
                                                   <Check className="w-3 h-3 mr-1" />
                                                   Enregistrer
