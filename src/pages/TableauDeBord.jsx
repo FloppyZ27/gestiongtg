@@ -208,6 +208,7 @@ export default function TableauDeBord() {
   const [editingChatCommentContent, setEditingChatCommentContent] = useState("");
   const [showDeleteChatMessageDialog, setShowDeleteChatMessageDialog] = useState(null);
   const [showDeleteChatCommentDialog, setShowDeleteChatCommentDialog] = useState(null);
+  const [editingDossier, setEditingDossier] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
