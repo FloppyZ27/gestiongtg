@@ -52,7 +52,7 @@ function BirthdayCard({ utilisateur, birthDate, getInitials, today }) {
         @keyframes confettiFall {
           0% { 
             transform: translateY(-20px) rotate(0deg);
-            opacity: 0.8;
+            opacity: 0.4;
           }
           100% { 
             transform: translateY(150px) rotate(720deg);
