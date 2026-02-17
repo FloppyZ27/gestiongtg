@@ -243,10 +243,10 @@ export default function EditDossierForm({
     }
   }, [editingDossier?.id]);
 
-  const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
-  const notaires = clients.filter(c => c.type_client === 'Notaire');
-  const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
-  const compagnies = clients.filter(c => c.type_client === 'Compagnie');
+  const clientsReguliers = (clients || []).filter(c => c.type_client === 'Client' || !c.type_client);
+  const notaires = (clients || []).filter(c => c.type_client === 'Notaire');
+  const courtiers = (clients || []).filter(c => c.type_client === 'Courtier immobilier');
+  const compagnies = (clients || []).filter(c => c.type_client === 'Compagnie');
 
   const getClientById = (id) => clients.find(c => c.id === id);
 
