@@ -2336,7 +2336,7 @@ export default function TableauDeBord() {
       <Dialog open={isNewChatMessageOpen} onOpenChange={setIsNewChatMessageOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white">
           <DialogHeader>
-            <DialogTitle>Nouveau message - {chatTab === "generale" ? "Générale" : "Équipe"}</DialogTitle>
+            <DialogTitle>Nouveau message - {chatTab === "generale" ? "Générale" : chatTab === "equipe" ? "Équipe" : "Club Social"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
