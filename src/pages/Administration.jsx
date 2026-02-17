@@ -303,11 +303,20 @@ export default function Administration() {
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
                                   <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
-                                  <SelectItem value="Administratif">Administratif</SelectItem>
-                                  <SelectItem value="Gestionnaire">Gestionnaire</SelectItem>
-                                  <SelectItem value="Autre">Autre</SelectItem>
+                                  <SelectItem value="Analyste-Foncier">Analyste-Foncier</SelectItem>
+                                  <SelectItem value="Collaboratrice">Collaboratrice</SelectItem>
+                                  <SelectItem value="Dessinateur">Dessinateur</SelectItem>
+                                  <SelectItem value="Comptabilité">Comptabilité</SelectItem>
                                 </SelectContent>
                               </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                type="date"
+                                value={user.date_embauche || ""}
+                                onChange={(e) => handleUpdateUser(user, "date_embauche", e.target.value)}
+                                className="bg-slate-800 border-slate-700 text-white"
+                              />
                             </TableCell>
                             <TableCell>
                               <Select 
@@ -386,7 +395,7 @@ export default function Administration() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
                             Aucun utilisateur actif trouvé
                           </TableCell>
                         </TableRow>
@@ -405,6 +414,7 @@ export default function Administration() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Utilisateur</TableHead>
                         <TableHead className="text-slate-300">Poste</TableHead>
+                        <TableHead className="text-slate-300">Date d'embauche</TableHead>
                         <TableHead className="text-slate-300">Rôle</TableHead>
                         <TableHead className="text-slate-300">Statut</TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
@@ -439,11 +449,20 @@ export default function Administration() {
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
                                   <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
-                                  <SelectItem value="Administratif">Administratif</SelectItem>
-                                  <SelectItem value="Gestionnaire">Gestionnaire</SelectItem>
-                                  <SelectItem value="Autre">Autre</SelectItem>
+                                  <SelectItem value="Analyste-Foncier">Analyste-Foncier</SelectItem>
+                                  <SelectItem value="Collaboratrice">Collaboratrice</SelectItem>
+                                  <SelectItem value="Dessinateur">Dessinateur</SelectItem>
+                                  <SelectItem value="Comptabilité">Comptabilité</SelectItem>
                                 </SelectContent>
                               </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                type="date"
+                                value={user.date_embauche || ""}
+                                onChange={(e) => handleUpdateUser(user, "date_embauche", e.target.value)}
+                                className="bg-slate-800 border-slate-700 text-white"
+                              />
                             </TableCell>
                             <TableCell>
                               <Select 
@@ -522,7 +541,7 @@ export default function Administration() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
                             Aucun utilisateur inactif trouvé
                           </TableCell>
                         </TableRow>
@@ -546,7 +565,7 @@ export default function Administration() {
                     </CardHeader>
                     <CardContent className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {["Arpenteur-Géomètre", "Technicien Terrain", "Administratif", "Gestionnaire", "Autre"].map(poste => {
+                        {["Arpenteur-Géomètre", "Technicien Terrain", "Analyste-Foncier", "Collaboratrice", "Dessinateur", "Comptabilité"].map(poste => {
                           const template = templates.find(t => t.type === 'poste' && t.nom === poste);
                           return (
                             <Button
