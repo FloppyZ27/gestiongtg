@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle, Edit, Trash2, Check } from "lucide-react";
 import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -802,17 +803,33 @@ export default function TableauDeBord() {
 
                       <div className="border-t border-slate-700 pt-2 mt-2">
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="flex gap-1">
-                            {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
-                              const reactionCount = post.reactions?.filter(r => r.emoji === emoji).length || 0;
-                              if (reactionCount === 0) return null;
-                              return (
-                                <span key={emoji} className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full">
-                                  {emoji} {reactionCount}
-                                </span>
-                              );
-                            })}
-                          </div>
+                          <TooltipProvider>
+                            <div className="flex gap-1">
+                              {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                const reactionsForEmoji = post.reactions?.filter(r => r.emoji === emoji) || [];
+                                const reactionCount = reactionsForEmoji.length;
+                                if (reactionCount === 0) return null;
+                                
+                                const userNames = reactionsForEmoji.map(r => {
+                                  const user = users.find(u => u.email === r.utilisateur_email);
+                                  return user?.full_name || r.utilisateur_email;
+                                }).join(', ');
+                                
+                                return (
+                                  <Tooltip key={emoji}>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                        {emoji} {reactionCount}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                      <p className="text-xs">{userNames}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </div>
+                          </TooltipProvider>
                           {post.commentaires && post.commentaires.length > 0 && (
                             <span className="text-xs text-slate-400 ml-auto">
                               {post.commentaires.length} commentaire{post.commentaires.length > 1 ? 's' : ''}
