@@ -187,7 +187,7 @@ export default function TableauDeBord() {
   const absencesAujourdhui = rendezvous.filter(rdv => 
     rdv.date_debut && 
     isSameDay(new Date(rdv.date_debut), today)
-  );
+  ).sort((a, b) => new Date(a.date_debut) - new Date(b.date_debut));
 
   const handleRaccourciClick = (raccourci) => {
     if (raccourci.action_type === 'page') {
@@ -359,6 +359,8 @@ export default function TableauDeBord() {
                 <div className="space-y-3">
                   {absencesAujourdhui.map((absence) => {
                     const utilisateur = users.find(u => u.email === absence.utilisateur_email);
+                    const debut = new Date(absence.date_debut);
+                    const fin = absence.date_fin ? new Date(absence.date_fin) : null;
                     return (
                       <div key={absence.id} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
                         <Avatar className="w-10 h-10">
@@ -370,6 +372,10 @@ export default function TableauDeBord() {
                         <div className="flex-1">
                           <p className="font-semibold text-white">{utilisateur?.full_name}</p>
                           <p className="text-sm text-slate-400">{absence.titre}</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {format(debut, "HH'h'mm")}
+                            {fin && ` - ${format(fin, "HH'h'mm")}`}
+                          </p>
                         </div>
                         <Badge className={absence.type === 'absence' ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"}>
                           {absence.type === 'absence' ? 'Absence' : 'RDV'}
