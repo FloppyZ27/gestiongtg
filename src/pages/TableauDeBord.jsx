@@ -903,19 +903,12 @@ export default function TableauDeBord() {
                             </div>
                              {post.utilisateur_email === user?.email && (
                                <div className="flex gap-1">
-                                 {(!message.image_url && !message.audio_url) && (
+                                 {(!post.image_url && !post.audio_url) && (
                                    <Button
                                      variant="ghost"
                                      size="sm"
-                                     onClick={() => {
-                                       setEditingChatMessageId(message.id);
-                                       if (message.type === 'post') {
-                                         setEditingChatMessageContent(message.contenu || "");
-                                       } else {
-                                         setEditingChatMessageContent(message.sondage_question || "");
-                                       }
-                                     }}
-                                     className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                                     onClick={() => handleEditPost(post)}
+                                     className="h-6 w-6 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
                                    >
                                      <Edit className="w-3 h-3" />
                                    </Button>
@@ -923,17 +916,14 @@ export default function TableauDeBord() {
                                  <Button
                                    variant="ghost"
                                    size="sm"
-                                   onClick={() => setShowDeleteChatMessageDialog(message.id)}
-                                   className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                   onClick={() => setShowDeletePostDialog(post.id)}
+                                   className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                                  >
                                    <Trash2 className="w-3 h-3" />
                                  </Button>
                                </div>
                              )}
-                           </div>
-                          <p className="text-xs text-slate-400">
-                            {format(new Date(message.created_date), "dd MMM 'à' HH:mm", { locale: fr })}
-                          </p>
+                             </div>
                         </div>
                       </div>
                       {message.type === 'post' ? (
