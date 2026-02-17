@@ -838,7 +838,7 @@ export default function TableauDeBord() {
                         {showComments[post.id] && (
                           <>
                             {post.commentaires && post.commentaires.length > 0 && (
-                              <div className="mt-3 space-y-2">
+                              <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto">
                                 {post.commentaires.map((comment, idx) => {
                                   const commentUser = users.find(u => u.email === comment.utilisateur_email);
                                   const isOwnComment = comment.utilisateur_email === user?.email;
