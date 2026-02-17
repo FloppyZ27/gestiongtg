@@ -114,6 +114,7 @@ export default function TableauDeBord() {
   const [editingPostId, setEditingPostId] = useState(null);
   const [editingPostContent, setEditingPostContent] = useState("");
   const [showDeletePostDialog, setShowDeletePostDialog] = useState(null);
+  const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -419,7 +420,8 @@ export default function TableauDeBord() {
     const updatedCommentaires = [...post.commentaires];
     updatedCommentaires[commentIdx] = {
       ...updatedCommentaires[commentIdx],
-      contenu: editingCommentContent
+      contenu: editingCommentContent,
+      date_modification: new Date().toISOString()
     };
 
     updatePostMutation.mutate({
@@ -436,13 +438,18 @@ export default function TableauDeBord() {
     setEditingCommentContent("");
   };
 
-  const handleDeleteComment = (post, commentIdx) => {
+  const handleDeleteComment = () => {
+    if (!showDeleteCommentDialog) return;
+    
+    const { post, commentIdx } = showDeleteCommentDialog;
     const updatedCommentaires = post.commentaires.filter((_, idx) => idx !== commentIdx);
     
     updatePostMutation.mutate({
       id: post.id,
       data: { ...post, commentaires: updatedCommentaires }
     });
+    
+    setShowDeleteCommentDialog(null);
   };
 
   const handleEditPost = (post) => {
@@ -458,12 +465,12 @@ export default function TableauDeBord() {
     if (post.type === 'post') {
       updatePostMutation.mutate({
         id: post.id,
-        data: { ...post, contenu: editingPostContent }
+        data: { ...post, contenu: editingPostContent, date_modification: new Date().toISOString() }
       });
     } else {
       updatePostMutation.mutate({
         id: post.id,
-        data: { ...post, sondage_question: editingPostContent }
+        data: { ...post, sondage_question: editingPostContent, date_modification: new Date().toISOString() }
       });
     }
     setEditingPostId(null);
@@ -640,6 +647,9 @@ export default function TableauDeBord() {
                               <p className="font-semibold text-white">{post.utilisateur_nom}</p>
                               <p className="text-xs text-slate-400">
                                 {format(new Date(post.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                                {post.date_modification && (
+                                  <span className="text-slate-500 ml-1">(modifié)</span>
+                                )}
                               </p>
                             </div>
                             {post.utilisateur_email === user?.email && (
@@ -872,7 +882,7 @@ export default function TableauDeBord() {
                                                 <Button
                                                   variant="ghost"
                                                   size="sm"
-                                                  onClick={() => handleDeleteComment(post, idx)}
+                                                  onClick={() => setShowDeleteCommentDialog({ post, commentIdx: idx })}
                                                   className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                                                 >
                                                   <Trash2 className="w-2.5 h-2.5" />
@@ -925,6 +935,9 @@ export default function TableauDeBord() {
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
                                           {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                          {comment.date_modification && (
+                                            <span className="text-slate-600 ml-1">(modifié)</span>
+                                          )}
                                         </p>
                                       </div>
                                     </div>
@@ -1294,6 +1307,26 @@ export default function TableauDeBord() {
             </Button>
             <Button
               onClick={() => handleDeletePost(showDeletePostDialog)}
+              className="bg-gradient-to-r from-red-500 to-red-600"
+            >
+              Supprimer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteCommentDialog !== null} onOpenChange={() => setShowDeleteCommentDialog(null)}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Supprimer le commentaire</DialogTitle>
+          </DialogHeader>
+          <p className="text-slate-300">Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.</p>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowDeleteCommentDialog(null)}>
+              Annuler
+            </Button>
+            <Button
+              onClick={handleDeleteComment}
               className="bg-gradient-to-r from-red-500 to-red-600"
             >
               Supprimer
