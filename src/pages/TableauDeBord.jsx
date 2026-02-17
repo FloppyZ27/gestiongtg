@@ -973,12 +973,12 @@ export default function TableauDeBord() {
                           )}
                         </>
                       ) : (
-                        <div className="mb-2">
-                          {editingChatMessageId === message.id ? (
+                        <div className="mb-3">
+                          {editingPostId === post.id ? (
                             <div className="space-y-2 mb-3">
                               <Input
-                                value={editingChatMessageContent}
-                                onChange={(e) => setEditingChatMessageContent(e.target.value)}
+                                value={editingPostContent}
+                                onChange={(e) => setEditingPostContent(e.target.value)}
                                 className="bg-slate-800 border-slate-600 text-white text-sm"
                                 placeholder="Question du sondage"
                               />
@@ -986,10 +986,7 @@ export default function TableauDeBord() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => {
-                                    setEditingChatMessageId(null);
-                                    setEditingChatMessageContent("");
-                                  }}
+                                  onClick={handleCancelEditPost}
                                   className="h-7 text-xs text-slate-400 hover:text-white"
                                 >
                                   <X className="w-3 h-3 mr-1" />
@@ -997,45 +994,59 @@ export default function TableauDeBord() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  onClick={() => {
-                                    updateChatMessageMutation.mutate({
-                                      id: message.id,
-                                      data: { ...message, sondage_question: editingChatMessageContent, date_modification: new Date().toISOString() }
-                                    });
-                                    setEditingChatMessageId(null);
-                                    setEditingChatMessageContent("");
-                                  }}
-                                  className="h-7 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
+                                  onClick={() => handleSaveEditPost(post)}
+                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600 text-white"
                                 >
                                   <Check className="w-3 h-3 mr-1" />
                                   Enregistrer
                                 </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="font-semibold text-white text-sm mb-2">{message.sondage_question}</p>
+                                </div>
+                                </div>
+                                ) : (
+                                <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
                           )}
-                          <div className="space-y-1">
-                            {message.sondage_options?.map((option, idx) => {
-                              const totalVotes = message.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
+                          <div className="space-y-2">
+                            {post.sondage_options?.map((option, idx) => {
+                              const totalVotes = post.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
                               const percentage = totalVotes > 0 ? ((option.votes?.length || 0) / totalVotes * 100).toFixed(0) : 0;
                               const hasVoted = option.votes?.includes(user?.email);
+                              const votersNames = (option.votes || []).map(voterEmail => {
+                                const voter = users.find(u => u.email === voterEmail);
+                                return voter?.full_name || voterEmail;
+                              }).join(', ');
+
                               return (
-                                <button
-                                  key={idx}
-                                  onClick={() => handleChatVote(message, idx)}
-                                  className={`w-full p-2 rounded-lg text-left transition-all text-xs ${
-                                    hasVoted ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-500' : 'bg-slate-700/50 hover:bg-slate-700'
-                                  }`}
-                                >
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-white">{option.option}</span>
-                                    <span className="text-xs text-slate-400">{percentage}%</span>
-                                  </div>
-                                  <div className="w-full bg-slate-900 rounded-full h-1.5">
-                                    <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full transition-all" style={{ width: `${percentage}%` }} />
-                                  </div>
-                                </button>
+                                <TooltipProvider key={idx}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <button
+                                        onClick={() => handleVote(post, idx)}
+                                        className={`w-full p-3 rounded-lg text-left transition-all ${
+                                          hasVoted 
+                                            ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-2 border-purple-500' 
+                                            : 'bg-slate-700/50 hover:bg-slate-700'
+                                        }`}
+                                      >
+                                        <div className="flex justify-between items-center mb-1">
+                                          <span className="text-white">{option.option}</span>
+                                          <span className="text-sm text-slate-400">{option.votes?.length || 0} vote{(option.votes?.length || 0) !== 1 ? 's' : ''} • {percentage}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-900 rounded-full h-2">
+                                          <div 
+                                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
+                                            style={{ width: `${percentage}%` }}
+                                          />
+                                        </div>
+                                      </button>
+                                    </TooltipTrigger>
+                                    {option.votes && option.votes.length > 0 && (
+                                      <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                        <p className="text-xs font-semibold mb-1">Ont voté pour cette option:</p>
+                                        <p className="text-xs">{votersNames}</p>
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
                               );
                             })}
                           </div>
