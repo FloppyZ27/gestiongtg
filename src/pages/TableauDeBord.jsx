@@ -1296,42 +1296,78 @@ export default function TableauDeBord() {
       </Dialog>
 
       <Dialog open={showDeletePostDialog !== null} onOpenChange={() => setShowDeletePostDialog(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white">
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
           <DialogHeader>
-            <DialogTitle>Supprimer la publication</DialogTitle>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-slate-300">Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.</p>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowDeletePostDialog(null)}>
-              Annuler
-            </Button>
-            <Button
-              onClick={() => handleDeletePost(showDeletePostDialog)}
-              className="bg-gradient-to-r from-red-500 to-red-600"
-            >
-              Supprimer
-            </Button>
-          </div>
+          <motion.div 
+            className="space-y-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setShowDeletePostDialog(null)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleDeletePost(showDeletePostDialog)}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showDeleteCommentDialog !== null} onOpenChange={() => setShowDeleteCommentDialog(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white">
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
           <DialogHeader>
-            <DialogTitle>Supprimer le commentaire</DialogTitle>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-slate-300">Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.</p>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowDeleteCommentDialog(null)}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleDeleteComment}
-              className="bg-gradient-to-r from-red-500 to-red-600"
-            >
-              Supprimer
-            </Button>
-          </div>
+          <motion.div 
+            className="space-y-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setShowDeleteCommentDialog(null)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDeleteComment}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
     </div>
