@@ -867,14 +867,14 @@ export default function TableauDeBord() {
                                   const hasMedia = comment.image_url || comment.audio_url;
                                   
                                   return (
-                                    <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
-                                      <Avatar className="w-7 h-7">
+                                    <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg max-w-full">
+                                      <Avatar className="w-7 h-7 flex-shrink-0">
                                         <AvatarImage src={commentUser?.photo_url} />
                                         <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
                                           {getInitials(comment.utilisateur_nom)}
                                         </AvatarFallback>
                                       </Avatar>
-                                      <div className="flex-1">
+                                      <div className="flex-1 min-w-0">
                                         <div className="bg-slate-700/50 rounded-lg p-2 max-w-full overflow-hidden">
                                           <div className="flex items-center justify-between mb-1">
                                             <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
