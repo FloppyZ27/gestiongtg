@@ -910,7 +910,7 @@ export default function TableauDeBord() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[25%_50%_25%] gap-6 mb-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-2">
               <CardTitle className="text-white flex items-center gap-2">
