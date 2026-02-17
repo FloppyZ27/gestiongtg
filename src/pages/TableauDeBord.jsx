@@ -2797,6 +2797,14 @@ export default function TableauDeBord() {
           </motion.div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
+
+      {editingDossier && (
+        <EditDossierDialog
+          dossier={editingDossier}
+          isOpen={!!editingDossier}
+          onClose={() => setEditingDossier(null)}
+        />
+      )}
+      </div>
+      );
+      }
