@@ -310,9 +310,31 @@ export default function Administration() {
                               </Select>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                {getRoleLabel(user.role)}
-                              </Badge>
+                              <Select 
+                                value={user.role || "user"} 
+                                onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                              >
+                                <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="admin">
+                                    <Badge variant="outline" className={`${getRoleColor('admin')} border`}>
+                                      {getRoleLabel('admin')}
+                                    </Badge>
+                                  </SelectItem>
+                                  <SelectItem value="gestionnaire">
+                                    <Badge variant="outline" className={`${getRoleColor('gestionnaire')} border`}>
+                                      {getRoleLabel('gestionnaire')}
+                                    </Badge>
+                                  </SelectItem>
+                                  <SelectItem value="user">
+                                    <Badge variant="outline" className={`${getRoleColor('user')} border`}>
+                                      {getRoleLabel('user')}
+                                    </Badge>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell>
                               <Select 
@@ -423,9 +445,31 @@ export default function Administration() {
                               </Select>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={`${getRoleColor(user.role)} border`}>
-                                {getRoleLabel(user.role)}
-                              </Badge>
+                              <Select 
+                                value={user.role || "user"} 
+                                onValueChange={(value) => handleUpdateUser(user, "role", value)}
+                              >
+                                <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="admin">
+                                    <Badge variant="outline" className={`${getRoleColor('admin')} border`}>
+                                      {getRoleLabel('admin')}
+                                    </Badge>
+                                  </SelectItem>
+                                  <SelectItem value="gestionnaire">
+                                    <Badge variant="outline" className={`${getRoleColor('gestionnaire')} border`}>
+                                      {getRoleLabel('gestionnaire')}
+                                    </Badge>
+                                  </SelectItem>
+                                  <SelectItem value="user">
+                                    <Badge variant="outline" className={`${getRoleColor('user')} border`}>
+                                      {getRoleLabel('user')}
+                                    </Badge>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                             <TableCell>
                               <Select 
