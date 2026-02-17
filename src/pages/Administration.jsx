@@ -421,6 +421,7 @@ export default function Administration() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Utilisateur</TableHead>
                         <TableHead className="text-slate-300">Poste</TableHead>
+                        <TableHead className="text-slate-300">Équipe</TableHead>
                         <TableHead className="text-slate-300">Date d'embauche</TableHead>
                         <TableHead className="text-slate-300">Rôle</TableHead>
                         <TableHead className="text-slate-300">Statut</TableHead>
@@ -460,6 +461,21 @@ export default function Administration() {
                                   <SelectItem value="Collaboratrice">Collaboratrice</SelectItem>
                                   <SelectItem value="Dessinateur">Dessinateur</SelectItem>
                                   <SelectItem value="Comptabilité">Comptabilité</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Select 
+                                value={user.equipe || ""} 
+                                onValueChange={(value) => handleUpdateUser(user, "equipe", value)}
+                              >
+                                <SelectTrigger className="w-36 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Samuel">Samuel</SelectItem>
+                                  <SelectItem value="Pierre-Luc">Pierre-Luc</SelectItem>
+                                  <SelectItem value="Dany">Dany</SelectItem>
                                 </SelectContent>
                               </Select>
                             </TableCell>
