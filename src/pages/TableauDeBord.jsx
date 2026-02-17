@@ -871,7 +871,7 @@ export default function TableauDeBord() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid gap-3" style={{ gridTemplateColumns: weekDays.map((date) => isSameDay(date, today) ? '1fr 1fr 1fr' : '1fr').join(' ') }}>
               {weekDays.map((date) => {
                 const isToday = isSameDay(date, today);
                 const mandats = getMandatsForDay(date);
@@ -879,7 +879,7 @@ export default function TableauDeBord() {
                 const dayNum = format(date, 'd');
                 
                 return (
-                  <div key={date.toISOString()} className={`rounded-lg transition-all ${isToday ? 'ring-2 ring-orange-400 bg-orange-500/20 p-4' : 'bg-slate-800/50 p-3'}`}>
+                  <div key={date.toISOString()} className={`rounded-lg transition-all ${isToday ? 'ring-2 ring-orange-400 bg-orange-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-50'}`}>
                     <div className={`text-center mb-3 ${isToday ? 'border-b-2 border-orange-400 pb-2' : ''}`}>
                       <p className={`font-semibold capitalize ${isToday ? 'text-orange-400 text-lg' : 'text-slate-300 text-sm'}`}>
                         {dayName}
