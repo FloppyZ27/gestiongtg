@@ -858,6 +858,48 @@ export default function TableauDeBord() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-2">
+              <CardTitle className="text-white flex items-center gap-2">
+                <UserX className="w-5 h-5 text-red-400" />
+                Absences aujourd'hui
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {absencesAujourdhui.length > 0 ? (
+                <div className="space-y-2">
+                  {absencesAujourdhui.map((absence) => {
+                    const utilisateur = users.find(u => u.email === absence.utilisateur_email);
+                    const debut = new Date(absence.date_debut);
+                    const fin = absence.date_fin ? new Date(absence.date_fin) : null;
+                    return (
+                      <div key={absence.id} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={utilisateur?.photo_url} />
+                          <AvatarFallback className="bg-gradient-to-r from-red-500 to-orange-500 text-xs">
+                            {getInitials(utilisateur?.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-semibold text-white text-sm">{utilisateur?.full_name}</span>
+                        <span className="text-sm text-slate-400">• {absence.titre}</span>
+                        <span className="text-xs text-slate-500">
+                          • {format(debut, "HH'h'mm")}{fin && ` - ${format(fin, "HH'h'mm")}`}
+                        </span>
+                        <Badge className={`ml-auto text-xs ${absence.type === 'absence' ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"}`}>
+                          {absence.type === 'absence' ? 'Absence' : 'RDV'}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-slate-500 py-8">Aucun événement aujourd'hui</p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Chat fusionné avec 3 tabs */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
