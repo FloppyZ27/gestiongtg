@@ -15,6 +15,7 @@ import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "d
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { motion } from "framer-motion";
 
 const ICONS_MAP = {
   Home, FileText, Users, Calendar, FolderOpen, Search, Settings, BarChart, MessageSquare, Compass, Plus
@@ -105,6 +106,11 @@ export default function TableauDeBord() {
     const dateA = new Date(a.date_naissance);
     const dateB = new Date(b.date_naissance);
     return dateA.getDate() - dateB.getDate();
+  });
+
+  const hasAnniversaireAujourdhui = anniversairesDuMois.some(u => {
+    const birthDate = new Date(u.date_naissance);
+    return isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
   });
 
   const absencesAujourdhui = rendezvous.filter(rdv => 
@@ -421,8 +427,42 @@ export default function TableauDeBord() {
                 {anniversairesDuMois.map((utilisateur) => {
                   const birthDate = new Date(utilisateur.date_naissance);
                   const isToday = isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
+                  
+                  if (isToday) {
+                    return (
+                      <motion.div
+                        key={utilisateur.id}
+                        animate={{
+                          scale: [1, 1.05, 1],
+                          rotate: [0, 2, -2, 0],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-2 border-pink-500 relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-purple-500/10 animate-pulse" />
+                        <Avatar className="w-10 h-10 relative z-10">
+                          <AvatarImage src={utilisateur.photo_url} />
+                          <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500">
+                            {getInitials(utilisateur.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 relative z-10">
+                          <p className="font-semibold text-white">{utilisateur.full_name}</p>
+                          <p className="text-sm text-slate-400">
+                            {format(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), "dd MMMM", { locale: fr })}
+                            <span className="ml-2 text-pink-400 font-semibold">🎂 Aujourd'hui!</span>
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  }
+                  
                   return (
-                    <div key={utilisateur.id} className={`flex items-center gap-3 p-3 rounded-lg ${isToday ? 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-2 border-pink-500' : 'bg-slate-800/50'}`}>
+                    <div key={utilisateur.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
                       <Avatar className="w-10 h-10">
                         <AvatarImage src={utilisateur.photo_url} />
                         <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500">
@@ -433,7 +473,6 @@ export default function TableauDeBord() {
                         <p className="font-semibold text-white">{utilisateur.full_name}</p>
                         <p className="text-sm text-slate-400">
                           {format(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), "dd MMMM", { locale: fr })}
-                          {isToday && <span className="ml-2 text-pink-400 font-semibold">🎂 Aujourd'hui!</span>}
                         </p>
                       </div>
                     </div>
