@@ -117,6 +117,28 @@ export default function TableauDeBord() {
   const [editingPostContent, setEditingPostContent] = useState("");
   const [showDeletePostDialog, setShowDeletePostDialog] = useState(null);
   const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(null);
+  const [chatTab, setChatTab] = useState("generale");
+  const [isNewChatMessageOpen, setIsNewChatMessageOpen] = useState(false);
+  const [newChatMessageType, setNewChatMessageType] = useState("post");
+  const [newChatContent, setNewChatContent] = useState("");
+  const [newChatSondageQuestion, setNewChatSondageQuestion] = useState("");
+  const [chatSondageOptions, setChatSondageOptions] = useState(["", ""]);
+  const [newChatImage, setNewChatImage] = useState(null);
+  const [newChatAudio, setNewChatAudio] = useState(null);
+  const [isRecordingNewChat, setIsRecordingNewChat] = useState(false);
+  const [chatCommentInputs, setChatCommentInputs] = useState({});
+  const [showChatReactions, setShowChatReactions] = useState({});
+  const [showChatComments, setShowChatComments] = useState({});
+  const [showChatCommentReactions, setShowChatCommentReactions] = useState({});
+  const [chatCommentImages, setChatCommentImages] = useState({});
+  const [chatCommentAudio, setChatCommentAudio] = useState({});
+  const [isChatRecording, setIsChatRecording] = useState({});
+  const [editingChatMessageId, setEditingChatMessageId] = useState(null);
+  const [editingChatMessageContent, setEditingChatMessageContent] = useState("");
+  const [editingChatCommentId, setEditingChatCommentId] = useState(null);
+  const [editingChatCommentContent, setEditingChatCommentContent] = useState("");
+  const [showDeleteChatMessageDialog, setShowDeleteChatMessageDialog] = useState(null);
+  const [showDeleteChatCommentDialog, setShowDeleteChatCommentDialog] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -156,6 +178,12 @@ export default function TableauDeBord() {
     initialData: [],
   });
 
+  const { data: chatMessages = [] } = useQuery({
+    queryKey: ['chatMessages'],
+    queryFn: () => base44.entities.MessageChat.list('-created_date', 50),
+    initialData: [],
+  });
+
   const createPostMutation = useMutation({
     mutationFn: (data) => base44.entities.PostClubSocial.create(data),
     onSuccess: () => {
@@ -174,6 +202,27 @@ export default function TableauDeBord() {
     mutationFn: ({ id, data }) => base44.entities.PostClubSocial.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['postsClubSocial'] });
+    },
+  });
+
+  const createChatMessageMutation = useMutation({
+    mutationFn: (data) => base44.entities.MessageChat.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatMessages'] });
+      setIsNewChatMessageOpen(false);
+      setNewChatContent("");
+      setNewChatSondageQuestion("");
+      setChatSondageOptions(["", ""]);
+      setNewChatMessageType("post");
+      setNewChatImage(null);
+      setNewChatAudio(null);
+    },
+  });
+
+  const updateChatMessageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.MessageChat.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatMessages'] });
     },
   });
 
@@ -517,6 +566,166 @@ export default function TableauDeBord() {
     });
   };
 
+  const handleCreateChatMessage = async () => {
+    let imageUrl = null;
+    let audioUrl = null;
+
+    if (newChatImage) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: newChatImage });
+      imageUrl = file_url;
+    }
+
+    if (newChatAudio) {
+      const audioFile = new File([newChatAudio], "audio.webm", { type: "audio/webm" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: audioFile });
+      audioUrl = file_url;
+    }
+
+    if (newChatMessageType === 'post') {
+      createChatMessageMutation.mutate({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        canal: chatTab,
+        contenu: newChatContent,
+        type: 'post',
+        image_url: imageUrl,
+        audio_url: audioUrl,
+        reactions: [],
+        commentaires: []
+      });
+    } else {
+      createChatMessageMutation.mutate({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        canal: chatTab,
+        type: 'sondage',
+        sondage_question: newChatSondageQuestion,
+        sondage_options: chatSondageOptions.filter(o => o).map(option => ({
+          option,
+          votes: []
+        })),
+        reactions: [],
+        commentaires: []
+      });
+    }
+  };
+
+  const handleChatReaction = (message, emoji) => {
+    const existingReactions = message.reactions || [];
+    const userReaction = existingReactions.find(r => r.utilisateur_email === user?.email);
+    
+    let newReactions;
+    if (userReaction && userReaction.emoji === emoji) {
+      newReactions = existingReactions.filter(r => r.utilisateur_email !== user?.email);
+    } else if (userReaction) {
+      newReactions = existingReactions.map(r => 
+        r.utilisateur_email === user?.email ? { ...r, emoji } : r
+      );
+    } else {
+      newReactions = [...existingReactions, { utilisateur_email: user?.email, emoji }];
+    }
+
+    updateChatMessageMutation.mutate({
+      id: message.id,
+      data: { ...message, reactions: newReactions }
+    });
+    setShowChatReactions({ ...showChatReactions, [message.id]: false });
+  };
+
+  const handleChatCommentReaction = (message, commentIdx, emoji) => {
+    const updatedCommentaires = [...message.commentaires];
+    const comment = updatedCommentaires[commentIdx];
+    const existingReactions = comment.reactions || [];
+    const userReaction = existingReactions.find(r => r.utilisateur_email === user?.email);
+    
+    let newReactions;
+    if (userReaction && userReaction.emoji === emoji) {
+      newReactions = existingReactions.filter(r => r.utilisateur_email !== user?.email);
+    } else if (userReaction) {
+      newReactions = existingReactions.map(r => 
+        r.utilisateur_email === user?.email ? { ...r, emoji } : r
+      );
+    } else {
+      newReactions = [...existingReactions, { utilisateur_email: user?.email, emoji }];
+    }
+
+    updatedCommentaires[commentIdx] = { ...comment, reactions: newReactions };
+
+    updateChatMessageMutation.mutate({
+      id: message.id,
+      data: { ...message, commentaires: updatedCommentaires }
+    });
+    setShowChatCommentReactions({ ...showChatCommentReactions, [`${message.id}-${commentIdx}`]: false });
+  };
+
+  const handleAddChatComment = async (message) => {
+    const commentText = chatCommentInputs[message.id];
+    const imageFile = chatCommentImages[message.id];
+    const audioBlob = chatCommentAudio[message.id];
+    
+    if (!commentText?.trim() && !imageFile && !audioBlob) return;
+
+    let imageUrl = null;
+    let audioUrl = null;
+
+    if (imageFile) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      imageUrl = file_url;
+    }
+
+    if (audioBlob) {
+      const audioFile = new File([audioBlob], "audio.webm", { type: "audio/webm" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: audioFile });
+      audioUrl = file_url;
+    }
+
+    const newComment = {
+      utilisateur_email: user?.email,
+      utilisateur_nom: user?.full_name,
+      contenu: commentText?.trim() || "",
+      date: new Date().toISOString(),
+      image_url: imageUrl,
+      audio_url: audioUrl,
+      reactions: []
+    };
+
+    const existingComments = message.commentaires || [];
+    updateChatMessageMutation.mutate({
+      id: message.id,
+      data: { ...message, commentaires: [...existingComments, newComment] }
+    });
+
+    setChatCommentInputs({ ...chatCommentInputs, [message.id]: "" });
+    setChatCommentImages({ ...chatCommentImages, [message.id]: null });
+    setChatCommentAudio({ ...chatCommentAudio, [message.id]: null });
+  };
+
+  const handleChatVote = (message, optionIndex) => {
+    const newOptions = message.sondage_options.map((opt, idx) => {
+      if (idx === optionIndex) {
+        const votes = opt.votes || [];
+        if (votes.includes(user?.email)) {
+          return { ...opt, votes: votes.filter(v => v !== user?.email) };
+        } else {
+          return { ...opt, votes: [...votes, user?.email] };
+        }
+      }
+      return opt;
+    });
+
+    updateChatMessageMutation.mutate({
+      id: message.id,
+      data: { ...message, sondage_options: newOptions }
+    });
+  };
+
+  const handleDeleteChatMessage = (messageId) => {
+    base44.entities.MessageChat.delete(messageId).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['chatMessages'] });
+      setShowDeleteChatMessageDialog(null);
+    });
+  };
+
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
@@ -576,28 +785,148 @@ export default function TableauDeBord() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
-            <CardTitle className="text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-orange-400" />
-              Mandats à sortir aujourd'hui
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {mandatsAujourdhui.length > 0 ? (
-              <div className="space-y-3">
-                {mandatsAujourdhui.map((dossier) => (
-                  <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
-                    <p className="font-semibold text-white">{dossier.numero_dossier}</p>
-                    <p className="text-sm text-slate-400">{dossier.arpenteur_geometre}</p>
-                  </div>
-                ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
+              <CardTitle className="text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-orange-400" />
+                Mandats à sortir aujourd'hui
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {mandatsAujourdhui.length > 0 ? (
+                <div className="space-y-3">
+                  {mandatsAujourdhui.map((dossier) => (
+                    <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
+                      <p className="font-semibold text-white">{dossier.numero_dossier}</p>
+                      <p className="text-sm text-slate-400">{dossier.arpenteur_geometre}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-slate-500 py-8">Aucun mandat à sortir aujourd'hui</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 py-2">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-cyan-400" />
+                  Chat
+                </CardTitle>
+                <Button
+                  size="sm"
+                  onClick={() => setIsNewChatMessageOpen(true)}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Publier
+                </Button>
               </div>
-            ) : (
-              <p className="text-center text-slate-500 py-8">Aucun mandat à sortir aujourd'hui</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex gap-2 mb-4 border-b border-slate-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setChatTab("generale")}
+                  className={`flex-1 rounded-none ${chatTab === "generale" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
+                >
+                  Générale
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setChatTab("equipe")}
+                  className={`flex-1 rounded-none ${chatTab === "equipe" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
+                >
+                  Équipe
+                </Button>
+              </div>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {chatMessages.filter(m => m.canal === chatTab).map((message) => {
+                  const messageUser = users.find(u => u.email === message.utilisateur_email);
+                  return (
+                    <div key={message.id} className="p-3 bg-slate-800/50 rounded-lg">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={messageUser?.photo_url} />
+                          <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                            {getInitials(message.utilisateur_nom)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-white text-sm">{message.utilisateur_nom}</p>
+                            {message.utilisateur_email === user?.email && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowDeleteChatMessageDialog(message.id)}
+                                className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-400">
+                            {format(new Date(message.created_date), "dd MMM 'à' HH:mm", { locale: fr })}
+                          </p>
+                        </div>
+                      </div>
+                      {message.type === 'post' ? (
+                        <>
+                          {message.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap mb-2">{message.contenu}</p>}
+                          {message.image_url && <img src={message.image_url} alt="Message" className="rounded-lg max-w-full mb-2" />}
+                          {message.audio_url && (
+                            <div className="mb-2 bg-slate-700/30 rounded-lg p-2">
+                              <audio controls className="w-full">
+                                <source src={message.audio_url} type="audio/webm" />
+                              </audio>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="mb-2">
+                          <p className="font-semibold text-white text-sm mb-2">{message.sondage_question}</p>
+                          <div className="space-y-1">
+                            {message.sondage_options?.map((option, idx) => {
+                              const totalVotes = message.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
+                              const percentage = totalVotes > 0 ? ((option.votes?.length || 0) / totalVotes * 100).toFixed(0) : 0;
+                              const hasVoted = option.votes?.includes(user?.email);
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => handleChatVote(message, idx)}
+                                  className={`w-full p-2 rounded-lg text-left transition-all text-xs ${
+                                    hasVoted ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-500' : 'bg-slate-700/50 hover:bg-slate-700'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-white">{option.option}</span>
+                                    <span className="text-xs text-slate-400">{percentage}%</span>
+                                  </div>
+                                  <div className="w-full bg-slate-900 rounded-full h-1.5">
+                                    <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full transition-all" style={{ width: `${percentage}%` }} />
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {chatMessages.filter(m => m.canal === chatTab).length === 0 && (
+                  <p className="text-center text-slate-500 py-8">Aucun message pour le moment</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[25%_50%_25%] gap-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
@@ -1506,6 +1835,206 @@ export default function TableauDeBord() {
               <Button
                 type="button"
                 onClick={handleDeleteComment}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isNewChatMessageOpen} onOpenChange={setIsNewChatMessageOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Nouveau message - {chatTab === "generale" ? "Générale" : "Équipe"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Type de publication</Label>
+              <Select value={newChatMessageType} onValueChange={setNewChatMessageType}>
+                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="post">Message</SelectItem>
+                  <SelectItem value="sondage">Sondage</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {newChatMessageType === 'post' ? (
+              <>
+                <div>
+                  <Label>Message</Label>
+                  <Textarea
+                    value={newChatContent}
+                    onChange={(e) => setNewChatContent(e.target.value)}
+                    placeholder="Écrivez votre message..."
+                    className="bg-slate-800 border-slate-700 text-white"
+                    rows={4}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="new-chat-image-upload"
+                    className="hidden"
+                    onChange={(e) => setNewChatImage(e.target.files[0])}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('new-chat-image-upload').click()}
+                    className="flex-1"
+                  >
+                    <Image className="w-4 h-4 mr-2" />
+                    {newChatImage ? newChatImage.name : 'Ajouter une photo'}
+                  </Button>
+                  {!isRecordingNewChat ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                          const recorder = new MediaRecorder(stream);
+                          const chunks = [];
+                          recorder.ondataavailable = (e) => chunks.push(e.data);
+                          recorder.onstop = () => {
+                            const blob = new Blob(chunks, { type: 'audio/webm' });
+                            setNewChatAudio(blob);
+                            stream.getTracks().forEach(track => track.stop());
+                          };
+                          recorder.start();
+                          setMediaRecorder(recorder);
+                          setIsRecordingNewChat(true);
+                        } catch (error) {
+                          console.error("Erreur d'accès au microphone:", error);
+                        }
+                      }}
+                      className="flex-1"
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      Enregistrer audio
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                          mediaRecorder.stop();
+                          setIsRecordingNewChat(false);
+                          setMediaRecorder(null);
+                        }
+                      }}
+                      className="flex-1 text-red-400 border-red-400 animate-pulse"
+                    >
+                      <StopCircle className="w-4 h-4 mr-2" />
+                      Arrêter
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label>Question</Label>
+                  <Input
+                    value={newChatSondageQuestion}
+                    onChange={(e) => setNewChatSondageQuestion(e.target.value)}
+                    placeholder="Posez votre question..."
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div>
+                  <Label>Options</Label>
+                  {chatSondageOptions.map((option, idx) => (
+                    <div key={idx} className="flex gap-2 mb-2">
+                      <Input
+                        value={option}
+                        onChange={(e) => {
+                          const newOptions = [...chatSondageOptions];
+                          newOptions[idx] = e.target.value;
+                          setChatSondageOptions(newOptions);
+                        }}
+                        placeholder={`Option ${idx + 1}`}
+                        className="bg-slate-800 border-slate-700 text-white"
+                      />
+                      {idx > 1 && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => setChatSondageOptions(chatSondageOptions.filter((_, i) => i !== idx))}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {chatSondageOptions.length < 5 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setChatSondageOptions([...chatSondageOptions, ""])}
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Ajouter une option
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsNewChatMessageOpen(false)}>
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreateChatMessage}
+                disabled={newChatMessageType === 'post' ? (!newChatContent && !newChatImage && !newChatAudio) : (!newChatSondageQuestion || chatSondageOptions.filter(o => o).length < 2)}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Publier
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteChatMessageDialog !== null} onOpenChange={() => setShowDeleteChatMessageDialog(null)}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <motion.div 
+            className="space-y-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setShowDeleteChatMessageDialog(null)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleDeleteChatMessage(showDeleteChatMessageDialog)}
                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
               >
                 Supprimer
