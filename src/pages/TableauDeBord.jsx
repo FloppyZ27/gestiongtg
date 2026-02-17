@@ -185,7 +185,6 @@ export default function TableauDeBord() {
   });
 
   const absencesAujourdhui = rendezvous.filter(rdv => 
-    rdv.type === 'absence' && 
     rdv.date_debut && 
     isSameDay(new Date(rdv.date_debut), today)
   );
@@ -368,16 +367,19 @@ export default function TableauDeBord() {
                             {getInitials(utilisateur?.full_name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-semibold text-white">{utilisateur?.full_name}</p>
                           <p className="text-sm text-slate-400">{absence.titre}</p>
                         </div>
+                        <Badge className={absence.type === 'absence' ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"}>
+                          {absence.type === 'absence' ? 'Absence' : 'RDV'}
+                        </Badge>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-center text-slate-500 py-8">Aucune absence aujourd'hui</p>
+                <p className="text-center text-slate-500 py-8">Aucun événement aujourd'hui</p>
               )}
             </CardContent>
           </Card>
