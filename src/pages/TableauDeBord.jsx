@@ -955,7 +955,47 @@ export default function TableauDeBord() {
                         </>
                       ) : (
                         <div className="mb-2">
-                          <p className="font-semibold text-white text-sm mb-2">{message.sondage_question}</p>
+                          {editingChatMessageId === message.id ? (
+                            <div className="space-y-2 mb-3">
+                              <Input
+                                value={editingChatMessageContent}
+                                onChange={(e) => setEditingChatMessageContent(e.target.value)}
+                                className="bg-slate-800 border-slate-600 text-white text-sm"
+                                placeholder="Question du sondage"
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingChatMessageId(null);
+                                    setEditingChatMessageContent("");
+                                  }}
+                                  className="h-7 text-xs text-slate-400 hover:text-white"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    updateChatMessageMutation.mutate({
+                                      id: message.id,
+                                      data: { ...message, sondage_question: editingChatMessageContent, date_modification: new Date().toISOString() }
+                                    });
+                                    setEditingChatMessageId(null);
+                                    setEditingChatMessageContent("");
+                                  }}
+                                  className="h-7 text-xs bg-cyan-500 hover:bg-cyan-600"
+                                >
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Enregistrer
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="font-semibold text-white text-sm mb-2">{message.sondage_question}</p>
+                          )}
                           <div className="space-y-1">
                             {message.sondage_options?.map((option, idx) => {
                               const totalVotes = message.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
