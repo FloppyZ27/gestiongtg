@@ -2707,12 +2707,12 @@ export default function EditDossierForm({
                                   <TableCell className="text-slate-300 text-xs w-[22.5%]">
                                     <div className="flex items-center gap-1.5">
                                       <span>
-                                        {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
+                                        {getUserInitials((users || []).find(u => u?.email === retour.utilisateur_assigne)?.full_name) || "-"}
                                       </span>
                                       <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
-                                        <AvatarImage src={users.find(u => u.email === retour.utilisateur_assigne)?.photo_url} />
+                                        <AvatarImage src={(users || []).find(u => u?.email === retour.utilisateur_assigne)?.photo_url} />
                                         <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name)}
+                                          {getUserInitials((users || []).find(u => u?.email === retour.utilisateur_assigne)?.full_name)}
                                         </AvatarFallback>
                                       </Avatar>
                                     </div>
