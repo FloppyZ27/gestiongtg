@@ -863,30 +863,52 @@ export default function TableauDeBord() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-orange-400" />
-                Mandats à sortir aujourd'hui
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              {mandatsAujourdhui.length > 0 ? (
-                <div className="space-y-3">
-                  {mandatsAujourdhui.map((dossier) => (
-                    <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
-                      <p className="font-semibold text-white">{dossier.numero_dossier}</p>
-                      <p className="text-sm text-slate-400">{dossier.arpenteur_geometre}</p>
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
+            <CardTitle className="text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-orange-400" />
+              Mandats à sortir cette semaine
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-5 gap-3">
+              {weekDays.map((date) => {
+                const isToday = isSameDay(date, today);
+                const mandats = getMandatsForDay(date);
+                const dayName = format(date, 'EEE', { locale: fr });
+                const dayNum = format(date, 'd');
+                
+                return (
+                  <div key={date.toISOString()} className={`rounded-lg transition-all ${isToday ? 'ring-2 ring-orange-400 bg-orange-500/20 p-4' : 'bg-slate-800/50 p-3'}`}>
+                    <div className={`text-center mb-3 ${isToday ? 'border-b-2 border-orange-400 pb-2' : ''}`}>
+                      <p className={`font-semibold capitalize ${isToday ? 'text-orange-400 text-lg' : 'text-slate-300 text-sm'}`}>
+                        {dayName}
+                      </p>
+                      <p className={`${isToday ? 'text-orange-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>
+                        {dayNum}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-slate-500 py-8">Aucun mandat à sortir aujourd'hui</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    
+                    {mandats.length > 0 ? (
+                      <div className={`space-y-2 ${isToday ? 'text-sm' : 'text-xs'}`}>
+                        {mandats.map((dossier) => (
+                          <div key={dossier.id} className={`p-2 rounded ${isToday ? 'bg-orange-400/20 border border-orange-400/50' : 'bg-slate-700/50'}`}>
+                            <p className="font-semibold text-white truncate">{dossier.numero_dossier}</p>
+                            <p className="text-slate-400 truncate">{dossier.arpenteur_geometre.split(' ')[0]}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className={`text-center ${isToday ? 'text-orange-300/60' : 'text-slate-500/60'} text-xs`}>
+                        —
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
