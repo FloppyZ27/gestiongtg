@@ -1139,7 +1139,7 @@ export default function TableauDeBord() {
                                     <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg max-w-full">
                                       <Avatar className="w-7 h-7 flex-shrink-0">
                                         <AvatarImage src={commentUser?.photo_url} />
-                                        <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                                        <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
                                           {getInitials(comment.utilisateur_nom)}
                                         </AvatarFallback>
                                       </Avatar>
