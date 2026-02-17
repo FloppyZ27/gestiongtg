@@ -877,9 +877,9 @@ export default function TableauDeBord() {
                   }
                   return false;
                 })).map((item) => {
-                  const message = chatTab === "clubsocial" ? null : item;
-                  const post = chatTab === "clubsocial" ? item : null;
                   if (chatTab === "clubsocial") {
+                    // Club Social - utilise entity PostClubSocial
+                    const post = item;
                     const postUser = users.find(u => u.email === post.utilisateur_email);
                     return (
                       <div key={post.id} className="p-4 bg-slate-800/50 rounded-lg">
