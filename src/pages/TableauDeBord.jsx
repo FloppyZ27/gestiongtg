@@ -356,28 +356,25 @@ export default function TableauDeBord() {
             </CardHeader>
             <CardContent className="p-4">
               {absencesAujourdhui.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {absencesAujourdhui.map((absence) => {
                     const utilisateur = users.find(u => u.email === absence.utilisateur_email);
                     const debut = new Date(absence.date_debut);
                     const fin = absence.date_fin ? new Date(absence.date_fin) : null;
                     return (
-                      <div key={absence.id} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
-                        <Avatar className="w-10 h-10">
+                      <div key={absence.id} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg">
+                        <Avatar className="w-8 h-8">
                           <AvatarImage src={utilisateur?.photo_url} />
-                          <AvatarFallback className="bg-gradient-to-r from-red-500 to-orange-500">
+                          <AvatarFallback className="bg-gradient-to-r from-red-500 to-orange-500 text-xs">
                             {getInitials(utilisateur?.full_name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold text-white">{utilisateur?.full_name}</p>
-                          <p className="text-sm text-slate-400">{absence.titre}</p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {format(debut, "HH'h'mm")}
-                            {fin && ` - ${format(fin, "HH'h'mm")}`}
-                          </p>
-                        </div>
-                        <Badge className={absence.type === 'absence' ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"}>
+                        <span className="font-semibold text-white text-sm">{utilisateur?.full_name}</span>
+                        <span className="text-sm text-slate-400">• {absence.titre}</span>
+                        <span className="text-xs text-slate-500">
+                          • {format(debut, "HH'h'mm")}{fin && ` - ${format(fin, "HH'h'mm")}`}
+                        </span>
+                        <Badge className={`ml-auto text-xs ${absence.type === 'absence' ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30"}`}>
                           {absence.type === 'absence' ? 'Absence' : 'RDV'}
                         </Badge>
                       </div>
