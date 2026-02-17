@@ -1173,18 +1173,15 @@ export default function TableauDeBord() {
                                           {isEditing ? (
                                             <div className="space-y-2 mt-2">
                                               <Input
-                                                value={editingChatCommentContent}
-                                                onChange={(e) => setEditingChatCommentContent(e.target.value)}
+                                                value={editingCommentContent}
+                                                onChange={(e) => setEditingCommentContent(e.target.value)}
                                                 className="bg-slate-800 border-slate-600 text-white text-sm"
                                               />
                                               <div className="flex gap-2 justify-end">
                                                 <Button
                                                   size="sm"
                                                   variant="ghost"
-                                                  onClick={() => {
-                                                    setEditingChatCommentId(null);
-                                                    setEditingChatCommentContent("");
-                                                  }}
+                                                  onClick={handleCancelEditComment}
                                                   className="h-6 text-xs text-slate-400 hover:text-white"
                                                 >
                                                   <X className="w-3 h-3 mr-1" />
@@ -1192,21 +1189,8 @@ export default function TableauDeBord() {
                                                 </Button>
                                                 <Button
                                                   size="sm"
-                                                  onClick={() => {
-                                                    const updatedCommentaires = [...message.commentaires];
-                                                    updatedCommentaires[idx] = {
-                                                      ...updatedCommentaires[idx],
-                                                      contenu: editingChatCommentContent,
-                                                      date_modification: new Date().toISOString()
-                                                    };
-                                                    updateChatMessageMutation.mutate({
-                                                      id: message.id,
-                                                      data: { ...message, commentaires: updatedCommentaires }
-                                                    });
-                                                    setEditingChatCommentId(null);
-                                                    setEditingChatCommentContent("");
-                                                  }}
-                                                  className="h-6 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
+                                                  onClick={() => handleSaveEditComment(post, idx)}
+                                                  className="h-6 text-xs bg-purple-500 hover:bg-purple-600 text-white"
                                                 >
                                                   <Check className="w-3 h-3 mr-1" />
                                                   Enregistrer
