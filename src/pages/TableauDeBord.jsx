@@ -901,14 +901,56 @@ export default function TableauDeBord() {
                       </div>
                       {message.type === 'post' ? (
                         <>
-                          {message.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap mb-2">{message.contenu}</p>}
-                          {message.image_url && <img src={message.image_url} alt="Message" className="rounded-lg max-w-full mb-2" />}
-                          {message.audio_url && (
-                            <div className="mb-2 bg-slate-700/30 rounded-lg p-2">
-                              <audio controls className="w-full">
-                                <source src={message.audio_url} type="audio/webm" />
-                              </audio>
+                          {editingChatMessageId === message.id ? (
+                            <div className="space-y-2 mb-3">
+                              <Textarea
+                                value={editingChatMessageContent}
+                                onChange={(e) => setEditingChatMessageContent(e.target.value)}
+                                className="bg-slate-800 border-slate-600 text-white text-sm break-words whitespace-pre-wrap"
+                                rows={3}
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingChatMessageId(null);
+                                    setEditingChatMessageContent("");
+                                  }}
+                                  className="h-7 text-xs text-slate-400 hover:text-white"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    updateChatMessageMutation.mutate({
+                                      id: message.id,
+                                      data: { ...message, contenu: editingChatMessageContent, date_modification: new Date().toISOString() }
+                                    });
+                                    setEditingChatMessageId(null);
+                                    setEditingChatMessageContent("");
+                                  }}
+                                  className="h-7 text-xs bg-cyan-500 hover:bg-cyan-600"
+                                >
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Enregistrer
+                                </Button>
+                              </div>
                             </div>
+                          ) : (
+                            <>
+                              {message.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap mb-2">{message.contenu}</p>}
+                              {message.image_url && <img src={message.image_url} alt="Message" className="rounded-lg max-w-full mb-2" />}
+                              {message.audio_url && (
+                                <div className="mb-2 bg-slate-700/30 rounded-lg p-2">
+                                  <audio controls className="w-full">
+                                    <source src={message.audio_url} type="audio/webm" />
+                                  </audio>
+                                </div>
+                              )}
+                            </>
                           )}
                         </>
                       ) : (
