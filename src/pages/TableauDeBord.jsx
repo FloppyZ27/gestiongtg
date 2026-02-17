@@ -91,8 +91,6 @@ const getUserInitials = (name) => {
   return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 };
 
-const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-
 function BirthdayCard({ utilisateur, birthDate, getInitials, today }) {
   const [confettiPieces, setConfettiPieces] = useState([]);
 
