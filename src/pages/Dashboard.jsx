@@ -132,7 +132,7 @@ export default function Dashboard() {
     },
     {
       title: "Ce mois",
-      value: actes.filter(a => {
+      value: (actes || []).filter(a => {
         const acteDate = new Date(a.date_bpd);
         const now = new Date();
         return acteDate.getMonth() === now.getMonth() && acteDate.getFullYear() === now.getFullYear();
