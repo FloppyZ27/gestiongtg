@@ -1397,13 +1397,16 @@ export default function TableauDeBord() {
                              </div>
                           </>
                         )}
-                      </div>
-                    </div>
-                  );
-                })}
-                {chatMessages.filter(m => m.canal === chatTab).length === 0 && (
-                  <p className="text-center text-slate-500 py-8">Aucun message pour le moment</p>
-                )}
+                        </div>
+                        </div>
+                        );
+                        })}
+                        {chatTab !== "clubsocial" && chatMessages.filter(m => m.canal === chatTab).length === 0 && (
+                        <p className="text-center text-slate-500 py-8">Aucun message pour le moment</p>
+                        )}
+                        {chatTab === "clubsocial" && posts.length === 0 && (
+                        <p className="text-center text-slate-500 py-8">Aucune publication pour le moment</p>
+                        )}
               </div>
             </CardContent>
           </Card>
