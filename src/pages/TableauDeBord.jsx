@@ -996,6 +996,91 @@ export default function TableauDeBord() {
                             Commenter
                           </Button>
                         </div>
+
+                        {showChatComments[message.id] && (
+                          <>
+                            {message.commentaires && message.commentaires.length > 0 && (
+                              <div className="mt-3 space-y-2 max-h-[200px] overflow-y-auto">
+                                {message.commentaires.map((comment, idx) => {
+                                  const commentUser = users.find(u => u.email === comment.utilisateur_email);
+                                  const isOwnComment = comment.utilisateur_email === user?.email;
+                                  return (
+                                    <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
+                                      <Avatar className="w-6 h-6 flex-shrink-0">
+                                        <AvatarImage src={commentUser?.photo_url} />
+                                        <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                                          {getInitials(comment.utilisateur_nom)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="bg-slate-700/50 rounded-lg p-2">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                            {isOwnComment && (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setShowDeleteChatCommentDialog({ message, commentIdx: idx })}
+                                                className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                              >
+                                                <Trash2 className="w-2.5 h-2.5" />
+                                              </Button>
+                                            )}
+                                          </div>
+                                          {comment.contenu && <p className="text-slate-300 text-xs break-words whitespace-pre-wrap">{comment.contenu}</p>}
+                                          {comment.image_url && <img src={comment.image_url} alt="Commentaire" className="mt-1 rounded-lg max-w-xs text-xs" />}
+                                          {comment.audio_url && (
+                                            <div className="mt-1 bg-slate-800/50 rounded-lg p-1">
+                                              <audio controls className="w-full">
+                                                <source src={comment.audio_url} type="audio/webm" />
+                                              </audio>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1">
+                                          {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            <div className="mt-3">
+                              <div className="flex gap-2">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={user?.photo_url} />
+                                  <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                                    {getInitials(user?.full_name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 flex gap-1">
+                                  <Input
+                                    value={chatCommentInputs[message.id] || ""}
+                                    onChange={(e) => setChatCommentInputs({ ...chatCommentInputs, [message.id]: e.target.value })}
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleAddChatComment(message);
+                                      }
+                                    }}
+                                    placeholder="Commenter..."
+                                    className="bg-slate-700 border-slate-600 text-white text-xs h-7"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleAddChatComment(message)}
+                                    disabled={!chatCommentInputs[message.id]?.trim()}
+                                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 h-7 px-2"
+                                  >
+                                    <Send className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
