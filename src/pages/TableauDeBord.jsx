@@ -1820,7 +1820,7 @@ export default function TableauDeBord() {
                                                 <Button
                                                   size="sm"
                                                   onClick={() => handleSaveEditComment(post, idx)}
-                                                  className="h-6 text-xs bg-purple-500 hover:bg-purple-600"
+                                                  className="h-6 text-xs bg-purple-500 hover:bg-purple-600 text-white"
                                                 >
                                                   <Check className="w-3 h-3 mr-1" />
                                                   Enregistrer
