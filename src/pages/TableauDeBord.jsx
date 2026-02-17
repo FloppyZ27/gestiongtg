@@ -1127,12 +1127,12 @@ export default function TableauDeBord() {
 
                         {showComments[post.id] && (
                           <>
-                            {message.commentaires && message.commentaires.length > 0 && (
+                            {post.commentaires && post.commentaires.length > 0 && (
                               <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto">
-                                {message.commentaires.map((comment, idx) => {
+                                {post.commentaires.map((comment, idx) => {
                                   const commentUser = users.find(u => u.email === comment.utilisateur_email);
                                   const isOwnComment = comment.utilisateur_email === user?.email;
-                                  const isEditing = editingChatCommentId === `${message.id}-${idx}`;
+                                  const isEditing = editingCommentId === `${post.id}-${idx}`;
                                   const hasMedia = comment.image_url || comment.audio_url;
                                   
                                   return (
