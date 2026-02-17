@@ -99,6 +99,9 @@ export default function TableauDeBord() {
   const [newPostContent, setNewPostContent] = useState("");
   const [newSondageQuestion, setNewSondageQuestion] = useState("");
   const [sondageOptions, setSondageOptions] = useState(["", ""]);
+  const [newPostImage, setNewPostImage] = useState(null);
+  const [newPostAudio, setNewPostAudio] = useState(null);
+  const [isRecordingNewPost, setIsRecordingNewPost] = useState(false);
   const [commentaireInputs, setCommentaireInputs] = useState({});
   const [showReactions, setShowReactions] = useState({});
   const [showComments, setShowComments] = useState({});
@@ -154,6 +157,8 @@ export default function TableauDeBord() {
       setNewSondageQuestion("");
       setSondageOptions(["", ""]);
       setNewPostType("post");
+      setNewPostImage(null);
+      setNewPostAudio(null);
     },
   });
 
@@ -204,13 +209,29 @@ export default function TableauDeBord() {
     }
   };
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
+    let imageUrl = null;
+    let audioUrl = null;
+
+    if (newPostImage) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: newPostImage });
+      imageUrl = file_url;
+    }
+
+    if (newPostAudio) {
+      const audioFile = new File([newPostAudio], "audio.webm", { type: "audio/webm" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: audioFile });
+      audioUrl = file_url;
+    }
+
     if (newPostType === 'post') {
       createPostMutation.mutate({
         utilisateur_email: user?.email,
         utilisateur_nom: user?.full_name,
         contenu: newPostContent,
         type: 'post',
+        image_url: imageUrl,
+        audio_url: audioUrl,
         reactions: [],
         commentaires: []
       });
@@ -227,6 +248,41 @@ export default function TableauDeBord() {
         reactions: [],
         commentaires: []
       });
+    }
+  };
+
+  const handleNewPostImageUpload = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      setNewPostImage(file);
+    }
+  };
+
+  const startRecordingNewPost = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setNewPostAudio(blob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecordingNewPost(true);
+    } catch (error) {
+      console.error("Erreur d'accès au microphone:", error);
+    }
+  };
+
+  const stopRecordingNewPost = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecordingNewPost(false);
+      setMediaRecorder(null);
     }
   };
 
@@ -509,7 +565,19 @@ export default function TableauDeBord() {
                       </div>
 
                       {post.type === 'post' ? (
-                        <p className="text-slate-300 mb-3">{post.contenu}</p>
+                        <>
+                          {post.contenu && <p className="text-slate-300 mb-3">{post.contenu}</p>}
+                          {post.image_url && (
+                            <img src={post.image_url} alt="Post" className="mb-3 rounded-lg max-w-full" />
+                          )}
+                          {post.audio_url && (
+                            <div className="mb-3 bg-slate-700/30 rounded-lg p-3">
+                              <audio controls className="w-full">
+                                <source src={post.audio_url} type="audio/webm" />
+                              </audio>
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <div className="mb-3">
                           <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
@@ -623,9 +691,11 @@ export default function TableauDeBord() {
                                             <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
                                           )}
                                           {comment.audio_url && (
-                                            <audio controls className="mt-2 w-full">
-                                              <source src={comment.audio_url} type="audio/webm" />
-                                            </audio>
+                                            <div className="mt-2 bg-slate-800/50 rounded-lg p-2">
+                                              <audio controls className="w-full">
+                                                <source src={comment.audio_url} type="audio/webm" />
+                                              </audio>
+                                            </div>
                                           )}
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
@@ -818,16 +888,87 @@ export default function TableauDeBord() {
             </div>
 
             {newPostType === 'post' ? (
-              <div>
-                <Label>Message</Label>
-                <Textarea
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="Partagez quelque chose..."
-                  className="bg-slate-800 border-slate-700 text-white"
-                  rows={4}
-                />
-              </div>
+              <>
+                <div>
+                  <Label>Message</Label>
+                  <Textarea
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    placeholder="Partagez quelque chose..."
+                    className="bg-slate-800 border-slate-700 text-white"
+                    rows={4}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="new-post-image-upload"
+                    className="hidden"
+                    onChange={(e) => handleNewPostImageUpload(e.target.files[0])}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('new-post-image-upload').click()}
+                    className="flex-1"
+                  >
+                    <Image className="w-4 h-4 mr-2" />
+                    {newPostImage ? newPostImage.name : 'Ajouter une photo'}
+                  </Button>
+                  {!isRecordingNewPost ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={startRecordingNewPost}
+                      className="flex-1"
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      Enregistrer audio
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={stopRecordingNewPost}
+                      className="flex-1 text-red-400 border-red-400 animate-pulse"
+                    >
+                      <StopCircle className="w-4 h-4 mr-2" />
+                      Arrêter
+                    </Button>
+                  )}
+                </div>
+                {newPostImage && (
+                  <div className="flex items-center gap-2 bg-slate-800/50 rounded p-2">
+                    <Image className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-slate-300">{newPostImage.name}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setNewPostImage(null)}
+                      className="ml-auto"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                {newPostAudio && (
+                  <div className="flex items-center gap-2 bg-slate-800/50 rounded p-2">
+                    <Mic className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-slate-300">Enregistrement audio</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setNewPostAudio(null)}
+                      className="ml-auto"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <>
                 <div>
@@ -885,7 +1026,7 @@ export default function TableauDeBord() {
               </Button>
               <Button
                 onClick={handleCreatePost}
-                disabled={newPostType === 'post' ? !newPostContent : !newSondageQuestion || sondageOptions.filter(o => o).length < 2}
+                disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
                 className="bg-gradient-to-r from-purple-500 to-pink-600"
               >
                 Publier
