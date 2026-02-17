@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send } from "lucide-react";
+import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send, Image, Mic, StopCircle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -102,6 +102,10 @@ export default function TableauDeBord() {
   const [commentaireInputs, setCommentaireInputs] = useState({});
   const [showReactions, setShowReactions] = useState({});
   const [showComments, setShowComments] = useState({});
+  const [commentImages, setCommentImages] = useState({});
+  const [commentAudio, setCommentAudio] = useState({});
+  const [isRecording, setIsRecording] = useState({});
+  const [mediaRecorder, setMediaRecorder] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -248,15 +252,34 @@ export default function TableauDeBord() {
     setShowReactions({ ...showReactions, [post.id]: false });
   };
 
-  const handleAddComment = (post) => {
+  const handleAddComment = async (post) => {
     const commentText = commentaireInputs[post.id];
-    if (!commentText || !commentText.trim()) return;
+    const imageFile = commentImages[post.id];
+    const audioBlob = commentAudio[post.id];
+    
+    if (!commentText?.trim() && !imageFile && !audioBlob) return;
+
+    let imageUrl = null;
+    let audioUrl = null;
+
+    if (imageFile) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      imageUrl = file_url;
+    }
+
+    if (audioBlob) {
+      const audioFile = new File([audioBlob], "audio.webm", { type: "audio/webm" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: audioFile });
+      audioUrl = file_url;
+    }
 
     const newComment = {
       utilisateur_email: user?.email,
       utilisateur_nom: user?.full_name,
-      contenu: commentText.trim(),
-      date: new Date().toISOString()
+      contenu: commentText?.trim() || "",
+      date: new Date().toISOString(),
+      image_url: imageUrl,
+      audio_url: audioUrl
     };
 
     const existingComments = post.commentaires || [];
@@ -266,6 +289,43 @@ export default function TableauDeBord() {
     });
 
     setCommentaireInputs({ ...commentaireInputs, [post.id]: "" });
+    setCommentImages({ ...commentImages, [post.id]: null });
+    setCommentAudio({ ...commentAudio, [post.id]: null });
+  };
+
+  const handleImageUpload = (postId, file) => {
+    if (file && file.type.startsWith('image/')) {
+      setCommentImages({ ...commentImages, [postId]: file });
+    }
+  };
+
+  const startRecording = async (postId) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setCommentAudio({ ...commentAudio, [postId]: blob });
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording({ ...isRecording, [postId]: true });
+    } catch (error) {
+      console.error("Erreur d'accès au microphone:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording({});
+      setMediaRecorder(null);
+    }
   };
 
   const handleVote = (post, optionIndex) => {
@@ -558,7 +618,15 @@ export default function TableauDeBord() {
                                       <div className="flex-1">
                                         <div className="bg-slate-700/50 rounded-lg p-2">
                                           <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
-                                          <p className="text-slate-300 text-sm">{comment.contenu}</p>
+                                          {comment.contenu && <p className="text-slate-300 text-sm">{comment.contenu}</p>}
+                                          {comment.image_url && (
+                                            <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
+                                          )}
+                                          {comment.audio_url && (
+                                            <audio controls className="mt-2 w-full">
+                                              <source src={comment.audio_url} type="audio/webm" />
+                                            </audio>
+                                          )}
                                         </div>
                                         <p className="text-xs text-slate-500 mt-1">
                                           {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
@@ -570,34 +638,100 @@ export default function TableauDeBord() {
                               </div>
                             )}
 
-                            <div className="flex gap-2 mt-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src={user?.photo_url} />
-                                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
-                                  {getInitials(user?.full_name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 flex gap-2">
-                                <Input
-                                  value={commentaireInputs[post.id] || ""}
-                                  onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
-                                  onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                      e.preventDefault();
-                                      handleAddComment(post);
-                                    }
-                                  }}
-                                  placeholder="Écrivez un commentaire..."
-                                  className="bg-slate-700 border-slate-600 text-white text-sm h-8"
-                                />
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleAddComment(post)}
-                                  disabled={!commentaireInputs[post.id]?.trim()}
-                                  className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
-                                >
-                                  <Send className="w-3 h-3" />
-                                </Button>
+                            <div className="mt-3">
+                              <div className="flex gap-2">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={user?.photo_url} />
+                                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                                    {getInitials(user?.full_name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex gap-2">
+                                    <Input
+                                      value={commentaireInputs[post.id] || ""}
+                                      onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
+                                      onKeyPress={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                          e.preventDefault();
+                                          handleAddComment(post);
+                                        }
+                                      }}
+                                      placeholder="Écrivez un commentaire..."
+                                      className="bg-slate-700 border-slate-600 text-white text-sm h-8"
+                                    />
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      id={`image-upload-${post.id}`}
+                                      className="hidden"
+                                      onChange={(e) => handleImageUpload(post.id, e.target.files[0])}
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => document.getElementById(`image-upload-${post.id}`).click()}
+                                      className="h-8 px-2 text-slate-400 hover:text-purple-400"
+                                    >
+                                      <Image className="w-4 h-4" />
+                                    </Button>
+                                    {!isRecording[post.id] ? (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => startRecording(post.id)}
+                                        className="h-8 px-2 text-slate-400 hover:text-purple-400"
+                                      >
+                                        <Mic className="w-4 h-4" />
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={stopRecording}
+                                        className="h-8 px-2 text-red-400 hover:text-red-500 animate-pulse"
+                                      >
+                                        <StopCircle className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleAddComment(post)}
+                                      disabled={!commentaireInputs[post.id]?.trim() && !commentImages[post.id] && !commentAudio[post.id]}
+                                      className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
+                                    >
+                                      <Send className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  {commentImages[post.id] && (
+                                    <div className="mt-2 flex items-center gap-2 bg-slate-700/30 rounded p-1">
+                                      <Image className="w-4 h-4 text-purple-400" />
+                                      <span className="text-xs text-slate-300">{commentImages[post.id].name}</span>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setCommentImages({ ...commentImages, [post.id]: null })}
+                                        className="h-5 w-5 p-0 ml-auto"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                  {commentAudio[post.id] && (
+                                    <div className="mt-2 flex items-center gap-2 bg-slate-700/30 rounded p-1">
+                                      <Mic className="w-4 h-4 text-purple-400" />
+                                      <span className="text-xs text-slate-300">Enregistrement audio</span>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setCommentAudio({ ...commentAudio, [post.id]: null })}
+                                        className="h-5 w-5 p-0 ml-auto"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </>
