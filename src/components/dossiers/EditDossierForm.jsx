@@ -1651,9 +1651,9 @@ export default function EditDossierForm({
                                   <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                  {(users || []).filter(u => u.statut === 'Actif' || !u.statut).map((u) => (
-                                    <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">
-                                      {u.full_name}
+                                  {(users || []).filter(u => u?.statut === 'Actif' || !u?.statut).map((u) => (
+                                    <SelectItem key={u?.email} value={u?.full_name} className="text-white text-xs">
+                                      {u?.full_name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
