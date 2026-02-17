@@ -926,9 +926,9 @@ export default function TableauDeBord() {
                              </div>
                         </div>
                       </div>
-                      {message.type === 'post' ? (
+                      {post.type === 'post' ? (
                         <>
-                          {editingChatMessageId === message.id ? (
+                          {editingPostId === post.id ? (
                             <div className="space-y-2 mb-3">
                               <Textarea
                                 value={editingChatMessageContent}
