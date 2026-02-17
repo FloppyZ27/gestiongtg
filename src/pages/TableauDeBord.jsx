@@ -823,6 +823,7 @@ export default function TableauDeBord() {
             </CardContent>
           </Card>
 
+          {/* Chat fusionné - Placeholder pour maintenant */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 py-2">
               <div className="flex justify-between items-center">
