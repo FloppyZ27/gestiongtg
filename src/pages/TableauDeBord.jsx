@@ -111,6 +111,9 @@ export default function TableauDeBord() {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState("");
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editingPostContent, setEditingPostContent] = useState("");
+  const [showDeletePostDialog, setShowDeletePostDialog] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -442,6 +445,43 @@ export default function TableauDeBord() {
     });
   };
 
+  const handleEditPost = (post) => {
+    setEditingPostId(post.id);
+    if (post.type === 'post') {
+      setEditingPostContent(post.contenu || "");
+    } else {
+      setEditingPostContent(post.sondage_question || "");
+    }
+  };
+
+  const handleSaveEditPost = (post) => {
+    if (post.type === 'post') {
+      updatePostMutation.mutate({
+        id: post.id,
+        data: { ...post, contenu: editingPostContent }
+      });
+    } else {
+      updatePostMutation.mutate({
+        id: post.id,
+        data: { ...post, sondage_question: editingPostContent }
+      });
+    }
+    setEditingPostId(null);
+    setEditingPostContent("");
+  };
+
+  const handleCancelEditPost = () => {
+    setEditingPostId(null);
+    setEditingPostContent("");
+  };
+
+  const handleDeletePost = (postId) => {
+    base44.entities.PostClubSocial.delete(postId).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['postsClubSocial'] });
+      setShowDeletePostDialog(null);
+    });
+  };
+
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
@@ -595,30 +635,118 @@ export default function TableauDeBord() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <p className="font-semibold text-white">{post.utilisateur_nom}</p>
-                          <p className="text-xs text-slate-400">
-                            {format(new Date(post.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-semibold text-white">{post.utilisateur_nom}</p>
+                              <p className="text-xs text-slate-400">
+                                {format(new Date(post.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                              </p>
+                            </div>
+                            {post.utilisateur_email === user?.email && (
+                              <div className="flex gap-1">
+                                {(!post.image_url && !post.audio_url) && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditPost(post)}
+                                    className="h-6 w-6 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setShowDeletePostDialog(post.id)}
+                                  className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {post.type === 'post' ? (
                         <>
-                          {post.contenu && <p className="text-slate-300 mb-3">{post.contenu}</p>}
-                          {post.image_url && (
-                            <img src={post.image_url} alt="Post" className="mb-3 rounded-lg max-w-full" />
-                          )}
-                          {post.audio_url && (
-                            <div className="mb-3 bg-slate-700/30 rounded-lg p-3">
-                              <audio controls className="w-full">
-                                <source src={post.audio_url} type="audio/webm" />
-                              </audio>
+                          {editingPostId === post.id ? (
+                            <div className="space-y-2 mb-3">
+                              <Textarea
+                                value={editingPostContent}
+                                onChange={(e) => setEditingPostContent(e.target.value)}
+                                className="bg-slate-800 border-slate-600 text-white text-sm"
+                                rows={3}
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={handleCancelEditPost}
+                                  className="h-7 text-xs text-slate-400 hover:text-white"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSaveEditPost(post)}
+                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600"
+                                >
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Enregistrer
+                                </Button>
+                              </div>
                             </div>
+                          ) : (
+                            <>
+                              {post.contenu && <p className="text-slate-300 mb-3">{post.contenu}</p>}
+                              {post.image_url && (
+                                <img src={post.image_url} alt="Post" className="mb-3 rounded-lg max-w-full" />
+                              )}
+                              {post.audio_url && (
+                                <div className="mb-3 bg-slate-700/30 rounded-lg p-3">
+                                  <audio controls className="w-full">
+                                    <source src={post.audio_url} type="audio/webm" />
+                                  </audio>
+                                </div>
+                              )}
+                            </>
                           )}
                         </>
                       ) : (
                         <div className="mb-3">
-                          <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
+                          {editingPostId === post.id ? (
+                            <div className="space-y-2 mb-3">
+                              <Input
+                                value={editingPostContent}
+                                onChange={(e) => setEditingPostContent(e.target.value)}
+                                className="bg-slate-800 border-slate-600 text-white text-sm"
+                                placeholder="Question du sondage"
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={handleCancelEditPost}
+                                  className="h-7 text-xs text-slate-400 hover:text-white"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Annuler
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSaveEditPost(post)}
+                                  className="h-7 text-xs bg-purple-500 hover:bg-purple-600"
+                                >
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Enregistrer
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="font-semibold text-white mb-3">{post.sondage_question}</p>
+                          )}
                           <div className="space-y-2">
                             {post.sondage_options?.map((option, idx) => {
                               const totalVotes = post.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
@@ -727,7 +855,31 @@ export default function TableauDeBord() {
                                       </Avatar>
                                       <div className="flex-1">
                                         <div className="bg-slate-700/50 rounded-lg p-2">
-                                          <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                          <div className="flex items-center justify-between mb-1">
+                                            <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                            {isOwnComment && !isEditing && (
+                                              <div className="flex gap-1">
+                                                {!hasMedia && (
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditComment(post, idx)}
+                                                    className="h-5 w-5 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
+                                                  >
+                                                    <Edit className="w-2.5 h-2.5" />
+                                                  </Button>
+                                                )}
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => handleDeleteComment(post, idx)}
+                                                  className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-2.5 h-2.5" />
+                                                </Button>
+                                              </div>
+                                            )}
+                                          </div>
                                           {isEditing ? (
                                             <div className="space-y-2 mt-2">
                                               <Input
@@ -766,28 +918,6 @@ export default function TableauDeBord() {
                                                   <audio controls className="w-full">
                                                     <source src={comment.audio_url} type="audio/webm" />
                                                   </audio>
-                                                </div>
-                                              )}
-                                              {isOwnComment && (
-                                                <div className="flex gap-1 justify-end mt-2">
-                                                  {!hasMedia && (
-                                                    <Button
-                                                      variant="ghost"
-                                                      size="sm"
-                                                      onClick={() => handleEditComment(post, idx)}
-                                                      className="h-6 w-6 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
-                                                    >
-                                                      <Edit className="w-3 h-3" />
-                                                    </Button>
-                                                  )}
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteComment(post, idx)}
-                                                    className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-                                                  >
-                                                    <Trash2 className="w-3 h-3" />
-                                                  </Button>
                                                 </div>
                                               )}
                                             </>
@@ -1149,6 +1279,26 @@ export default function TableauDeBord() {
             <DialogTitle>Gérer vos raccourcis</DialogTitle>
           </DialogHeader>
           <p className="text-slate-400 text-sm">Cette fonctionnalité sera disponible prochainement.</p>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeletePostDialog !== null} onOpenChange={() => setShowDeletePostDialog(null)}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Supprimer la publication</DialogTitle>
+          </DialogHeader>
+          <p className="text-slate-300">Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.</p>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowDeletePostDialog(null)}>
+              Annuler
+            </Button>
+            <Button
+              onClick={() => handleDeletePost(showDeletePostDialog)}
+              className="bg-gradient-to-r from-red-500 to-red-600"
+            >
+              Supprimer
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
