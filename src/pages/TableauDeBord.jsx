@@ -189,12 +189,19 @@ export default function TableauDeBord() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['postsClubSocial'] });
       setIsNewPostOpen(false);
+      setIsNewChatMessageOpen(false);
       setNewPostContent("");
       setNewSondageQuestion("");
       setSondageOptions(["", ""]);
       setNewPostType("post");
       setNewPostImage(null);
       setNewPostAudio(null);
+      setNewChatContent("");
+      setNewChatSondageQuestion("");
+      setChatSondageOptions(["", ""]);
+      setNewChatMessageType("post");
+      setNewChatImage(null);
+      setNewChatAudio(null);
     },
   });
 
