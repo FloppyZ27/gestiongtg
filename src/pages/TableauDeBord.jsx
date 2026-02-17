@@ -879,9 +879,10 @@ export default function TableauDeBord() {
                 })).map((item) => {
                   const message = chatTab === "clubsocial" ? null : item;
                   const post = chatTab === "clubsocial" ? item : null;
-                  const messageUser = users.find(u => u.email === message.utilisateur_email);
-                  return (
-                    <div key={message.id} className="p-3 bg-slate-800/50 rounded-lg">
+                  if (chatTab === "clubsocial") {
+                    const postUser = users.find(u => u.email === post.utilisateur_email);
+                    return (
+                      <div key={post.id} className="p-4 bg-slate-800/50 rounded-lg">
                       <div className="flex items-start gap-2 mb-2">
                         <Avatar className="w-8 h-8">
                           <AvatarImage src={messageUser?.photo_url} />
