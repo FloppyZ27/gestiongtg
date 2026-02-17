@@ -415,9 +415,9 @@ export default function TableauDeBord() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <Card className={`border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl ${hasAnniversaireAujourdhui ? 'ring-2 ring-pink-500 shadow-pink-500/50 shadow-2xl' : ''}`}>
             <CardHeader className="border-b border-slate-800">
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className={`text-white flex items-center gap-2 ${hasAnniversaireAujourdhui ? 'animate-pulse' : ''}`}>
                 <Cake className="w-5 h-5 text-pink-400" />
                 Anniversaires ce mois-ci
               </CardTitle>
