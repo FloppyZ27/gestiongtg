@@ -84,11 +84,6 @@ const navigationItems = [
     url: createPageUrl("Recherches"),
     icon: Search,
   },
-  {
-    title: "SharePoint",
-    url: createPageUrl("SharePoint"),
-    icon: Cloud,
-  },
 ];
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
