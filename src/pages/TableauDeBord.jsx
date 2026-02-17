@@ -323,30 +323,30 @@ export default function TableauDeBord() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-orange-400" />
-                Mandats à sortir aujourd'hui
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              {mandatsAujourdhui.length > 0 ? (
-                <div className="space-y-3">
-                  {mandatsAujourdhui.map((dossier) => (
-                    <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
-                      <p className="font-semibold text-white">{dossier.numero_dossier}</p>
-                      <p className="text-sm text-slate-400">{dossier.arpenteur_geometre}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-slate-500 py-8">Aucun mandat à sortir aujourd'hui</p>
-              )}
-            </CardContent>
-          </Card>
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
+            <CardTitle className="text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-orange-400" />
+              Mandats à sortir aujourd'hui
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            {mandatsAujourdhui.length > 0 ? (
+              <div className="space-y-3">
+                {mandatsAujourdhui.map((dossier) => (
+                  <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
+                    <p className="font-semibold text-white">{dossier.numero_dossier}</p>
+                    <p className="text-sm text-slate-400">{dossier.arpenteur_geometre}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-slate-500 py-8">Aucun mandat à sortir aujourd'hui</p>
+            )}
+          </CardContent>
+        </Card>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-2">
               <CardTitle className="text-white flex items-center gap-2">
@@ -386,10 +386,7 @@ export default function TableauDeBord() {
               )}
             </CardContent>
           </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl lg:col-span-2">
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/20 to-pink-500/20 py-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-white flex items-center gap-2">
