@@ -101,6 +101,7 @@ export default function TableauDeBord() {
   const [sondageOptions, setSondageOptions] = useState(["", ""]);
   const [commentaireInputs, setCommentaireInputs] = useState({});
   const [showReactions, setShowReactions] = useState({});
+  const [showComments, setShowComments] = useState({});
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -532,6 +533,7 @@ export default function TableauDeBord() {
                           <Button
                             size="sm"
                             variant="ghost"
+                            onClick={() => setShowComments({ ...showComments, [post.id]: !showComments[post.id] })}
                             className="text-slate-400 hover:text-purple-400 text-xs h-7"
                           >
                             <MessageCircle className="w-3 h-3 mr-1" />
@@ -539,63 +541,67 @@ export default function TableauDeBord() {
                           </Button>
                         </div>
 
-                        {post.commentaires && post.commentaires.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            {post.commentaires.map((comment, idx) => {
-                              const commentUser = users.find(u => u.email === comment.utilisateur_email);
-                              return (
-                                <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
-                                  <Avatar className="w-7 h-7">
-                                    <AvatarImage src={commentUser?.photo_url} />
-                                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
-                                      {getInitials(comment.utilisateur_nom)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <div className="bg-slate-700/50 rounded-lg p-2">
-                                      <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
-                                      <p className="text-slate-300 text-sm">{comment.contenu}</p>
+                        {showComments[post.id] && (
+                          <>
+                            {post.commentaires && post.commentaires.length > 0 && (
+                              <div className="mt-3 space-y-2">
+                                {post.commentaires.map((comment, idx) => {
+                                  const commentUser = users.find(u => u.email === comment.utilisateur_email);
+                                  return (
+                                    <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
+                                      <Avatar className="w-7 h-7">
+                                        <AvatarImage src={commentUser?.photo_url} />
+                                        <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                                          {getInitials(comment.utilisateur_nom)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1">
+                                        <div className="bg-slate-700/50 rounded-lg p-2">
+                                          <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                          <p className="text-slate-300 text-sm">{comment.contenu}</p>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1">
+                                          {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                        </p>
+                                      </div>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1">
-                                      {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
-                                    </p>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                                  );
+                                })}
+                              </div>
+                            )}
 
-                        <div className="flex gap-2 mt-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={user?.photo_url} />
-                            <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
-                              {getInitials(user?.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 flex gap-2">
-                            <Input
-                              value={commentaireInputs[post.id] || ""}
-                              onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                  e.preventDefault();
-                                  handleAddComment(post);
-                                }
-                              }}
-                              placeholder="Écrivez un commentaire..."
-                              className="bg-slate-700 border-slate-600 text-white text-sm h-8"
-                            />
-                            <Button
-                              size="sm"
-                              onClick={() => handleAddComment(post)}
-                              disabled={!commentaireInputs[post.id]?.trim()}
-                              className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
-                            >
-                              <Send className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
+                            <div className="flex gap-2 mt-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src={user?.photo_url} />
+                                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                                  {getInitials(user?.full_name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 flex gap-2">
+                                <Input
+                                  value={commentaireInputs[post.id] || ""}
+                                  onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
+                                  onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleAddComment(post);
+                                    }
+                                  }}
+                                  placeholder="Écrivez un commentaire..."
+                                  className="bg-slate-700 border-slate-600 text-white text-sm h-8"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAddComment(post)}
+                                  disabled={!commentaireInputs[post.id]?.trim()}
+                                  className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
+                                >
+                                  <Send className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
