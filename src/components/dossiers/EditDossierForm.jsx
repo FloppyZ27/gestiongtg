@@ -2331,7 +2331,7 @@ export default function EditDossierForm({
                                    <SelectValue placeholder="Sélectionner" />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                   {formData.mandats.map((mandat, index) => (
+                                   {(formData?.mandats || []).map((mandat, index) => (
                                      <SelectItem key={index} value={mandat.type_mandat} className="text-white text-xs">
                                        {mandat.type_mandat || `Mandat ${index + 1}`}
                                      </SelectItem>
