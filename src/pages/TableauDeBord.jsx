@@ -1006,9 +1006,10 @@ export default function TableauDeBord() {
                                       size="sm"
                                       onClick={() => handleAddComment(post)}
                                       disabled={!commentaireInputs[post.id]?.trim() && !commentImages[post.id] && !commentAudio[post.id]}
-                                      className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-9 px-4"
+                                      className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-9 px-4 text-white border-none"
+                                      style={{ backgroundColor: 'rgb(168, 85, 247)', backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))' }}
                                     >
-                                      <Send className="w-4 h-4 mr-1" />
+                                      <Send className="w-4 h-4 mr-1 text-white" />
                                       Envoyer
                                     </Button>
                                   </div>
@@ -1278,9 +1279,10 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreatePost}
                 disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-11 px-6 text-base font-semibold"
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-11 px-6 text-base font-semibold text-white border-none"
+                style={{ backgroundColor: 'rgb(168, 85, 247)', backgroundImage: 'linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153))' }}
               >
-                <Send className="w-5 h-5 mr-2" />
+                <Send className="w-5 h-5 mr-2 text-white" />
                 Publier
               </Button>
             </div>
