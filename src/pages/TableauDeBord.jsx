@@ -265,6 +265,34 @@ export default function TableauDeBord() {
     isSameDay(new Date(rdv.date_debut), today)
   ).sort((a, b) => new Date(a.date_debut) - new Date(b.date_debut));
 
+  // Fonction pour obtenir la semaine (lundi-vendredi)
+  const getWeekDays = () => {
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    monday.setDate(diff);
+    
+    const days = [];
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      days.push(date);
+    }
+    return days;
+  };
+
+  const weekDays = getWeekDays();
+
+  // Fonction pour obtenir les mandats d'une journée spécifique
+  const getMandatsForDay = (date) => {
+    return dossiers.filter(dossier => {
+      return dossier.mandats?.some(mandat => {
+        if (!mandat.date_livraison) return false;
+        return isSameDay(new Date(mandat.date_livraison), date);
+      });
+    });
+  };
+
   const handleRaccourciClick = (raccourci) => {
     if (raccourci.action_type === 'page') {
       navigate(createPageUrl(raccourci.action_cible));
