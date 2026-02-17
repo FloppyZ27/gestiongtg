@@ -38,8 +38,6 @@ import NotificationButton from "@/components/shared/NotificationButton";
 import DossierSearchBar from "@/components/shared/DossierSearchBar";
 import PermissionGuard from "@/components/shared/PermissionGuard";
 
-const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-
 const navigationItems = [
   {
     title: "Tableau de Bord",
