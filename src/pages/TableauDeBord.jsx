@@ -924,6 +924,79 @@ export default function TableauDeBord() {
                           </div>
                         </div>
                       )}
+
+                      <div className="border-t border-slate-700 pt-2 mt-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TooltipProvider>
+                            <div className="flex gap-1">
+                              {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                const reactionsForEmoji = message.reactions?.filter(r => r.emoji === emoji) || [];
+                                const reactionCount = reactionsForEmoji.length;
+                                if (reactionCount === 0) return null;
+                                
+                                const userNames = reactionsForEmoji.map(r => {
+                                  const u = users.find(usr => usr.email === r.utilisateur_email);
+                                  return u?.full_name || r.utilisateur_email;
+                                }).join(', ');
+                                
+                                return (
+                                  <Tooltip key={emoji}>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                        {emoji} {reactionCount}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                      <p className="text-xs">{userNames}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </div>
+                          </TooltipProvider>
+                          {message.commentaires && message.commentaires.length > 0 && (
+                            <span className="text-xs text-slate-400 ml-auto">
+                              {message.commentaires.length} commentaire{message.commentaires.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 border-t border-slate-700 pt-2">
+                          <div className="relative">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setShowChatReactions({ ...showChatReactions, [message.id]: !showChatReactions[message.id] })}
+                              className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                            >
+                              <ThumbsUp className="w-3 h-3 mr-1" />
+                              Réagir
+                            </Button>
+                            {showChatReactions[message.id] && (
+                              <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    onClick={() => handleChatReaction(message, emoji)}
+                                    className="text-2xl hover:scale-125 transition-transform p-1"
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowChatComments({ ...showChatComments, [message.id]: !showChatComments[message.id] })}
+                            className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Commenter
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
