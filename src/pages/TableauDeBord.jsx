@@ -581,32 +581,61 @@ export default function TableauDeBord() {
       audioUrl = file_url;
     }
 
-    if (newChatMessageType === 'post') {
-      createChatMessageMutation.mutate({
-        utilisateur_email: user?.email,
-        utilisateur_nom: user?.full_name,
-        canal: chatTab,
-        contenu: newChatContent,
-        type: 'post',
-        image_url: imageUrl,
-        audio_url: audioUrl,
-        reactions: [],
-        commentaires: []
-      });
+    // Si c'est Club Social, utilise PostClubSocial, sinon MessageChat
+    if (chatTab === "clubsocial") {
+      if (newChatMessageType === 'post') {
+        createPostMutation.mutate({
+          utilisateur_email: user?.email,
+          utilisateur_nom: user?.full_name,
+          contenu: newChatContent,
+          type: 'post',
+          image_url: imageUrl,
+          audio_url: audioUrl,
+          reactions: [],
+          commentaires: []
+        });
+      } else {
+        createPostMutation.mutate({
+          utilisateur_email: user?.email,
+          utilisateur_nom: user?.full_name,
+          type: 'sondage',
+          sondage_question: newChatSondageQuestion,
+          sondage_options: chatSondageOptions.filter(o => o).map(option => ({
+            option,
+            votes: []
+          })),
+          reactions: [],
+          commentaires: []
+        });
+      }
     } else {
-      createChatMessageMutation.mutate({
-        utilisateur_email: user?.email,
-        utilisateur_nom: user?.full_name,
-        canal: chatTab,
-        type: 'sondage',
-        sondage_question: newChatSondageQuestion,
-        sondage_options: chatSondageOptions.filter(o => o).map(option => ({
-          option,
-          votes: []
-        })),
-        reactions: [],
-        commentaires: []
-      });
+      if (newChatMessageType === 'post') {
+        createChatMessageMutation.mutate({
+          utilisateur_email: user?.email,
+          utilisateur_nom: user?.full_name,
+          canal: chatTab,
+          contenu: newChatContent,
+          type: 'post',
+          image_url: imageUrl,
+          audio_url: audioUrl,
+          reactions: [],
+          commentaires: []
+        });
+      } else {
+        createChatMessageMutation.mutate({
+          utilisateur_email: user?.email,
+          utilisateur_nom: user?.full_name,
+          canal: chatTab,
+          type: 'sondage',
+          sondage_question: newChatSondageQuestion,
+          sondage_options: chatSondageOptions.filter(o => o).map(option => ({
+            option,
+            votes: []
+          })),
+          reactions: [],
+          commentaires: []
+        });
+      }
     }
   };
 
