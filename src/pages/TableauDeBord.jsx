@@ -842,11 +842,18 @@ export default function TableauDeBord() {
                   onClick={() => setChatTab("equipe")}
                   className={`flex-1 rounded-none ${chatTab === "equipe" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
                 >
-                  Équipe
+                  Équipe {user?.equipe && `${user.equipe}`}
                 </Button>
               </div>
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {chatMessages.filter(m => m.canal === chatTab).map((message) => {
+                {chatMessages.filter(m => {
+                  if (m.canal === "generale") return true;
+                  if (m.canal === "equipe" && user?.equipe) {
+                    const messageUser = users.find(u => u.email === m.utilisateur_email);
+                    return messageUser?.equipe === user.equipe;
+                  }
+                  return false;
+                }).map((message) => {
                   const messageUser = users.find(u => u.email === message.utilisateur_email);
                   return (
                     <div key={message.id} className="p-3 bg-slate-800/50 rounded-lg">
