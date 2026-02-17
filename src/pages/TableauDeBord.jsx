@@ -1400,6 +1400,570 @@ export default function TableauDeBord() {
                         </div>
                         </div>
                         );
+                        } else {
+                        // Chat normal - utilise entity MessageChat
+                        const message = item;
+                        const messageUser = users.find(u => u.email === message.utilisateur_email);
+                        return (
+                        <div key={message.id} className="p-3 bg-slate-800/50 rounded-lg">
+                        <div className="flex items-start gap-2 mb-2">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={messageUser?.photo_url} />
+                            <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                              {getInitials(message.utilisateur_nom)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-semibold text-white text-sm">{message.utilisateur_nom}</p>
+                              {message.utilisateur_email === user?.email && (
+                                <div className="flex gap-1">
+                                  {(!message.image_url && !message.audio_url) && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingChatMessageId(message.id);
+                                        if (message.type === 'post') {
+                                          setEditingChatMessageContent(message.contenu || "");
+                                        } else {
+                                          setEditingChatMessageContent(message.sondage_question || "");
+                                        }
+                                      }}
+                                      className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowDeleteChatMessageDialog(message.id)}
+                                    className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-400">
+                              {format(new Date(message.created_date), "dd MMM 'à' HH:mm", { locale: fr })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {message.type === 'post' ? (
+                          <>
+                            {editingChatMessageId === message.id ? (
+                              <div className="space-y-2 mb-3">
+                                <Textarea
+                                  value={editingChatMessageContent}
+                                  onChange={(e) => setEditingChatMessageContent(e.target.value)}
+                                  className="bg-slate-800 border-slate-600 text-white text-sm break-words whitespace-pre-wrap"
+                                  rows={3}
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingChatMessageId(null);
+                                      setEditingChatMessageContent("");
+                                    }}
+                                    className="h-7 text-xs text-slate-400 hover:text-white"
+                                  >
+                                    <X className="w-3 h-3 mr-1" />
+                                    Annuler
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      updateChatMessageMutation.mutate({
+                                        id: message.id,
+                                        data: { ...message, contenu: editingChatMessageContent, date_modification: new Date().toISOString() }
+                                      });
+                                      setEditingChatMessageId(null);
+                                      setEditingChatMessageContent("");
+                                    }}
+                                    className="h-7 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
+                                  >
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Enregistrer
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                {message.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap mb-2">{message.contenu}</p>}
+                                {message.image_url && <img src={message.image_url} alt="Message" className="rounded-lg max-w-full mb-2" />}
+                                {message.audio_url && (
+                                  <div className="mb-2 bg-slate-700/30 rounded-lg p-2">
+                                    <audio controls className="w-full">
+                                      <source src={message.audio_url} type="audio/webm" />
+                                    </audio>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <div className="mb-2">
+                            {editingChatMessageId === message.id ? (
+                              <div className="space-y-2 mb-3">
+                                <Input
+                                  value={editingChatMessageContent}
+                                  onChange={(e) => setEditingChatMessageContent(e.target.value)}
+                                  className="bg-slate-800 border-slate-600 text-white text-sm"
+                                  placeholder="Question du sondage"
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingChatMessageId(null);
+                                      setEditingChatMessageContent("");
+                                    }}
+                                    className="h-7 text-xs text-slate-400 hover:text-white"
+                                  >
+                                    <X className="w-3 h-3 mr-1" />
+                                    Annuler
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      updateChatMessageMutation.mutate({
+                                        id: message.id,
+                                        data: { ...message, sondage_question: editingChatMessageContent, date_modification: new Date().toISOString() }
+                                      });
+                                      setEditingChatMessageId(null);
+                                      setEditingChatMessageContent("");
+                                    }}
+                                    className="h-7 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
+                                  >
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Enregistrer
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="font-semibold text-white text-sm mb-2">{message.sondage_question}</p>
+                            )}
+                            <div className="space-y-1">
+                              {message.sondage_options?.map((option, idx) => {
+                                const totalVotes = message.sondage_options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
+                                const percentage = totalVotes > 0 ? ((option.votes?.length || 0) / totalVotes * 100).toFixed(0) : 0;
+                                const hasVoted = option.votes?.includes(user?.email);
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleChatVote(message, idx)}
+                                    className={`w-full p-2 rounded-lg text-left transition-all text-xs ${
+                                      hasVoted ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-500' : 'bg-slate-700/50 hover:bg-slate-700'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-white">{option.option}</span>
+                                      <span className="text-xs text-slate-400">{percentage}%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-900 rounded-full h-1.5">
+                                      <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-1.5 rounded-full transition-all" style={{ width: `${percentage}%` }} />
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="border-t border-slate-700 pt-2 mt-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TooltipProvider>
+                              <div className="flex gap-1">
+                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                  const reactionsForEmoji = message.reactions?.filter(r => r.emoji === emoji) || [];
+                                  const reactionCount = reactionsForEmoji.length;
+                                  if (reactionCount === 0) return null;
+
+                                  const userNames = reactionsForEmoji.map(r => {
+                                    const u = users.find(usr => usr.email === r.utilisateur_email);
+                                    return u?.full_name || r.utilisateur_email;
+                                  }).join(', ');
+
+                                  return (
+                                    <Tooltip key={emoji}>
+                                      <TooltipTrigger asChild>
+                                        <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                          {emoji} {reactionCount}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                        <p className="text-xs">{userNames}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                })}
+                              </div>
+                            </TooltipProvider>
+                            {message.commentaires && message.commentaires.length > 0 && (
+                              <span className="text-xs text-slate-400 ml-auto">
+                                {message.commentaires.length} commentaire{message.commentaires.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2 border-t border-slate-700 pt-2">
+                            <div className="relative">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setShowChatReactions({ ...showChatReactions, [message.id]: !showChatReactions[message.id] })}
+                                className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                              >
+                                <ThumbsUp className="w-3 h-3 mr-1" />
+                                Réagir
+                              </Button>
+                              {showChatReactions[message.id] && (
+                                <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                  {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleChatReaction(message, emoji)}
+                                      className="text-2xl hover:scale-125 transition-transform p-1"
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setShowChatComments({ ...showChatComments, [message.id]: !showChatComments[message.id] })}
+                              className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                            >
+                              <MessageCircle className="w-3 h-3 mr-1" />
+                              Commenter
+                            </Button>
+                          </div>
+
+                          {showChatComments[message.id] && (
+                            <>
+                              {message.commentaires && message.commentaires.length > 0 && (
+                                <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto">
+                                  {message.commentaires.map((comment, idx) => {
+                                    const commentUser = users.find(u => u.email === comment.utilisateur_email);
+                                    const isOwnComment = comment.utilisateur_email === user?.email;
+                                    const isEditing = editingChatCommentId === `${message.id}-${idx}`;
+                                    const hasMedia = comment.image_url || comment.audio_url;
+
+                                    return (
+                                      <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg max-w-full">
+                                        <Avatar className="w-7 h-7 flex-shrink-0">
+                                          <AvatarImage src={commentUser?.photo_url} />
+                                          <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                                            {getInitials(comment.utilisateur_nom)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="bg-slate-700/50 rounded-lg p-2 max-w-full overflow-hidden">
+                                            <div className="flex items-center justify-between mb-1">
+                                              <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                              {isOwnComment && !isEditing && (
+                                                <div className="flex gap-1">
+                                                  {!hasMedia && (
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => {
+                                                        setEditingChatCommentId(`${message.id}-${idx}`);
+                                                        setEditingChatCommentContent(comment.contenu);
+                                                      }}
+                                                      className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                                                    >
+                                                      <Edit className="w-2.5 h-2.5" />
+                                                    </Button>
+                                                  )}
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setShowDeleteChatCommentDialog({ message, commentIdx: idx })}
+                                                    className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                                  >
+                                                    <Trash2 className="w-2.5 h-2.5" />
+                                                  </Button>
+                                                </div>
+                                              )}
+                                            </div>
+                                            {isEditing ? (
+                                              <div className="space-y-2 mt-2">
+                                                <Input
+                                                  value={editingChatCommentContent}
+                                                  onChange={(e) => setEditingChatCommentContent(e.target.value)}
+                                                  className="bg-slate-800 border-slate-600 text-white text-sm"
+                                                />
+                                                <div className="flex gap-2 justify-end">
+                                                  <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => {
+                                                      setEditingChatCommentId(null);
+                                                      setEditingChatCommentContent("");
+                                                    }}
+                                                    className="h-6 text-xs text-slate-400 hover:text-white"
+                                                  >
+                                                    <X className="w-3 h-3 mr-1" />
+                                                    Annuler
+                                                  </Button>
+                                                  <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      const updatedCommentaires = [...message.commentaires];
+                                                      updatedCommentaires[idx] = {
+                                                        ...updatedCommentaires[idx],
+                                                        contenu: editingChatCommentContent,
+                                                        date_modification: new Date().toISOString()
+                                                      };
+                                                      updateChatMessageMutation.mutate({
+                                                        id: message.id,
+                                                        data: { ...message, commentaires: updatedCommentaires }
+                                                      });
+                                                      setEditingChatCommentId(null);
+                                                      setEditingChatCommentContent("");
+                                                    }}
+                                                    className="h-6 text-xs bg-cyan-500 hover:bg-cyan-600 text-white"
+                                                  >
+                                                    <Check className="w-3 h-3 mr-1" />
+                                                    Enregistrer
+                                                  </Button>
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <>
+                                                {comment.contenu && <p className="text-slate-300 text-sm break-words whitespace-pre-wrap overflow-wrap-anywhere max-w-full">{comment.contenu}</p>}
+                                                {comment.image_url && (
+                                                  <img src={comment.image_url} alt="Commentaire" className="mt-2 rounded-lg max-w-xs" />
+                                                )}
+                                                {comment.audio_url && (
+                                                  <div className="mt-2 bg-slate-800/50 rounded-lg p-2">
+                                                    <audio controls className="w-full">
+                                                      <source src={comment.audio_url} type="audio/webm" />
+                                                    </audio>
+                                                  </div>
+                                                )}
+                                              </>
+                                            )}
+                                          </div>
+
+                                          {comment.reactions && comment.reactions.length > 0 && (
+                                            <TooltipProvider>
+                                              <div className="flex gap-1 mt-2">
+                                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                                                  const reactionsForEmoji = comment.reactions?.filter(r => r.emoji === emoji) || [];
+                                                  const reactionCount = reactionsForEmoji.length;
+                                                  if (reactionCount === 0) return null;
+
+                                                  const userNames = reactionsForEmoji.map(r => {
+                                                    const u = users.find(usr => usr.email === r.utilisateur_email);
+                                                    return u?.full_name || r.utilisateur_email;
+                                                  }).join(', ');
+
+                                                  return (
+                                                    <Tooltip key={emoji}>
+                                                      <TooltipTrigger asChild>
+                                                        <span className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full cursor-pointer hover:bg-slate-700">
+                                                          {emoji} {reactionCount}
+                                                        </span>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                                        <p className="text-xs">{userNames}</p>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  );
+                                                })}
+                                              </div>
+                                            </TooltipProvider>
+                                          )}
+
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <div className="relative">
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setShowChatCommentReactions({ ...showChatCommentReactions, [`${message.id}-${idx}`]: !showChatCommentReactions[`${message.id}-${idx}`] })}
+                                                className="text-slate-400 hover:text-cyan-400 text-xs h-5 px-1"
+                                              >
+                                                <Smile className="w-3 h-3" />
+                                              </Button>
+                                              {showChatCommentReactions[`${message.id}-${idx}`] && (
+                                                <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                                  {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                                    <button
+                                                      key={emoji}
+                                                      onClick={() => handleChatCommentReaction(message, idx, emoji)}
+                                                      className="text-xl hover:scale-125 transition-transform p-1"
+                                                    >
+                                                      {emoji}
+                                                    </button>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <p className="text-xs text-slate-500">
+                                              {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                              {comment.date_modification && (
+                                                <span className="text-slate-600 ml-1">(modifié)</span>
+                                              )}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              <div className="mt-3">
+                                <div className="flex gap-2">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarImage src={user?.photo_url} />
+                                    <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
+                                      {getInitials(user?.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <div className="flex gap-2">
+                                      <Textarea
+                                        value={chatCommentInputs[message.id] || ""}
+                                        onChange={(e) => setChatCommentInputs({ ...chatCommentInputs, [message.id]: e.target.value })}
+                                        onKeyPress={(e) => {
+                                          if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleAddChatComment(message);
+                                          }
+                                        }}
+                                        placeholder="Écrivez un commentaire..."
+                                        className="bg-slate-700 border-slate-600 text-white text-sm min-h-[72px] max-h-[200px] resize-none"
+                                        rows={3}
+                                      />
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        id={`chat-image-upload-${message.id}`}
+                                        className="hidden"
+                                        onChange={(e) => setChatCommentImages({ ...chatCommentImages, [message.id]: e.target.files[0] })}
+                                      />
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => document.getElementById(`chat-image-upload-${message.id}`).click()}
+                                        className="h-8 px-2 text-slate-400 hover:text-cyan-400"
+                                      >
+                                        <Image className="w-4 h-4" />
+                                      </Button>
+                                      {!isChatRecording[message.id] ? (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={async () => {
+                                            try {
+                                              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                                              const recorder = new MediaRecorder(stream);
+                                              const chunks = [];
+                                              recorder.ondataavailable = (e) => chunks.push(e.data);
+                                              recorder.onstop = () => {
+                                                const blob = new Blob(chunks, { type: 'audio/webm' });
+                                                setChatCommentAudio({ ...chatCommentAudio, [message.id]: blob });
+                                                stream.getTracks().forEach(track => track.stop());
+                                              };
+                                              recorder.start();
+                                              setMediaRecorder(recorder);
+                                              setIsChatRecording({ ...isChatRecording, [message.id]: true });
+                                            } catch (error) {
+                                              console.error("Erreur d'accès au microphone:", error);
+                                            }
+                                          }}
+                                          className="h-8 px-2 text-slate-400 hover:text-cyan-400"
+                                        >
+                                          <Mic className="w-4 h-4" />
+                                        </Button>
+                                      ) : (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => {
+                                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                                              mediaRecorder.stop();
+                                              setIsChatRecording({ ...isChatRecording, [message.id]: false });
+                                              setMediaRecorder(null);
+                                            }
+                                          }}
+                                          className="h-8 px-2 text-red-400 hover:text-red-500 animate-pulse"
+                                        >
+                                          <StopCircle className="w-4 h-4" />
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleAddChatComment(message)}
+                                        disabled={!chatCommentInputs[message.id]?.trim() && !chatCommentImages[message.id] && !chatCommentAudio[message.id]}
+                                        className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/50 h-9 px-4 text-white border-none"
+                                        style={{ backgroundColor: 'rgb(34, 211, 238)', backgroundImage: 'linear-gradient(to right, rgb(34, 211, 238), rgb(59, 130, 246))' }}
+                                      >
+                                        <Send className="w-4 h-4 mr-1 text-white" />
+                                        Envoyer
+                                      </Button>
+                                    </div>
+                                    {chatCommentImages[message.id] && (
+                                      <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <Image className="w-4 h-4 text-cyan-400" />
+                                          <span className="text-xs text-slate-300">{chatCommentImages[message.id].name}</span>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setChatCommentImages({ ...chatCommentImages, [message.id]: null })}
+                                            className="h-5 w-5 p-0 ml-auto"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                        <img 
+                                          src={URL.createObjectURL(chatCommentImages[message.id])} 
+                                          alt="Preview" 
+                                          className="rounded-lg max-w-full max-h-32 object-contain"
+                                        />
+                                      </div>
+                                    )}
+                                    {chatCommentAudio[message.id] && (
+                                      <div className="mt-2 bg-slate-700/30 rounded-lg p-2">
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <Mic className="w-4 h-4 text-cyan-400" />
+                                          <span className="text-xs text-slate-300">Enregistrement audio</span>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setChatCommentAudio({ ...chatCommentAudio, [message.id]: null })}
+                                            className="h-5 w-5 p-0 ml-auto"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                        <audio controls className="w-full">
+                                          <source src={URL.createObjectURL(chatCommentAudio[message.id])} type="audio/webm" />
+                                        </audio>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        </div>
+                        );
+                        }
                         })}
                         {chatTab !== "clubsocial" && chatMessages.filter(m => m.canal === chatTab).length === 0 && (
                         <p className="text-center text-slate-500 py-8">Aucun message pour le moment</p>
