@@ -1006,9 +1006,10 @@ export default function TableauDeBord() {
                                       size="sm"
                                       onClick={() => handleAddComment(post)}
                                       disabled={!commentaireInputs[post.id]?.trim() && !commentImages[post.id] && !commentAudio[post.id]}
-                                      className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
+                                      className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-9 px-4"
                                     >
-                                      <Send className="w-3 h-3" />
+                                      <Send className="w-4 h-4 mr-1" />
+                                      Envoyer
                                     </Button>
                                   </div>
                                   {commentImages[post.id] && (
@@ -1277,8 +1278,9 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreatePost}
                 disabled={newPostType === 'post' ? (!newPostContent && !newPostImage && !newPostAudio) : (!newSondageQuestion || sondageOptions.filter(o => o).length < 2)}
-                className="bg-gradient-to-r from-purple-500 to-pink-600"
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/50 h-11 px-6 text-base font-semibold"
               >
+                <Send className="w-5 h-5 mr-2" />
                 Publier
               </Button>
             </div>
