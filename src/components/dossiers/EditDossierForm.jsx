@@ -2640,8 +2640,8 @@ export default function EditDossierForm({
                                     aVal = a.date_appel || '';
                                     bVal = b.date_appel || '';
                                   } else if (retourAppelSortConfig.key === 'utilisateur') {
-                                    aVal = users.find(u => u.email === a.utilisateur_assigne)?.full_name || a.utilisateur_assigne || '';
-                                    bVal = users.find(u => u.email === b.utilisateur_assigne)?.full_name || b.utilisateur_assigne || '';
+                                    aVal = (users || []).find(u => u?.email === a.utilisateur_assigne)?.full_name || a.utilisateur_assigne || '';
+                                    bVal = (users || []).find(u => u?.email === b.utilisateur_assigne)?.full_name || b.utilisateur_assigne || '';
                                   } else if (retourAppelSortConfig.key === 'statut') {
                                     aVal = a.statut || '';
                                     bVal = b.statut || '';
