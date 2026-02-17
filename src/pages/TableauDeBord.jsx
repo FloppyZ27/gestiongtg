@@ -965,9 +965,14 @@ export default function TableauDeBord() {
                           if (!mandat) return null;
                           
                           const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                          const bgColorClass = arpenteurColor.split(' ')[0];
-                          const clientsNames = getClientsNames(dossier.clients_ids);
-                          const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
+                           const bgColorClass = arpenteurColor.split(' ')[0];
+                           const clientsNames = dossier.clients_ids && dossier.clients_ids.length > 0 
+                             ? dossier.clients_ids.map(id => {
+                                 const client = dossier.clients_ids.includes(id) ? { prenom: "Client", nom: id } : null;
+                                 return client ? `${client.prenom} ${client.nom}` : "";
+                               }).filter(name => name).join(", ")
+                             : "-";
+                           const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
                           
                           return (
                             <div 
