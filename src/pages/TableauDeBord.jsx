@@ -883,17 +883,25 @@ export default function TableauDeBord() {
                     const postUser = users.find(u => u.email === post.utilisateur_email);
                     return (
                       <div key={post.id} className="p-4 bg-slate-800/50 rounded-lg">
-                      <div className="flex items-start gap-2 mb-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={messageUser?.photo_url} />
-                          <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-xs">
-                            {getInitials(message.utilisateur_nom)}
+                      <div className="flex items-start gap-3 mb-3">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={postUser?.photo_url} />
+                          <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500">
+                            {getInitials(post.utilisateur_nom)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                             <p className="font-semibold text-white text-sm">{message.utilisateur_nom}</p>
-                             {message.utilisateur_email === user?.email && (
+                            <div>
+                             <p className="font-semibold text-white">{post.utilisateur_nom}</p>
+                             <p className="text-xs text-slate-400">
+                               {format(new Date(post.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                               {post.date_modification && (
+                                 <span className="text-slate-500 ml-1">(modifié)</span>
+                               )}
+                             </p>
+                            </div>
+                             {post.utilisateur_email === user?.email && (
                                <div className="flex gap-1">
                                  {(!message.image_url && !message.audio_url) && (
                                    <Button
