@@ -1054,19 +1054,19 @@ export default function TableauDeBord() {
                       )}
 
                       <div className="border-t border-slate-700 pt-2 mt-2">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-3">
                           <TooltipProvider>
                             <div className="flex gap-1">
                               {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
-                                const reactionsForEmoji = message.reactions?.filter(r => r.emoji === emoji) || [];
+                                const reactionsForEmoji = post.reactions?.filter(r => r.emoji === emoji) || [];
                                 const reactionCount = reactionsForEmoji.length;
                                 if (reactionCount === 0) return null;
-                                
+
                                 const userNames = reactionsForEmoji.map(r => {
-                                  const u = users.find(usr => usr.email === r.utilisateur_email);
-                                  return u?.full_name || r.utilisateur_email;
+                                  const user = users.find(u => u.email === r.utilisateur_email);
+                                  return user?.full_name || r.utilisateur_email;
                                 }).join(', ');
-                                
+
                                 return (
                                   <Tooltip key={emoji}>
                                     <TooltipTrigger asChild>
@@ -1082,9 +1082,9 @@ export default function TableauDeBord() {
                               })}
                             </div>
                           </TooltipProvider>
-                          {message.commentaires && message.commentaires.length > 0 && (
+                          {post.commentaires && post.commentaires.length > 0 && (
                             <span className="text-xs text-slate-400 ml-auto">
-                              {message.commentaires.length} commentaire{message.commentaires.length > 1 ? 's' : ''}
+                              {post.commentaires.length} commentaire{post.commentaires.length > 1 ? 's' : ''}
                             </span>
                           )}
                         </div>
@@ -1094,18 +1094,18 @@ export default function TableauDeBord() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => setShowChatReactions({ ...showChatReactions, [message.id]: !showChatReactions[message.id] })}
-                              className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                              onClick={() => setShowReactions({ ...showReactions, [post.id]: !showReactions[post.id] })}
+                              className="text-slate-400 hover:text-purple-400 text-xs h-7"
                             >
                               <ThumbsUp className="w-3 h-3 mr-1" />
                               Réagir
                             </Button>
-                            {showChatReactions[message.id] && (
+                            {showReactions[post.id] && (
                               <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
                                 {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
                                   <button
                                     key={emoji}
-                                    onClick={() => handleChatReaction(message, emoji)}
+                                    onClick={() => handleReaction(post, emoji)}
                                     className="text-2xl hover:scale-125 transition-transform p-1"
                                   >
                                     {emoji}
@@ -1117,8 +1117,8 @@ export default function TableauDeBord() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => setShowChatComments({ ...showChatComments, [message.id]: !showChatComments[message.id] })}
-                            className="text-slate-400 hover:text-cyan-400 text-xs h-6"
+                            onClick={() => setShowComments({ ...showComments, [post.id]: !showComments[post.id] })}
+                            className="text-slate-400 hover:text-purple-400 text-xs h-7"
                           >
                             <MessageCircle className="w-3 h-3 mr-1" />
                             Commenter
