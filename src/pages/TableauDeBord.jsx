@@ -164,6 +164,8 @@ function BirthdayCard({ utilisateur, birthDate, getInitials, today }) {
   );
 }
 
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+
 export default function TableauDeBord() {
   const [isEditRaccourcisOpen, setIsEditRaccourcisOpen] = useState(false);
   const [isNewPostOpen, setIsNewPostOpen] = useState(false);
