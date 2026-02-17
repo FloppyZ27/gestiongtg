@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass } from "lucide-react";
+import { Plus, Settings, Calendar, Cake, UserX, BarChart, MessageSquare, ThumbsUp, MessageCircle, Smile, TrendingUp, X, Home, FileText, Users, FolderOpen, Search, Compass, Send } from "lucide-react";
 import { format, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -99,6 +99,8 @@ export default function TableauDeBord() {
   const [newPostContent, setNewPostContent] = useState("");
   const [newSondageQuestion, setNewSondageQuestion] = useState("");
   const [sondageOptions, setSondageOptions] = useState(["", ""]);
+  const [commentaireInputs, setCommentaireInputs] = useState({});
+  const [showReactions, setShowReactions] = useState({});
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -242,6 +244,27 @@ export default function TableauDeBord() {
       id: post.id,
       data: { ...post, reactions: newReactions }
     });
+    setShowReactions({ ...showReactions, [post.id]: false });
+  };
+
+  const handleAddComment = (post) => {
+    const commentText = commentaireInputs[post.id];
+    if (!commentText || !commentText.trim()) return;
+
+    const newComment = {
+      utilisateur_email: user?.email,
+      utilisateur_nom: user?.full_name,
+      contenu: commentText.trim(),
+      date: new Date().toISOString()
+    };
+
+    const existingComments = post.commentaires || [];
+    updatePostMutation.mutate({
+      id: post.id,
+      data: { ...post, commentaires: [...existingComments, newComment] }
+    });
+
+    setCommentaireInputs({ ...commentaireInputs, [post.id]: "" });
   };
 
   const handleVote = (post, optionIndex) => {
@@ -461,22 +484,118 @@ export default function TableauDeBord() {
                         </div>
                       )}
 
-                      <div className="flex gap-2">
-                        {['👍', '❤️', '😂', '🎉'].map((emoji) => {
-                          const reactionCount = post.reactions?.filter(r => r.emoji === emoji).length || 0;
-                          const userReacted = post.reactions?.some(r => r.utilisateur_email === user?.email && r.emoji === emoji);
-                          return (
+                      <div className="border-t border-slate-700 pt-2 mt-2">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex gap-1">
+                            {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => {
+                              const reactionCount = post.reactions?.filter(r => r.emoji === emoji).length || 0;
+                              if (reactionCount === 0) return null;
+                              return (
+                                <span key={emoji} className="text-xs bg-slate-700/50 px-1.5 py-0.5 rounded-full">
+                                  {emoji} {reactionCount}
+                                </span>
+                              );
+                            })}
+                          </div>
+                          {post.commentaires && post.commentaires.length > 0 && (
+                            <span className="text-xs text-slate-400 ml-auto">
+                              {post.commentaires.length} commentaire{post.commentaires.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 border-t border-slate-700 pt-2">
+                          <div className="relative">
                             <Button
-                              key={emoji}
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleReaction(post, emoji)}
-                              className={`${userReacted ? 'bg-purple-500/20 text-purple-400' : 'text-slate-400'}`}
+                              onClick={() => setShowReactions({ ...showReactions, [post.id]: !showReactions[post.id] })}
+                              className="text-slate-400 hover:text-purple-400 text-xs h-7"
                             >
-                              {emoji} {reactionCount > 0 && reactionCount}
+                              <ThumbsUp className="w-3 h-3 mr-1" />
+                              Réagir
                             </Button>
-                          );
-                        })}
+                            {showReactions[post.id] && (
+                              <div className="absolute bottom-full left-0 mb-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-2 flex gap-1 z-10">
+                                {['👍', '❤️', '😂', '🎉', '😮', '😢'].map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    onClick={() => handleReaction(post, emoji)}
+                                    className="text-2xl hover:scale-125 transition-transform p-1"
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-slate-400 hover:text-purple-400 text-xs h-7"
+                          >
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Commenter
+                          </Button>
+                        </div>
+
+                        {post.commentaires && post.commentaires.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {post.commentaires.map((comment, idx) => {
+                              const commentUser = users.find(u => u.email === comment.utilisateur_email);
+                              return (
+                                <div key={idx} className="flex gap-2 bg-slate-700/30 p-2 rounded-lg">
+                                  <Avatar className="w-7 h-7">
+                                    <AvatarImage src={commentUser?.photo_url} />
+                                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                                      {getInitials(comment.utilisateur_nom)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <div className="bg-slate-700/50 rounded-lg p-2">
+                                      <p className="font-semibold text-white text-xs">{comment.utilisateur_nom}</p>
+                                      <p className="text-slate-300 text-sm">{comment.contenu}</p>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                      {format(new Date(comment.date), "dd MMM 'à' HH:mm", { locale: fr })}
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 mt-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={user?.photo_url} />
+                            <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                              {getInitials(user?.full_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 flex gap-2">
+                            <Input
+                              value={commentaireInputs[post.id] || ""}
+                              onChange={(e) => setCommentaireInputs({ ...commentaireInputs, [post.id]: e.target.value })}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleAddComment(post);
+                                }
+                              }}
+                              placeholder="Écrivez un commentaire..."
+                              className="bg-slate-700 border-slate-600 text-white text-sm h-8"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddComment(post)}
+                              disabled={!commentaireInputs[post.id]?.trim()}
+                              className="bg-gradient-to-r from-purple-500 to-pink-600 h-8 px-3"
+                            >
+                              <Send className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
