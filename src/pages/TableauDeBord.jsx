@@ -2100,9 +2100,9 @@ export default function TableauDeBord() {
                 )}
               </div>
             </CardContent>
-          </Card>
-        </div>
-      </div>
+            </Card>
+            </div>
+            </div>
 
       <Dialog open={isNewPostOpen} onOpenChange={setIsNewPostOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white">
