@@ -968,7 +968,7 @@ export default function TableauDeBord() {
                            const bgColorClass = arpenteurColor.split(' ')[0];
                            const clientsNames = dossier.clients_ids && dossier.clients_ids.length > 0 
                              ? dossier.clients_ids.map(id => {
-                                 const client = dossier.clients_ids.includes(id) ? { prenom: "Client", nom: id } : null;
+                                 const client = clients.find(c => c.id === id);
                                  return client ? `${client.prenom} ${client.nom}` : "";
                                }).filter(name => name).join(", ")
                              : "-";
