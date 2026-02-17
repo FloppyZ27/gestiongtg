@@ -1153,11 +1153,8 @@ export default function TableauDeBord() {
                                                   <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => {
-                                                      setEditingChatCommentId(`${message.id}-${idx}`);
-                                                      setEditingChatCommentContent(comment.contenu);
-                                                    }}
-                                                    className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                                                    onClick={() => handleEditComment(post, idx)}
+                                                    className="h-5 w-5 p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10"
                                                   >
                                                     <Edit className="w-2.5 h-2.5" />
                                                   </Button>
@@ -1165,7 +1162,7 @@ export default function TableauDeBord() {
                                                 <Button
                                                   variant="ghost"
                                                   size="sm"
-                                                  onClick={() => setShowDeleteChatCommentDialog({ message, commentIdx: idx })}
+                                                  onClick={() => setShowDeleteCommentDialog({ post, commentIdx: idx })}
                                                   className="h-5 w-5 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                                                 >
                                                   <Trash2 className="w-2.5 h-2.5" />
