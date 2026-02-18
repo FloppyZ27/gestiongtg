@@ -281,6 +281,21 @@ export default function LeveTerrain() {
     reader.readAsDataURL(file);
   });
 
+  // Extraire les coordonnées GPS à chaque changement de photo
+  useEffect(() => {
+    if (lightboxIndex === null) {
+      setPhotoGPS(null);
+      return;
+    }
+    const current = photosFiles[lightboxIndex];
+    const isImg = ['jpg','jpeg','png','gif','webp'].includes(current?.name.split('.').pop()?.toLowerCase());
+    if (isImg && current?.downloadUrl) {
+      extractGPSFromImage(current.downloadUrl).then(gps => setPhotoGPS(gps));
+    } else {
+      setPhotoGPS(null);
+    }
+  }, [lightboxIndex, photosFiles]);
+
   // Extraire les coordonnées GPS d'une image
   const extractGPSFromImage = async (imageUrl) => {
     try {
