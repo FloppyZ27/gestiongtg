@@ -537,7 +537,7 @@ export default function LeveTerrain() {
                           ref={cameraInputRef}
                           type="file"
                           accept="image/*"
-                          capture="user"
+                          capture="environment"
                           onChange={handleCameraCapture}
                           className="hidden"
                         />
