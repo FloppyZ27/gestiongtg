@@ -2733,7 +2733,8 @@ export default function TableauDeBord() {
               <Button
                 onClick={handleCreateChatMessage}
                 disabled={newChatMessageType === 'post' ? (!newChatContent && !newChatImage && !newChatAudio) : (!newChatSondageQuestion || chatSondageOptions.filter(o => o).length < 2)}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                className="border-none text-white"
+                style={{ background: 'linear-gradient(to right, rgb(6, 182, 212), rgb(37, 99, 235))', backgroundImage: 'linear-gradient(to right, rgb(6, 182, 212), rgb(37, 99, 235))' }}
               >
                 <Send className="w-4 h-4 mr-2" />
                 Publier
