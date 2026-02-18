@@ -291,6 +291,7 @@ export default function LeveTerrain() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           accuracy: position.coords.accuracy,
+          heading: position.coords.heading,
           timestamp: new Date().toISOString()
         };
       } catch (e) {
