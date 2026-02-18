@@ -198,7 +198,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
               newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
               newMandat.tache_actuelle) {
             const clientsNames = dossierData.clients_ids?.map(cid => {
-              const client = clients.find(c => c.id === cid);
+              const client = (clients || []).find(c => c?.id === cid);
               return client ? `${client.prenom} ${client.nom}` : "";
             }).filter(n => n).join(", ");
             
