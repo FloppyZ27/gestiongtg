@@ -343,33 +343,44 @@ export default function LeveTerrain() {
     }
   }, [lightboxIndex, photosFiles, photosGPS, selectedItem]);
 
-  // Extraire les coordonnées GPS d'une image
-  const extractGPSFromImage = async (imageUrl) => {
+  // Extraire les coordonnées GPS et l'orientation d'une image
+  const extractGPSAndOrientationFromImage = async (imageUrl) => {
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();
       const binary = String.fromCharCode.apply(null, new Uint8Array(arrayBuffer));
       const exifData = piexif.load(binary);
-      
+
+      let gpsData = null;
+      let heading = null;
+
       if (exifData.GPS && exifData.GPS[piexif.GPSIFD.GPSLatitude] && exifData.GPS[piexif.GPSIFD.GPSLongitude]) {
         const lat = exifData.GPS[piexif.GPSIFD.GPSLatitude];
         const lng = exifData.GPS[piexif.GPSIFD.GPSLongitude];
         const latRef = exifData.GPS[piexif.GPSIFD.GPSLatitudeRef].toLocaleLowerCase();
         const lngRef = exifData.GPS[piexif.GPSIFD.GPSLongitudeRef].toLocaleLowerCase();
-        
+
         const latDegrees = lat[0][0] / lat[0][1] + lat[1][0] / lat[1][1] / 60 + lat[2][0] / lat[2][1] / 3600;
         const lngDegrees = lng[0][0] / lng[0][1] + lng[1][0] / lng[1][1] / 60 + lng[2][0] / lng[2][1] / 3600;
-        
+
         const latFinal = latRef === 's' ? -latDegrees : latDegrees;
         const lngFinal = lngRef === 'w' ? -lngDegrees : lngDegrees;
-        
-        return { lat: latFinal, lng: lngFinal };
+
+        gpsData = { lat: latFinal, lng: lngFinal };
       }
+
+      // Extraire l'orientation (heading) des métadonnées EXIF
+      if (exifData.Exif && exifData.Exif[piexif.ExifIFD.GPSImgDirection]) {
+        const dirData = exifData.Exif[piexif.ExifIFD.GPSImgDirection];
+        heading = dirData[0] / dirData[1];
+      }
+
+      return { gpsData, heading };
     } catch (e) {
       // Pas de GPS ou erreur lors de l'extraction
     }
-    return null;
+    return { gpsData: null, heading: null };
   };
 
   const mapUrl = selectedItem?.mandat?.adresse_travaux
