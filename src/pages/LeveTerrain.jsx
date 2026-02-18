@@ -195,7 +195,7 @@ export default function LeveTerrain() {
     const initiale = ARPENTEUR_INITIALS[arp] || arp;
     const numDossier = dossier.numero_dossier;
     const dateStr = format(new Date(), "yyyyMMdd");
-    const photoPath = `ARPENTEUR/${initiale}/DOSSIER/${numDossier}/TERRAIN/IN/${numDossier}_TI_${dateStr}/PHOTOS`;
+    const photoPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
 
     try {
       const res = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: photoPath });
