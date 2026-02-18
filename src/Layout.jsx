@@ -1809,8 +1809,16 @@ function LayoutContent({ children, currentPageName }) {
 }
 
 export default function Layout({ children, currentPageName }) {
+  const [isDesktop, setIsDesktop] = React.useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
+  
+  React.useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={isDesktop}>
       <LayoutContent children={children} currentPageName={currentPageName} />
     </SidebarProvider>
   );
