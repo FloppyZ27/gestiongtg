@@ -463,15 +463,30 @@ export default function Comptabilite() {
                   })}
                 </div>
 
-                <div className={`flex items-center justify-between mb-3 p-3 rounded-lg border bg-gradient-to-r ${getArpenteurTabColor(selectedArpenteur).includes('red') ? 'from-red-500/10 to-transparent border-red-500/20' : getArpenteurTabColor(selectedArpenteur).includes('slate') ? 'from-slate-500/10 to-transparent border-slate-500/20' : getArpenteurTabColor(selectedArpenteur).includes('orange') ? 'from-orange-500/10 to-transparent border-orange-500/20' : getArpenteurTabColor(selectedArpenteur).includes('yellow') ? 'from-yellow-500/10 to-transparent border-yellow-500/20' : 'from-cyan-500/10 to-transparent border-cyan-500/20'}`}>
+                {/* Totaux globaux tous arpenteurs */}
+                <div className="flex items-center justify-between mb-2 px-3 py-2 rounded-lg border border-violet-500/20 bg-violet-500/5">
+                  <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tous arpenteurs ({allMandatsItems.length} mandats)</span>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Tarification totale</p>
+                      <p className="text-violet-300 font-bold text-sm">{grandTotalTarif.toFixed(2)} $</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Valeur progressée</p>
+                      <p className="text-emerald-400 font-bold text-sm">{grandTotalValeur.toFixed(2)} $</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Entête arpenteur sélectionné */}
+                <div className="flex items-center justify-between mb-3 p-3 rounded-lg border border-slate-700 bg-slate-800/30">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`${getArpenteurColor(selectedArpenteur)} border font-bold`}>{getArpenteurInitials(selectedArpenteur).replace('-', '')}</Badge>
                     <span className="text-white font-semibold">{selectedArpenteur}</span>
                     <Badge className="bg-slate-700/50 text-slate-300 border-slate-600 text-xs">{mandatsItems.length} mandat{mandatsItems.length > 1 ? 's' : ''}</Badge>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right">
-                      <p className="text-xs text-slate-400">Tarification totale</p>
+                      <p className="text-xs text-slate-400">Tarification</p>
                       <p className="text-white font-bold text-sm">{totalTarif.toFixed(2)} $</p>
                     </div>
                     <div className="text-right">
