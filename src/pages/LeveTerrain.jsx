@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users } from "lucide-react";
+import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const ARPENTEUR_INITIALS = {
