@@ -171,7 +171,7 @@ export default function Comptabilite() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
         <div className="w-full">
           <div className="flex items-center gap-3 mb-8">
-            <BarChart2 className="w-8 h-8 text-violet-400" />
+            <Landmark className="w-8 h-8 text-violet-400" />
             <div>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Comptabilité</h1>
               <p className="text-slate-400">Feuilles de temps, heures et tarification des mandats</p>
