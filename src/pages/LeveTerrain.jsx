@@ -351,7 +351,7 @@ export default function LeveTerrain() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           accuracy: position.coords.accuracy,
-          heading: position.coords.heading, // peut être null sur certains appareils
+          heading: deviceOrientationRef.current || position.coords.heading, // Utiliser l'orientation du téléphone si disponible
           timestamp: new Date().toISOString()
         };
         console.log('📍 Device GPS capturé:', deviceGPS);
