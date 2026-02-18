@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { DollarSign, Clock, ChevronUp, ChevronDown, Users, TrendingUp } from "lucide-react";
+import { DollarSign, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -37,15 +37,16 @@ const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCa
 
 export default function Comptabilite() {
   const [feuilleTempsCollapsed, setFeuilleTempsCollapsed] = useState(false);
-  const [listeHeuresCollapsed, setListeHeuresCollapsed] = useState(false);
   const [mandatsCollapsed, setMandatsCollapsed] = useState(false);
 
-  // Feuille de temps agenda
-  const [agendaCurrentDate, setAgendaCurrentDate] = useState(new Date());
-  const [selectedAgendaUser, setSelectedAgendaUser] = useState(null);
+  // Vue : 'liste' ou 'agenda'
+  const [feuilleTempsView, setFeuilleTempsView] = useState('liste');
 
-  // Résumé heures
-  const [resumeWeekDate, setResumeWeekDate] = useState(new Date());
+  // Semaine partagée entre les deux vues
+  const [currentWeekDate, setCurrentWeekDate] = useState(new Date());
+
+  // Utilisateur sélectionné pour l'agenda
+  const [selectedAgendaUser, setSelectedAgendaUser] = useState(null);
 
   // Mandats tabs
   const [selectedArpenteur, setSelectedArpenteur] = useState(ARPENTEURS[0]);
@@ -57,6 +58,13 @@ export default function Comptabilite() {
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
 
+  // Scroll à 7h lors du passage en vue agenda
+  useEffect(() => {
+    if (feuilleTempsView === 'agenda' && agendaScrollRef.current) {
+      agendaScrollRef.current.scrollTop = 7 * 60; // 7h * 60px/h
+    }
+  }, [feuilleTempsView]);
+
   // ---- Helpers pointage ----
   const getPointageDuration = (p) => {
     if (p.heure_debut_modifiee && p.heure_fin_modifiee) return p.duree_heures_modifiee || 0;
@@ -64,34 +72,17 @@ export default function Comptabilite() {
     return p.duree_heures || 0;
   };
 
-  // ---- Agenda helpers ----
-  const getAgendaWeekDays = () => {
-    const dayOfWeek = agendaCurrentDate.getDay();
-    const sunday = new Date(agendaCurrentDate);
-    sunday.setDate(agendaCurrentDate.getDate() - dayOfWeek);
+  // ---- Semaine partagée ----
+  const getWeekDays = (baseDate) => {
+    const dayOfWeek = baseDate.getDay();
+    const sunday = new Date(baseDate);
+    sunday.setDate(baseDate.getDate() - dayOfWeek);
     return Array.from({ length: 7 }, (_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
   };
 
-  const getPointagesForDateUser = (date, userEmail) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail);
-  };
-
-  const getUserDayTotalHours = (date, userEmail) => {
-    return getPointagesForDateUser(date, userEmail).reduce((sum, p) => sum + getPointageDuration(p), 0);
-  };
-
-  // ---- Résumé heures helpers ----
-  const getResumeWeekDays = () => {
-    const dayOfWeek = resumeWeekDate.getDay();
-    const sunday = new Date(resumeWeekDate);
-    sunday.setDate(resumeWeekDate.getDate() - dayOfWeek);
-    return Array.from({ length: 7 }, (_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
-  };
-
-  const getResumeMonthDays = () => {
-    const year = resumeWeekDate.getFullYear();
-    const month = resumeWeekDate.getMonth();
+  const getMonthDays = (baseDate) => {
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
@@ -99,25 +90,29 @@ export default function Comptabilite() {
     return days;
   };
 
-  const getUserWeekHoursResume = (userEmail) => {
-    return getResumeWeekDays().reduce((sum, day) => {
-      const dateStr = day.toISOString().split('T')[0];
-      return sum + allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail).reduce((s, p) => s + getPointageDuration(p), 0);
-    }, 0);
+  const weekDays = getWeekDays(currentWeekDate);
+
+  const getPointagesForDateUser = (date, userEmail) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail);
   };
 
-  const getUserMonthHoursResume = (userEmail) => {
-    return getResumeMonthDays().reduce((sum, day) => {
+  const getUserDayTotalHours = (date, userEmail) =>
+    getPointagesForDateUser(date, userEmail).reduce((sum, p) => sum + getPointageDuration(p), 0);
+
+  const getUserWeekHours = (userEmail) =>
+    weekDays.reduce((sum, day) => sum + getUserDayTotalHours(day, userEmail), 0);
+
+  const getUserMonthHours = (userEmail) =>
+    getMonthDays(currentWeekDate).reduce((sum, day) => {
       const dateStr = day.toISOString().split('T')[0];
       return sum + allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail).reduce((s, p) => s + getPointageDuration(p), 0);
     }, 0);
-  };
 
   // ---- Mandats helpers ----
-  const getMandatsOuverts = (arpenteur) => {
-    return dossiers.filter(d => d.arpenteur_geometre === arpenteur && d.statut === "Ouvert")
+  const getMandatsOuverts = (arpenteur) =>
+    dossiers.filter(d => d.arpenteur_geometre === arpenteur && d.statut === "Ouvert")
       .flatMap(d => (d.mandats || []).map(m => ({ dossier: d, mandat: m })));
-  };
 
   const getMandatProgress = (tacheActuelle) => {
     const idx = TACHES.indexOf(tacheActuelle || "Ouverture");
@@ -135,9 +130,7 @@ export default function Comptabilite() {
     return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(Boolean).join(", ");
   };
 
-  const agendaWeekDays = getAgendaWeekDays();
   const activeAgendaUser = selectedAgendaUser || users[0];
-  const resumeWeekDays = getResumeWeekDays();
   const mandatsItems = getMandatsOuverts(selectedArpenteur);
   const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
   const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
@@ -154,7 +147,7 @@ export default function Comptabilite() {
             </div>
           </div>
 
-          {/* ===== SECTION 1 : Agenda feuille de temps ===== */}
+          {/* ===== SECTION 1 : Feuille de temps (Liste + Agenda fusionnés) ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
             <div className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800" onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}>
               <div className="flex items-center justify-between">
@@ -168,237 +161,209 @@ export default function Comptabilite() {
 
             {!feuilleTempsCollapsed && (
               <CardContent className="p-4">
-                {/* Contrôles navigation */}
-                <div className="flex items-center justify-between mb-4">
+                {/* Contrôles : navigation + toggle vue */}
+                <div className="flex items-center justify-between mb-4 gap-4">
                   <div className="text-white font-semibold text-sm">
-                    Semaine du {format(agendaWeekDays[0], "d MMMM", { locale: fr })} au {format(agendaWeekDays[6], "d MMMM yyyy", { locale: fr })}
+                    Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
+                    <span className="ml-3 text-slate-400 font-normal text-xs">| {format(currentWeekDate, "MMMM yyyy", { locale: fr })}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setAgendaCurrentDate(new Date(agendaCurrentDate.getFullYear(), agendaCurrentDate.getMonth(), agendaCurrentDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
-                    <Button size="sm" onClick={() => setAgendaCurrentDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAgendaCurrentDate(new Date(agendaCurrentDate.getFullYear(), agendaCurrentDate.getMonth(), agendaCurrentDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
+                    {/* Toggle vue */}
+                    <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
+                      <button
+                        onClick={() => setFeuilleTempsView('liste')}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${feuilleTempsView === 'liste' ? 'bg-emerald-500/30 text-emerald-300' : 'text-slate-400 hover:text-slate-200'}`}
+                      >
+                        <List className="w-3.5 h-3.5" /> Liste
+                      </button>
+                      <button
+                        onClick={() => setFeuilleTempsView('agenda')}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${feuilleTempsView === 'agenda' ? 'bg-cyan-500/30 text-cyan-300' : 'text-slate-400 hover:text-slate-200'}`}
+                      >
+                        <CalendarDays className="w-3.5 h-3.5" /> Agenda
+                      </button>
+                    </div>
+                    {/* Navigation */}
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
+                    <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
                   </div>
                 </div>
 
-                {/* Agenda layout : colonne utilisateurs 20% + grille horaire 80% */}
-                <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '865px' }}>
-                  {/* Colonne utilisateurs - 20% (filtre) */}
-                  <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '20%' }}>
-                    <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0 px-2 py-3">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
+                {/* ---- VUE LISTE ---- */}
+                {feuilleTempsView === 'liste' && (
+                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-[2fr,1fr,1fr] bg-slate-800/50 px-4 py-2 border-b border-slate-700">
+                      <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Cette semaine</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Ce mois</div>
                     </div>
-                    <div className="overflow-y-auto flex-1">
-                      {users.map(u => {
-                        const isActive = activeAgendaUser?.email === u.email;
-                        return (
-                          <button
-                            key={u.id}
-                            onClick={() => setSelectedAgendaUser(u)}
-                            className={`w-full flex items-center gap-2 px-3 py-2.5 border-b border-slate-800/50 hover:bg-slate-800/40 transition-colors ${isActive ? 'bg-emerald-500/20 border-l-4 border-l-emerald-500' : ''}`}
-                          >
-                            <Avatar className="w-7 h-7 flex-shrink-0">
+                    {users.map(u => {
+                      const weekH = getUserWeekHours(u.email);
+                      const monthH = getUserMonthHours(u.email);
+                      return (
+                        <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
                               <AvatarImage src={u.photo_url} />
-                              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
+                              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                             </Avatar>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className={`text-xs truncate leading-tight ${isActive ? 'text-emerald-300 font-semibold' : 'text-slate-200'}`}>{u.full_name}</p>
-                              <p className="text-[10px] text-slate-500 truncate">{u.poste || u.role}</p>
+                            <div>
+                              <p className="text-white font-medium text-sm">{u.full_name}</p>
+                              <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                             </div>
-                          </button>
-                        );
-                      })}
+                          </div>
+                          <div className="text-right"><span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span></div>
+                          <div className="text-right"><span className={`font-bold text-sm ${monthH > 0 ? 'text-cyan-400' : 'text-slate-600'}`}>{monthH.toFixed(1)}h</span></div>
+                        </div>
+                      );
+                    })}
+                    <div className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 bg-slate-800/50 items-center">
+                      <div className="text-xs font-bold text-slate-300">TOTAL</div>
+                      <div className="text-right font-bold text-sm text-emerald-400">{users.reduce((sum, u) => sum + getUserWeekHours(u.email), 0).toFixed(1)}h</div>
+                      <div className="text-right font-bold text-sm text-cyan-400">{users.reduce((sum, u) => sum + getUserMonthHours(u.email), 0).toFixed(1)}h</div>
                     </div>
                   </div>
+                )}
 
-                  {/* Grille horaire - 80% */}
-                  <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* En-têtes des jours */}
-                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50">
-                      {agendaWeekDays.map((day, idx) => {
-                        const isToday = day.toDateString() === new Date().toDateString();
-                        return (
-                          <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
-                            <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>{format(day, "EEE", { locale: fr })}</div>
-                            <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>{format(day, "d")}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Ligne totaux pour l'utilisateur actif */}
-                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-800/50">
-                      <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50 flex items-center justify-center">
-                        <div className="text-xs font-semibold text-emerald-400">Total</div>
+                {/* ---- VUE AGENDA ---- */}
+                {feuilleTempsView === 'agenda' && (
+                  <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '865px' }}>
+                    {/* Colonne utilisateurs (filtre) */}
+                    <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '18%' }}>
+                      <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0 px-2 py-3">
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
                       </div>
-                      {agendaWeekDays.map((day, idx) => {
-                        const total = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
-                        return (
-                          <div key={idx} className="flex-1 border-r border-slate-700 flex items-center justify-center px-1 py-2">
-                            {total > 0 ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">{total.toFixed(1)}h</Badge> : <span className="text-slate-700 text-xs">-</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Grille horaire comme dans Profil */}
-                    <div className="overflow-y-auto flex-1 relative" ref={agendaScrollRef}>
-                      <div className="flex relative" style={{ minHeight: '1440px' }}>
-                        {/* Colonne des heures */}
-                        <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
-                          {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                            <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
-                              <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
-                                {hour.toString().padStart(2, '0')}:00
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Colonnes des jours */}
-                        {agendaWeekDays.map((day, dayIdx) => {
-                          const isToday = day.toDateString() === new Date().toDateString();
-                          const dayPointages = activeAgendaUser ? getPointagesForDateUser(day, activeAgendaUser.email) : [];
-
+                      <div className="overflow-y-auto flex-1">
+                        {users.map(u => {
+                          const isActive = activeAgendaUser?.email === u.email;
+                          const weekH = getUserWeekHours(u.email);
                           return (
-                            <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
-                              {/* Grille des heures de fond */}
-                              {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
-                              ))}
-
-                              {/* Blocs de pointage */}
-                              {dayPointages.map(p => {
-                                const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
-                                const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
-                                const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
-                                const startHour = startTime.getHours();
-                                const startMin = startTime.getMinutes();
-                                const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-                                const topPx = startHour * 60 + startMin;
-
-                                const initialStart = new Date(p.heure_debut);
-                                const initialEnd = new Date(p.heure_fin);
-                                const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
-
-                                return (
-                                  <Tooltip key={p.id}>
-                                    <TooltipTrigger asChild>
-                                      <div
-                                        className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-default overflow-hidden flex flex-col ${
-                                          isModified
-                                            ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                            : p.confirme 
-                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
-                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
-                                        }`}
-                                        style={{ height: `${totalMinutes}px`, top: `${topPx}px` }}
-                                      >
-                                        {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
-                                        {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
-                                        <div className="text-[11px] leading-tight">
-                                          <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>
-                                            Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
-                                          </div>
-                                          {isModified && (
-                                            <div className="opacity-90 text-orange-400 mt-1">
-                                              Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
-                                            </div>
-                                          )}
-                                          {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
-                                        </div>
-                                        {isModified && (
-                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
-                                            Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-3">
-                                      <div className="space-y-1 text-xs">
-                                        <div className="font-semibold text-emerald-400">Pointage du {format(new Date(p.date), "d MMMM yyyy", { locale: fr })}</div>
-                                        <div className="text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(2)}h)</div>
-                                        {isModified && <div className="text-orange-400">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(2)}h)</div>}
-                                        {p.description && <div className="text-slate-400 border-t border-slate-600 pt-1 mt-1">{p.description}</div>}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                );
-                              })}
-                            </div>
+                            <button
+                              key={u.id}
+                              onClick={() => setSelectedAgendaUser(u)}
+                              className={`w-full flex items-center gap-2 px-3 py-2.5 border-b border-slate-800/50 hover:bg-slate-800/40 transition-colors text-left ${isActive ? 'bg-emerald-500/20 border-l-4 border-l-emerald-500' : ''}`}
+                            >
+                              <Avatar className="w-7 h-7 flex-shrink-0">
+                                <AvatarImage src={u.photo_url} />
+                                <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-xs truncate leading-tight ${isActive ? 'text-emerald-300 font-semibold' : 'text-slate-200'}`}>{u.full_name}</p>
+                                <p className={`text-[10px] ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h semaine</p>
+                              </div>
+                            </button>
                           );
                         })}
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
 
-          {/* ===== SECTION 2 : Résumé heures par utilisateur ===== */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-            <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800" onClick={() => setListeHeuresCollapsed(!listeHeuresCollapsed)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center"><Users className="w-3 h-3 text-emerald-400" /></div>
-                  <h3 className="text-emerald-300 text-sm font-semibold">Résumé des heures par utilisateur</h3>
-                </div>
-                {listeHeuresCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-              </div>
-            </div>
-
-            {!listeHeuresCollapsed && (
-              <CardContent className="p-6">
-                {/* Navigation semaine */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-white font-semibold text-sm">
-                    Semaine du {format(resumeWeekDays[0], "d MMMM", { locale: fr })} au {format(resumeWeekDays[6], "d MMMM yyyy", { locale: fr })}
-                    <span className="ml-3 text-slate-400 font-normal text-xs">| Mois : {format(resumeWeekDate, "MMMM yyyy", { locale: fr })}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setResumeWeekDate(new Date(resumeWeekDate.getFullYear(), resumeWeekDate.getMonth(), resumeWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
-                    <Button size="sm" onClick={() => setResumeWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
-                    <Button size="sm" variant="outline" onClick={() => setResumeWeekDate(new Date(resumeWeekDate.getFullYear(), resumeWeekDate.getMonth(), resumeWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
-                  </div>
-                </div>
-
-                <div className="border border-slate-700 rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-[2fr,1fr,1fr] bg-slate-800/50 px-4 py-2 border-b border-slate-700">
-                    <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Cette semaine</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Ce mois</div>
-                  </div>
-                  {users.map(u => {
-                    const weekH = getUserWeekHoursResume(u.email);
-                    const monthH = getUserMonthHoursResume(u.email);
-                    return (
-                      <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={u.photo_url} />
-                            <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-white font-medium text-sm">{u.full_name}</p>
-                            <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
-                          </div>
-                        </div>
-                        <div className="text-right"><span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span></div>
-                        <div className="text-right"><span className={`font-bold text-sm ${monthH > 0 ? 'text-cyan-400' : 'text-slate-600'}`}>{monthH.toFixed(1)}h</span></div>
+                    {/* Grille horaire */}
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                      {/* En-têtes des jours */}
+                      <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50">
+                        <div className="w-16 flex-shrink-0 border-r border-slate-700" />
+                        {weekDays.map((day, idx) => {
+                          const isToday = day.toDateString() === new Date().toDateString();
+                          const dayTotal = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
+                          return (
+                            <div key={idx} className={`flex-1 text-center py-2 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
+                              <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>{format(day, "EEE", { locale: fr })}</div>
+                              <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>{format(day, "d")}</div>
+                              {dayTotal > 0
+                                ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] mt-0.5">{dayTotal.toFixed(1)}h</Badge>
+                                : <span className="text-[10px] text-slate-700">-</span>}
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                  <div className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 bg-slate-800/50 items-center">
-                    <div className="text-xs font-bold text-slate-300">TOTAL</div>
-                    <div className="text-right font-bold text-sm text-emerald-400">{users.reduce((sum, u) => sum + getUserWeekHoursResume(u.email), 0).toFixed(1)}h</div>
-                    <div className="text-right font-bold text-sm text-cyan-400">{users.reduce((sum, u) => sum + getUserMonthHoursResume(u.email), 0).toFixed(1)}h</div>
+
+                      {/* Grille horaire scrollable */}
+                      <div className="overflow-y-auto flex-1 relative" ref={agendaScrollRef}>
+                        <div className="flex relative" style={{ minHeight: '1440px' }}>
+                          {/* Colonne des heures */}
+                          <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                            {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                              <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                                <div className="w-full border-r border-slate-700 px-2 py-1 text-xs text-slate-500 text-right">
+                                  {hour.toString().padStart(2, '0')}:00
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Colonnes des jours */}
+                          {weekDays.map((day, dayIdx) => {
+                            const isToday = day.toDateString() === new Date().toDateString();
+                            const dayPointages = activeAgendaUser ? getPointagesForDateUser(day, activeAgendaUser.email) : [];
+
+                            return (
+                              <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/5' : 'bg-slate-800/10'}`}>
+                                {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                  <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                                ))}
+
+                                {dayPointages.map(p => {
+                                  const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                  const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                  const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                  const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                  const topPx = startTime.getHours() * 60 + startTime.getMinutes();
+                                  const initialStart = new Date(p.heure_debut);
+                                  const initialEnd = new Date(p.heure_fin);
+                                  const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+
+                                  return (
+                                    <Tooltip key={p.id}>
+                                      <TooltipTrigger asChild>
+                                        <div
+                                          className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-default overflow-hidden flex flex-col ${
+                                            isModified
+                                              ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                              : p.confirme
+                                              ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                              : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                          }`}
+                                          style={{ height: `${Math.max(totalMinutes, 20)}px`, top: `${topPx}px` }}
+                                        >
+                                          {isModified && <div className="text-[10px] font-bold">MODIFIÉ</div>}
+                                          {p.confirme && !isModified && <div className="text-[10px] font-bold">CONFIRMÉ</div>}
+                                          <div className="text-[11px] leading-tight">
+                                            <div className="opacity-80">
+                                              {format(initialStart, "HH:mm")}–{format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
+                                            </div>
+                                            {isModified && (
+                                              <div className="text-orange-300 mt-0.5">
+                                                → {format(startTime, "HH:mm")}–{format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-3">
+                                        <div className="space-y-1 text-xs">
+                                          <div className="font-semibold text-emerald-400">Pointage du {format(new Date(p.date), "d MMMM yyyy", { locale: fr })}</div>
+                                          <div className="text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(2)}h)</div>
+                                          {isModified && <div className="text-orange-400">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(2)}h)</div>}
+                                          {p.description && <div className="text-slate-400 border-t border-slate-600 pt-1 mt-1">{p.description}</div>}
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             )}
           </Card>
 
-          {/* ===== SECTION 3 : Mandats ouverts avec tabs arpenteurs ===== */}
+          {/* ===== SECTION 2 : Mandats ouverts avec tabs arpenteurs ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
             <div className="cursor-pointer hover:bg-violet-900/40 transition-colors rounded-t-lg py-2 px-3 bg-violet-900/20 border-b border-slate-800" onClick={() => setMandatsCollapsed(!mandatsCollapsed)}>
               <div className="flex items-center justify-between">
@@ -412,7 +377,6 @@ export default function Comptabilite() {
 
             {!mandatsCollapsed && (
               <CardContent className="p-4">
-                {/* Tabs arpenteurs */}
                 <div className="flex gap-1 flex-wrap mb-4 border-b border-slate-700 pb-3">
                   {ARPENTEURS.map(arp => {
                     const count = getMandatsOuverts(arp).length;
@@ -431,7 +395,6 @@ export default function Comptabilite() {
                   })}
                 </div>
 
-                {/* Résumé arpenteur sélectionné */}
                 <div className={`flex items-center justify-between mb-3 p-3 rounded-lg border bg-gradient-to-r ${getArpenteurTabColor(selectedArpenteur).includes('red') ? 'from-red-500/10 to-transparent border-red-500/20' : getArpenteurTabColor(selectedArpenteur).includes('slate') ? 'from-slate-500/10 to-transparent border-slate-500/20' : getArpenteurTabColor(selectedArpenteur).includes('orange') ? 'from-orange-500/10 to-transparent border-orange-500/20' : getArpenteurTabColor(selectedArpenteur).includes('yellow') ? 'from-yellow-500/10 to-transparent border-yellow-500/20' : 'from-cyan-500/10 to-transparent border-cyan-500/20'}`}>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className={`${getArpenteurColor(selectedArpenteur)} border font-bold`}>{getArpenteurInitials(selectedArpenteur).replace('-', '')}</Badge>
@@ -450,7 +413,6 @@ export default function Comptabilite() {
                   </div>
                 </div>
 
-                {/* Table mandats */}
                 {mandatsItems.length > 0 ? (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <div className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.8fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
