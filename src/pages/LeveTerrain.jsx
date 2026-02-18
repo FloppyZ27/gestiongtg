@@ -876,12 +876,25 @@ export default function LeveTerrain() {
             <div className="flex-1 flex items-center justify-between px-6 py-4 gap-6" onClick={e => e.stopPropagation()}>
               {/* Image centrée à gauche */}
               <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-              {isImg && current.downloadUrl ? (
-                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
-              ) : (
-                <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
-                  <Image className="w-16 h-16 mb-3" />
-                  <p className="text-sm">{current?.name}</p>
+                {isImg && current.downloadUrl ? (
+                  <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
+                ) : (
+                  <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
+                    <Image className="w-16 h-16 mb-3" />
+                    <p className="text-sm">{current?.name}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Carte satellite avec tous les pins des photos */}
+              {selectedItem && photosFiles.length > 0 && (
+                <div className="w-[450px] h-[450px] rounded-lg overflow-hidden border border-slate-600 shadow-lg flex-shrink-0" onClick={e => e.stopPropagation()}>
+                  <PhotoMapOverlay 
+                    photosGPS={photosGPS} 
+                    photosFiles={photosFiles} 
+                    selectedDossier={selectedItem.dossier}
+                    lightboxIndex={lightboxIndex}
+                  />
                 </div>
               )}
             </div>
@@ -889,21 +902,11 @@ export default function LeveTerrain() {
             {/* Flèche droite */}
             {photosFiles.length > 1 && (
               <button
-                className="absolute right-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
                 onClick={(e) => { e.stopPropagation(); goNext(); }}
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
-            )}
-
-            {/* Carte satellite avec tous les pins des photos */}
-            {selectedItem && photosFiles.length > 0 && (
-              <PhotoMapOverlay 
-                photosGPS={photosGPS} 
-                photosFiles={photosFiles} 
-                selectedDossier={selectedItem.dossier}
-                lightboxIndex={lightboxIndex}
-              />
             )}
 
             {/* Bande de miniatures en bas */}
