@@ -71,6 +71,7 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
               key={gps.id} 
               position={[gps.latitude, gps.longitude]}
               icon={createHeadingIcon(gps.heading, isCurrent)}
+              zIndexOffset={isCurrent ? 1000 : 0}
             >
               <Popup>
                 <div className="text-xs space-y-1">
