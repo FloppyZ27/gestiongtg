@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, Mountain, ExternalLink, RefreshCw, Upload } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 
 const ARPENTEUR_INITIALS = {
   "Samuel Guay": "SG",
