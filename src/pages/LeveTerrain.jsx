@@ -427,6 +427,37 @@ export default function LeveTerrain() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const handleDeletePhoto = async (idx, photoName) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) return;
+    try {
+      // Supprimer la photo de SharePoint (via function)
+      base44.functions.invoke('deleteSharePointFile', { 
+        filePath: photosFiles[idx].webUrl 
+      }).catch(() => {});
+
+      // Supprimer les données GPS associées
+      const gpsToDelete = photosGPS.find(
+        gps => gps.dossier_id === selectedItem.dossier.id && gps.photo_name === photoName
+      );
+      if (gpsToDelete) {
+        base44.entities.PhotoGPS.delete(gpsToDelete.id).catch(() => {});
+      }
+
+      // Mettre à jour la liste des photos
+      const newPhotos = photosFiles.filter((_, i) => i !== idx);
+      setPhotosFiles(newPhotos);
+
+      // Fermer le lightbox si aucune photo restante
+      if (newPhotos.length === 0) {
+        setLightboxIndex(null);
+      } else if (lightboxIndex >= newPhotos.length) {
+        setLightboxIndex(lightboxIndex - 1);
+      }
+    } catch (e) {
+      console.error("Erreur suppression photo:", e);
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col">
