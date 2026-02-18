@@ -871,7 +871,7 @@ export default function LeveTerrain() {
                   ];
                   
                   return (
-                    <MapContainer center={center} zoom={18} style={{ height: '100%', width: '100%' }}>
+                    <MapContainer center={center} zoom={18} style={{ height: '100%', width: '100%' }} attributionControl={true}>
                       <TileLayer
                         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                         attribution='&copy; Esri'
@@ -881,14 +881,8 @@ export default function LeveTerrain() {
                         const photoNum = photoIdx >= 0 ? photoIdx + 1 : idx + 1;
                         const isCurrentPhoto = lightboxIndex === photoIdx;
                         
-                        const customIcon = L.divIcon({
-                          html: `<div class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs text-white ${isCurrentPhoto ? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-emerald-500'} shadow-lg">${photoNum}</div>`,
-                          iconSize: [32, 32],
-                          className: ''
-                        });
-                        
                         return (
-                          <Marker key={gps.id} position={[gps.latitude, gps.longitude]} icon={customIcon}>
+                          <Marker key={gps.id} position={[gps.latitude, gps.longitude]}>
                             <Popup>
                               <div className="text-xs">
                                 <p className="font-bold">Photo {photoNum}</p>
