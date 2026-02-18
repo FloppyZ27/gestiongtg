@@ -332,6 +332,8 @@ export default function LeveTerrain() {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
+    window.removeEventListener('deviceorientation', () => {});
+    deviceOrientationRef.current = null;
     setShowCamera(false);
   };
 
