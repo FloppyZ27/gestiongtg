@@ -963,7 +963,7 @@ export default function LeveTerrain() {
             <div className="text-center text-slate-400 text-xs pb-4">
               {current?.name}
             </div>
-          </div>
+           </div>
         );
       })()}
 
