@@ -448,15 +448,16 @@ export default function Comptabilite() {
                   {ARPENTEURS.map(arp => {
                     const count = getMandatsOuverts(arp).length;
                     const isActive = selectedArpenteur === arp;
-                    const colorClass = getArpenteurColor(arp);
+                    const tabStyle = getArpenteurTabStyle(arp, isActive);
                     return (
                       <button
                         key={arp}
                         onClick={() => setSelectedArpenteur(arp)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${colorClass} border` : `${colorClass} opacity-40 hover:opacity-80`}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-80'}`}
+                        style={{ border: tabStyle.border, color: tabStyle.color, background: tabStyle.background }}
                       >
                         {arp}
-                        <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-700 text-slate-400'}`}>{count}</span>
+                        <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'rgba(255,255,255,0.15)' }}>{count}</span>
                       </button>
                     );
                   })}
