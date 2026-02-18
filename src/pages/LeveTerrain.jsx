@@ -806,7 +806,7 @@ export default function LeveTerrain() {
         };
         return (
           <div
-            className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-between p-4"
             onClick={() => setLightboxIndex(null)}
           >
             {/* Fermer */}
@@ -822,51 +822,55 @@ export default function LeveTerrain() {
               {lightboxIndex + 1} / {photosFiles.length}
             </div>
 
-            {/* Flèche gauche */}
-            {photosFiles.length > 1 && (
-              <button
-                className="absolute left-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
-                onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Image */}
-            <div className="max-w-5xl max-h-[70vh] flex items-center justify-center px-20" onClick={e => e.stopPropagation()}>
-              {isImg && current.downloadUrl ? (
-                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[70vh] rounded-lg object-contain shadow-2xl" />
-              ) : (
-                <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
-                  <Image className="w-16 h-16 mb-3" />
-                  <p className="text-sm">{current?.name}</p>
+            {/* PHOTO À GAUCHE - Centrée verticalement */}
+            <div className="flex-1 flex items-center justify-start pr-4" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-4">
+                {photosFiles.length > 1 && (
+                  <button
+                    className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 flex-shrink-0"
+                    onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                )}
+                
+                <div className="max-w-2xl max-h-[80vh] flex items-center justify-center">
+                  {isImg && current.downloadUrl ? (
+                    <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[80vh] rounded-lg object-contain shadow-2xl" />
+                  ) : (
+                    <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
+                      <Image className="w-16 h-16 mb-3" />
+                      <p className="text-sm">{current?.name}</p>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {photosFiles.length > 1 && (
+                  <button
+                    className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 flex-shrink-0"
+                    onClick={(e) => { e.stopPropagation(); goNext(); }}
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Flèche droite */}
-            {photosFiles.length > 1 && (
-              <button
-                className="absolute right-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
-                onClick={(e) => { e.stopPropagation(); goNext(); }}
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Carte satellite avec tous les pins des photos */}
+            {/* CARTE À DROITE - Centrée verticalement, 75% de la taille originale */}
             {selectedItem && photosFiles.length > 0 && (
-              <PhotoMapOverlay 
-                photosGPS={photosGPS} 
-                photosFiles={photosFiles} 
-                selectedDossier={selectedItem.dossier}
-                lightboxIndex={lightboxIndex}
-              />
+              <div className="flex items-center justify-end">
+                <PhotoMapOverlay 
+                  photosGPS={photosGPS} 
+                  photosFiles={photosFiles} 
+                  selectedDossier={selectedItem.dossier}
+                  lightboxIndex={lightboxIndex}
+                />
+              </div>
             )}
 
             {/* Bande de miniatures en bas */}
             {photosFiles.length > 1 && (
-              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 px-4 py-3 rounded-lg">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 px-4 py-3 rounded-lg z-20">
                 {/* Flèche scroll gauche */}
                 {thumbnailScroll > 0 && (
                   <button
@@ -913,11 +917,6 @@ export default function LeveTerrain() {
                 )}
               </div>
             )}
-
-            {/* Nom du fichier */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-slate-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full">
-              {current?.name}
-            </div>
           </div>
         );
       })()}
