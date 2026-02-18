@@ -34,19 +34,19 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
 
   const createHeadingIcon = (heading, isCurrent) => {
     const color = isCurrent ? '#3b82f6' : '#10b981';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <g transform="translate(12, 12) rotate(${heading || 0})">
-        <path d="M 0,-10 L 3,-3 L -3,-3 Z" fill="${color}" stroke="white" stroke-width="1"/>
-        <circle cx="0" cy="0" r="8" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3"/>
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+      <circle cx="20" cy="20" r="16" fill="${color}" stroke="white" stroke-width="2"/>
+      <g transform="translate(20, 20) rotate(${heading || 0})">
+        <path d="M 0,-12 L 5,2 L -5,2 Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
       </g>
-      <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="20" cy="20" r="4" fill="white"/>
     </svg>`;
     
     return L.divIcon({
       html: svg,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      popupAnchor: [0, -16]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
     });
   };
 
