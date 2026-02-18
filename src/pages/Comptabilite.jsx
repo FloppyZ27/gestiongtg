@@ -23,6 +23,18 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
+// Retourne les classes inline border+text séparément pour les tabs
+const getArpenteurTabStyle = (arpenteur, isActive) => {
+  const styles = {
+    "Samuel Guay": { border: "1px solid rgba(239,68,68,0.5)", color: "rgb(248,113,113)", background: isActive ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.05)" },
+    "Pierre-Luc Pilote": { border: "1px solid rgba(148,163,184,0.5)", color: "rgb(203,213,225)", background: isActive ? "rgba(148,163,184,0.15)" : "rgba(148,163,184,0.05)" },
+    "Frédéric Gilbert": { border: "1px solid rgba(249,115,22,0.5)", color: "rgb(251,146,60)", background: isActive ? "rgba(249,115,22,0.15)" : "rgba(249,115,22,0.05)" },
+    "Dany Gaboury": { border: "1px solid rgba(234,179,8,0.5)", color: "rgb(250,204,21)", background: isActive ? "rgba(234,179,8,0.15)" : "rgba(234,179,8,0.05)" },
+    "Benjamin Larouche": { border: "1px solid rgba(34,211,238,0.5)", color: "rgb(34,211,238)", background: isActive ? "rgba(34,211,238,0.15)" : "rgba(34,211,238,0.05)" },
+  };
+  return styles[arpenteur] || { border: "1px solid rgba(16,185,129,0.5)", color: "rgb(52,211,153)", background: isActive ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.05)" };
+};
+
 const getArpenteurTabColor = (arpenteur) => {
   const colors = { "Samuel Guay": "border-red-500 text-red-400 bg-red-500/10", "Pierre-Luc Pilote": "border-slate-400 text-slate-300 bg-slate-500/10", "Frédéric Gilbert": "border-orange-500 text-orange-400 bg-orange-500/10", "Dany Gaboury": "border-yellow-500 text-yellow-400 bg-yellow-500/10", "Benjamin Larouche": "border-cyan-500 text-cyan-400 bg-cyan-500/10" };
   return colors[arpenteur] || "border-emerald-500 text-emerald-400 bg-emerald-500/10";
