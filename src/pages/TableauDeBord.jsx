@@ -338,6 +338,27 @@ export default function TableauDeBord() {
     return isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
   });
 
+  // Compteurs de messages non lus (messages créés après la dernière visite)
+  const getUnreadCount = (tab) => {
+    const storageKey = `lastVisit_chat_${tab}_${user?.email}`;
+    const lastVisit = localStorage.getItem(storageKey);
+    if (!lastVisit) return 0;
+    const lastVisitDate = new Date(lastVisit);
+    if (tab === "clubsocial") {
+      return posts.filter(p => new Date(p.created_date) > lastVisitDate && p.utilisateur_email !== user?.email).length;
+    }
+    return chatMessages.filter(m => m.canal === tab && new Date(m.created_date) > lastVisitDate && m.utilisateur_email !== user?.email).length;
+  };
+
+  const markAsRead = (tab) => {
+    const storageKey = `lastVisit_chat_${tab}_${user?.email}`;
+    localStorage.setItem(storageKey, new Date().toISOString());
+  };
+
+  const unreadGenerale = getUnreadCount("generale");
+  const unreadEquipe = getUnreadCount("equipe");
+  const unreadClubSocial = getUnreadCount("clubsocial");
+
   const absencesAujourdhui = rendezvous.filter(rdv => 
     rdv.date_debut && 
     isSameDay(new Date(rdv.date_debut), today)
