@@ -254,21 +254,83 @@ export default function LeveTerrain() {
                       onClick={() => handleSelectDossier({ dossier, mandat })}
                       className={`w-full text-left px-3 py-3 border-b border-slate-800/50 hover:bg-slate-800/40 transition-all ${isSelected ? 'bg-emerald-500/15 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </Badge>
-                        {isSelected && <ChevronRight className="w-4 h-4 text-emerald-400" />}
+                      {/* Badges N° dossier + type mandat */}
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex gap-1 flex-wrap">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                          </Badge>
+                          <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>{mandat.type_mandat}</Badge>
+                        </div>
+                        {isSelected && <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
                       </div>
-                      <p className="text-white text-xs font-medium truncate">{getClientsNames(dossier.clients_ids)}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>{mandat.type_mandat}</Badge>
+                      {/* Client */}
+                      <div className="flex items-center gap-1 mb-1">
+                        <User className="w-3 h-3 text-white flex-shrink-0" />
+                        <p className="text-white text-xs font-medium truncate">{getClientsNames(dossier.clients_ids)}</p>
                       </div>
-                      {mandat.adresse_travaux && (
-                        <p className="text-slate-500 text-[10px] mt-1 truncate">
-                          <MapPin className="w-2.5 h-2.5 inline mr-0.5" />{formatAdresse(mandat.adresse_travaux)}
-                        </p>
+                      {/* Adresse */}
+                      {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                        <div className="flex items-start gap-1 mb-1">
+                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                          <p className="text-slate-400 text-[10px] break-words">{formatAdresse(mandat.adresse_travaux)}</p>
+                        </div>
                       )}
+                      {/* Date livraison */}
+                      {mandat.date_livraison && (
+                        <div className="flex items-center gap-1 mb-1">
+                          <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                          <span className="text-emerald-300 text-[10px]">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                        </div>
+                      )}
+                      {/* Terrain info depuis terrains_list[0] si disponible */}
+                      {(() => {
+                        const terrain = mandat.terrains_list?.[0] || mandat.terrain;
+                        if (!terrain) return null;
+                        return (
+                          <>
+                            {terrain.date_limite_leve && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                <span className="text-yellow-300 text-[10px]">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                              </div>
+                            )}
+                            {terrain.a_rendez_vous && terrain.date_rendez_vous && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                                <span className="text-orange-300 text-[10px]">
+                                  RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
+                                  {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
+                                </span>
+                              </div>
+                            )}
+                            {terrain.instruments_requis && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                <span className="text-emerald-300 text-[10px] truncate">{terrain.instruments_requis}</span>
+                              </div>
+                            )}
+                            {terrain.technicien && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                <span className="text-blue-300 text-[10px] truncate">{terrain.technicien}</span>
+                              </div>
+                            )}
+                            {terrain.dossier_simultane && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                <span className="text-purple-300 text-[10px] truncate">Avec: {terrain.dossier_simultane}</span>
+                              </div>
+                            )}
+                            {terrain.temps_prevu && (
+                              <div className="flex items-center gap-1">
+                                <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                <span className="text-emerald-300 text-[10px]">{terrain.temps_prevu}</span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </button>
                   );
                 })
