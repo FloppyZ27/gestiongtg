@@ -264,7 +264,7 @@ export default function Comptabilite() {
                     </div>
 
                     {/* Lignes par utilisateur */}
-                    {users.map(u => {
+                    {sortedUsers.map(u => {
                       const weekH = getUserWeekHours(u.email);
                       return (
                         <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
