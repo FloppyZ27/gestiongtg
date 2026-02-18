@@ -901,45 +901,7 @@ export default function TableauDeBord() {
           </div>
         </div>
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-white">Raccourcis</CardTitle>
-              <Button
-                size="sm"
-                onClick={() => setIsEditRaccourcisOpen(true)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Personnaliser
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {raccourcis.map((raccourci) => {
-                const IconComponent = ICONS_MAP[raccourci.icone] || Home;
-                return (
-                  <Button
-                    key={raccourci.id}
-                    onClick={() => handleRaccourciClick(raccourci)}
-                    className={`h-24 flex flex-col gap-2 ${raccourci.couleur || 'bg-slate-800'} hover:opacity-80 transition-all`}
-                  >
-                    <IconComponent className="w-8 h-8" />
-                    <span className="text-sm">{raccourci.titre}</span>
-                  </Button>
-                );
-              })}
-              <Button
-                onClick={() => setIsEditRaccourcisOpen(true)}
-                className="h-24 flex flex-col gap-2 bg-slate-800/50 border-2 border-dashed border-slate-700 hover:border-emerald-500"
-              >
-                <Plus className="w-8 h-8" />
-                <span className="text-sm">Ajouter</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
