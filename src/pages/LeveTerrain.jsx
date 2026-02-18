@@ -825,22 +825,29 @@ export default function LeveTerrain() {
                         {photosFiles.map((file, idx) => {
                           const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.name.split('.').pop()?.toLowerCase());
                           return (
-                            <button
-                              key={file.id}
-                              onClick={() => setLightboxIndex(idx)}
-                              className="group relative aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-blue-500 transition-all"
-                            >
-                              {isImage && file.downloadUrl ? (
-                                <img src={file.downloadUrl} alt={file.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <div className="flex items-center justify-center h-full">
-                                  <Image className="w-8 h-8 text-slate-600" />
+                            <div key={file.id} className="group relative aspect-square">
+                              <button
+                                onClick={() => setLightboxIndex(idx)}
+                                className="w-full h-full rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-blue-500 transition-all"
+                              >
+                                {isImage && file.downloadUrl ? (
+                                  <img src={file.downloadUrl} alt={file.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full">
+                                    <Image className="w-8 h-8 text-slate-600" />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                  <ZoomIn className="w-5 h-5 text-white" />
                                 </div>
-                              )}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <ZoomIn className="w-5 h-5 text-white" />
-                              </div>
-                            </button>
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeletePhoto(idx, file.name); }}
+                                className="absolute top-1 right-1 bg-red-600/80 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
