@@ -54,7 +54,7 @@ export default function Comptabilite() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
-  const { data: allEntreesTemps = [] } = useQuery({ queryKey: ['allEntreesTemps'], queryFn: () => base44.entities.EntreeTemps.list('-date', 500), initialData: [] });
+  const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
 
   // ---- Agenda helpers ----
   const getAgendaWeekDays = () => {
