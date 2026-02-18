@@ -230,15 +230,17 @@ export default function LeveTerrain() {
       const dataUrl = `data:image/jpeg;base64,${base64Content}`;
       const { gpsData, heading: exifHeading } = await extractGPSAndOrientationFromImage(dataUrl);
 
+      console.log('📸 Photo upload:', { fileName: file.name, exifHeading, deviceGPSHeading: deviceGPS?.heading });
+
       // Déterminer le heading final (EXIF prioritaire, puis device)
       let finalHeading = null;
       let finalLat = null;
       let finalLng = null;
       let finalAccuracy = null;
 
-      if (exifHeading !== null) {
+      if (exifHeading !== null && exifHeading !== undefined) {
         finalHeading = exifHeading;
-      } else if (deviceGPS?.heading) {
+      } else if (deviceGPS?.heading !== null && deviceGPS?.heading !== undefined) {
         finalHeading = deviceGPS.heading;
       }
 
@@ -250,6 +252,8 @@ export default function LeveTerrain() {
         finalLng = deviceGPS.lng;
         finalAccuracy = deviceGPS.accuracy;
       }
+
+      console.log('💾 Storing PhotoGPS:', { finalLat, finalLng, finalHeading });
 
       // Sauvegarder les coordonnées GPS et l'orientation
       if (finalLat && finalLng) {
