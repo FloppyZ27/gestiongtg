@@ -693,14 +693,28 @@ export default function LeveTerrain() {
       </div>
       {/* ===== LIGHTBOX PHOTOS ===== */}
       {lightboxIndex !== null && (() => {
-        const imageFiles = photosFiles.filter(f => ['jpg','jpeg','png','gif','webp'].includes(f.name.split('.').pop()?.toLowerCase()));
         const current = photosFiles[lightboxIndex];
         const isImg = ['jpg','jpeg','png','gif','webp'].includes(current?.name.split('.').pop()?.toLowerCase());
-        const goPrev = () => setLightboxIndex(i => (i - 1 + photosFiles.length) % photosFiles.length);
-        const goNext = () => setLightboxIndex(i => (i + 1) % photosFiles.length);
+        const goPrev = () => {
+          setLightboxIndex(i => (i - 1 + photosFiles.length) % photosFiles.length);
+          setThumbnailScroll(Math.max(0, thumbnailScroll - 1));
+        };
+        const goNext = () => {
+          setLightboxIndex(i => (i + 1) % photosFiles.length);
+          setThumbnailScroll(Math.min(Math.max(0, photosFiles.length - 5), thumbnailScroll + 1));
+        };
+        const handleThumbClick = (idx) => {
+          setLightboxIndex(idx);
+          const visibleCount = 5;
+          if (idx < thumbnailScroll) {
+            setThumbnailScroll(idx);
+          } else if (idx >= thumbnailScroll + visibleCount) {
+            setThumbnailScroll(Math.max(0, idx - visibleCount + 1));
+          }
+        };
         return (
           <div
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center"
             onClick={() => setLightboxIndex(null)}
           >
             {/* Fermer */}
@@ -727,9 +741,9 @@ export default function LeveTerrain() {
             )}
 
             {/* Image */}
-            <div className="max-w-5xl max-h-[85vh] flex items-center justify-center px-20" onClick={e => e.stopPropagation()}>
+            <div className="max-w-5xl max-h-[70vh] flex items-center justify-center px-20" onClick={e => e.stopPropagation()}>
               {isImg && current.downloadUrl ? (
-                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[85vh] rounded-lg object-contain shadow-2xl" />
+                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[70vh] rounded-lg object-contain shadow-2xl" />
               ) : (
                 <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
                   <Image className="w-16 h-16 mb-3" />
@@ -748,23 +762,60 @@ export default function LeveTerrain() {
               </button>
             )}
 
+            {/* Bande de miniatures en bas */}
+            {photosFiles.length > 1 && (
+              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 px-4 py-3 rounded-lg">
+                {/* Flèche scroll gauche */}
+                {thumbnailScroll > 0 && (
+                  <button
+                    className="text-slate-400 hover:text-white flex-shrink-0"
+                    onClick={(e) => { e.stopPropagation(); setThumbnailScroll(Math.max(0, thumbnailScroll - 1)); }}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                )}
+                
+                {/* Miniatures */}
+                <div className="flex gap-2 overflow-hidden" style={{ width: '300px' }}>
+                  {photosFiles.slice(thumbnailScroll, thumbnailScroll + 5).map((file, i) => {
+                    const realIdx = thumbnailScroll + i;
+                    const isImage = ['jpg','jpeg','png','gif','webp'].includes(file.name.split('.').pop()?.toLowerCase());
+                    return (
+                      <button
+                        key={file.id}
+                        onClick={(e) => { e.stopPropagation(); handleThumbClick(realIdx); }}
+                        className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
+                          lightboxIndex === realIdx ? 'border-blue-500 ring-2 ring-blue-400' : 'border-slate-600 hover:border-slate-400'
+                        }`}
+                      >
+                        {isImage && file.downloadUrl ? (
+                          <img src={file.downloadUrl} alt={file.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                            <Image className="w-6 h-6 text-slate-600" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Flèche scroll droite */}
+                {thumbnailScroll + 5 < photosFiles.length && (
+                  <button
+                    className="text-slate-400 hover:text-white flex-shrink-0"
+                    onClick={(e) => { e.stopPropagation(); setThumbnailScroll(Math.min(photosFiles.length - 5, thumbnailScroll + 1)); }}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Nom du fichier */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-slate-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full">
               {current?.name}
             </div>
-
-            {/* Lien SharePoint */}
-            {current?.webUrl && (
-              <a
-                href={current.webUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute bottom-12 left-1/2 -translate-x-1/2 text-blue-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full flex items-center gap-1 hover:text-blue-300"
-                onClick={e => e.stopPropagation()}
-              >
-                <ExternalLink className="w-3 h-3" /> Ouvrir dans SharePoint
-              </a>
-            )}
           </div>
         );
       })()}
