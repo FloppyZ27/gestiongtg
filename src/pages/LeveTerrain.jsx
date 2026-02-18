@@ -911,7 +911,7 @@ export default function LeveTerrain() {
 
             {/* Bande de miniatures en bas */}
             {photosFiles.length > 1 && (
-              <div className="flex items-center justify-center gap-2 bg-black/80 px-4 py-3 rounded-lg mx-auto mb-4">
+              <div className="flex items-center justify-center gap-2 bg-black/80 px-4 py-3 rounded-lg mx-auto mb-4 w-full">
                 {/* Flèche scroll gauche */}
                 {thumbnailScroll > 0 && (
                   <button
@@ -921,9 +921,9 @@ export default function LeveTerrain() {
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                 )}
-                
+
                 {/* Miniatures */}
-                <div className="flex gap-2 overflow-hidden" style={{ width: '300px' }}>
+                <div className="flex gap-2 overflow-hidden flex-1">
                   {photosFiles.slice(thumbnailScroll, thumbnailScroll + 5).map((file, i) => {
                     const realIdx = thumbnailScroll + i;
                     const isImage = ['jpg','jpeg','png','gif','webp'].includes(file.name.split('.').pop()?.toLowerCase());
