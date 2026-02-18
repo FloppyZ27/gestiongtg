@@ -865,15 +865,17 @@ export default function LeveTerrain() {
             {/* Flèche gauche */}
             {photosFiles.length > 1 && (
               <button
-                className="absolute left-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
                 onClick={(e) => { e.stopPropagation(); goPrev(); }}
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
             )}
 
-            {/* Image centrée */}
-            <div className="flex-1 flex items-center justify-center px-6" onClick={e => e.stopPropagation()}>
+            {/* Conteneur principal : photo à gauche, carte à droite */}
+            <div className="flex-1 flex items-center justify-between px-6 py-4 gap-6" onClick={e => e.stopPropagation()}>
+              {/* Image centrée à gauche */}
+              <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
               {isImg && current.downloadUrl ? (
                 <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
               ) : (
