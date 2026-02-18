@@ -161,6 +161,11 @@ export default function Comptabilite() {
   const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
   const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
 
+  // Totaux globaux tous arpenteurs
+  const allMandatsItems = ARPENTEURS.flatMap(arp => getMandatsOuverts(arp));
+  const grandTotalTarif = allMandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
+  const grandTotalValeur = allMandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
