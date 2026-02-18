@@ -55,14 +55,12 @@ const getAdresseString = (addr) => {
 export default function LeveTerrain() {
   const today = new Date().toISOString().split('T')[0];
   const [selectedItem, setSelectedItem] = useState(null); // { dossier, mandat }
+  const [terrainStartTime, setTerrainStartTime] = useState(null); // Date object quand punch in terrain
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [showPunchControls, setShowPunchControls] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [spFiles, setSpFiles] = useState({ IN: [], OUT: [] });
   const [photosFiles, setPhotosFiles] = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
-  const punchTimerRef = useRef(null);
   const cameraInputRef = useRef(null);
   const queryClient = useQueryClient();
 
