@@ -230,7 +230,7 @@ export default function LeveTerrain() {
       const dataUrl = `data:image/jpeg;base64,${base64Content}`;
       const { gpsData, heading: exifHeading } = await extractGPSAndOrientationFromImage(dataUrl);
 
-      console.log('📸 Photo upload:', { fileName: file.name, exifHeading, deviceGPSHeading: deviceGPS?.heading });
+      console.log('📸 Photo upload:', { fileName: file.name, exifHeading, deviceGPS });
 
       // Déterminer le heading final (EXIF prioritaire, puis device)
       let finalHeading = null;
@@ -240,7 +240,7 @@ export default function LeveTerrain() {
 
       if (exifHeading !== null && exifHeading !== undefined) {
         finalHeading = exifHeading;
-      } else if (deviceGPS?.heading !== null && deviceGPS?.heading !== undefined) {
+      } else if (deviceGPS && deviceGPS.heading !== null && deviceGPS.heading !== undefined) {
         finalHeading = deviceGPS.heading;
       }
 
@@ -253,11 +253,11 @@ export default function LeveTerrain() {
         finalAccuracy = deviceGPS.accuracy;
       }
 
-      console.log('💾 Storing PhotoGPS:', { finalLat, finalLng, finalHeading });
+      console.log('💾 Storing PhotoGPS:', { finalLat, finalLng, finalHeading, timestamp: deviceGPS?.timestamp });
 
       // Sauvegarder les coordonnées GPS et l'orientation
       if (finalLat && finalLng) {
-        await base44.entities.PhotoGPS.create({
+        const photoGPSRecord = {
           dossier_id: selectedItem.dossier.id,
           mandat_type: selectedItem.mandat.type_mandat,
           photo_name: file.name,
@@ -267,7 +267,9 @@ export default function LeveTerrain() {
           heading: finalHeading,
           timestamp: deviceGPS?.timestamp || new Date().toISOString(),
           utilisateur_email: user?.email
-        });
+        };
+        console.log('🔐 Final PhotoGPS record:', photoGPSRecord);
+        await base44.entities.PhotoGPS.create(photoGPSRecord);
       }
 
       loadPhotos(selectedItem.dossier);
