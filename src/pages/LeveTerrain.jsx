@@ -855,21 +855,52 @@ export default function LeveTerrain() {
               </button>
             )}
 
-            {/* Carte localisation avec GPS ou adresse */}
-            {(photoGPS || selectedItem?.mandat?.adresse_travaux) && (
-              <div className="absolute bottom-64 right-4 w-72 h-64 rounded-lg overflow-hidden border border-slate-600 shadow-lg" onClick={e => e.stopPropagation()}>
-                <iframe
-                  title="Localisation photo"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={photoGPS 
-                    ? `https://www.google.com/maps?q=${photoGPS.lat},${photoGPS.lng}&output=embed`
-                    : `https://www.google.com/maps?q=${encodeURIComponent(getAdresseString(selectedItem.mandat.adresse_travaux))}&output=embed`
-                  }
-                />
+            {/* Carte satellite avec tous les pins des photos */}
+            {photosFiles.length > 0 && photosGPS.some(gps => gps.dossier_id === selectedItem?.dossier?.id) && (
+              <div className="absolute bottom-64 right-4 w-80 h-80 rounded-lg overflow-hidden border border-slate-600 shadow-lg z-20" onClick={e => e.stopPropagation()}>
+                {(() => {
+                  const dossierId = selectedItem.dossier.id;
+                  const photosGPSForDossier = photosGPS.filter(gps => gps.dossier_id === dossierId && gps.latitude && gps.longitude);
+                  
+                  if (photosGPSForDossier.length === 0) return null;
+                  
+                  const center = [
+                    photosGPSForDossier.reduce((sum, gps) => sum + gps.latitude, 0) / photosGPSForDossier.length,
+                    photosGPSForDossier.reduce((sum, gps) => sum + gps.longitude, 0) / photosGPSForDossier.length
+                  ];
+                  
+                  return (
+                    <MapContainer center={center} zoom={18} style={{ height: '100%', width: '100%' }}>
+                      <TileLayer
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        attribution='&copy; Esri'
+                      />
+                      {photosGPSForDossier.map((gps, idx) => {
+                        const photoIdx = photosFiles.findIndex(f => f.name === gps.photo_name);
+                        const photoNum = photoIdx >= 0 ? photoIdx + 1 : idx + 1;
+                        const isCurrentPhoto = lightboxIndex === photoIdx;
+                        
+                        const customIcon = L.divIcon({
+                          html: `<div class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs text-white ${isCurrentPhoto ? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-emerald-500'} shadow-lg">${photoNum}</div>`,
+                          iconSize: [32, 32],
+                          className: ''
+                        });
+                        
+                        return (
+                          <Marker key={gps.id} position={[gps.latitude, gps.longitude]} icon={customIcon}>
+                            <Popup>
+                              <div className="text-xs">
+                                <p className="font-bold">Photo {photoNum}</p>
+                                <p className="text-slate-600">{gps.photo_name}</p>
+                                {gps.accuracy_meters && <p className="text-slate-500">±{Math.round(gps.accuracy_meters)}m</p>}
+                              </div>
+                            </Popup>
+                          </Marker>
+                        );
+                      })}
+                    </MapContainer>
+                  );
+                })()}
               </div>
             )}
 
