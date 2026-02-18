@@ -640,19 +640,12 @@ export default function LeveTerrain() {
                         </button>
                         <Button
                           size="sm"
-                          onClick={() => cameraInputRef.current?.click()}
+                          onClick={openCamera}
                           className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none h-8 text-xs"
                         >
                           <Camera className="w-3.5 h-3.5 mr-1" /> Prendre photo
                         </Button>
-                        <input
-                          ref={cameraInputRef}
-                          type="file"
-                          accept="image/*"
-                          capture
-                          onChange={handleCameraCapture}
-                          className="hidden"
-                        />
+                        <input ref={cameraInputRef} type="file" accept="image/*" onChange={handleCameraCapture} className="hidden" />
                       </div>
                     </div>
 
