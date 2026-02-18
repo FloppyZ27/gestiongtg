@@ -891,34 +891,8 @@ export default function LeveTerrain() {
               <button
                 className="text-white bg-red-700/80 hover:bg-red-600 rounded-full p-2 transition-colors"
                 onClick={() => {
-                  if (selectedItem && confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) {
-                    try {
-                      // Supprimer la photo de SharePoint (via function)
-                      base44.functions.invoke('deleteSharePointFile', { 
-                        filePath: photosFiles[lightboxIndex].webUrl 
-                      }).catch(() => {});
-                      
-                      // Supprimer les données GPS associées
-                      const gpsToDelete = photosGPS.find(
-                        gps => gps.dossier_id === selectedItem.dossier.id && gps.photo_name === photosFiles[lightboxIndex].name
-                      );
-                      if (gpsToDelete) {
-                        base44.entities.PhotoGPS.delete(gpsToDelete.id).catch(() => {});
-                      }
-                      
-                      // Mettre à jour la liste des photos
-                      const newPhotos = photosFiles.filter((_, idx) => idx !== lightboxIndex);
-                      setPhotosFiles(newPhotos);
-                      
-                      // Fermer le lightbox ou afficher la photo précédente
-                      if (newPhotos.length === 0) {
-                        setLightboxIndex(null);
-                      } else if (lightboxIndex >= newPhotos.length) {
-                        setLightboxIndex(lightboxIndex - 1);
-                      }
-                    } catch (e) {
-                      console.error("Erreur suppression photo:", e);
-                    }
+                  if (selectedItem) {
+                    handleDeletePhoto(lightboxIndex, photosFiles[lightboxIndex].name);
                   }
                 }}
               >
