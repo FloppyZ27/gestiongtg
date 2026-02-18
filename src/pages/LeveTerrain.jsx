@@ -221,7 +221,7 @@ export default function LeveTerrain() {
     const initiale = ARPENTEUR_INITIALS[arp] || arp;
     const numDossier = selectedItem.dossier.numero_dossier;
     const dateStr = format(new Date(), "yyyyMMdd");
-    const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${numDossier}/TERRAIN/IN/${numDossier}_TI_${dateStr}/PHOTOS`;
+    const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
 
     try {
       await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: await fileToBase64(file) });
