@@ -73,11 +73,11 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
               icon={createHeadingIcon(gps.heading, isCurrent)}
             >
               <Popup>
-                <div className="text-xs">
+                <div className="text-xs space-y-1">
                   <p className="font-bold">Photo {photoNum}</p>
                   <p className="text-slate-600">{gps.photo_name}</p>
-                  {gps.accuracy_meters && <p className="text-slate-500">±{Math.round(gps.accuracy_meters)}m</p>}
-                  {gps.heading !== null && gps.heading !== undefined && <p className="text-slate-500">Direction: {Math.round(gps.heading)}°</p>}
+                  {gps.accuracy_meters && <p className="text-slate-500">Précision: ±{Math.round(gps.accuracy_meters)}m</p>}
+                  <p className="text-slate-500">Direction: {gps.heading !== null && gps.heading !== undefined ? Math.round(gps.heading) + '°' : 'N/A'}</p>
                 </div>
               </Popup>
             </Marker>
