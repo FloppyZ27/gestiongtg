@@ -180,42 +180,44 @@ export default function Comptabilite() {
                   </div>
                 </div>
 
-                {/* Agenda layout : colonne utilisateurs 20% + grille 80% */}
-                <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '600px' }}>
-                  {/* Colonne utilisateurs - 20% */}
+                {/* Agenda layout : colonne utilisateurs 20% + grille horaire 80% */}
+                <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '865px' }}>
+                  {/* Colonne utilisateurs - 20% (filtre) */}
                   <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '20%' }}>
-                    {/* Header vide aligné avec en-têtes jours */}
-                    <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0" style={{ height: '56px' }}>
-                      <div className="h-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
-                      </div>
+                    <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0 px-2 py-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
                     </div>
-                    {/* Ligne totaux */}
-                    <div className="border-b border-slate-700 bg-slate-800/50 flex-shrink-0 px-2 py-1.5" style={{ height: '40px' }}>
-                      <span className="text-xs font-semibold text-emerald-400">Totaux</span>
-                    </div>
-                    {/* Liste utilisateurs scrollable */}
                     <div className="overflow-y-auto flex-1">
-                      {users.map(u => (
-                        <div key={u.id} className="flex items-center gap-2 px-2 py-2 border-b border-slate-800/50 hover:bg-slate-800/30">
-                          <Avatar className="w-6 h-6 flex-shrink-0">
-                            <AvatarImage src={u.photo_url} />
-                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs text-slate-200 truncate leading-tight">{u.full_name}</span>
-                        </div>
-                      ))}
+                      {users.map(u => {
+                        const isActive = activeAgendaUser?.email === u.email;
+                        return (
+                          <button
+                            key={u.id}
+                            onClick={() => setSelectedAgendaUser(u)}
+                            className={`w-full flex items-center gap-2 px-3 py-2.5 border-b border-slate-800/50 hover:bg-slate-800/40 transition-colors ${isActive ? 'bg-emerald-500/20 border-l-4 border-l-emerald-500' : ''}`}
+                          >
+                            <Avatar className="w-7 h-7 flex-shrink-0">
+                              <AvatarImage src={u.photo_url} />
+                              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className={`text-xs truncate leading-tight ${isActive ? 'text-emerald-300 font-semibold' : 'text-slate-200'}`}>{u.full_name}</p>
+                              <p className="text-[10px] text-slate-500 truncate">{u.poste || u.role}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Grille agenda - 80% */}
-                  <div className="flex-1 overflow-x-auto flex flex-col min-w-0">
+                  {/* Grille horaire - 80% */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
                     {/* En-têtes des jours */}
-                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50" style={{ height: '56px' }}>
+                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50">
                       {agendaWeekDays.map((day, idx) => {
                         const isToday = day.toDateString() === new Date().toDateString();
                         return (
-                          <div key={idx} className={`flex-1 text-center py-2 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
+                          <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
                             <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>{format(day, "EEE", { locale: fr })}</div>
                             <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>{format(day, "d")}</div>
                           </div>
@@ -223,65 +225,109 @@ export default function Comptabilite() {
                       })}
                     </div>
 
-                    {/* Ligne totaux par jour */}
-                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-800/50" style={{ height: '40px' }}>
+                    {/* Ligne totaux pour l'utilisateur actif */}
+                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-800/50">
+                      <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-800/50 flex items-center justify-center">
+                        <div className="text-xs font-semibold text-emerald-400">Total</div>
+                      </div>
                       {agendaWeekDays.map((day, idx) => {
-                        const total = users.reduce((sum, u) => sum + getUserDayTotalHours(day, u.email), 0);
+                        const total = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
                         return (
-                          <div key={idx} className="flex-1 border-r border-slate-700 flex items-center justify-center px-1">
-                            {total > 0 ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1">{total.toFixed(1)}h</Badge> : <span className="text-slate-700 text-xs">-</span>}
+                          <div key={idx} className="flex-1 border-r border-slate-700 flex items-center justify-center px-1 py-2">
+                            {total > 0 ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">{total.toFixed(1)}h</Badge> : <span className="text-slate-700 text-xs">-</span>}
                           </div>
                         );
                       })}
                     </div>
 
-                    {/* Lignes par utilisateur */}
-                    <div className="overflow-y-auto flex-1">
-                      {users.map(u => (
-                        <div key={u.id} className="flex border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors" style={{ minHeight: '48px' }}>
-                          {agendaWeekDays.map((day, dayIdx) => {
-                            const isToday = day.toDateString() === new Date().toDateString();
-                            const pointages = getPointagesForDateUser(day, u.email);
-                            const totalH = pointages.reduce((sum, p) => sum + getPointageDuration(p), 0);
-                            return (
-                              <div key={dayIdx} className={`flex-1 border-r border-slate-700 p-1 ${isToday ? 'bg-emerald-500/5' : ''}`} style={{ minWidth: 0 }}>
-                                {pointages.length > 0 ? (
-                                  <div className="space-y-0.5">
-                                    {pointages.map(p => {
-                                      const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
-                                      const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
-                                      const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
-                                      const duree = getPointageDuration(p);
-                                      return (
-                                        <Tooltip key={p.id}>
-                                          <TooltipTrigger asChild>
-                                            <div className={`rounded px-1.5 py-0.5 cursor-default border ${isModified ? 'bg-gradient-to-r from-orange-500/30 to-amber-500/20 border-orange-500/30' : 'bg-gradient-to-r from-emerald-500/30 to-teal-500/20 border-emerald-500/30'}`}>
-                                              <div className="flex items-center justify-between gap-1">
-                                                <span className="text-[10px] text-slate-300 truncate">{format(debut, "HH:mm")}–{format(fin, "HH:mm")}</span>
-                                                <span className={`text-[10px] font-bold flex-shrink-0 ${isModified ? 'text-orange-400' : 'text-emerald-400'}`}>{duree.toFixed(1)}h</span>
-                                              </div>
-                                            </div>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-white max-w-xs p-3 text-xs">
-                                            <div className="space-y-1">
-                                              <div className={`font-semibold ${isModified ? 'text-orange-400' : 'text-emerald-400'}`}>{duree.toFixed(2)}h {isModified ? '(modifié)' : ''}</div>
-                                              <div className="text-slate-300">{format(debut, "HH:mm")} → {format(fin, "HH:mm")}</div>
-                                              {p.description && <div className="text-slate-400">{p.description}</div>}
-                                            </div>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      );
-                                    })}
-                                    {pointages.length > 1 && (
-                                      <div className="text-[9px] text-slate-500 text-right px-0.5">Total: {totalH.toFixed(1)}h</div>
-                                    )}
-                                  </div>
-                                ) : null}
+                    {/* Grille horaire comme dans Profil */}
+                    <div className="overflow-y-auto flex-1 relative" ref={agendaScrollRef}>
+                      <div className="flex relative" style={{ minHeight: '1440px' }}>
+                        {/* Colonne des heures */}
+                        <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                          {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                            <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                              <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
+                                {hour.toString().padStart(2, '0')}:00
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
                         </div>
-                      ))}
+
+                        {/* Colonnes des jours */}
+                        {agendaWeekDays.map((day, dayIdx) => {
+                          const isToday = day.toDateString() === new Date().toDateString();
+                          const dayPointages = activeAgendaUser ? getPointagesForDateUser(day, activeAgendaUser.email) : [];
+
+                          return (
+                            <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
+                              {/* Grille des heures de fond */}
+                              {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                                <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                              ))}
+
+                              {/* Blocs de pointage */}
+                              {dayPointages.map(p => {
+                                const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                const startHour = startTime.getHours();
+                                const startMin = startTime.getMinutes();
+                                const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                const topPx = startHour * 60 + startMin;
+
+                                const initialStart = new Date(p.heure_debut);
+                                const initialEnd = new Date(p.heure_fin);
+                                const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+
+                                return (
+                                  <Tooltip key={p.id}>
+                                    <TooltipTrigger asChild>
+                                      <div
+                                        className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-default overflow-hidden flex flex-col ${
+                                          isModified
+                                            ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                            : p.confirme 
+                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                        }`}
+                                        style={{ height: `${totalMinutes}px`, top: `${topPx}px` }}
+                                      >
+                                        {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
+                                        {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
+                                        <div className="text-[11px] leading-tight">
+                                          <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>
+                                            Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
+                                          </div>
+                                          {isModified && (
+                                            <div className="opacity-90 text-orange-400 mt-1">
+                                              Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
+                                            </div>
+                                          )}
+                                          {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
+                                        </div>
+                                        {isModified && (
+                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
+                                            Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-3">
+                                      <div className="space-y-1 text-xs">
+                                        <div className="font-semibold text-emerald-400">Pointage du {format(new Date(p.date), "d MMMM yyyy", { locale: fr })}</div>
+                                        <div className="text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(2)}h)</div>
+                                        {isModified && <div className="text-orange-400">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(2)}h)</div>}
+                                        {p.description && <div className="text-slate-400 border-t border-slate-600 pt-1 mt-1">{p.description}</div>}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
