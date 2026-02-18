@@ -213,7 +213,7 @@ export default function LeveTerrain() {
     await uploadPhoto(file);
   };
 
-  const uploadPhoto = async (file) => {
+  const uploadPhoto = async (file, deviceGPS) => {
     if (!selectedItem) return;
     const arp = selectedItem.dossier.arpenteur_geometre;
     const initiale = ARPENTEUR_INITIALS[arp] || arp;
@@ -222,6 +222,21 @@ export default function LeveTerrain() {
     const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
     try {
       await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: await fileToBase64(file) });
+      
+      // Sauvegarder les coordonnées GPS du périphérique si disponibles
+      if (deviceGPS) {
+        await base44.entities.PhotoGPS.create({
+          dossier_id: selectedItem.dossier.id,
+          mandat_type: selectedItem.mandat.type_mandat,
+          photo_name: file.name,
+          latitude: deviceGPS.lat,
+          longitude: deviceGPS.lng,
+          accuracy_meters: deviceGPS.accuracy,
+          timestamp: deviceGPS.timestamp,
+          utilisateur_email: user?.email
+        });
+      }
+      
       loadPhotos(selectedItem.dossier);
     } catch (e) {
       console.error("Upload photo error:", e);
