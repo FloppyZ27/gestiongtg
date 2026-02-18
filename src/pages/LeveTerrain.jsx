@@ -93,6 +93,7 @@ export default function LeveTerrain() {
   const [showCamera, setShowCamera] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
+  const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
