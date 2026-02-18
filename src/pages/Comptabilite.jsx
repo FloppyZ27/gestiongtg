@@ -436,7 +436,7 @@ export default function Comptabilite() {
                       <button
                         key={arp}
                         onClick={() => setSelectedArpenteur(arp)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${colorClass} border` : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${colorClass} border` : `${colorClass} opacity-40 hover:opacity-80`}`}
                       >
                         {arp}
                         <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-700 text-slate-400'}`}>{count}</span>
