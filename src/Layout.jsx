@@ -75,6 +75,11 @@ const navigationItems = [
     icon: Kanban,
   },
   {
+    title: "Comptabilité",
+    url: createPageUrl("Comptabilite"),
+    icon: DollarSign,
+  },
+  {
     title: "Cédule Terrain",
     url: createPageUrl("CeduleTerrain"),
     icon: CalendarDays,
