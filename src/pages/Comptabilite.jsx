@@ -272,24 +272,7 @@ export default function Comptabilite() {
                       );
                     })}
 
-                    {/* Ligne totaux par jour */}
-                    <div className="grid px-3 py-2 bg-slate-800/50 items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
-                      <div className="text-xs font-bold text-slate-300">Total / jour</div>
-                      {weekDays.map((day, idx) => {
-                        const total = users.reduce((sum, u) => sum + getUserDayTotalHours(day, u.email), 0);
-                        const isToday = day.toDateString() === new Date().toDateString();
-                        return (
-                          <div key={idx} className="text-right">
-                            <span className={`text-xs font-bold ${total > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-300') : 'text-slate-700'}`}>
-                              {total > 0 ? `${total.toFixed(1)}h` : '-'}
-                            </span>
-                          </div>
-                        );
-                      })}
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-slate-500">—</span>
-                      </div>
-                    </div>
+
                   </div>
                 )}
 
