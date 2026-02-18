@@ -369,11 +369,11 @@ export default function LeveTerrain() {
                       <div className="flex items-center gap-3">
                         {/* Voyant */}
                         <div className="relative w-5 h-5 flex items-center justify-center flex-shrink-0">
-                          {pointageEnCours ? (
+                          {terrainStartTime ? (
                             <>
-                              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping opacity-50"></div>
+                                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-50"></div>
                               </div>
                             </>
                           ) : (
@@ -387,7 +387,7 @@ export default function LeveTerrain() {
                         </div>
 
                         {/* Bouton */}
-                        {!pointageEnCours ? (
+                        {!terrainStartTime ? (
                           <Button onClick={handlePunchIn} size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 border-none h-9">
                             <Play className="w-4 h-4 mr-1" /> Punch In
                           </Button>
