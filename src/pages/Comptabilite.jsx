@@ -136,6 +136,7 @@ export default function Comptabilite() {
   };
 
   const agendaWeekDays = getAgendaWeekDays();
+  const activeAgendaUser = selectedAgendaUser || users[0];
   const resumeWeekDays = getResumeWeekDays();
   const mandatsItems = getMandatsOuverts(selectedArpenteur);
   const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
