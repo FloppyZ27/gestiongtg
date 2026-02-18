@@ -381,30 +381,33 @@ export default function LeveTerrain() {
       let gpsData = null;
       let heading = null;
 
+      // Extraire les coordonnées GPS
       if (exifData.GPS && exifData.GPS[piexif.GPSIFD.GPSLatitude] && exifData.GPS[piexif.GPSIFD.GPSLongitude]) {
         const lat = exifData.GPS[piexif.GPSIFD.GPSLatitude];
         const lng = exifData.GPS[piexif.GPSIFD.GPSLongitude];
-        const latRef = exifData.GPS[piexif.GPSIFD.GPSLatitudeRef].toLocaleLowerCase();
-        const lngRef = exifData.GPS[piexif.GPSIFD.GPSLongitudeRef].toLocaleLowerCase();
+        const latRef = exifData.GPS[piexif.GPSIFD.GPSLatitudeRef];
+        const lngRef = exifData.GPS[piexif.GPSIFD.GPSLongitudeRef];
 
         const latDegrees = lat[0][0] / lat[0][1] + lat[1][0] / lat[1][1] / 60 + lat[2][0] / lat[2][1] / 3600;
         const lngDegrees = lng[0][0] / lng[0][1] + lng[1][0] / lng[1][1] / 60 + lng[2][0] / lng[2][1] / 3600;
 
-        const latFinal = latRef === 's' ? -latDegrees : latDegrees;
-        const lngFinal = lngRef === 'w' ? -lngDegrees : lngDegrees;
+        const latFinal = latRef === 'S' || latRef === 's' ? -latDegrees : latDegrees;
+        const lngFinal = lngRef === 'W' || lngRef === 'w' ? -lngDegrees : lngDegrees;
 
         gpsData = { lat: latFinal, lng: lngFinal };
       }
 
-      // Extraire l'orientation (heading) des métadonnées EXIF
-      if (exifData.Exif && exifData.Exif[piexif.ExifIFD.GPSImgDirection]) {
-        const dirData = exifData.Exif[piexif.ExifIFD.GPSImgDirection];
-        heading = dirData[0] / dirData[1];
+      // Extraire l'orientation (heading/direction) depuis GPSImgDirection (tag 17 dans GPS)
+      if (exifData.GPS && exifData.GPS[piexif.GPSIFD.GPSImgDirection]) {
+        const dirData = exifData.GPS[piexif.GPSIFD.GPSImgDirection];
+        if (Array.isArray(dirData) && dirData.length > 0) {
+          heading = dirData[0] / dirData[1];
+        }
       }
 
       return { gpsData, heading };
     } catch (e) {
-      // Pas de GPS ou erreur lors de l'extraction
+      console.error("Erreur extraction EXIF:", e);
     }
     return { gpsData: null, heading: null };
   };
