@@ -431,15 +431,15 @@ export default function Comptabilite() {
                   {ARPENTEURS.map(arp => {
                     const count = getMandatsOuverts(arp).length;
                     const isActive = selectedArpenteur === arp;
-                    const tabColor = getArpenteurTabColor(arp);
+                    const colorClass = getArpenteurColor(arp);
                     return (
                       <button
                         key={arp}
                         onClick={() => setSelectedArpenteur(arp)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${tabColor} border-b-2` : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${colorClass} border` : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
                       >
-                        {arp.split(' ').map(w => w[0]).join('')} — {arp.split(' ').slice(-1)[0]}
-                        {count > 0 && <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-700'}`}>{count}</span>}
+                        {arp}
+                        <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-700 text-slate-400'}`}>{count}</span>
                       </button>
                     );
                   })}
