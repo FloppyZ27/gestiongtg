@@ -685,6 +685,35 @@ export default function LeveTerrain() {
           </div>
         </div>
       </div>
+      {/* ===== MODAL CAMÉRA ===== */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full max-w-2xl rounded-lg"
+            style={{ maxHeight: '70vh', objectFit: 'cover' }}
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          <div className="flex gap-4 mt-6">
+            <Button
+              onClick={closeCamera}
+              size="lg"
+              className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={takeSnapshot}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
+            >
+              <Camera className="w-5 h-5 mr-2" /> Capturer
+            </Button>
+          </div>
+        </div>
+      )}
     </TooltipProvider>
   );
 }
