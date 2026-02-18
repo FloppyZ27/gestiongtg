@@ -210,7 +210,7 @@ export default function LeveTerrain() {
   const handleCameraCapture = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedItem) return;
-    await uploadPhoto(file);
+    await uploadPhoto(file, null);
   };
 
   const uploadPhoto = async (file, deviceGPS) => {
