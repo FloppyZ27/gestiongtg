@@ -61,7 +61,6 @@ import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
 import GestionDeMandat from './pages/GestionDeMandat';
 import Home from './pages/Home';
-import LeveTerrain from './pages/LeveTerrain';
 import Lots from './pages/Lots';
 import Notaires from './pages/Notaires';
 import PriseDeMandat from './pages/PriseDeMandat';
@@ -70,6 +69,7 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import LeveTerrain from './pages/LeveTerrain';
 import __Layout from './Layout.jsx';
 
 
@@ -88,7 +88,6 @@ export const PAGES = {
     "EditerActe": EditerActe,
     "GestionDeMandat": GestionDeMandat,
     "Home": Home,
-    "LeveTerrain": LeveTerrain,
     "Lots": Lots,
     "Notaires": Notaires,
     "PriseDeMandat": PriseDeMandat,
@@ -97,6 +96,7 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "LeveTerrain": LeveTerrain,
 }
 
 export const pagesConfig = {

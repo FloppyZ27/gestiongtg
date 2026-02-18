@@ -234,6 +234,7 @@ export default function LeveTerrain() {
           latitude: deviceGPS.lat,
           longitude: deviceGPS.lng,
           accuracy_meters: deviceGPS.accuracy,
+          heading: deviceGPS.heading,
           timestamp: deviceGPS.timestamp,
           utilisateur_email: user?.email
         });
