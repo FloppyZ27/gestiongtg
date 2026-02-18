@@ -77,7 +77,7 @@ const navigationItems = [
   {
     title: "Comptabilité",
     url: createPageUrl("Comptabilite"),
-    icon: DollarSign,
+    icon: Landmark,
   },
   {
     title: "Cédule Terrain",
