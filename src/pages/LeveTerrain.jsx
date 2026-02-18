@@ -834,10 +834,10 @@ export default function LeveTerrain() {
               </button>
             )}
 
-            {/* Image */}
-            <div className="max-w-5xl max-h-[70vh] flex items-center justify-center px-20" onClick={e => e.stopPropagation()}>
+            {/* Image centrée */}
+            <div className="flex-1 flex items-center justify-center px-6" onClick={e => e.stopPropagation()}>
               {isImg && current.downloadUrl ? (
-                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[70vh] rounded-lg object-contain shadow-2xl" />
+                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
               ) : (
                 <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
                   <Image className="w-16 h-16 mb-3" />
