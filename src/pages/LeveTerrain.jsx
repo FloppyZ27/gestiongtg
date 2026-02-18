@@ -67,14 +67,6 @@ export default function LeveTerrain() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
-  const { data: pointages = [] } = useQuery({
-    queryKey: ['pointages', user?.email],
-    queryFn: () => base44.entities.Pointage.filter({ utilisateur_email: user?.email }, '-date', 50),
-    initialData: [],
-    enabled: !!user,
-  });
-
-  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
   // Dossiers du jour avec tâche Terrain
   const dossiersDuJour = dossiers
