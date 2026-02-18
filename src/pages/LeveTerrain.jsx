@@ -321,11 +321,12 @@ export default function LeveTerrain() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           accuracy: position.coords.accuracy,
-          heading: position.coords.heading,
+          heading: position.coords.heading, // peut être null sur certains appareils
           timestamp: new Date().toISOString()
         };
+        console.log('📍 Device GPS capturé:', deviceGPS);
       } catch (e) {
-        // Géolocalisation non disponible ou refusée
+        console.warn('Géolocalisation non disponible:', e);
       }
     }
     
