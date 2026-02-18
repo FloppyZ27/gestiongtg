@@ -932,7 +932,7 @@ export default function TableauDeBord() {
                     </div>
                     
                     {dossiersList.length > 0 ? (
-                      <div className={`space-y-2 max-h-[300px] overflow-y-auto ${isToday ? '' : 'opacity-50'}`}>
+                      <div className={`space-y-2 max-h-[500px] overflow-y-auto ${isToday ? '' : 'opacity-50'}`}>
                         {dossiersList.map((dossier) => {
                           const mandat = dossier.mandats?.[0];
                           if (!mandat) return null;
