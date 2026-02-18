@@ -242,7 +242,8 @@ export default function LeveTerrain() {
       if (exifHeading !== null && exifHeading !== undefined) {
         finalHeading = exifHeading;
       } else if (deviceGPS && deviceGPS.heading !== null && deviceGPS.heading !== undefined) {
-        finalHeading = deviceGPS.heading;
+        // Ajouter 90° pour corriger l'offset de DeviceOrientationEvent
+        finalHeading = (deviceGPS.heading + 90) % 360;
       }
 
       if (gpsData) {
