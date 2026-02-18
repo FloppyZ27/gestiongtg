@@ -497,7 +497,7 @@ export default function LeveTerrain() {
                         <div>
                           <h3 className="text-white font-semibold">Photos</h3>
                           <p className="text-slate-600 text-[10px]">
-                            ARPENTEUR/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}/DOSSIER/{selectedItem.dossier.numero_dossier}/TERRAIN/IN/{selectedItem.dossier.numero_dossier}_TI_{format(new Date(), "yyyyMMdd")}/PHOTOS
+                            ARPENTEUR/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}/DOSSIER/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}-{selectedItem.dossier.numero_dossier}/TERRAIN/IN/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}-{selectedItem.dossier.numero_dossier}_T_{ format(new Date(), "yyyyMMdd")}/PHOTOS
                           </p>
                         </div>
                       </div>
