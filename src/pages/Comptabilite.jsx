@@ -465,30 +465,24 @@ export default function Comptabilite() {
 
                 {mandatsItems.length > 0 ? (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.8fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
+                    <div className="grid grid-cols-[1.2fr,2fr,1.5fr,2fr,1fr,1.8fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
                       <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
                       <div className="text-xs font-semibold text-slate-400">Client</div>
                       <div className="text-xs font-semibold text-slate-400">Type</div>
-                      <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Prix estimé</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Rabais</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Net</div>
+                      <div className="text-xs font-semibold text-slate-400">Adresse travaux</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Prix net</div>
                       <div className="text-xs font-semibold text-slate-400 text-center">Progression / Valeur</div>
                     </div>
                     {mandatsItems.map(({ dossier, mandat }, idx) => {
                       const progress = getMandatProgress(mandat.tache_actuelle);
-                      const prix = mandat.prix_estime || 0;
-                      const rabais = mandat.rabais || 0;
-                      const prixNet = prix - rabais;
+                      const prixNet = (mandat.prix_estime || 0) - (mandat.rabais || 0);
                       const valeurProgressee = getMandatValeurProgression(mandat);
                       return (
-                        <div key={`${dossier.id}-${idx}`} className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.8fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2">
+                        <div key={`${dossier.id}-${idx}`} className="grid grid-cols-[1.2fr,2fr,1.5fr,2fr,1fr,1.8fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2">
                           <div><Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge></div>
                           <div className="text-slate-300 text-xs truncate">{getClientsNames(dossier.clients_ids)}</div>
-                          <div><Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>{mandat.type_mandat}</Badge></div>
-                          <div>{mandat.tache_actuelle ? <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge> : <span className="text-slate-600 text-xs">-</span>}</div>
-                          <div className="text-right text-slate-300 text-xs">{prix > 0 ? `${prix.toFixed(0)} $` : '-'}</div>
-                          <div className="text-right text-xs">{rabais > 0 ? <span className="text-red-400">-{rabais.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
+                          <div><Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>{getAbbreviatedMandatType(mandat.type_mandat)}</Badge></div>
+                          <div className="text-slate-300 text-xs truncate">{formatAdresse(mandat.adresse_travaux) || <span className="text-slate-600">-</span>}</div>
                           <div className="text-right text-xs font-semibold">{prixNet > 0 ? <span className="text-white">{prixNet.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
                           <div className="px-1">
                             <div className="flex items-center justify-between mb-1">
