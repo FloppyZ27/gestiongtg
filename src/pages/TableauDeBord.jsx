@@ -982,9 +982,8 @@ export default function TableauDeBord() {
                                 </div>
                               )}
 
-                              <div className="mt-2 space-y-2">
-                                <Progress value={Math.round((TACHES.indexOf(mandat.tache_actuelle || "Ouverture") / TACHES.length) * 100)} className="h-1.5" />
-                                <div className="flex items-center justify-end">
+                              <div className="mt-2">
+                                <div className="flex items-center justify-end mb-1">
                                   {assignedUser ? (
                                     <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
                                       <AvatarImage src={assignedUser.photo_url} />
@@ -998,6 +997,27 @@ export default function TableauDeBord() {
                                     </div>
                                   )}
                                 </div>
+                                {(() => {
+                                  const tacheIndex = TACHES.indexOf(mandat.tache_actuelle || "Ouverture");
+                                  let rawProgress = 0;
+                                  if (tacheIndex >= 0 && TACHES.length > 1) {
+                                    rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
+                                  }
+                                  const progress = Math.round(rawProgress / 5) * 5;
+                                  return (
+                                    <div className="w-full bg-slate-900/50 h-4 rounded-full overflow-hidden border border-slate-700/50 relative">
+                                      <div
+                                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                                        style={{ width: `${progress}%` }}
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">
+                                          {progress}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                           );
