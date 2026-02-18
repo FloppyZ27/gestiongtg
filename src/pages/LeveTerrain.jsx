@@ -90,6 +90,7 @@ export default function LeveTerrain() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
