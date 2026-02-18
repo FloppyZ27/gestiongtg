@@ -82,33 +82,14 @@ export default function LeveTerrain() {
     return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(Boolean).join(", ");
   };
 
-  // Timer pointage
+  // Timer terrain local (indépendant du pointage de la topbar)
   useEffect(() => {
-    if (!pointageEnCours) { setElapsedTime(0); return; }
+    if (!terrainStartTime) { setElapsedTime(0); return; }
     const interval = setInterval(() => {
-      const elapsed = Math.floor((new Date().getTime() - new Date(pointageEnCours.heure_debut).getTime()) / 1000);
-      setElapsedTime(elapsed);
+      setElapsedTime(Math.floor((new Date().getTime() - terrainStartTime.getTime()) / 1000));
     }, 1000);
     return () => clearInterval(interval);
-  }, [pointageEnCours]);
-
-  // Auto-hide punch controls
-  useEffect(() => {
-    if (showPunchControls && !isHovering) {
-      punchTimerRef.current = setTimeout(() => setShowPunchControls(false), 3000);
-    }
-    return () => clearTimeout(punchTimerRef.current);
-  }, [showPunchControls, isHovering]);
-
-  const createPointageMutation = useMutation({
-    mutationFn: (data) => base44.entities.Pointage.create(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] }),
-  });
-
-  const updatePointageMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] }),
-  });
+  }, [terrainStartTime]);
 
   const createEntreeMutation = useMutation({
     mutationFn: (data) => base44.entities.EntreeTemps.create(data),
@@ -116,27 +97,16 @@ export default function LeveTerrain() {
   });
 
   const handlePunchIn = () => {
-    const now = new Date();
-    createPointageMutation.mutate({
-      utilisateur_email: user?.email,
-      date: now.toISOString().split('T')[0],
-      heure_debut: now.toISOString(),
-      statut: 'en_cours'
-    });
+    setTerrainStartTime(new Date());
   };
 
   const handlePunchOut = () => {
-    if (!pointageEnCours) return;
+    if (!terrainStartTime) return;
     const now = new Date();
-    const debut = new Date(pointageEnCours.heure_debut);
-    const dureeHeures = (now.getTime() - debut.getTime()) / 1000 / 60 / 60;
+    const dureeHeures = (now.getTime() - terrainStartTime.getTime()) / 1000 / 60 / 60;
+    setTerrainStartTime(null);
+    setElapsedTime(0);
 
-    updatePointageMutation.mutate({
-      id: pointageEnCours.id,
-      data: { ...pointageEnCours, heure_fin: now.toISOString(), duree_heures: parseFloat(dureeHeures.toFixed(2)), statut: 'termine' }
-    });
-
-    // Créer entrée de temps terrain si un dossier est sélectionné
     if (selectedItem) {
       createEntreeMutation.mutate({
         date: today,
