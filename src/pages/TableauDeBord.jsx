@@ -2805,6 +2805,8 @@ export default function TableauDeBord() {
           dossier={editingDossier}
           isOpen={!!editingDossier}
           onClose={() => setEditingDossier(null)}
+          clients={clients}
+          users={users}
         />
       )}
       </div>
