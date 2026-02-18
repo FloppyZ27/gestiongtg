@@ -55,6 +55,7 @@ import ChaineDeTitre from './pages/ChaineDeTitre';
 import Clavardage from './pages/Clavardage';
 import Clients from './pages/Clients';
 import CommunicationClients from './pages/CommunicationClients';
+import Comptabilite from './pages/Comptabilite';
 import Dashboard from './pages/Dashboard';
 import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
@@ -68,7 +69,6 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import Comptabilite from './pages/Comptabilite';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +81,7 @@ export const PAGES = {
     "Clavardage": Clavardage,
     "Clients": Clients,
     "CommunicationClients": CommunicationClients,
+    "Comptabilite": Comptabilite,
     "Dashboard": Dashboard,
     "Dossiers": Dossiers,
     "EditerActe": EditerActe,
@@ -94,7 +95,6 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "Comptabilite": Comptabilite,
 }
 
 export const pagesConfig = {

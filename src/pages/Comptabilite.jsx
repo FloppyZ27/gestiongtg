@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { DollarSign, Clock, ChevronUp, ChevronDown, Users, TrendingUp, BarChart3 } from "lucide-react";
+import { DollarSign, Clock, ChevronUp, ChevronDown, Users, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -14,50 +14,22 @@ const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Re
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
 const getArpenteurInitials = (arpenteur) => {
-  const mapping = {
-    "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-",
-    "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-"
-  };
+  const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
   return mapping[arpenteur] || "";
 };
 
 const getArpenteurColor = (arpenteur) => {
-  const colors = {
-    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-  };
+  const colors = { "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30", "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30", "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30", "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" };
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-const getArpenteurBg = (arpenteur) => {
-  const colors = {
-    "Samuel Guay": "from-red-500/20 to-red-600/10 border-red-500/30",
-    "Pierre-Luc Pilote": "from-slate-500/20 to-slate-600/10 border-slate-500/30",
-    "Frédéric Gilbert": "from-orange-500/20 to-orange-600/10 border-orange-500/30",
-    "Dany Gaboury": "from-yellow-500/20 to-yellow-600/10 border-yellow-500/30",
-    "Benjamin Larouche": "from-cyan-500/20 to-cyan-600/10 border-cyan-500/30"
-  };
-  return colors[arpenteur] || "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30";
+const getArpenteurTabColor = (arpenteur) => {
+  const colors = { "Samuel Guay": "border-red-500 text-red-400 bg-red-500/10", "Pierre-Luc Pilote": "border-slate-400 text-slate-300 bg-slate-500/10", "Frédéric Gilbert": "border-orange-500 text-orange-400 bg-orange-500/10", "Dany Gaboury": "border-yellow-500 text-yellow-400 bg-yellow-500/10", "Benjamin Larouche": "border-cyan-500 text-cyan-400 bg-cyan-500/10" };
+  return colors[arpenteur] || "border-emerald-500 text-emerald-400 bg-emerald-500/10";
 };
 
 const getMandatColor = (typeMandat) => {
-  const colors = {
-    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
-    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
-    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
-    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
-  };
+  const colors = { "Bornage": "bg-red-500/20 text-red-400 border-red-500/30", "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30", "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30", "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30", "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30", "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30", "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30", "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30", "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30", "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30" };
   return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
@@ -67,112 +39,75 @@ export default function Comptabilite() {
   const [feuilleTempsCollapsed, setFeuilleTempsCollapsed] = useState(false);
   const [listeHeuresCollapsed, setListeHeuresCollapsed] = useState(false);
   const [mandatsCollapsed, setMandatsCollapsed] = useState(false);
-  const [feuilleTempsTab, setFeuilleTempsTab] = useState("semaine");
-  const [feuilleTempsCurrentDate, setFeuilleTempsCurrentDate] = useState(new Date());
-  const [selectedUserId, setSelectedUserId] = useState("tous");
 
-  const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
-    initialData: [],
-  });
+  // Feuille de temps agenda
+  const [agendaCurrentDate, setAgendaCurrentDate] = useState(new Date());
 
-  const { data: dossiers = [] } = useQuery({
-    queryKey: ['dossiers'],
-    queryFn: () => base44.entities.Dossier.list(),
-    initialData: [],
-  });
+  // Résumé heures
+  const [resumeWeekDate, setResumeWeekDate] = useState(new Date());
 
-  const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
-    initialData: [],
-  });
+  // Mandats tabs
+  const [selectedArpenteur, setSelectedArpenteur] = useState(ARPENTEURS[0]);
 
-  const { data: allEntreesTemps = [] } = useQuery({
-    queryKey: ['allEntreesTemps'],
-    queryFn: () => base44.entities.EntreeTemps.list('-date', 500),
-    initialData: [],
-  });
+  const agendaScrollRef = useRef(null);
 
-  // Navigation feuille de temps
-  const getWeekDays = () => {
-    const dayOfWeek = feuilleTempsCurrentDate.getDay();
-    const sunday = new Date(feuilleTempsCurrentDate);
-    sunday.setDate(feuilleTempsCurrentDate.getDate() - dayOfWeek);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(sunday);
-      d.setDate(sunday.getDate() + i);
-      return d;
-    });
+  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
+  const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
+  const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
+  const { data: allEntreesTemps = [] } = useQuery({ queryKey: ['allEntreesTemps'], queryFn: () => base44.entities.EntreeTemps.list('-date', 500), initialData: [] });
+
+  // ---- Agenda helpers ----
+  const getAgendaWeekDays = () => {
+    const dayOfWeek = agendaCurrentDate.getDay();
+    const sunday = new Date(agendaCurrentDate);
+    sunday.setDate(agendaCurrentDate.getDate() - dayOfWeek);
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
   };
 
-  const getMonthDays = () => {
-    const year = feuilleTempsCurrentDate.getFullYear();
-    const month = feuilleTempsCurrentDate.getMonth();
+  const getEntreesForDateUser = (date, userEmail) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail);
+  };
+
+  const getUserDayTotalHours = (date, userEmail) => {
+    return getEntreesForDateUser(date, userEmail).reduce((sum, e) => sum + (e.heures || 0), 0);
+  };
+
+  // ---- Résumé heures helpers ----
+  const getResumeWeekDays = () => {
+    const dayOfWeek = resumeWeekDate.getDay();
+    const sunday = new Date(resumeWeekDate);
+    sunday.setDate(resumeWeekDate.getDate() - dayOfWeek);
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
+  };
+
+  const getResumeMonthDays = () => {
+    const year = resumeWeekDate.getFullYear();
+    const month = resumeWeekDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
-    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
-      days.push(new Date(d));
-    }
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) days.push(new Date(d));
     return days;
   };
 
-  const goPrevious = () => {
-    if (feuilleTempsTab === "semaine") {
-      setFeuilleTempsCurrentDate(new Date(feuilleTempsCurrentDate.getFullYear(), feuilleTempsCurrentDate.getMonth(), feuilleTempsCurrentDate.getDate() - 7));
-    } else {
-      setFeuilleTempsCurrentDate(new Date(feuilleTempsCurrentDate.getFullYear(), feuilleTempsCurrentDate.getMonth() - 1, 1));
-    }
-  };
-
-  const goNext = () => {
-    if (feuilleTempsTab === "semaine") {
-      setFeuilleTempsCurrentDate(new Date(feuilleTempsCurrentDate.getFullYear(), feuilleTempsCurrentDate.getMonth(), feuilleTempsCurrentDate.getDate() + 7));
-    } else {
-      setFeuilleTempsCurrentDate(new Date(feuilleTempsCurrentDate.getFullYear(), feuilleTempsCurrentDate.getMonth() + 1, 1));
-    }
-  };
-
-  const getEntreesForDate = (date, userEmail = null) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return allEntreesTemps.filter(e => {
-      const matchDate = e.date === dateStr;
-      const matchUser = userEmail ? e.utilisateur_email === userEmail : (selectedUserId === "tous" || e.utilisateur_email === selectedUserId);
-      return matchDate && matchUser;
-    });
-  };
-
-  const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
-      const c = clients.find(cl => cl.id === id);
-      return c ? `${c.prenom} ${c.nom}` : "";
-    }).filter(Boolean).join(", ");
-  };
-
-  // Calcul heures par utilisateur
-  const getUserTotalHours = (userEmail) => {
-    return allEntreesTemps.filter(e => e.utilisateur_email === userEmail).reduce((sum, e) => sum + (e.heures || 0), 0);
-  };
-
-  const getUserWeekHours = (userEmail) => {
-    return getWeekDays().reduce((sum, day) => {
-      return sum + getEntreesForDate(day, userEmail).reduce((s, e) => s + (e.heures || 0), 0);
+  const getUserWeekHoursResume = (userEmail) => {
+    return getResumeWeekDays().reduce((sum, day) => {
+      const dateStr = day.toISOString().split('T')[0];
+      return sum + allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail).reduce((s, e) => s + (e.heures || 0), 0);
     }, 0);
   };
 
-  const getUserMonthHours = (userEmail) => {
-    return getMonthDays().reduce((sum, day) => {
-      return sum + getEntreesForDate(day, userEmail).reduce((s, e) => s + (e.heures || 0), 0);
+  const getUserMonthHoursResume = (userEmail) => {
+    return getResumeMonthDays().reduce((sum, day) => {
+      const dateStr = day.toISOString().split('T')[0];
+      return sum + allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail).reduce((s, e) => s + (e.heures || 0), 0);
     }, 0);
   };
 
-  // Mandats ouverts par arpenteur
-  const getMandatsOuvertsByArpenteur = (arpenteur) => {
-    return dossiers
-      .filter(d => d.arpenteur_geometre === arpenteur && d.statut === "Ouvert")
+  // ---- Mandats helpers ----
+  const getMandatsOuverts = (arpenteur) => {
+    return dossiers.filter(d => d.arpenteur_geometre === arpenteur && d.statut === "Ouvert")
       .flatMap(d => (d.mandats || []).map(m => ({ dossier: d, mandat: m })));
   };
 
@@ -183,22 +118,20 @@ export default function Comptabilite() {
   };
 
   const getMandatValeurProgression = (mandat) => {
-    const prix = mandat.prix_estime || 0;
-    const rabais = mandat.rabais || 0;
-    const prixNet = prix - rabais;
-    const progress = getMandatProgress(mandat.tache_actuelle) / 100;
-    return prixNet * progress;
+    const prixNet = (mandat.prix_estime || 0) - (mandat.rabais || 0);
+    return prixNet * (getMandatProgress(mandat.tache_actuelle) / 100);
   };
 
-  const days = feuilleTempsTab === "semaine" ? getWeekDays() : getMonthDays();
-  const filteredDays = feuilleTempsTab === "mois" ? days.filter(day => {
-    const entries = getEntreesForDate(day);
-    return entries.length > 0;
-  }) : days;
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(Boolean).join(", ");
+  };
 
-  const totalHeuresPeriode = days.reduce((sum, day) => {
-    return sum + getEntreesForDate(day).reduce((s, e) => s + (e.heures || 0), 0);
-  }, 0);
+  const agendaWeekDays = getAgendaWeekDays();
+  const resumeWeekDays = getResumeWeekDays();
+  const mandatsItems = getMandatsOuverts(selectedArpenteur);
+  const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
+  const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
 
   return (
     <TooltipProvider>
@@ -207,24 +140,17 @@ export default function Comptabilite() {
           <div className="flex items-center gap-3 mb-8">
             <DollarSign className="w-8 h-8 text-emerald-400" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Comptabilité
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Comptabilité</h1>
               <p className="text-slate-400">Feuilles de temps, heures et tarification des mandats</p>
             </div>
           </div>
 
-          {/* Section 1 - Feuille de temps tous utilisateurs */}
+          {/* ===== SECTION 1 : Agenda feuille de temps ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-            <div
-              className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800"
-              onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}
-            >
+            <div className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800" onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
-                    <Clock className="w-3 h-3 text-cyan-400" />
-                  </div>
+                  <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center"><Clock className="w-3 h-3 text-cyan-400" /></div>
                   <h3 className="text-cyan-300 text-sm font-semibold">Feuille de temps — Tous les utilisateurs</h3>
                 </div>
                 {feuilleTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -232,145 +158,133 @@ export default function Comptabilite() {
             </div>
 
             {!feuilleTempsCollapsed && (
-              <CardContent className="p-6">
-                {/* Filtres */}
-                <div className="flex flex-wrap gap-3 mb-6 pb-4 border-b border-slate-700 items-center justify-between">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-slate-400 text-sm">Utilisateur:</span>
-                    <Button
-                      size="sm"
-                      onClick={() => setSelectedUserId("tous")}
-                      className={`h-7 text-xs ${selectedUserId === "tous" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                    >
-                      Tous
-                    </Button>
-                    {users.map(u => (
-                      <Button
-                        key={u.id}
-                        size="sm"
-                        onClick={() => setSelectedUserId(u.email)}
-                        className={`h-7 text-xs ${selectedUserId === u.email ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                      >
-                        {u.full_name}
-                      </Button>
-                    ))}
+              <CardContent className="p-4">
+                {/* Contrôles navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-white font-semibold text-sm">
+                    Semaine du {format(agendaWeekDays[0], "d MMMM", { locale: fr })} au {format(agendaWeekDays[6], "d MMMM yyyy", { locale: fr })}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={goPrevious} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
-                    <Button size="sm" onClick={() => setFeuilleTempsCurrentDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
-                    <Button size="sm" variant="outline" onClick={goNext} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
-                    <div className="h-5 w-px bg-slate-700 mx-1"></div>
-                    <Button size="sm" onClick={() => setFeuilleTempsTab("semaine")} className={`h-7 text-xs ${feuilleTempsTab === "semaine" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white"}`}>Semaine</Button>
-                    <Button size="sm" onClick={() => setFeuilleTempsTab("mois")} className={`h-7 text-xs ${feuilleTempsTab === "mois" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white"}`}>Mois</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAgendaCurrentDate(new Date(agendaCurrentDate.getFullYear(), agendaCurrentDate.getMonth(), agendaCurrentDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
+                    <Button size="sm" onClick={() => setAgendaCurrentDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAgendaCurrentDate(new Date(agendaCurrentDate.getFullYear(), agendaCurrentDate.getMonth(), agendaCurrentDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-white font-semibold">
-                    {feuilleTempsTab === "semaine"
-                      ? `Semaine du ${format(getWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                      : format(feuilleTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(feuilleTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                  </div>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                    Total: {totalHeuresPeriode.toFixed(1)}h
-                  </Badge>
-                </div>
-
-                {/* En-têtes */}
-                <div className="grid grid-cols-[1fr,1.5fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
-                  <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
-                  <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                  <div className="text-xs font-semibold text-slate-400">Client</div>
-                  <div className="text-xs font-semibold text-slate-400">Mandat</div>
-                  <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                  <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
-                </div>
-
-                <div className="space-y-2">
-                  {filteredDays.map(day => {
-                    const dayEntries = getEntreesForDate(day);
-                    if (feuilleTempsTab === "mois" && dayEntries.length === 0) return null;
-                    const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
-                    const dateStr = day.toISOString().split('T')[0];
-                    const isToday = dateStr === new Date().toISOString().split('T')[0];
-
-                    return (
-                      <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
-                          <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                            {format(day, "EEE d MMM", { locale: fr })}
-                          </span>
-                          {totalHours > 0 && (
-                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">{totalHours.toFixed(1)}h</Badge>
-                          )}
-                        </div>
-                        {dayEntries.length > 0 ? (
-                          <div className="divide-y divide-slate-800">
-                            {dayEntries.map(entree => {
-                              const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                              const entreeUser = users.find(u => u.email === entree.utilisateur_email);
-                              return (
-                                <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                  <div className="grid grid-cols-[1fr,1.5fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
-                                    <div className="flex items-center gap-1.5">
-                                      <Avatar className="w-5 h-5 flex-shrink-0">
-                                        <AvatarImage src={entreeUser?.photo_url} />
-                                        <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getInitials(entreeUser?.full_name)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <span className="text-xs text-slate-300 truncate">{entreeUser?.full_name?.split(' ')[0] || "-"}</span>
-                                    </div>
-                                    <div>
-                                      {dossier && (
-                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="text-slate-400 text-xs truncate">
-                                      {dossier ? getClientsNames(dossier.clients_ids) : "-"}
-                                    </div>
-                                    <div>
-                                      {entree.mandat && (
-                                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs truncate max-w-full">
-                                          {entree.mandat}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div>
-                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">{entree.tache}</Badge>
-                                    </div>
-                                    <div className="text-right">
-                                      <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="p-3 text-center text-slate-500 text-xs">Aucune entrée</div>
-                        )}
+                {/* Agenda layout : colonne utilisateurs 20% + grille 80% */}
+                <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '600px' }}>
+                  {/* Colonne utilisateurs - 20% */}
+                  <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '20%' }}>
+                    {/* Header vide aligné avec en-têtes jours */}
+                    <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0" style={{ height: '56px' }}>
+                      <div className="h-full flex items-center justify-center">
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
                       </div>
-                    );
-                  })}
+                    </div>
+                    {/* Ligne totaux */}
+                    <div className="border-b border-slate-700 bg-slate-800/50 flex-shrink-0 px-2 py-1.5" style={{ height: '40px' }}>
+                      <span className="text-xs font-semibold text-emerald-400">Totaux</span>
+                    </div>
+                    {/* Liste utilisateurs scrollable */}
+                    <div className="overflow-y-auto flex-1">
+                      {users.map(u => (
+                        <div key={u.id} className="flex items-center gap-2 px-2 py-2 border-b border-slate-800/50 hover:bg-slate-800/30">
+                          <Avatar className="w-6 h-6 flex-shrink-0">
+                            <AvatarImage src={u.photo_url} />
+                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs text-slate-200 truncate leading-tight">{u.full_name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Grille agenda - 80% */}
+                  <div className="flex-1 overflow-x-auto flex flex-col min-w-0">
+                    {/* En-têtes des jours */}
+                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50" style={{ height: '56px' }}>
+                      {agendaWeekDays.map((day, idx) => {
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        return (
+                          <div key={idx} className={`flex-1 text-center py-2 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
+                            <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>{format(day, "EEE", { locale: fr })}</div>
+                            <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>{format(day, "d")}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Ligne totaux par jour */}
+                    <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-800/50" style={{ height: '40px' }}>
+                      {agendaWeekDays.map((day, idx) => {
+                        const total = users.reduce((sum, u) => sum + getUserDayTotalHours(day, u.email), 0);
+                        return (
+                          <div key={idx} className="flex-1 border-r border-slate-700 flex items-center justify-center px-1">
+                            {total > 0 ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1">{total.toFixed(1)}h</Badge> : <span className="text-slate-700 text-xs">-</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Lignes par utilisateur */}
+                    <div className="overflow-y-auto flex-1">
+                      {users.map(u => (
+                        <div key={u.id} className="flex border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors" style={{ minHeight: '48px' }}>
+                          {agendaWeekDays.map((day, dayIdx) => {
+                            const isToday = day.toDateString() === new Date().toDateString();
+                            const entries = getEntreesForDateUser(day, u.email);
+                            const totalH = entries.reduce((sum, e) => sum + (e.heures || 0), 0);
+                            return (
+                              <div key={dayIdx} className={`flex-1 border-r border-slate-700 p-1 ${isToday ? 'bg-emerald-500/5' : ''}`} style={{ minWidth: 0 }}>
+                                {entries.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {entries.map(e => {
+                                      const dossier = dossiers.find(d => d.id === e.dossier_id);
+                                      return (
+                                        <Tooltip key={e.id}>
+                                          <TooltipTrigger asChild>
+                                            <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/20 border border-emerald-500/30 rounded px-1.5 py-0.5 cursor-default">
+                                              <div className="flex items-center justify-between gap-1">
+                                                <span className="text-[10px] text-emerald-300 font-semibold truncate">{e.tache}</span>
+                                                <span className="text-[10px] text-emerald-400 font-bold flex-shrink-0">{e.heures}h</span>
+                                              </div>
+                                              {dossier && <div className="text-[9px] text-slate-400 truncate">{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</div>}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-white max-w-xs p-3 text-xs">
+                                            <div className="space-y-1">
+                                              <div className="font-semibold text-emerald-400">{e.heures}h — {e.tache}</div>
+                                              {dossier && <div className="text-slate-300">Dossier: {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</div>}
+                                              {dossier && <div className="text-slate-400">{getClientsNames(dossier.clients_ids)}</div>}
+                                              {e.mandat && <div className="text-blue-400">Mandat: {e.mandat}</div>}
+                                            </div>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      );
+                                    })}
+                                    {entries.length > 1 && (
+                                      <div className="text-[9px] text-slate-500 text-right px-0.5">Total: {totalH.toFixed(1)}h</div>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             )}
           </Card>
 
-          {/* Section 2 - Liste simple heures par utilisateur */}
+          {/* ===== SECTION 2 : Résumé heures par utilisateur ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-            <div
-              className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800"
-              onClick={() => setListeHeuresCollapsed(!listeHeuresCollapsed)}
-            >
+            <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800" onClick={() => setListeHeuresCollapsed(!listeHeuresCollapsed)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                    <Users className="w-3 h-3 text-emerald-400" />
-                  </div>
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center"><Users className="w-3 h-3 text-emerald-400" /></div>
                   <h3 className="text-emerald-300 text-sm font-semibold">Résumé des heures par utilisateur</h3>
                 </div>
                 {listeHeuresCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -379,181 +293,157 @@ export default function Comptabilite() {
 
             {!listeHeuresCollapsed && (
               <CardContent className="p-6">
-                <div className="mb-3 text-xs text-slate-500">
-                  Semaine courante : {format(getWeekDays()[0], "d MMM", { locale: fr })} – {format(getWeekDays()[6], "d MMM yyyy", { locale: fr })} &nbsp;|&nbsp;
-                  Mois courant : {format(new Date(), "MMMM yyyy", { locale: fr })}
+                {/* Navigation semaine */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-white font-semibold text-sm">
+                    Semaine du {format(resumeWeekDays[0], "d MMMM", { locale: fr })} au {format(resumeWeekDays[6], "d MMMM yyyy", { locale: fr })}
+                    <span className="ml-3 text-slate-400 font-normal text-xs">| Mois : {format(resumeWeekDate, "MMMM yyyy", { locale: fr })}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setResumeWeekDate(new Date(resumeWeekDate.getFullYear(), resumeWeekDate.getMonth(), resumeWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
+                    <Button size="sm" onClick={() => setResumeWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
+                    <Button size="sm" variant="outline" onClick={() => setResumeWeekDate(new Date(resumeWeekDate.getFullYear(), resumeWeekDate.getMonth(), resumeWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
+                  </div>
                 </div>
+
                 <div className="border border-slate-700 rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-[2fr,1fr,1fr,1fr] bg-slate-800/50 px-4 py-2 border-b border-slate-700">
+                  <div className="grid grid-cols-[2fr,1fr,1fr] bg-slate-800/50 px-4 py-2 border-b border-slate-700">
                     <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
                     <div className="text-xs font-semibold text-slate-400 text-right">Cette semaine</div>
                     <div className="text-xs font-semibold text-slate-400 text-right">Ce mois</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Total cumulatif</div>
                   </div>
                   {users.map(u => {
-                    const weekH = getUserWeekHours(u.email);
-                    const monthH = getUserMonthHours(u.email);
-                    const totalH = getUserTotalHours(u.email);
+                    const weekH = getUserWeekHoursResume(u.email);
+                    const monthH = getUserMonthHoursResume(u.email);
                     return (
-                      <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr,1fr] px-4 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
+                      <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={u.photo_url} />
-                            <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                              {getInitials(u.full_name)}
-                            </AvatarFallback>
+                            <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="text-white font-medium text-sm">{u.full_name}</p>
                             <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span>
-                        </div>
-                        <div className="text-right">
-                          <span className={`font-bold text-sm ${monthH > 0 ? 'text-cyan-400' : 'text-slate-600'}`}>{monthH.toFixed(1)}h</span>
-                        </div>
-                        <div className="text-right">
-                          <span className={`font-bold text-sm ${totalH > 0 ? 'text-purple-400' : 'text-slate-600'}`}>{totalH.toFixed(1)}h</span>
-                        </div>
+                        <div className="text-right"><span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span></div>
+                        <div className="text-right"><span className={`font-bold text-sm ${monthH > 0 ? 'text-cyan-400' : 'text-slate-600'}`}>{monthH.toFixed(1)}h</span></div>
                       </div>
                     );
                   })}
-                  {/* Total row */}
-                  <div className="grid grid-cols-[2fr,1fr,1fr,1fr] px-4 py-3 bg-slate-800/50 items-center">
+                  <div className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 bg-slate-800/50 items-center">
                     <div className="text-xs font-bold text-slate-300">TOTAL</div>
-                    <div className="text-right font-bold text-sm text-emerald-400">
-                      {users.reduce((sum, u) => sum + getUserWeekHours(u.email), 0).toFixed(1)}h
-                    </div>
-                    <div className="text-right font-bold text-sm text-cyan-400">
-                      {users.reduce((sum, u) => sum + getUserMonthHours(u.email), 0).toFixed(1)}h
-                    </div>
-                    <div className="text-right font-bold text-sm text-purple-400">
-                      {users.reduce((sum, u) => sum + getUserTotalHours(u.email), 0).toFixed(1)}h
-                    </div>
+                    <div className="text-right font-bold text-sm text-emerald-400">{users.reduce((sum, u) => sum + getUserWeekHoursResume(u.email), 0).toFixed(1)}h</div>
+                    <div className="text-right font-bold text-sm text-cyan-400">{users.reduce((sum, u) => sum + getUserMonthHoursResume(u.email), 0).toFixed(1)}h</div>
                   </div>
                 </div>
               </CardContent>
             )}
           </Card>
 
-          {/* Section 3 - Mandats ouverts par arpenteur */}
+          {/* ===== SECTION 3 : Mandats ouverts avec tabs arpenteurs ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-            <div
-              className="cursor-pointer hover:bg-violet-900/40 transition-colors rounded-t-lg py-2 px-3 bg-violet-900/20 border-b border-slate-800"
-              onClick={() => setMandatsCollapsed(!mandatsCollapsed)}
-            >
+            <div className="cursor-pointer hover:bg-violet-900/40 transition-colors rounded-t-lg py-2 px-3 bg-violet-900/20 border-b border-slate-800" onClick={() => setMandatsCollapsed(!mandatsCollapsed)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-violet-500/30 flex items-center justify-center">
-                    <TrendingUp className="w-3 h-3 text-violet-400" />
-                  </div>
-                  <h3 className="text-violet-300 text-sm font-semibold">Mandats ouverts — Tarification et progression par arpenteur</h3>
+                  <div className="w-5 h-5 rounded-full bg-violet-500/30 flex items-center justify-center"><TrendingUp className="w-3 h-3 text-violet-400" /></div>
+                  <h3 className="text-violet-300 text-sm font-semibold">Mandats ouverts — Tarification et progression</h3>
                 </div>
                 {mandatsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
               </div>
             </div>
 
             {!mandatsCollapsed && (
-              <CardContent className="p-6 space-y-8">
-                {ARPENTEURS.map(arpenteur => {
-                  const mandatsItems = getMandatsOuvertsByArpenteur(arpenteur);
-                  if (mandatsItems.length === 0) return null;
+              <CardContent className="p-4">
+                {/* Tabs arpenteurs */}
+                <div className="flex gap-1 flex-wrap mb-4 border-b border-slate-700 pb-3">
+                  {ARPENTEURS.map(arp => {
+                    const count = getMandatsOuverts(arp).length;
+                    const isActive = selectedArpenteur === arp;
+                    const tabColor = getArpenteurTabColor(arp);
+                    return (
+                      <button
+                        key={arp}
+                        onClick={() => setSelectedArpenteur(arp)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isActive ? `${tabColor} border-b-2` : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'}`}
+                      >
+                        {arp.split(' ').map(w => w[0]).join('')} — {arp.split(' ').slice(-1)[0]}
+                        {count > 0 && <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-700'}`}>{count}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  const totalTarif = mandatsItems.reduce((sum, { mandat }) => {
-                    const prix = mandat.prix_estime || 0;
-                    const rabais = mandat.rabais || 0;
-                    return sum + (prix - rabais);
-                  }, 0);
+                {/* Résumé arpenteur sélectionné */}
+                <div className={`flex items-center justify-between mb-3 p-3 rounded-lg border bg-gradient-to-r ${getArpenteurTabColor(selectedArpenteur).includes('red') ? 'from-red-500/10 to-transparent border-red-500/20' : getArpenteurTabColor(selectedArpenteur).includes('slate') ? 'from-slate-500/10 to-transparent border-slate-500/20' : getArpenteurTabColor(selectedArpenteur).includes('orange') ? 'from-orange-500/10 to-transparent border-orange-500/20' : getArpenteurTabColor(selectedArpenteur).includes('yellow') ? 'from-yellow-500/10 to-transparent border-yellow-500/20' : 'from-cyan-500/10 to-transparent border-cyan-500/20'}`}>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={`${getArpenteurColor(selectedArpenteur)} border font-bold`}>{getArpenteurInitials(selectedArpenteur).replace('-', '')}</Badge>
+                    <span className="text-white font-semibold">{selectedArpenteur}</span>
+                    <Badge className="bg-slate-700/50 text-slate-300 border-slate-600 text-xs">{mandatsItems.length} mandat{mandatsItems.length > 1 ? 's' : ''}</Badge>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Tarification totale</p>
+                      <p className="text-white font-bold text-sm">{totalTarif.toFixed(2)} $</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Valeur progressée</p>
+                      <p className="text-emerald-400 font-bold text-sm">{totalValeurProgression.toFixed(2)} $</p>
+                    </div>
+                  </div>
+                </div>
 
-                  const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
-
-                  return (
-                    <div key={arpenteur}>
-                      <div className={`flex items-center justify-between mb-3 p-3 rounded-lg border bg-gradient-to-r ${getArpenteurBg(arpenteur)}`}>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={`${getArpenteurColor(arpenteur)} border font-bold`}>
-                            {getArpenteurInitials(arpenteur).replace('-', '')}
-                          </Badge>
-                          <span className="text-white font-semibold">{arpenteur}</span>
-                          <Badge className="bg-slate-700/50 text-slate-300 border-slate-600 text-xs">{mandatsItems.length} mandat{mandatsItems.length > 1 ? 's' : ''}</Badge>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-xs text-slate-400">Tarification totale</p>
-                            <p className="text-white font-bold text-sm">{totalTarif.toFixed(2)} $</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-slate-400">Valeur progressée</p>
-                            <p className="text-emerald-400 font-bold text-sm">{totalValeurProgression.toFixed(2)} $</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <div className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.5fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
-                          <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                          <div className="text-xs font-semibold text-slate-400">Client</div>
-                          <div className="text-xs font-semibold text-slate-400">Type</div>
-                          <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                          <div className="text-xs font-semibold text-slate-400 text-right">Prix estimé</div>
-                          <div className="text-xs font-semibold text-slate-400 text-right">Rabais</div>
-                          <div className="text-xs font-semibold text-slate-400 text-right">Net</div>
-                          <div className="text-xs font-semibold text-slate-400 text-center">Progression / Valeur</div>
-                        </div>
-
-                        {mandatsItems.map(({ dossier, mandat }, idx) => {
-                          const progress = getMandatProgress(mandat.tache_actuelle);
-                          const prix = mandat.prix_estime || 0;
-                          const rabais = mandat.rabais || 0;
-                          const prixNet = prix - rabais;
-                          const valeurProgressee = getMandatValeurProgression(mandat);
-                          const clientsNames = getClientsNames(dossier.clients_ids);
-
-                          return (
-                            <div key={`${dossier.id}-${idx}`} className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.5fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2">
-                              <div>
-                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                </Badge>
-                              </div>
-                              <div className="text-slate-300 text-xs truncate">{clientsNames}</div>
-                              <div>
-                                <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                  {mandat.type_mandat}
-                                </Badge>
-                              </div>
-                              <div>
-                                {mandat.tache_actuelle ? (
-                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge>
-                                ) : <span className="text-slate-600 text-xs">-</span>}
-                              </div>
-                              <div className="text-right text-slate-300 text-xs">{prix > 0 ? `${prix.toFixed(0)} $` : '-'}</div>
-                              <div className="text-right text-xs">{rabais > 0 ? <span className="text-red-400">-{rabais.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
-                              <div className="text-right text-xs font-semibold">{prixNet > 0 ? <span className="text-white">{prixNet.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
-                              <div className="px-1">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-slate-400">{progress}%</span>
-                                  <span className="text-xs text-emerald-400 font-semibold">{valeurProgressee > 0 ? `${valeurProgressee.toFixed(0)} $` : '-'}</span>
-                                </div>
-                                <div className="w-full bg-slate-900/50 h-3 rounded-full overflow-hidden border border-slate-700/50 relative">
-                                  <div
-                                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                                    style={{ width: `${progress}%` }}
-                                  />
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-[9px] font-bold text-white drop-shadow-md leading-none">{progress}%</span>
-                                  </div>
-                                </div>
+                {/* Table mandats */}
+                {mandatsItems.length > 0 ? (
+                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.8fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
+                      <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
+                      <div className="text-xs font-semibold text-slate-400">Client</div>
+                      <div className="text-xs font-semibold text-slate-400">Type</div>
+                      <div className="text-xs font-semibold text-slate-400">Tâche</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Prix estimé</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Rabais</div>
+                      <div className="text-xs font-semibold text-slate-400 text-right">Net</div>
+                      <div className="text-xs font-semibold text-slate-400 text-center">Progression / Valeur</div>
+                    </div>
+                    {mandatsItems.map(({ dossier, mandat }, idx) => {
+                      const progress = getMandatProgress(mandat.tache_actuelle);
+                      const prix = mandat.prix_estime || 0;
+                      const rabais = mandat.rabais || 0;
+                      const prixNet = prix - rabais;
+                      const valeurProgressee = getMandatValeurProgression(mandat);
+                      return (
+                        <div key={`${dossier.id}-${idx}`} className="grid grid-cols-[1.2fr,2fr,1.5fr,1.2fr,1fr,1fr,1fr,1.8fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2">
+                          <div><Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge></div>
+                          <div className="text-slate-300 text-xs truncate">{getClientsNames(dossier.clients_ids)}</div>
+                          <div><Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>{mandat.type_mandat}</Badge></div>
+                          <div>{mandat.tache_actuelle ? <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge> : <span className="text-slate-600 text-xs">-</span>}</div>
+                          <div className="text-right text-slate-300 text-xs">{prix > 0 ? `${prix.toFixed(0)} $` : '-'}</div>
+                          <div className="text-right text-xs">{rabais > 0 ? <span className="text-red-400">-{rabais.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
+                          <div className="text-right text-xs font-semibold">{prixNet > 0 ? <span className="text-white">{prixNet.toFixed(0)} $</span> : <span className="text-slate-600">-</span>}</div>
+                          <div className="px-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-slate-400">{progress}%</span>
+                              <span className="text-xs text-emerald-400 font-semibold">{valeurProgressee > 0 ? `${valeurProgressee.toFixed(0)} $` : '-'}</span>
+                            </div>
+                            <div className="w-full bg-slate-900/50 h-3 rounded-full overflow-hidden border border-slate-700/50 relative">
+                              <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[9px] font-bold text-white drop-shadow-md">{progress}%</span>
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-slate-500">
+                    <TrendingUp className="w-10 h-10 mx-auto mb-3 text-slate-700" />
+                    <p>Aucun mandat ouvert pour {selectedArpenteur}</p>
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>
