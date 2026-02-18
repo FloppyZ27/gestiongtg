@@ -42,6 +42,7 @@ export default function Comptabilite() {
 
   // Feuille de temps agenda
   const [agendaCurrentDate, setAgendaCurrentDate] = useState(new Date());
+  const [selectedAgendaUser, setSelectedAgendaUser] = useState(null);
 
   // Résumé heures
   const [resumeWeekDate, setResumeWeekDate] = useState(new Date());
