@@ -91,6 +91,7 @@ export default function LeveTerrain() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const deviceOrientationRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
