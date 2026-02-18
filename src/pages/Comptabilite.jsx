@@ -77,6 +77,9 @@ export default function Comptabilite() {
   // Mandats tabs
   const [selectedArpenteur, setSelectedArpenteur] = useState(ARPENTEURS[0]);
 
+  // Tri feuille de temps
+  const [userSortOrder, setUserSortOrder] = useState('asc');
+
   const agendaScrollRef = useRef(null);
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
