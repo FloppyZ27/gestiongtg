@@ -34,12 +34,14 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
 
   const createHeadingIcon = (heading, isCurrent) => {
     const color = isCurrent ? '#3b82f6' : '#10b981';
+    // Utiliser heading si disponible, sinon 0
+    const rotation = heading !== null && heading !== undefined ? heading : 0;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
       <circle cx="20" cy="20" r="16" fill="${color}" stroke="white" stroke-width="2"/>
-      <g transform="translate(20, 20) rotate(${heading || 0})">
-        <path d="M 0,-12 L 5,2 L -5,2 Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+      <g transform="translate(20, 20) rotate(${rotation})">
+        <path d="M 0,-10 L 6,4 L -6,4 Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
       </g>
-      <circle cx="20" cy="20" r="4" fill="white"/>
+      <circle cx="20" cy="20" r="3" fill="white"/>
     </svg>`;
     
     return L.divIcon({
