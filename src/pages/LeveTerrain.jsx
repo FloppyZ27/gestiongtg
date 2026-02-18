@@ -281,6 +281,35 @@ export default function LeveTerrain() {
     reader.readAsDataURL(file);
   });
 
+  // Extraire les coordonnées GPS d'une image
+  const extractGPSFromImage = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      const binary = String.fromCharCode.apply(null, new Uint8Array(arrayBuffer));
+      const exifData = piexif.load(binary);
+      
+      if (exifData.GPS && exifData.GPS[piexif.GPSIFD.GPSLatitude] && exifData.GPS[piexif.GPSIFD.GPSLongitude]) {
+        const lat = exifData.GPS[piexif.GPSIFD.GPSLatitude];
+        const lng = exifData.GPS[piexif.GPSIFD.GPSLongitude];
+        const latRef = exifData.GPS[piexif.GPSIFD.GPSLatitudeRef].toLocaleLowerCase();
+        const lngRef = exifData.GPS[piexif.GPSIFD.GPSLongitudeRef].toLocaleLowerCase();
+        
+        const latDegrees = lat[0][0] / lat[0][1] + lat[1][0] / lat[1][1] / 60 + lat[2][0] / lat[2][1] / 3600;
+        const lngDegrees = lng[0][0] / lng[0][1] + lng[1][0] / lng[1][1] / 60 + lng[2][0] / lng[2][1] / 3600;
+        
+        const latFinal = latRef === 's' ? -latDegrees : latDegrees;
+        const lngFinal = lngRef === 'w' ? -lngDegrees : lngDegrees;
+        
+        return { lat: latFinal, lng: lngFinal };
+      }
+    } catch (e) {
+      // Pas de GPS ou erreur lors de l'extraction
+    }
+    return null;
+  };
+
   const mapUrl = selectedItem?.mandat?.adresse_travaux
     ? `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_KEY || ''}&q=${encodeURIComponent(getAdresseString(selectedItem.mandat.adresse_travaux))}`
     : null;
