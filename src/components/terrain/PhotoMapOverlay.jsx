@@ -51,7 +51,7 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
   };
 
   return (
-    <div className="absolute bottom-96 right-4 w-[600px] h-[600px] rounded-lg overflow-hidden border border-slate-600 shadow-lg z-20" onClick={e => e.stopPropagation()}>
+    <div className="absolute top-1/2 right-4 -translate-y-1/2 w-[450px] h-[450px] rounded-lg overflow-hidden border border-slate-600 shadow-lg z-20" onClick={e => e.stopPropagation()}>
       <MapContainer center={center} zoom={18} maxZoom={21} style={{ height: '100%', width: '100%' }}>
         <MapCenter center={center} />
         <TileLayer
