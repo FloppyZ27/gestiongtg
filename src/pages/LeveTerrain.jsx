@@ -762,6 +762,21 @@ export default function LeveTerrain() {
               </button>
             )}
 
+            {/* Carte localisation */}
+            {selectedItem?.mandat?.adresse_travaux && (
+              <div className="absolute bottom-64 right-4 w-72 h-64 rounded-lg overflow-hidden border border-slate-600 shadow-lg" onClick={e => e.stopPropagation()}>
+                <iframe
+                  title="Localisation photo"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(getAdresseString(selectedItem.mandat.adresse_travaux))}&output=embed`}
+                />
+              </div>
+            )}
+
             {/* Bande de miniatures en bas */}
             {photosFiles.length > 1 && (
               <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 px-4 py-3 rounded-lg">
