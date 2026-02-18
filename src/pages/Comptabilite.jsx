@@ -309,7 +309,7 @@ export default function Comptabilite() {
                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
                       </div>
                       <div className="overflow-y-auto flex-1">
-                        {users.map(u => {
+                       {sortedUsers.map(u => {
                           const isActive = activeAgendaUser?.email === u.email;
                           const weekH = getUserWeekHours(u.email);
                           return (
