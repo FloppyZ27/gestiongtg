@@ -811,13 +811,51 @@ export default function LeveTerrain() {
             className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center"
             onClick={() => setLightboxIndex(null)}
           >
-            {/* Fermer */}
-            <button
-              className="absolute top-4 right-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-2 z-10"
-              onClick={() => setLightboxIndex(null)}
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {/* Fermer + Supprimer */}
+            <div className="absolute top-4 right-4 flex gap-2 z-10">
+              <button
+                className="text-white bg-red-700/80 hover:bg-red-600 rounded-full p-2 transition-colors"
+                onClick={() => {
+                  if (selectedItem && confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) {
+                    try {
+                      // Supprimer la photo de SharePoint (via function)
+                      base44.functions.invoke('deleteSharePointFile', { 
+                        filePath: photosFiles[lightboxIndex].webUrl 
+                      }).catch(() => {});
+                      
+                      // Supprimer les données GPS associées
+                      const gpsToDelete = photosGPS.find(
+                        gps => gps.dossier_id === selectedItem.dossier.id && gps.photo_name === photosFiles[lightboxIndex].name
+                      );
+                      if (gpsToDelete) {
+                        base44.entities.PhotoGPS.delete(gpsToDelete.id).catch(() => {});
+                      }
+                      
+                      // Mettre à jour la liste des photos
+                      const newPhotos = photosFiles.filter((_, idx) => idx !== lightboxIndex);
+                      setPhotosFiles(newPhotos);
+                      
+                      // Fermer le lightbox ou afficher la photo précédente
+                      if (newPhotos.length === 0) {
+                        setLightboxIndex(null);
+                      } else if (lightboxIndex >= newPhotos.length) {
+                        setLightboxIndex(lightboxIndex - 1);
+                      }
+                    } catch (e) {
+                      console.error("Erreur suppression photo:", e);
+                    }
+                  }
+                }}
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <button
+                className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-2 z-10 transition-colors"
+                onClick={() => setLightboxIndex(null)}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
             {/* Compteur */}
             <div className="absolute top-4 left-1/2 -translate-x-1/2 text-slate-300 text-sm bg-slate-800/80 px-3 py-1 rounded-full">
