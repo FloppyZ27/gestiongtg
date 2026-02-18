@@ -261,6 +261,25 @@ export default function LeveTerrain() {
 
   const takeSnapshot = async () => {
     if (!videoRef.current || !canvasRef.current) return;
+    
+    // Obtenir les coordonnées GPS du périphérique
+    let deviceGPS = null;
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000, enableHighAccuracy: true });
+        });
+        deviceGPS = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: new Date().toISOString()
+        };
+      } catch (e) {
+        // Géolocalisation non disponible ou refusée
+      }
+    }
+    
     const video = videoRef.current;
     const canvas = canvasRef.current;
     canvas.width = video.videoWidth;
@@ -271,7 +290,7 @@ export default function LeveTerrain() {
       const fileName = `photo_${format(new Date(), "yyyyMMdd_HHmmss")}.jpg`;
       const file = new File([blob], fileName, { type: 'image/jpeg' });
       closeCamera();
-      await uploadPhoto(file);
+      await uploadPhoto(file, deviceGPS);
     }, 'image/jpeg', 0.92);
   };
 
