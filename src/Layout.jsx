@@ -85,6 +85,11 @@ const navigationItems = [
     icon: CalendarDays,
   },
   {
+    title: "Levé Terrain",
+    url: createPageUrl("LeveTerrain"),
+    icon: Mountain,
+  },
+  {
     title: "Recherches",
     url: createPageUrl("Recherches"),
     icon: Search,
