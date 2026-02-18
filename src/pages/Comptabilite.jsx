@@ -160,7 +160,20 @@ export default function Comptabilite() {
   };
 
   const activeAgendaUser = selectedAgendaUser || users[0];
-  const mandatsItems = getMandatsOuverts(selectedArpenteur);
+
+  // Utilisateurs triés
+  const sortedUsers = [...users].sort((a, b) => {
+    const nameA = (a.full_name || '').toLowerCase();
+    const nameB = (b.full_name || '').toLowerCase();
+    return userSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
+
+  // Mandats triés par numéro de dossier croissant
+  const mandatsItems = getMandatsOuverts(selectedArpenteur).sort((a, b) => {
+    const numA = parseInt(a.dossier.numero_dossier) || 0;
+    const numB = parseInt(b.dossier.numero_dossier) || 0;
+    return numA - numB;
+  });
   const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
   const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
 
