@@ -33,6 +33,20 @@ const getMandatColor = (typeMandat) => {
   return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = { "Certificat de localisation": "CL", "Description Technique": "DT", "Implantation": "Imp", "Levé topographique": "Levé Topo", "Piquetage": "Piq" };
+  return abbreviations[type] || type;
+};
+
+const formatAdresse = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  return parts.filter(p => p).join(', ');
+};
+
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
 export default function Comptabilite() {
