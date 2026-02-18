@@ -206,18 +206,69 @@ export default function LeveTerrain() {
   const handleCameraCapture = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedItem) return;
+    await uploadPhoto(file);
+  };
+
+  const uploadPhoto = async (file) => {
+    if (!selectedItem) return;
     const arp = selectedItem.dossier.arpenteur_geometre;
     const initiale = ARPENTEUR_INITIALS[arp] || arp;
     const numDossier = selectedItem.dossier.numero_dossier;
     const dateStr = format(new Date(), "yyyyMMdd");
     const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
-
     try {
       await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: await fileToBase64(file) });
       loadPhotos(selectedItem.dossier);
     } catch (e) {
       console.error("Upload photo error:", e);
     }
+  };
+
+  const openCamera = async () => {
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      // Fallback caméra frontale si caméra arrière indisponible
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (e) {
+        console.error("Caméra indisponible:", e);
+        setShowCamera(false);
+      }
+    }
+  };
+
+  const closeCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  };
+
+  const takeSnapshot = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const fileName = `photo_${format(new Date(), "yyyyMMdd_HHmmss")}.jpg`;
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
+      closeCamera();
+      await uploadPhoto(file);
+    }, 'image/jpeg', 0.92);
   };
 
   const fileToBase64 = (file) => new Promise((resolve) => {
