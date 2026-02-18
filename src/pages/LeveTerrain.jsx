@@ -406,51 +406,34 @@ export default function LeveTerrain() {
                         </div>
                       </div>
 
-                      <div
-                        className="flex items-center gap-3"
-                        onMouseEnter={() => setIsHovering(true)}
-                        onMouseLeave={() => setIsHovering(false)}
-                      >
+                      <div className="flex items-center gap-3">
                         {/* Voyant */}
-                        <button
-                          onClick={() => setShowPunchControls(!showPunchControls)}
-                          className="relative w-8 h-8 flex items-center justify-center"
-                        >
+                        <div className="relative w-5 h-5 flex items-center justify-center flex-shrink-0">
                           {pointageEnCours ? (
                             <>
-                              <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-4 h-4 bg-blue-500 rounded-full animate-ping opacity-50"></div>
+                                <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping opacity-50"></div>
                               </div>
                             </>
                           ) : (
-                            <div className="w-4 h-4 bg-slate-600 rounded-full"></div>
+                            <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
                           )}
-                        </button>
+                        </div>
 
-                        {/* Chrono + bouton */}
-                        <AnimatePresence>
-                          {(showPunchControls || pointageEnCours) && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex items-center gap-3">
-                              <div className="px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-700">
-                                <span className="text-white font-bold tabular-nums text-sm">{formatElapsedTime(elapsedTime)}</span>
-                              </div>
-                              {!pointageEnCours ? (
-                                <Button onClick={handlePunchIn} size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 border-none h-9">
-                                  <Play className="w-4 h-4 mr-1" /> Punch In
-                                </Button>
-                              ) : (
-                                <Button onClick={handlePunchOut} size="sm" className="bg-gradient-to-r from-red-500 to-red-600 border-none h-9">
-                                  <Square className="w-4 h-4 mr-1" /> Punch Out
-                                </Button>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        {/* Chrono */}
+                        <div className="px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-700">
+                          <span className="text-white font-bold tabular-nums text-sm">{formatElapsedTime(elapsedTime)}</span>
+                        </div>
 
-                        {!showPunchControls && !pointageEnCours && (
-                          <Button onClick={() => setShowPunchControls(true)} size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 border-none h-9">
+                        {/* Bouton */}
+                        {!pointageEnCours ? (
+                          <Button onClick={handlePunchIn} size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 border-none h-9">
                             <Play className="w-4 h-4 mr-1" /> Punch In
+                          </Button>
+                        ) : (
+                          <Button onClick={handlePunchOut} size="sm" className="bg-gradient-to-r from-red-500 to-red-600 border-none h-9">
+                            <Square className="w-4 h-4 mr-1" /> Punch Out
                           </Button>
                         )}
                       </div>
