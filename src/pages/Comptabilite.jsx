@@ -56,6 +56,13 @@ export default function Comptabilite() {
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
 
+  // ---- Helpers pointage ----
+  const getPointageDuration = (p) => {
+    if (p.heure_debut_modifiee && p.heure_fin_modifiee) return p.duree_heures_modifiee || 0;
+    if (p.heure_debut && p.heure_fin) return (new Date(p.heure_fin) - new Date(p.heure_debut)) / (1000 * 60 * 60);
+    return p.duree_heures || 0;
+  };
+
   // ---- Agenda helpers ----
   const getAgendaWeekDays = () => {
     const dayOfWeek = agendaCurrentDate.getDay();
@@ -64,13 +71,13 @@ export default function Comptabilite() {
     return Array.from({ length: 7 }, (_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
   };
 
-  const getEntreesForDateUser = (date, userEmail) => {
+  const getPointagesForDateUser = (date, userEmail) => {
     const dateStr = date.toISOString().split('T')[0];
-    return allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail);
+    return allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail);
   };
 
   const getUserDayTotalHours = (date, userEmail) => {
-    return getEntreesForDateUser(date, userEmail).reduce((sum, e) => sum + (e.heures || 0), 0);
+    return getPointagesForDateUser(date, userEmail).reduce((sum, p) => sum + getPointageDuration(p), 0);
   };
 
   // ---- Résumé heures helpers ----
@@ -94,14 +101,14 @@ export default function Comptabilite() {
   const getUserWeekHoursResume = (userEmail) => {
     return getResumeWeekDays().reduce((sum, day) => {
       const dateStr = day.toISOString().split('T')[0];
-      return sum + allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail).reduce((s, e) => s + (e.heures || 0), 0);
+      return sum + allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail).reduce((s, p) => s + getPointageDuration(p), 0);
     }, 0);
   };
 
   const getUserMonthHoursResume = (userEmail) => {
     return getResumeMonthDays().reduce((sum, day) => {
       const dateStr = day.toISOString().split('T')[0];
-      return sum + allEntreesTemps.filter(e => e.date === dateStr && e.utilisateur_email === userEmail).reduce((s, e) => s + (e.heures || 0), 0);
+      return sum + allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail).reduce((s, p) => s + getPointageDuration(p), 0);
     }, 0);
   };
 
