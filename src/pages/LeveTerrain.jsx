@@ -91,6 +91,7 @@ export default function LeveTerrain() {
   const streamRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
+  const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
