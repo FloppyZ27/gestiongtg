@@ -808,7 +808,7 @@ export default function LeveTerrain() {
         };
         return (
           <div
-            className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/90 flex flex-col"
             onClick={() => setLightboxIndex(null)}
           >
             {/* Fermer + Supprimer */}
