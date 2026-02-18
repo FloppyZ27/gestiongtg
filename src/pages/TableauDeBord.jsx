@@ -1120,26 +1120,41 @@ export default function TableauDeBord() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setChatTab("generale")}
+                  onClick={() => { setChatTab("generale"); markAsRead("generale"); }}
                   className={`flex-1 rounded-none ${chatTab === "generale" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
                 >
-                  Générale
+                  <span className="flex items-center gap-1.5">
+                    Générale
+                    {unreadGenerale > 0 && chatTab !== "generale" && (
+                      <span className="bg-cyan-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">{unreadGenerale}</span>
+                    )}
+                  </span>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setChatTab("equipe")}
+                  onClick={() => { setChatTab("equipe"); markAsRead("equipe"); }}
                   className={`flex-1 rounded-none ${chatTab === "equipe" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
                 >
-                  Équipe
+                  <span className="flex items-center gap-1.5">
+                    Équipe
+                    {unreadEquipe > 0 && chatTab !== "equipe" && (
+                      <span className="bg-cyan-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">{unreadEquipe}</span>
+                    )}
+                  </span>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setChatTab("clubsocial")}
+                  onClick={() => { setChatTab("clubsocial"); markAsRead("clubsocial"); }}
                   className={`flex-1 rounded-none ${chatTab === "clubsocial" ? "text-cyan-400 border-b-2 border-cyan-400" : "text-slate-400"}`}
                 >
-                  Club Social
+                  <span className="flex items-center gap-1.5">
+                    Club Social
+                    {unreadClubSocial > 0 && chatTab !== "clubsocial" && (
+                      <span className="bg-cyan-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">{unreadClubSocial}</span>
+                    )}
+                  </span>
                 </Button>
               </div>
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
