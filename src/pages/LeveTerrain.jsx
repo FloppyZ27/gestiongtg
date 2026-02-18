@@ -690,6 +690,84 @@ export default function LeveTerrain() {
           </div>
         </div>
       </div>
+      {/* ===== LIGHTBOX PHOTOS ===== */}
+      {lightboxIndex !== null && (() => {
+        const imageFiles = photosFiles.filter(f => ['jpg','jpeg','png','gif','webp'].includes(f.name.split('.').pop()?.toLowerCase()));
+        const current = photosFiles[lightboxIndex];
+        const isImg = ['jpg','jpeg','png','gif','webp'].includes(current?.name.split('.').pop()?.toLowerCase());
+        const goPrev = () => setLightboxIndex(i => (i - 1 + photosFiles.length) % photosFiles.length);
+        const goNext = () => setLightboxIndex(i => (i + 1) % photosFiles.length);
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Fermer */}
+            <button
+              className="absolute top-4 right-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-2 z-10"
+              onClick={() => setLightboxIndex(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Compteur */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-slate-300 text-sm bg-slate-800/80 px-3 py-1 rounded-full">
+              {lightboxIndex + 1} / {photosFiles.length}
+            </div>
+
+            {/* Flèche gauche */}
+            {photosFiles.length > 1 && (
+              <button
+                className="absolute left-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
+                onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Image */}
+            <div className="max-w-5xl max-h-[85vh] flex items-center justify-center px-20" onClick={e => e.stopPropagation()}>
+              {isImg && current.downloadUrl ? (
+                <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-[85vh] rounded-lg object-contain shadow-2xl" />
+              ) : (
+                <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
+                  <Image className="w-16 h-16 mb-3" />
+                  <p className="text-sm">{current?.name}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Flèche droite */}
+            {photosFiles.length > 1 && (
+              <button
+                className="absolute right-4 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
+                onClick={(e) => { e.stopPropagation(); goNext(); }}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Nom du fichier */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-slate-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full">
+              {current?.name}
+            </div>
+
+            {/* Lien SharePoint */}
+            {current?.webUrl && (
+              <a
+                href={current.webUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-12 left-1/2 -translate-x-1/2 text-blue-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full flex items-center gap-1 hover:text-blue-300"
+                onClick={e => e.stopPropagation()}
+              >
+                <ExternalLink className="w-3 h-3" /> Ouvrir dans SharePoint
+              </a>
+            )}
+          </div>
+        );
+      })()}
+
       {/* ===== MODAL CAMÉRA ===== */}
       {showCamera && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
