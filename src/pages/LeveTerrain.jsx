@@ -872,8 +872,8 @@ export default function LeveTerrain() {
               </button>
             )}
 
-            {/* Conteneur principal : photo à gauche, carte à droite */}
-            <div className="flex-1 flex items-center justify-between px-6 py-4 gap-6" onClick={e => e.stopPropagation()}>
+            {/* Conteneur principal : photo à gauche, flèche, carte à droite */}
+            <div className="flex-1 flex items-center justify-center px-6 py-4 gap-4" onClick={e => e.stopPropagation()}>
               {/* Image centrée à gauche */}
               <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
                 {isImg && current.downloadUrl ? (
@@ -885,6 +885,16 @@ export default function LeveTerrain() {
                   </div>
                 )}
               </div>
+
+              {/* Flèche droite */}
+              {photosFiles.length > 1 && (
+                <button
+                  className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 flex-shrink-0"
+                  onClick={(e) => { e.stopPropagation(); goNext(); }}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
 
               {/* Carte satellite avec tous les pins des photos */}
               {selectedItem && photosFiles.length > 0 && (
@@ -898,16 +908,6 @@ export default function LeveTerrain() {
                 </div>
               )}
             </div>
-
-            {/* Flèche droite */}
-            {photosFiles.length > 1 && (
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
-                onClick={(e) => { e.stopPropagation(); goNext(); }}
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            )}
 
             {/* Bande de miniatures en bas */}
             {photosFiles.length > 1 && (
