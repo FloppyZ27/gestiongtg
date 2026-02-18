@@ -193,18 +193,28 @@ export default function Comptabilite() {
                 {/* ---- VUE LISTE ---- */}
                 {feuilleTempsView === 'liste' && (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-[2fr,1fr,1fr] bg-slate-800/50 px-4 py-2 border-b border-slate-700">
+                    {/* En-tête : Utilisateur + dim à sam + total */}
+                    <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
                       <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Cette semaine</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Ce mois</div>
+                      {weekDays.map((day, idx) => {
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        return (
+                          <div key={idx} className="text-xs font-semibold text-right" style={{ color: isToday ? 'rgb(52,211,153)' : 'rgb(148,163,184)' }}>
+                            <div>{format(day, "EEE", { locale: fr })}</div>
+                            <div>{format(day, "d")}</div>
+                          </div>
+                        );
+                      })}
+                      <div className="text-xs font-semibold text-slate-400 text-right">Total</div>
                     </div>
+
+                    {/* Lignes par utilisateur */}
                     {users.map(u => {
                       const weekH = getUserWeekHours(u.email);
-                      const monthH = getUserMonthHours(u.email);
                       return (
-                        <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
+                        <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="w-7 h-7">
                               <AvatarImage src={u.photo_url} />
                               <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                             </Avatar>
@@ -213,15 +223,41 @@ export default function Comptabilite() {
                               <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                             </div>
                           </div>
-                          <div className="text-right"><span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span></div>
-                          <div className="text-right"><span className={`font-bold text-sm ${monthH > 0 ? 'text-cyan-400' : 'text-slate-600'}`}>{monthH.toFixed(1)}h</span></div>
+                          {weekDays.map((day, idx) => {
+                            const h = getUserDayTotalHours(day, u.email);
+                            const isToday = day.toDateString() === new Date().toDateString();
+                            return (
+                              <div key={idx} className="text-right">
+                                <span className={`text-xs font-medium ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
+                                  {h > 0 ? `${h.toFixed(1)}h` : '-'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          <div className="text-right">
+                            <span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span>
+                          </div>
                         </div>
                       );
                     })}
-                    <div className="grid grid-cols-[2fr,1fr,1fr] px-4 py-3 bg-slate-800/50 items-center">
-                      <div className="text-xs font-bold text-slate-300">TOTAL</div>
-                      <div className="text-right font-bold text-sm text-emerald-400">{users.reduce((sum, u) => sum + getUserWeekHours(u.email), 0).toFixed(1)}h</div>
-                      <div className="text-right font-bold text-sm text-cyan-400">{users.reduce((sum, u) => sum + getUserMonthHours(u.email), 0).toFixed(1)}h</div>
+
+                    {/* Ligne totaux par jour */}
+                    <div className="grid px-3 py-2 bg-slate-800/50 items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
+                      <div className="text-xs font-bold text-slate-300">Total / jour</div>
+                      {weekDays.map((day, idx) => {
+                        const total = users.reduce((sum, u) => sum + getUserDayTotalHours(day, u.email), 0);
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        return (
+                          <div key={idx} className="text-right">
+                            <span className={`text-xs font-bold ${total > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-300') : 'text-slate-700'}`}>
+                              {total > 0 ? `${total.toFixed(1)}h` : '-'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-slate-500">—</span>
+                      </div>
                     </div>
                   </div>
                 )}
