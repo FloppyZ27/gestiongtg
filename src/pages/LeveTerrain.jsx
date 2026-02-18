@@ -960,7 +960,7 @@ export default function LeveTerrain() {
             )}
 
             {/* Nom du fichier */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-slate-400 text-xs bg-slate-800/80 px-3 py-1 rounded-full">
+            <div className="text-center text-slate-400 text-xs pb-4">
               {current?.name}
             </div>
           </div>
