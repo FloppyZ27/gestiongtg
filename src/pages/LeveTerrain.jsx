@@ -742,15 +742,6 @@ export default function LeveTerrain() {
         const current = photosFiles[lightboxIndex];
         const isImg = ['jpg','jpeg','png','gif','webp'].includes(current?.name.split('.').pop()?.toLowerCase());
         
-        // Extraire GPS à chaque changement de photo
-        useEffect(() => {
-          if (isImg && current?.downloadUrl) {
-            extractGPSFromImage(current.downloadUrl).then(gps => setPhotoGPS(gps));
-          } else {
-            setPhotoGPS(null);
-          }
-        }, [lightboxIndex, current?.downloadUrl]);
-        
         const goPrev = () => {
           setLightboxIndex(i => (i - 1 + photosFiles.length) % photosFiles.length);
           setThumbnailScroll(Math.max(0, thumbnailScroll - 1));
