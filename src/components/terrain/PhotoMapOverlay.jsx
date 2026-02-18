@@ -18,11 +18,12 @@ export default function PhotoMapOverlay({ photosGPS, photosFiles, selectedDossie
   ];
 
   return (
-    <div className="absolute bottom-64 right-4 w-80 h-80 rounded-lg overflow-hidden border border-slate-600 shadow-lg z-20" onClick={e => e.stopPropagation()}>
-      <MapContainer center={center} zoom={18} style={{ height: '100%', width: '100%' }}>
+    <div className="absolute bottom-96 right-4 w-[600px] h-[600px] rounded-lg overflow-hidden border border-slate-600 shadow-lg z-20" onClick={e => e.stopPropagation()}>
+      <MapContainer center={center} zoom={18} maxZoom={21} style={{ height: '100%', width: '100%' }}>
         <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution='&copy; Esri'
+          url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+          attribution='&copy; Google'
+          maxZoom={21}
         />
         {photosGPSForDossier.map((gps) => {
           const photoIdx = photosFiles.findIndex(f => f.name === gps.photo_name);
