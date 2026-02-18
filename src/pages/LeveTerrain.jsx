@@ -223,23 +223,49 @@ export default function LeveTerrain() {
     const dateStr = format(new Date(), "yyyyMMdd");
     const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
     try {
-      await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: await fileToBase64(file) });
-      
-      // Sauvegarder les coordonnées GPS du périphérique si disponibles
-      if (deviceGPS) {
+      const base64Content = await fileToBase64(file);
+      await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: base64Content });
+
+      // Extraire l'orientation EXIF de la photo
+      const dataUrl = `data:image/jpeg;base64,${base64Content}`;
+      const { gpsData, heading: exifHeading } = await extractGPSAndOrientationFromImage(dataUrl);
+
+      // Déterminer le heading final (EXIF prioritaire, puis device)
+      let finalHeading = null;
+      let finalLat = null;
+      let finalLng = null;
+      let finalAccuracy = null;
+
+      if (exifHeading !== null) {
+        finalHeading = exifHeading;
+      } else if (deviceGPS?.heading) {
+        finalHeading = deviceGPS.heading;
+      }
+
+      if (gpsData) {
+        finalLat = gpsData.lat;
+        finalLng = gpsData.lng;
+      } else if (deviceGPS) {
+        finalLat = deviceGPS.lat;
+        finalLng = deviceGPS.lng;
+        finalAccuracy = deviceGPS.accuracy;
+      }
+
+      // Sauvegarder les coordonnées GPS et l'orientation
+      if (finalLat && finalLng) {
         await base44.entities.PhotoGPS.create({
           dossier_id: selectedItem.dossier.id,
           mandat_type: selectedItem.mandat.type_mandat,
           photo_name: file.name,
-          latitude: deviceGPS.lat,
-          longitude: deviceGPS.lng,
-          accuracy_meters: deviceGPS.accuracy,
-          heading: deviceGPS.heading,
-          timestamp: deviceGPS.timestamp,
+          latitude: finalLat,
+          longitude: finalLng,
+          accuracy_meters: finalAccuracy,
+          heading: finalHeading,
+          timestamp: deviceGPS?.timestamp || new Date().toISOString(),
           utilisateur_email: user?.email
         });
       }
-      
+
       loadPhotos(selectedItem.dossier);
     } catch (e) {
       console.error("Upload photo error:", e);
