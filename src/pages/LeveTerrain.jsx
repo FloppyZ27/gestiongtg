@@ -86,6 +86,10 @@ export default function LeveTerrain() {
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const cameraInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const [showCamera, setShowCamera] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
