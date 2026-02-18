@@ -803,8 +803,8 @@ export default function LeveTerrain() {
               </button>
             )}
 
-            {/* Carte localisation */}
-            {selectedItem?.mandat?.adresse_travaux && (
+            {/* Carte localisation avec GPS ou adresse */}
+            {(photoGPS || selectedItem?.mandat?.adresse_travaux) && (
               <div className="absolute bottom-64 right-4 w-72 h-64 rounded-lg overflow-hidden border border-slate-600 shadow-lg" onClick={e => e.stopPropagation()}>
                 <iframe
                   title="Localisation photo"
@@ -813,7 +813,10 @@ export default function LeveTerrain() {
                   style={{ border: 0 }}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(getAdresseString(selectedItem.mandat.adresse_travaux))}&output=embed`}
+                  src={photoGPS 
+                    ? `https://www.google.com/maps?q=${photoGPS.lat},${photoGPS.lng}&output=embed`
+                    : `https://www.google.com/maps?q=${encodeURIComponent(getAdresseString(selectedItem.mandat.adresse_travaux))}&output=embed`
+                  }
                 />
               </div>
             )}
