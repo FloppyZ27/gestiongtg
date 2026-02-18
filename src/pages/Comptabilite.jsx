@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { DollarSign, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays } from "lucide-react";
+import { BarChart2, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
