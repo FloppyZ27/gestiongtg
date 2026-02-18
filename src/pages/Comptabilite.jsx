@@ -242,7 +242,15 @@ export default function Comptabilite() {
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     {/* En-tête : Utilisateur + dim à sam + total */}
                     <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
-                      <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
+                      <div className="text-xs font-semibold text-slate-400">
+                        <button
+                          onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+                          className="flex items-center gap-1 hover:text-white transition-colors"
+                        >
+                          Utilisateur
+                          {userSortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                        </button>
+                      </div>
                       {weekDays.map((day, idx) => {
                         const isToday = day.toDateString() === new Date().toDateString();
                         return (
