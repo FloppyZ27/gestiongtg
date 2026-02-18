@@ -298,6 +298,31 @@ export default function LeveTerrain() {
       } catch (e) {
         console.error("Caméra indisponible:", e);
         setShowCamera(false);
+        return;
+      }
+    }
+
+    // Capturer l'orientation du téléphone (heading)
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      const handleDeviceOrientation = (event) => {
+        // alpha = rotation autour de l'axe Z (0-360°) = heading
+        const heading = (event.alpha || 0 + 360) % 360;
+        deviceOrientationRef.current = heading;
+        console.log('📱 Device Orientation:', heading);
+      };
+
+      // Demander la permissions pour iOS 13+
+      if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
+        DeviceOrientationEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleDeviceOrientation);
+            }
+          })
+          .catch(e => console.warn('Permission orientation refusée:', e));
+      } else {
+        // Android et autres
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
       }
     }
   };
