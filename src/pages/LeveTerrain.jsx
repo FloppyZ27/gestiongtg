@@ -276,83 +276,90 @@ export default function LeveTerrain() {
                     <button
                       key={`${dossier.id}-${idx}`}
                       onClick={() => handleSelectDossier({ dossier, mandat })}
-                      className={`w-full text-left px-3 py-3 border-b border-slate-800/50 hover:bg-slate-800/40 transition-all ${isSelected ? 'bg-emerald-500/15 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}
+                      className={`w-full text-left p-2 border-b border-slate-800/50 transition-all ${isSelected ? 'ring-2 ring-inset ring-emerald-500' : ''}`}
                     >
-                      {/* Badges N° dossier + type mandat */}
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex gap-1 flex-wrap">
-                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                          </Badge>
-                          <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>{mandat.type_mandat}</Badge>
-                        </div>
-                        {isSelected && <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
-                      </div>
-                      {/* Client */}
-                      <div className="flex items-center gap-1 mb-1">
-                        <User className="w-3 h-3 text-white flex-shrink-0" />
-                        <p className="text-white text-xs font-medium truncate">{getClientsNames(dossier.clients_ids)}</p>
-                      </div>
-                      {/* Adresse */}
-                      {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                        <div className="flex items-start gap-1 mb-1">
-                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                          <p className="text-slate-400 text-[10px] break-words">{formatAdresse(mandat.adresse_travaux)}</p>
-                        </div>
-                      )}
-                      {/* Date livraison */}
-                      {mandat.date_livraison && (
-                        <div className="flex items-center gap-1 mb-1">
-                          <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                          <span className="text-emerald-300 text-[10px]">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
-                        </div>
-                      )}
-                      {/* Terrain info depuis terrains_list[0] si disponible */}
+                      {/* Carte identique à DossierCard dans CéduleTerrain */}
                       {(() => {
                         const terrain = mandat.terrains_list?.[0] || mandat.terrain;
-                        if (!terrain) return null;
+                        const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                        const bgColorClass = arpColor.split(' ')[0];
                         return (
-                          <>
-                            {terrain.date_limite_leve && (
+                          <div className={`${bgColorClass} rounded-lg p-2`}>
+                            {/* Entête badges */}
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex gap-1 flex-wrap">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                                <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+                                  {getAbbreviatedMandatType(mandat.type_mandat)}
+                                </Badge>
+                              </div>
+                              {isSelected && <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
+                            </div>
+                            {/* Client */}
+                            <div className="flex items-center gap-1 mb-1">
+                              <User className="w-3 h-3 text-white flex-shrink-0" />
+                              <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                            </div>
+                            {/* Adresse */}
+                            {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                              <div className="flex items-start gap-1 mb-1">
+                                <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
+                              </div>
+                            )}
+                            {/* Date livraison */}
+                            {mandat.date_livraison && (
                               <div className="flex items-center gap-1 mb-1">
-                                <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-                                <span className="text-yellow-300 text-[10px]">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                                <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                <span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
                               </div>
                             )}
-                            {terrain.a_rendez_vous && terrain.date_rendez_vous && (
-                              <div className="flex items-center gap-1 mb-1">
-                                <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
-                                <span className="text-orange-300 text-[10px]">
-                                  RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
-                                  {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
-                                </span>
-                              </div>
+                            {terrain && (
+                              <>
+                                {terrain.date_limite_leve && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                    <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                                  </div>
+                                )}
+                                {terrain.a_rendez_vous && terrain.date_rendez_vous && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                                    <span className="text-xs text-orange-300">
+                                      RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
+                                      {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
+                                    </span>
+                                  </div>
+                                )}
+                                {terrain.instruments_requis && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                    <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
+                                  </div>
+                                )}
+                                {terrain.technicien && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                    <span className="text-xs text-blue-300 truncate">{terrain.technicien}</span>
+                                  </div>
+                                )}
+                                {terrain.dossier_simultane && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                    <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
+                                  </div>
+                                )}
+                                {terrain.temps_prevu && (
+                                  <div className="flex items-center gap-1 mt-2 pt-1 border-t border-emerald-500/30">
+                                    <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                    <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+                                  </div>
+                                )}
+                              </>
                             )}
-                            {terrain.instruments_requis && (
-                              <div className="flex items-center gap-1 mb-1">
-                                <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                                <span className="text-emerald-300 text-[10px] truncate">{terrain.instruments_requis}</span>
-                              </div>
-                            )}
-                            {terrain.technicien && (
-                              <div className="flex items-center gap-1 mb-1">
-                                <UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" />
-                                <span className="text-blue-300 text-[10px] truncate">{terrain.technicien}</span>
-                              </div>
-                            )}
-                            {terrain.dossier_simultane && (
-                              <div className="flex items-center gap-1 mb-1">
-                                <Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
-                                <span className="text-purple-300 text-[10px] truncate">Avec: {terrain.dossier_simultane}</span>
-                              </div>
-                            )}
-                            {terrain.temps_prevu && (
-                              <div className="flex items-center gap-1">
-                                <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                                <span className="text-emerald-300 text-[10px]">{terrain.temps_prevu}</span>
-                              </div>
-                            )}
-                          </>
+                          </div>
                         );
                       })()}
                     </button>
