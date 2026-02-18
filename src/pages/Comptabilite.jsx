@@ -239,37 +239,38 @@ export default function Comptabilite() {
                         <div key={u.id} className="flex border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors" style={{ minHeight: '48px' }}>
                           {agendaWeekDays.map((day, dayIdx) => {
                             const isToday = day.toDateString() === new Date().toDateString();
-                            const entries = getEntreesForDateUser(day, u.email);
-                            const totalH = entries.reduce((sum, e) => sum + (e.heures || 0), 0);
+                            const pointages = getPointagesForDateUser(day, u.email);
+                            const totalH = pointages.reduce((sum, p) => sum + getPointageDuration(p), 0);
                             return (
                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 p-1 ${isToday ? 'bg-emerald-500/5' : ''}`} style={{ minWidth: 0 }}>
-                                {entries.length > 0 ? (
+                                {pointages.length > 0 ? (
                                   <div className="space-y-0.5">
-                                    {entries.map(e => {
-                                      const dossier = dossiers.find(d => d.id === e.dossier_id);
+                                    {pointages.map(p => {
+                                      const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                      const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                      const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                      const duree = getPointageDuration(p);
                                       return (
-                                        <Tooltip key={e.id}>
+                                        <Tooltip key={p.id}>
                                           <TooltipTrigger asChild>
-                                            <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/20 border border-emerald-500/30 rounded px-1.5 py-0.5 cursor-default">
+                                            <div className={`rounded px-1.5 py-0.5 cursor-default border ${isModified ? 'bg-gradient-to-r from-orange-500/30 to-amber-500/20 border-orange-500/30' : 'bg-gradient-to-r from-emerald-500/30 to-teal-500/20 border-emerald-500/30'}`}>
                                               <div className="flex items-center justify-between gap-1">
-                                                <span className="text-[10px] text-emerald-300 font-semibold truncate">{e.tache}</span>
-                                                <span className="text-[10px] text-emerald-400 font-bold flex-shrink-0">{e.heures}h</span>
+                                                <span className="text-[10px] text-slate-300 truncate">{format(debut, "HH:mm")}–{format(fin, "HH:mm")}</span>
+                                                <span className={`text-[10px] font-bold flex-shrink-0 ${isModified ? 'text-orange-400' : 'text-emerald-400'}`}>{duree.toFixed(1)}h</span>
                                               </div>
-                                              {dossier && <div className="text-[9px] text-slate-400 truncate">{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</div>}
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-white max-w-xs p-3 text-xs">
                                             <div className="space-y-1">
-                                              <div className="font-semibold text-emerald-400">{e.heures}h — {e.tache}</div>
-                                              {dossier && <div className="text-slate-300">Dossier: {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</div>}
-                                              {dossier && <div className="text-slate-400">{getClientsNames(dossier.clients_ids)}</div>}
-                                              {e.mandat && <div className="text-blue-400">Mandat: {e.mandat}</div>}
+                                              <div className={`font-semibold ${isModified ? 'text-orange-400' : 'text-emerald-400'}`}>{duree.toFixed(2)}h {isModified ? '(modifié)' : ''}</div>
+                                              <div className="text-slate-300">{format(debut, "HH:mm")} → {format(fin, "HH:mm")}</div>
+                                              {p.description && <div className="text-slate-400">{p.description}</div>}
                                             </div>
                                           </TooltipContent>
                                         </Tooltip>
                                       );
                                     })}
-                                    {entries.length > 1 && (
+                                    {pointages.length > 1 && (
                                       <div className="text-[9px] text-slate-500 text-right px-0.5">Total: {totalH.toFixed(1)}h</div>
                                     )}
                                   </div>
