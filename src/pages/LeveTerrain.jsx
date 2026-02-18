@@ -911,7 +911,7 @@ export default function LeveTerrain() {
 
             {/* Bande de miniatures en bas */}
             {photosFiles.length > 1 && (
-              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/80 px-4 py-3 rounded-lg">
+              <div className="flex items-center justify-center gap-2 bg-black/80 px-4 py-3 rounded-lg mx-auto mb-4">
                 {/* Flèche scroll gauche */}
                 {thumbnailScroll > 0 && (
                   <button
