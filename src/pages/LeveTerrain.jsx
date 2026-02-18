@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, Mountain, ExternalLink, RefreshCw, Upload } from "lucide-react";
+import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer } from "lucide-react";
 
 const ARPENTEUR_INITIALS = {
   "Samuel Guay": "SG",
