@@ -311,6 +311,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
     }
   });
 
