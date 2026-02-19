@@ -83,7 +83,7 @@ export default function DossierSearchBar({ dossiers, clients }) {
   }, [searchTerm, dossiers, clients]);
 
   const handleDossierClick = (dossier) => {
-    const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
+    const url = createPageUrl("Dossiers") + "?edit_dossier_id=" + dossier.id;
     window.location.href = url;
     setSearchTerm("");
     setShowResults(false);
