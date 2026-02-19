@@ -244,6 +244,17 @@ export default function EditDossierForm({
     }
   }, [editingDossier?.id]);
 
+  // Charger l'historique des actions quand le dossier change
+  React.useEffect(() => {
+    if (editingDossier?.id) {
+      base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 50)
+        .then(setActionLogs)
+        .catch(() => setActionLogs([]));
+    } else {
+      setActionLogs([]);
+    }
+  }, [editingDossier?.id]);
+
   const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
   const notaires = (clients || []).filter(c => c?.type_client === 'Notaire');
   const courtiers = (clients || []).filter(c => c?.type_client === 'Courtier immobilier');
