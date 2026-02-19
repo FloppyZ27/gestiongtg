@@ -3134,10 +3134,12 @@ export default function EditDossierForm({
               <Button
                 type="button"
                 onClick={() => {
-                  removeMandat(mandatIndexToDelete);
-                  setActiveTabMandat(Math.max(0, mandatIndexToDelete - 1).toString());
-                  setShowDeleteMandatConfirm(false);
-                  setMandatIndexToDelete(null);
+                const mandatLabel = formData.mandats[mandatIndexToDelete]?.type_mandat || `Mandat ${mandatIndexToDelete + 1}`;
+                addActionLog("Mandat supprimé", `Mandat supprimé: ${mandatLabel}`);
+                removeMandat(mandatIndexToDelete);
+                setActiveTabMandat(Math.max(0, mandatIndexToDelete - 1).toString());
+                setShowDeleteMandatConfirm(false);
+                setMandatIndexToDelete(null);
                 }}
                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
               >
