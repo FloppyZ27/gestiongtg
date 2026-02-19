@@ -150,6 +150,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         })) || [],
         description: dossier.description || ""
       };
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       setFormData(data);
       setInitialFormData(JSON.parse(JSON.stringify(data)));
       initialFormDataRef.current = JSON.parse(JSON.stringify(data));
