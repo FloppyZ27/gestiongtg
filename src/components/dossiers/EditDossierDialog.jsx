@@ -231,7 +231,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       // Détecter et logger les changements importants
       const changesLog = [];
 
-      if (oldDossier && oldDossier.statut !== dossierData.statut) {
+      if (oldDossier?.statut !== dossierData.statut) {
         changesLog.push(`Statut: ${oldDossier.statut} → ${dossierData.statut}`);
       }
 
