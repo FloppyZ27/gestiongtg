@@ -542,8 +542,8 @@ export default function LeveTerrain() {
                         const terrain = mandat.terrains_list?.[0] || mandat.terrain;
                         const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
                         const bgColorClass = arpColor.split(' ')[0];
-                        const donneurUser = terrain?.donneur
-                          ? users.find(u => u.full_name === terrain.donneur)
+                        const assignedUser = mandat.utilisateur_assigne
+                          ? users.find(u => u.email === mandat.utilisateur_assigne)
                           : null;
                         const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
                         return (
@@ -614,7 +614,7 @@ export default function LeveTerrain() {
                                     <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
                                   </div>
                                 )}
-                                {/* Temps prévu + Donneur (identique à DossierCard de CéduleTerrain) */}
+                                {/* Temps prévu + Utilisateur assigné au mandat */}
                                 <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
                                   <div className="flex items-center gap-1">
                                     {terrain.temps_prevu && (
@@ -624,21 +624,24 @@ export default function LeveTerrain() {
                                       </>
                                     )}
                                   </div>
-                                  {donneurUser ? (
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-xs text-emerald-300 font-medium">{getUserInitials(donneurUser.full_name)}</span>
-                                      <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-                                        <AvatarImage src={donneurUser.photo_url} />
-                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getUserInitials(donneurUser.full_name)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    </div>
-                                  ) : (
-                                    <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
-                                      <User className="w-3 h-3 text-emerald-500" />
-                                    </div>
-                                  )}
+                                  {(() => {
+                                    const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
+                                    return assignedUser ? (
+                                      <div className="flex items-center gap-1">
+                                        <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
+                                        <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+                                          <AvatarImage src={assignedUser.photo_url} />
+                                          <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                            {getUserInitials(assignedUser.full_name)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </div>
+                                    ) : (
+                                      <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                        <User className="w-3 h-3 text-emerald-500" />
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </>
                             )}
