@@ -3077,16 +3077,22 @@ export default function EditDossierForm({
                   if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
                     // Supprimer une minute
                     const updatedMandats = [...formData.mandats];
+                    const mandatLabel = formData.mandats[minuteToDeleteInfo.mandatIndex]?.type_mandat || `Mandat ${minuteToDeleteInfo.mandatIndex + 1}`;
                     updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list = updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list.filter((_, idx) => idx !== minuteToDeleteInfo.minuteIndex);
                     setFormData({...formData, mandats: updatedMandats});
+                    addActionLog("Minute supprimée", `Minute ${minuteToDeleteInfo.minute} supprimée pour le mandat: ${mandatLabel}`);
                   } else if (minuteToDeleteInfo?.entreeTempsId) {
                     // Supprimer une entrée de temps
+                    const entree = entreesTemps.find(e => e.id === minuteToDeleteInfo.entreeTempsId);
                     await base44.entities.EntreeTemps.delete(minuteToDeleteInfo.entreeTempsId);
                     setEntreesTemps(prev => prev.filter(e => e.id !== minuteToDeleteInfo.entreeTempsId));
+                    if (entree) addActionLog("Entrée de temps supprimée", `${entree.heures}h - ${entree.tache} - ${entree.mandat}`);
                   } else if (minuteToDeleteInfo?.retourAppelId) {
                     // Supprimer un retour d'appel
+                    const retour = retoursAppel.find(r => r.id === minuteToDeleteInfo.retourAppelId);
                     await base44.entities.RetourAppel.delete(minuteToDeleteInfo.retourAppelId);
                     setRetoursAppel(prev => prev.filter(r => r.id !== minuteToDeleteInfo.retourAppelId));
+                    if (retour) addActionLog("Retour d'appel supprimé", `${retour.raison}`);
                   }
                   setShowDeleteMinuteConfirm(false);
                   setMinuteToDeleteInfo(null);
