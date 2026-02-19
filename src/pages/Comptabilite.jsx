@@ -518,8 +518,16 @@ export default function Comptabilite() {
                       const prixNet = (mandat.prix_estime || 0) - (mandat.rabais || 0);
                       const valeurProgressee = getMandatValeurProgression(mandat);
                       return (
-                        <div key={`${dossier.id}-${idx}`} className="grid grid-cols-[1.2fr,2fr,1.5fr,2fr,1fr,1.8fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2">
-                          <div className="text-white text-xs font-medium">{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</div>
+                        <div
+                          key={`${dossier.id}-${idx}`}
+                          className="grid grid-cols-[1.2fr,2fr,1.5fr,2fr,1fr,1.8fr] px-3 py-2 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2 cursor-pointer"
+                          onClick={() => window.dispatchEvent(new CustomEvent('openDossierEdit', { detail: { dossierId: dossier.id } }))}
+                        >
+                          <div>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                            </Badge>
+                          </div>
                           <div className="text-slate-300 text-xs truncate">{getClientsNames(dossier.clients_ids)}</div>
                           <div><Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>{getAbbreviatedMandatType(mandat.type_mandat)}</Badge></div>
                           <div className="text-slate-300 text-xs truncate">{formatAdresse(mandat.adresse_travaux) || <span className="text-slate-600">-</span>}</div>
