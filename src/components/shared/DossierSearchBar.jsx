@@ -112,46 +112,74 @@ export default function DossierSearchBar({ dossiers, clients }) {
         />
       </div>
 
-      {showResults && searchTerm.trim() && (
-        <div className="absolute top-full mt-2 w-full bg-slate-900 border-2 border-emerald-500/30 rounded-lg shadow-2xl overflow-hidden z-50">
+      {showResults && (
+        <div className="absolute top-full mt-2 w-full min-w-[520px] bg-slate-900 border-2 border-emerald-500/30 rounded-lg shadow-2xl overflow-hidden z-50">
+          {!searchTerm.trim() && (
+            <div className="px-3 py-1.5 border-b border-slate-800 flex items-center gap-1.5">
+              <Clock className="w-3 h-3 text-slate-500" />
+              <span className="text-[11px] text-slate-500">Dossiers récents</span>
+            </div>
+          )}
           {filteredDossiers.length > 0 ? (
-            <div className="max-h-[300px] overflow-y-auto">
-              {filteredDossiers.map((dossier) => (
-                <div
-                  key={dossier.id}
-                  onClick={() => handleDossierClick(dossier)}
-                  className="p-3 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800 last:border-b-0"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                    </Badge>
-                    <Badge className={dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
-                      {dossier.statut}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-300 truncate">
-                    {getClientsNames(dossier.clients_ids) || "Aucun client"}
-                  </p>
-                  {dossier.mandats && dossier.mandats.length > 0 && (
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-xs">
-                          {mandat.type_mandat}
+            <div className="max-h-[420px] overflow-y-auto">
+              {filteredDossiers.map((dossier) => {
+                const clientsNames = getClientsNames(dossier.clients_ids);
+                const adresse = dossier.mandats?.[0] ? getAdresse(dossier.mandats[0]) : (dossier.adresse_texte || "");
+                return (
+                  <div
+                    key={dossier.id}
+                    onClick={() => handleDossierClick(dossier)}
+                    className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
+                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                         </Badge>
-                      ))}
-                      {dossier.mandats.length > 2 && (
-                        <Badge className="bg-slate-700 text-slate-300 text-xs">
-                          +{dossier.mandats.length - 2}
+                        {clientsNames && (
+                          <span className="text-sm text-slate-300 truncate flex items-center gap-1">
+                            <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                            {clientsNames}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {dossier.date_ouverture && (
+                          <span className="text-[10px] text-slate-500">
+                            {format(new Date(dossier.date_ouverture), "d MMM yyyy", { locale: fr })}
+                          </span>
+                        )}
+                        <Badge className={`text-[10px] px-1.5 py-0 ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {dossier.statut}
                         </Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      {adresse && (
+                        <span className="text-[11px] text-slate-500 flex items-center gap-1 truncate">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          {adresse}
+                        </span>
+                      )}
+                      {dossier.mandats && dossier.mandats.length > 0 && (
+                        <div className="flex gap-1 flex-shrink-0">
+                          {dossier.mandats.slice(0, 3).map((mandat, idx) => mandat.type_mandat && (
+                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0">
+                              {mandat.type_mandat.length > 20 ? mandat.type_mandat.substring(0, 20) + '…' : mandat.type_mandat}
+                            </Badge>
+                          ))}
+                          {dossier.mandats.length > 3 && (
+                            <Badge className="bg-slate-700 text-slate-400 text-[10px] px-1.5 py-0">+{dossier.mandats.length - 3}</Badge>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           ) : (
-            <div className="p-4 text-center text-slate-500">
+            <div className="p-4 text-center text-slate-500 text-sm">
               Aucun dossier trouvé
             </div>
           )}
