@@ -37,6 +37,7 @@ import NotificationBanner from "@/components/shared/NotificationBanner";
 import NotificationButton from "@/components/shared/NotificationButton";
 import DossierSearchBar from "@/components/shared/DossierSearchBar";
 import PermissionGuard from "@/components/shared/PermissionGuard";
+import GlobalDossierEditDialog from "@/components/shared/GlobalDossierEditDialog";
 
 const navigationItems = [
   {
