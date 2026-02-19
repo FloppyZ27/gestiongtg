@@ -183,12 +183,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   }, [formData, dossier, initialFormData]);
 
   const autoSaveMutation = useMutation({
-    mutationFn: async ({ id, dossierData }) => {
-      const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
-      const oldDossier = allDossiersCurrentState.find(d => d.id === id);
+    mutationFn: async ({ id, dossierData, oldFormData }) => {
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
       
       const currentUser = await base44.auth.me();
+      const oldDossier = oldFormData;
       
       if (oldDossier && dossierData.mandats) {
         for (let i = 0; i < dossierData.mandats.length; i++) {
