@@ -1870,6 +1870,7 @@ export default function EditDossierForm({
                               updatedMandats[newTerrainForm.mandatIndex].tache_actuelle = "Cédule";
 
                               setFormData({...formData, mandats: updatedMandats});
+                              addActionLog("Terrain ajouté", `Terrain ajouté pour le mandat: ${formData.mandats[newTerrainForm.mandatIndex]?.type_mandat || 'Mandat ' + (newTerrainForm.mandatIndex + 1)}`);
                               setNewTerrainForm({});
                               setNewTerrainFormCollapsed(true);
                             }}
