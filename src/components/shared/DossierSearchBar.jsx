@@ -108,6 +108,7 @@ export default function DossierSearchBar({ dossiers, clients }) {
             setShowResults(true);
           }}
           onFocus={() => setShowResults(true)}
+          onKeyDown={(e) => { if (e.key === 'Escape') { setShowResults(false); setSearchTerm(""); } }}
           className="pl-10 bg-slate-800/50 border-slate-700 text-white"
         />
       </div>
