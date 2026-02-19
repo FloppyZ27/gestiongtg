@@ -239,32 +239,62 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       // Détecter et logger les changements importants
       const changesLog = [];
 
-      if (oldDossier?.statut !== dossierData.statut) {
-        changesLog.push(`Statut: ${oldDossier.statut} → ${dossierData.statut}`);
+      // Comparer les champs de base
+      if ((oldDossier?.statut || '') !== (dossierData.statut || '')) {
+        changesLog.push(`Statut: ${oldDossier?.statut || 'Aucun'} → ${dossierData.statut || 'Aucun'}`);
+      }
+      if ((oldDossier?.arpenteur_geometre || '') !== (dossierData.arpenteur_geometre || '')) {
+        changesLog.push(`Arpenteur: ${oldDossier?.arpenteur_geometre || 'Aucun'} → ${dossierData.arpenteur_geometre || 'Aucun'}`);
+      }
+      if ((oldDossier?.utilisateur_assigne || '') !== (dossierData.utilisateur_assigne || '')) {
+        const oldUser = (users || []).find(u => u?.email === oldDossier?.utilisateur_assigne)?.full_name || oldDossier?.utilisateur_assigne || 'Aucun';
+        const newUser = (users || []).find(u => u?.email === dossierData.utilisateur_assigne)?.full_name || dossierData.utilisateur_assigne || 'Aucun';
+        changesLog.push(`Retour d'appel assigné: ${oldUser} → ${newUser}`);
       }
 
-      if (oldDossier !== undefined) {
-        (dossierData.mandats || []).forEach((newMandat, i) => {
-          const oldMandat = oldDossier.mandats?.[i];
-          const mandatLabel = newMandat.type_mandat || `Mandat ${i + 1}`;
-          if (oldMandat) {
-            if (newMandat.tache_actuelle !== oldMandat.tache_actuelle && (newMandat.tache_actuelle || oldMandat.tache_actuelle)) {
-              changesLog.push(`[${mandatLabel}] Tâche: ${oldMandat.tache_actuelle || 'Aucune'} → ${newMandat.tache_actuelle || 'Aucune'}`);
-            }
-            if (newMandat.utilisateur_assigne !== oldMandat.utilisateur_assigne) {
-              const oldUser = (users || []).find(u => u?.email === oldMandat.utilisateur_assigne)?.full_name || 'Aucun';
-              const newUser = (users || []).find(u => u?.email === newMandat.utilisateur_assigne)?.full_name || 'Aucun';
-              changesLog.push(`[${mandatLabel}] Responsable: ${oldUser} → ${newUser}`);
-            }
-          } else {
-            changesLog.push(`Mandat ajouté: ${mandatLabel}`);
-          }
-        });
+      // Comparer les mandats
+      const oldMandats = oldDossier?.mandats || [];
+      const newMandats = dossierData.mandats || [];
 
-        if ((oldDossier.mandats?.length || 0) > (dossierData.mandats?.length || 0)) {
-          for (let i = (dossierData.mandats?.length || 0); i < (oldDossier.mandats?.length || 0); i++) {
-            changesLog.push(`Mandat supprimé: ${oldDossier.mandats[i].type_mandat || 'Mandat ' + (i + 1)}`);
+      // Mandats ajoutés ou modifiés
+      newMandats.forEach((newMandat, i) => {
+        const oldMandat = oldMandats[i];
+        const mandatLabel = newMandat.type_mandat || `Mandat ${i + 1}`;
+        if (!oldMandat) {
+          changesLog.push(`Mandat ajouté: ${mandatLabel}`);
+        } else {
+          if ((newMandat.type_mandat || '') !== (oldMandat.type_mandat || '')) {
+            changesLog.push(`[${mandatLabel}] Type: ${oldMandat.type_mandat || 'Aucun'} → ${newMandat.type_mandat || 'Aucun'}`);
           }
+          if ((newMandat.tache_actuelle || '') !== (oldMandat.tache_actuelle || '')) {
+            changesLog.push(`[${mandatLabel}] Tâche: ${oldMandat.tache_actuelle || 'Aucune'} → ${newMandat.tache_actuelle || 'Aucune'}`);
+          }
+          if ((newMandat.utilisateur_assigne || '') !== (oldMandat.utilisateur_assigne || '')) {
+            const oldUser = (users || []).find(u => u?.email === oldMandat.utilisateur_assigne)?.full_name || oldMandat.utilisateur_assigne || 'Aucun';
+            const newUser = (users || []).find(u => u?.email === newMandat.utilisateur_assigne)?.full_name || newMandat.utilisateur_assigne || 'Aucun';
+            changesLog.push(`[${mandatLabel}] Responsable: ${oldUser} → ${newUser}`);
+          }
+          if ((newMandat.date_livraison || '') !== (oldMandat.date_livraison || '')) {
+            changesLog.push(`[${mandatLabel}] Date livraison: ${oldMandat.date_livraison || 'Aucune'} → ${newMandat.date_livraison || 'Aucune'}`);
+          }
+          if ((newMandat.date_signature || '') !== (oldMandat.date_signature || '')) {
+            changesLog.push(`[${mandatLabel}] Date signature: ${oldMandat.date_signature || 'Aucune'} → ${newMandat.date_signature || 'Aucune'}`);
+          }
+          const oldMinuteCount = oldMandat.minutes_list?.length || 0;
+          const newMinuteCount = newMandat.minutes_list?.length || 0;
+          if (newMinuteCount > oldMinuteCount) {
+            const added = newMandat.minutes_list.slice(oldMinuteCount);
+            added.forEach(m => changesLog.push(`[${mandatLabel}] Minute ajoutée: ${m.minute}`));
+          } else if (newMinuteCount < oldMinuteCount) {
+            changesLog.push(`[${mandatLabel}] Minute(s) supprimée(s): ${oldMinuteCount - newMinuteCount}`);
+          }
+        }
+      });
+
+      // Mandats supprimés
+      if (oldMandats.length > newMandats.length) {
+        for (let i = newMandats.length; i < oldMandats.length; i++) {
+          changesLog.push(`Mandat supprimé: ${oldMandats[i].type_mandat || 'Mandat ' + (i + 1)}`);
         }
       }
 
