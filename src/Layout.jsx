@@ -166,6 +166,12 @@ const getAbbreviatedMandatType = (type) => {
 
 function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
+
+  // Scroll to top on page change
+  useEffect(() => {
+    const container = document.getElementById('main-scroll-container');
+    if (container) container.scrollTop = 0;
+  }, [location.pathname]);
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
   const [dossierSearchTerm, setDossierSearchTerm] = useState("");
   const [selectedDossierId, setSelectedDossierId] = useState(null);
