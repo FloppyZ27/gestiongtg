@@ -28,7 +28,7 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-export default function DossierSearchBar({ dossiers, clients }) {
+export default function DossierSearchBar({ dossiers, clients, onDossierSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
