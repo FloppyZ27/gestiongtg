@@ -177,15 +177,16 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     
     const oldSnapshot = JSON.parse(JSON.stringify(initialFormDataRef.current));
     const currentFormData = JSON.parse(JSON.stringify(formData));
+    const dossierId = dossier.id;
 
     saveTimeoutRef.current = setTimeout(() => {
       initialFormDataRef.current = currentFormData;
-      autoSaveMutation.mutate({ id: dossier.id, dossierData: currentFormData, oldFormData: oldSnapshot });
+      autoSaveMutation.mutate({ id: dossierId, dossierData: currentFormData, oldFormData: oldSnapshot });
       setHasChanges(false);
     }, 1500);
     
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData]);
+  }, [JSON.stringify(formData)]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData, oldFormData }) => {
