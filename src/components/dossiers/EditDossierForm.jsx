@@ -2423,6 +2423,7 @@ export default function EditDossierForm({
                                  utilisateur_email: user?.email || ""
                                });
 
+                               addActionLog("Entrée de temps", `${parseFloat(newEntreeTempsForm.heures)}h - ${newEntreeTempsForm.tache} - ${newEntreeTempsForm.mandat}`);
                                setEntreesTemps(prev => [createdEntree, ...prev]);
                                setNewEntreeTempsForm({
                                  date: new Date().toISOString().split('T')[0],
