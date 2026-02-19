@@ -2609,6 +2609,7 @@ export default function EditDossierForm({
                                  statut: "Retour d'appel"
                                });
 
+                               addActionLog("Retour d'appel", `Retour d'appel ajouté: ${newRetourAppel.raison}`);
                                setRetoursAppel(prev => [createdRetour, ...prev]);
                                setFormData({...formData, statut: "Retour d'appel"});
 
