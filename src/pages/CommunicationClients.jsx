@@ -53,7 +53,7 @@ export default function CommunicationClients() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent mb-2">
             Communication clients

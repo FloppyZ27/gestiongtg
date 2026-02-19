@@ -11,7 +11,7 @@ export default function Recherches() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="flex items-center gap-3 mb-6">
           <SearchIcon className="w-8 h-8 text-emerald-400" />
           <div>
