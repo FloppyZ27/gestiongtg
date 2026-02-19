@@ -314,14 +314,16 @@ export default function EditDossierForm({
 
   const [actionLogs, setActionLogs] = useState([]);
 
-  // Charger les logs d'actions pour le dossier
+  // Charger les logs d'actions pour le dossier + initialiser prevFormDataRef
   React.useEffect(() => {
     if (editingDossier?.id) {
       base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 100)
         .then(setActionLogs)
         .catch(() => setActionLogs([]));
+      prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
     } else {
       setActionLogs([]);
+      prevFormDataRef.current = null;
     }
   }, [editingDossier?.id]);
 
