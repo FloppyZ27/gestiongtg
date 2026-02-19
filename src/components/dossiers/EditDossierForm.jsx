@@ -190,37 +190,7 @@ export default function EditDossierForm({
     queryFn: () => base44.auth.me(),
   });
 
-  // Auto-save mutation
-  const autoSaveMutation = useMutation({
-    mutationFn: async (dossierData) => {
-      if (!editingDossier) return;
-      
-      const updatedDossier = await base44.entities.Dossier.update(editingDossier.id, dossierData);
-      return updatedDossier;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-    },
-  });
-
-  // Auto-save avec debounce
-  useEffect(() => {
-    if (editingDossier) {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      saveTimeoutRef.current = setTimeout(() => {
-        autoSaveMutation.mutate(formData);
-      }, 300);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [formData, editingDossier]);
+  // Auto-save géré par EditDossierDialog (avec logging des changements)
 
   // Charger les retours d'appel quand le dossier change
   React.useEffect(() => {
