@@ -104,11 +104,17 @@ export default function LeveTerrain() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
 
-  // Dossiers du jour avec tâche Terrain
+  // Dossiers du jour avec tâche Terrain assignés à l'utilisateur actuel
+  const today = new Date().toISOString().split('T')[0];
   const dossiersDuJour = dossiers
     .filter(d => d.statut === "Ouvert")
     .flatMap(d => (d.mandats || [])
-      .filter(m => m.tache_actuelle === "Terrain")
+      .filter(m => 
+        m.tache_actuelle === "Terrain" && 
+        m.utilisateur_assigne === user?.email &&
+        (m.terrains_list?.some(t => t.date_cedulee === today) || 
+         (m.terrain?.date_cedulee === today))
+      )
       .map(m => ({ dossier: d, mandat: m }))
     )
     .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
