@@ -154,33 +154,41 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
+  const initialFormDataRef = React.useRef(null);
+
+  // Sync ref whenever initialFormData changes
+  useEffect(() => {
+    initialFormDataRef.current = initialFormData;
+  }, [initialFormData]);
   
   useEffect(() => {
-    if (dossier && initialFormData) {
-      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      setHasChanges(hasFormChanges);
-      
-      // Auto-save après 300ms sans changement
-      if (hasFormChanges) {
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
-        }
-        
-        const oldSnapshot = JSON.parse(JSON.stringify(initialFormData));
-        saveTimeoutRef.current = setTimeout(() => {
-          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData, oldFormData: oldSnapshot });
-          setInitialFormData(JSON.parse(JSON.stringify(formData)));
-          setHasChanges(false);
-        }, 300);
-      }
+    if (!dossier || !initialFormDataRef.current) return;
+
+    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
+    setHasChanges(hasFormChanges);
+    
+    if (!hasFormChanges) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    
+    // Capture snapshot NOW (before the timeout fires)
+    const oldSnapshot = JSON.parse(JSON.stringify(initialFormDataRef.current));
+    const currentFormData = JSON.parse(JSON.stringify(formData));
+
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSaveMutation.mutate({ id: dossier.id, dossierData: currentFormData, oldFormData: oldSnapshot });
+      setInitialFormData(currentFormData);
+      setHasChanges(false);
+    }, 1500);
     
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [formData, dossier, initialFormData]);
+  }, [formData, dossier?.id]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData, oldFormData }) => {
