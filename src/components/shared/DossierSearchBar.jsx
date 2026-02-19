@@ -83,11 +83,12 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
   }, [searchTerm, dossiers, clients]);
 
   const handleDossierClick = (dossier) => {
-    if (onDossierSelect) {
-      onDossierSelect(dossier);
-    } else {
-      const url = createPageUrl("Dossiers") + "?edit_dossier_id=" + dossier.id;
-      window.location.href = url;
+    // Dispatch a custom event so any page (esp. Dossiers) can intercept it
+    window.dispatchEvent(new CustomEvent('openDossierEdit', { detail: { dossierId: dossier.id } }));
+    // If not already on Dossiers page, navigate there with the param
+    const isDossiersPage = window.location.pathname === createPageUrl("Dossiers");
+    if (!isDossiersPage) {
+      window.location.href = createPageUrl("Dossiers") + "?edit_dossier_id=" + dossier.id;
     }
     setSearchTerm("");
     setShowResults(false);
