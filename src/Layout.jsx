@@ -996,6 +996,9 @@ function LayoutContent({ children, currentPageName }) {
       {/* Notification Banner */}
       <NotificationBanner user={user} />
       
+      {/* Dialog global pour modifier un dossier depuis n'importe quelle page */}
+      <GlobalDossierEditDialog />
+      
       {/* Dialog pour l'entrée de temps */}
       <Dialog open={isEntreeTempsOpen} onOpenChange={(open) => {
         if (!open && hasEntreeChanges) {
