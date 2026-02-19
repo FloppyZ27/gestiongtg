@@ -163,6 +163,7 @@ export default function EditDossierForm({
   });
   const [retoursAppel, setRetoursAppel] = useState([]);
   const [entreesTemps, setEntreesTemps] = useState([]);
+  const [actionLogs, setActionLogs] = useState([]);
   const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
