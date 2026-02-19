@@ -235,7 +235,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         changesLog.push(`Statut: ${oldDossier.statut} → ${dossierData.statut}`);
       }
 
-      if (oldDossier) {
+      if (oldDossier !== undefined) {
         (dossierData.mandats || []).forEach((newMandat, i) => {
           const oldMandat = oldDossier.mandats?.[i];
           const mandatLabel = newMandat.type_mandat || `Mandat ${i + 1}`;
