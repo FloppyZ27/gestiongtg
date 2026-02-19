@@ -1078,7 +1078,7 @@ export default function Profil() {
                                     <Tooltip key={event.id}>
                                       <TooltipTrigger asChild>
                                         <div
-                                          className={`absolute left-1 right-1 rounded px-3 py-2 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
+                                          className={`absolute left-1 right-1 rounded px-2 py-1 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-0.5 overflow-hidden ${
                                             isAbsence
                                               ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                               : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
@@ -1100,23 +1100,36 @@ export default function Profil() {
                                           >
                                             <Trash2 className="w-2.5 h-2.5" />
                                           </button>
-                                          <div className="truncate text-[11px] font-bold opacity-90 uppercase">
-                                            {isAbsence ? 'Absence' : 'Rendez-vous'}
-                                          </div>
-                                          <div className={`truncate font-bold text-sm ${
-                                            isAbsence ? 'text-orange-300' : 'text-purple-300'
-                                          }`}>{event.titre}</div>
-                                          {event.date_fin && (
-                                            <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
-                                          )}
-                                          {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
-                                          {durationMinutes >= 60 && (
-                                            <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
-                                              <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
-                                              {durationMinutes >= 90 && (
-                                                <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                          {durationMinutes <= 60 ? (
+                                            // Affichage compact : type + titre seulement
+                                            <>
+                                              <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
+                                                {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                              </div>
+                                              <div className={`truncate font-bold text-xs ${
+                                                isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                              }`}>{event.titre}</div>
+                                            </>
+                                          ) : (
+                                            // Affichage complet
+                                            <>
+                                              <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                                {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                              </div>
+                                              <div className={`truncate font-bold text-sm ${
+                                                isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                              }`}>{event.titre}</div>
+                                              {event.date_fin && (
+                                                <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                               )}
-                                            </div>
+                                              {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                              <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
+                                                <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                                {durationMinutes >= 90 && (
+                                                  <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                                )}
+                                              </div>
+                                            </>
                                           )}
                                         </div>
                                       </TooltipTrigger>
