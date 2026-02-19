@@ -261,14 +261,14 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       }
 
       if (changesLog.length > 0) {
-        base44.entities.ActionLog.create({
+        await base44.entities.ActionLog.create({
           utilisateur_email: currentUser?.email,
           utilisateur_nom: currentUser?.full_name,
           action: "Modification",
           entite: "Dossier",
           entite_id: id,
           details: changesLog.join(" | ")
-        }).catch(() => {});
+        });
       }
 
       return updatedDossier;
