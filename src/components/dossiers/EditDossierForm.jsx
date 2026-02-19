@@ -2125,6 +2125,7 @@ export default function EditDossierForm({
                                updatedMandats[newMinuteForm.mandatIndex].minutes_list.push(newMinute);
 
                                setFormData({...formData, mandats: updatedMandats});
+                               addActionLog("Minute ajoutée", `Minute ${newMinuteForm.minute} (${newMinuteForm.type_minute || 'Initiale'}) ajoutée pour le mandat: ${formData.mandats[newMinuteForm.mandatIndex]?.type_mandat || 'Mandat ' + (newMinuteForm.mandatIndex + 1)}`);
                                setNewMinuteForm({});
                                setNewMinuteFormCollapsed(true);
                              }}
