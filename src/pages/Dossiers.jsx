@@ -1648,10 +1648,10 @@ export default function Dossiers() {
           ...dossier,
           mandatInfo: mandat,
           mandatIndex: idx,
-          displayId: `${dossier.id}-${idx}`
+          displayId: `${dossier.id}__mandat__${idx}`
         }));
       }
-      return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
+      return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: `${dossier.id}__nomandat` }];
     });
   }, [dossiers]);
 
