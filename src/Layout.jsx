@@ -1811,13 +1811,6 @@ function LayoutContent({ children, currentPageName }) {
 
           <div
             className="flex-1 overflow-y-auto overflow-x-hidden pt-[73px]"
-            ref={(el) => {
-              if (el) {
-                // Scroll to top on every page change
-                el._scrollContainer = true;
-                el.dataset.scrollContainer = "true";
-              }
-            }}
             id="main-scroll-container"
           >
             <PermissionGuard pageName={currentPageName}>
