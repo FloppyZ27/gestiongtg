@@ -105,7 +105,6 @@ export default function LeveTerrain() {
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
 
   // Dossiers du jour avec tâche Terrain assignés à l'utilisateur actuel
-  const today = new Date().toISOString().split('T')[0];
   const dossiersDuJour = dossiers
     .filter(d => d.statut === "Ouvert")
     .flatMap(d => (d.mandats || [])
