@@ -163,7 +163,6 @@ export default function EditDossierForm({
   });
   const [retoursAppel, setRetoursAppel] = useState([]);
   const [entreesTemps, setEntreesTemps] = useState([]);
-  const [actionLogs, setActionLogs] = useState([]);
   const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -190,7 +189,37 @@ export default function EditDossierForm({
     queryFn: () => base44.auth.me(),
   });
 
-  // Auto-save géré par EditDossierDialog (avec logging des changements)
+  // Auto-save mutation
+  const autoSaveMutation = useMutation({
+    mutationFn: async (dossierData) => {
+      if (!editingDossier) return;
+      
+      const updatedDossier = await base44.entities.Dossier.update(editingDossier.id, dossierData);
+      return updatedDossier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    },
+  });
+
+  // Auto-save avec debounce
+  useEffect(() => {
+    if (editingDossier) {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(() => {
+        autoSaveMutation.mutate(formData);
+      }, 300);
+    }
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, editingDossier]);
 
   // Charger les retours d'appel quand le dossier change
   React.useEffect(() => {
@@ -212,17 +241,6 @@ export default function EditDossierForm({
     } else {
       setEntreesTemps([]);
     }
-  }, [editingDossier?.id]);
-
-  // Charger l'historique des actions quand le dossier change - et rafraîchir régulièrement
-  React.useEffect(() => {
-    if (!editingDossier?.id) { setActionLogs([]); return; }
-    const load = () => base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 50)
-      .then(setActionLogs)
-      .catch(() => setActionLogs([]));
-    load();
-    const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
   }, [editingDossier?.id]);
 
   const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
@@ -2814,33 +2832,13 @@ export default function EditDossierForm({
               </TabsContent>
               
               <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                {actionLogs.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-center">
-                    <div>
-                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p className="text-slate-500">Aucune action enregistrée</p>
-                      <p className="text-slate-600 text-sm mt-1">Les modifications apparaîtront ici</p>
-                    </div>
+                <div className="flex items-center justify-center h-full text-center">
+                  <div>
+                    <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <p className="text-slate-500">Aucune action enregistrée</p>
+                    <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {actionLogs.map((log) => (
-                      <div key={log.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="text-xs font-semibold text-emerald-400">{log.utilisateur_nom || log.utilisateur_email}</span>
-                          <span className="text-[10px] text-slate-500 flex-shrink-0">
-                            {log.created_date ? format(new Date(log.created_date), "d MMM yyyy, HH:mm", { locale: fr }) : ""}
-                          </span>
-                        </div>
-                        <div className="space-y-0.5">
-                          {(log.details || "").split(" | ").map((detail, i) => (
-                            <p key={i} className="text-xs text-slate-300">{detail}</p>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                </div>
               </TabsContent>
             </Tabs>
           )}

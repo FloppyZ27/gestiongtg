@@ -95,13 +95,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     description: ""
   });
 
-  // Ref pour savoir si on a déjà initialisé ce dossier
-  const initializedDossierIdRef = React.useRef(null);
-
   useEffect(() => {
-    // N'initialiser que quand l'ID du dossier change (pas à chaque refetch)
-    if (dossier && dossier.id !== initializedDossierIdRef.current) {
-      initializedDossierIdRef.current = dossier.id;
+    if (dossier) {
       const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
@@ -150,61 +145,49 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         })) || [],
         description: dossier.description || ""
       };
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       setFormData(data);
       setInitialFormData(JSON.parse(JSON.stringify(data)));
-      initialFormDataRef.current = JSON.parse(JSON.stringify(data));
       setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
       setHasChanges(false);
-    } else if (!dossier) {
-      initializedDossierIdRef.current = null;
     }
-  }, [dossier?.id]);
+  }, [dossier, dossier?.id, JSON.stringify(dossier?.mandats)]);
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
-  const initialFormDataRef = React.useRef(null);
-  const autoSaveRef = React.useRef(null);
-
-  // Mettre à jour la ref de la mutation pour éviter les closures périmées
+  
   useEffect(() => {
-    autoSaveRef.current = autoSaveMutation;
-  });
-
-  useEffect(() => {
-    if (!dossier?.id || !initialFormDataRef.current) return;
-
-    const currentJSON = JSON.stringify(formData);
-    const initialJSON = JSON.stringify(initialFormDataRef.current);
-
-    if (currentJSON === initialJSON) {
-      setHasChanges(false);
-      return;
+    if (dossier && initialFormData) {
+      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      setHasChanges(hasFormChanges);
+      
+      // Auto-save après 300ms sans changement
+      if (hasFormChanges) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        
+        saveTimeoutRef.current = setTimeout(() => {
+          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
+          setInitialFormData(JSON.parse(JSON.stringify(formData)));
+          setHasChanges(false);
+        }, 300);
+      }
     }
-
-    setHasChanges(true);
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-
-    const oldSnapshot = JSON.parse(initialJSON);
-    const newSnapshot = JSON.parse(currentJSON);
-    const dossierId = dossier.id;
-
-    saveTimeoutRef.current = setTimeout(() => {
-      initialFormDataRef.current = newSnapshot;
-      setHasChanges(false);
-      autoSaveRef.current.mutate({ id: dossierId, dossierData: newSnapshot, oldFormData: oldSnapshot });
-    }, 1500);
-
-    return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, dossier?.id]);
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, dossier, initialFormData]);
 
   const autoSaveMutation = useMutation({
-    mutationFn: async ({ id, dossierData, oldFormData }) => {
+    mutationFn: async ({ id, dossierData }) => {
+      const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
+      const oldDossier = allDossiersCurrentState.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
       
       const currentUser = await base44.auth.me();
-      const oldDossier = oldFormData;
       
       if (oldDossier && dossierData.mandats) {
         for (let i = 0; i < dossierData.mandats.length; i++) {
@@ -245,85 +228,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         }
       }
       
-      // Détecter et logger les changements importants
-      const changesLog = [];
-
-      // Comparer les champs de base
-      if ((oldDossier?.statut || '') !== (dossierData.statut || '')) {
-        changesLog.push(`Statut: ${oldDossier?.statut || 'Aucun'} → ${dossierData.statut || 'Aucun'}`);
-      }
-      if ((oldDossier?.arpenteur_geometre || '') !== (dossierData.arpenteur_geometre || '')) {
-        changesLog.push(`Arpenteur: ${oldDossier?.arpenteur_geometre || 'Aucun'} → ${dossierData.arpenteur_geometre || 'Aucun'}`);
-      }
-      if ((oldDossier?.utilisateur_assigne || '') !== (dossierData.utilisateur_assigne || '')) {
-        const oldUser = (users || []).find(u => u?.email === oldDossier?.utilisateur_assigne)?.full_name || oldDossier?.utilisateur_assigne || 'Aucun';
-        const newUser = (users || []).find(u => u?.email === dossierData.utilisateur_assigne)?.full_name || dossierData.utilisateur_assigne || 'Aucun';
-        changesLog.push(`Retour d'appel assigné: ${oldUser} → ${newUser}`);
-      }
-
-      // Comparer les mandats
-      const oldMandats = oldDossier?.mandats || [];
-      const newMandats = dossierData.mandats || [];
-
-      // Mandats ajoutés ou modifiés
-      newMandats.forEach((newMandat, i) => {
-        const oldMandat = oldMandats[i];
-        const mandatLabel = newMandat.type_mandat || `Mandat ${i + 1}`;
-        if (!oldMandat) {
-          changesLog.push(`Mandat ajouté: ${mandatLabel}`);
-        } else {
-          if ((newMandat.type_mandat || '') !== (oldMandat.type_mandat || '')) {
-            changesLog.push(`[${mandatLabel}] Type: ${oldMandat.type_mandat || 'Aucun'} → ${newMandat.type_mandat || 'Aucun'}`);
-          }
-          if ((newMandat.tache_actuelle || '') !== (oldMandat.tache_actuelle || '')) {
-            changesLog.push(`[${mandatLabel}] Tâche: ${oldMandat.tache_actuelle || 'Aucune'} → ${newMandat.tache_actuelle || 'Aucune'}`);
-          }
-          if ((newMandat.utilisateur_assigne || '') !== (oldMandat.utilisateur_assigne || '')) {
-            const oldUser = (users || []).find(u => u?.email === oldMandat.utilisateur_assigne)?.full_name || oldMandat.utilisateur_assigne || 'Aucun';
-            const newUser = (users || []).find(u => u?.email === newMandat.utilisateur_assigne)?.full_name || newMandat.utilisateur_assigne || 'Aucun';
-            changesLog.push(`[${mandatLabel}] Responsable: ${oldUser} → ${newUser}`);
-          }
-          if ((newMandat.date_livraison || '') !== (oldMandat.date_livraison || '')) {
-            changesLog.push(`[${mandatLabel}] Date livraison: ${oldMandat.date_livraison || 'Aucune'} → ${newMandat.date_livraison || 'Aucune'}`);
-          }
-          if ((newMandat.date_signature || '') !== (oldMandat.date_signature || '')) {
-            changesLog.push(`[${mandatLabel}] Date signature: ${oldMandat.date_signature || 'Aucune'} → ${newMandat.date_signature || 'Aucune'}`);
-          }
-          const oldMinuteCount = oldMandat.minutes_list?.length || 0;
-          const newMinuteCount = newMandat.minutes_list?.length || 0;
-          if (newMinuteCount > oldMinuteCount) {
-            const added = newMandat.minutes_list.slice(oldMinuteCount);
-            added.forEach(m => changesLog.push(`[${mandatLabel}] Minute ajoutée: ${m.minute}`));
-          } else if (newMinuteCount < oldMinuteCount) {
-            changesLog.push(`[${mandatLabel}] Minute(s) supprimée(s): ${oldMinuteCount - newMinuteCount}`);
-          }
-        }
-      });
-
-      // Mandats supprimés
-      if (oldMandats.length > newMandats.length) {
-        for (let i = newMandats.length; i < oldMandats.length; i++) {
-          changesLog.push(`Mandat supprimé: ${oldMandats[i].type_mandat || 'Mandat ' + (i + 1)}`);
-        }
-      }
-
-      if (changesLog.length > 0) {
-        await base44.entities.ActionLog.create({
-          utilisateur_email: currentUser?.email,
-          utilisateur_nom: currentUser?.full_name,
-          action: "Modification",
-          entite: "Dossier",
-          entite_id: id,
-          details: changesLog.join(" | ")
-        });
-      }
-
       return updatedDossier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
     }
   });
 
