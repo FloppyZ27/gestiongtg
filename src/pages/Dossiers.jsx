@@ -267,13 +267,21 @@ export default function Dossiers() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const dossierIdFromUrl = urlParams.get('dossier_id');
+    const editDossierIdFromUrl = urlParams.get('edit_dossier_id');
     
-    if (dossierIdFromUrl && dossiers.length > 0) {
-      const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
-      if (dossier) {
-        handleView(dossier);
-        // Nettoyer l'URL
-        window.history.replaceState({}, '', window.location.pathname);
+    if (dossiers.length > 0) {
+      if (editDossierIdFromUrl) {
+        const dossier = dossiers.find(d => d.id === editDossierIdFromUrl);
+        if (dossier) {
+          handleEdit(dossier);
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      } else if (dossierIdFromUrl) {
+        const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
+        if (dossier) {
+          handleView(dossier);
+          window.history.replaceState({}, '', window.location.pathname);
+        }
       }
     }
   }, [dossiers]);
