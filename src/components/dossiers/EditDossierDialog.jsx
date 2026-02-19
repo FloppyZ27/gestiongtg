@@ -164,39 +164,27 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const saveTimeoutRef = React.useRef(null);
   const initialFormDataRef = React.useRef(null);
 
-  // Sync ref whenever initialFormData changes
   useEffect(() => {
-    initialFormDataRef.current = initialFormData;
-  }, [initialFormData]);
-  
-  useEffect(() => {
-    if (!dossier || !initialFormDataRef.current) return;
+    if (!dossier?.id || !initialFormDataRef.current) return;
 
     const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
     setHasChanges(hasFormChanges);
     
     if (!hasFormChanges) return;
 
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     
-    // Capture snapshot NOW (before the timeout fires)
     const oldSnapshot = JSON.parse(JSON.stringify(initialFormDataRef.current));
     const currentFormData = JSON.parse(JSON.stringify(formData));
 
     saveTimeoutRef.current = setTimeout(() => {
+      initialFormDataRef.current = currentFormData;
       autoSaveMutation.mutate({ id: dossier.id, dossierData: currentFormData, oldFormData: oldSnapshot });
-      setInitialFormData(currentFormData);
       setHasChanges(false);
     }, 1500);
     
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [formData, dossier?.id]);
+    return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
+  }, [formData]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData, oldFormData }) => {
