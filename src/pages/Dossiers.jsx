@@ -286,6 +286,17 @@ export default function Dossiers() {
     }
   }, [dossiers]);
 
+  // Écouter l'événement global openDossierEdit (déclenché depuis la barre de recherche)
+  useEffect(() => {
+    const handler = (e) => {
+      const { dossierId } = e.detail;
+      const dossier = dossiers.find(d => d.id === dossierId);
+      if (dossier) handleEdit(dossier);
+    };
+    window.addEventListener('openDossierEdit', handler);
+    return () => window.removeEventListener('openDossierEdit', handler);
+  }, [dossiers]);
+
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
