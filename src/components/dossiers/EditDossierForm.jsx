@@ -2858,13 +2858,44 @@ export default function EditDossierForm({
               </TabsContent>
               
               <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                <div className="flex items-center justify-center h-full text-center">
-                  <div>
-                    <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                    <p className="text-slate-500">Aucune action enregistrée</p>
-                    <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                {actionLogs.length > 0 ? (
+                  <div className="space-y-3">
+                    {actionLogs.map((log) => (
+                      <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge className={`text-xs ${
+                                log.action === 'CREATION_DOSSIER' || log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                log.action === 'MODIFICATION_DOSSIER' || log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                log.action === 'SUPPRESSION_DOSSIER' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                                'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                              }`}>
+                                {log.action === 'CREATION_DOSSIER' ? 'Création' :
+                                 log.action === 'MODIFICATION_DOSSIER' ? 'Modification' :
+                                 log.action === 'SUPPRESSION_DOSSIER' ? 'Suppression' :
+                                 log.action}
+                              </Badge>
+                              <span className="text-slate-400 text-xs">
+                                {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                              </span>
+                            </div>
+                            <p className="text-slate-300 text-sm">{log.details}</p>
+                            <p className="text-slate-500 text-xs mt-1">Par {log.utilisateur_nom || log.utilisateur_email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-center">
+                    <div>
+                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                      <p className="text-slate-500">Aucune action enregistrée</p>
+                      <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           )}
