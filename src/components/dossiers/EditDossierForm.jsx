@@ -2067,6 +2067,7 @@ export default function EditDossierForm({
                                           }
 
                                           setFormData({...formData, mandats: updatedMandats});
+                                          addActionLog("Terrain supprimé", `Terrain supprimé pour le mandat: ${mandat.type_mandat || 'Mandat ' + (mandatIndex + 1)}`);
                                         }}
                                         className="text-slate-400 hover:text-red-400 transition-colors"
                                       >
