@@ -228,6 +228,49 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         }
       }
       
+      // Détecter et logger les changements importants
+      const changesLog = [];
+
+      if (oldDossier && oldDossier.statut !== dossierData.statut) {
+        changesLog.push(`Statut: ${oldDossier.statut} → ${dossierData.statut}`);
+      }
+
+      if (oldDossier) {
+        (dossierData.mandats || []).forEach((newMandat, i) => {
+          const oldMandat = oldDossier.mandats?.[i];
+          const mandatLabel = newMandat.type_mandat || `Mandat ${i + 1}`;
+          if (oldMandat) {
+            if (newMandat.tache_actuelle !== oldMandat.tache_actuelle && (newMandat.tache_actuelle || oldMandat.tache_actuelle)) {
+              changesLog.push(`[${mandatLabel}] Tâche: ${oldMandat.tache_actuelle || 'Aucune'} → ${newMandat.tache_actuelle || 'Aucune'}`);
+            }
+            if (newMandat.utilisateur_assigne !== oldMandat.utilisateur_assigne) {
+              const oldUser = (users || []).find(u => u?.email === oldMandat.utilisateur_assigne)?.full_name || 'Aucun';
+              const newUser = (users || []).find(u => u?.email === newMandat.utilisateur_assigne)?.full_name || 'Aucun';
+              changesLog.push(`[${mandatLabel}] Responsable: ${oldUser} → ${newUser}`);
+            }
+          } else {
+            changesLog.push(`Mandat ajouté: ${mandatLabel}`);
+          }
+        });
+
+        if ((oldDossier.mandats?.length || 0) > (dossierData.mandats?.length || 0)) {
+          for (let i = (dossierData.mandats?.length || 0); i < (oldDossier.mandats?.length || 0); i++) {
+            changesLog.push(`Mandat supprimé: ${oldDossier.mandats[i].type_mandat || 'Mandat ' + (i + 1)}`);
+          }
+        }
+      }
+
+      if (changesLog.length > 0) {
+        base44.entities.ActionLog.create({
+          utilisateur_email: currentUser?.email,
+          utilisateur_nom: currentUser?.full_name,
+          action: "Modification",
+          entite: "Dossier",
+          entite_id: id,
+          details: changesLog.join(" | ")
+        }).catch(() => {});
+      }
+
       return updatedDossier;
     },
     onSuccess: () => {
