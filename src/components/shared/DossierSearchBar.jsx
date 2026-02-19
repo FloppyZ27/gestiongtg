@@ -43,18 +43,39 @@ export default function DossierSearchBar({ dossiers, clients }) {
     }).filter(name => name).join(", ");
   };
 
-  const filteredDossiers = (dossiers || []).filter(dossier => {
-    if (!searchTerm.trim()) return false;
+  const getAdresse = (mandat) => {
+    if (!mandat?.adresse_travaux) return "";
+    const a = mandat.adresse_travaux;
+    return [a.numeros_civiques?.filter(n => n).join(', '), a.rue, a.ville, a.code_postal].filter(Boolean).join(' ');
+  };
+
+  const filteredDossiers = React.useMemo(() => {
+    if (!searchTerm.trim()) return (dossiers || [])
+      .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))
+      .slice(0, 8);
+
     const searchLower = searchTerm.toLowerCase();
-    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
-    const clientsNames = getClientsNames(dossier.clients_ids);
-    return (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
-    );
-  }).slice(0, 5);
+    return (dossiers || []).filter(dossier => {
+      const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+      const clientsNames = getClientsNames(dossier.clients_ids);
+      const notairesNames = getClientsNames(dossier.notaires_ids);
+      const courtiersNames = getClientsNames(dossier.courtiers_ids);
+      const adresses = (dossier.mandats || []).map(m => getAdresse(m)).join(' ');
+      const mandatsTypes = (dossier.mandats || []).map(m => m.type_mandat || '').join(' ');
+      return (
+        fullNumber.toLowerCase().includes(searchLower) ||
+        dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+        clientsNames.toLowerCase().includes(searchLower) ||
+        notairesNames.toLowerCase().includes(searchLower) ||
+        courtiersNames.toLowerCase().includes(searchLower) ||
+        adresses.toLowerCase().includes(searchLower) ||
+        mandatsTypes.toLowerCase().includes(searchLower) ||
+        dossier.adresse_texte?.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))
+    .slice(0, 8);
+  }, [searchTerm, dossiers, clients]);
 
   const handleDossierClick = (dossier) => {
     const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
