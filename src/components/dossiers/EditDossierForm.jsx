@@ -214,15 +214,15 @@ export default function EditDossierForm({
     }
   }, [editingDossier?.id]);
 
-  // Charger l'historique des actions quand le dossier change
+  // Charger l'historique des actions quand le dossier change - et rafraîchir régulièrement
   React.useEffect(() => {
-    if (editingDossier?.id) {
-      base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 50)
-        .then(setActionLogs)
-        .catch(() => setActionLogs([]));
-    } else {
-      setActionLogs([]);
-    }
+    if (!editingDossier?.id) { setActionLogs([]); return; }
+    const load = () => base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 50)
+      .then(setActionLogs)
+      .catch(() => setActionLogs([]));
+    load();
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
   }, [editingDossier?.id]);
 
   const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
