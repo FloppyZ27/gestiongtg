@@ -1557,68 +1557,93 @@ export default function Profil() {
                                  })}
 
                                  {dayPointages.map(p => {
-                                   const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
-                                   
-                                   const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
-                                   const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
-                                   const startHour = startTime.getHours();
-                                   const startMin = startTime.getMinutes();
-                                   const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-                                   const topPx = startHour * 60 + startMin;
-                                   
-                                   const initialStart = new Date(p.heure_debut);
-                                   const initialEnd = new Date(p.heure_fin);
-                                   const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+                                  const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
 
-                                   return (
-                                     <div
-                                       key={`display-${p.id}`}
-                                       className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
-                                         isModified
-                                           ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                           : p.confirme 
-                                           ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
-                                           : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
-                                       }`}
-                                       onClick={() => handleOpenEditPointage(p)}
-                                       style={{
-                                         height: `${totalMinutes}px`,
-                                         top: `${topPx}px`
-                                       }}
-                                       title={p.description || "Cliquer pour éditer"}
-                                     >
-                                       {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
-                                       {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
-                                       <div className="text-[11px] leading-tight">
-                                         <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
-                                         {isModified && (
-                                           <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
-                                         )}
-                                         {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
-                                       </div>
-                                       {!p.confirme && (
-                                         <button
-                                           onClick={(e) => {
-                                             e.stopPropagation();
-                                             handleConfirmPointage(p);
-                                           }}
-                                           className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
-                                         >
-                                           Confirmer
-                                         </button>
-                                       )}
-                                       {p.confirme && !isModified && (
-                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
-                                           Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                         </div>
-                                       )}
-                                       {isModified && (
-                                         <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
-                                           Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                         </div>
-                                       )}
-                                     </div>
-                                   );
+                                  const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                  const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                  const startHour = startTime.getHours();
+                                  const startMin = startTime.getMinutes();
+                                  const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                  const topPx = startHour * 60 + startMin;
+
+                                  const initialStart = new Date(p.heure_debut);
+                                  const initialEnd = new Date(p.heure_fin);
+                                  const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+                                  const modifiedDuration = isModified ? (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60) : null;
+
+                                  return (
+                                    <Tooltip key={`display-${p.id}`}>
+                                      <TooltipTrigger asChild>
+                                        <div
+                                          className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
+                                            isModified
+                                              ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                              : p.confirme 
+                                              ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                              : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                          }`}
+                                          onClick={() => handleOpenEditPointage(p)}
+                                          style={{
+                                            height: `${totalMinutes}px`,
+                                            top: `${topPx}px`
+                                          }}
+                                        >
+                                          {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
+                                          {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
+                                          <div className="text-[11px] leading-tight">
+                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                            {isModified && (
+                                              <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                            )}
+                                            {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
+                                          </div>
+                                          {!p.confirme && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleConfirmPointage(p);
+                                              }}
+                                              className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
+                                            >
+                                              Confirmer
+                                            </button>
+                                          )}
+                                          {p.confirme && !isModified && (
+                                            <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
+                                              Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                            </div>
+                                          )}
+                                          {isModified && (
+                                            <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
+                                              Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
+                                        <div className="space-y-2">
+                                          <div className={`text-xs font-bold uppercase ${isModified ? 'text-orange-400' : p.confirme ? 'text-green-400' : 'text-blue-400'}`}>
+                                            {isModified ? 'Pointage modifié' : p.confirme ? 'Pointage confirmé' : 'Pointage en attente'}
+                                          </div>
+                                          <div className="text-sm text-slate-300">
+                                            <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
+                                            {isModified && (
+                                              <div className="mt-1">Modifié: <span className="text-orange-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
+                                            )}
+                                          </div>
+                                          {p.description && (
+                                            <div className="text-sm opacity-75 whitespace-pre-wrap border-t border-white/10 pt-2">{p.description}</div>
+                                          )}
+                                          <div className="pt-2 border-t border-white/20">
+                                            <div className="text-xs opacity-60">
+                                              {p.confirme && <div>Confirmé: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                              {isModified && <div>Modifié: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
                                  })}
                                  </div>
                                  );
