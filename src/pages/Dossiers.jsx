@@ -3506,151 +3506,96 @@ export default function Dossiers() {
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-5 gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                      <div className="grid grid-cols-5 gap-3">
+                        {/* Arpenteurs */}
+                        <div>
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">Arpenteurs</p>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
                             {ARPENTEURS.map((arp) => (
-                              <DropdownMenuCheckboxItem
-                                key={arp}
-                                checked={filterArpenteur.includes(arp)}
-                                onCheckedChange={(checked) => {
-                                  setFilterArpenteur(
-                                    checked
-                                      ? [...filterArpenteur, arp]
-                                      : filterArpenteur.filter((a) => a !== arp)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {arp}
-                              </DropdownMenuCheckboxItem>
+                              <label key={arp} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filterArpenteur.includes(arp)}
+                                  onChange={(e) => setFilterArpenteur(e.target.checked ? [...filterArpenteur, arp] : filterArpenteur.filter(a => a !== arp))}
+                                  className="accent-emerald-500 w-3 h-3"
+                                />
+                                <span className="text-white text-xs truncate">{arp}</span>
+                              </label>
                             ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </div>
+                        </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Statuts ({filterStatut.length > 0 ? `${filterStatut.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            <DropdownMenuCheckboxItem
-                              checked={filterStatut.includes("Ouvert")}
-                              onCheckedChange={(checked) => {
-                                setFilterStatut(
-                                  checked
-                                    ? [...filterStatut, "Ouvert"]
-                                    : filterStatut.filter((s) => s !== "Ouvert")
-                                );
-                              }}
-                              className="text-white"
-                            >
-                              Ouvert
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem
-                              checked={filterStatut.includes("Fermé")}
-                              onCheckedChange={(checked) => {
-                                setFilterStatut(
-                                  checked
-                                    ? [...filterStatut, "Fermé"]
-                                    : filterStatut.filter((s) => s !== "Fermé")
-                                );
-                              }}
-                              className="text-white"
-                            >
-                              Fermé
-                            </DropdownMenuCheckboxItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* Statuts */}
+                        <div>
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">Statuts</p>
+                          <div className="space-y-1">
+                            {["Ouvert", "Fermé"].map((s) => (
+                              <label key={s} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filterStatut.includes(s)}
+                                  onChange={(e) => setFilterStatut(e.target.checked ? [...filterStatut, s] : filterStatut.filter(x => x !== s))}
+                                  className="accent-emerald-500 w-3 h-3"
+                                />
+                                <span className="text-white text-xs">{s}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Mandats ({filterMandat.length > 0 ? `${filterMandat.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                        {/* Mandats */}
+                        <div>
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">Mandats</p>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
                             {TYPES_MANDATS.map((type) => (
-                              <DropdownMenuCheckboxItem
-                                key={type}
-                                checked={filterMandat.includes(type)}
-                                onCheckedChange={(checked) => {
-                                  setFilterMandat(
-                                    checked
-                                      ? [...filterMandat, type]
-                                      : filterMandat.filter((t) => t !== type)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {type}
-                              </DropdownMenuCheckboxItem>
+                              <label key={type} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filterMandat.includes(type)}
+                                  onChange={(e) => setFilterMandat(e.target.checked ? [...filterMandat, type] : filterMandat.filter(t => t !== type))}
+                                  className="accent-emerald-500 w-3 h-3"
+                                />
+                                <span className="text-white text-xs truncate">{type}</span>
+                              </label>
                             ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </div>
+                        </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Tâches ({filterTache.length > 0 ? `${filterTache.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                        {/* Tâches */}
+                        <div>
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">Tâches</p>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
                             {TACHES.map((tache) => (
-                              <DropdownMenuCheckboxItem
-                                key={tache}
-                                checked={filterTache.includes(tache)}
-                                onCheckedChange={(checked) => {
-                                  setFilterTache(
-                                    checked
-                                      ? [...filterTache, tache]
-                                      : filterTache.filter((t) => t !== tache)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {tache}
-                              </DropdownMenuCheckboxItem>
+                              <label key={tache} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filterTache.includes(tache)}
+                                  onChange={(e) => setFilterTache(e.target.checked ? [...filterTache, tache] : filterTache.filter(t => t !== tache))}
+                                  className="accent-emerald-500 w-3 h-3"
+                                />
+                                <span className="text-white text-xs">{tache}</span>
+                              </label>
                             ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </div>
+                        </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                        {/* Villes */}
+                        <div>
+                          <p className="text-xs text-emerald-400 font-semibold mb-1">Villes</p>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
                             {uniqueVilles.map((ville) => (
-                              <DropdownMenuCheckboxItem
-                                key={ville}
-                                checked={filterVille.includes(ville)}
-                                onCheckedChange={(checked) => {
-                                  setFilterVille(
-                                    checked
-                                      ? [...filterVille, ville]
-                                      : filterVille.filter((v) => v !== ville)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {ville}
-                              </DropdownMenuCheckboxItem>
+                              <label key={ville} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filterVille.includes(ville)}
+                                  onChange={(e) => setFilterVille(e.target.checked ? [...filterVille, ville] : filterVille.filter(v => v !== ville))}
+                                  className="accent-emerald-500 w-3 h-3"
+                                />
+                                <span className="text-white text-xs">{ville}</span>
+                              </label>
                             ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="space-y-1 pt-1 border-t border-emerald-500/30">
