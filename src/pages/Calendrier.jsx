@@ -491,51 +491,76 @@ export default function Calendrier() {
                                   <Tooltip key={event.id}>
                                     <TooltipTrigger asChild>
                                       <div
-                                        className={`absolute left-1 right-1 rounded px-3 py-2 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
-                                          isAbsence
-                                            ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
-                                            : isHoliday
-                                            ? 'bg-gradient-to-r from-blue-500/60 to-cyan-500/60 border border-blue-500 text-blue-50'
-                                            : isBirthday
-                                            ? 'bg-gradient-to-r from-purple-500/60 to-pink-500/60 border border-purple-500 text-purple-50'
-                                            : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
-                                        }`}
-                                        style={{
-                                          height: `${Math.max(40, durationMinutes * 1.5)}px`,
-                                          top: `${topPx}px`
-                                        }}
-                                        onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
+                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-0.5 overflow-hidden ${
+                                         isAbsence
+                                           ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                           : isHoliday
+                                           ? 'bg-gradient-to-r from-blue-500/60 to-cyan-500/60 border border-blue-500 text-blue-50'
+                                           : isBirthday
+                                           ? 'bg-gradient-to-r from-purple-500/60 to-pink-500/60 border border-purple-500 text-purple-50'
+                                           : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                       }`}
+                                       style={{
+                                         height: `${Math.max(40, durationMinutes * 1.5)}px`,
+                                         top: `${topPx}px`
+                                       }}
+                                       onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                       >
-                                        <div className="truncate text-[11px] font-bold opacity-90 uppercase">
-                                          {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
-                                        </div>
-                                        <div className={`truncate font-bold text-sm ${
-                                          isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
-                                        }`}>{event.titre}</div>
-                                        {event.date_fin && (
-                                          <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
-                                        )}
-                                        {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
-                                        {(event.type === 'rendez-vous' || event.type === 'absence') && durationMinutes >= 60 && (
-                                          <div className="flex items-center justify-between pt-1 border-t border-white/20 mt-auto">
-                                            <div className="text-[9px] opacity-60 truncate">
-                                              <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
-                                              {durationMinutes >= 90 && (
-                                                <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
-                                              )}
-                                            </div>
-                                            {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                              <div className="flex items-center gap-1 flex-shrink-0">
-                                                <Avatar className="w-5 h-5">
-                                                  <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                                  <AvatarFallback className="text-[8px] bg-white/30">
-                                                    {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
-                                                  </AvatarFallback>
-                                                </Avatar>
-                                              </div>
-                                            )}
-                                          </div>
-                                        )}
+                                       {durationMinutes <= 60 ? (
+                                         // Affichage compact : type + titre + photo
+                                         <div className="flex items-center justify-between gap-1 h-full min-w-0">
+                                           <div className="flex flex-col min-w-0 flex-1">
+                                             <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
+                                               {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
+                                             </div>
+                                             <div className={`truncate font-bold text-xs ${
+                                               isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
+                                             }`}>{event.titre}</div>
+                                           </div>
+                                           {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                             <Avatar className="w-5 h-5 flex-shrink-0">
+                                               <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                               <AvatarFallback className="text-[8px] bg-white/30">
+                                                 {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                               </AvatarFallback>
+                                             </Avatar>
+                                           )}
+                                         </div>
+                                       ) : (
+                                         // Affichage complet
+                                         <>
+                                           <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                             {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
+                                           </div>
+                                           <div className={`truncate font-bold text-sm ${
+                                             isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
+                                           }`}>{event.titre}</div>
+                                           {event.date_fin && (
+                                             <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                           )}
+                                           {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                           {(event.type === 'rendez-vous' || event.type === 'absence') && (
+                                             <div className="flex items-center justify-between pt-1 border-t border-white/20 mt-auto">
+                                               <div className="text-[9px] opacity-60 truncate">
+                                                 <div className="truncate">Créé: {format(new Date(event.created_date), "dd/MM/yy")}</div>
+                                                 {durationMinutes >= 90 && (
+                                                   <div className="truncate">Modif: {format(new Date(event.updated_date), "dd/MM/yy")}</div>
+                                                 )}
+                                               </div>
+                                               {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
+                                                 <div className="flex items-center gap-1 flex-shrink-0">
+                                                   <Avatar className="w-5 h-5">
+                                                     <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                                     <AvatarFallback className="text-[8px] bg-white/30">
+                                                       {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                                     </AvatarFallback>
+                                                   </Avatar>
+                                                 </div>
+                                               )}
+                                             </div>
+                                           )}
+                                         </>
+                                       )}
                                       </div>
                                     </TooltipTrigger>
                                     <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
