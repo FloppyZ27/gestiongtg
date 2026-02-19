@@ -3332,6 +3332,7 @@ export default function EditDossierForm({
                     ...terrainForm
                   };
                   setFormData({...formData, mandats: updatedMandats});
+                  addActionLog("Terrain modifié", `Terrain modifié pour le mandat: ${editingTerrainInfo.mandat?.type_mandat || 'Mandat ' + (editingTerrainInfo.mandatIndex + 1)}`);
                   setIsTerrainDialogOpen(false);
                 }
               }}
