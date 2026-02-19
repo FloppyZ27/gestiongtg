@@ -166,8 +166,9 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           clearTimeout(saveTimeoutRef.current);
         }
         
+        const oldSnapshot = JSON.parse(JSON.stringify(initialFormData));
         saveTimeoutRef.current = setTimeout(() => {
-          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
+          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData, oldFormData: oldSnapshot });
           setInitialFormData(JSON.parse(JSON.stringify(formData)));
           setHasChanges(false);
         }, 300);
