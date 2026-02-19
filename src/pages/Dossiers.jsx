@@ -3506,96 +3506,131 @@ export default function Dossiers() {
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-5 gap-3">
-                        {/* Arpenteurs */}
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold mb-1">Arpenteurs</p>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                      <div className="grid grid-cols-5 gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" onCloseAutoFocus={(e) => e.preventDefault()}>
                             {ARPENTEURS.map((arp) => (
-                              <label key={arp} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={filterArpenteur.includes(arp)}
-                                  onChange={(e) => setFilterArpenteur(e.target.checked ? [...filterArpenteur, arp] : filterArpenteur.filter(a => a !== arp))}
-                                  className="accent-emerald-500 w-3 h-3"
-                                />
-                                <span className="text-white text-xs truncate">{arp}</span>
-                              </label>
+                              <div
+                                key={arp}
+                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFilterArpenteur(prev => prev.includes(arp) ? prev.filter(a => a !== arp) : [...prev, arp]);
+                                }}
+                              >
+                                <input type="checkbox" readOnly checked={filterArpenteur.includes(arp)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
+                                <span className="text-white text-xs">{arp}</span>
+                              </div>
                             ))}
-                          </div>
-                        </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        {/* Statuts */}
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold mb-1">Statuts</p>
-                          <div className="space-y-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Statuts ({filterStatut.length > 0 ? `${filterStatut.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" onCloseAutoFocus={(e) => e.preventDefault()}>
                             {["Ouvert", "Fermé"].map((s) => (
-                              <label key={s} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={filterStatut.includes(s)}
-                                  onChange={(e) => setFilterStatut(e.target.checked ? [...filterStatut, s] : filterStatut.filter(x => x !== s))}
-                                  className="accent-emerald-500 w-3 h-3"
-                                />
+                              <div
+                                key={s}
+                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFilterStatut(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+                                }}
+                              >
+                                <input type="checkbox" readOnly checked={filterStatut.includes(s)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
                                 <span className="text-white text-xs">{s}</span>
-                              </label>
+                              </div>
                             ))}
-                          </div>
-                        </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        {/* Mandats */}
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold mb-1">Mandats</p>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Mandats ({filterMandat.length > 0 ? `${filterMandat.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
                             {TYPES_MANDATS.map((type) => (
-                              <label key={type} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={filterMandat.includes(type)}
-                                  onChange={(e) => setFilterMandat(e.target.checked ? [...filterMandat, type] : filterMandat.filter(t => t !== type))}
-                                  className="accent-emerald-500 w-3 h-3"
-                                />
-                                <span className="text-white text-xs truncate">{type}</span>
-                              </label>
+                              <div
+                                key={type}
+                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFilterMandat(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
+                                }}
+                              >
+                                <input type="checkbox" readOnly checked={filterMandat.includes(type)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
+                                <span className="text-white text-xs">{type}</span>
+                              </div>
                             ))}
-                          </div>
-                        </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        {/* Tâches */}
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold mb-1">Tâches</p>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Tâches ({filterTache.length > 0 ? `${filterTache.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
                             {TACHES.map((tache) => (
-                              <label key={tache} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={filterTache.includes(tache)}
-                                  onChange={(e) => setFilterTache(e.target.checked ? [...filterTache, tache] : filterTache.filter(t => t !== tache))}
-                                  className="accent-emerald-500 w-3 h-3"
-                                />
+                              <div
+                                key={tache}
+                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFilterTache(prev => prev.includes(tache) ? prev.filter(t => t !== tache) : [...prev, tache]);
+                                }}
+                              >
+                                <input type="checkbox" readOnly checked={filterTache.includes(tache)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
                                 <span className="text-white text-xs">{tache}</span>
-                              </label>
+                              </div>
                             ))}
-                          </div>
-                        </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        {/* Villes */}
-                        <div>
-                          <p className="text-xs text-emerald-400 font-semibold mb-1">Villes</p>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
                             {uniqueVilles.map((ville) => (
-                              <label key={ville} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-1 py-0.5 rounded">
-                                <input
-                                  type="checkbox"
-                                  checked={filterVille.includes(ville)}
-                                  onChange={(e) => setFilterVille(e.target.checked ? [...filterVille, ville] : filterVille.filter(v => v !== ville))}
-                                  className="accent-emerald-500 w-3 h-3"
-                                />
+                              <div
+                                key={ville}
+                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFilterVille(prev => prev.includes(ville) ? prev.filter(v => v !== ville) : [...prev, ville]);
+                                }}
+                              >
+                                <input type="checkbox" readOnly checked={filterVille.includes(ville)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
                                 <span className="text-white text-xs">{ville}</span>
-                              </label>
+                              </div>
                             ))}
-                          </div>
-                        </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
 
                       <div className="space-y-1 pt-1 border-t border-emerald-500/30">
