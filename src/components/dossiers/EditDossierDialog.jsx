@@ -164,29 +164,37 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
   const initialFormDataRef = React.useRef(null);
+  const formDataRef = React.useRef(formData);
+
+  // Garder formDataRef synchronisé avec formData
+  useEffect(() => {
+    formDataRef.current = formData;
+  });
 
   useEffect(() => {
     if (!dossier?.id || !initialFormDataRef.current) return;
 
-    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
+    const currentJSON = JSON.stringify(formData);
+    const initialJSON = JSON.stringify(initialFormDataRef.current);
+    const hasFormChanges = currentJSON !== initialJSON;
+
     setHasChanges(hasFormChanges);
-    
     if (!hasFormChanges) return;
 
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    
-    const oldSnapshot = JSON.parse(JSON.stringify(initialFormDataRef.current));
-    const currentFormData = JSON.parse(JSON.stringify(formData));
+
+    const oldSnapshot = JSON.parse(initialJSON);
     const dossierId = dossier.id;
 
     saveTimeoutRef.current = setTimeout(() => {
+      const currentFormData = JSON.parse(JSON.stringify(formDataRef.current));
       initialFormDataRef.current = currentFormData;
       autoSaveMutation.mutate({ id: dossierId, dossierData: currentFormData, oldFormData: oldSnapshot });
       setHasChanges(false);
     }, 1500);
-    
+
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [JSON.stringify(formData)]);
+  }, [formData]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData, oldFormData }) => {
