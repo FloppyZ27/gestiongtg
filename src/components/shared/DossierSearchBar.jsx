@@ -49,12 +49,14 @@ export default function DossierSearchBar({ dossiers, clients }) {
     return [a.numeros_civiques?.filter(n => n).join(', '), a.rue, a.ville, a.code_postal].filter(Boolean).join(' ');
   };
 
+  const matchesAllWords = (haystack, words) => words.every(w => haystack.includes(w));
+
   const filteredDossiers = React.useMemo(() => {
     if (!searchTerm.trim()) return (dossiers || [])
       .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))
       .slice(0, 8);
 
-    const searchLower = searchTerm.toLowerCase();
+    const words = searchTerm.toLowerCase().trim().split(/\s+/);
     return (dossiers || []).filter(dossier => {
       const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
       const clientsNames = getClientsNames(dossier.clients_ids);
@@ -62,16 +64,19 @@ export default function DossierSearchBar({ dossiers, clients }) {
       const courtiersNames = getClientsNames(dossier.courtiers_ids);
       const adresses = (dossier.mandats || []).map(m => getAdresse(m)).join(' ');
       const mandatsTypes = (dossier.mandats || []).map(m => m.type_mandat || '').join(' ');
-      return (
-        fullNumber.toLowerCase().includes(searchLower) ||
-        dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-        clientsNames.toLowerCase().includes(searchLower) ||
-        notairesNames.toLowerCase().includes(searchLower) ||
-        courtiersNames.toLowerCase().includes(searchLower) ||
-        adresses.toLowerCase().includes(searchLower) ||
-        mandatsTypes.toLowerCase().includes(searchLower) ||
-        dossier.adresse_texte?.toLowerCase().includes(searchLower)
-      );
+      // Concatenate everything into one big searchable string
+      const haystack = [
+        fullNumber,
+        dossier.numero_dossier,
+        clientsNames,
+        notairesNames,
+        courtiersNames,
+        adresses,
+        mandatsTypes,
+        dossier.adresse_texte
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return matchesAllWords(haystack, words);
     })
     .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))
     .slice(0, 8);
