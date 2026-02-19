@@ -275,6 +275,19 @@ export default function EditDossierForm({
       if (oldMandat.date_signature !== newMandat.date_signature) {
         changes.push(`[${mandatLabel}] Date signature: "${oldMandat.date_signature || '-'}" → "${newMandat.date_signature || '-'}"`);
       }
+      // Tarification
+      if (oldMandat.prix_estime !== newMandat.prix_estime) {
+        changes.push(`[${mandatLabel}] Prix estimé: "${oldMandat.prix_estime ?? '-'}" → "${newMandat.prix_estime ?? '-'}"`);
+      }
+      if (oldMandat.rabais !== newMandat.rabais) {
+        changes.push(`[${mandatLabel}] Rabais: "${oldMandat.rabais ?? '-'}" → "${newMandat.rabais ?? '-'}"`);
+      }
+      if (oldMandat.taxes_incluses !== newMandat.taxes_incluses) {
+        changes.push(`[${mandatLabel}] Taxes incluses: "${oldMandat.taxes_incluses ? 'Oui' : 'Non'}" → "${newMandat.taxes_incluses ? 'Oui' : 'Non'}"`);
+      }
+      if (oldMandat.prix_convenu !== newMandat.prix_convenu) {
+        changes.push(`[${mandatLabel}] Prix convenu: "${oldMandat.prix_convenu ? 'Oui' : 'Non'}" → "${newMandat.prix_convenu ? 'Oui' : 'Non'}"`);
+      }
     });
 
     if (changes.length > 0) {
