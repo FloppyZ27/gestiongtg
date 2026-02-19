@@ -164,11 +164,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
   const initialFormDataRef = React.useRef(null);
-  const formDataRef = React.useRef(formData);
+  const autoSaveRef = React.useRef(null);
 
-  // Garder formDataRef synchronisé avec formData
+  // Mettre à jour la ref de la mutation pour éviter les closures périmées
   useEffect(() => {
-    formDataRef.current = formData;
+    autoSaveRef.current = autoSaveMutation;
   });
 
   useEffect(() => {
@@ -176,25 +176,28 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
     const currentJSON = JSON.stringify(formData);
     const initialJSON = JSON.stringify(initialFormDataRef.current);
-    const hasFormChanges = currentJSON !== initialJSON;
 
-    setHasChanges(hasFormChanges);
-    if (!hasFormChanges) return;
+    if (currentJSON === initialJSON) {
+      setHasChanges(false);
+      return;
+    }
 
+    setHasChanges(true);
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
 
     const oldSnapshot = JSON.parse(initialJSON);
+    const newSnapshot = JSON.parse(currentJSON);
     const dossierId = dossier.id;
 
     saveTimeoutRef.current = setTimeout(() => {
-      const currentFormData = JSON.parse(JSON.stringify(formDataRef.current));
-      initialFormDataRef.current = currentFormData;
-      autoSaveMutation.mutate({ id: dossierId, dossierData: currentFormData, oldFormData: oldSnapshot });
+      initialFormDataRef.current = newSnapshot;
       setHasChanges(false);
+      autoSaveRef.current.mutate({ id: dossierId, dossierData: newSnapshot, oldFormData: oldSnapshot });
     }, 1500);
 
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, dossier?.id]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData, oldFormData }) => {
