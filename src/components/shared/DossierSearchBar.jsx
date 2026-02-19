@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, MapPin, User, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { createPageUrl } from "@/utils";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
