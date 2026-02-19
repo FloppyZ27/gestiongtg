@@ -221,6 +221,32 @@ export default function EditDossierForm({
     };
   }, [formData, editingDossier]);
 
+  const [actionLogs, setActionLogs] = useState([]);
+
+  // Charger les logs d'actions pour le dossier
+  React.useEffect(() => {
+    if (editingDossier?.id) {
+      base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 100)
+        .then(setActionLogs)
+        .catch(() => setActionLogs([]));
+    } else {
+      setActionLogs([]);
+    }
+  }, [editingDossier?.id]);
+
+  const addActionLog = async (action, details) => {
+    if (!editingDossier?.id) return;
+    const log = await base44.entities.ActionLog.create({
+      utilisateur_email: user?.email || "",
+      utilisateur_nom: user?.full_name || "",
+      action,
+      entite: "Dossier",
+      entite_id: editingDossier.id,
+      details
+    });
+    setActionLogs(prev => [log, ...prev]);
+  };
+
   // Charger les retours d'appel quand le dossier change
   React.useEffect(() => {
     if (editingDossier?.id) {
