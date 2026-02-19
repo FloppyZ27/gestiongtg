@@ -83,8 +83,12 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
   }, [searchTerm, dossiers, clients]);
 
   const handleDossierClick = (dossier) => {
-    const url = createPageUrl("Dossiers") + "?edit_dossier_id=" + dossier.id;
-    window.location.href = url;
+    if (onDossierSelect) {
+      onDossierSelect(dossier);
+    } else {
+      const url = createPageUrl("Dossiers") + "?edit_dossier_id=" + dossier.id;
+      window.location.href = url;
+    }
     setSearchTerm("");
     setShowResults(false);
   };
