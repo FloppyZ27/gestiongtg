@@ -1634,11 +1634,22 @@ export default function Profil() {
                                           {p.description && (
                                             <div className="text-sm opacity-75 whitespace-pre-wrap border-t border-white/10 pt-2">{p.description}</div>
                                           )}
-                                          <div className="pt-2 border-t border-white/20">
+                                          <div className="pt-2 border-t border-white/20 space-y-2">
                                             <div className="text-xs opacity-60">
                                               {p.confirme && <div>Confirmé: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
                                               {isModified && <div>Modifié: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
                                             </div>
+                                            {!p.confirme && (
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleConfirmPointage(p);
+                                                }}
+                                                className="w-full text-xs px-2 py-1 bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/30 rounded transition-colors"
+                                              >
+                                                Confirmer
+                                              </button>
+                                            )}
                                           </div>
                                         </div>
                                       </TooltipContent>
