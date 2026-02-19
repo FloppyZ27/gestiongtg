@@ -95,8 +95,13 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     description: ""
   });
 
+  // Ref pour savoir si on a déjà initialisé ce dossier
+  const initializedDossierIdRef = React.useRef(null);
+
   useEffect(() => {
-    if (dossier) {
+    // N'initialiser que quand l'ID du dossier change (pas à chaque refetch)
+    if (dossier && dossier.id !== initializedDossierIdRef.current) {
+      initializedDossierIdRef.current = dossier.id;
       const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
@@ -147,10 +152,13 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       };
       setFormData(data);
       setInitialFormData(JSON.parse(JSON.stringify(data)));
+      initialFormDataRef.current = JSON.parse(JSON.stringify(data));
       setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
       setHasChanges(false);
+    } else if (!dossier) {
+      initializedDossierIdRef.current = null;
     }
-  }, [dossier, dossier?.id, JSON.stringify(dossier?.mandats)]);
+  }, [dossier?.id]);
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
