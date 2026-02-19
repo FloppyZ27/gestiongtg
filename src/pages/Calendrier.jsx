@@ -507,18 +507,16 @@ export default function Calendrier() {
                                        onClick={() => (event.type === 'rendez-vous' || event.type === 'absence') && handleEventClick(event)}
                                       >
                                        {durationMinutes <= 60 ? (
-                                         // Affichage compact : type + titre + photo
-                                         <div className="flex items-center justify-between gap-1 h-full min-w-0">
-                                           <div className="flex flex-col min-w-0 flex-1">
-                                             <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
-                                               {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
-                                             </div>
-                                             <div className={`truncate font-bold text-xs ${
-                                               isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
-                                             }`}>{event.titre}</div>
+                                         // Affichage compact : type + titre + photo en bas à droite
+                                         <div className="flex flex-col h-full min-w-0 relative">
+                                           <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
+                                             {isAbsence ? 'Absence' : isHoliday ? 'Jour férié' : isBirthday ? 'Anniversaire' : 'Rendez-vous'}
                                            </div>
+                                           <div className={`truncate font-bold text-xs ${
+                                             isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
+                                           }`}>{event.titre}</div>
                                            {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                             <Avatar className="w-5 h-5 flex-shrink-0">
+                                             <Avatar className="w-5 h-5 absolute bottom-0 right-0">
                                                <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
                                                <AvatarFallback className="text-[8px] bg-white/30">
                                                  {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
