@@ -169,6 +169,7 @@ function LayoutContent({ children, currentPageName }) {
 
   // Scroll to top on page change
   useEffect(() => {
+    window.scrollTo(0, 0);
     const container = document.getElementById('main-scroll-container');
     if (container) container.scrollTop = 0;
   }, [location.pathname]);
