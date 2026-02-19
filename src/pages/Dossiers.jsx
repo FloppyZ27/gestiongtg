@@ -3707,7 +3707,7 @@ export default function Dossiers() {
                     {sortedDossiers.length > 0 ?
                   sortedDossiers.map((dossier) =>
                   <TableRow
-                    key={dossier.id}
+                    key={dossier.displayId}
                     className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
                     onClick={() => handleEdit(dossier)}>
 
