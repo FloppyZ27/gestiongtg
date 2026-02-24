@@ -529,7 +529,7 @@ export default function LeveTerrain() {
               {dossiersDuJour.length === 0 ? (
                 <div className="p-4 text-center text-slate-600 text-sm mt-8">
                   <Mountain className="w-10 h-10 mx-auto mb-3 text-slate-700" />
-                  Aucun dossier en tâche Terrain aujourd'hui
+                  Aucun dossier céduler aujourd'hui
                 </div>
               ) : (
                 dossiersDuJour.map(({ dossier, mandat }, idx) => {
