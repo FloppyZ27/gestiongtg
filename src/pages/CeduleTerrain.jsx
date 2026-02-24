@@ -89,10 +89,20 @@ export default function CeduleTerrain() {
     initialData: [],
   });
 
-  const techniciensTerrain = employes.filter(e => e.poste === "Technicien Terrain" && e.statut === "Actif");
-  
+  // Utiliser les utilisateurs actifs avec le poste "Technicien Terrain"
+  const techniciensTerrain = users
+    .filter(u => u.poste === "Technicien Terrain")
+    .map(u => {
+      const parts = (u.full_name || '').split(' ');
+      return {
+        ...u,
+        prenom: parts[0] || '',
+        nom: parts.slice(1).join(' ') || ''
+      };
+    });
+
   // Filtrer les ressources par place d'affaire
-  const techniciensByPlace = techniciensTerrain; // TODO: ajouter place_affaire à Employe si nécessaire
+  const techniciensByPlace = techniciensTerrain;
   const vehiculesByPlace = vehicules;
   const equipementsByPlace = equipements;
 
