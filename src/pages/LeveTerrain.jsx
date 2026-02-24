@@ -520,7 +520,7 @@ export default function LeveTerrain() {
             <div className="px-3 py-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers — Tâche Terrain</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler aujourd'hui</span>
               </div>
               <p className="text-emerald-400 font-bold text-lg mt-1">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
             </div>
