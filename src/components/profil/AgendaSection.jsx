@@ -22,6 +22,30 @@ export default function AgendaSection({
   handleEditEvent,
   deleteRendezVousMutation
 }) {
+  
+  // Recalculer getAgendaMonthDays ici pour inclure les jours complets dimanche-samedi
+  const getMonthDaysWithFullWeeks = () => {
+    const year = agendaCurrentDate.getFullYear();
+    const month = agendaCurrentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const firstDayOfWeek = firstDay.getDay();
+    const startDate = new Date(firstDay);
+    startDate.setDate(firstDay.getDate() - firstDayOfWeek);
+    
+    const lastDayOfWeek = lastDay.getDay();
+    const endDate = new Date(lastDay);
+    endDate.setDate(lastDay.getDate() + (6 - lastDayOfWeek));
+    
+    const days = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+    return days;
+  };
+  
+  const monthDaysToDisplay = agendaViewMode === "mois" ? getMonthDaysWithFullWeeks() : getAgendaMonthDays();
   return (
     <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
       <div 
@@ -281,7 +305,7 @@ export default function AgendaSection({
           {/* Vue Mois */}
           {agendaViewMode === "mois" && (
             <div className="grid grid-cols-7 w-full" style={{ gap: '2px' }}>
-              {getAgendaMonthDays().map((day, index) => {
+              {monthDaysToDisplay.map((day, index) => {
                 const dateStr = format(day, "yyyy-MM-dd");
                 const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
                 const isCurrentMonth = day.getMonth() === agendaCurrentDate.getMonth();
