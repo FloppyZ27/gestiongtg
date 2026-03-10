@@ -15,50 +15,21 @@ import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+import AgendaSection from "@/components/profil/AgendaSection";
+
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
-  const mapping = {
-    "Samuel Guay": "SG-",
-    "Dany Gaboury": "DG-",
-    "Pierre-Luc Pilote": "PLP-",
-    "Benjamin Larouche": "BL-",
-    "Frédéric Gilbert": "FG-"
-  };
+  const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
   return mapping[arpenteur] || "";
 };
 
 const getArpenteurColor = (arpenteur) => {
-  const colors = {
-    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-  };
+  const colors = { "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30", "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30", "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30", "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" };
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-};
-
-const CommentairesSection = ({ dossierId, dossierTemporaire }) => {
-  return (
-    <div className="p-4 space-y-4 text-slate-300">
-      {dossierId ? (
-        <>
-          <p className="text-sm text-slate-400">Section des commentaires pour le dossier {dossierId}.</p>
-          <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-md min-h-[100px] flex items-center justify-center text-slate-500">
-            Aucun commentaire pour le moment.
-          </div>
-          <Textarea placeholder="Ajouter un nouveau commentaire..." className="bg-slate-800 border-slate-700" />
-          <Button size="sm" className="bg-blue-500 hover:bg-blue-600 w-full">Ajouter un commentaire</Button>
-        </>
-      ) : (
-        <p className="text-sm text-slate-500">Sélectionnez un dossier pour voir les commentaires.</p>
-      )}
-    </div>
-  );
 };
 
 
