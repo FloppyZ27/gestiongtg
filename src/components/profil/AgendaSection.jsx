@@ -424,6 +424,7 @@ export default function AgendaSection({
                 );
               })}
             </div>
+            </div>
           )}
         </CardContent>
       </Card>
