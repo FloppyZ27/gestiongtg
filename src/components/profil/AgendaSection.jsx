@@ -304,6 +304,13 @@ export default function AgendaSection({
 
           {/* Vue Mois */}
           {agendaViewMode === "mois" && (
+            <div>
+              {/* En-têtes des jours */}
+              <div className="grid grid-cols-7 w-full mb-1" style={{ gap: '2px' }}>
+                {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map(j => (
+                  <div key={j} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{j}</div>
+                ))}
+              </div>
             <div className="grid grid-cols-7 w-full" style={{ gap: '2px' }}>
               {monthDaysToDisplay.map((day, index) => {
                 const dateStr = format(day, "yyyy-MM-dd");
@@ -416,6 +423,7 @@ export default function AgendaSection({
                   );
                 })}
               </div>
+            </div>
             </div>
           )}
         </CardContent>
