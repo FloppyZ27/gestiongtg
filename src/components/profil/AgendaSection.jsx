@@ -420,15 +420,12 @@ export default function AgendaSection({
                         );
                       })}
                     </div>
-                  );
-                  })}
                   </Card>
-                  );
-                  })}
-                  </div>
-                  </div>
-                  )}
-                  </CardContent>
-                  </Card>
-                  );
-                  }
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
