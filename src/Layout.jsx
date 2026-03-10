@@ -19,7 +19,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar.jsx";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
