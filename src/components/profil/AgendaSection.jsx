@@ -421,13 +421,14 @@ export default function AgendaSection({
                       })}
                     </div>
                   );
-                })}
-              </div>
-            </div>
-            </div>
-          )}
-        </CardContent>
-      )}
-    </Card>
-  );
-}
+                  })}
+                  </Card>
+                  );
+                  })}
+                  </div>
+                  </div>
+                  )}
+                  </CardContent>
+                  </Card>
+                  );
+                  }
