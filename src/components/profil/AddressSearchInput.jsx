@@ -43,8 +43,8 @@ export default function AddressSearchInput({ value, onChange, className }) {
       setLoading(true);
       try {
         const result = await base44.integrations.Core.InvokeLLM({
-          prompt: `Tu es un assistant de recherche d'adresses canadiennes. L'utilisateur tape: "${val}". 
-Retourne une liste de 5 adresses complètes réelles au Canada (surtout Québec) qui correspondent à cette recherche.
+          prompt: `Tu es un assistant de recherche d'adresses. L'utilisateur tape: "${val}". 
+Retourne une liste de 5 adresses complètes réelles situées dans un rayon de 100 km autour de la ville d'Alma, Québec (incluant Alma, Saguenay, Chicoutimi, Jonquière, Saint-Félicien, Roberval, La Baie, Dolbeau-Mistassini et les municipalités environnantes du Saguenay-Lac-Saint-Jean).
 Format: tableau JSON d'objets avec champ "adresse" (adresse complète avec numéro civique, rue, ville, province, code postal).
 Exemple: [{"adresse": "123 Rue des Érables, Alma, QC G8B 1A1"}]`,
           response_json_schema: {
