@@ -103,7 +103,49 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
+    // Priorité 1: Template de rôle (le plus prioritaire)
+    const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
+    console.log(`Template de rôle trouvé:`, roleTemplate);
+    
+    if (roleTemplate && roleTemplate.permissions_pages && roleTemplate.permissions_pages.length > 0) {
+      const allowedPagesByRole = roleTemplate.permissions_pages || [];
+      console.log(`✅ Template de rôle trouvé - utilisation de ses permissions:`, allowedPagesByRole);
+      const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
+      
+      if (!hasRoleAccess) {
+        console.log(`❌ Accès refusé par template de rôle - ${normalizedPageName} non inclus`);
+        setHasAccess(false);
+        setShowWarning(true);
+        return;
+      }
+      
+      console.log(`✅ Accès autorisé par template de rôle`);
+      setHasAccess(true);
+      return;
+    }
+
+    // Priorité 2: Template de poste
+    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
+    console.log(`Template de poste trouvé:`, posteTemplate);
+    
+    if (posteTemplate && posteTemplate.permissions_pages && posteTemplate.permissions_pages.length > 0) {
+      const allowedPagesByPoste = posteTemplate.permissions_pages || [];
+      console.log(`✅ Template de poste trouvé - utilisation de ses permissions:`, allowedPagesByPoste);
+      const hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
+      
+      if (!hasPosteAccess) {
+        console.log(`❌ Accès refusé par template de poste - ${normalizedPageName} non inclus`);
+        setHasAccess(false);
+        setShowWarning(true);
+        return;
+      }
+      
+      console.log(`✅ Accès autorisé par template de poste`);
+      setHasAccess(true);
+      return;
+    }
+
+    // Priorité 3: Permissions spécifiques de l'utilisateur
     if (user.permissions_pages && user.permissions_pages.length > 0) {
       console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
       const hasUserAccess = user.permissions_pages.includes(normalizedPageName);
@@ -120,45 +162,8 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Priorité 2: Vérifier via les templates (rôle ET poste)
-    let hasRoleAccess = true;
-    let hasPosteAccess = true;
-
-    // Vérification par rôle
-    const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
-    console.log(`Template de rôle trouvé:`, roleTemplate);
-    
-    if (roleTemplate) {
-      const allowedPagesByRole = roleTemplate.permissions_pages || [];
-      console.log(`Pages autorisées par rôle:`, allowedPagesByRole);
-      hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
-      console.log(`Rôle autorise? ${hasRoleAccess}`);
-    } else {
-      console.log(`⚠️ Pas de template de rôle - accès par défaut accordé`);
-    }
-
-    // Vérification par poste
-    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
-    console.log(`Template de poste trouvé:`, posteTemplate);
-    
-    if (posteTemplate) {
-      const allowedPagesByPoste = posteTemplate.permissions_pages || [];
-      console.log(`Pages autorisées par poste:`, allowedPagesByPoste);
-      hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
-      console.log(`Poste autorise? ${hasPosteAccess}`);
-    } else {
-      console.log(`⚠️ Pas de template de poste - accès par défaut accordé`);
-    }
-
-    // Les DEUX doivent autoriser (règle AND)
-    if (!hasRoleAccess || !hasPosteAccess) {
-      console.log(`❌ Accès refusé à ${normalizedPageName}`);
-      setHasAccess(false);
-      setShowWarning(true);
-      return;
-    }
-
-    console.log(`✅ Accès autorisé à ${normalizedPageName}`);
+    // Si aucune règle ne s'applique, accès par défaut accordé
+    console.log(`✅ Aucune restriction - accès accordé par défaut`);
     setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
