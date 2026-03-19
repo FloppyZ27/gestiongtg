@@ -355,21 +355,21 @@ export default function Administration() {
                             </TableCell>
                             <TableCell>
                               <Select 
-                                value={user.actif !== false ? "actif" : "inactif"} 
-                                onValueChange={(value) => handleUpdateUser(user, "actif", value === "actif")}
+                                value={user.statut || "Actif"} 
+                                onValueChange={(value) => handleUpdateUser(user, "statut", value)}
                                 disabled={user.email === currentUser?.email}
                               >
                                 <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="actif">
+                                  <SelectItem value="Actif">
                                     <div className="flex items-center gap-2">
                                       <CheckCircle className="w-3 h-3 text-green-400" />
                                       <span>Actif</span>
                                     </div>
                                   </SelectItem>
-                                  <SelectItem value="inactif">
+                                  <SelectItem value="Inactif">
                                     <div className="flex items-center gap-2">
                                       <XCircle className="w-3 h-3 text-red-400" />
                                       <span>Inactif</span>
@@ -517,21 +517,21 @@ export default function Administration() {
                             </TableCell>
                             <TableCell>
                               <Select 
-                                value={user.actif !== false ? "actif" : "inactif"} 
-                                onValueChange={(value) => handleUpdateUser(user, "actif", value === "actif")}
+                                value={user.statut || "Actif"} 
+                                onValueChange={(value) => handleUpdateUser(user, "statut", value)}
                                 disabled={user.email === currentUser?.email}
                               >
                                 <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="actif">
+                                  <SelectItem value="Actif">
                                     <div className="flex items-center gap-2">
                                       <CheckCircle className="w-3 h-3 text-green-400" />
                                       <span>Actif</span>
                                     </div>
                                   </SelectItem>
-                                  <SelectItem value="inactif">
+                                  <SelectItem value="Inactif">
                                     <div className="flex items-center gap-2">
                                       <XCircle className="w-3 h-3 text-red-400" />
                                       <span>Inactif</span>
