@@ -827,7 +827,7 @@ export default function Profil() {
                       <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-1">
                         <Cake className="w-3 h-3 text-slate-500" />
-                        {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {user?.date_naissance ? format(new Date(user.date_naissance + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                       </p>
                     </div>
                     <div>
