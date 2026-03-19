@@ -437,7 +437,7 @@ export default function Profil() {
 
   const calculateSeniority = () => {
     if (!user?.date_embauche) return "N/A";
-    const embaucheDate = new Date(user.date_embauche);
+    const embaucheDate = new Date(user.date_embauche + 'T00:00:00');
     const now = new Date();
     const years = now.getFullYear() - embaucheDate.getFullYear();
     const months = now.getMonth() - embaucheDate.getMonth();
