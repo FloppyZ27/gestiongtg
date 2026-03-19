@@ -240,7 +240,6 @@ export default function PermissionGuard({ children, pageName }) {
           <div className="text-center">
             <Shield className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Accès restreint</h2>
-            <p className="text-slate-400">Chargement...</p>
           </div>
         </div>
       </>
