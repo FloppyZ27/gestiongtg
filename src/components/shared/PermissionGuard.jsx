@@ -47,6 +47,15 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Page demandée: ${pageName}`);
     console.log(`Rôle utilisateur: ${user.role}`);
     console.log(`Poste utilisateur: ${user.poste}`);
+    console.log(`Statut utilisateur: ${user.statut}`);
+
+    // Si l'utilisateur est Inactif, bloquer l'accès à toutes les pages
+    if (user.statut === 'Inactif') {
+      console.log(`❌ Utilisateur Inactif - accès refusé`);
+      setHasAccess(false);
+      setShowWarning(true);
+      return;
+    }
 
     // Admin a accès à tout sauf "Recherches"
     if (user.role === 'admin' && pageName !== 'Recherches') {
@@ -180,14 +189,27 @@ export default function PermissionGuard({ children, pageName }) {
                 <Shield className="w-5 h-5 text-yellow-400 mt-0.5" />
                 <div>
                   <p className="text-white font-medium mb-1">
-                    Vous n'avez pas accès à cette page
+                    {user?.statut === 'Inactif' ? 'Compte inactif' : 'Vous n\'avez pas accès à cette page'}
                   </p>
-                  <p className="text-sm text-slate-400">
-                    Votre poste <span className="text-yellow-400 font-medium">({user?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
-                  </p>
-                  <p className="text-sm text-slate-400 mt-2">
-                    Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
-                  </p>
+                  {user?.statut === 'Inactif' ? (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        Votre compte est actuellement <span className="text-red-400 font-medium">inactif</span>. Vous n'avez accès à aucune page de l'application.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Veuillez contacter un administrateur pour réactiver votre compte.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        Votre poste <span className="text-yellow-400 font-medium">({user?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end">
