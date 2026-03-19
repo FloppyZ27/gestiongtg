@@ -834,7 +834,7 @@ export default function Profil() {
                       <Label className="text-slate-400 text-xs">Date d'embauche</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-1">
                         <Briefcase className="w-3 h-3 text-slate-500" />
-                        {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {user?.date_embauche ? format(new Date(user.date_embauche + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                         {user?.date_embauche && <span className="text-slate-400 text-xs">({calculateSeniority()})</span>}
                       </p>
                     </div>
