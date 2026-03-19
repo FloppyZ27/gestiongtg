@@ -105,11 +105,20 @@ export default function PermissionGuard({ children, pageName }) {
 
     // Priorité 1: Template de rôle (le plus prioritaire)
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
-    console.log(`Template de rôle trouvé:`, roleTemplate);
+    console.log(`Template de rôle:`, roleTemplate);
     
-    if (roleTemplate && roleTemplate.permissions_pages && roleTemplate.permissions_pages.length > 0) {
+    if (roleTemplate) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
-      console.log(`✅ Template de rôle trouvé - utilisation de ses permissions:`, allowedPagesByRole);
+      
+      // Si le template existe mais n'a AUCUNE permission définie, accès complet
+      if (allowedPagesByRole.length === 0) {
+        console.log(`✅ Template de rôle sans restrictions - accès complet`);
+        setHasAccess(true);
+        return;
+      }
+      
+      // Si le template a des permissions définies, vérifier si la page est autorisée
+      console.log(`Template de rôle avec restrictions:`, allowedPagesByRole);
       const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
       
       if (!hasRoleAccess) {
@@ -126,11 +135,20 @@ export default function PermissionGuard({ children, pageName }) {
 
     // Priorité 2: Template de poste
     const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
-    console.log(`Template de poste trouvé:`, posteTemplate);
+    console.log(`Template de poste:`, posteTemplate);
     
-    if (posteTemplate && posteTemplate.permissions_pages && posteTemplate.permissions_pages.length > 0) {
+    if (posteTemplate) {
       const allowedPagesByPoste = posteTemplate.permissions_pages || [];
-      console.log(`✅ Template de poste trouvé - utilisation de ses permissions:`, allowedPagesByPoste);
+      
+      // Si le template existe mais n'a AUCUNE permission définie, accès complet
+      if (allowedPagesByPoste.length === 0) {
+        console.log(`✅ Template de poste sans restrictions - accès complet`);
+        setHasAccess(true);
+        return;
+      }
+      
+      // Si le template a des permissions définies, vérifier si la page est autorisée
+      console.log(`Template de poste avec restrictions:`, allowedPagesByPoste);
       const hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
       
       if (!hasPosteAccess) {
