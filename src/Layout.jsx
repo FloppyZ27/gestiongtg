@@ -199,27 +199,6 @@ function LayoutContent({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  // Rediriger les utilisateurs inactifs vers CompteInactif
-  useEffect(() => {
-    if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
-      navigate('/CompteInactif');
-    }
-  }, [user, location.pathname, navigate]);
-
-  // Afficher un loader pendant le chargement de l'utilisateur
-  if (isLoadingUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
-  if (user?.statut === 'Inactif') {
-    return <>{children}</>;
-  }
-
   const { data: dossiers = [] } = useQuery({
     queryKey: ['dossiers'],
     queryFn: () => base44.entities.Dossier.list(),
@@ -256,6 +235,27 @@ function LayoutContent({ children, currentPageName }) {
     initialData: [],
     enabled: !!user,
   });
+
+  // Rediriger les utilisateurs inactifs vers CompteInactif
+  useEffect(() => {
+    if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
+      navigate('/CompteInactif');
+    }
+  }, [user, location.pathname, navigate]);
+
+  // Afficher un loader pendant le chargement de l'utilisateur
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
+  if (user?.statut === 'Inactif') {
+    return <>{children}</>;
+  }
 
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
