@@ -87,8 +87,8 @@ export default function Administration() {
     });
 
     let actionLabel = "";
-    if (field === "actif") {
-      actionLabel = value ? "ACTIVATION_UTILISATEUR" : "DESACTIVATION_UTILISATEUR";
+    if (field === "statut") {
+      actionLabel = value === "Actif" ? "ACTIVATION_UTILISATEUR" : "DESACTIVATION_UTILISATEUR";
     } else if (field === "poste") {
       actionLabel = "MODIFICATION_POSTE";
     } else if (field === "role") {
@@ -196,12 +196,12 @@ export default function Administration() {
     );
   });
 
-  const activeUsers = filteredUsers.filter(u => u.actif !== false);
-  const inactiveUsers = filteredUsers.filter(u => u.actif === false);
+  const activeUsers = filteredUsers.filter(u => u.statut !== 'Inactif');
+  const inactiveUsers = filteredUsers.filter(u => u.statut === 'Inactif');
 
-  const adminUsers = users.filter(u => u.role === 'admin' && u.actif !== false);
-  const gestionnaireUsers = users.filter(u => u.role === 'gestionnaire' && u.actif !== false);
-  const standardUsers = users.filter(u => u.role === 'user' && u.actif !== false);
+  const adminUsers = users.filter(u => u.role === 'admin' && u.statut !== 'Inactif');
+  const gestionnaireUsers = users.filter(u => u.role === 'gestionnaire' && u.statut !== 'Inactif');
+  const standardUsers = users.filter(u => u.role === 'user' && u.statut !== 'Inactif');
 
   // Check if current user is admin
   const isAdmin = currentUser?.role === 'admin';
