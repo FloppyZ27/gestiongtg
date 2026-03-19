@@ -289,18 +289,10 @@ export default function Profil() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Ajuster la date d'anniversaire pour compenser le décalage de timezone
-      let adjustedDateNaissance = profileForm.date_naissance;
-      if (adjustedDateNaissance) {
-        const date = new Date(adjustedDateNaissance);
-        date.setDate(date.getDate() + 1);
-        adjustedDateNaissance = date.toISOString().split('T')[0];
-      }
-
       await updateProfileMutation.mutateAsync({
         prenom: profileForm.prenom,
         nom: profileForm.nom,
-        date_naissance: adjustedDateNaissance,
+        date_naissance: profileForm.date_naissance,
         telephone: profileForm.telephone,
         adresse: profileForm.adresse
       });
