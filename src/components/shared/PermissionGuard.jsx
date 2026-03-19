@@ -69,43 +69,10 @@ export default function PermissionGuard({ children, pageName }) {
     // Si l'utilisateur est Actif ou n'a pas de statut, appliquer les permissions normales
     // (Les utilisateurs Actifs passent par les permissions comme tout le monde)
 
-    // Admin a accès à tout sauf "Recherches"
-    if (user.role === 'admin' && pageName !== 'Recherches') {
-      console.log(`✅ Admin - accès automatique (sauf Recherches)`);
+    // Admin a accès à tout (y compris Recherches)
+    if (user.role === 'admin') {
+      console.log(`✅ Admin - accès automatique complet`);
       setHasAccess(true);
-      return;
-    }
-
-    // Page "Recherches" nécessite permission explicite (utilisateur OU templates)
-    if (pageName === 'Recherches') {
-      console.log(`Page Recherches - permission explicite requise`);
-      
-      // Vérifier permissions utilisateur
-      if (user.permissions_pages && user.permissions_pages.length > 0) {
-        const hasUserAccess = user.permissions_pages.includes(pageName);
-        if (hasUserAccess) {
-          console.log(`✅ Accès Recherches autorisé par permissions utilisateur`);
-          setHasAccess(true);
-          return;
-        }
-      }
-      
-      // Vérifier templates
-      const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
-      const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
-      
-      const roleAllows = roleTemplate?.permissions_pages?.includes(pageName) || false;
-      const posteAllows = posteTemplate?.permissions_pages?.includes(pageName) || false;
-      
-      if (roleAllows && posteAllows) {
-        console.log(`✅ Accès Recherches autorisé par templates`);
-        setHasAccess(true);
-        return;
-      }
-      
-      console.log(`❌ Accès Recherches refusé - permission explicite manquante`);
-      setHasAccess(false);
-      setShowWarning(true);
       return;
     }
 
@@ -115,7 +82,7 @@ export default function PermissionGuard({ children, pageName }) {
       const hasUserAccess = user.permissions_pages.includes(pageName);
       
       if (!hasUserAccess) {
-        console.log(`❌ Accès refusé par permissions utilisateur spécifiques`);
+        console.log(`❌ Accès refusé par permissions utilisateur spécifiques - ${pageName} non inclus`);
         setHasAccess(false);
         setShowWarning(true);
         return;
