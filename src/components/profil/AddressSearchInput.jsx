@@ -15,7 +15,6 @@ export default function AddressSearchInput({ value, onChange, className }) {
     setQuery(value || "");
   }, [value]);
 
-  // Fermer le dropdown si on clique en dehors
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -42,34 +41,16 @@ export default function AddressSearchInput({ value, onChange, className }) {
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const result = await base44.integrations.Core.InvokeLLM({
-          prompt: `Tu es un assistant de recherche d'adresses. L'utilisateur tape: "${val}". 
-Retourne une liste de 5 adresses complètes réelles situées dans un rayon de 100 km autour de la ville d'Alma, Québec (incluant Alma, Saguenay, Chicoutimi, Jonquière, Saint-Félicien, Roberval, La Baie, Dolbeau-Mistassini et les municipalités environnantes du Saguenay-Lac-Saint-Jean).
-Format: tableau JSON d'objets avec champ "adresse" (adresse complète avec numéro civique, rue, ville, province, code postal).
-Exemple: [{"adresse": "123 Rue des Érables, Alma, QC G8B 1A1"}]`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              adresses: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    adresse: { type: "string" }
-                  }
-                }
-              }
-            }
-          }
-        });
-        setSuggestions(result?.adresses || []);
-        setShowDropdown(true);
+        const response = await base44.functions.invoke('googlePlacesAutocomplete', { query: val });
+        const predictions = response.data?.predictions || [];
+        setSuggestions(predictions);
+        setShowDropdown(predictions.length > 0);
       } catch (err) {
         setSuggestions([]);
       } finally {
         setLoading(false);
       }
-    }, 500);
+    }, 400);
   };
 
   const handleSelect = (adresse) => {
