@@ -15,15 +15,17 @@ Deno.serve(async (req) => {
 
     const apiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
 
-    // Utiliser Google Places Autocomplete avec bias vers Alma, QC (lat: 48.55, lng: -71.65)
+    // Utiliser Google Places Autocomplete avec restriction stricte autour d'Alma, QC
+    // Bounding box approximatif de 100km autour d'Alma (48.55, -71.65)
+    // ~0.9 degré lat = ~100km, ~1.3 degré lng = ~100km à cette latitude
     const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json");
     url.searchParams.set("input", query);
     url.searchParams.set("key", apiKey);
     url.searchParams.set("language", "fr");
     url.searchParams.set("components", "country:ca");
-    // Bias vers Alma, QC avec rayon de 100km
     url.searchParams.set("location", "48.55,-71.65");
     url.searchParams.set("radius", "100000");
+    url.searchParams.set("strictbounds", "true");
     url.searchParams.set("types", "address");
 
     const response = await fetch(url.toString());
