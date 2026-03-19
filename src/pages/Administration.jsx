@@ -279,7 +279,7 @@ export default function Administration() {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="text-white">{user.full_name}</div>
+                                  <div className="text-white">{user.prenom} {user.nom}</div>
                                   <div className="text-xs text-slate-400">{user.email}</div>
                                 </div>
                               </div>
@@ -441,7 +441,7 @@ export default function Administration() {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="text-white">{user.full_name}</div>
+                                  <div className="text-white">{user.prenom} {user.nom}</div>
                                   <div className="text-xs text-slate-400">{user.email}</div>
                                 </div>
                               </div>
