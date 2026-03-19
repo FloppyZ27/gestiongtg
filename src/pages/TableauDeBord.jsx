@@ -2265,7 +2265,7 @@ export default function TableauDeBord() {
             </CardContent>
           </Card>
 
-          <Card className={`border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mr-6 ${hasAnniversaireAujourdhui ? 'ring-2 ring-pink-500 shadow-pink-500/50 shadow-2xl' : ''}`}>
+          <Card className={`border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mr-[90px] ${hasAnniversaireAujourdhui ? 'ring-2 ring-pink-500 shadow-pink-500/50 shadow-2xl' : ''}`}>
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-pink-500/20 to-purple-500/20 py-2">
               <CardTitle className="text-white flex items-center gap-2">
                 <Cake className="w-5 h-5 text-pink-400" />
