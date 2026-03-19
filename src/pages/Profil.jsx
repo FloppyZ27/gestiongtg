@@ -1636,13 +1636,11 @@ export default function Profil() {
                   />
                 </div>
               </div>
-              <div className="space-y-2 relative">
+              <div className="space-y-2">
                 <Label>Adresse</Label>
-                <Input
+                <AddressSearchInput
                   value={profileForm.adresse}
-                  onChange={(e) => setProfileForm({...profileForm, adresse: e.target.value})}
-                  placeholder="Adresse civique..."
-                  className="bg-slate-800 border-slate-700"
+                  onChange={(val) => setProfileForm({...profileForm, adresse: val})}
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
