@@ -324,17 +324,17 @@ export default function TableauDeBord() {
   const monthEnd = endOfMonth(today);
   const anniversairesDuMois = users.filter(u => {
     if (!u.date_naissance) return false;
-    const birthDate = new Date(u.date_naissance);
+    const birthDate = new Date(u.date_naissance + 'T00:00:00');
     const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
     return isWithinInterval(thisYearBirthday, { start: monthStart, end: monthEnd });
   }).sort((a, b) => {
-    const dateA = new Date(a.date_naissance);
-    const dateB = new Date(b.date_naissance);
+    const dateA = new Date(a.date_naissance + 'T00:00:00');
+    const dateB = new Date(b.date_naissance + 'T00:00:00');
     return dateA.getDate() - dateB.getDate();
   });
 
   const hasAnniversaireAujourdhui = anniversairesDuMois.some(u => {
-    const birthDate = new Date(u.date_naissance);
+    const birthDate = new Date(u.date_naissance + 'T00:00:00');
     return isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
   });
 
@@ -2274,39 +2274,39 @@ export default function TableauDeBord() {
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-3">
-                {anniversairesDuMois.map((utilisateur) => {
-                  const birthDate = new Date(utilisateur.date_naissance);
-                  const isToday = isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
-                  
-                  if (isToday) {
-                    return (
-                      <BirthdayCard
-                        key={utilisateur.id}
-                        utilisateur={utilisateur}
-                        birthDate={birthDate}
-                        getInitials={getInitials}
-                        today={today}
-                      />
-                    );
-                  }
-                  
-                  return (
-                    <div key={utilisateur.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={utilisateur.photo_url} />
-                        <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500">
-                          {getInitials(utilisateur.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-semibold text-white">{utilisateur.full_name}</p>
-                        <p className="text-sm text-slate-400">
-                          {format(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), "dd MMMM", { locale: fr })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+               {anniversairesDuMois.map((utilisateur) => {
+                 const birthDate = new Date(utilisateur.date_naissance + 'T00:00:00');
+                 const isToday = isSameDay(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), today);
+
+                 if (isToday) {
+                   return (
+                     <BirthdayCard
+                       key={utilisateur.id}
+                       utilisateur={utilisateur}
+                       birthDate={birthDate}
+                       getInitials={getInitials}
+                       today={today}
+                     />
+                   );
+                 }
+
+                 return (
+                   <div key={utilisateur.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
+                     <Avatar className="w-10 h-10">
+                       <AvatarImage src={utilisateur.photo_url} />
+                       <AvatarFallback className="bg-gradient-to-r from-pink-500 to-purple-500">
+                         {getInitials(utilisateur.full_name)}
+                       </AvatarFallback>
+                     </Avatar>
+                     <div className="flex-1">
+                       <p className="font-semibold text-white">{utilisateur.full_name}</p>
+                       <p className="text-sm text-slate-400">
+                         {format(new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate()), "dd MMMM", { locale: fr })}
+                       </p>
+                     </div>
+                   </div>
+                 );
+               })}
                 {anniversairesDuMois.length === 0 && (
                   <p className="text-center text-slate-500 py-8">Aucun anniversaire ce mois-ci</p>
                 )}
