@@ -50,13 +50,6 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Poste utilisateur: ${user.poste}`);
     console.log(`Statut utilisateur: ${user.statut}`);
 
-    // Si l'utilisateur est Actif, accès complet à toute l'application
-    if (user.statut === 'Actif') {
-      console.log(`✅ Utilisateur Actif - accès complet`);
-      setHasAccess(true);
-      return;
-    }
-
     // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
     if (user.statut === 'Inactif' && pageName !== 'CompteInactif') {
       console.log(`❌ Utilisateur Inactif - redirection vers CompteInactif`);
@@ -72,6 +65,9 @@ export default function PermissionGuard({ children, pageName }) {
       setHasAccess(true);
       return;
     }
+
+    // Si l'utilisateur est Actif ou n'a pas de statut, appliquer les permissions normales
+    // (Les utilisateurs Actifs passent par les permissions comme tout le monde)
 
     // Admin a accès à tout sauf "Recherches"
     if (user.role === 'admin' && pageName !== 'Recherches') {
