@@ -236,28 +236,14 @@ function LayoutContent({ children, currentPageName }) {
     enabled: !!user,
   });
 
+  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
+
   // Rediriger les utilisateurs inactifs vers CompteInactif
   useEffect(() => {
     if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
       navigate('/CompteInactif');
     }
   }, [user, location.pathname, navigate]);
-
-  // Afficher un loader pendant le chargement de l'utilisateur
-  if (isLoadingUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
-  if (user?.statut === 'Inactif') {
-    return <>{children}</>;
-  }
-
-  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
   // Calculer le temps écoulé du pointage en cours
   useEffect(() => {
@@ -290,6 +276,20 @@ function LayoutContent({ children, currentPageName }) {
       }
     };
   }, [showPunchControls, isHoveringPunch]);
+
+  // Afficher un loader pendant le chargement de l'utilisateur
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
+  if (user?.statut === 'Inactif') {
+    return <>{children}</>;
+  }
 
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
