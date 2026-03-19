@@ -173,6 +173,8 @@ function LayoutContent({ children, currentPageName }) {
     const container = document.getElementById('main-scroll-container');
     if (container) container.scrollTop = 0;
   }, [location.pathname]);
+
+  const navigate = useNavigate();
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
   const [dossierSearchTerm, setDossierSearchTerm] = useState("");
   const [selectedDossierId, setSelectedDossierId] = useState(null);
@@ -196,6 +198,18 @@ function LayoutContent({ children, currentPageName }) {
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Rediriger les utilisateurs inactifs vers CompteInactif
+  useEffect(() => {
+    if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
+      navigate('/CompteInactif');
+    }
+  }, [user, location.pathname, navigate]);
+
+  // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
+  if (user?.statut === 'Inactif') {
+    return <>{children}</>;
+  }
 
   const { data: dossiers = [] } = useQuery({
     queryKey: ['dossiers'],
