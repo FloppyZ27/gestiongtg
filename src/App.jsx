@@ -15,6 +15,8 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
+import CompteInactif from './pages/CompteInactif';
+
 setupIframeMessaging();
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
@@ -49,6 +51,7 @@ const AuthenticatedApp = () => {
     <LayoutWrapper currentPageName={mainPageKey}>
       <Routes>
         <Route path="/" element={<MainPage />} />
+        <Route path="/CompteInactif" element={<CompteInactif />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}

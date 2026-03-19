@@ -24,6 +24,7 @@ const PAGE_DISPLAY_NAMES = {
 export default function PermissionGuard({ children, pageName }) {
   const [showWarning, setShowWarning] = useState(false);
   const [hasAccess, setHasAccess] = useState(null);
+  const [isInactive, setIsInactive] = useState(false);
   const navigate = useNavigate();
 
   const { data: user, isLoading: userLoading } = useQuery({
@@ -49,11 +50,12 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Poste utilisateur: ${user.poste}`);
     console.log(`Statut utilisateur: ${user.statut}`);
 
-    // Si l'utilisateur est Inactif, bloquer l'accès à toutes les pages
+    // Si l'utilisateur est Inactif, rediriger vers la page CompteInactif
     if (user.statut === 'Inactif') {
-      console.log(`❌ Utilisateur Inactif - accès refusé`);
+      console.log(`❌ Utilisateur Inactif - redirection vers CompteInactif`);
+      setIsInactive(true);
       setHasAccess(false);
-      setShowWarning(true);
+      navigate(createPageUrl("CompteInactif"));
       return;
     }
 
@@ -158,7 +160,11 @@ export default function PermissionGuard({ children, pageName }) {
 
   const handleGoBack = () => {
     setShowWarning(false);
-    navigate(createPageUrl("TableauDeBord"));
+    if (isInactive) {
+      navigate(createPageUrl("CompteInactif"));
+    } else {
+      navigate(createPageUrl("TableauDeBord"));
+    }
   };
 
   // Afficher un écran de chargement si les données ne sont pas prêtes
