@@ -821,8 +821,8 @@ export default function Profil() {
                     </div>
                   </div>
 
-                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Rôle */}
-                  <div className="grid grid-cols-4 gap-x-6 gap-y-2">
+                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Équipe, Rôle */}
+                  <div className="grid grid-cols-5 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-1">
@@ -841,6 +841,10 @@ export default function Profil() {
                     <div>
                       <Label className="text-slate-400 text-xs">Poste</Label>
                       <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Équipe de travail</Label>
+                      <p className="text-white font-medium text-sm">{user?.equipe || "-"}</p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-xs">Rôle</Label>
