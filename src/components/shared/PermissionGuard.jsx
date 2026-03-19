@@ -18,7 +18,32 @@ const PAGE_DISPLAY_NAMES = {
   "CeduleTerrain": "Cédule Terrain",
   "Recherches": "Recherches",
   "SharePoint": "SharePoint",
-  "Administration": "Administration"
+  "Administration": "Administration",
+  "Dashboard": "Actes",
+  "LeveTerrain": "Levé Terrain",
+  "Comptabilite": "Comptabilité"
+};
+
+// Normaliser le nom de page pour la vérification des permissions
+const normalizePageName = (pageName) => {
+  // Certains noms de fichiers diffèrent des clés de permission
+  const pageMapping = {
+    "Dashboard": "Dashboard", // Page Actes
+    "TableauDeBord": "TableauDeBord",
+    "Dossiers": "Dossiers",
+    "Clients": "Clients",
+    "Calendrier": "Calendrier",
+    "Profil": "Profil",
+    "CommunicationClients": "CommunicationClients",
+    "GestionDeMandat": "GestionDeMandat",
+    "CeduleTerrain": "CeduleTerrain",
+    "LeveTerrain": "LeveTerrain",
+    "Recherches": "Recherches",
+    "SharePoint": "SharePoint",
+    "Administration": "Administration",
+    "Comptabilite": "Comptabilite"
+  };
+  return pageMapping[pageName] || pageName;
 };
 
 export default function PermissionGuard({ children, pageName }) {
@@ -44,8 +69,10 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
+    const normalizedPageName = normalizePageName(pageName);
+
     console.log(`=== Vérification d'accès pour ${user.email} ===`);
-    console.log(`Page demandée: ${pageName}`);
+    console.log(`Page demandée: ${pageName} (normalisé: ${normalizedPageName})`);
     console.log(`Rôle utilisateur: ${user.role}`);
     console.log(`Poste utilisateur: ${user.poste}`);
     console.log(`Statut utilisateur: ${user.statut}`);
@@ -79,10 +106,10 @@ export default function PermissionGuard({ children, pageName }) {
     // Priorité 1: Vérifier les permissions spécifiques de l'utilisateur
     if (user.permissions_pages && user.permissions_pages.length > 0) {
       console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
-      const hasUserAccess = user.permissions_pages.includes(pageName);
+      const hasUserAccess = user.permissions_pages.includes(normalizedPageName);
       
       if (!hasUserAccess) {
-        console.log(`❌ Accès refusé par permissions utilisateur spécifiques - ${pageName} non inclus`);
+        console.log(`❌ Accès refusé par permissions utilisateur spécifiques - ${normalizedPageName} non inclus`);
         setHasAccess(false);
         setShowWarning(true);
         return;
@@ -104,7 +131,7 @@ export default function PermissionGuard({ children, pageName }) {
     if (roleTemplate) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
       console.log(`Pages autorisées par rôle:`, allowedPagesByRole);
-      hasRoleAccess = allowedPagesByRole.includes(pageName);
+      hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
       console.log(`Rôle autorise? ${hasRoleAccess}`);
     } else {
       console.log(`⚠️ Pas de template de rôle - accès par défaut accordé`);
@@ -117,7 +144,7 @@ export default function PermissionGuard({ children, pageName }) {
     if (posteTemplate) {
       const allowedPagesByPoste = posteTemplate.permissions_pages || [];
       console.log(`Pages autorisées par poste:`, allowedPagesByPoste);
-      hasPosteAccess = allowedPagesByPoste.includes(pageName);
+      hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
       console.log(`Poste autorise? ${hasPosteAccess}`);
     } else {
       console.log(`⚠️ Pas de template de poste - accès par défaut accordé`);
@@ -125,13 +152,13 @@ export default function PermissionGuard({ children, pageName }) {
 
     // Les DEUX doivent autoriser (règle AND)
     if (!hasRoleAccess || !hasPosteAccess) {
-      console.log(`❌ Accès refusé à ${pageName}`);
+      console.log(`❌ Accès refusé à ${normalizedPageName}`);
       setHasAccess(false);
       setShowWarning(true);
       return;
     }
 
-    console.log(`✅ Accès autorisé à ${pageName}`);
+    console.log(`✅ Accès autorisé à ${normalizedPageName}`);
     setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
