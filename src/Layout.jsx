@@ -238,6 +238,41 @@ function LayoutContent({ children, currentPageName }) {
 
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
+  const [entreeForm, setEntreeForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    heures: "",
+    dossier_id: "",
+    mandat: "",
+    tache: "",
+    tache_suivante: "",
+    utilisateur_assigne: "",
+    description: ""
+  });
+
+  const createEntreeMutation = useMutation({
+    mutationFn: (data) => base44.entities.EntreeTemps.create({ ...data, utilisateur_email: user?.email }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
+      setIsEntreeTempsOpen(false);
+      setHasEntreeChanges(false);
+      resetForm();
+    },
+  });
+
+  const createPointageMutation = useMutation({
+    mutationFn: (data) => base44.entities.Pointage.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+    },
+  });
+
+  const updatePointageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+    },
+  });
+
   // Rediriger les utilisateurs inactifs vers CompteInactif
   useEffect(() => {
     if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
@@ -290,41 +325,6 @@ function LayoutContent({ children, currentPageName }) {
   if (user?.statut === 'Inactif') {
     return <>{children}</>;
   }
-
-  const [entreeForm, setEntreeForm] = useState({
-    date: new Date().toISOString().split('T')[0],
-    heures: "",
-    dossier_id: "",
-    mandat: "",
-    tache: "",
-    tache_suivante: "",
-    utilisateur_assigne: "",
-    description: ""
-  });
-
-  const createEntreeMutation = useMutation({
-    mutationFn: (data) => base44.entities.EntreeTemps.create({ ...data, utilisateur_email: user?.email }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
-      setIsEntreeTempsOpen(false);
-      setHasEntreeChanges(false);
-      resetForm();
-    },
-  });
-
-  const createPointageMutation = useMutation({
-    mutationFn: (data) => base44.entities.Pointage.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
-    },
-  });
-
-  const updatePointageMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
-    },
-  });
 
   const resetForm = () => {
     setEntreeForm({
