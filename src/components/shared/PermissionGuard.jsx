@@ -50,12 +50,19 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Poste utilisateur: ${user.poste}`);
     console.log(`Statut utilisateur: ${user.statut}`);
 
-    // Si l'utilisateur est Inactif, rediriger vers la page CompteInactif
-    if (user.statut === 'Inactif') {
+    // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
+    if (user.statut === 'Inactif' && pageName !== 'CompteInactif') {
       console.log(`❌ Utilisateur Inactif - redirection vers CompteInactif`);
       setIsInactive(true);
       setHasAccess(false);
       navigate(createPageUrl("CompteInactif"));
+      return;
+    }
+
+    // Si l'utilisateur est Inactif et est sur la page CompteInactif, autoriser l'accès
+    if (user.statut === 'Inactif' && pageName === 'CompteInactif') {
+      console.log(`✅ Page CompteInactif autorisée pour utilisateur inactif`);
+      setHasAccess(true);
       return;
     }
 
