@@ -31,10 +31,38 @@ Deno.serve(async (req) => {
     const response = await fetch(url.toString());
     const data = await response.json();
 
-    const predictions = (data.predictions || []).map(p => ({
-      adresse: p.description,
-      place_id: p.place_id
-    }));
+    // Pour chaque prédiction, récupérer les détails pour avoir le code postal
+    const predictions = await Promise.all(
+      (data.predictions || []).map(async (p) => {
+        try {
+          const detailsUrl = new URL("https://maps.googleapis.com/maps/api/place/details/json");
+          detailsUrl.searchParams.set("place_id", p.place_id);
+          detailsUrl.searchParams.set("key", apiKey);
+          detailsUrl.searchParams.set("fields", "formatted_address,address_components");
+          detailsUrl.searchParams.set("language", "fr");
+
+          const detailsRes = await fetch(detailsUrl.toString());
+          const detailsData = await detailsRes.json();
+
+          const components = detailsData.result?.address_components || [];
+          const postalComp = components.find(c => c.types.includes("postal_code"));
+          const postalCode = postalComp?.short_name || "";
+
+          let adresse = detailsData.result?.formatted_address || p.description;
+          // Retirer ", Canada" à la fin
+          adresse = adresse.replace(/, Canada$/, "");
+
+          // Insérer le code postal si pas déjà présent
+          if (postalCode && !adresse.includes(postalCode)) {
+            adresse = adresse.replace(/, QC/, `, QC ${postalCode}`);
+          }
+
+          return { adresse, place_id: p.place_id };
+        } catch {
+          return { adresse: p.description, place_id: p.place_id };
+        }
+      })
+    );
 
     return Response.json({ predictions });
   } catch (error) {
