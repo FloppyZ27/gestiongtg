@@ -111,7 +111,7 @@ export default function Administration() {
 
   const handleManagePermissions = (user) => {
     setSelectedUser(user);
-    setIsPermissionsDialogOpen(true);
+    setIsUserPermissionsDialogOpen(true);
   };
 
   const handleResetPassword = (user) => {
