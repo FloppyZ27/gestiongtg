@@ -144,7 +144,19 @@ export default function PermissionGuard({ children, pageName }) {
       }
     }
     
-    // Les deux sont autorises (rôle ET poste si applicable)
+    // Étape 3: Si rôle et poste autorisent, vérifier les permissions utilisateur (si elles existent)
+    const userPermissionPages = user?.permissions_pages;
+    if (userPermissionPages && userPermissionPages.length > 0) {
+      const hasUserAccess = userPermissionPages.includes(normalizedPageName);
+      if (!hasUserAccess) {
+        setHasAccess(false);
+        setRestrictionReason('utilisateur');
+        setShowWarning(true);
+        return;
+      }
+    }
+    
+    // Tous les niveaux autorisent l'accès
     setHasAccess(true);
     setRestrictionReason(null);
   }, [user, pageName, templates, userLoading, templatesLoading]);
