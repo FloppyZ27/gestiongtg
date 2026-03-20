@@ -198,7 +198,7 @@ export default function PermissionGuard({ children, pageName }) {
                   ) : (
                     <>
                       <p className="text-sm text-slate-400">
-                        Votre rôle <span className="text-yellow-400 font-medium">({getRoleLabel(userRole)})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                        Votre rôle <span className="text-yellow-400 font-medium">({getRoleLabel(user?.role)})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
                       </p>
                       <p className="text-sm text-slate-400 mt-2">
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
