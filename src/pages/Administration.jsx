@@ -12,6 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
 import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDialog";
+import UserPermissionsDialog from "@/components/admin/UserPermissionsDialog";
 import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
