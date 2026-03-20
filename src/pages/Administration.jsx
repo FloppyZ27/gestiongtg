@@ -653,9 +653,9 @@ export default function Administration() {
       </div>
 
       {/* Dialogs */}
-      <PermissionsDialog
-        open={isPermissionsDialogOpen}
-        onOpenChange={setIsPermissionsDialogOpen}
+      <UserPermissionsDialog
+        open={isUserPermissionsDialogOpen}
+        onOpenChange={setIsUserPermissionsDialogOpen}
         user={selectedUser}
         onSave={handleSavePermissions}
       />
