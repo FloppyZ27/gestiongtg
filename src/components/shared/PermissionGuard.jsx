@@ -132,57 +132,13 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Si pas de template de rôle, vérifier les autres niveaux
-    // Priorité 2: Template de poste
-    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === userPoste);
-    console.log(`Template de poste:`, posteTemplate);
+    // TEMPORAIREMENT DÉSACTIVÉ - Permissions par poste et utilisateur
+    // Seules les permissions de rôle s'appliquent pour le moment
     
-    if (posteTemplate) {
-      const allowedPagesByPoste = posteTemplate.permissions_pages || [];
-      
-      // Si le template existe mais n'a AUCUNE permission définie, accès complet
-      if (allowedPagesByPoste.length === 0) {
-        console.log(`✅ Template de poste sans restrictions - accès complet`);
-        setHasAccess(true);
-        return;
-      }
-      
-      // Si le template a des permissions définies, vérifier si la page est autorisée
-      console.log(`Template de poste avec restrictions:`, allowedPagesByPoste);
-      const hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
-      
-      if (!hasPosteAccess) {
-        console.log(`❌ Accès refusé par template de poste - ${normalizedPageName} non inclus`);
-        setHasAccess(false);
-        setShowWarning(true);
-        return;
-      }
-      
-      console.log(`✅ Accès autorisé par template de poste`);
-      setHasAccess(true);
-      return;
-    }
-
-    // Priorité 3: Permissions spécifiques de l'utilisateur
-    if (userPermissionsPages && userPermissionsPages.length > 0) {
-      console.log(`Permissions spécifiques utilisateur:`, userPermissionsPages);
-      const hasUserAccess = userPermissionsPages.includes(normalizedPageName);
-      
-      if (!hasUserAccess) {
-        console.log(`❌ Accès refusé par permissions utilisateur spécifiques - ${normalizedPageName} non inclus`);
-        setHasAccess(false);
-        setShowWarning(true);
-        return;
-      }
-      
-      console.log(`✅ Accès autorisé par permissions utilisateur spécifiques`);
-      setHasAccess(true);
-      return;
-    }
-
-    // Si aucune règle ne s'applique, accès par défaut accordé
-    console.log(`✅ Aucune restriction - accès accordé par défaut`);
-    setHasAccess(true);
+    // Si aucun template de rôle, refuser l'accès par défaut
+    console.log(`❌ Aucun template de rôle trouvé - accès refusé par défaut`);
+    setHasAccess(false);
+    setShowWarning(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
   const handleGoBack = () => {
