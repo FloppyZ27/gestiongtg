@@ -18,15 +18,18 @@ Deno.serve(async (req) => {
         // Get current user data
         const targetUser = await base44.asServiceRole.entities.User.get(userId);
         
-        // Update user permissions in the data object
-        const updatedData = {
-            ...targetUser.data,
-            permissions_pages: permissions_pages || [],
-            permissions_informations: permissions_informations || []
-        };
+        // Clean up the data object - remove ALL permissions fields
+        const cleanedData = { ...targetUser.data };
+        delete cleanedData.permissions_pages;
+        delete cleanedData.permissions_informations;
+        if (cleanedData.data) {
+            delete cleanedData.data.permissions_pages;
+            delete cleanedData.data.permissions_informations;
+            delete cleanedData.data;
+        }
         
         await base44.asServiceRole.entities.User.update(userId, {
-            data: updatedData
+            data: cleanedData
         });
 
         return Response.json({ success: true, message: 'Permissions updated successfully' });
