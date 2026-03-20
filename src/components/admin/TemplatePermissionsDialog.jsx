@@ -117,32 +117,53 @@ export default function TemplatePermissionsDialog({ open, onOpenChange, template
             </div>
           )}
 
-          {/* Pages pour les postes */}
+          {/* Pages et Informations pour les postes */}
           {template?.type === 'poste' && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                <Label className="text-lg text-emerald-400">Pages accessibles</Label>
+            <>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield className="w-5 h-5 text-emerald-400" />
+                  <Label className="text-lg text-emerald-400">Accès aux pages</Label>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pl-7">
+                  {PAGES_DISPONIBLES.map(page => (
+                    <div key={page} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`tpl-page-${page}`}
+                        checked={selectedPages.includes(page)}
+                        onCheckedChange={() => togglePage(page)}
+                        className="border-slate-600"
+                      />
+                      <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
+                        {PAGE_DISPLAY_NAMES[page]}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="text-sm text-slate-400 mb-4 pl-7">
-                Cochez les pages auxquelles ce poste aura accès. Les pages non cochées seront restreintes.
-              </p>
-              <div className="grid grid-cols-2 gap-3 pl-7">
-                {PAGES_DISPONIBLES.map(page => (
-                  <div key={page} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`tpl-page-${page}`}
-                      checked={selectedPages.includes(page)}
-                      onCheckedChange={() => togglePage(page)}
-                      className="border-slate-600"
-                    />
-                    <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
-                      {PAGE_DISPLAY_NAMES[page]}
-                    </label>
-                  </div>
-                ))}
+
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="w-5 h-5 text-blue-400" />
+                  <Label className="text-lg text-blue-400">Accès aux informations</Label>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pl-7">
+                  {INFORMATIONS_DISPONIBLES.map(info => (
+                    <div key={info} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`tpl-info-${info}`}
+                        checked={selectedInfos.includes(info)}
+                        onCheckedChange={() => toggleInfo(info)}
+                        className="border-slate-600"
+                      />
+                      <label htmlFor={`tpl-info-${info}`} className="text-sm text-slate-300 cursor-pointer">
+                        {info}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">

@@ -12,7 +12,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
 import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDialog";
-import UserPermissionsDialog from "@/components/admin/UserPermissionsDialog";
 import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -39,7 +38,6 @@ export default function Administration() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
-  const [isUserPermissionsDialogOpen, setIsUserPermissionsDialogOpen] = useState(false);
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -111,7 +109,7 @@ export default function Administration() {
 
   const handleManagePermissions = (user) => {
     setSelectedUser(user);
-    setIsUserPermissionsDialogOpen(true);
+    setIsPermissionsDialogOpen(true);
   };
 
   const handleResetPassword = (user) => {
@@ -653,9 +651,9 @@ export default function Administration() {
       </div>
 
       {/* Dialogs */}
-      <UserPermissionsDialog
-        open={isUserPermissionsDialogOpen}
-        onOpenChange={setIsUserPermissionsDialogOpen}
+      <PermissionsDialog
+        open={isPermissionsDialogOpen}
+        onOpenChange={setIsPermissionsDialogOpen}
         user={selectedUser}
         onSave={handleSavePermissions}
       />

@@ -59,7 +59,7 @@ export default function PermissionGuard({ children, pageName }) {
   const [showWarning, setShowWarning] = useState(false);
   const [hasAccess, setHasAccess] = useState(null);
   const [isInactive, setIsInactive] = useState(false);
-  const [restrictionReason, setRestrictionReason] = useState(null); // 'role', 'poste' ou 'utilisateur'
+  const [restrictionReason, setRestrictionReason] = useState(null); // 'role' ou 'poste'
   const navigate = useNavigate();
 
   const { data: user, isLoading: userLoading } = useQuery({
@@ -144,19 +144,7 @@ export default function PermissionGuard({ children, pageName }) {
       }
     }
     
-    // Étape 3: Si rôle et poste autorisent, vérifier les permissions utilisateur (si elles existent)
-    const userPermissionPages = user?.permissions_pages;
-    if (userPermissionPages && userPermissionPages.length > 0) {
-      const hasUserAccess = userPermissionPages.includes(normalizedPageName);
-      if (!hasUserAccess) {
-        setHasAccess(false);
-        setRestrictionReason('utilisateur');
-        setShowWarning(true);
-        return;
-      }
-    }
-    
-    // Tous les niveaux autorisent l'accès
+    // Les deux sont autorises (rôle ET poste si applicable)
     setHasAccess(true);
     setRestrictionReason(null);
   }, [user, pageName, templates, userLoading, templatesLoading]);
@@ -222,15 +210,6 @@ export default function PermissionGuard({ children, pageName }) {
                     <>
                       <p className="text-sm text-slate-400">
                         Votre poste <span className="text-yellow-400 font-medium">({user?.poste || user?.data?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
-                      </p>
-                      <p className="text-sm text-slate-400 mt-2">
-                        Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
-                      </p>
-                    </>
-                  ) : restrictionReason === 'utilisateur' ? (
-                    <>
-                      <p className="text-sm text-slate-400">
-                        L'accès à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span> vous a été restreint par un administrateur.
                       </p>
                       <p className="text-sm text-slate-400 mt-2">
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
