@@ -213,7 +213,14 @@ function LayoutContent({ children, currentPageName }) {
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      try {
+        return await base44.entities.User.list();
+      } catch (error) {
+        console.error('Erreur chargement users dans layout:', error);
+        return [];
+      }
+    },
     initialData: [],
   });
 
