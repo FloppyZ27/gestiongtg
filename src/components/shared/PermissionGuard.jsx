@@ -75,7 +75,8 @@ export default function PermissionGuard({ children, pageName }) {
     const userRole = user.data?.role || user.role;
     const userPoste = user.data?.poste || user.poste;
     const userStatut = user.data?.statut || user.statut;
-    const userPermissionsPages = user.data?.permissions_pages || user.permissions_pages;
+    // IGNORER les permissions individuelles - seul le rôle compte
+    // const userPermissionsPages = user.data?.permissions_pages || user.permissions_pages;
 
     console.log(`=== Vérification d'accès pour ${user.email} ===`);
     console.log(`Page demandée: ${pageName} (normalisé: ${normalizedPageName})`);
