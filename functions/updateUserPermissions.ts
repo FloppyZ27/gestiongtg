@@ -9,15 +9,24 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
 
-        const { userId, permissions_pages } = await req.json();
+        const { userId, permissions_pages, permissions_informations } = await req.json();
 
-        if (!userId || !permissions_pages) {
-            return Response.json({ error: 'userId and permissions_pages are required' }, { status: 400 });
+        if (!userId) {
+            return Response.json({ error: 'userId is required' }, { status: 400 });
         }
 
-        // Update user permissions
+        // Get current user data
+        const targetUser = await base44.asServiceRole.entities.User.get(userId);
+        
+        // Update user permissions in the data object
+        const updatedData = {
+            ...targetUser.data,
+            permissions_pages: permissions_pages || [],
+            permissions_informations: permissions_informations || []
+        };
+        
         await base44.asServiceRole.entities.User.update(userId, {
-            permissions_pages
+            data: updatedData
         });
 
         return Response.json({ success: true, message: 'Permissions updated successfully' });
