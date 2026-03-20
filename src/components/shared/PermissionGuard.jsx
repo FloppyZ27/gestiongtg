@@ -109,36 +109,30 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Priorité 1: Template de rôle (le plus prioritaire)
+    // Priorité ABSOLUE: Template de rôle (domine tout)
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === userRole);
     console.log(`Template de rôle:`, roleTemplate);
     
     if (roleTemplate) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
       
-      // Si le template existe mais n'a AUCUNE permission définie, accès complet
-      if (allowedPagesByRole.length === 0) {
-        console.log(`✅ Template de rôle sans restrictions - accès complet`);
-        setHasAccess(true);
-        return;
-      }
-      
-      // Si le template a des permissions définies, vérifier si la page est autorisée
-      console.log(`Template de rôle avec restrictions:`, allowedPagesByRole);
+      // Si le template de rôle a des permissions définies, elles sont ABSOLUES
+      console.log(`Template de rôle avec restrictions ABSOLUES:`, allowedPagesByRole);
       const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
       
       if (!hasRoleAccess) {
-        console.log(`❌ Accès refusé par template de rôle - ${normalizedPageName} non inclus`);
+        console.log(`❌ Accès refusé par template de rôle (ABSOLU) - ${normalizedPageName} non inclus`);
         setHasAccess(false);
         setShowWarning(true);
         return;
       }
       
-      console.log(`✅ Accès autorisé par template de rôle`);
+      console.log(`✅ Accès autorisé par template de rôle (ABSOLU)`);
       setHasAccess(true);
       return;
     }
 
+    // Si pas de template de rôle, vérifier les autres niveaux
     // Priorité 2: Template de poste
     const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === userPoste);
     console.log(`Template de poste:`, posteTemplate);
