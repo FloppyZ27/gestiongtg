@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
 
-        const { userId, permissions_pages, permissions_informations } = await req.json();
+        const { userId } = await req.json();
 
         if (!userId) {
             return Response.json({ error: 'userId is required' }, { status: 400 });
@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
         const targetUser = await base44.asServiceRole.entities.User.get(userId);
         
         // Create new data object WITHOUT permissions fields
-        const { permissions_pages, permissions_informations, data: nestedData, ...cleanedData } = targetUser.data || {};
+        const { permissions_pages: _p1, permissions_informations: _p2, data: _nested, ...cleanedData } = targetUser.data || {};
         
         console.log('Original data keys:', Object.keys(targetUser.data || {}));
         console.log('Cleaned data keys:', Object.keys(cleanedData));
