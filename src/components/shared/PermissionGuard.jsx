@@ -197,10 +197,28 @@ export default function PermissionGuard({ children, pageName }) {
                         Veuillez contacter un administrateur pour réactiver votre compte.
                       </p>
                     </>
-                  ) : (
+                  ) : restrictionReason === 'role' ? (
                     <>
                       <p className="text-sm text-slate-400">
                         Votre rôle <span className="text-yellow-400 font-medium">({getRoleLabel(user?.role)})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                      </p>
+                    </>
+                  ) : restrictionReason === 'poste' ? (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        Votre poste <span className="text-yellow-400 font-medium">({user?.poste || user?.data?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        Vous n'avez pas les permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
                       </p>
                       <p className="text-sm text-slate-400 mt-2">
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
