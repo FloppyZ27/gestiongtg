@@ -178,8 +178,12 @@ export default function Administration() {
         nom: selectedTemplate.nom,
         ...permissions
       });
-      queryClient.invalidateQueries({ queryKey: ['permissionsTemplates'] });
     }
+    
+    // Invalider tous les caches de permissions pour forcer le rechargement
+    queryClient.invalidateQueries({ queryKey: ['permissionsTemplates'] });
+    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    
     setIsTemplateDialogOpen(false);
   };
 
