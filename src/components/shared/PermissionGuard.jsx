@@ -59,7 +59,6 @@ export default function PermissionGuard({ children, pageName }) {
   const [showWarning, setShowWarning] = useState(false);
   const [hasAccess, setHasAccess] = useState(null);
   const [isInactive, setIsInactive] = useState(false);
-  const [restrictionReason, setRestrictionReason] = useState(null); // 'role' ou 'poste'
   const navigate = useNavigate();
 
   const { data: user, isLoading: userLoading } = useQuery({
@@ -122,7 +121,6 @@ export default function PermissionGuard({ children, pageName }) {
     // Si le rôle n'autorise pas la page, refuser (le rôle est prioritaire)
     if (!hasRoleAccess) {
       setHasAccess(false);
-      setRestrictionReason('role');
       setShowWarning(true);
       return;
     }
@@ -137,7 +135,6 @@ export default function PermissionGuard({ children, pageName }) {
         // Si le poste n'autorise pas la page, refuser (même si le rôle l'autorise)
         if (!hasPosteAccess) {
           setHasAccess(false);
-          setRestrictionReason('poste');
           setShowWarning(true);
           return;
         }
@@ -146,7 +143,6 @@ export default function PermissionGuard({ children, pageName }) {
     
     // Les deux sont autorises (rôle ET poste si applicable)
     setHasAccess(true);
-    setRestrictionReason(null);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
   const handleGoBack = () => {
