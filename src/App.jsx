@@ -21,7 +21,7 @@ setupIframeMessaging();
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+  : <>{children};</>;
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -48,16 +48,14 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <LayoutWrapper currentPageName={mainPageKey}>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/CompteInactif" element={<CompteInactif />} />
-        {Object.entries(Pages).map(([path, Page]) => (
-          <Route key={path} path={`/${path}`} element={<Page />} />
-        ))}
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </LayoutWrapper>
+    <Routes>
+      <Route path="/" element={<LayoutWrapper currentPageName={mainPageKey}><MainPage /></LayoutWrapper>} />
+      <Route path="/CompteInactif" element={<LayoutWrapper currentPageName="CompteInactif"><CompteInactif /></LayoutWrapper>} />
+      {Object.entries(Pages).map(([path, Page]) => (
+        <Route key={path} path={`/${path}`} element={<LayoutWrapper currentPageName={path}><Page /></LayoutWrapper>} />
+      ))}
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
   );
 };
 
