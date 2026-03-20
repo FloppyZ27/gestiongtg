@@ -70,6 +70,8 @@ export default function PermissionGuard({ children, pageName }) {
     queryKey: ['permissionsTemplates'],
     queryFn: () => base44.entities.PermissionsTemplate.list(),
     initialData: [],
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   useEffect(() => {
