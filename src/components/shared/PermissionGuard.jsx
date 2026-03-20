@@ -195,14 +195,6 @@ export default function PermissionGuard({ children, pageName }) {
                   )}
                 </div>
               </div>
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleGoBack}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
-                >
-                  Retour au tableau de bord
-                </Button>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
