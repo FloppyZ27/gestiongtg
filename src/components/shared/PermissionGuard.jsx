@@ -227,6 +227,15 @@ export default function PermissionGuard({ children, pageName }) {
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
                       </p>
                     </>
+                  ) : restrictionReason === 'utilisateur' ? (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        L'accès à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span> vous a été restreint par un administrateur.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                      </p>
+                    </>
                   ) : (
                     <>
                       <p className="text-sm text-slate-400">
