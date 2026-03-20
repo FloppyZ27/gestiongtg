@@ -14,9 +14,12 @@ const PAGES_DISPONIBLES = [
   "Clients",
   "GestionDeMandat",
   "CeduleTerrain",
+  "LeveTerrain",
   "Recherches",
   "SharePoint",
-  "Administration"
+  "Administration",
+  "Dashboard",
+  "Comptabilite"
 ];
 
 const PAGE_DISPLAY_NAMES = {
@@ -28,9 +31,12 @@ const PAGE_DISPLAY_NAMES = {
   "Clients": "Clients",
   "GestionDeMandat": "Gestion de Mandat",
   "CeduleTerrain": "Cédule Terrain",
+  "LeveTerrain": "Levé Terrain",
   "Recherches": "Recherches",
   "SharePoint": "SharePoint",
-  "Administration": "Administration"
+  "Administration": "Administration",
+  "Dashboard": "Actes",
+  "Comptabilite": "Comptabilité"
 };
 
 const INFORMATIONS_DISPONIBLES = [
