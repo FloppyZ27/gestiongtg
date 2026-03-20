@@ -71,8 +71,8 @@ export default function PermissionGuard({ children, pageName }) {
 
     const normalizedPageName = normalizePageName(pageName);
 
-    // Lire les données depuis user.data ou directement depuis user
-    const userRole = user.data?.role || user.role;
+    // Lire les données depuis user - le rôle est TOUJOURS dans user.role (niveau racine)
+    const userRole = user.role; // TOUJOURS au niveau racine
     const userPoste = user.data?.poste || user.poste;
     const userStatut = user.data?.statut || user.statut;
     // IGNORER les permissions individuelles - seul le rôle compte
