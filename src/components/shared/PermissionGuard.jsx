@@ -59,6 +59,7 @@ export default function PermissionGuard({ children, pageName }) {
   const [showWarning, setShowWarning] = useState(false);
   const [hasAccess, setHasAccess] = useState(null);
   const [isInactive, setIsInactive] = useState(false);
+  const [restrictionReason, setRestrictionReason] = useState(null); // 'role' ou 'poste'
   const navigate = useNavigate();
 
   const { data: user, isLoading: userLoading } = useQuery({
