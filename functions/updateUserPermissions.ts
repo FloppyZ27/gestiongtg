@@ -18,22 +18,19 @@ Deno.serve(async (req) => {
         // Get current user data
         const targetUser = await base44.asServiceRole.entities.User.get(userId);
         
-        // Override permissions with empty arrays to disable individual permissions
-        const updatedData = {
-            ...targetUser.data,
-            permissions_pages: [],
-            permissions_informations: []
-        };
+        // Rebuild data object WITHOUT any permission fields
+        const { 
+            permissions_pages, 
+            permissions_informations, 
+            data: nestedData,
+            ...cleanData 
+        } = targetUser.data || {};
         
-        // Remove nested data.data if it exists
-        if (updatedData.data) {
-            delete updatedData.data;
-        }
-        
-        console.log('Updated data:', JSON.stringify(updatedData, null, 2));
+        console.log('Original data:', JSON.stringify(targetUser.data, null, 2));
+        console.log('Cleaned data:', JSON.stringify(cleanData, null, 2));
         
         await base44.asServiceRole.entities.User.update(userId, {
-            data: updatedData
+            data: cleanData
         });
 
         return Response.json({ success: true, message: 'Permissions updated successfully' });
