@@ -122,6 +122,7 @@ export default function PermissionGuard({ children, pageName }) {
     // Si le rôle n'autorise pas la page, refuser (le rôle est prioritaire)
     if (!hasRoleAccess) {
       setHasAccess(false);
+      setRestrictionReason('role');
       setShowWarning(true);
       return;
     }
@@ -136,6 +137,7 @@ export default function PermissionGuard({ children, pageName }) {
         // Si le poste n'autorise pas la page, refuser (même si le rôle l'autorise)
         if (!hasPosteAccess) {
           setHasAccess(false);
+          setRestrictionReason('poste');
           setShowWarning(true);
           return;
         }
@@ -144,6 +146,7 @@ export default function PermissionGuard({ children, pageName }) {
     
     // Les deux sont autorises (rôle ET poste si applicable)
     setHasAccess(true);
+    setRestrictionReason(null);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
   const handleGoBack = () => {
