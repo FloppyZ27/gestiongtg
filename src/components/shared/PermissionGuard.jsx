@@ -84,17 +84,6 @@ export default function PermissionGuard({ children, pageName }) {
     const userRole = user.role; // TOUJOURS au niveau racine
     const userPoste = user.data?.poste || user.poste;
     const userStatut = user.data?.statut || user.statut;
-    // IGNORER les permissions individuelles - seul le rôle compte
-    // const userPermissionsPages = user.data?.permissions_pages || user.permissions_pages;
-
-    console.log(`=== Vérification d'accès pour ${user.email} ===`);
-    console.log(`Page demandée: ${pageName} (normalisé: ${normalizedPageName})`);
-    console.log(`Rôle utilisateur: ${userRole}`);
-    console.log(`Poste utilisateur: ${userPoste}`);
-    console.log(`Statut utilisateur: ${userStatut}`);
-    console.log(`Templates disponibles:`, templates);
-    console.log(`user.data complet:`, user.data);
-    console.log(`user complet (niveau racine):`, user);
 
     // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
     if (userStatut === 'Inactif' && pageName !== 'CompteInactif') {
