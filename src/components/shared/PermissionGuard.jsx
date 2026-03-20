@@ -113,26 +113,36 @@ export default function PermissionGuard({ children, pageName }) {
       return;
     }
 
-    // Priorité ABSOLUE: Template de rôle (domine tout)
+    // Étape 1: Vérifier le rôle (plus fort que le poste)
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === userRole);
+    const allowedPagesByRole = roleTemplate?.permissions_pages || [];
+    const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
     
-    if (roleTemplate) {
-      const allowedPagesByRole = roleTemplate.permissions_pages || [];
-      const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
-      
-      if (!hasRoleAccess) {
-        setHasAccess(false);
-        setShowWarning(true);
-        return;
-      }
-      
-      setHasAccess(true);
+    // Si le rôle n'autorise pas la page, refuser (le rôle est prioritaire)
+    if (!hasRoleAccess) {
+      setHasAccess(false);
+      setShowWarning(true);
       return;
     }
     
-    // Si aucun template de rôle, refuser l'accès par défaut
-    setHasAccess(false);
-    setShowWarning(true);
+    // Étape 2: Si le rôle autorise, vérifier le poste (si applicable)
+    if (userPoste) {
+      const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === userPoste);
+      if (posteTemplate) {
+        const allowedPagesByPoste = posteTemplate.permissions_pages || [];
+        const hasPosteAccess = allowedPagesByPoste.includes(normalizedPageName);
+        
+        // Si le poste n'autorise pas la page, refuser (même si le rôle l'autorise)
+        if (!hasPosteAccess) {
+          setHasAccess(false);
+          setShowWarning(true);
+          return;
+        }
+      }
+    }
+    
+    // Les deux sont autorises (rôle ET poste si applicable)
+    setHasAccess(true);
   }, [user, pageName, templates, userLoading, templatesLoading]);
 
   const handleGoBack = () => {
