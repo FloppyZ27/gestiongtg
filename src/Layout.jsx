@@ -275,7 +275,8 @@ function LayoutContent({ children, currentPageName }) {
 
   // Rediriger les utilisateurs inactifs vers CompteInactif
   useEffect(() => {
-    if (user?.statut === 'Inactif' && location.pathname !== '/CompteInactif') {
+    const statut = user?.data?.statut || user?.statut;
+    if (statut === 'Inactif' && location.pathname !== '/CompteInactif') {
       navigate('/CompteInactif');
     }
   }, [user, location.pathname, navigate]);
@@ -322,7 +323,7 @@ function LayoutContent({ children, currentPageName }) {
   }
 
   // Si l'utilisateur est inactif, afficher uniquement la page CompteInactif sans layout
-  if (user?.statut === 'Inactif') {
+  if (user?.data?.statut === 'Inactif' || user?.statut === 'Inactif') {
     return <>{children}</>;
   }
 
@@ -1644,7 +1645,7 @@ function LayoutContent({ children, currentPageName }) {
                   })}
 
                   {/* Admin menu item */}
-                  {user?.role === 'admin' && (
+                  {(user?.data?.role === 'admin' || user?.role === 'admin') && (
                     <SidebarMenuItem>
                       {isCollapsed ? (
                         <Tooltip>
