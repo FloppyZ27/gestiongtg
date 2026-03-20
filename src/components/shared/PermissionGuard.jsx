@@ -83,6 +83,8 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Rôle utilisateur: ${userRole}`);
     console.log(`Poste utilisateur: ${userPoste}`);
     console.log(`Statut utilisateur: ${userStatut}`);
+    console.log(`Templates disponibles:`, templates);
+    console.log(`user.data complet:`, user.data);
 
     // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
     if (userStatut === 'Inactif' && pageName !== 'CompteInactif') {
@@ -112,17 +114,19 @@ export default function PermissionGuard({ children, pageName }) {
 
     // Priorité ABSOLUE: Template de rôle (domine tout)
     const roleTemplate = templates.find(t => t.type === 'role' && t.nom === userRole);
-    console.log(`Template de rôle:`, roleTemplate);
+    console.log(`🔍 Recherche template pour rôle "${userRole}":`, roleTemplate);
+    console.log(`🔍 Tous les templates de type "role":`, templates.filter(t => t.type === 'role'));
     
     if (roleTemplate) {
       const allowedPagesByRole = roleTemplate.permissions_pages || [];
       
       // Si le template de rôle a des permissions définies, elles sont ABSOLUES
-      console.log(`Template de rôle avec restrictions ABSOLUES:`, allowedPagesByRole);
+      console.log(`📋 Template de rôle avec restrictions ABSOLUES:`, allowedPagesByRole);
       const hasRoleAccess = allowedPagesByRole.includes(normalizedPageName);
+      console.log(`🔑 Page "${normalizedPageName}" dans la liste?`, hasRoleAccess);
       
       if (!hasRoleAccess) {
-        console.log(`❌ Accès refusé par template de rôle (ABSOLU) - ${normalizedPageName} non inclus`);
+        console.log(`❌ ACCÈS REFUSÉ par template de rôle (ABSOLU) - "${normalizedPageName}" non inclus dans:`, allowedPagesByRole);
         setHasAccess(false);
         setShowWarning(true);
         return;
@@ -132,6 +136,8 @@ export default function PermissionGuard({ children, pageName }) {
       setHasAccess(true);
       return;
     }
+    
+    console.log(`⚠️ AUCUN template de rôle trouvé pour "${userRole}"`);
 
     // TEMPORAIREMENT DÉSACTIVÉ - Permissions par poste et utilisateur
     // Seules les permissions de rôle s'appliquent pour le moment
