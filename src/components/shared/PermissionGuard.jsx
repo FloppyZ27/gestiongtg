@@ -24,6 +24,15 @@ const PAGE_DISPLAY_NAMES = {
   "Comptabilite": "Comptabilité"
 };
 
+const getRoleLabel = (role) => {
+  const labels = {
+    "admin": "Administrateur",
+    "gestionnaire": "Gestionnaire",
+    "user": "Utilisateur"
+  };
+  return labels[role] || role;
+};
+
 // Normaliser le nom de page pour la vérification des permissions
 const normalizePageName = (pageName) => {
   // Certains noms de fichiers diffèrent des clés de permission
@@ -85,6 +94,7 @@ export default function PermissionGuard({ children, pageName }) {
     console.log(`Statut utilisateur: ${userStatut}`);
     console.log(`Templates disponibles:`, templates);
     console.log(`user.data complet:`, user.data);
+    console.log(`user complet (niveau racine):`, user);
 
     // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
     if (userStatut === 'Inactif' && pageName !== 'CompteInactif') {
@@ -199,7 +209,7 @@ export default function PermissionGuard({ children, pageName }) {
                   ) : (
                     <>
                       <p className="text-sm text-slate-400">
-                        Votre poste <span className="text-yellow-400 font-medium">({user?.poste})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                        Votre rôle <span className="text-yellow-400 font-medium">({getRoleLabel(userRole)})</span> ne dispose pas des permissions nécessaires pour accéder à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
                       </p>
                       <p className="text-sm text-slate-400 mt-2">
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
