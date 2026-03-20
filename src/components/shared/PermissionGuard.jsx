@@ -71,14 +71,20 @@ export default function PermissionGuard({ children, pageName }) {
 
     const normalizedPageName = normalizePageName(pageName);
 
+    // Lire les données depuis user.data ou directement depuis user
+    const userRole = user.data?.role || user.role;
+    const userPoste = user.data?.poste || user.poste;
+    const userStatut = user.data?.statut || user.statut;
+    const userPermissionsPages = user.data?.permissions_pages || user.permissions_pages;
+
     console.log(`=== Vérification d'accès pour ${user.email} ===`);
     console.log(`Page demandée: ${pageName} (normalisé: ${normalizedPageName})`);
-    console.log(`Rôle utilisateur: ${user.role}`);
-    console.log(`Poste utilisateur: ${user.poste}`);
-    console.log(`Statut utilisateur: ${user.statut}`);
+    console.log(`Rôle utilisateur: ${userRole}`);
+    console.log(`Poste utilisateur: ${userPoste}`);
+    console.log(`Statut utilisateur: ${userStatut}`);
 
     // Si l'utilisateur est Inactif ET qu'il n'est pas déjà sur la page CompteInactif, rediriger
-    if (user.statut === 'Inactif' && pageName !== 'CompteInactif') {
+    if (userStatut === 'Inactif' && pageName !== 'CompteInactif') {
       console.log(`❌ Utilisateur Inactif - redirection vers CompteInactif`);
       setIsInactive(true);
       setHasAccess(false);
@@ -87,7 +93,7 @@ export default function PermissionGuard({ children, pageName }) {
     }
 
     // Si l'utilisateur est Inactif et est sur la page CompteInactif, autoriser l'accès
-    if (user.statut === 'Inactif' && pageName === 'CompteInactif') {
+    if (userStatut === 'Inactif' && pageName === 'CompteInactif') {
       console.log(`✅ Page CompteInactif autorisée pour utilisateur inactif`);
       setHasAccess(true);
       return;
@@ -97,14 +103,14 @@ export default function PermissionGuard({ children, pageName }) {
     // (Les utilisateurs Actifs passent par les permissions comme tout le monde)
 
     // Admin a accès à tout (y compris Recherches)
-    if (user.role === 'admin') {
+    if (userRole === 'admin') {
       console.log(`✅ Admin - accès automatique complet`);
       setHasAccess(true);
       return;
     }
 
     // Priorité 1: Template de rôle (le plus prioritaire)
-    const roleTemplate = templates.find(t => t.type === 'role' && t.nom === user.role);
+    const roleTemplate = templates.find(t => t.type === 'role' && t.nom === userRole);
     console.log(`Template de rôle:`, roleTemplate);
     
     if (roleTemplate) {
@@ -134,7 +140,7 @@ export default function PermissionGuard({ children, pageName }) {
     }
 
     // Priorité 2: Template de poste
-    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === user.poste);
+    const posteTemplate = templates.find(t => t.type === 'poste' && t.nom === userPoste);
     console.log(`Template de poste:`, posteTemplate);
     
     if (posteTemplate) {
@@ -164,9 +170,9 @@ export default function PermissionGuard({ children, pageName }) {
     }
 
     // Priorité 3: Permissions spécifiques de l'utilisateur
-    if (user.permissions_pages && user.permissions_pages.length > 0) {
-      console.log(`Permissions spécifiques utilisateur:`, user.permissions_pages);
-      const hasUserAccess = user.permissions_pages.includes(normalizedPageName);
+    if (userPermissionsPages && userPermissionsPages.length > 0) {
+      console.log(`Permissions spécifiques utilisateur:`, userPermissionsPages);
+      const hasUserAccess = userPermissionsPages.includes(normalizedPageName);
       
       if (!hasUserAccess) {
         console.log(`❌ Accès refusé par permissions utilisateur spécifiques - ${normalizedPageName} non inclus`);
