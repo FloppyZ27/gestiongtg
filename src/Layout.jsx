@@ -217,11 +217,12 @@ function LayoutContent({ children, currentPageName }) {
       try {
         return await base44.entities.User.list();
       } catch (error) {
-        console.error('Erreur chargement users dans layout:', error);
+        // Les utilisateurs non-admin n'ont pas accès à la liste complète
         return [];
       }
     },
     initialData: [],
+    retry: false,
   });
 
   const { data: retoursAppels = [] } = useQuery({
