@@ -18,19 +18,11 @@ Deno.serve(async (req) => {
         // Get current user data
         const targetUser = await base44.asServiceRole.entities.User.get(userId);
         
-        // Clean up ALL permission fields from data object
-        const cleanedData = { ...targetUser.data };
+        // Create new data object WITHOUT permissions fields
+        const { permissions_pages, permissions_informations, data: nestedData, ...cleanedData } = targetUser.data || {};
         
-        // Remove permissions at root level of data
-        delete cleanedData.permissions_pages;
-        delete cleanedData.permissions_informations;
-        
-        // Remove nested data.data if it exists
-        if (cleanedData.data) {
-            delete cleanedData.data;
-        }
-        
-        console.log('Cleaned data:', JSON.stringify(cleanedData, null, 2));
+        console.log('Original data keys:', Object.keys(targetUser.data || {}));
+        console.log('Cleaned data keys:', Object.keys(cleanedData));
         
         await base44.asServiceRole.entities.User.update(userId, {
             data: cleanedData
