@@ -4948,9 +4948,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       }}
                       isCollapsed={tarificationStepCollapsed}
                       onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
-                    />
-
-                    {/* Header Tabs Commentaires/Historique - Collapsible */}
+                                           />
+                                         </form>
+                                           {/* Header Tabs Commentaires/Historique - Collapsible */}
                     <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
                     onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
@@ -5017,8 +5017,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       )}
                       </div>
                       </div>
-
-                      {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+                      </div>
                       <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800"><Button type="button" variant="outline" className="border-red-500 text-red-400" onClick={() => setShowCancelConfirmDossier(true)}>Annuler</Button><Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button></div>
                       </motion.div>
                       </DialogContent>
