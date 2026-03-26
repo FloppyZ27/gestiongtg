@@ -2354,30 +2354,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 mandatsInfo.some(m => m.type_mandat) ||
                 commentairesTemporaires.length > 0;
               
-              if (hasChanges && !editingPriseMandat) {
-                setShowCancelConfirm(true);
-                return;
-              }
-              
-              // Déverrouiller le mandat si on était en train de l'éditer
-              if (editingPriseMandat && !isLocked) {
-                await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                  ...editingPriseMandat,
-                  locked_by: null,
-                  locked_at: null
-                });
-              }
-              
-              // Rafraîchir la liste à la fermeture
-              queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-              
-              setIsDialogOpen(false);
-              resetFullForm();
-              setIsLocked(false);
-              setLockedBy("");
-            } else {
-              setIsDialogOpen(open);
-            }
+              if(hasChanges&&!editingPriseMandat){setShowCancelConfirm(true);return;}
+              if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}
+              queryClient.invalidateQueries({queryKey:['priseMandats']});
+              setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
+            }else{setIsDialogOpen(open);}
           }}>
 
             <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }} hideClose>
