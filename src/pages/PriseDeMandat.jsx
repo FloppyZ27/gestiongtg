@@ -3042,9 +3042,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 (nouveauDossierForm?.notaires_ids || []).length > 0 ||
                 (nouveauDossierForm?.courtiers_ids || []).length > 0 ||
                 (nouveauDossierForm?.mandats || []).some(m => m.utilisateur_assigne) ||
-                JSON.stringify((nouveauDossierForm?.mandats || []).map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) !== JSON.stringify((mandatsInfo || []).filter(m => m.type_mandat).map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) ||
-                (commentairesTemporairesDossier || []).length !== (commentairesTemporaires || []).length ||
-                (dossierDocuments || []).length > 0;
+  JSON.stringify((nouveauDossierForm?.mandats || []).map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) !== JSON.stringify((mandatsInfo || []).filter(m => m.type_mandat).map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) ||
+                (commentairesTemporairesDossier || []).length !== ((commentairesTemporaires || []).length || 0) ||
+                ((dossierDocuments || []).length || 0) > 0;
               
               if (hasChanges) {
                 setShowCancelConfirmDossier(true);
