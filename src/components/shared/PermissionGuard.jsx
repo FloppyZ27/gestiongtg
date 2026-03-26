@@ -144,7 +144,16 @@ export default function PermissionGuard({ children, pageName }) {
       }
     }
     
-    // Les deux sont autorises (rôle ET poste si applicable)
+    // Étape 3: Vérifier les permissions spécifiques à l'utilisateur (si définies)
+    const userPagePermissions = user.permissions_pages || [];
+    if (userPagePermissions.length > 0 && !userPagePermissions.includes(normalizedPageName)) {
+      setHasAccess(false);
+      setRestrictionReason('utilisateur');
+      setShowWarning(true);
+      return;
+    }
+
+    // Les trois niveaux sont autorisés
     setHasAccess(true);
     setRestrictionReason(null);
   }, [user, pageName, templates, userLoading, templatesLoading]);
@@ -213,6 +222,15 @@ export default function PermissionGuard({ children, pageName }) {
                       </p>
                       <p className="text-sm text-slate-400 mt-2">
                         Veuillez contacter un administrateur si vous pensez avoir besoin d'accéder à cette page.
+                      </p>
+                    </>
+                  ) : restrictionReason === 'utilisateur' ? (
+                    <>
+                      <p className="text-sm text-slate-400">
+                        Vos permissions personnelles ne vous donnent pas accès à <span className="text-white font-medium">{PAGE_DISPLAY_NAMES[pageName] || pageName}</span>.
+                      </p>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Un administrateur a configuré des restrictions spécifiques à votre compte. Contactez-le pour modifier vos accès.
                       </p>
                     </>
                   ) : (
