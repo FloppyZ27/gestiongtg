@@ -2698,18 +2698,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 </div>
 
                 <div className="flex-1 flex overflow-hidden">
-                  {/* Sidebar de navigation */}
-                  <PriseMandatNavSidebar
-                    setDossierInfoStepCollapsed={setDossierInfoStepCollapsed}
-                    setClientStepCollapsed={setClientStepCollapsed}
-                    setProfessionnelStepCollapsed={setProfessionnelStepCollapsed}
-                    setAddressStepCollapsed={setAddressStepCollapsed}
-                    setMandatStepCollapsed={setMandatStepCollapsed}
-                    setTarificationStepCollapsed={setTarificationStepCollapsed}
-                    setDocumentsStepCollapsed={setDocumentsStepCollapsed}
-                  />
                   {/* Main form content */}
-                  <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
