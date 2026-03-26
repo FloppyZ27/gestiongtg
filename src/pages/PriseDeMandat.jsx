@@ -6294,13 +6294,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
           if (!open) {
             let hasChanges = false;
             if (editingLot) {
-                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
-            } else {
-                hasChanges = newLotForm.numero_lot || 
-                  newLotForm.circonscription_fonciere || 
-                  newLotForm.rang || 
-                  newLotForm.types_operation.length > 0 ||
-                  commentairesTemporairesLot.length > 0;
+                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || ((commentairesTemporairesLot || []).length || 0) > 0;
             }
             
             if (hasChanges) {
