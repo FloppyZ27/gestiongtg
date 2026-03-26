@@ -6200,7 +6200,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 hasChanges = newLotForm.numero_lot || 
                   newLotForm.circonscription_fonciere || 
                   newLotForm.rang || 
-                  newLotForm.types_operation.length > 0 ||
+                  (newLotForm.types_operation || []).length > 0 ||
                   commentairesTemporairesLot.length > 0;
             }
             
@@ -6406,7 +6406,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                      hasChanges = newLotForm.numero_lot || 
                        newLotForm.circonscription_fonciere || 
                        newLotForm.rang || 
-                       newLotForm.types_operation.length > 0 ||
+                       (newLotForm.types_operation || []).length > 0 ||
                        commentairesTemporairesLot.length > 0;
                  }
 
