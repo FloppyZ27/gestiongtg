@@ -2696,8 +2696,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 </div>
 
                 <div className="flex-1 flex overflow-hidden">
-                  {/* Main form content - 70% */}
-                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-blue-400"},{id:"section-client",t:"Client",I:User,c:"text-emerald-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-purple-400"},{id:"section-adresse",t:"Adresse",I:MapPin,c:"text-cyan-400"},{id:"section-mandats",t:"Mandats",I:FilePlus,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:FileText,c:"text-yellow-400"},{id:"section-documents",t:"Documents",I:File,c:"text-slate-400"}].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>{const el=document.getElementById(s.id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
+                  <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
@@ -2888,33 +2888,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
                     {/* Sidebar - 30% */}
                      <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                    {/* Navigation rapide */}
-                    <div className="flex-shrink-0 px-4 py-2 border-b border-slate-800 bg-slate-900/50">
-                     <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mb-2">Navigation</p>
-                     <div className="flex flex-col gap-1">
-                       {[
-                         { label: "Informations", color: "text-blue-400 hover:bg-blue-500/10", section: "section-dossier-info" },
-                         { label: "Client", color: "text-emerald-400 hover:bg-emerald-500/10", section: "section-client" },
-                         { label: "Professionnel", color: "text-purple-400 hover:bg-purple-500/10", section: "section-professionnel" },
-                         { label: "Adresse", color: "text-cyan-400 hover:bg-cyan-500/10", section: "section-adresse" },
-                         { label: "Mandats", color: "text-orange-400 hover:bg-orange-500/10", section: "section-mandats" },
-                         { label: "Tarification", color: "text-yellow-400 hover:bg-yellow-500/10", section: "section-tarification" },
-                         { label: "Documents", color: "text-slate-400 hover:bg-slate-500/10", section: "section-documents" },
-                       ].map(({ label, color, section }) => (
-                         <button
-                           key={section}
-                           type="button"
-                           onClick={() => {
-                             const el = document.getElementById(section);
-                             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                           }}
-                           className={`text-left text-xs px-2 py-1 rounded transition-colors ${color}`}
-                         >
-                           {label}
-                         </button>
-                       ))}
-                     </div>
-                    </div>
                     {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
