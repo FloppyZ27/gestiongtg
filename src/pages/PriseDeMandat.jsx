@@ -3028,11 +3028,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
             if (!open) {
               // Vérifier si des modifications ont été faites par rapport à l'état initial
-              const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+              const initialMandats = (mandatsInfo || []).filter(m => m.type_mandat).map(m => ({
                 type_mandat: m.type_mandat,
                 date_livraison: m.date_livraison || ""
               }));
-              const currentMandats = nouveauDossierForm.mandats.map(m => ({
+              const currentMandats = (nouveauDossierForm?.mandats || []).map(m => ({
                 type_mandat: m.type_mandat,
                 date_livraison: m.date_livraison || ""
               }));
