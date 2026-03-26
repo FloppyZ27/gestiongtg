@@ -127,8 +127,8 @@ export default function Calendrier() {
   if (viewMode === 'month') {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    startDate = startOfWeek(monthStart, { locale: fr });
-    endDate = endOfWeek(monthEnd, { locale: fr });
+    startDate = monthStart;
+    endDate = monthEnd;
     daysInView = eachDayOfInterval({ start: startDate, end: endDate });
   } else {
     startDate = startOfWeek(currentDate, { locale: fr });
