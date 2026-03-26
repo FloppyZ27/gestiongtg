@@ -636,9 +636,13 @@ export default function Calendrier() {
                                           <div className="text-sm opacity-75 whitespace-pre-wrap">{event.description}</div>
                                         )}
                                         {(event.type === 'rendez-vous' || event.type === 'absence') && (
-                                          <div className="pt-2 border-t border-white/20 space-y-2">
+                                          <div className="pt-2 border-t border-white/20 flex items-center justify-between gap-3">
+                                            <div className="text-xs opacity-60">
+                                              <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
+                                              <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
+                                            </div>
                                             {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                              <div className="flex flex-col items-center gap-1">
+                                              <div className="flex flex-col items-center gap-1 flex-shrink-0">
                                                 <Avatar className="w-8 h-8">
                                                   <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
                                                   <AvatarFallback className="text-xs bg-white/30">
@@ -648,10 +652,6 @@ export default function Calendrier() {
                                                 <span className="text-xs font-bold text-white">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
                                               </div>
                                             )}
-                                            <div className="text-xs opacity-60 pt-1 border-t border-white/10">
-                                              <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
-                                              <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
-                                            </div>
                                           </div>
                                         )}
                                       </div>
@@ -778,9 +778,13 @@ export default function Calendrier() {
                                     <div className="text-sm opacity-75 whitespace-pre-wrap">{event.description}</div>
                                   )}
                                   {(event.type === 'rendez-vous' || event.type === 'absence') && (
-                                    <div className="pt-2 border-t border-white/20 space-y-2">
+                                    <div className="pt-2 border-t border-white/20 flex items-center justify-between gap-3">
+                                      <div className="text-xs opacity-60">
+                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
+                                        <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
+                                      </div>
                                       {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                        <div className="flex flex-col items-center gap-1">
+                                        <div className="flex flex-col items-center gap-1 flex-shrink-0">
                                           <Avatar className="w-8 h-8">
                                             <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
                                             <AvatarFallback className="text-xs bg-white/30">
@@ -790,10 +794,6 @@ export default function Calendrier() {
                                           <span className="text-xs font-bold text-white">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
                                         </div>
                                       )}
-                                      <div className="text-xs opacity-60 pt-1 border-t border-white/10">
-                                        <div>Créé: {format(new Date(event.created_date), "dd/MM/yy à HH:mm")}</div>
-                                        <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
-                                      </div>
                                     </div>
                                   )}
                                 </div>
