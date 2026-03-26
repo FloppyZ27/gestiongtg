@@ -3611,29 +3611,14 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* New Lot Dialog */}
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            let hasChanges = false;
-            if (editingLot) {
-                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || ((commentairesTemporairesLot || []).length > 0);
-            }
-            
-            if (hasChanges) {
-              setShowCancelLotConfirm(true);
-            } else {
-              setIsNewLotDialogOpen(false);
-              resetLotForm();
-            }
-          } else {
-            // Charger l'historique du lot lors de l'ouverture en mode édition
-            if (open && editingLot) {
-              const loadActionLogs = async () => {
-                const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: editingLot.id }, '-created_date');
-                setLotActionLogs(logs);
-              };
-              loadActionLogs();
-            }
-            setIsNewLotDialogOpen(open);
+          if (open && editingLot) {
+            const loadActionLogs = async () => {
+              const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: editingLot.id }, '-created_date');
+              setLotActionLogs(logs);
+            };
+            loadActionLogs();
           }
+          setIsNewLotDialogOpen(open);
         }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
