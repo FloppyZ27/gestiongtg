@@ -3484,12 +3484,12 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* Lot Selector Dialog */}
         <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
-          setIsLotSelectorOpen(open);
-          if (!open) {
-            setLotCirconscriptionFilter("all");
+          if (open === false) {
             setLotSearchTerm("");
+            setLotCirconscriptionFilter("all");
             setLotCadastreFilter("Québec");
           }
+          setIsLotSelectorOpen(open);
         }}>
           <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-black/50">
             <DialogHeader>
