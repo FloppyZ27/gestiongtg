@@ -642,16 +642,16 @@ export default function Calendrier() {
                                               <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
                                             </div>
                                             {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
-                                                <Avatar className="w-6 h-6">
-                                                  <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
-                                                  <AvatarFallback className="text-xs bg-white/30">
-                                                    {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
-                                                  </AvatarFallback>
-                                                </Avatar>
-                                              </div>
-                                            )}
+                                                  <div className="flex flex-col items-center gap-1">
+                                                    <Avatar className="w-8 h-8">
+                                                      <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
+                                                      <AvatarFallback className="text-xs bg-white/30">
+                                                        {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
+                                                      </AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="text-xs font-bold text-white">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
+                                                  </div>
+                                                )}
                                           </div>
                                         )}
                                       </div>
@@ -784,14 +784,14 @@ export default function Calendrier() {
                                         <div>Modifié: {format(new Date(event.updated_date), "dd/MM/yy à HH:mm")}</div>
                                       </div>
                                       {event.utilisateur_email && getUserByEmail(event.utilisateur_email) && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-xs font-bold">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
-                                          <Avatar className="w-6 h-6">
+                                        <div className="flex flex-col items-center gap-1">
+                                          <Avatar className="w-8 h-8">
                                             <AvatarImage src={getUserByEmail(event.utilisateur_email)?.photo_url} />
                                             <AvatarFallback className="text-xs bg-white/30">
                                               {getInitials(getUserByEmail(event.utilisateur_email)?.full_name)}
                                             </AvatarFallback>
                                           </Avatar>
+                                          <span className="text-xs font-bold text-white">{getUserByEmail(event.utilisateur_email)?.full_name}</span>
                                         </div>
                                       )}
                                     </div>
