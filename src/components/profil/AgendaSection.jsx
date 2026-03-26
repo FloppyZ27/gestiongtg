@@ -268,7 +268,7 @@ export default function AgendaSection({
                                         style={{ top: '2px' }}
                                         className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
                                       >
-                                        <Trash2 className="w-2.5 h-2.5 group-hover:text-yellow-300 transition-colors" />
+                                        <Trash2 className="w-2.5 h-2.5 group-hover:text-red-300 transition-colors" />
                                         </button>
                                         {durationMinutes <= 60 ? (
                                         <>
@@ -406,7 +406,7 @@ export default function AgendaSection({
                                   style={{ top: '2px' }}
                                   className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
                                 >
-                                  <Trash2 className="w-2.5 h-2.5 group-hover:text-yellow-300 transition-colors" />
+                                  <Trash2 className="w-2.5 h-2.5 group-hover:text-red-300 transition-colors" />
                                   </button>
                                   <div className="truncate text-[11px] font-bold opacity-90 uppercase">
                                   {isAbsence ? 'Absence' : 'Rendez-vous'}
