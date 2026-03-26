@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +24,19 @@ export default function Calendrier() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [eventForm, setEventForm] = useState({
+    titre: "",
+    description: "",
+    date_debut: "",
+    heure_debut: "",
+    date_fin: "",
+    heure_fin: "",
+    type: "rendez-vous"
+  });
+
+  const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -204,12 +218,56 @@ export default function Calendrier() {
     }
   };
 
+  const updateRendezVousMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.RendezVous.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allRendezVous'] });
+      setIsEditingEvent(false);
+      setEditingEvent(null);
+    },
+  });
+
   const handleEventClick = (event) => {
-    // Only open details for 'rendez-vous' or 'absence'
-    if (event.type === 'rendez-vous' || event.type === 'absence') {
+    if (event.type !== 'rendez-vous' && event.type !== 'absence') return;
+    if (event.utilisateur_email === currentUser?.email) {
+      // Ouvrir en mode modification
+      const debut = new Date(event.date_debut);
+      const fin = event.date_fin ? new Date(event.date_fin) : debut;
+      setEventForm({
+        titre: event.titre,
+        description: event.description || "",
+        date_debut: debut.toISOString().split('T')[0],
+        heure_debut: debut.toTimeString().slice(0, 5),
+        date_fin: fin.toISOString().split('T')[0],
+        heure_fin: fin.toTimeString().slice(0, 5),
+        type: event.type
+      });
+      setEditingEvent(event);
+      setIsEditingEvent(true);
+    } else {
+      // Ouvrir en mode détails
       setSelectedEvent(event);
       setIsDetailsDialogOpen(true);
     }
+  };
+
+  const handleSubmitEvent = async (e) => {
+    e.preventDefault();
+    const dateDebut = new Date(`${eventForm.date_debut}T${eventForm.heure_debut}`);
+    const dateFin = eventForm.date_fin && eventForm.heure_fin
+      ? new Date(`${eventForm.date_fin}T${eventForm.heure_fin}`)
+      : new Date(dateDebut.getTime() + 60 * 60 * 1000);
+    await updateRendezVousMutation.mutateAsync({
+      id: editingEvent.id,
+      data: {
+        ...editingEvent,
+        titre: eventForm.titre,
+        description: eventForm.description,
+        date_debut: dateDebut.toISOString(),
+        date_fin: dateFin.toISOString(),
+        type: eventForm.type
+      }
+    });
   };
 
   // Compute all visible events for statistics based on the current calendar view
@@ -751,6 +809,62 @@ export default function Calendrier() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Event Dialog (own events) */}
+        <Dialog open={isEditingEvent} onOpenChange={(open) => { setIsEditingEvent(open); if (!open) setEditingEvent(null); }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Modifier l'événement</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmitEvent} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <div className="flex gap-2">
+                  <Button type="button" onClick={() => setEventForm({...eventForm, type: "rendez-vous"})} className={eventForm.type === "rendez-vous" ? "bg-purple-500/20 text-purple-400 flex-1" : "bg-slate-800 text-white flex-1"}>
+                    Rendez-vous
+                  </Button>
+                  <Button type="button" onClick={() => setEventForm({...eventForm, type: "absence"})} className={eventForm.type === "absence" ? "bg-red-500/20 text-red-400 flex-1" : "bg-slate-800 text-white flex-1"}>
+                    Absence
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Titre <span className="text-red-400">*</span></Label>
+                <Input value={eventForm.titre} onChange={(e) => setEventForm({...eventForm, titre: e.target.value})} className="bg-slate-800 border-slate-700 text-white" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <textarea value={eventForm.description} onChange={(e) => setEventForm({...eventForm, description: e.target.value})} className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm" rows="2" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Date de début <span className="text-red-400">*</span></Label>
+                  <Input type="date" value={eventForm.date_debut} onChange={(e) => setEventForm({...eventForm, date_debut: e.target.value})} className="bg-slate-800 border-slate-700 text-white" required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Heure <span className="text-red-400">*</span></Label>
+                  <Input type="time" value={eventForm.heure_debut} onChange={(e) => setEventForm({...eventForm, heure_debut: e.target.value})} className="bg-slate-800 border-slate-700 text-white" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Date de fin</Label>
+                  <Input type="date" value={eventForm.date_fin} onChange={(e) => setEventForm({...eventForm, date_fin: e.target.value})} className="bg-slate-800 border-slate-700 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Heure de fin</Label>
+                  <Input type="time" value={eventForm.heure_fin} onChange={(e) => setEventForm({...eventForm, heure_fin: e.target.value})} className="bg-slate-800 border-slate-700 text-white" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditingEvent(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                <Button type="submit" className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold border-2 border-purple-400 text-purple-100" disabled={updateRendezVousMutation.isPending}>
+                  {updateRendezVousMutation.isPending ? 'Enregistrement...' : 'Modifier'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Event Details Dialog */}
         <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
