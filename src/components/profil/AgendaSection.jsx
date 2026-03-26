@@ -358,7 +358,7 @@ export default function AgendaSection({
                           <Tooltip key={event.id}>
                             <TooltipTrigger asChild>
                               <div
-                                className={`text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
+                                className={`relative text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
                                   isAbsence
                                     ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
                                     : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
