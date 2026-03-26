@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CalendarDays, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export default function AgendaSection({ 
-  agendaCollapsed, 
-  setAgendaCollapsed, 
-  agendaViewMode, 
-  setAgendaViewMode, 
+  agendaCollapsed,
+  setAgendaCollapsed,
+  agendaViewMode,
+  setAgendaViewMode,
   agendaCurrentDate,
   setIsAddingEvent,
   goToAgendaPrevious,
@@ -22,6 +23,7 @@ export default function AgendaSection({
   handleEditEvent,
   deleteRendezVousMutation
 }) {
+  const [eventToDelete, setEventToDelete] = useState(null);
   
   // Recalculer getAgendaMonthDays ici pour inclure les jours complets dimanche-samedi
   const getMonthDaysWithFullWeeks = () => {
@@ -46,7 +48,45 @@ export default function AgendaSection({
   };
   
   const monthDaysToDisplay = agendaViewMode === "mois" ? getMonthDaysWithFullWeeks() : getAgendaMonthDays();
+
+  const handleDeleteClick = (e, event) => {
+    e.stopPropagation();
+    setEventToDelete(event);
+  };
+
+  const confirmDelete = () => {
+    if (eventToDelete) {
+      deleteRendezVousMutation.mutate(eventToDelete.id);
+      setEventToDelete(null);
+    }
+  };
+
   return (
+    <>
+    <Dialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-xl text-red-400 flex items-center gap-2">
+            <Trash2 className="w-5 h-5" />
+            Supprimer l'événement
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300">
+            Êtes-vous sûr de vouloir supprimer <span className="text-white font-semibold">{eventToDelete?.titre}</span> ?
+          </p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setEventToDelete(null)} className="border-slate-600 text-slate-300">
+              Annuler
+            </Button>
+            <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white border-none">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
     <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
       <div 
         className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/20 border-b border-slate-800"
@@ -224,13 +264,8 @@ export default function AgendaSection({
                                       onClick={() => handleEditEvent(event)}
                                     >
                                       <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          if (confirm("Supprimer cet événement ?")) {
-                                            deleteRendezVousMutation.mutate(event.id);
-                                          }
-                                        }}
-                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => handleDeleteClick(e, event)}
+                                        className="absolute top-1 right-1 w-8 h-8 bg-red-600 hover:bg-red-700 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                       >
                                         <Trash2 className="w-2.5 h-2.5" />
                                       </button>
@@ -366,13 +401,8 @@ export default function AgendaSection({
                                 onClick={() => handleEditEvent(event)}
                               >
                                 <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (confirm("Supprimer cet événement ?")) {
-                                      deleteRendezVousMutation.mutate(event.id);
-                                    }
-                                  }}
-                                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500/80 hover:bg-red-600 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e) => handleDeleteClick(e, event)}
+                                  className="absolute top-1 right-1 w-8 h-8 bg-red-600 hover:bg-red-700 rounded text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <Trash2 className="w-2.5 h-2.5" />
                                 </button>
@@ -429,5 +459,6 @@ export default function AgendaSection({
         </CardContent>
       )}
     </Card>
+    </>
   );
 }
