@@ -3555,7 +3555,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredLotsForSelector.length > 0 ? (
+                    {(filteredLotsForSelector || []).length > 0 ? (
                       filteredLotsForSelector.map((lot) => {
                         const isSelected = currentMandatIndex !== null &&
                           formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
