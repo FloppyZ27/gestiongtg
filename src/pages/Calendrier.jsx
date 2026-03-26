@@ -104,9 +104,26 @@ export default function Calendrier() {
     return userMatch && typeMatch;
   });
 
+  // Calcul dynamique de la date de Pâques (algorithme Meeus/Jones/Butcher)
+  const calculateEaster = (year) => {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+  };
+
   // Jours fériés Canada/Québec
-  // Note: For a production app, calculating floating holidays (like Victoria Day, Labour Day, Thanksgiving) dynamically
-  // would be more robust. These dates are accurate for 2025.
   const getHolidays = (year) => {
     const holidays = [
       { date: `${year}-01-01`, name: "Jour de l'an" },
@@ -117,30 +134,34 @@ export default function Calendrier() {
     ];
     
     // Dates variables par année (Easter-based holidays)
-    if (year === 2025) {
-      holidays.push(
-        { date: "2025-04-18", name: "Vendredi saint" },
-        { date: "2025-05-19", name: "Fête de la Reine" },
-        { date: "2025-09-01", name: "Fête du Travail" },
-        { date: "2025-10-13", name: "Action de grâce" }
-      );
-    } else if (year === 2026) {
-      holidays.push(
-        { date: "2026-04-03", name: "Vendredi saint" },
-        { date: "2026-04-06", name: "Lundi de Pâques" },
-        { date: "2026-05-18", name: "Fête de la Reine" },
-        { date: "2026-09-07", name: "Fête du Travail" },
-        { date: "2026-10-12", name: "Action de grâce" }
-      );
-    } else if (year === 2027) {
-      holidays.push(
-        { date: "2027-03-26", name: "Vendredi saint" },
-        { date: "2027-03-29", name: "Lundi de Pâques" },
-        { date: "2027-05-24", name: "Fête de la Reine" },
-        { date: "2027-09-06", name: "Fête du Travail" },
-        { date: "2027-10-11", name: "Action de grâce" }
-      );
-    }
+    const easterDate = calculateEaster(year);
+    const goodFriday = new Date(easterDate);
+    goodFriday.setDate(easterDate.getDate() - 2);
+    const easterMonday = new Date(easterDate);
+    easterMonday.setDate(easterDate.getDate() + 1);
+    
+    holidays.push(
+      { date: format(goodFriday, 'yyyy-MM-dd'), name: "Vendredi saint" },
+      { date: format(easterMonday, 'yyyy-MM-dd'), name: "Lundi de Pâques" }
+    );
+    
+    // Victoria Day (3rd Monday in May)
+    const mayFirst = new Date(year, 4, 1);
+    let victoriaDay = new Date(mayFirst);
+    victoriaDay.setDate(mayFirst.getDate() + (22 - mayFirst.getDay()));
+    holidays.push({ date: format(victoriaDay, 'yyyy-MM-dd'), name: "Fête de la Reine" });
+    
+    // Labour Day (1st Monday in September)
+    const septemberFirst = new Date(year, 8, 1);
+    let labourDay = new Date(septemberFirst);
+    labourDay.setDate(septemberFirst.getDate() + (8 - septemberFirst.getDay()));
+    holidays.push({ date: format(labourDay, 'yyyy-MM-dd'), name: "Fête du Travail" });
+    
+    // Thanksgiving (2nd Monday in October)
+    const octoberFirst = new Date(year, 9, 1);
+    let thanksgiving = new Date(octoberFirst);
+    thanksgiving.setDate(octoberFirst.getDate() + (15 - octoberFirst.getDay()));
+    holidays.push({ date: format(thanksgiving, 'yyyy-MM-dd'), name: "Action de grâce" });
     
     return holidays;
   };
