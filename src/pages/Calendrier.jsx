@@ -223,6 +223,21 @@ export default function Calendrier() {
     });
   };
 
+  // Calendar logic
+  let startDate, endDate, daysInView;
+
+  if (viewMode === 'month') {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    startDate = monthStart;
+    endDate = monthEnd;
+    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+  } else {
+    startDate = startOfWeek(currentDate, { locale: fr });
+    endDate = endOfWeek(currentDate, { locale: fr });
+    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+  }
+
   // Compute all visible events for statistics based on the current calendar view
   const allVisibleEvents = daysInView.flatMap(day => getEventsForDay(day));
 
