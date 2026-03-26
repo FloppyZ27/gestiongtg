@@ -145,7 +145,7 @@ export default function PermissionGuard({ children, pageName }) {
     }
     
     // Étape 3: Vérifier les permissions spécifiques à l'utilisateur (si définies)
-    const userPagePermissions = user.permissions_pages || [];
+    const userPagePermissions = user.data?.permissions_pages || user.permissions_pages || [];
     if (userPagePermissions.length > 0 && !userPagePermissions.includes(normalizedPageName)) {
       setHasAccess(false);
       setRestrictionReason('utilisateur');
