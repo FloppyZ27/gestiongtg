@@ -27,7 +27,6 @@ export default function FeuilleTempsSection({
   weekScrollRef
 }) {
   
-  // Générer les jours du mois avec semaines complètes (dimanche à samedi)
   const getMonthDaysWithFullWeeks = () => {
     const year = pointageCurrentDate.getFullYear();
     const month = pointageCurrentDate.getMonth();
@@ -68,7 +67,6 @@ export default function FeuilleTempsSection({
 
       {!pointageCollapsed && (
         <CardContent className="p-6">
-          {/* Header avec navigation et contrôles */}
           <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
@@ -192,14 +190,14 @@ export default function FeuilleTempsSection({
                       {getPointageWeekDays().map((day, idx) => {
                         const isToday = day.toDateString() === new Date().toDateString();
                         return (
-                        <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-emerald-500 ring-inset' : 'bg-slate-900/50'}`}>
-                          <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
-                            {format(day, "EEE", { locale: fr })}
+                          <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-emerald-500 ring-inset' : 'bg-slate-900/50'}`}>
+                            <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
+                              {format(day, "EEE", { locale: fr })}
+                            </div>
+                            <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(day, "d", { locale: fr })}
+                            </div>
                           </div>
-                          <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                            {format(day, "d", { locale: fr })}
-                          </div>
-                        </div>
                         );
                       })}
                     </div>
@@ -258,177 +256,188 @@ export default function FeuilleTempsSection({
                         }, 0);
                         
                         return (
-                        <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
-                          {totalInitial > 0 && (
-                            <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
-                          )}
-                          {totalModifie > 0 && (
-                            <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
-                          )}
-                        </div>
+                          <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
+                            {totalInitial > 0 && (
+                              <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                            )}
+                            {totalModifie > 0 && (
+                              <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
 
                     <div className="overflow-y-auto flex-1 relative" ref={weekScrollRef}>
-                     <div className="flex relative" style={{ minHeight: '1440px' }}>
-                       <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
-                         {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                           <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
-                             <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
-                               {hour.toString().padStart(2, '0')}:00
-                             </div>
-                           </div>
-                         ))}
-                       </div>
+                      <div className="flex relative" style={{ minHeight: '1440px' }}>
+                        <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                          {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                            <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                              <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
+                                {hour.toString().padStart(2, '0')}:00
+                              </div>
+                            </div>
+                          ))}
+                        </div>
 
                         {getPointageWeekDays().map((day, dayIdx) => {
-                         const isToday = day.toDateString() === new Date().toDateString();
-                         const dayEvents = getEventsForDate(day);
-                         const dayPointages = getPointageForDate(day);
+                          const isToday = day.toDateString() === new Date().toDateString();
+                          const dayEvents = getEventsForDate(day);
+                          const dayPointages = getPointageForDate(day);
 
-                         return (
-                           <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
-                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                               <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
-                             ))}
+                          return (
+                            <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/10' : 'bg-slate-800/20'}`}>
+                              {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                                <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                              ))}
 
-                             {dayEvents.map(event => {
-                               const startTime = new Date(event.start.dateTime);
-                               const endTime = new Date(event.end.dateTime);
-                               const startHour = startTime.getHours();
-                               const startMin = startTime.getMinutes();
-                               const durationMinutes = (endTime - startTime) / (1000 * 60);
-                               const topPx = startHour * 60 + startMin;
+                              {dayEvents.map(event => {
+                                const startTime = new Date(event.start.dateTime);
+                                const endTime = new Date(event.end.dateTime);
+                                const startHour = startTime.getHours();
+                                const startMin = startTime.getMinutes();
+                                const durationMinutes = (endTime - startTime) / (1000 * 60);
+                                const topPx = startHour * 60 + startMin;
 
-                               return (
-                                 <div
-                                   key={event.id}
-                                   className="absolute left-1 right-1 bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold z-10"
-                                   style={{
-                                     height: `${Math.max(20, durationMinutes)}px`,
-                                     top: `${topPx}px`
-                                   }}
-                                 >
-                                   <div className="truncate">{format(startTime, "HH:mm")}</div>
-                                   <div className="truncate text-[9px] opacity-90">{event.subject}</div>
-                                 </div>
-                               );
-                             })}
+                                return (
+                                  <div
+                                    key={event.id}
+                                    className="absolute left-1 right-1 bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold z-10"
+                                    style={{
+                                      height: `${Math.max(20, durationMinutes)}px`,
+                                      top: `${topPx}px`
+                                    }}
+                                  >
+                                    <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                    <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                  </div>
+                                );
+                              })}
 
-                             {dayPointages.map(p => {
-                              const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                              {dayPointages.map(p => {
+                                const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                                const startHour = startTime.getHours();
+                                const startMin = startTime.getMinutes();
+                                const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                const topPx = startHour * 60 + startMin;
+                                const initialStart = new Date(p.heure_debut);
+                                const initialEnd = new Date(p.heure_fin);
+                                const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+                                const modifiedDuration = isModified ? (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60) : null;
 
-                              const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
-                              const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
-                              const startHour = startTime.getHours();
-                              const startMin = startTime.getMinutes();
-                              const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-                              const topPx = startHour * 60 + startMin;
-
-                              const initialStart = new Date(p.heure_debut);
-                              const initialEnd = new Date(p.heure_fin);
-                              const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
-                              const modifiedDuration = isModified ? (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60) : null;
-
-                              return (
-                                <Tooltip key={`display-${p.id}`}>
-                                  <TooltipTrigger asChild>
-                                    <div
-                                      className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
-                                        isModified
-                                          ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                          : p.confirme 
-                                          ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
-                                          : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
-                                      }`}
-                                      onClick={() => handleOpenEditPointage(p)}
-                                      style={{
-                                        height: `${totalMinutes}px`,
-                                        top: `${topPx}px`
-                                      }}
-                                    >
-                                      {p.description && <div className="text-[12px] font-bold mb-0.5 truncate">{p.description}</div>}
-                                      <div className={`text-[11px] font-semibold mb-1 ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
-                                        {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
-                                      </div>
-                                      <div className="text-[11px] leading-tight">
-                                        <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
-                                        {isModified && (
-                                          <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                return (
+                                  <Tooltip key={`display-${p.id}`}>
+                                    <TooltipTrigger asChild>
+                                      <div
+                                        className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
+                                          isModified
+                                            ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                            : p.confirme 
+                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                        }`}
+                                        onClick={() => handleOpenEditPointage(p)}
+                                        style={{
+                                          height: `${totalMinutes}px`,
+                                          top: `${topPx}px`
+                                        }}
+                                      >
+                                        {/* Toujours afficher la description */}
+                                        {p.description && (
+                                          <div className="text-[12px] font-bold truncate leading-tight">{p.description}</div>
                                         )}
-                                      </div>
-                                      {!p.confirme && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleConfirmPointage(p);
-                                          }}
-                                          className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
-                                        >
-                                          Confirmer
-                                        </button>
-                                      )}
-                                      {p.confirme && !isModified && (
-                                        <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
-                                          Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                        </div>
-                                      )}
-                                      {isModified && (
-                                        <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
-                                          Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
-                                    <div className="space-y-2">
-                                      <div className={`text-xs font-bold uppercase ${isModified ? 'text-orange-400' : p.confirme ? 'text-green-400' : 'text-blue-400'}`}>
-                                        {isModified ? 'Pointage modifié' : p.confirme ? 'Pointage confirmé' : 'Pointage en attente'}
-                                      </div>
-                                      <div className="text-sm text-slate-300">
-                                        <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
-                                        {isModified && (
-                                          <div className="mt-1">Modifié: <span className="text-orange-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
+                                        {/* Statut visible si >= 30px */}
+                                        {totalMinutes >= 30 && (
+                                          <div className={`text-[11px] font-semibold ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
+                                            {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
+                                          </div>
                                         )}
-                                      </div>
-                                      {p.description && (
-                                        <div className="text-sm opacity-75 whitespace-pre-wrap border-t border-white/10 pt-2">{p.description}</div>
-                                      )}
-                                      <div className="pt-2 border-t border-white/20 space-y-2">
-                                        <div className="text-xs opacity-60">
-                                          {p.confirme && <div>Confirmé: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
-                                          {isModified && <div>Modifié: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
-                                        </div>
-                                        {!p.confirme && (
+                                        {/* Heures visibles si >= 60px */}
+                                        {totalMinutes >= 60 && (
+                                          <div className="text-[11px] leading-tight">
+                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>
+                                              Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
+                                            </div>
+                                            {isModified && (
+                                              <div className="opacity-90 text-orange-400 mt-1">
+                                                Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                        {/* Bouton et dates visibles si >= 90px */}
+                                        {totalMinutes >= 90 && !p.confirme && (
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               handleConfirmPointage(p);
                                             }}
-                                            className="w-full text-xs px-2 py-1 bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/30 rounded transition-colors"
+                                            className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
                                           >
                                             Confirmer
                                           </button>
                                         )}
+                                        {totalMinutes >= 90 && p.confirme && !isModified && (
+                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
+                                            Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                          </div>
+                                        )}
+                                        {totalMinutes >= 90 && isModified && (
+                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
+                                            Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              );
-                             })}
-                             </div>
-                             );
-                             })}
-                             </div>
-                             </div>
-                             </div>
-                             </div>
-                             </div>
-                             </TabsContent>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
+                                      <div className="space-y-2">
+                                        <div className={`text-xs font-bold uppercase ${isModified ? 'text-orange-400' : p.confirme ? 'text-green-400' : 'text-blue-400'}`}>
+                                          {isModified ? 'Pointage modifié' : p.confirme ? 'Pointage confirmé' : 'Pointage en attente'}
+                                        </div>
+                                        <div className="text-sm text-slate-300">
+                                          <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
+                                          {isModified && (
+                                            <div className="mt-1">Modifié: <span className="text-orange-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
+                                          )}
+                                        </div>
+                                        {p.description && (
+                                          <div className="text-sm opacity-75 whitespace-pre-wrap border-t border-white/10 pt-2">{p.description}</div>
+                                        )}
+                                        <div className="pt-2 border-t border-white/20 space-y-2">
+                                          <div className="text-xs opacity-60">
+                                            {p.confirme && <div>Confirmé: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                            {isModified && <div>Modifié: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                          </div>
+                                          {!p.confirme && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleConfirmPointage(p);
+                                              }}
+                                              className="w-full text-xs px-2 py-1 bg-green-500/20 hover:bg-green-500/40 text-green-400 border border-green-500/30 rounded transition-colors"
+                                            >
+                                              Confirmer
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
 
             <TabsContent value="month" className="space-y-3">
-              {/* En-têtes des jours de la semaine */}
               <div className="grid grid-cols-7 w-full mb-1" style={{ gap: '2px' }}>
                 {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map(j => (
                   <div key={j} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{j}</div>
