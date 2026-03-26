@@ -201,7 +201,10 @@ export default function MandatStepForm({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" side="top" align="start">
-                    <div className="max-h-[200px] overflow-y-auto p-2 space-y-1">
+                    <div
+                      className="max-h-[200px] overflow-y-auto p-2 space-y-1"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
                       {TYPES_MANDATS.map((type) => {
                         const isSelected = selectedTypes.includes(type);
                         return (
