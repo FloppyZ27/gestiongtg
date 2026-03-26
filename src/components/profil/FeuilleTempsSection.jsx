@@ -348,7 +348,7 @@ export default function FeuilleTempsSection({
                                         top: `${topPx}px`
                                       }}
                                     >
-                                      {p.description && <div className="text-[12px] font-bold mb-0.5 truncate">{p.description}</div>}
+                                      <div className="text-[12px] font-bold mb-0.5 truncate">{p.description || 'Pointage'}</div>
                                       <div className={`text-[11px] font-semibold mb-1 ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
                                         {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
                                       </div>
