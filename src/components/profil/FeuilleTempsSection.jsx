@@ -349,19 +349,15 @@ export default function FeuilleTempsSection({
                                       }}
                                     >
                                       <div className="text-[12px] font-bold mb-0.5 truncate">{p.description || 'Pointage'}</div>
-                                      {totalMinutes >= 40 && (
-                                        <div className={`text-[11px] font-semibold mb-1 ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
-                                          {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
-                                        </div>
-                                      )}
-                                      {totalMinutes >= 60 && (
-                                        <div className="text-[11px] leading-tight">
-                                          <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
-                                          {isModified && (
-                                            <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
-                                          )}
-                                        </div>
-                                      )}
+                                      <div className={`text-[11px] font-semibold mb-1 ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
+                                        {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
+                                      </div>
+                                      <div className="text-[11px] leading-tight">
+                                        <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                        {isModified && (
+                                          <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                        )}
+                                      </div>
                                       {!p.confirme && (
                                         <button
                                           onClick={(e) => {
