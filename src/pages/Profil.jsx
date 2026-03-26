@@ -741,11 +741,16 @@ export default function Profil() {
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
         <div className="w-full">
-        <div className="flex items-center gap-3 mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-            Mon Profil
-          </h1>
-          <UserCircle className="w-8 h-8 text-emerald-400" />
+        <div className="flex items-start justify-between gap-3 mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                Mon Profil
+              </h1>
+              <UserCircle className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+            </div>
+            <p className="text-slate-400">Gérez vos informations personnelles et professionnelles</p>
+          </div>
         </div>
 
         {/* Personal Information Card */}
