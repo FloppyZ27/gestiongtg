@@ -79,7 +79,7 @@ export default function AgendaSection({
             <Button variant="outline" onClick={() => setEventToDelete(null)} className="border-slate-600 text-slate-300">
               Annuler
             </Button>
-            <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white border-none">
+            <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white border-2 border-red-400">
               <Trash2 className="w-4 h-4 mr-2" />
               Supprimer
             </Button>
