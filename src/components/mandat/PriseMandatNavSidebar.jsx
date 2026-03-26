@@ -13,13 +13,111 @@ export default function PriseMandatNavSidebar({
   setDocumentsStepCollapsed,
 }) {
   const sections = [
-    { id: "infos", label: "Infos dossier", icon: FolderOpen, color: "text-blue-400", toggle: () => setDossierInfoStepCollapsed(false) },
-    { id: "client", label: "Client", icon: User, color: "text-emerald-400", toggle: () => setClientStepCollapsed(false) },
-    { id: "professionnel", label: "Professionnel", icon: Briefcase, color: "text-purple-400", toggle: () => setProfessionnelStepCollapsed(false) },
-    { id: "adresse", label: "Adresse", icon: MapPin, color: "text-amber-400", toggle: () => setAddressStepCollapsed(false) },
-    { id: "mandats", label: "Mandats", icon: ClipboardList, color: "text-orange-400", toggle: () => setMandatStepCollapsed(false) },
-    { id: "tarification", label: "Tarification", icon: Receipt, color: "text-purple-400", toggle: () => setTarificationStepCollapsed(false) },
-    { id: "documents", label: "Documents", icon: FileText, color: "text-yellow-400", toggle: () => setDocumentsStepCollapsed(false) },
+    { 
+      id: "infos", 
+      label: "Infos dossier", 
+      icon: FolderOpen, 
+      color: "text-blue-400", 
+      open: () => setDossierInfoStepCollapsed(false),
+      closeOthers: () => {
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "client", 
+      label: "Client", 
+      icon: User, 
+      color: "text-emerald-400", 
+      open: () => setClientStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "professionnel", 
+      label: "Professionnel", 
+      icon: Briefcase, 
+      color: "text-purple-400", 
+      open: () => setProfessionnelStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "adresse", 
+      label: "Adresse", 
+      icon: MapPin, 
+      color: "text-amber-400", 
+      open: () => setAddressStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "mandats", 
+      label: "Mandats", 
+      icon: ClipboardList, 
+      color: "text-orange-400", 
+      open: () => setMandatStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "tarification", 
+      label: "Tarification", 
+      icon: Receipt, 
+      color: "text-purple-400", 
+      open: () => setTarificationStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setDocumentsStepCollapsed(true);
+      }
+    },
+    { 
+      id: "documents", 
+      label: "Documents", 
+      icon: FileText, 
+      color: "text-yellow-400", 
+      open: () => setDocumentsStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+      }
+    },
   ];
 
   return (
@@ -31,7 +129,8 @@ export default function PriseMandatNavSidebar({
               <button
                 type="button"
                 onClick={() => {
-                  section.toggle();
+                  section.closeOthers();
+                  section.open();
                   setTimeout(() => {
                     const el = document.querySelector(`[data-section-pm="${section.id}"]`);
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
