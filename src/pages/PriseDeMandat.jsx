@@ -3042,8 +3042,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 (nouveauDossierForm.notaires_ids || []).length > 0 ||
                 (nouveauDossierForm.courtiers_ids || []).length > 0 ||
                 nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
-                JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
-                commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
+                JSON.stringify(nouveauDossierForm.mandats.map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) !== JSON.stringify((mandatsInfo || []).filter(m => m.type_mandat).map(m => ({ type_mandat: m.type_mandat, date_livraison: m.date_livraison || "" }))) ||
+                (commentairesTemporairesDossier || []).length !== (commentairesTemporaires || []).length ||
                 dossierDocuments.length > 0;
               
               if (hasChanges) {
@@ -5863,7 +5863,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     <div
                       key={client.id}
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.clients_ids.includes(client.id)
+                        (formData.clients_ids || []).includes(client.id)
                           ? 'bg-blue-500/20 border border-blue-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
@@ -5953,7 +5953,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     <div
                       key={notaire.id}
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.notaires_ids.includes(notaire.id)
+                        (formData.notaires_ids || []).includes(notaire.id)
                           ? 'bg-purple-500/20 border border-purple-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
@@ -6043,7 +6043,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     <div
                       key={courtier.id}
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.courtiers_ids.includes(courtier.id)
+                        (formData.courtiers_ids || []).includes(courtier.id)
                           ? 'bg-orange-500/20 border border-orange-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
