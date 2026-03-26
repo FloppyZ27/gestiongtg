@@ -4000,7 +4000,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                         {(nouveauDossierForm.compagnies_ids || []).length > 0 ? (
                                           <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                            {nouveauDossierForm.compagnies_ids.map(compagnieId => {
+                                            {(nouveauDossierForm.compagnies_ids || []).map(compagnieId => {
                                               const compagnie = clients.find(c => c.id === compagnieId);
                                               if (!compagnie) return null;
                                               const currentPhone = compagnie.telephones?.find(t => t.actuel)?.telephone || compagnie.telephones?.[0]?.telephone || "";
@@ -4112,7 +4112,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                                 setNouveauDossierForm(prev => ({
                                                   ...prev,
                                                   compagnies_ids: (prev.compagnies_ids || []).includes(compagnie.id)
-                                                    ? prev.compagnies_ids.filter(id => id !== compagnie.id)
+                                                    ? (prev.compagnies_ids || []).filter(id => id !== compagnie.id)
                                                     : [...(prev.compagnies_ids || []), compagnie.id]
                                                 }));
                                               }}
