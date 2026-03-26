@@ -2361,7 +2361,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             }else{setIsDialogOpen(open);}
           }}>
 
-            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }} hideClose>
+            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -3659,7 +3659,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -3749,7 +3749,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -3839,7 +3839,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
