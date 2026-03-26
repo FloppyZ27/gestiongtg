@@ -3039,8 +3039,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               
               const hasChanges = nouveauDossierForm.numero_dossier || 
                 JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
-                nouveauDossierForm.notaires_ids.length > 0 ||
-                nouveauDossierForm.courtiers_ids.length > 0 ||
+                (nouveauDossierForm.notaires_ids || []).length > 0 ||
+                (nouveauDossierForm.courtiers_ids || []).length > 0 ||
                 nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
                 JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
                 commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
@@ -3095,7 +3095,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     }`}>
                       <span>
                         {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
-                        {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
+                        {(nouveauDossierForm.clients_ids || []).length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
                           <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
                         )}
                       </span>
@@ -3505,19 +3505,19 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                               <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
                                 <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
-                                  Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
+                                  Clients {(nouveauDossierForm.clients_ids || []).length > 0 && `(${(nouveauDossierForm.clients_ids || []).length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <FileText className="w-3 h-3" />
-                                  Notaires {(nouveauDossierForm.notaires_ids || []).length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
+                                  Notaires {(nouveauDossierForm.notaires_ids || []).length > 0 && `(${(nouveauDossierForm.notaires_ids || []).length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
-                                  Courtiers {(nouveauDossierForm.courtiers_ids || []).length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
+                                  Courtiers {(nouveauDossierForm.courtiers_ids || []).length > 0 && `(${(nouveauDossierForm.courtiers_ids || []).length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="compagnies" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <Briefcase className="w-3 h-3" />
-                                  Compagnies {(nouveauDossierForm.compagnies_ids || []).length > 0 && `(${nouveauDossierForm.compagnies_ids.length})`}
+                                  Compagnies {(nouveauDossierForm.compagnies_ids || []).length > 0 && `(${(nouveauDossierForm.compagnies_ids || []).length})`}
                                 </TabsTrigger>
                               </TabsList>
 
@@ -3527,9 +3527,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                 <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                  <div className="flex items-center justify-between mb-2">
                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                    {nouveauDossierForm.clients_ids.length > 0 ? (
+                                    {(nouveauDossierForm.clients_ids || []).length > 0 ? (
                                       <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                        {nouveauDossierForm.clients_ids.map(clientId => {
+                                        {(nouveauDossierForm.clients_ids || []).map(clientId => {
                                           const client = clients.find(c => c.id === clientId);
                                           if (!client) return null;
                                           const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
@@ -3633,16 +3633,16 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredClientsForSelector.length > 0 ? (
                                         filteredClientsForSelector.slice(0, 15).map((client) => {
-                                          const isSelected = nouveauDossierForm.clients_ids.includes(client.id);
+                                          const isSelected = (nouveauDossierForm.clients_ids || []).includes(client.id);
                                           return (
                                             <div
                                               key={client.id}
                                               onClick={() => {
                                                 setNouveauDossierForm(prev => ({
-                                                  ...prev,
-                                                  clients_ids: prev.clients_ids.includes(client.id)
-                                                    ? prev.clients_ids.filter(id => id !== client.id)
-                                                    : [...prev.clients_ids, client.id]
+                                                    ...prev,
+                                                    clients_ids: (prev.clients_ids || []).includes(client.id)
+                                                      ? (prev.clients_ids || []).filter(id => id !== client.id)
+                                                      : [...(prev.clients_ids || []), client.id]
                                                 }));
                                               }}
                                               className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
@@ -3790,16 +3790,16 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredNotairesForSelector.length > 0 ? (
                                         filteredNotairesForSelector.slice(0, 15).map((notaire) => {
-                                          const isSelected = nouveauDossierForm.notaires_ids.includes(notaire.id);
-                                          return (
-                                            <div
-                                              key={notaire.id}
-                                              onClick={() => {
-                                                setNouveauDossierForm(prev => ({
-                                                  ...prev,
-                                                  notaires_ids: prev.notaires_ids.includes(notaire.id)
-                                                    ? prev.notaires_ids.filter(id => id !== notaire.id)
-                                                    : [...prev.notaires_ids, notaire.id]
+                                          const isSelected = (nouveauDossierForm.notaires_ids || []).includes(notaire.id);
+                                                           return (
+                                                             <div
+                                                               key={notaire.id}
+                                                               onClick={() => {
+                                                                 setNouveauDossierForm(prev => ({
+                                                                   ...prev,
+                                                                   notaires_ids: (prev.notaires_ids || []).includes(notaire.id)
+                                                                     ? (prev.notaires_ids || []).filter(id => id !== notaire.id)
+                                                                     : [...(prev.notaires_ids || []), notaire.id]
                                                 }));
                                               }}
                                               className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
@@ -3947,16 +3947,16 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredCourtiersForSelector.length > 0 ? (
                                         filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
-                                          const isSelected = nouveauDossierForm.courtiers_ids.includes(courtier.id);
-                                          return (
-                                            <div
-                                              key={courtier.id}
-                                              onClick={() => {
-                                                setNouveauDossierForm(prev => ({
-                                                  ...prev,
-                                                  courtiers_ids: prev.courtiers_ids.includes(courtier.id)
-                                                    ? prev.courtiers_ids.filter(id => id !== courtier.id)
-                                                    : [...prev.courtiers_ids, courtier.id]
+                                          const isSelected = (nouveauDossierForm.courtiers_ids || []).includes(courtier.id);
+                                                           return (
+                                                             <div
+                                                               key={courtier.id}
+                                                               onClick={() => {
+                                                                 setNouveauDossierForm(prev => ({
+                                                                   ...prev,
+                                                                   courtiers_ids: (prev.courtiers_ids || []).includes(courtier.id)
+                                                                     ? (prev.courtiers_ids || []).filter(id => id !== courtier.id)
+                                                                     : [...(prev.courtiers_ids || []), courtier.id]
                                                 }));
                                               }}
                                               className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
@@ -5084,9 +5084,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       }));
 
                       const hasChanges = nouveauDossierForm.numero_dossier || 
-                      JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
-                      nouveauDossierForm.notaires_ids.length > 0 ||
-                      nouveauDossierForm.courtiers_ids.length > 0 ||
+                      JSON.stringify(nouveauDossierForm.clients_ids || []) !== JSON.stringify(formData.clients_ids || []) ||
+                      (nouveauDossierForm.notaires_ids || []).length > 0 ||
+                      (nouveauDossierForm.courtiers_ids || []).length > 0 ||
                       nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
                       JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
                       commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
