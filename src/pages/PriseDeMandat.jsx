@@ -3038,7 +3038,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               }));
               
               const hasChanges = nouveauDossierForm.numero_dossier || 
-                JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
+                JSON.stringify(nouveauDossierForm.clients_ids || []) !== JSON.stringify(formData.clients_ids || []) ||
                 (nouveauDossierForm.notaires_ids || []).length > 0 ||
                 (nouveauDossierForm.courtiers_ids || []).length > 0 ||
                 nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
@@ -3206,15 +3206,15 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       let hasAnyManualInfo = false;
                       
                       // Vérifier si un texte saisi correspond à un professionnel sélectionné
-                      const selectedClientsNames = nouveauDossierForm.clients_ids.map(id => {
+                      const selectedClientsNames = (nouveauDossierForm.clients_ids || []).map(id => {
                         const c = clients.find(cl => cl.id === id);
                         return c ? `${c.prenom} ${c.nom}`.trim() : '';
                       });
-                      const selectedNotairesNames = nouveauDossierForm.notaires_ids.map(id => {
+                      const selectedNotairesNames = (nouveauDossierForm.notaires_ids || []).map(id => {
                         const n = notaires.find(nt => nt.id === id);
                         return n ? `${n.prenom} ${n.nom}`.trim() : '';
                       });
-                      const selectedCourtiersNames = nouveauDossierForm.courtiers_ids.map(id => {
+                      const selectedCourtiersNames = (nouveauDossierForm.courtiers_ids || []).map(id => {
                         const ct = courtiers.find(cr => cr.id === id);
                         return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
                       });
@@ -3339,7 +3339,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       queryClient.invalidateQueries({ queryKey: ['notifications'] });
                       
                       // Envoyer un email aux clients
-                      const clientsEmails = dossierDataAvecCedule.clients_ids
+                      const clientsEmails = (dossierDataAvecCedule.clients_ids || [])
                         .map(id => {
                           const client = clients.find(c => c.id === id);
                           return client?.courriels?.find(c => c.actuel)?.courriel || client?.courriels?.[0]?.courriel;
@@ -3549,7 +3549,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                                 type="button" 
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                                  setNouveauDossierForm(prev => ({...prev, clients_ids: (prev.clients_ids || []).filter(id => id !== clientId)}));
                                                 }} 
                                                 className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
                                               >
@@ -3706,7 +3706,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                                     type="button" 
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
+                                                      setNouveauDossierForm(prev => ({...prev, notaires_ids: (prev.notaires_ids || []).filter(id => id !== notaireId)}));
                                                     }} 
                                                     className="absolute right-1 top-1 hover:text-red-400 text-purple-300"
                                                   >
@@ -3863,7 +3863,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                                     type="button" 
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                                      setNouveauDossierForm(prev => ({...prev, courtiers_ids: (prev.courtiers_ids || []).filter(id => id !== courtierId)}));
                                                     }} 
                                                     className="absolute right-1 top-1 hover:text-red-400 text-orange-300"
                                                   >
