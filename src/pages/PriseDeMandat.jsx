@@ -3509,11 +3509,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                 </TabsTrigger>
                                 <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <FileText className="w-3 h-3" />
-                                  Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
+                                  Notaires {(nouveauDossierForm.notaires_ids || []).length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
-                                  Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
+                                  Courtiers {(nouveauDossierForm.courtiers_ids || []).length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="compagnies" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <Briefcase className="w-3 h-3" />
@@ -3684,9 +3684,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                       <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                       <div className="flex items-center justify-between mb-2">
                                       <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                        {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                            {nouveauDossierForm.notaires_ids.map(notaireId => {
+                                        {(nouveauDossierForm.notaires_ids || []).length > 0 ? (
+                                            <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                              {(nouveauDossierForm.notaires_ids || []).map(notaireId => {
                                               const notaire = clients.find(c => c.id === notaireId);
                                               if (!notaire) return null;
                                               const currentPhone = notaire.telephones?.find(t => t.actuel)?.telephone || notaire.telephones?.[0]?.telephone || "";
@@ -3841,9 +3841,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                    <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                        {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                            {nouveauDossierForm.courtiers_ids.map(courtierId => {
+                                        {(nouveauDossierForm.courtiers_ids || []).length > 0 ? (
+                                            <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                              {(nouveauDossierForm.courtiers_ids || []).map(courtierId => {
                                               const courtier = clients.find(c => c.id === courtierId);
                                               if (!courtier) return null;
                                               const currentPhone = courtier.telephones?.find(t => t.actuel)?.telephone || courtier.telephones?.[0]?.telephone || "";
