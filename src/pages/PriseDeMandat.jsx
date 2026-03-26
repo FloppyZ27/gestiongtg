@@ -3050,14 +3050,12 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               setShowCancelConfirmDossier(true);
               } else {
                setIsOuvrirDossierDialogOpen(false);
-               setNouveauDossierForm({ numero_dossier: "", arpenteur_geometre: "", date_ouverture: new Date().toISOString().split('T')[0], statut: "Ouvert", ttl: "Non", clients_ids: [], notaires_ids: [], courtiers_ids: [], mandats: [] });
-               setCommentairesTemporairesDossier([]); setDossierDocuments([]); setActiveTabMandatDossier("0");
+               setNouveauDossierForm({numero_dossier:"",arpenteur_geometre:"",date_ouverture:new Date().toISOString().split('T')[0],statut:"Ouvert",ttl:"Non",clients_ids:[],notaires_ids:[],courtiers_ids:[],mandats:[]});setCommentairesTemporairesDossier([]);setDossierDocuments([]);setActiveTabMandatDossier("0");
              }
            }
          }} />
 
-              <ConfirmationDialogs
-              showStatutChangeConfirm={showStatutChangeConfirm} setShowStatutChangeConfirm={setShowStatutChangeConfirm}
+              <ConfirmationDialogs showStatutChangeConfirm={showStatutChangeConfirm} setShowStatutChangeConfirm={setShowStatutChangeConfirm}
               pendingStatutChange={pendingStatutChange} setPendingStatutChange={setPendingStatutChange}
               formData={formData} setFormData={setFormData} setHasDocuments={setHasDocuments}
               getArpenteurInitials={getArpenteurInitials}
@@ -4704,6 +4702,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           </CardContent>
         </Card>
       </div>
+    </div>
     </>
   );
 });
