@@ -348,14 +348,15 @@ export default function FeuilleTempsSection({
                                         top: `${topPx}px`
                                       }}
                                     >
-                                      {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
-                                      {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
+                                      {p.description && <div className="text-[12px] font-bold mb-0.5 truncate">{p.description}</div>}
+                                      <div className={`text-[11px] font-semibold mb-1 ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
+                                        {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
+                                      </div>
                                       <div className="text-[11px] leading-tight">
                                         <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
                                         {isModified && (
                                           <div className="opacity-90 text-orange-400 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                         )}
-                                        {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
                                       </div>
                                       {!p.confirme && (
                                         <button
