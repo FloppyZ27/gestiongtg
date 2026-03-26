@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shield, FileText } from "lucide-react";
+import { Shield } from "lucide-react";
 
 const PAGES_DISPONIBLES = [
   "TableauDeBord",
@@ -39,43 +39,25 @@ const PAGE_DISPLAY_NAMES = {
   "Comptabilite": "Comptabilité"
 };
 
-const INFORMATIONS_DISPONIBLES = [
-  "Données financières",
-  "Informations clients sensibles",
-  "Historique complet des dossiers",
-  "Commentaires privés",
-  "Données personnelles employés",
-  "Rapports d'activité",
-  "Logs système"
-];
-
 export default function TemplatePermissionsDialog({ open, onOpenChange, template, onSave }) {
   const [selectedPages, setSelectedPages] = useState([]);
-  const [selectedInfos, setSelectedInfos] = useState([]);
 
   useEffect(() => {
     if (template) {
       setSelectedPages(template.permissions_pages || []);
-      setSelectedInfos(template.permissions_informations || []);
     }
   }, [template]);
 
   const handleSave = () => {
     onSave({
       permissions_pages: selectedPages,
-      permissions_informations: selectedInfos
+      permissions_informations: []
     });
   };
 
   const togglePage = (page) => {
     setSelectedPages(prev =>
       prev.includes(page) ? prev.filter(p => p !== page) : [...prev, page]
-    );
-  };
-
-  const toggleInfo = (info) => {
-    setSelectedInfos(prev =>
-      prev.includes(info) ? prev.filter(i => i !== info) : [...prev, info]
     );
   };
 
@@ -89,82 +71,32 @@ export default function TemplatePermissionsDialog({ open, onOpenChange, template
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Pages - Toujours affichées pour les rôles */}
-          {template?.type === 'role' && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                <Label className="text-lg text-emerald-400">Pages accessibles</Label>
-              </div>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-5 h-5 text-emerald-400" />
+              <Label className="text-lg text-emerald-400">Pages accessibles</Label>
+            </div>
+            {template?.type === 'role' && (
               <p className="text-sm text-slate-400 mb-4 pl-7">
                 Cochez les pages auxquelles ce rôle aura accès. Les pages non cochées seront restreintes.
               </p>
-              <div className="grid grid-cols-2 gap-3 pl-7">
-                {PAGES_DISPONIBLES.map(page => (
-                  <div key={page} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`tpl-page-${page}`}
-                      checked={selectedPages.includes(page)}
-                      onCheckedChange={() => togglePage(page)}
-                      className="border-slate-600"
-                    />
-                    <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
-                      {PAGE_DISPLAY_NAMES[page]}
-                    </label>
-                  </div>
-                ))}
-              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3 pl-7">
+              {PAGES_DISPONIBLES.map(page => (
+                <div key={page} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`tpl-page-${page}`}
+                    checked={selectedPages.includes(page)}
+                    onCheckedChange={() => togglePage(page)}
+                    className="border-slate-600"
+                  />
+                  <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
+                    {PAGE_DISPLAY_NAMES[page]}
+                  </label>
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Pages et Informations pour les postes */}
-          {template?.type === 'poste' && (
-            <>
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield className="w-5 h-5 text-emerald-400" />
-                  <Label className="text-lg text-emerald-400">Accès aux pages</Label>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pl-7">
-                  {PAGES_DISPONIBLES.map(page => (
-                    <div key={page} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`tpl-page-${page}`}
-                        checked={selectedPages.includes(page)}
-                        onCheckedChange={() => togglePage(page)}
-                        className="border-slate-600"
-                      />
-                      <label htmlFor={`tpl-page-${page}`} className="text-sm text-slate-300 cursor-pointer">
-                        {PAGE_DISPLAY_NAMES[page]}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <FileText className="w-5 h-5 text-blue-400" />
-                  <Label className="text-lg text-blue-400">Accès aux informations</Label>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pl-7">
-                  {INFORMATIONS_DISPONIBLES.map(info => (
-                    <div key={info} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`tpl-info-${info}`}
-                        checked={selectedInfos.includes(info)}
-                        onCheckedChange={() => toggleInfo(info)}
-                        className="border-slate-600"
-                      />
-                      <label htmlFor={`tpl-info-${info}`} className="text-sm text-slate-300 cursor-pointer">
-                        {info}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <Button
