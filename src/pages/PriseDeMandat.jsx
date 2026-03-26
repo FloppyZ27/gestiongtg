@@ -2866,7 +2866,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </TabsList>
                       
                       <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporairesDossier} onCommentairesTempChange={setCommentairesTemporairesDossier} />
+                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
                       </TabsContent>
                       
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
