@@ -3621,7 +3621,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           if (!open) {
             let hasChanges = false;
             if (editingLot) {
-                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || ((commentairesTemporairesLot || []).length || 0) > 0;
+                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || ((commentairesTemporairesLot || []).length > 0);
             }
             
             if (hasChanges) {
