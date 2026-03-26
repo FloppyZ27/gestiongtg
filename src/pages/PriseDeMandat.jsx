@@ -4948,10 +4948,63 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       }}
                       isCollapsed={tarificationStepCollapsed}
                       onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
-                                           />
-                                         </form>
-                                           {/* Header Tabs Commentaires/Historique - Collapsible */}
-                    <div 
+                    />
+
+                    {/* Section Documents - Utiliser DocumentsStepForm */}
+                    {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
+                      <DocumentsStepForm
+                        arpenteurGeometre={nouveauDossierForm.arpenteur_geometre}
+                        numeroDossier={nouveauDossierForm.numero_dossier}
+                        isCollapsed={documentsCollapsed}
+                        onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
+                        onDocumentsChange={(hasFiles) => {}}
+                      />
+                    )}
+                  </form>
+                  </div>
+                  </div>
+
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  {/* Carte de l'adresse des travaux - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setMapCollapsedDossier(!mapCollapsedDossier)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-slate-400" />
+                      <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
+                    </div>
+                    {mapCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                  {!mapCollapsedDossier && nouveauDossierForm.mandats.length > 0 && nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux && (
+                    nouveauDossierForm.mandats[activeTabMandatDossier].adresse_travaux.rue || nouveauDossierForm.mandats[activeTabMandatDossier].adresse_travaux.ville
+                  ) && (
+                    <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
+                      <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
+                        <div className="aspect-square w-full max-h-[calc(100%-28px)]">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                              `${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.rue || ''}, ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.ville || ''}, ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.province || 'Québec'}, Canada`
+                            )}&zoom=15`}
+                          />
+                        </div>
+                        <div className="p-2 bg-slate-800/80">
+                          <p className="text-xs text-slate-300 truncate">
+                            📍 {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.numeros_civiques?.[0]} {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.rue}, {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.ville}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Header Tabs Commentaires/Historique - Collapsible */}
+                  <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
                     onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
                   >
@@ -5017,8 +5070,54 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       )}
                       </div>
                       </div>
+
+                      {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+                      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                      <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                      const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
+                      const currentMandats = nouveauDossierForm.mandats.map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
+
+                      const hasChanges = nouveauDossierForm.numero_dossier || 
+                      JSON.stringify(nouveauDossierForm.clients_ids || []) !== JSON.stringify(formData.clients_ids || []) ||
+                      (nouveauDossierForm.notaires_ids || []).length > 0 ||
+                      (nouveauDossierForm.courtiers_ids || []).length > 0 ||
+                      nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
+                      JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
+                      commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
+                      dossierDocuments.length > 0;
+
+                      if (hasChanges) {
+                      setShowCancelConfirmDossier(true);
+                      } else {
+                      setIsOuvrirDossierDialogOpen(false);
+                      setNouveauDossierForm({
+                        numero_dossier: "",
+                        arpenteur_geometre: "",
+                        date_ouverture: new Date().toISOString().split('T')[0],
+                        statut: "Ouvert",
+                        ttl: "Non",
+                        clients_ids: [],
+                        notaires_ids: [],
+                        courtiers_ids: [],
+                        mandats: []
+                      });
+                      setCommentairesTemporairesDossier([]);
+                      setDossierDocuments([]);
+                      setActiveTabMandatDossier("0");
+                      }
+                      }}>
+                      Annuler
+                      </Button>
+                      <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      Ouvrir
+                      </Button>
                       </div>
-                      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800"><Button type="button" variant="outline" className="border-red-500 text-red-400" onClick={() => setShowCancelConfirmDossier(true)}>Annuler</Button><Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button></div>
                       </motion.div>
                       </DialogContent>
                       </Dialog>
@@ -6200,7 +6299,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 hasChanges = newLotForm.numero_lot || 
                   newLotForm.circonscription_fonciere || 
                   newLotForm.rang || 
-                  (newLotForm.types_operation || []).length > 0 ||
+                  newLotForm.types_operation.length > 0 ||
                   commentairesTemporairesLot.length > 0;
             }
             
@@ -6406,7 +6505,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                      hasChanges = newLotForm.numero_lot || 
                        newLotForm.circonscription_fonciere || 
                        newLotForm.rang || 
-                       (newLotForm.types_operation || []).length > 0 ||
+                       newLotForm.types_operation.length > 0 ||
                        commentairesTemporairesLot.length > 0;
                  }
 
