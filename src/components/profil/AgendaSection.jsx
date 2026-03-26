@@ -265,8 +265,8 @@ export default function AgendaSection({
                                     >
                                       <button
                                         onClick={(e) => handleDeleteClick(e, event)}
-                                        style={{ top: '2px', outline: '0.5px solid rgb(239,68,68)', outlineOffset: '1px' }}
-                                        className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
+                                        style={{ top: '2px' }}
+                                        className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
                                       >
                                         <Trash2 className="w-2.5 h-2.5 group-hover:text-yellow-300 transition-colors" />
                                         </button>
@@ -403,8 +403,8 @@ export default function AgendaSection({
                               >
                                 <button
                                   onClick={(e) => handleDeleteClick(e, event)}
-                                  style={{ top: '2px', outline: '0.5px solid rgb(239,68,68)', outlineOffset: '1px' }}
-                                  className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
+                                  style={{ top: '2px' }}
+                                  className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
                                 >
                                   <Trash2 className="w-2.5 h-2.5 group-hover:text-yellow-300 transition-colors" />
                                   </button>
