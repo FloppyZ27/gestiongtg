@@ -75,15 +75,15 @@ export default function PermissionsDialog({ open, onOpenChange, user, onSave }) 
   const allowedPagesByRole = roleTemplate?.permissions_pages || [];
   const allowedPagesByPoste = posteTemplate?.permissions_pages || [];
   
-  const isPageAllowedByTemplates = (page) => {
-    // Si pas de templates, tout est autorisé
-    if (!roleTemplate && !posteTemplate) return true;
+  // Retourne la raison de restriction par template (rôle/poste) ou null si autorisé
+  const getTemplateRestriction = (page) => {
+    const roleBlocks = roleTemplate && !allowedPagesByRole.includes(page);
+    const posteBlocks = posteTemplate && !allowedPagesByPoste.includes(page);
     
-    // Si templates existent, les deux doivent autoriser
-    const roleAllows = !roleTemplate || allowedPagesByRole.includes(page);
-    const posteAllows = !posteTemplate || allowedPagesByPoste.includes(page);
-    
-    return roleAllows && posteAllows;
+    if (roleBlocks && posteBlocks) return 'rôle & poste';
+    if (roleBlocks) return 'rôle';
+    if (posteBlocks) return 'poste';
+    return null;
   };
 
   const handleSave = () => {
@@ -121,21 +121,25 @@ export default function PermissionsDialog({ open, onOpenChange, user, onSave }) 
             </div>
             <div className="grid grid-cols-2 gap-3 pl-7">
               {PAGES_DISPONIBLES.map(page => {
-                const isAllowed = isPageAllowedByTemplates(page);
+                const restriction = getTemplateRestriction(page);
+                const isBlocked = !!restriction;
                 return (
                   <div key={page} className="flex items-center gap-2">
                     <Checkbox
                       id={`page-${page}`}
-                      checked={selectedPages.includes(page)}
-                      onCheckedChange={() => togglePage(page)}
-                      disabled={!isAllowed}
+                      checked={!isBlocked && selectedPages.includes(page)}
+                      onCheckedChange={() => !isBlocked && togglePage(page)}
+                      disabled={isBlocked}
                       className="border-slate-600"
                     />
                     <label 
                       htmlFor={`page-${page}`} 
-                      className={`text-sm cursor-pointer ${isAllowed ? 'text-slate-300' : 'text-slate-600 line-through'}`}
+                      className={`text-sm ${isBlocked ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 cursor-pointer'}`}
                     >
                       {PAGE_DISPLAY_NAMES[page]}
+                      {isBlocked && (
+                        <span className="text-slate-500 ml-1 text-xs">({restriction})</span>
+                      )}
                     </label>
                   </div>
                 );
