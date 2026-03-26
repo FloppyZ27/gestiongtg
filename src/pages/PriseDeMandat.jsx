@@ -3051,12 +3051,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               } else {
                setIsOuvrirDossierDialogOpen(false);
                setNouveauDossierForm({ numero_dossier: "", arpenteur_geometre: "", date_ouverture: new Date().toISOString().split('T')[0], statut: "Ouvert", ttl: "Non", clients_ids: [], notaires_ids: [], courtiers_ids: [], mandats: [] });
-               setCommentairesTemporairesDossier([]);
-               setDossierDocuments([]);
-               setActiveTabMandatDossier("0");
-              }
-              }
-              }}>
+               setCommentairesTemporairesDossier([]); setDossierDocuments([]); setActiveTabMandatDossier("0");
+             }
+           }
+         }} />
 
               <ConfirmationDialogs
               showStatutChangeConfirm={showStatutChangeConfirm} setShowStatutChangeConfirm={setShowStatutChangeConfirm}
