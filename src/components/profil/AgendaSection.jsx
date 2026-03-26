@@ -265,12 +265,12 @@ export default function AgendaSection({
                                     >
                                       <button
                                         onClick={(e) => handleDeleteClick(e, event)}
-                                        style={{ top: '2px' }}
-                                        className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-opacity outline outline-1 outline-red-500"
+                                        style={{ top: '2px', outlineWidth: '0.5px', outlineOffset: '1px' }}
+                                        className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group/btn outline outline-red-500"
                                       >
-                                        <Trash2 className="w-2.5 h-2.5" />
-                                      </button>
-                                      {durationMinutes <= 60 ? (
+                                        <Trash2 className="w-2.5 h-2.5 group-hover/btn:text-yellow-300 transition-colors" />
+                                        </button>
+                                        {durationMinutes <= 60 ? (
                                         <>
                                           <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
                                             {isAbsence ? 'Absence' : 'Rendez-vous'}
@@ -403,12 +403,12 @@ export default function AgendaSection({
                               >
                                 <button
                                   onClick={(e) => handleDeleteClick(e, event)}
-                                  style={{ top: '2px' }}
-                                  className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-opacity outline outline-1 outline-red-500"
+                                  style={{ top: '2px', outlineWidth: '0.5px', outlineOffset: '1px' }}
+                                  className="absolute right-1 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group/btn outline outline-red-500"
                                 >
-                                  <Trash2 className="w-2.5 h-2.5" />
-                                </button>
-                                <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                  <Trash2 className="w-2.5 h-2.5 group-hover/btn:text-yellow-300 transition-colors" />
+                                  </button>
+                                  <div className="truncate text-[11px] font-bold opacity-90 uppercase">
                                   {isAbsence ? 'Absence' : 'Rendez-vous'}
                                 </div>
                                 <div className={`truncate font-bold text-sm ${
