@@ -223,6 +223,53 @@ export default function Calendrier() {
     });
   };
 
+  const getEventsForDay = (day) => {
+    const events = filteredRendezVous.filter(rdv => {
+      const rdvStart = new Date(rdv.date_debut);
+      const rdvEnd = rdv.date_fin ? new Date(rdv.date_fin) : rdvStart;
+      const dayStart = new Date(day);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(day);
+      dayEnd.setHours(23, 59, 59, 999);
+      return rdvStart <= dayEnd && rdvEnd >= dayStart;
+    });
+
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const currentYear = day.getFullYear();
+    const holidays = getHolidays(currentYear);
+    const holiday = holidays.find(h => h.date === dayStr);
+    if (holiday) {
+      events.push({
+        id: `holiday-${dayStr}`,
+        titre: holiday.name,
+        type: 'holiday',
+        date_debut: dayStr,
+        description: `C'est un jour férié : ${holiday.name}.`
+      });
+    }
+
+    users.forEach(u => {
+      if (u.date_naissance) {
+        const birthDate = new Date(u.date_naissance);
+        if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
+          const userMatch = selectedUser.length === 0 || selectedUser.includes(u.email);
+          if (userMatch) {
+            events.push({
+              id: `birthday-${u.email}-${dayStr}`,
+              titre: `🎂 Anniversaire de ${u.full_name}`,
+              type: 'birthday',
+              date_debut: dayStr,
+              utilisateur_email: u.email,
+              description: `Aujourd'hui, c'est l'anniversaire de ${u.full_name} !`,
+            });
+          }
+        }
+      }
+    });
+
+    return events;
+  };
+
   // Calendar logic
   let startDate, endDate, daysInView;
 
