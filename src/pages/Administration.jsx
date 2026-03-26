@@ -435,12 +435,12 @@ export default function Administration() {
                     <TableBody>
                       {inactiveUsers.length > 0 ? (
                         inactiveUsers.map((user) => (
-                          <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800 opacity-60">
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-10 h-10 grayscale">
-                                  <AvatarImage src={user.photo_url} />
-                                  <AvatarFallback className="bg-gradient-to-r from-slate-500 to-slate-600">
+                          <TableRow key={user.id} className="hover:bg-slate-800/30 border-slate-800">
+                             <TableCell className="font-medium">
+                               <div className="flex items-center gap-3">
+                                 <Avatar className="w-10 h-10">
+                                   <AvatarImage src={user.photo_url} />
+                                   <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-500">
                                     {getInitials(user.full_name)}
                                   </AvatarFallback>
                                 </Avatar>
