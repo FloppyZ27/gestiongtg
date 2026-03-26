@@ -143,28 +143,6 @@ export default function PermissionsDialog({ open, onOpenChange, user, onSave }) 
             </div>
           </div>
 
-          {/* Informations */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-5 h-5 text-blue-400" />
-              <Label className="text-lg text-blue-400">Accès aux informations</Label>
-            </div>
-            <div className="grid grid-cols-2 gap-3 pl-7">
-              {INFORMATIONS_DISPONIBLES.map(info => (
-                <div key={info} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`info-${info}`}
-                    checked={selectedInfos.includes(info)}
-                    onCheckedChange={() => toggleInfo(info)}
-                    className="border-slate-600"
-                  />
-                  <label htmlFor={`info-${info}`} className="text-sm text-slate-300 cursor-pointer">
-                    {info}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <Button
