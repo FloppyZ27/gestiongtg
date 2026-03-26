@@ -108,88 +108,41 @@ export default function Calendrier() {
   // Note: For a production app, calculating floating holidays (like Victoria Day, Labour Day, Thanksgiving) dynamically
   // would be more robust. These dates are accurate for 2025.
   const getHolidays = (year) => {
-    return [
+    const holidays = [
       { date: `${year}-01-01`, name: "Jour de l'an" },
-      { date: `${year}-04-18`, name: "Vendredi saint" }, // Good Friday 2025
-      { date: `${year}-05-19`, name: "Fête de la Reine" }, // Victoria Day 2025
       { date: `${year}-06-24`, name: "Fête nationale du Québec" },
       { date: `${year}-07-01`, name: "Fête du Canada" },
-      { date: `${year}-09-01`, name: "Fête du Travail" }, // Labour Day 2025
-      { date: `${year}-10-13`, name: "Action de grâce" }, // Thanksgiving 2025
       { date: `${year}-12-25`, name: "Noël" },
       { date: `${year}-12-26`, name: "Lendemain de Noël" },
     ];
-  };
-
-  // Calendar logic
-  let startDate, endDate, daysInView;
-
-  if (viewMode === 'month') {
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    startDate = monthStart;
-    endDate = monthEnd;
-    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
-  } else {
-    startDate = startOfWeek(currentDate, { locale: fr });
-    endDate = endOfWeek(currentDate, { locale: fr });
-    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
-  }
-
-  const getEventsForDay = (day) => {
-    // Start with filtered RendezVous and Absences
-    const events = filteredRendezVous.filter(rdv => {
-      const rdvStart = new Date(rdv.date_debut);
-      const rdvEnd = rdv.date_fin ? new Date(rdv.date_fin) : rdvStart;
-      
-      // Check if the day falls within the event's date range
-      const dayStart = new Date(day);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(day);
-      dayEnd.setHours(23, 59, 59, 999);
-      
-      return rdvStart <= dayEnd && rdvEnd >= dayStart;
-    });
-
-    const dayStr = format(day, 'yyyy-MM-dd');
-    const currentYear = day.getFullYear();
-
-    // Add holidays
-    const holidays = getHolidays(currentYear);
-    const holiday = holidays.find(h => h.date === dayStr);
-    if (holiday) {
-      events.push({
-        id: `holiday-${dayStr}`,
-        titre: holiday.name,
-        type: 'holiday',
-        date_debut: dayStr,
-        description: `C'est un jour férié : ${holiday.name}.`
-      });
+    
+    // Dates variables par année (Easter-based holidays)
+    if (year === 2025) {
+      holidays.push(
+        { date: "2025-04-18", name: "Vendredi saint" },
+        { date: "2025-05-19", name: "Fête de la Reine" },
+        { date: "2025-09-01", name: "Fête du Travail" },
+        { date: "2025-10-13", name: "Action de grâce" }
+      );
+    } else if (year === 2026) {
+      holidays.push(
+        { date: "2026-04-03", name: "Vendredi saint" },
+        { date: "2026-04-06", name: "Lundi de Pâques" },
+        { date: "2026-05-18", name: "Fête de la Reine" },
+        { date: "2026-09-07", name: "Fête du Travail" },
+        { date: "2026-10-12", name: "Action de grâce" }
+      );
+    } else if (year === 2027) {
+      holidays.push(
+        { date: "2027-03-26", name: "Vendredi saint" },
+        { date: "2027-03-29", name: "Lundi de Pâques" },
+        { date: "2027-05-24", name: "Fête de la Reine" },
+        { date: "2027-09-06", name: "Fête du Travail" },
+        { date: "2027-10-11", name: "Action de grâce" }
+      );
     }
-
-    // Add birthdays for all users
-    users.forEach(u => {
-      if (u.date_naissance) {
-        const birthDate = new Date(u.date_naissance);
-        // Check if the month and day match the current day in the calendar view
-        if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
-          // Check if this user's birthday should be displayed based on selectedUser filter
-          const userMatch = selectedUser.length === 0 || selectedUser.includes(u.email);
-          if (userMatch) {
-            events.push({
-              id: `birthday-${u.email}-${dayStr}`,
-              titre: `🎂 Anniversaire de ${u.full_name}`,
-              type: 'birthday',
-              date_debut: dayStr,
-              utilisateur_email: u.email,
-              description: `Aujourd'hui, c'est l'anniversaire de ${u.full_name} !`,
-            });
-          }
-        }
-      }
-    });
-
-    return events;
+    
+    return holidays;
   };
 
   const previousPeriod = () => {
@@ -737,10 +690,10 @@ export default function Calendrier() {
                                   <div className={`truncate font-bold text-sm ${
                                     isAbsence ? 'text-orange-300' : isHoliday ? 'text-cyan-300' : isBirthday ? 'text-pink-300' : 'text-purple-300'
                                   }`}>{event.titre}</div>
-                                  {event.date_fin && (
+                                  {!isHoliday && !isBirthday && event.date_fin && (
                                     <div className="truncate text-[11px] opacity-90">{format(displayStart, "HH:mm")} - {format(displayEnd, "HH:mm")}</div>
                                   )}
-                                  {event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
+                                  {!isHoliday && !isBirthday && event.description && <div className="truncate text-[10px] opacity-75">{event.description}</div>}
                                   {(event.type === 'rendez-vous' || event.type === 'absence') && (
                                     <div className="flex items-center justify-between pt-1 border-t border-white/20 mt-auto">
                                       <div className="text-[9px] opacity-60 truncate">
