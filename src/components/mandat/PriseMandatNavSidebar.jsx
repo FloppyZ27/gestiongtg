@@ -103,8 +103,22 @@ export default function PriseMandatNavSidebar({
         setDocumentsStepCollapsed(true);
       }
     },
+    { 
+      id: "documents", 
+      label: "Documents", 
+      icon: FileText, 
+      color: "text-yellow-400", 
+      open: () => setDocumentsStepCollapsed(false),
+      closeOthers: () => {
+        setDossierInfoStepCollapsed(true);
+        setClientStepCollapsed(true);
+        setProfessionnelStepCollapsed(true);
+        setAddressStepCollapsed(true);
+        setMandatStepCollapsed(true);
+        setTarificationStepCollapsed(true);
+      }
+    },
   ];
-  // Documents section removed
 
   return (
     <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0">
