@@ -334,9 +334,7 @@ export default function Profil() {
   const handleOpenEditPointage = (pointage) => {
     const hasModification = pointage.heure_debut_modifiee && pointage.heure_fin_modifiee;
     
-    let heureDebut = "";
-    let heureFin = "";
-    let date = "";
+    let heureDebut, heureFin, date;
     
     if (hasModification) {
       const debutMod = new Date(pointage.heure_debut_modifiee);
@@ -344,8 +342,14 @@ export default function Profil() {
       heureDebut = debutMod.toTimeString().slice(0, 5);
       heureFin = finMod.toTimeString().slice(0, 5);
       date = pointage.date;
+    } else {
+      const debut = pointage.heure_debut ? new Date(pointage.heure_debut) : null;
+      const fin = pointage.heure_fin ? new Date(pointage.heure_fin) : null;
+      heureDebut = debut ? debut.toTimeString().slice(0, 5) : "";
+      heureFin = fin ? fin.toTimeString().slice(0, 5) : "";
+      date = pointage.date || "";
     }
-    
+
     setEditPointageForm({
       date: date,
       heure_debut: heureDebut,
