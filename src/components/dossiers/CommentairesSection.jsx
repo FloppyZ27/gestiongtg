@@ -575,6 +575,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                           Annuler
                         </Button>
                         <Button
+                          type="button"
                           size="sm"
                           onClick={() => handleSaveEdit(commentaire)}
                           className="h-7 text-xs text-slate-400 hover:text-white"
