@@ -122,7 +122,9 @@ export default function DocumentsStepForm({
   onToggleCollapse,
   onDocumentsChange,
   isTemporaire = false,
-  clientInfo = null
+  clientInfo = null,
+  onAddHistoriqueEntry = null,
+  priseMandatId = null
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -211,38 +213,69 @@ export default function DocumentsStepForm({
     });
   };
 
-  const createHistoryEntry = async (fileName) => {
+  const createHistoryEntry = async (fileName, action = 'Ajout de document') => {
     try {
       const user = await base44.auth.me();
-      if (!user || (!arpenteurGeometre || (!numeroDossier && !isTemporaire))) return;
+      if (!user) return;
 
-      // Pour les dossiers temporaires, pas d'historique dans Dossier
-      if (isTemporaire && clientInfo) {
-        return;
+      const details = action === 'Ajout de document'
+        ? `Document "${fileName}" ajouté à la section Documents`
+        : action === 'Suppression de document'
+        ? `Document "${fileName}" supprimé de la section Documents`
+        : `Dossier "${fileName}" supprimé de la section Documents`;
+
+      const historiqueEntry = {
+        action,
+        details,
+        utilisateur_email: user.email,
+        utilisateur_nom: user.full_name,
+        date: new Date().toISOString()
+      };
+
+      // Notifier le parent (met à jour l'état local d'historique)
+      if (onAddHistoriqueEntry) {
+        onAddHistoriqueEntry(historiqueEntry);
       }
 
-      if (numeroDossier && arpenteurGeometre) {
-        // Chercher le dossier correspondant
+      // Mettre à jour directement l'entité PriseMandat si on a l'id
+      // OU chercher par arpenteur + numero_dossier
+      const pmId = priseMandatId;
+      if (pmId) {
+        const priseMandat = await base44.entities.PriseMandat.filter({ id: pmId }, '', 1);
+        if (priseMandat && priseMandat.length > 0) {
+          const pm = priseMandat[0];
+          const updatedHistorique = [historiqueEntry, ...(pm.historique || [])];
+          await base44.entities.PriseMandat.update(pmId, {
+            historique: updatedHistorique
+          });
+        }
+      } else if (arpenteurGeometre && numeroDossier) {
+        // Chercher le PriseMandat par arpenteur + numero_dossier
+        const priseMandats = await base44.entities.PriseMandat.filter(
+          { arpenteur_geometre: arpenteurGeometre, numero_dossier: numeroDossier },
+          '',
+          1
+        );
+        if (priseMandats && priseMandats.length > 0) {
+          const pm = priseMandats[0];
+          const updatedHistorique = [historiqueEntry, ...(pm.historique || [])];
+          await base44.entities.PriseMandat.update(pm.id, {
+            historique: updatedHistorique
+          });
+        }
+      }
+
+      // Mettre aussi à jour l'entité Dossier si en mode dossier ouvert
+      if (numeroDossier && arpenteurGeometre && !isTemporaire) {
         const dossiersData = await base44.entities.Dossier.filter(
           { numero_dossier: numeroDossier, arpenteur_geometre: arpenteurGeometre },
           '',
           1
         );
-
         if (dossiersData && dossiersData.length > 0) {
           const dossier = dossiersData[0];
-          const historiqueEntry = {
-            action: 'Ajout de document',
-            details: `Document "${fileName}" ajouté à la section Documents`,
-            utilisateur_email: user.email,
-            utilisateur_nom: user.full_name,
-            date: new Date().toISOString()
-          };
-
-          const updatedHistorique = [...(dossier.historique || []), historiqueEntry];
-          await base44.entities.Dossier.update(dossier.id, {
-            historique: updatedHistorique
-          });
+          const updatedHistorique = [historiqueEntry, ...(dossier.historique || [])];
+          await base44.entities.Dossier.update(dossier.id, { historique: updatedHistorique });
         }
       }
     } catch (error) {
@@ -263,7 +296,7 @@ export default function DocumentsStepForm({
       for (let i = 0; i < droppedFiles.length; i++) {
         setUploadProgress(`Téléversement ${i + 1}/${droppedFiles.length}: ${droppedFiles[i].name}`);
         await uploadFile(droppedFiles[i]);
-        await createHistoryEntry(droppedFiles[i].name);
+        await createHistoryEntry(droppedFiles[i].name, 'Ajout de document');
       }
       setUploadProgress("");
       refetch();
@@ -284,7 +317,7 @@ export default function DocumentsStepForm({
       for (let i = 0; i < selectedFiles.length; i++) {
         setUploadProgress(`Téléversement ${i + 1}/${selectedFiles.length}: ${selectedFiles[i].name}`);
         await uploadFile(selectedFiles[i]);
-        await createHistoryEntry(selectedFiles[i].name);
+        await createHistoryEntry(selectedFiles[i].name, 'Ajout de document');
       }
       setUploadProgress("");
       refetch();
@@ -364,7 +397,7 @@ export default function DocumentsStepForm({
         action: 'delete',
         fileId: file.id
       });
-      await createHistoryEntry(`${file.name} (supprimé)`);
+      await createHistoryEntry(file.name, 'Suppression de document');
       refetch();
     } catch (error) {
       console.error("Erreur suppression:", error);
@@ -404,7 +437,7 @@ export default function DocumentsStepForm({
         action: 'delete',
         fileId: folder.id
       });
-      await createHistoryEntry(`Dossier "${folder.name}" supprimé`);
+      await createHistoryEntry(folder.name, 'Suppression de dossier');
       setFolderToDelete(null);
       refetch();
     } catch (error) {
