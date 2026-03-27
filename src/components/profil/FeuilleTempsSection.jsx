@@ -335,9 +335,9 @@ export default function FeuilleTempsSection({
                                         className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
                                           isModified
                                             ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                            : p.type === 'Vacance'
+                                            : p.type?.includes('Vacance')
                                             ? 'bg-gradient-to-r from-purple-500/60 to-violet-500/60 border border-purple-500 text-purple-50'
-                                            : p.type === 'Mieux-Être'
+                                            : p.type?.includes('Mieux')
                                             ? 'bg-gradient-to-r from-cyan-500/60 to-blue-500/60 border border-cyan-500 text-cyan-50'
                                             : p.confirme
                                             ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
@@ -357,8 +357,8 @@ export default function FeuilleTempsSection({
                                         {totalMinutes >= 30 && (
                                           <div className={`text-[11px] font-semibold ${
                                             isModified ? 'text-orange-300'
-                                            : p.type === 'Vacance' ? 'text-purple-300'
-                                            : p.type === 'Mieux-Être' ? 'text-cyan-300'
+                                            : p.type?.includes('Vacance') ? 'text-purple-300'
+                                            : p.type?.includes('Mieux') ? 'text-cyan-300'
                                             : p.confirme ? 'text-green-300'
                                             : 'text-blue-300'
                                           }`}>
@@ -368,7 +368,7 @@ export default function FeuilleTempsSection({
                                         {/* Heures visibles si >= 60px */}
                                         {totalMinutes >= 60 && (
                                           <div className="text-[11px] leading-tight">
-                                            <div className={isModified ? "opacity-50 text-slate-300" : p.type === 'Vacance' ? "opacity-90 text-purple-400" : p.type === 'Mieux-Être' ? "opacity-90 text-cyan-400" : p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>
+                                            <div className={isModified ? "opacity-50 text-slate-300" : p.type?.includes('Vacance') ? "opacity-90 text-purple-400" : p.type?.includes('Mieux') ? "opacity-90 text-cyan-400" : p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>
                                               Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
                                             </div>
                                             {isModified && (
@@ -391,7 +391,7 @@ export default function FeuilleTempsSection({
                                           </button>
                                         )}
                                         {totalMinutes >= 90 && p.confirme && !isModified && (
-                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type === 'Vacance' ? 'border-purple-400/30' : p.type === 'Mieux-Être' ? 'border-cyan-400/30' : 'border-green-400/30'}`}>
+                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type?.includes('Vacance') ? 'border-purple-400/30' : p.type?.includes('Mieux') ? 'border-cyan-400/30' : 'border-green-400/30'}`}>
                                             Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
                                           </div>
                                         )}
@@ -406,8 +406,8 @@ export default function FeuilleTempsSection({
                                       <div className="space-y-2">
                                         <div className={`text-xs font-bold uppercase ${
                                            isModified ? 'text-orange-400'
-                                           : p.type === 'Vacance' ? 'text-purple-400'
-                                           : p.type === 'Mieux-Être' ? 'text-cyan-400'
+                                           : p.type?.includes('Vacance') ? 'text-purple-400'
+                                           : p.type?.includes('Mieux') ? 'text-cyan-400'
                                            : p.confirme ? 'text-green-400'
                                            : 'text-blue-400'
                                          }`}>
@@ -505,9 +505,9 @@ export default function FeuilleTempsSection({
 
                     <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
                       {dayPointages.map((p) => {
-                        const typeColor = p.type === 'Vacance' 
+                        const typeColor = p.type?.includes('Vacance') 
                           ? 'text-purple-400' 
-                          : p.type === 'Mieux-Être'
+                          : p.type?.includes('Mieux')
                           ? 'text-cyan-400'
                           : 'text-slate-400';
                         return (

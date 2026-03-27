@@ -906,25 +906,106 @@ export default function Profil() {
           deleteRendezVousMutation={deleteRendezVousMutation}
         />
 
+        {/* Section Entrée de temps */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <div 
+            className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/20 border-b border-slate-800"
+            onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-purple-500/30 flex items-center justify-center">
+                  <Timer className="w-3 h-3 text-purple-400" />
+                </div>
+                <h3 className="text-purple-300 text-sm font-semibold">Entrée de temps</h3>
+              </div>
+              {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+            </div>
+          </div>
+
+          {!entreeTempsCollapsed && (
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Navigation et contrôles */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => goToEntreeTemPrevious()}>&lt;</Button>
+                    <Button variant="outline" size="sm" onClick={() => goToEntreeTempsToday()}>Aujourd'hui</Button>
+                    <Button variant="outline" size="sm" onClick={() => goToEntreeTempsNext()}>&gt;</Button>
+                  </div>
+                  <Tabs value={entreeTempsTab} onValueChange={setEntreeTempsTab} className="w-auto">
+                    <TabsList className="bg-slate-800/50">
+                      <TabsTrigger value="semaine">Semaine</TabsTrigger>
+                      <TabsTrigger value="mois">Mois</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                {/* Vue Semaine */}
+                {entreeTempsTab === "semaine" && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-7 gap-2">
+                      {getEntreeTempsWeekDays().map((day, idx) => {
+                        const entries = getEntreeTempsForDate(day);
+                        const total = calculateTotalHours(day.toISOString().split('T')[0]);
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        return (
+                          <Card key={idx} className={`p-3 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                            <p className="text-xs text-slate-400">{format(day, "EEE dd", { locale: fr })}</p>
+                            <p className="text-lg font-bold text-white mt-2">{total.toFixed(1)}h</p>
+                            {entries.length > 0 && (
+                              <div className="text-xs text-slate-400 mt-2 space-y-1">
+                                {entries.map(e => (
+                                  <div key={e.id}>{e.tache}: {e.heures}h</div>
+                                ))}
+                              </div>
+                            )}
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Vue Mois */}
+                {entreeTempsTab === "mois" && (
+                  <div className="grid grid-cols-7 gap-2">
+                    {getEntreeTempsMonthDays().map((day, idx) => {
+                      const total = calculateTotalHours(day.toISOString().split('T')[0]);
+                      const isToday = day.toDateString() === new Date().toDateString();
+                      return (
+                        <Card key={idx} className={`p-2 text-center text-xs ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                          <p className="font-bold text-white">{day.getDate()}</p>
+                          <p className="text-slate-400">{total.toFixed(1)}h</p>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
         {/* Section Feuille de temps (Pointage) - Utilisation du composant */}
-        <FeuilleTempsSection
-          pointageCollapsed={pointageCollapsed}
-          setPointageCollapsed={setPointageCollapsed}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          pointageCurrentDate={pointageCurrentDate}
-          setIsAddingPointage={setIsAddingPointage}
-          goToPointagePrevious={goToPointagePrevious}
-          goToPointageToday={goToPointageToday}
-          goToPointageNext={goToPointageNext}
-          getPointageWeekDays={getPointageWeekDays}
-          getPointageMonthDays={getPointageMonthDays}
-          getPointageForDate={getPointageForDate}
-          getEventsForDate={getEventsForDate}
-          handleOpenEditPointage={handleOpenEditPointage}
-          handleConfirmPointage={handleConfirmPointage}
-          weekScrollRef={weekScrollRef}
-        />
+         <FeuilleTempsSection
+           pointageCollapsed={pointageCollapsed}
+           setPointageCollapsed={setPointageCollapsed}
+           viewMode={viewMode}
+           setViewMode={setViewMode}
+           pointageCurrentDate={pointageCurrentDate}
+           setIsAddingPointage={setIsAddingPointage}
+           goToPointagePrevious={goToPointagePrevious}
+           goToPointageToday={goToPointageToday}
+           goToPointageNext={goToPointageNext}
+           getPointageWeekDays={getPointageWeekDays}
+           getPointageMonthDays={getPointageMonthDays}
+           getPointageForDate={getPointageForDate}
+           getEventsForDate={getEventsForDate}
+           handleOpenEditPointage={handleOpenEditPointage}
+           handleConfirmPointage={handleConfirmPointage}
+           weekScrollRef={weekScrollRef}
+         />
 
         {/* Add Pointage Dialog - Full featured with Tabs */}
         <Dialog open={isAddingPointage} onOpenChange={(open) => {
