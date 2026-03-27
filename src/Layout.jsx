@@ -256,7 +256,8 @@ function LayoutContent({ children, currentPageName }) {
     tache_suivante: "",
     utilisateur_assigne: "",
     description: "",
-    type: "Pointage"
+    type: "Pointage",
+    multiplicateur: "1"
   });
 
   const createEntreeMutation = useMutation({
@@ -1499,6 +1500,23 @@ function LayoutContent({ children, currentPageName }) {
                             placeholder="Ex: 2.5"
                             className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                           />
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Multiplicateur <span className="text-red-400">*</span></Label>
+                          <Select value={entreeForm.multiplicateur || "1"} onValueChange={(value) => {
+                            setEntreeForm({...entreeForm, multiplicateur: value});
+                            setHasEntreeChanges(true);
+                          }}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="1" className="text-white text-xs">1</SelectItem>
+                              <SelectItem value="1.5" className="text-white text-xs">1.5</SelectItem>
+                              <SelectItem value="2" className="text-white text-xs">2</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="space-y-1">

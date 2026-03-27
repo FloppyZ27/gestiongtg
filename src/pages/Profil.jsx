@@ -83,7 +83,8 @@ export default function Profil() {
     heure_debut: "",
     heure_fin: "",
     description: "",
-    type: "Pointage"
+    type: "Pointage",
+    multiplicateur: "1"
   });
   const weekScrollRef = React.useRef(null);
 
@@ -238,10 +239,11 @@ export default function Profil() {
         heure_debut: "",
         heure_fin: "",
         description: "",
-        type: "Pointage"
+        type: "Pointage",
+        multiplicateur: "1"
       });
-    },
-  });
+      },
+      });
 
   const createRendezVousMutation = useMutation({
     mutationFn: (data) => base44.entities.RendezVous.create({ ...data, utilisateur_email: user?.email }),
@@ -1330,7 +1332,8 @@ export default function Profil() {
               heure_debut: "",
               heure_fin: "",
               description: "",
-              type: "Pointage"
+              type: "Pointage",
+              multiplicateur: "1"
             });
           }
         }}>
@@ -1358,6 +1361,21 @@ export default function Profil() {
                         <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
                         <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
                         <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Multiplicateur <span className="text-red-400">*</span></Label>
+                    <Select value={addPointageForm.multiplicateur || "1"} onValueChange={(value) => {
+                      setAddPointageForm({...addPointageForm, multiplicateur: value});
+                    }}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="1" className="text-white">1</SelectItem>
+                        <SelectItem value="1.5" className="text-white">1.5</SelectItem>
+                        <SelectItem value="2" className="text-white">2</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
