@@ -748,14 +748,17 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     if(editingPriseMandat.arpenteur_geometre!==formData.arpenteur_geometre)_h("Changement d'arpenteur-géomètre",`${editingPriseMandat.arpenteur_geometre||'Non défini'} → ${formData.arpenteur_geometre}`);
     if((editingPriseMandat.place_affaire||'')!==(formData.placeAffaire||''))_h("Changement de place d'affaire",`${editingPriseMandat.place_affaire||'Non définie'} → ${formData.placeAffaire||'Non définie'}`);
     const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
-    if(_oc!==_nc&&(_oc||_nc))_h("Client",`${_oc||'—'} → ${_nc||'—'}`);if((initialPriseMandatData.client_info?.telephone||'')!==(clientInfo.telephone||''))_h("Tél.",`${initialPriseMandatData.client_info?.telephone||'—'} → ${clientInfo.telephone||'—'}`);if((initialPriseMandatData.client_info?.courriel||'')!==(clientInfo.courriel||''))_h("Courriel",`${initialPriseMandatData.client_info?.courriel||'—'} → ${clientInfo.courriel||'—'}`);
-    if((initialPriseMandatData.professionnel_info?.notaire||'')!==(professionnelInfo.notaire||''))_h("Notaire",`${initialPriseMandatData.professionnel_info?.notaire||'—'} → ${professionnelInfo.notaire||'—'}`);if((initialPriseMandatData.professionnel_info?.courtier||'')!==(professionnelInfo.courtier||''))_h("Courtier",`${initialPriseMandatData.professionnel_info?.courtier||'—'} → ${professionnelInfo.courtier||'—'}`);if((initialPriseMandatData.professionnel_info?.compagnie||'')!==(professionnelInfo.compagnie||''))_h("Compagnie",`${initialPriseMandatData.professionnel_info?.compagnie||'—'} → ${professionnelInfo.compagnie||'—'}`);
-    const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;const _na=`${workAddress.rue||''}${workAddress.ville||''}`;if(_oa!==_na&&_na)_h("Adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());if((initialPriseMandatData.adresse_travaux?.numero_lot||'')!==(workAddress.numero_lot||''))_h("N° lot",`${initialPriseMandatData.adresse_travaux?.numero_lot||'—'} → ${workAddress.numero_lot||'—'}`);
-    const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');if(_om!==_nm)_h("Types de mandats",_nm||'—');if((initialPriseMandatData.echeance_souhaitee||'')!==(mandatsInfo[0]?.echeance_souhaitee||''))_h("Échéance",`${initialPriseMandatData.echeance_souhaitee||'—'} → ${mandatsInfo[0]?.echeance_souhaitee||'—'}`);if((initialPriseMandatData.urgence_percue||'')!==(mandatsInfo[0]?.urgence_percue||''))_h("Urgence",`${initialPriseMandatData.urgence_percue||'—'} → ${mandatsInfo[0]?.urgence_percue||'—'}`);
-    const _fd=(d)=>d?new Date(d).toLocaleDateString('fr-CA'):'—';if((initialPriseMandatData.date_signature||'')!==(mandatsInfo[0]?.date_signature||''))_h("Date signature",`${_fd(initialPriseMandatData.date_signature)} → ${_fd(mandatsInfo[0]?.date_signature)}`);if((initialPriseMandatData.date_debut_travaux||'')!==(mandatsInfo[0]?.date_debut_travaux||''))_h("Début travaux",`${_fd(initialPriseMandatData.date_debut_travaux)} → ${_fd(mandatsInfo[0]?.date_debut_travaux)}`);if((initialPriseMandatData.date_livraison||'')!==(mandatsInfo[0]?.date_livraison||''))_h("Date livraison",`${_fd(initialPriseMandatData.date_livraison)} → ${_fd(mandatsInfo[0]?.date_livraison)}`);
-    const _otp=(initialPriseMandatData.mandats||[]).reduce((s,m)=>s+(m.prix_estime||0)+(m.prix_premier_lot||0)+(m.prix_autres_lots||0),0);const _ntp=mandatsInfo.filter(m=>m.type_mandat).reduce((s,m)=>s+(m.prix_estime||0)+(m.prix_premier_lot||0)+(m.prix_autres_lots||0),0);if(_otp!==_ntp)_h("Tarification",`${_otp.toFixed(2)} $ → ${_ntp.toFixed(2)} $`);const _otr=(initialPriseMandatData.mandats||[]).reduce((s,m)=>s+(m.rabais||0),0);const _ntr=mandatsInfo.filter(m=>m.type_mandat).reduce((s,m)=>s+(m.rabais||0),0);if(_otr!==_ntr)_h("Rabais",`${_otr.toFixed(2)} $ → ${_ntr.toFixed(2)} $`);
-    const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=currentCommentaires.length;if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
-    else{const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=currentCommentaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}}
+    if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
+    const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
+    const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
+    if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
+    const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
+    const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
+    if(_om!==_nm)_h("Modification mandats",_nm||'—');
+    const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=currentCommentaires.length;
+    if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
+    else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
+    else{const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=currentCommentaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}
     const updatedHistorique=[...newHistoriqueEntries,...historique];
 
     try {
@@ -1471,36 +1474,144 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         });
       }
 
-      const _sh=(a,d)=>newHistoriqueEntries.push({action:a,details:d,utilisateur_nom:userName,utilisateur_email:userEmail,date:now});
-      const _sf=(d)=>d?format(new Date(d),"dd MMM yyyy",{locale:fr}):'Non définie';
-      if(editingPriseMandat.urgence_percue!==(mandatsInfo[0]?.urgence_percue||''))_sh("Changement d'urgence",`${editingPriseMandat.urgence_percue||'Non définie'} → ${mandatsInfo[0]?.urgence_percue||'Non définie'}`);
-      const oldClientName=`${editingPriseMandat.client_info?.prenom||''} ${editingPriseMandat.client_info?.nom||''}`.trim();
-      const newClientName=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
-      const oldAdresse=formatAdresse(editingPriseMandat.adresse_travaux);const newAdresse=formatAdresse(workAddress);
-      if(oldClientName!==newClientName&&newClientName)_sh("Modification des informations client",oldClientName?`${oldClientName} → ${newClientName}`:`Ajout: ${newClientName}`);
-      if((editingPriseMandat.client_info?.telephone||'')!==(clientInfo.telephone||''))_sh("Modification téléphone",`${editingPriseMandat.client_info?.telephone||'—'} → ${clientInfo.telephone||'—'}`);
-      if((editingPriseMandat.client_info?.courriel||'')!==(clientInfo.courriel||''))_sh("Modification courriel",`${editingPriseMandat.client_info?.courriel||'—'} → ${clientInfo.courriel||'—'}`);
-      if((editingPriseMandat.professionnel_info?.notaire||'')!==(professionnelInfo.notaire||''))_sh("Modification notaire",`${editingPriseMandat.professionnel_info?.notaire||'—'} → ${professionnelInfo.notaire||'—'}`);
-      if((editingPriseMandat.professionnel_info?.courtier||'')!==(professionnelInfo.courtier||''))_sh("Modification courtier immobilier",`${editingPriseMandat.professionnel_info?.courtier||'—'} → ${professionnelInfo.courtier||'—'}`);
-      if((editingPriseMandat.professionnel_info?.compagnie||'')!==(professionnelInfo.compagnie||''))_sh("Modification compagnie",`${editingPriseMandat.professionnel_info?.compagnie||'—'} → ${professionnelInfo.compagnie||'—'}`);
-      if(oldAdresse!==newAdresse&&newAdresse)_sh("Modification de l'adresse des travaux",oldAdresse?`${oldAdresse} → ${newAdresse}`:`Ajout: ${newAdresse}`);
-      if((editingPriseMandat.adresse_travaux?.numero_lot||'')!==(workAddress.numero_lot||''))_sh("Modification N° de lot",`${editingPriseMandat.adresse_travaux?.numero_lot||'—'} → ${workAddress.numero_lot||'—'}`);
-      const oldMandatTypes=(editingPriseMandat.mandats||[]).map(m=>m.type_mandat).join(', ');
-      const newMandatTypes=mandatsToSave.map(m=>m.type_mandat).join(', ');
-      if(oldMandatTypes!==newMandatTypes)_sh("Modification des types de mandats",oldMandatTypes?`${oldMandatTypes} → ${newMandatTypes}`:`Ajout: ${newMandatTypes}`);
-      if(editingPriseMandat.echeance_souhaitee!==(mandatsInfo[0]?.echeance_souhaitee||''))_sh("Échéance souhaitée modifiée",`${editingPriseMandat.echeance_souhaitee||'Non définie'} → ${mandatsInfo[0]?.echeance_souhaitee||'Non définie'}`);
-      if(editingPriseMandat.date_signature!==(mandatsInfo[0]?.date_signature||''))_sh("Modification date de signature",`${_sf(editingPriseMandat.date_signature)} → ${_sf(mandatsInfo[0]?.date_signature)}`);
-      if(editingPriseMandat.date_debut_travaux!==(mandatsInfo[0]?.date_debut_travaux||''))_sh("Modification début des travaux",`${_sf(editingPriseMandat.date_debut_travaux)} → ${_sf(mandatsInfo[0]?.date_debut_travaux)}`);
-      if(editingPriseMandat.date_livraison!==(mandatsInfo[0]?.date_livraison||''))_sh("Modification date de livraison",`${_sf(editingPriseMandat.date_livraison)} → ${_sf(mandatsInfo[0]?.date_livraison)}`);
-      const oldTotalPrix=(editingPriseMandat.mandats||[]).reduce((s,m)=>s+(m.prix_estime||0)+(m.prix_premier_lot||0)+(m.prix_autres_lots||0),0);
-      const newTotalPrix=mandatsToSave.reduce((s,m)=>s+(m.prix_estime||0)+(m.prix_premier_lot||0)+(m.prix_autres_lots||0),0);
-      if(oldTotalPrix!==newTotalPrix)_sh("Modification tarification",`${oldTotalPrix.toFixed(2)} $ → ${newTotalPrix.toFixed(2)} $`);
-      const oldTotalRabais=(editingPriseMandat.mandats||[]).reduce((s,m)=>s+(m.rabais||0),0);
-      const newTotalRabais=mandatsToSave.reduce((s,m)=>s+(m.rabais||0),0);
-      if(oldTotalRabais!==newTotalRabais)_sh("Modification du rabais",`${oldTotalRabais.toFixed(2)} $ → ${newTotalRabais.toFixed(2)} $`);
-      const oldClientsIds=(editingPriseMandat.clients_ids||[]).sort().join(',');
-      const newClientsIds=(formData.clients_ids||[]).sort().join(',');
-      if(oldClientsIds!==newClientsIds){const oldNames=getClientsNames(editingPriseMandat.clients_ids||[]);const newNames=getClientsNames(formData.clients_ids||[]);_sh("Modification des clients sélectionnés",oldNames!=='-'?`${oldNames} → ${newNames}`:`Ajout: ${newNames}`);}
+      // Vérifier changement d'urgence
+      if (editingPriseMandat.urgence_percue !== (mandatsInfo[0]?.urgence_percue || "")) {
+        newHistoriqueEntries.push({
+          action: "Changement d'urgence",
+          details: `${editingPriseMandat.urgence_percue || 'Non définie'} → ${mandatsInfo[0]?.urgence_percue || 'Non définie'}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de client info (déclaré avant pour réutilisation)
+      const oldClientName = `${editingPriseMandat.client_info?.prenom || ''} ${editingPriseMandat.client_info?.nom || ''}`.trim();
+      const newClientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+      const oldAdresse = formatAdresse(editingPriseMandat.adresse_travaux);
+      const newAdresse = formatAdresse(workAddress);
+      if (oldClientName !== newClientName && newClientName) {
+        newHistoriqueEntries.push({
+          action: "Modification des informations client",
+          details: oldClientName ? `${oldClientName} → ${newClientName}` : `Ajout: ${newClientName}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'adresse
+      if (oldAdresse !== newAdresse && newAdresse) {
+        newHistoriqueEntries.push({
+          action: "Modification de l'adresse des travaux",
+          details: oldAdresse ? `${oldAdresse} → ${newAdresse}` : `Ajout: ${newAdresse}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de types de mandats
+      const oldMandatTypes = (editingPriseMandat.mandats || []).map(m => m.type_mandat).join(', ');
+      const newMandatTypes = mandatsToSave.map(m => m.type_mandat).join(', ');
+      if (oldMandatTypes !== newMandatTypes) {
+        newHistoriqueEntries.push({
+          action: "Modification des types de mandats",
+          details: oldMandatTypes ? `${oldMandatTypes} → ${newMandatTypes}` : `Ajout: ${newMandatTypes}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de prix total
+      const oldTotalPrix = (editingPriseMandat.mandats || []).reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
+      const newTotalPrix = mandatsToSave.reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
+      if (oldTotalPrix !== newTotalPrix) {
+        newHistoriqueEntries.push({
+          action: "Modification du prix estimé",
+          details: `${oldTotalPrix.toFixed(2)} $ → ${newTotalPrix.toFixed(2)} $`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de rabais total
+      const oldTotalRabais = (editingPriseMandat.mandats || []).reduce((sum, m) => sum + (m.rabais || 0), 0);
+      const newTotalRabais = mandatsToSave.reduce((sum, m) => sum + (m.rabais || 0), 0);
+      if (oldTotalRabais !== newTotalRabais) {
+        newHistoriqueEntries.push({
+          action: "Modification du rabais",
+          details: `${oldTotalRabais.toFixed(2)} $ → ${newTotalRabais.toFixed(2)} $`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de livraison
+      if (editingPriseMandat.date_livraison !== (mandatsInfo[0]?.date_livraison || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
+        newHistoriqueEntries.push({
+          action: "Modification de la date de livraison",
+          details: `${formatDate(editingPriseMandat.date_livraison)} → ${formatDate(mandatsInfo[0]?.date_livraison)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de signature
+      if (editingPriseMandat.date_signature !== (mandatsInfo[0]?.date_signature || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
+        newHistoriqueEntries.push({
+          action: "Modification de la date de signature",
+          details: `${formatDate(editingPriseMandat.date_signature)} → ${formatDate(mandatsInfo[0]?.date_signature)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de début des travaux
+      if (editingPriseMandat.date_debut_travaux !== (mandatsInfo[0]?.date_debut_travaux || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
+        newHistoriqueEntries.push({
+          action: "Modification de la date de début des travaux",
+          details: `${formatDate(editingPriseMandat.date_debut_travaux)} → ${formatDate(mandatsInfo[0]?.date_debut_travaux)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'échéance souhaitée
+      if (editingPriseMandat.echeance_souhaitee !== (mandatsInfo[0]?.echeance_souhaitee || "")) {
+        newHistoriqueEntries.push({
+          action: "Modification de l'échéance souhaitée",
+          details: `${editingPriseMandat.echeance_souhaitee || 'Non définie'} → ${mandatsInfo[0]?.echeance_souhaitee || 'Non définie'}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de clients_ids
+      const oldClientsIds = (editingPriseMandat.clients_ids || []).sort().join(',');
+      const newClientsIds = (formData.clients_ids || []).sort().join(',');
+      if (oldClientsIds !== newClientsIds) {
+        const oldNames = getClientsNames(editingPriseMandat.clients_ids || []);
+        const newNames = getClientsNames(formData.clients_ids || []);
+        newHistoriqueEntries.push({
+          action: "Modification des clients sélectionnés",
+          details: oldNames !== '-' ? `${oldNames} → ${newNames}` : `Ajout: ${newNames}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
       const updatedHistorique = [...newHistoriqueEntries, ...historique];
       
       updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
