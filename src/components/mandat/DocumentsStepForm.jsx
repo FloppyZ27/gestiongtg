@@ -124,9 +124,43 @@ export default function DocumentsStepForm({
   isTemporaire = false,
   clientInfo = null,
   onAddHistoriqueEntry = null,
-  priseMandatId = null
+  priseMandatId = null,
+  previousNumeroDossier = null
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isTransferring, setIsTransferring] = useState(false);
+
+  // Transfert automatique quand le numéro de dossier est assigné (temporaire -> numéroté)
+  React.useEffect(() => {
+    const doTransfer = async () => {
+      if (!numeroDossier || !arpenteurGeometre) return;
+      if (!previousNumeroDossier && numeroDossier) {
+        // On vient d'assigner un numéro de dossier - vérifier s'il y a des fichiers temporaires
+        const initials = getArpenteurInitials(arpenteurGeometre).replace('-', '');
+        const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || 'Client';
+        const tempPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
+        const finalPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+
+        try {
+          setIsTransferring(true);
+          const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: tempPath });
+          const files = checkRes.data?.files || [];
+          if (files.length > 0) {
+            await base44.functions.invoke('moveSharePointFiles', {
+              sourceFolderPath: tempPath,
+              destinationFolderPath: finalPath
+            });
+            refetch();
+          }
+        } catch (err) {
+          console.error('Erreur transfert auto:', err);
+        } finally {
+          setIsTransferring(false);
+        }
+      }
+    };
+    doTransfer();
+  }, [numeroDossier]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [previewFile, setPreviewFile] = useState(null);
