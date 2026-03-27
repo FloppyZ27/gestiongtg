@@ -364,6 +364,7 @@ export default function DocumentsStepForm({
         action: 'delete',
         fileId: file.id
       });
+      await createHistoryEntry(`${file.name} (supprimé)`);
       refetch();
     } catch (error) {
       console.error("Erreur suppression:", error);
@@ -403,6 +404,7 @@ export default function DocumentsStepForm({
         action: 'delete',
         fileId: folder.id
       });
+      await createHistoryEntry(`Dossier "${folder.name}" supprimé`);
       setFolderToDelete(null);
       refetch();
     } catch (error) {
