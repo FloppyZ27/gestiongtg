@@ -926,436 +926,169 @@ export default function Profil() {
           weekScrollRef={weekScrollRef}
         />
 
-        {/* Dialog EntreeTemps - replaces the Add Pointage Dialog */}
-        <EntreeTempsDialog
-          isOpen={isAddingPointage}
-          onOpenChange={setIsAddingPointage}
-          hasChanges={false}
-          onShowWarning={() => {}}
-          entreeForm={addPointageForm}
-          setEntreeForm={setAddPointageForm}
-          selectedDossierId={addPointageForm.dossier_id || ""}
-          dossierSearchTerm=""
-          setDossierSearchTerm={() => {}}
-          filteredDossiers={dossiers}
-          selectedDossier={dossiers.find(d => d.id === addPointageForm.dossier_id)}
-          dossiers={dossiers}
-          clients={clients}
-          lots={[]}
-          users={users}
-          pointages={pointages}
-          onSubmit={handleSubmitAddPointage}
-          onReset={() => {
+        {/* Add Pointage Dialog - Full featured with Tabs */}
+        <Dialog open={isAddingPointage} onOpenChange={(open) => {
+          setIsAddingPointage(open);
+          if (!open) {
             setAddPointageForm({
               date: new Date().toISOString().split('T')[0],
-              heures: "",
-              dossier_id: "",
-              mandat: "",
-              tache: "",
-              tache_suivante: "",
-              utilisateur_assigne: "",
+              heure_debut: "",
+              heure_fin: "",
               description: "",
               type: "Pointage",
               multiplicateur: "1"
             });
-          }}
-        />
-
-        {/* Section Entrée de temps */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <div 
-            className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800"
-            onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                  <Clock className="w-3 h-3 text-emerald-400" />
-                </div>
-                <h3 className="text-emerald-300 text-sm font-semibold">Entrée de temps</h3>
-              </div>
-              {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-            </div>
-          </div>
-
-          {!entreeTempsCollapsed && (
-            <CardContent className="p-6">
-              {/* Header avec navigation et contrôles */}
-              <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="text-white font-semibold text-lg">
-                      {entreeTempsTab === "semaine"
-                        ? `Semaine du ${format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                        : entreeTempsTab === "mois"
-                        ? format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)
-                        : "Toutes les entrées"}
-                    </div>
-                    {entreeTempsTab === "semaine" && (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                        Total: {getEntreeTempsWeekDays().reduce((sum, day) => {
-                          const dayEntries = getEntreeTempsForDate(day);
-                          return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
-                        }, 0).toFixed(1)}h
-                      </Badge>
-                    )}
-                    {entreeTempsTab === "mois" && (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                        Total: {getEntreeTempsMonthDays().reduce((sum, day) => {
-                          const dayEntries = getEntreeTempsForDate(day);
-                          return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
-                        }, 0).toFixed(1)}h
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {entreeTempsTab !== "tous" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={goToEntreeTemPrevious}
-                          className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                        >
-                          ← Précédent
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={goToEntreeTempsToday}
-                          className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
-                        >
-                          Aujourd'hui
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={goToEntreeTempsNext}
-                          className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                        >
-                          Suivant →
-                        </Button>
-                        <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                      </>
-                    )}
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        onClick={() => setEntreeTempsTab("semaine")}
-                        className={entreeTempsTab === "semaine" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
-                      >
-                        Semaine
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setEntreeTempsTab("mois")}
-                        className={entreeTempsTab === "mois" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
-                      >
-                        Mois
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setEntreeTempsTab("tous")}
-                        className={entreeTempsTab === "tous" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
-                      >
-                        Tous
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vue Semaine */}
-              {entreeTempsTab === "semaine" && (
-                <div className="space-y-2">
-                  {/* En-têtes des colonnes */}
-                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
-                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                    <div className="text-xs font-semibold text-slate-400">Client</div>
-                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
-                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
-                  </div>
-                  {getEntreeTempsWeekDays().map(day => {
-                    const dayEntries = getEntreeTempsForDate(day);
-                    const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
-                    const dateStr = day.toISOString().split('T')[0];
-                    const isToday = dateStr === new Date().toISOString().split('T')[0];
-                    
-                    return (
-                      <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(day, "EEE d MMM", { locale: fr })}
-                            </span>
-                          </div>
-                          {totalHours > 0 && (
-                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                              {totalHours.toFixed(1)}h
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {dayEntries.length > 0 ? (
-                          <div className="divide-y divide-slate-800">
-                            {dayEntries.map((entree) => {
-                              const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                              return (
-                                <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
-                                    <div>
-                                      {dossier && (
-                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="text-slate-400 text-xs truncate">
-                                      {dossier ? getClientsNames(dossier.clients_ids) : "-"}
-                                    </div>
-                                    <div>
-                                      {entree.mandat && (
-                                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
-                                          {entree.mandat}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div>
-                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                        {entree.tache}
-                                      </Badge>
-                                    </div>
-                                    <div className="text-right">
-                                      <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="p-3 text-center text-slate-500 text-xs">
-                            Aucune entrée
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Vue Mois */}
-              {entreeTempsTab === "mois" && (
-                <div className="space-y-2">
-                  {/* En-têtes des colonnes */}
-                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
-                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                    <div className="text-xs font-semibold text-slate-400">Client</div>
-                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
-                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
-                  </div>
-                  {getEntreeTempsMonthDays().map(day => {
-                    const dayEntries = getEntreeTempsForDate(day);
-                    const totalHours = dayEntries.reduce((sum, e) => sum + (e.heures || 0), 0);
-                    const dateStr = day.toISOString().split('T')[0];
-                    const isToday = dateStr === new Date().toISOString().split('T')[0];
-                    
-                    if (dayEntries.length === 0) return null;
-                    
-                    return (
-                      <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(day, "EEE d MMM", { locale: fr })}
-                            </span>
-                          </div>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                            {totalHours.toFixed(1)}h
-                          </Badge>
-                        </div>
-                        
-                        <div className="divide-y divide-slate-800">
-                          {dayEntries.map((entree) => {
-                            const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                            return (
-                              <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
-                                  <div>
-                                    {dossier && (
-                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="text-slate-400 text-xs truncate">
-                                    {dossier ? getClientsNames(dossier.clients_ids) : "-"}
-                                  </div>
-                                  <div>
-                                    {entree.mandat && (
-                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
-                                        {entree.mandat}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                      {entree.tache}
-                                    </Badge>
-                                  </div>
-                                  <div className="text-right">
-                                    <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Vue Tous */}
-              {entreeTempsTab === "tous" && (
-                <div className="space-y-2">
-                  {/* En-têtes des colonnes */}
-                  <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700 mb-3">
-                    <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                    <div className="text-xs font-semibold text-slate-400">Client</div>
-                    <div className="text-xs font-semibold text-slate-400">Mandat</div>
-                    <div className="text-xs font-semibold text-slate-400">Tâche</div>
-                    <div className="text-xs font-semibold text-slate-400 text-right">Temps</div>
-                  </div>
-                  {sortedDates.map(date => {
-                    const dayEntries = groupedEntrees[date];
-                    const totalHours = calculateTotalHours(date);
-                    const dateStr = date;
-                    const isToday = dateStr === new Date().toISOString().split('T')[0];
-                    
-                    return (
-                      <div key={date} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(new Date(date + 'T00:00:00'), "EEE d MMM yyyy", { locale: fr })}
-                            </span>
-                          </div>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                            {totalHours.toFixed(1)}h
-                          </Badge>
-                        </div>
-                        
-                        <div className="divide-y divide-slate-800">
-                          {dayEntries.map((entree) => {
-                            const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                            return (
-                              <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
-                                <div className="grid grid-cols-[1fr,2fr,1.5fr,1.5fr,0.8fr] gap-2 items-center">
-                                  <div>
-                                    {dossier && (
-                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="text-slate-400 text-xs truncate">
-                                    {dossier ? getClientsNames(dossier.clients_ids) : "-"}
-                                  </div>
-                                  <div>
-                                    {entree.mandat && (
-                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
-                                        {entree.mandat}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                      {entree.tache}
-                                    </Badge>
-                                  </div>
-                                  <div className="text-right">
-                                    <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                  {sortedDates.length === 0 && (
-                    <div className="text-center py-12 text-slate-500">
-                      <Clock className="w-12 h-12 mx-auto mb-3 text-slate-600" />
-                      <p className="text-lg">Aucune entrée de temps enregistrée</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          )}
-        </Card>
-
-        {/* Change Password Dialog */}
-        <Dialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Modifier le mot de passe</DialogTitle>
+              <DialogTitle className="text-2xl">Ajouter une entrée de temps</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Mot de passe actuel</Label>
-                <Input
-                  type="password"
-                  value={passwordForm.currentPassword}
-                  onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                  required
-                />
+            
+            {/* Soldes de temps en haut */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+              <div className="text-center">
+                <div className="text-xs text-slate-400">Vacances</div>
+                <div className="text-lg font-bold text-emerald-400">0h</div>
               </div>
-              <div className="space-y-2">
-                <Label>Nouveau mot de passe</Label>
-                <Input
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                  required
-                />
+              <div className="text-center">
+                <div className="text-xs text-slate-400">Mieux-Être</div>
+                <div className="text-lg font-bold text-blue-400">0h</div>
               </div>
-              <div className="space-y-2">
-                <Label>Confirmer le mot de passe</Label>
-                <Input
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                  required
-                />
+              <div className="text-center">
+                <div className="text-xs text-slate-400">Banques</div>
+                <div className="text-lg font-bold text-yellow-400">0h</div>
               </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsChangingPassword(false)} 
-                  disabled={changePasswordMutation.isPending}
-                  className="border-red-500 text-red-400 hover:bg-red-500/10"
-                >
-                  Annuler
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600" 
-                  disabled={changePasswordMutation.isPending}
-                >
-                  {changePasswordMutation.isPending ? 'Modification...' : 'Modifier'}
-                </Button>
-              </div>
-            </form>
+            </div>
+            
+            <Tabs defaultValue="pointage" className="w-full">
+              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
+                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
+                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="pointage" className="space-y-4">
+                <form onSubmit={handleSubmitAddPointage} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
+                    <Select value={addPointageForm.type || "Pointage"} onValueChange={(value) => {
+                      setAddPointageForm({...addPointageForm, type: value});
+                    }}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
+                        <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
+                        <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Multiplicateur <span className="text-red-400">*</span></Label>
+                    <Select value={addPointageForm.multiplicateur || "1"} onValueChange={(value) => {
+                      setAddPointageForm({...addPointageForm, multiplicateur: value});
+                    }}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="1" className="text-white">1</SelectItem>
+                        <SelectItem value="1.5" className="text-white">1.5</SelectItem>
+                        <SelectItem value="2" className="text-white">2</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
+                    <Input
+                      type="date"
+                      value={addPointageForm.date}
+                      onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="time"
+                        value={addPointageForm.heure_debut}
+                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="time"
+                        value={addPointageForm.heure_fin}
+                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                    <textarea
+                      value={addPointageForm.description}
+                      onChange={(e) => setAddPointageForm({...addPointageForm, description: e.target.value})}
+                      placeholder="Description de l'activité..."
+                      className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
+                      rows="3"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddingPointage(false)}
+                      disabled={createPointageMutation.isPending}
+                      className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                      disabled={createPointageMutation.isPending}
+                    >
+                      {createPointageMutation.isPending ? 'Ajout...' : 'Ajouter'}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="facture" className="space-y-3">
+                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+                  <div className="mb-4">
+                    <Label className="text-slate-300 text-sm font-semibold mb-2 block">Dossier de facturation</Label>
+                    <p className="text-slate-400 text-xs">Uploadez vos factures ici</p>
+                  </div>
+                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5">
+                    <Upload className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                    <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
+                    <p className="text-slate-500 text-xs">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      className="hidden"
+                      id="facture-input-profil"
+                    />
+                    <label htmlFor="facture-input-profil" className="cursor-pointer">
+                      <Button type="button" variant="outline" size="sm" className="mt-3 mx-auto border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                        Sélectionner des fichiers
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
 
