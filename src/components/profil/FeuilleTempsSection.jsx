@@ -336,7 +336,11 @@ export default function FeuilleTempsSection({
                                           isModified
                                             ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
                                             : p.confirme 
-                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                            ? p.type === 'Vacance'
+                                              ? 'bg-gradient-to-r from-purple-500/60 to-violet-500/60 border border-purple-500 text-purple-50'
+                                              : p.type === 'Mieux-Être'
+                                              ? 'bg-gradient-to-r from-cyan-500/60 to-blue-500/60 border border-cyan-500 text-cyan-50'
+                                              : 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                             : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
                                         }`}
                                         onClick={() => handleOpenEditPointage(p)}
@@ -468,33 +472,45 @@ export default function FeuilleTempsSection({
 
                   return (
                     <Card 
-                      key={dateStr}
-                      className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
-                      style={{ minHeight: '120px' }}
+                    key={dateStr}
+                    className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
+                    style={{ minHeight: '120px' }}
                     >
-                      <div className="mb-2 w-full">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <div className="flex items-center justify-center mb-1">
-                            <div className="flex-1">
-                              <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
-                                {format(day, "EEE", { locale: fr })}
-                              </p>
-                              <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
-                                {format(day, "d", { locale: fr })}
-                              </p>
-                            </div>
+                     <div className="mb-2 w-full">
+                      <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
+                        <div className="flex items-center justify-center mb-1">
+                          <div className="flex-1">
+                            <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
+                              {format(day, "EEE", { locale: fr })}
+                            </p>
+                            <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
+                              {format(day, "d", { locale: fr })}
+                            </p>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
-                        {totalInitial > 0 && (
-                          <div className="text-xs text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
-                        )}
-                        {totalModifie > 0 && (
-                          <div className="text-xs text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
-                        )}
-                      </div>
+                    <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
+                      {dayPointages.map((p) => {
+                        const typeColor = p.type === 'Vacance' 
+                          ? 'text-purple-400' 
+                          : p.type === 'Mieux-Être'
+                          ? 'text-cyan-400'
+                          : 'text-slate-400';
+                        return (
+                          <div key={p.id} className={`text-xs font-semibold ${typeColor}`}>
+                            {p.type}: {p.duree_heures?.toFixed(1) || '0'}h
+                          </div>
+                        );
+                      })}
+                      {dayPointages.length === 0 && totalInitial > 0 && (
+                        <div className="text-xs text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
+                      )}
+                      {totalModifie > 0 && (
+                        <div className="text-xs text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
+                      )}
+                    </div>
                     </Card>
                   );
                 })}
