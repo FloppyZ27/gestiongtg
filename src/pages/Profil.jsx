@@ -1318,7 +1318,7 @@ export default function Profil() {
           </DialogContent>
         </Dialog>
 
-        {/* Add Pointage Dialog */}
+        {/* Add Pointage Dialog - Full featured with Tabs */}
         <Dialog open={isAddingPointage} onOpenChange={(open) => {
           setIsAddingPointage(open);
           if (!open) {
@@ -1330,73 +1330,108 @@ export default function Profil() {
             });
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Ajouter une entrée de pointage</DialogTitle>
+              <DialogTitle className="text-2xl">Ajouter une entrée de temps</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmitAddPointage} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
-                <Input
-                  type="date"
-                  value={addPointageForm.date}
-                  onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
-                  className="bg-slate-800 border-slate-700 text-white"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="time"
-                    value={addPointageForm.heure_debut}
-                    onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    required
-                  />
+            <Tabs defaultValue="pointage" className="w-full">
+              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
+                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
+                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="pointage" className="space-y-4">
+                <form onSubmit={handleSubmitAddPointage} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
+                    <Input
+                      type="date"
+                      value={addPointageForm.date}
+                      onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="time"
+                        value={addPointageForm.heure_debut}
+                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="time"
+                        value={addPointageForm.heure_fin}
+                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                    <textarea
+                      value={addPointageForm.description}
+                      onChange={(e) => setAddPointageForm({...addPointageForm, description: e.target.value})}
+                      placeholder="Description de l'activité..."
+                      className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
+                      rows="3"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddingPointage(false)}
+                      disabled={createPointageMutation.isPending}
+                      className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                      disabled={createPointageMutation.isPending}
+                    >
+                      {createPointageMutation.isPending ? 'Ajout...' : 'Ajouter'}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="facture" className="space-y-3">
+                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+                  <div className="mb-4">
+                    <Label className="text-slate-300 text-sm font-semibold mb-2 block">Dossier de facturation</Label>
+                    <p className="text-slate-400 text-xs">Uploadez vos factures ici</p>
+                  </div>
+                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5">
+                    <Upload className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                    <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
+                    <p className="text-slate-500 text-xs">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      className="hidden"
+                      id="facture-input-profil"
+                    />
+                    <label htmlFor="facture-input-profil" className="cursor-pointer">
+                      <Button type="button" variant="outline" size="sm" className="mt-3 mx-auto border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                        Sélectionner des fichiers
+                      </Button>
+                    </label>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="time"
-                    value={addPointageForm.heure_fin}
-                    onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
-                <textarea
-                  value={addPointageForm.description}
-                  onChange={(e) => setAddPointageForm({...addPointageForm, description: e.target.value})}
-                  placeholder="Description de l'activité..."
-                  className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
-                  rows="3"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddingPointage(false)}
-                  disabled={createPointageMutation.isPending}
-                  className="border-red-500 text-red-400 hover:bg-red-500/10"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                  disabled={createPointageMutation.isPending}
-                >
-                  {createPointageMutation.isPending ? 'Ajout...' : 'Ajouter'}
-                </Button>
-              </div>
-            </form>
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
 
