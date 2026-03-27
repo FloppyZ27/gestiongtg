@@ -577,7 +577,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                         <Button
                           size="sm"
                           onClick={() => handleSaveEdit(commentaire)}
-                          className="h-7 text-xs bg-emerald-500 hover:bg-emerald-600"
+                          className="h-7 text-xs text-slate-400 hover:text-white"
                         >
                           <Check className="w-3 h-3 mr-1" />
                           Enregistrer
