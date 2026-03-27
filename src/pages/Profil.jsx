@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import AgendaSection from "@/components/profil/AgendaSection";
 import FeuilleTempsSection from "@/components/profil/FeuilleTempsSection";
@@ -236,7 +237,8 @@ export default function Profil() {
         date: new Date().toISOString().split('T')[0],
         heure_debut: "",
         heure_fin: "",
-        description: ""
+        description: "",
+        type: "Pointage"
       });
     },
   });
@@ -1327,7 +1329,8 @@ export default function Profil() {
               date: new Date().toISOString().split('T')[0],
               heure_debut: "",
               heure_fin: "",
-              description: ""
+              description: "",
+              type: "Pointage"
             });
           }
         }}>
