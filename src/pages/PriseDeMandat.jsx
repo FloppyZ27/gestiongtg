@@ -702,7 +702,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat, commentairesTemporaires]);
 
   const handleAutoSave = async (overrideCommentaires) => {
-    const currentCommentaires = overrideCommentaires !== undefined ? overrideCommentaires : commentairesTemporaires;
+    const currentCommentaires = Array.isArray(overrideCommentaires) ? overrideCommentaires : commentairesTemporaires;
     if (!initialPriseMandatData || !editingPriseMandat || isLocked) return;
     if (!overrideCommentaires && !hasFormChanges) return;
     const mandatsToSave = mandatsInfo
