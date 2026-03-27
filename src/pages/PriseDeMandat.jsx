@@ -699,7 +699,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         date_ouverture: initialPriseMandatData.date_ouverture || ""
       };
       
-      const hasCommentChanges = commentairesTemporaires.length !== (initialPriseMandatData.commentaires?.length || 0);
+      const hasCommentChanges = JSON.stringify(commentairesTemporaires.map(c=>c.contenu)) !== JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu));
       const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData) || hasCommentChanges;
       setHasFormChanges(hasChanges);
 
