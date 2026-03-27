@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings, UserCog } from "lucide-react";
+import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, Settings, UserCog, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
@@ -41,6 +41,8 @@ export default function Administration() {
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -200,8 +202,50 @@ export default function Administration() {
     );
   });
 
-  const activeUsers = filteredUsers.filter(u => u.statut !== 'Inactif');
-  const inactiveUsers = filteredUsers.filter(u => u.statut === 'Inactif');
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortUsers = (usersList) => {
+    if (!sortField) return usersList;
+    return [...usersList].sort((a, b) => {
+      let aVal = (a[sortField] || "").toString().toLowerCase();
+      let bVal = (b[sortField] || "").toString().toLowerCase();
+      if (sortField === "full_name") {
+        aVal = (`${a.prenom || ""} ${a.nom || ""}`).toLowerCase();
+        bVal = (`${b.prenom || ""} ${b.nom || ""}`).toLowerCase();
+      }
+      if (sortField === "date_embauche") {
+        aVal = a.date_embauche || "";
+        bVal = b.date_embauche || "";
+      }
+      return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 ml-1 text-slate-500" />;
+    return sortDirection === "asc" ? <ChevronUp className="w-3 h-3 ml-1 text-emerald-400" /> : <ChevronDown className="w-3 h-3 ml-1 text-emerald-400" />;
+  };
+
+  const SortableHead = ({ field, label, className = "" }) => (
+    <TableHead
+      className={`text-slate-300 cursor-pointer hover:text-white select-none ${className}`}
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center">{label}<SortIcon field={field} /></div>
+    </TableHead>
+  );
+
+  const rawActiveUsers = filteredUsers.filter(u => u.statut !== 'Inactif');
+  const rawInactiveUsers = filteredUsers.filter(u => u.statut === 'Inactif');
+  const activeUsers = sortUsers(rawActiveUsers);
+  const inactiveUsers = sortUsers(rawInactiveUsers);
 
   const adminUsers = users.filter(u => u.role === 'admin' && u.statut !== 'Inactif');
   const gestionnaireUsers = users.filter(u => u.role === 'gestionnaire' && u.statut !== 'Inactif');
@@ -261,12 +305,12 @@ export default function Administration() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Poste</TableHead>
-                        <TableHead className="text-slate-300">Équipe</TableHead>
-                        <TableHead className="text-slate-300">Date d'embauche</TableHead>
-                        <TableHead className="text-slate-300">Rôle</TableHead>
-                        <TableHead className="text-slate-300">Statut</TableHead>
+                        <SortableHead field="full_name" label="Utilisateur" />
+                        <SortableHead field="poste" label="Poste" />
+                        <SortableHead field="equipe" label="Équipe" />
+                        <SortableHead field="date_embauche" label="Date d'embauche" />
+                        <SortableHead field="role" label="Rôle" />
+                        <SortableHead field="statut" label="Statut" />
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -423,12 +467,12 @@ export default function Administration() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Utilisateur</TableHead>
-                        <TableHead className="text-slate-300">Poste</TableHead>
-                        <TableHead className="text-slate-300">Équipe</TableHead>
-                        <TableHead className="text-slate-300">Date d'embauche</TableHead>
-                        <TableHead className="text-slate-300">Rôle</TableHead>
-                        <TableHead className="text-slate-300">Statut</TableHead>
+                        <SortableHead field="full_name" label="Utilisateur" />
+                        <SortableHead field="poste" label="Poste" />
+                        <SortableHead field="equipe" label="Équipe" />
+                        <SortableHead field="date_embauche" label="Date d'embauche" />
+                        <SortableHead field="role" label="Rôle" />
+                        <SortableHead field="statut" label="Statut" />
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
