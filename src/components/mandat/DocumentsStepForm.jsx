@@ -132,20 +132,17 @@ export default function DocumentsStepForm({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
-  const [activeTab, setActiveTab] = useState("intrants");
   const [currentSubPath, setCurrentSubPath] = useState("");
   const [folderToDelete, setFolderToDelete] = useState(null);
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   
-  // Construire le chemin de base selon l'onglet actif
+  // Construire le chemin de base - toujours INTRANTS
   let baseFolderPath;
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
     const today = new Date().toISOString().split('T')[0];
-    baseFolderPath = activeTab === "intrants" 
-      ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`
-      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/TERRAIN`;
+    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
   } else {
     baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
   }
@@ -155,7 +152,7 @@ export default function DocumentsStepForm({
 
   // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, activeTab, currentSubPath],
+    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, currentSubPath],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -178,10 +175,7 @@ export default function DocumentsStepForm({
     }
   }, [filesList.length, onDocumentsChange]);
   
-  // Réinitialiser le sous-chemin quand on change d'onglet
-  React.useEffect(() => {
-    setCurrentSubPath("");
-  }, [activeTab]);
+
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -407,37 +401,12 @@ export default function DocumentsStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <Tabs value={activeTab} onValueChange={(v) => !isTemporaire ? setActiveTab('intrants') : setActiveTab(v)} className="w-full">
-            {isTemporaire && (
-            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 h-8 mb-3">
-              <TabsTrigger value="intrants" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
-                <FolderOpen className="w-3 h-3 mr-1" />
-                INTRANTS
-                {activeTab === "intrants" && filesList.length > 0 && (
-                  <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
-                    {filesList.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="terrain" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
-                <FolderOpen className="w-3 h-3 mr-1" />
-                TERRAIN
-                {activeTab === "terrain" && filesList.length > 0 && (
-                  <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
-                    {filesList.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-            )}
-            {!isTemporaire && (
-            <div className="mb-3 flex items-center gap-2">
-              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs"><FolderOpen className="w-3 h-3 mr-1" />INTRANTS</Badge>
-              {filesList.length > 0 && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{filesList.length} fichier{filesList.length > 1 ? 's' : ''}</Badge>}
-            </div>
-            )}
+          <div className="mb-3 flex items-center gap-2">
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs"><FolderOpen className="w-3 h-3 mr-1" />INTRANTS</Badge>
+            {filesList.length > 0 && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{filesList.length} fichier{filesList.length > 1 ? 's' : ''}</Badge>}
+          </div>
 
-            <TabsContent value={activeTab} className="mt-0">
+            <div className="mt-0">
               {/* Message si drag over */}
               {isDragOver && (
                 <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
@@ -639,8 +608,7 @@ export default function DocumentsStepForm({
                   )}
                 </>
               )}
-            </TabsContent>
-          </Tabs>
+            </div>
         </CardContent>
       )}
 
