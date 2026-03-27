@@ -1080,19 +1080,16 @@ function LayoutContent({ children, currentPageName }) {
       }}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
           <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800 px-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
-            </div>
-            <Tabs defaultValue="pointage" className="w-full">
-              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0">
-                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
-                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 pt-3">
-            <Tabs defaultValue="pointage" className="w-full">
+            <Tabs defaultValue="pointage" className="w-full h-full">
+              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
+                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
+                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
+              </TabsList>
+
               <TabsContent value="pointage" className="space-y-3">
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations du dossier */}
