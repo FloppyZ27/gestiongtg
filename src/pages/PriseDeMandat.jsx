@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink, Clock, Filter, DollarSign, Receipt, Users, Home, ClipboardList } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink, Clock, Filter, DollarSign, Receipt, Users, Home, ClipboardList, ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { createPageUrl } from "@/utils";
@@ -4962,51 +4962,20 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('arpenteur_geometre')}
-                    >
-                      {activeListTab === "ouvrir" ? "Dossier" : "Arpenteur-Géomètre"} {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('clients')}
-                    >
-                      Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('adresse_travaux')}
-                    >
-                      Adresse des travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('ville')}
-                    >
-                      Ville {sortField === 'ville' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead className="text-slate-300 text-xs">
-                      N° de téléphone
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('types_mandats')}
-                    >
-                      Types de mandats {sortField === 'types_mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('created_date')}
-                    >
-                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                      onClick={() => handleSort('urgence_percue')}
-                    >
-                      Urgence {sortField === 'urgence_percue' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
+                    {[['arpenteur_geometre', activeListTab === 'ouvrir' ? 'Dossier' : 'Arpenteur-Géomètre'], ['clients', 'Clients'], ['adresse_travaux', 'Adresse des travaux'], ['ville', 'Ville'], [null, 'N° de téléphone'], ['types_mandats', 'Types de mandats'], ['created_date', 'Date'], ['urgence_percue', 'Urgence']].map(([field, label]) => (
+                      <TableHead
+                        key={label}
+                        className={`text-slate-300 text-xs ${field ? 'cursor-pointer hover:text-white select-none' : ''}`}
+                        onClick={field ? () => handleSort(field) : undefined}
+                      >
+                        <div className="flex items-center gap-1">
+                          {label}
+                          {field && (sortField === field
+                            ? sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />
+                            : <ChevronsUpDown className="w-3 h-3 text-slate-500" />)}
+                        </div>
+                      </TableHead>
+                    ))}
                     <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
