@@ -39,6 +39,8 @@ import NotificationButton from "@/components/shared/NotificationButton";
 import DossierSearchBar from "@/components/shared/DossierSearchBar";
 import PermissionGuard from "@/components/shared/PermissionGuard";
 import GlobalDossierEditDialog from "@/components/shared/GlobalDossierEditDialog";
+import EntreeTempsDialog from "@/components/shared/EntreeTempsDialog";
+import UnsavedWarningDialog from "@/components/shared/UnsavedWarningDialog";
 
 const navigationItems = [
   {
@@ -1072,24 +1074,28 @@ function LayoutContent({ children, currentPageName }) {
       <GlobalDossierEditDialog />
       
       {/* Dialog pour l'entrée de temps */}
-      <Dialog open={isEntreeTempsOpen} onOpenChange={(open) => {
-        if (!open && hasEntreeChanges) {
-          setShowUnsavedWarning(true);
-        } else {
-          setIsEntreeTempsOpen(open);
-        }
-      }}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800 px-6">
-            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 pt-3">
-            <Tabs defaultValue="pointage" className="w-full h-full">
-              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
-                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
-                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
-              </TabsList>
+      <EntreeTempsDialog
+        isOpen={isEntreeTempsOpen}
+        onOpenChange={setIsEntreeTempsOpen}
+        hasChanges={hasEntreeChanges}
+        onShowWarning={() => setShowUnsavedWarning(true)}
+        entreeForm={entreeForm}
+        setEntreeForm={setEntreeForm}
+        selectedDossierId={selectedDossierId}
+        dossierSearchTerm={dossierSearchTerm}
+        setDossierSearchTerm={setDossierSearchTerm}
+        filteredDossiers={filteredDossiers}
+        selectedDossier={selectedDossier}
+        dossiers={dossiers}
+        clients={clients}
+        lots={lots}
+        users={users}
+        pointages={pointages}
+        onSubmit={handleSubmit}
+        onReset={resetForm}
+      />
+      
+      {/* Dialogs replaced with separate components */}
 
               <TabsContent value="pointage" className="space-y-3">
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
@@ -1624,75 +1630,22 @@ function LayoutContent({ children, currentPageName }) {
                     </label>
                   </div>
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          <div className="flex justify-end gap-3 py-4 px-6 bg-slate-900 border-t border-slate-800 w-full">
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="border-red-500 text-red-400 hover:bg-red-500/10"
-              onClick={() => {
-                if (hasEntreeChanges) {
-                  setShowUnsavedWarning(true);
-                } else {
-                  setIsEntreeTempsOpen(false);
-                }
-              }}
-            >
-              Annuler
-            </Button>
-            <Button 
-              type="submit" 
-              form="entree-temps-form" 
-              className="bg-gradient-to-r from-emerald-500 to-teal-600"
-              disabled={!selectedDossierId}
-            >
-              Enregistrer
-            </Button>
-          </div>
+        </TabsList>
         </DialogContent>
       </Dialog>
 
       {/* Dialog d'avertissement modifications non sauvegardées */}
-      <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
-        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              Attention
-              <span className="text-2xl">⚠️</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-slate-300 text-center">
-              Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-            </p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button
-                type="button"
-                onClick={() => {
-                  setShowUnsavedWarning(false);
-                  setIsEntreeTempsOpen(false);
-                  setHasEntreeChanges(false);
-                  resetForm();
-                }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-              >
-                Abandonner
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => setShowUnsavedWarning(false)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Continuer l'édition
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <UnsavedWarningDialog
+        open={showUnsavedWarning}
+        onOpenChange={setShowUnsavedWarning}
+        onAbandon={() => {
+          setShowUnsavedWarning(false);
+          setIsEntreeTempsOpen(false);
+          setHasEntreeChanges(false);
+          resetForm();
+        }}
+        onContinue={() => setShowUnsavedWarning(false)}
+      />
       
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
