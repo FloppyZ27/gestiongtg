@@ -128,6 +128,15 @@ export default function DocumentsStepForm({
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [viewMode, setViewMode] = useState("list");
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const [currentSubPath, setCurrentSubPath] = useState("");
+  const [folderToDelete, setFolderToDelete] = useState(null);
   const prevNumeroDossierRef = React.useRef(numeroDossier);
 
   const initials = getArpenteurInitials(arpenteurGeometre);
