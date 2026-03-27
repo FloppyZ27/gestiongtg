@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import AgendaSection from "@/components/profil/AgendaSection";
 import FeuilleTempsSection from "@/components/profil/FeuilleTempsSection";
+import EntreeTempsDialog from "@/components/shared/EntreeTempsDialog";
 import AddressSearchInput from "@/components/profil/AddressSearchInput";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -906,7 +907,7 @@ export default function Profil() {
         />
 
         {/* Section Feuille de temps (Pointage) - Utilisation du composant */}
-        <FeuilleTempsSection 
+        <FeuilleTempsSection
           pointageCollapsed={pointageCollapsed}
           setPointageCollapsed={setPointageCollapsed}
           viewMode={viewMode}
@@ -923,6 +924,41 @@ export default function Profil() {
           handleOpenEditPointage={handleOpenEditPointage}
           handleConfirmPointage={handleConfirmPointage}
           weekScrollRef={weekScrollRef}
+        />
+
+        {/* Dialog EntreeTemps - replaces the Add Pointage Dialog */}
+        <EntreeTempsDialog
+          isOpen={isAddingPointage}
+          onOpenChange={setIsAddingPointage}
+          hasChanges={false}
+          onShowWarning={() => {}}
+          entreeForm={addPointageForm}
+          setEntreeForm={setAddPointageForm}
+          selectedDossierId={addPointageForm.dossier_id || ""}
+          dossierSearchTerm=""
+          setDossierSearchTerm={() => {}}
+          filteredDossiers={dossiers}
+          selectedDossier={dossiers.find(d => d.id === addPointageForm.dossier_id)}
+          dossiers={dossiers}
+          clients={clients}
+          lots={[]}
+          users={users}
+          pointages={pointages}
+          onSubmit={handleSubmitAddPointage}
+          onReset={() => {
+            setAddPointageForm({
+              date: new Date().toISOString().split('T')[0],
+              heures: "",
+              dossier_id: "",
+              mandat: "",
+              tache: "",
+              tache_suivante: "",
+              utilisateur_assigne: "",
+              description: "",
+              type: "Pointage",
+              multiplicateur: "1"
+            });
+          }}
         />
 
         {/* Section Entrée de temps */}
