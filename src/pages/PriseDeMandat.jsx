@@ -2352,7 +2352,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 commentairesTemporaires.length > 0;
               
               if(hasChanges&&!editingPriseMandat&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
-              if(editingPriseMandat&&hasFormChanges&&!showUnsavedWarning&&!showCancelConfirm){setShowUnsavedWarning(true);return;}
               if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}
               queryClient.invalidateQueries({queryKey:['priseMandats']});
               setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
