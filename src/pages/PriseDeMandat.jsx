@@ -2888,10 +2888,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       )}
                       </div>
                       </div>
-                      <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                       <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h&&!editingPriseMandat){setShowCancelConfirm(true);return;}if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
-                       <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending||updatePriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">{editingPriseMandat?"Sauvegarder":"Ouvrir"}</Button>
-                      </div>
+                      {!editingPriseMandat && <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                        <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
+                        <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button>
+                       </div>}
                       </motion.div>
                       </DialogContent>
                       </Dialog>
