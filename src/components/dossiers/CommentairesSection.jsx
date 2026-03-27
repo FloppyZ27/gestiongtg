@@ -137,6 +137,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
         ? contentWithoutMedia.substring(0, 150) + "..." 
         : contentWithoutMedia;
       
+      // Créer l'entrée d'historique
+      const historiqueEntry = {
+        action: "Ajout de commentaire",
+        details: truncatedContent || "Ajout d'un commentaire",
+        utilisateur_email: commentaireData.utilisateur_email,
+        utilisateur_nom: commentaireData.utilisateur_nom,
+        date: new Date().toISOString()
+      };
+      
+      if (onAddHistoriqueEntry) {
+        onAddHistoriqueEntry(historiqueEntry);
+      }
+      
       await base44.entities.ActionLog.create({
         utilisateur_email: commentaireData.utilisateur_email,
         utilisateur_nom: commentaireData.utilisateur_nom,
@@ -239,6 +252,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
         ? contentWithoutMedia.substring(0, 150) + "..." 
         : contentWithoutMedia;
       
+      // Créer l'entrée d'historique
+      const historiqueEntry = {
+        action: "Modification de commentaire",
+        details: truncatedContent || "Modification d'un commentaire",
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        date: new Date().toISOString()
+      };
+      
+      if (onAddHistoriqueEntry) {
+        onAddHistoriqueEntry(historiqueEntry);
+      }
+      
       await base44.entities.ActionLog.create({
         utilisateur_email: user?.email,
         utilisateur_nom: user?.full_name,
@@ -275,6 +301,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       const truncatedContent = contentWithoutMedia.length > 150 
         ? contentWithoutMedia.substring(0, 150) + "..." 
         : contentWithoutMedia;
+      
+      // Créer l'entrée d'historique
+      const historiqueEntry = {
+        action: "Suppression de commentaire",
+        details: truncatedContent || "Suppression d'un commentaire",
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        date: new Date().toISOString()
+      };
+      
+      if (onAddHistoriqueEntry) {
+        onAddHistoriqueEntry(historiqueEntry);
+      }
       
       await base44.entities.ActionLog.create({
         utilisateur_email: user?.email,
