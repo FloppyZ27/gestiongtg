@@ -746,8 +746,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     const _h=(a,d)=>newHistoriqueEntries.push({action:a,details:d,utilisateur_nom:userName,utilisateur_email:userEmail,date:now});
     if(editingPriseMandat.statut!==formData.statut)_h("Changement de statut",`${editingPriseMandat.statut} → ${formData.statut}`);
     if(editingPriseMandat.arpenteur_geometre!==formData.arpenteur_geometre)_h("Changement d'arpenteur-géomètre",`${editingPriseMandat.arpenteur_geometre||'Non défini'} → ${formData.arpenteur_geometre}`);
-    const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();
-    const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
+    if((editingPriseMandat.place_affaire||'')!==(formData.placeAffaire||''))_h("Changement de place d'affaire",`${editingPriseMandat.place_affaire||'Non définie'} → ${formData.placeAffaire||'Non définie'}`);
+    const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
     if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
     const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
     const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
