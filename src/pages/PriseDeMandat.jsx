@@ -749,12 +749,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     if((editingPriseMandat.place_affaire||'')!==(formData.placeAffaire||''))_h("Changement de place d'affaire",`${editingPriseMandat.place_affaire||'Non définie'} → ${formData.placeAffaire||'Non définie'}`);
     const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
     if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
-    const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
-    const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
-    if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
-    const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
-    const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
-    if(_om!==_nm)_h("Modification mandats",_nm||'—');
+    const _ot=initialPriseMandatData.client_info?.telephone||'';const _nt=clientInfo.telephone||'';if(_ot!==_nt)_h("Modification téléphone",`${_ot||'—'} → ${_nt||'—'}`);
+    const _ott=initialPriseMandatData.client_info?.type_telephone||'';const _ntt=clientInfo.type_telephone||'';if(_ott!==_ntt&&(_ott||_ntt))_h("Modification type de téléphone",`${_ott||'—'} → ${_ntt||'—'}`);
+    const _oe=initialPriseMandatData.client_info?.courriel||'';const _ne=clientInfo.courriel||'';if(_oe!==_ne)_h("Modification courriel",`${_oe||'—'} → ${_ne||'—'}`);
+    const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;const _na=`${workAddress.rue||''}${workAddress.ville||''}`;if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
+    const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');if(_om!==_nm)_h("Modification mandats",_nm||'—');
     const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=currentCommentaires.length;
     if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
     else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
