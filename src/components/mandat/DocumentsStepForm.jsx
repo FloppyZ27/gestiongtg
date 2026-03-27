@@ -402,7 +402,7 @@ export default function DocumentsStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="mb-3 flex items-center gap-2">
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs"><FolderOpen className="w-3 h-3 mr-1" />INTRANTS</Badge>
+
             {filesList.length > 0 && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{filesList.length} fichier{filesList.length > 1 ? 's' : ''}</Badge>}
           </div>
 
