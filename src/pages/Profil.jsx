@@ -969,45 +969,47 @@ export default function Profil() {
                 </div>
                 
                 <form onSubmit={handleSubmitAddPointage} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
-                    <Select value={addPointageForm.type || "Pointage"} onValueChange={(value) => {
-                      setAddPointageForm({...addPointageForm, type: value});
-                    }}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
-                        <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
-                        <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-400 text-sm">Multiplicateur <span className="text-red-400">*</span></Label>
-                    <Select value={addPointageForm.multiplicateur || "1"} onValueChange={(value) => {
-                      setAddPointageForm({...addPointageForm, multiplicateur: value});
-                    }}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="1" className="text-white">1</SelectItem>
-                        <SelectItem value="1.5" className="text-white">1.5</SelectItem>
-                        <SelectItem value="2" className="text-white">2</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
-                    <Input
-                      type="date"
-                      value={addPointageForm.date}
-                      onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
-                      className="bg-slate-800 border-slate-700 text-white"
-                      required
-                    />
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
+                      <Select value={addPointageForm.type || "Pointage"} onValueChange={(value) => {
+                        setAddPointageForm({...addPointageForm, type: value});
+                      }}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
+                          <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
+                          <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Multiplicateur <span className="text-red-400">*</span></Label>
+                      <Select value={addPointageForm.multiplicateur || "1"} onValueChange={(value) => {
+                        setAddPointageForm({...addPointageForm, multiplicateur: value});
+                      }}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="1" className="text-white">1</SelectItem>
+                          <SelectItem value="1.5" className="text-white">1.5</SelectItem>
+                          <SelectItem value="2" className="text-white">2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="date"
+                        value={addPointageForm.date}
+                        onChange={(e) => setAddPointageForm({...addPointageForm, date: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                        required
+                      />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
