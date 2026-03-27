@@ -169,7 +169,7 @@ export default function DocumentsStepForm({
       }
     };
     doTransfer();
-  }, [numeroDossier]);
+  }, [numeroDossier, arpenteurGeometre, clientInfo, refetch]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [previewFile, setPreviewFile] = useState(null);
