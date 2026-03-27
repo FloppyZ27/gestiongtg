@@ -701,10 +701,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     }
   }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat, commentairesTemporaires]);
 
-  // Fonction d'auto-save déclenchée sur blur
-  const handleAutoSave = async () => {
-    if (!initialPriseMandatData || !editingPriseMandat || isLocked || !hasFormChanges) return;
-
+  const handleAutoSave = async (overrideCommentaires) => {
+    const currentCommentaires = overrideCommentaires !== undefined ? overrideCommentaires : commentairesTemporaires;
+    if (!initialPriseMandatData || !editingPriseMandat || isLocked) return;
+    if (!overrideCommentaires && !hasFormChanges) return;
     const mandatsToSave = mandatsInfo
       .filter(m => m.type_mandat)
       .map(m => ({
@@ -755,10 +755,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
     const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
     if(_om!==_nm)_h("Modification mandats",_nm||'—');
-    const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=commentairesTemporaires.length;
+    const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=currentCommentaires.length;
     if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
     else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
-    else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu))){const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=commentairesTemporaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}
+    else{const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=currentCommentaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}
     const updatedHistorique=[...newHistoriqueEntries,...historique];
 
     try {
@@ -2851,7 +2851,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </TabsList>
                       
                       <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); setTimeout(() => handleAutoSave(), 100); }} />
+                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); handleAutoSave(newComments); }} />
                       </TabsContent>
                       
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
