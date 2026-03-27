@@ -21,6 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AnimatePresence, motion } from "framer-motion";
@@ -254,7 +255,8 @@ function LayoutContent({ children, currentPageName }) {
     tache: "",
     tache_suivante: "",
     utilisateur_assigne: "",
-    description: ""
+    description: "",
+    type: "Pointage"
   });
 
   const createEntreeMutation = useMutation({
@@ -319,6 +321,37 @@ function LayoutContent({ children, currentPageName }) {
       }
     };
   }, [showPunchControls, isHoveringPunch]);
+
+  const getWeekStartDate = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 0);
+    const sunday = new Date(today.setDate(diff));
+    return sunday.toLocaleDateString('fr-CA');
+  };
+
+  const getWeekEndDate = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) + 5;
+    const saturday = new Date(today.setDate(diff));
+    return saturday.toLocaleDateString('fr-CA');
+  };
+
+  const openFactureFolder = async () => {
+    if (!user) return;
+    const weekStart = getWeekStartDate();
+    const weekEnd = getWeekEndDate();
+    const folderPath = `EMPLOYÉS/${user.full_name}/FACTURES/${weekStart}_${weekEnd}`;
+    const sharePointUrl = `https://gestiongtg.sharepoint.com/sites/GestionGTG/Documents Partagés/${folderPath}`;
+    window.open(sharePointUrl, '_blank');
+  };
+
+  const handleFactureUpload = async (e) => {
+    const files = Array.from(e.target.files || e.dataTransfer?.files || []);
+    if (files.length === 0) return;
+    // À implémenter : upload vers SharePoint
+  };
 
   // Afficher un loader pendant le chargement de l'utilisateur
   if (isLoadingUser) {
@@ -1047,10 +1080,20 @@ function LayoutContent({ children, currentPageName }) {
       }}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
           <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800 px-6">
-            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
+            </div>
+            <Tabs defaultValue="pointage" className="w-full">
+              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0">
+                <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
+                <TabsTrigger value="facture" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 pt-3">
+            <Tabs defaultValue="pointage" className="w-full">
+              <TabsContent value="pointage" className="space-y-3">
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations du dossier */}
               <div className="border border-slate-700 bg-slate-800/30 rounded-lg mb-2">
@@ -1412,23 +1455,40 @@ function LayoutContent({ children, currentPageName }) {
                     {!detailsCollapsed && (
                     <div className="pt-2 pb-2 px-3">
                     <div className="rounded-lg p-3">
-                      <div className="grid grid-cols-5 gap-2">
-                        <div className="space-y-0.5">
-                          <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
-                          <Input
-                            type="date"
-                            value={entreeForm.date}
-                            onChange={(e) => {
-                              setEntreeForm({...entreeForm, date: e.target.value});
-                              setHasEntreeChanges(true);
-                            }}
-                            required
-                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                          />
-                        </div>
+                      <div className="grid grid-cols-6 gap-2">
+                      <div className="space-y-0.5">
+                        <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                        <Input
+                          type="date"
+                          value={entreeForm.date}
+                          onChange={(e) => {
+                            setEntreeForm({...entreeForm, date: e.target.value});
+                            setHasEntreeChanges(true);
+                          }}
+                          required
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                        />
+                      </div>
 
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Type <span className="text-red-400">*</span></Label>
+                        <Select value={entreeForm.type} onValueChange={(value) => {
+                          setEntreeForm({...entreeForm, type: value});
+                          setHasEntreeChanges(true);
+                        }}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Pointage" className="text-white text-xs">Pointage</SelectItem>
+                            <SelectItem value="Mieux-Être" className="text-white text-xs">Mieux-Être</SelectItem>
+                            <SelectItem value="Vacance" className="text-white text-xs">Vacance</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
                           <Input
                             type="number"
                             step="0.25"
@@ -1507,6 +1567,50 @@ function LayoutContent({ children, currentPageName }) {
                     </div>
                     )}
             </form>
+              </TabsContent>
+
+              <TabsContent value="facture" className="space-y-3">
+                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+                  <div className="mb-4">
+                    <Label className="text-slate-300 text-sm font-semibold mb-2 block">Dossier de facturation</Label>
+                    <p className="text-slate-400 text-xs mb-3">
+                      Semaine du {getWeekStartDate()} au {getWeekEndDate()}
+                    </p>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    onClick={() => openFactureFolder()}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 mb-4"
+                  >
+                    <Cloud className="w-4 h-4 mr-2" />
+                    Ouvrir le dossier SharePoint
+                  </Button>
+
+                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5"
+                    onDragOver={(e) => { e.preventDefault(); }}
+                    onDrop={(e) => { e.preventDefault(); handleFactureUpload(e); }}
+                  >
+                    <Cloud className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                    <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
+                    <p className="text-slate-500 text-xs">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={(e) => handleFactureUpload(e)}
+                      className="hidden"
+                      id="facture-input"
+                    />
+                    <label htmlFor="facture-input" className="cursor-pointer">
+                      <Button type="button" variant="outline" size="sm" className="mt-3 mx-auto border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                        Sélectionner des fichiers
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           <div className="flex justify-end gap-3 py-4 px-6 bg-slate-900 border-t border-slate-800 w-full">
