@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -124,36 +124,45 @@ export default function DocumentsStepForm({
   isTemporaire = false,
   clientInfo = null,
   onAddHistoriqueEntry = null,
-  priseMandatId = null,
-  previousNumeroDossier = null
+  priseMandatId = null
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
+  const prevNumeroDossierRef = React.useRef(numeroDossier);
 
   // Transfert automatique quand le numéro de dossier est assigné (temporaire -> numéroté)
   React.useEffect(() => {
+    const prevNumero = prevNumeroDossierRef.current;
+    prevNumeroDossierRef.current = numeroDossier;
+
     const doTransfer = async () => {
+      // Se déclenche uniquement quand on passe de vide à un numéro renseigné
       if (!numeroDossier || !arpenteurGeometre) return;
-      if (!previousNumeroDossier && numeroDossier) {
-        // On vient d'assigner un numéro de dossier - vérifier s'il y a des fichiers temporaires
+      if (prevNumero) return; // était déjà renseigné, pas de transfert
+      {
         const initials = getArpenteurInitials(arpenteurGeometre).replace('-', '');
         const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || 'Client';
         const tempPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
         const finalPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
 
+        console.log('[TRANSFERT AUTO] Source:', tempPath);
+        console.log('[TRANSFERT AUTO] Destination:', finalPath);
+
         try {
           setIsTransferring(true);
           const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: tempPath });
           const files = checkRes.data?.files || [];
+          console.log('[TRANSFERT AUTO] Fichiers trouvés:', files.length);
           if (files.length > 0) {
             await base44.functions.invoke('moveSharePointFiles', {
               sourceFolderPath: tempPath,
               destinationFolderPath: finalPath
             });
+            console.log('[TRANSFERT AUTO] Transfert réussi');
             refetch();
           }
         } catch (err) {
-          console.error('Erreur transfert auto:', err);
+          console.error('[TRANSFERT AUTO] Erreur:', err);
         } finally {
           setIsTransferring(false);
         }
