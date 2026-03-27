@@ -775,7 +775,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           } catch (error) {
             console.error("Erreur sauvegarde auto:", error);
           }
-        }, 500); // Délai de 500ms pour éviter trop de requêtes
+        }, 3000); // Délai de 3s après la dernière modification
 
         return () => clearTimeout(timer);
       }
