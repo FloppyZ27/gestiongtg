@@ -699,7 +699,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         date_ouverture: initialPriseMandatData.date_ouverture || ""
       };
       
-      const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData);
+      const hasCommentChanges = commentairesTemporaires.length !== (initialPriseMandatData.commentaires?.length || 0);
+      const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData) || hasCommentChanges;
       setHasFormChanges(hasChanges);
 
       // Sauvegarder automatiquement si changements détectés
@@ -783,7 +784,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         return () => clearTimeout(timer);
       }
     }
-  }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat]);
+  }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat, commentairesTemporaires]);
 
   const createDossierMutation = useMutation({
     mutationFn: async ({ dossierData, commentairesToCreate = null }) => {
@@ -2354,7 +2355,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 mandatsInfo.some(m => m.type_mandat) ||
                 commentairesTemporaires.length > 0;
               
-              if(hasChanges&&!editingPriseMandat){setShowCancelConfirm(true);return;}
+              if(hasChanges&&!editingPriseMandat&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
+              if(editingPriseMandat&&hasFormChanges&&!showUnsavedWarning&&!showCancelConfirm){setShowUnsavedWarning(true);return;}
               if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}
               queryClient.invalidateQueries({queryKey:['priseMandats']});
               setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
@@ -3068,7 +3070,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   type="button"
                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                   onClick={async () => {
-                    // Déverrouiller le mandat si on annule
                     if (editingPriseMandat && !isLocked) {
                       await base44.entities.PriseMandat.update(editingPriseMandat.id, {
                         ...editingPriseMandat,
@@ -3077,11 +3078,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       });
                       queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
                     }
-                    setShowCancelConfirm(false);
-                    setIsDialogOpen(false);
                     resetFullForm();
                     setIsLocked(false);
                     setLockedBy("");
+                    setShowCancelConfirm(false);
+                    setIsDialogOpen(false);
                   }}
                 >
                   Abandonner
@@ -3122,7 +3123,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   type="button"
                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                   onClick={async () => {
-                    // Déverrouiller le mandat si on annule
                     if (editingPriseMandat && !isLocked) {
                       await base44.entities.PriseMandat.update(editingPriseMandat.id, {
                         ...editingPriseMandat,
@@ -3131,11 +3131,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       });
                       queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
                     }
-                    setShowUnsavedWarning(false);
-                    setIsDialogOpen(false);
                     resetFullForm();
                     setIsLocked(false);
                     setLockedBy("");
+                    setShowUnsavedWarning(false);
+                    setIsDialogOpen(false);
                   }}
                 >
                   Abandonner
