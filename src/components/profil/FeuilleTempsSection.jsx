@@ -355,14 +355,19 @@ export default function FeuilleTempsSection({
                                         )}
                                         {/* Statut visible si >= 30px */}
                                         {totalMinutes >= 30 && (
-                                          <div className={`text-[11px] font-semibold ${isModified ? 'text-orange-300' : p.confirme ? 'text-green-300' : 'text-blue-300'}`}>
+                                          <div className={`text-[11px] font-semibold ${
+                                            isModified ? 'text-orange-300'
+                                            : p.confirme
+                                            ? p.type === 'Vacance' ? 'text-purple-300' : p.type === 'Mieux-Être' ? 'text-cyan-300' : 'text-green-300'
+                                            : 'text-blue-300'
+                                          }`}>
                                             {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
                                           </div>
                                         )}
                                         {/* Heures visibles si >= 60px */}
                                         {totalMinutes >= 60 && (
                                           <div className="text-[11px] leading-tight">
-                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>
+                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.confirme ? p.type === 'Vacance' ? "opacity-90 text-purple-400" : p.type === 'Mieux-Être' ? "opacity-90 text-cyan-400" : "opacity-90 text-green-400" : "opacity-50 text-slate-300")}>
                                               Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
                                             </div>
                                             {isModified && (
@@ -385,7 +390,7 @@ export default function FeuilleTempsSection({
                                           </button>
                                         )}
                                         {totalMinutes >= 90 && p.confirme && !isModified && (
-                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-green-400/30">
+                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type === 'Vacance' ? 'border-purple-400/30' : p.type === 'Mieux-Être' ? 'border-cyan-400/30' : 'border-green-400/30'}`}>
                                             Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
                                           </div>
                                         )}
@@ -398,7 +403,12 @@ export default function FeuilleTempsSection({
                                     </TooltipTrigger>
                                     <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
                                       <div className="space-y-2">
-                                        <div className={`text-xs font-bold uppercase ${isModified ? 'text-orange-400' : p.confirme ? 'text-green-400' : 'text-blue-400'}`}>
+                                        <div className={`text-xs font-bold uppercase ${
+                                           isModified ? 'text-orange-400'
+                                           : p.confirme
+                                           ? p.type === 'Vacance' ? 'text-purple-400' : p.type === 'Mieux-Être' ? 'text-cyan-400' : 'text-green-400'
+                                           : 'text-blue-400'
+                                         }`}>
                                           {isModified ? 'Pointage modifié' : p.confirme ? 'Pointage confirmé' : 'Pointage en attente'}
                                         </div>
                                         <div className="text-sm text-slate-300">
