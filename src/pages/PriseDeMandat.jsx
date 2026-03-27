@@ -645,7 +645,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         setInitialPriseMandatData(null);
       } else {
         // Auto-save - NE PAS rafraîchir, juste mettre à jour les états locaux
-        setEditingPriseMandat(updatedPriseMandat);
+        setEditingPriseMandat(updatedPriseMandat);setHistorique(updatedPriseMandat.historique||[]);
         setInitialPriseMandatData(JSON.parse(JSON.stringify(updatedPriseMandat)));
         setHasFormChanges(false);
       }
@@ -747,27 +747,23 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           const userName = user?.full_name || "Utilisateur";
           const userEmail = user?.email || "";
 
-          if (editingPriseMandat.statut !== formData.statut) {
-            newHistoriqueEntries.push({
-              action: "Changement de statut",
-              details: `${editingPriseMandat.statut} → ${formData.statut}`,
-              utilisateur_nom: userName,
-              utilisateur_email: userEmail,
-              date: now
-            });
-          }
-
-          if (editingPriseMandat.arpenteur_geometre !== formData.arpenteur_geometre) {
-            newHistoriqueEntries.push({
-              action: "Changement d'arpenteur-géomètre",
-              details: `${editingPriseMandat.arpenteur_geometre || 'Non défini'} → ${formData.arpenteur_geometre}`,
-              utilisateur_nom: userName,
-              utilisateur_email: userEmail,
-              date: now
-            });
-          }
-
-          const updatedHistorique = [...newHistoriqueEntries, ...historique];
+          const _h=(a,d)=>newHistoriqueEntries.push({action:a,details:d,utilisateur_nom:userName,utilisateur_email:userEmail,date:now});
+          if(editingPriseMandat.statut!==formData.statut)_h("Changement de statut",`${editingPriseMandat.statut} → ${formData.statut}`);
+          if(editingPriseMandat.arpenteur_geometre!==formData.arpenteur_geometre)_h("Changement d'arpenteur-géomètre",`${editingPriseMandat.arpenteur_geometre||'Non défini'} → ${formData.arpenteur_geometre}`);
+          const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();
+          const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
+          if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
+          const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
+          const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
+          if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
+          const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
+          const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
+          if(_om!==_nm)_h("Modification mandats",_nm||'—');
+          const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=commentairesTemporaires.length;
+          if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
+          else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
+          else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu)))_h("Commentaire modifié","Contenu mis à jour");
+          const updatedHistorique=[...newHistoriqueEntries,...historique];
 
           // Sauvegarder automatiquement
           try {
