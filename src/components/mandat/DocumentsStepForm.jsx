@@ -211,6 +211,45 @@ export default function DocumentsStepForm({
     });
   };
 
+  const createHistoryEntry = async (fileName) => {
+    try {
+      const user = await base44.auth.me();
+      if (!user || (!arpenteurGeometre || (!numeroDossier && !isTemporaire))) return;
+
+      // Pour les dossiers temporaires, pas d'historique dans Dossier
+      if (isTemporaire && clientInfo) {
+        return;
+      }
+
+      if (numeroDossier && arpenteurGeometre) {
+        // Chercher le dossier correspondant
+        const dossiersData = await base44.entities.Dossier.filter(
+          { numero_dossier: numeroDossier, arpenteur_geometre: arpenteurGeometre },
+          '',
+          1
+        );
+
+        if (dossiersData && dossiersData.length > 0) {
+          const dossier = dossiersData[0];
+          const historiqueEntry = {
+            action: 'Ajout de document',
+            details: `Document "${fileName}" ajouté à la section Documents`,
+            utilisateur_email: user.email,
+            utilisateur_nom: user.full_name,
+            date: new Date().toISOString()
+          };
+
+          const updatedHistorique = [...(dossier.historique || []), historiqueEntry];
+          await base44.entities.Dossier.update(dossier.id, {
+            historique: updatedHistorique
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erreur création historique:', error);
+    }
+  };
+
   const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -224,6 +263,7 @@ export default function DocumentsStepForm({
       for (let i = 0; i < droppedFiles.length; i++) {
         setUploadProgress(`Téléversement ${i + 1}/${droppedFiles.length}: ${droppedFiles[i].name}`);
         await uploadFile(droppedFiles[i]);
+        await createHistoryEntry(droppedFiles[i].name);
       }
       setUploadProgress("");
       refetch();
@@ -233,7 +273,7 @@ export default function DocumentsStepForm({
     } finally {
       setIsUploading(false);
     }
-  }, [folderPath, refetch]);
+  }, [folderPath, refetch, arpenteurGeometre, numeroDossier, isTemporaire, clientInfo]);
 
   const handleFileSelect = async (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -244,6 +284,7 @@ export default function DocumentsStepForm({
       for (let i = 0; i < selectedFiles.length; i++) {
         setUploadProgress(`Téléversement ${i + 1}/${selectedFiles.length}: ${selectedFiles[i].name}`);
         await uploadFile(selectedFiles[i]);
+        await createHistoryEntry(selectedFiles[i].name);
       }
       setUploadProgress("");
       refetch();
