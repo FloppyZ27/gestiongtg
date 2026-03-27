@@ -142,13 +142,12 @@ export default function DocumentsStepForm({
   let baseFolderPath;
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+    const today = new Date().toISOString().split('T')[0];
     baseFolderPath = activeTab === "intrants" 
-      ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`
-      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/TERRAIN`;
+      ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`
+      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/TERRAIN`;
   } else {
-    baseFolderPath = activeTab === "intrants"
-      ? `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`
-      : `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
+    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
   }
   
   // Ajouter le sous-chemin s'il existe
@@ -408,7 +407,8 @@ export default function DocumentsStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={(v) => !isTemporaire ? setActiveTab('intrants') : setActiveTab(v)} className="w-full">
+            {isTemporaire && (
             <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 h-8 mb-3">
               <TabsTrigger value="intrants" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
                 <FolderOpen className="w-3 h-3 mr-1" />
@@ -429,6 +429,13 @@ export default function DocumentsStepForm({
                 )}
               </TabsTrigger>
             </TabsList>
+            )}
+            {!isTemporaire && (
+            <div className="mb-3 flex items-center gap-2">
+              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs"><FolderOpen className="w-3 h-3 mr-1" />INTRANTS</Badge>
+              {filesList.length > 0 && <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{filesList.length} fichier{filesList.length > 1 ? 's' : ''}</Badge>}
+            </div>
+            )}
 
             <TabsContent value={activeTab} className="mt-0">
               {/* Message si drag over */}
