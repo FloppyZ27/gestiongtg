@@ -180,9 +180,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
   // END NEW STATES
 
-  // NEW STATE FOR TEMPORARY COMMENTS
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
-  // END NEW STATE
 
   const [filterArpenteur, setFilterArpenteur] = useState([]);
   const [filterStatut, setFilterStatut] = useState("all");
@@ -2855,7 +2853,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </TabsList>
                       
                       <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
+                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); setTimeout(() => handleAutoSave(), 100); }} />
                       </TabsContent>
                       
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
