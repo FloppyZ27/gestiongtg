@@ -945,22 +945,6 @@ export default function Profil() {
               <DialogTitle className="text-2xl">Ajouter une entrée de temps</DialogTitle>
             </DialogHeader>
             
-            {/* Soldes de temps en haut */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
-              <div className="text-center">
-                <div className="text-xs text-slate-400">Vacances</div>
-                <div className="text-lg font-bold text-emerald-400">0h</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-slate-400">Mieux-Être</div>
-                <div className="text-lg font-bold text-blue-400">0h</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-slate-400">Banques</div>
-                <div className="text-lg font-bold text-yellow-400">0h</div>
-              </div>
-            </div>
-            
             <Tabs defaultValue="pointage" className="w-full">
               <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
                 <TabsTrigger value="pointage" className="px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
@@ -968,6 +952,22 @@ export default function Profil() {
               </TabsList>
 
               <TabsContent value="pointage" className="space-y-4">
+                {/* Soldes de temps */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Vacances</div>
+                    <div className="text-lg font-bold text-emerald-400">0h</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Mieux-Être</div>
+                    <div className="text-lg font-bold text-blue-400">0h</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Banques</div>
+                    <div className="text-lg font-bold text-yellow-400">0h</div>
+                  </div>
+                </div>
+                
                 <form onSubmit={handleSubmitAddPointage} className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
