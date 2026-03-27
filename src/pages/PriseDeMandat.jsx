@@ -2865,9 +2865,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </TabsContent>
                       
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                        {historiqueDossier.length > 0 ? (
+                        {historique.length > 0 ? (
                           <div className="space-y-2">
-                            {historiqueDossier.map((entry, idx) => (
+                            {historique.map((entry, idx) => (
                               <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <div className="flex items-start gap-2">
                                   <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
