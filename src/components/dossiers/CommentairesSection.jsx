@@ -128,13 +128,22 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       console.log("Comment created:", newComment);
       
       // Log l'action
+      // Extraire le contenu sans les tags média
+      const contentWithoutMedia = commentaireData.contenu
+        .replace(/\[AUDIO:[^\]]+\]/g, '')
+        .replace(/\[IMAGE:[^\]]+\]/g, '')
+        .trim();
+      const truncatedContent = contentWithoutMedia.length > 150 
+        ? contentWithoutMedia.substring(0, 150) + "..." 
+        : contentWithoutMedia;
+      
       await base44.entities.ActionLog.create({
         utilisateur_email: commentaireData.utilisateur_email,
         utilisateur_nom: commentaireData.utilisateur_nom,
         action: "AJOUT_COMMENTAIRE",
         entite: "CommentaireDossier",
         entite_id: newComment.id,
-        details: `Ajout d'un commentaire sur un dossier`,
+        details: truncatedContent || "Ajout d'un commentaire sur un dossier",
         metadata: {
           dossier_id: commentaireData.dossier_id
         }
@@ -222,13 +231,21 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       const result = await base44.entities.CommentaireDossier.update(id, data);
       
       // Log l'action
+      const contentWithoutMedia = data.contenu
+        .replace(/\[AUDIO:[^\]]+\]/g, '')
+        .replace(/\[IMAGE:[^\]]+\]/g, '')
+        .trim();
+      const truncatedContent = contentWithoutMedia.length > 150 
+        ? contentWithoutMedia.substring(0, 150) + "..." 
+        : contentWithoutMedia;
+      
       await base44.entities.ActionLog.create({
         utilisateur_email: user?.email,
         utilisateur_nom: user?.full_name,
         action: "MODIFICATION_COMMENTAIRE",
         entite: "CommentaireDossier",
         entite_id: id,
-        details: `Modification d'un commentaire`,
+        details: truncatedContent || "Modification d'un commentaire",
         metadata: {
           dossier_id: dossierId
         }
@@ -249,13 +266,23 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       await base44.entities.CommentaireDossier.delete(id);
       
       // Log l'action
+      // Récupérer le contenu du commentaire supprimé
+      const commentaireToDelete = commentaires.find(c => c.id === id);
+      const contentWithoutMedia = commentaireToDelete?.contenu
+        ?.replace(/\[AUDIO:[^\]]+\]/g, '')
+        ?.replace(/\[IMAGE:[^\]]+\]/g, '')
+        ?.trim() || "";
+      const truncatedContent = contentWithoutMedia.length > 150 
+        ? contentWithoutMedia.substring(0, 150) + "..." 
+        : contentWithoutMedia;
+      
       await base44.entities.ActionLog.create({
         utilisateur_email: user?.email,
         utilisateur_nom: user?.full_name,
         action: "SUPPRESSION_COMMENTAIRE",
         entite: "CommentaireDossier",
         entite_id: id,
-        details: `Suppression d'un commentaire`,
+        details: truncatedContent || "Suppression d'un commentaire",
         metadata: {
           dossier_id: dossierId
         }
