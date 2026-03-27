@@ -2888,7 +2888,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       )}
                       </div>
                       </div>
-
+                      <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                       <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h&&!editingPriseMandat){setShowCancelConfirm(true);return;}if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
+                       <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending||updatePriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">{editingPriseMandat?"Sauvegarder":"Ouvrir"}</Button>
+                      </div>
                       </motion.div>
                       </DialogContent>
                       </Dialog>
@@ -3261,32 +3264,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         {/* Dialog de succès d'import .d01 */}
         <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
           <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">✅</span>
-                Succès
-                <span className="text-2xl">✅</span>
-              </DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <p className="text-slate-300 text-center">
-                Données importées avec succès depuis le fichier .d01
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowD01ImportSuccess(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  OK
-                </Button>
-              </div>
-            </motion.div>
+            <DialogHeader><DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3"><span className="text-2xl">✅</span>Succès<span className="text-2xl">✅</span></DialogTitle></DialogHeader>
+            <div className="space-y-4 p-2">
+              <p className="text-slate-300 text-center">Données importées avec succès depuis le fichier .d01</p>
+              <div className="flex justify-center pt-4"><Button type="button" onClick={() => setShowD01ImportSuccess(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">OK</Button></div>
+            </div>
           </DialogContent>
         </Dialog>
 
