@@ -180,7 +180,7 @@ export default function EntreeTempsDialog({
 
             <TabsContent value="pointage" className="space-y-3">
               {/* Résumé des heures restantes */}
-              <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 grid grid-cols-3 gap-2 mb-3">
+              <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Vacances restantes</Label>
                   <div className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white text-sm font-semibold h-8 flex items-center">
