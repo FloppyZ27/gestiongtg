@@ -175,10 +175,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     type_minute: "Initiale"
   });
 
-  // NEW STATES FOR DOSSIER REFERENCE
   const [dossierReferenceId, setDossierReferenceId] = useState(null);
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
-  // END NEW STATES
 
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
 
@@ -760,7 +758,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=commentairesTemporaires.length;
     if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
     else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
-    else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu)))_h("Commentaire modifié","Contenu mis à jour");
+    else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu))){const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=commentairesTemporaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}
     const updatedHistorique=[...newHistoriqueEntries,...historique];
 
     try {
