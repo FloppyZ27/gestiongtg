@@ -652,7 +652,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     },
   });
 
-  // Détecter les changements et sauvegarder automatiquement
+  // Détecter les changements (sans auto-save automatique)
   useEffect(() => {
     if (initialPriseMandatData && editingPriseMandat && !isLocked) {
       const currentData = {
@@ -702,85 +702,79 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       const hasCommentChanges = JSON.stringify(commentairesTemporaires.map(c=>c.contenu)) !== JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu));
       const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData) || hasCommentChanges;
       setHasFormChanges(hasChanges);
-
-      // Sauvegarder automatiquement si changements détectés
-      if (hasChanges) {
-        const timer = setTimeout(async () => {
-          // Préparer les mandats
-          const mandatsToSave = mandatsInfo
-            .filter(m => m.type_mandat)
-            .map(m => ({
-              type_mandat: m.type_mandat,
-              prix_estime: m.prix_estime || 0,
-              prix_premier_lot: m.prix_premier_lot || 0,
-              prix_autres_lots: m.prix_autres_lots || 0,
-              rabais: m.rabais || 0,
-              taxes_incluses: m.taxes_incluses || false
-            }));
-
-          const dataToSubmit = {
-            arpenteur_geometre: formData.arpenteur_geometre,
-            place_affaire: formData.placeAffaire,
-            numero_dossier: formData.numero_dossier,
-            date_ouverture: formData.date_ouverture,
-            clients_ids: formData.clients_ids,
-            notaires_ids: formData.notaires_ids || [],
-            courtiers_ids: formData.courtiers_ids || [],
-            compagnies_ids: formData.compagnies_ids || [],
-            client_info: clientInfo,
-            professionnel_info: professionnelInfo,
-            adresse_travaux: workAddress,
-            mandats: mandatsToSave,
-            echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
-            date_signature: mandatsInfo[0]?.date_signature || "",
-            date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
-            date_livraison: mandatsInfo[0]?.date_livraison || "",
-            urgence_percue: mandatsInfo[0]?.urgence_percue || "",
-            statut: formData.statut,
-            locked_by: user?.email,
-            locked_at: editingPriseMandat.locked_at
-          };
-
-          // Créer les entrées d'historique
-          const newHistoriqueEntries = [];
-          const now = new Date().toISOString();
-          const userName = user?.full_name || "Utilisateur";
-          const userEmail = user?.email || "";
-
-          const _h=(a,d)=>newHistoriqueEntries.push({action:a,details:d,utilisateur_nom:userName,utilisateur_email:userEmail,date:now});
-          if(editingPriseMandat.statut!==formData.statut)_h("Changement de statut",`${editingPriseMandat.statut} → ${formData.statut}`);
-          if(editingPriseMandat.arpenteur_geometre!==formData.arpenteur_geometre)_h("Changement d'arpenteur-géomètre",`${editingPriseMandat.arpenteur_geometre||'Non défini'} → ${formData.arpenteur_geometre}`);
-          const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();
-          const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
-          if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
-          const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
-          const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
-          if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
-          const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
-          const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
-          if(_om!==_nm)_h("Modification mandats",_nm||'—');
-          const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=commentairesTemporaires.length;
-          if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
-          else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
-          else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu)))_h("Commentaire modifié","Contenu mis à jour");
-          const updatedHistorique=[...newHistoriqueEntries,...historique];
-
-          // Sauvegarder automatiquement
-          try {
-            await updatePriseMandatMutation.mutateAsync({ 
-              id: editingPriseMandat.id, 
-              data: { ...dataToSubmit, historique: updatedHistorique },
-              autoSave: true
-            });
-          } catch (error) {
-            console.error("Erreur sauvegarde auto:", error);
-          }
-        }, 3000); // Délai de 3s après la dernière modification
-
-        return () => clearTimeout(timer);
-      }
     }
   }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat, commentairesTemporaires]);
+
+  // Fonction d'auto-save déclenchée sur blur
+  const handleAutoSave = async () => {
+    if (!initialPriseMandatData || !editingPriseMandat || isLocked || !hasFormChanges) return;
+
+    const mandatsToSave = mandatsInfo
+      .filter(m => m.type_mandat)
+      .map(m => ({
+        type_mandat: m.type_mandat,
+        prix_estime: m.prix_estime || 0,
+        prix_premier_lot: m.prix_premier_lot || 0,
+        prix_autres_lots: m.prix_autres_lots || 0,
+        rabais: m.rabais || 0,
+        taxes_incluses: m.taxes_incluses || false
+      }));
+
+    const dataToSubmit = {
+      arpenteur_geometre: formData.arpenteur_geometre,
+      place_affaire: formData.placeAffaire,
+      numero_dossier: formData.numero_dossier,
+      date_ouverture: formData.date_ouverture,
+      clients_ids: formData.clients_ids,
+      notaires_ids: formData.notaires_ids || [],
+      courtiers_ids: formData.courtiers_ids || [],
+      compagnies_ids: formData.compagnies_ids || [],
+      client_info: clientInfo,
+      professionnel_info: professionnelInfo,
+      adresse_travaux: workAddress,
+      mandats: mandatsToSave,
+      echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
+      date_signature: mandatsInfo[0]?.date_signature || "",
+      date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
+      date_livraison: mandatsInfo[0]?.date_livraison || "",
+      urgence_percue: mandatsInfo[0]?.urgence_percue || "",
+      statut: formData.statut,
+      locked_by: user?.email,
+      locked_at: editingPriseMandat.locked_at
+    };
+
+    const newHistoriqueEntries = [];
+    const now = new Date().toISOString();
+    const userName = user?.full_name || "Utilisateur";
+    const userEmail = user?.email || "";
+    const _h=(a,d)=>newHistoriqueEntries.push({action:a,details:d,utilisateur_nom:userName,utilisateur_email:userEmail,date:now});
+    if(editingPriseMandat.statut!==formData.statut)_h("Changement de statut",`${editingPriseMandat.statut} → ${formData.statut}`);
+    if(editingPriseMandat.arpenteur_geometre!==formData.arpenteur_geometre)_h("Changement d'arpenteur-géomètre",`${editingPriseMandat.arpenteur_geometre||'Non défini'} → ${formData.arpenteur_geometre}`);
+    const _oc=`${initialPriseMandatData.client_info?.prenom||''} ${initialPriseMandatData.client_info?.nom||''}`.trim();
+    const _nc=`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim();
+    if(_oc!==_nc&&(_oc||_nc))_h("Modification client",`${_oc||'—'} → ${_nc||'—'}`);
+    const _oa=`${initialPriseMandatData.adresse_travaux?.rue||''}${initialPriseMandatData.adresse_travaux?.ville||''}`;
+    const _na=`${workAddress.rue||''}${workAddress.ville||''}`;
+    if(_oa!==_na&&_na)_h("Modification adresse",`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}`.trim());
+    const _om=(initialPriseMandatData.mandats||[]).map(m=>m.type_mandat).join(',');
+    const _nm=mandatsInfo.filter(m=>m.type_mandat).map(m=>m.type_mandat).join(',');
+    if(_om!==_nm)_h("Modification mandats",_nm||'—');
+    const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=commentairesTemporaires.length;
+    if(_ncc>_occ)_h("Commentaire ajouté",`${_ncc-_occ} commentaire(s) ajouté(s)`);
+    else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
+    else if(JSON.stringify(commentairesTemporaires.map(c=>c.contenu))!==JSON.stringify((initialPriseMandatData.commentaires||[]).map(c=>c.contenu)))_h("Commentaire modifié","Contenu mis à jour");
+    const updatedHistorique=[...newHistoriqueEntries,...historique];
+
+    try {
+      await updatePriseMandatMutation.mutateAsync({
+        id: editingPriseMandat.id,
+        data: { ...dataToSubmit, historique: updatedHistorique },
+        autoSave: true
+      });
+    } catch (error) {
+      console.error("Erreur sauvegarde auto:", error);
+    }
+  };
 
   const createDossierMutation = useMutation({
     mutationFn: async ({ dossierData, commentairesToCreate = null }) => {
@@ -2608,7 +2602,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
                   <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
-                  <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
+                  <form id="dossier-form" onSubmit={handleSubmit} onBlur={handleAutoSave} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
                   <div id="section-dossier-info"><DossierInfoStepForm
                     disabled={isLocked}
