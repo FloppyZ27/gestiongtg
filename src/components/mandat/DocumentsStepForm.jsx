@@ -130,8 +130,41 @@ export default function DocumentsStepForm({
   const [isTransferring, setIsTransferring] = useState(false);
   const prevNumeroDossierRef = React.useRef(numeroDossier);
 
+  const initials = getArpenteurInitials(arpenteurGeometre);
+  
+  // Construire le chemin de base - toujours INTRANTS
+  let baseFolderPath;
+  if (isTemporaire && clientInfo) {
+    const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+    const today = new Date().toISOString().split('T')[0];
+    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
+  } else {
+    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+  }
+  
+  // Ajouter le sous-chemin s'il existe
+  const folderPath = currentSubPath ? `${baseFolderPath}/${currentSubPath}` : baseFolderPath;
+
+  // Fetch files from SharePoint - dossier spécifique
+  const { data: filesData, isLoading, refetch } = useQuery({
+    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, currentSubPath],
+    queryFn: async () => {
+      const response = await base44.functions.invoke('sharepoint', {
+        action: 'list',
+        folderPath: folderPath
+      });
+      return response.data;
+    },
+    enabled: !!arpenteurGeometre && (!!numeroDossier || (isTemporaire && !!clientInfo)),
+    staleTime: 30000
+  });
+
+  const files = filesData?.files || [];
+  const folders = files.filter(f => f.type === 'folder');
+  const filesList = files.filter(f => f.type === 'file');
+
   // Transfert automatique quand le numéro de dossier est assigné (temporaire -> numéroté)
-  React.useEffect(() => {
+  useEffect(() => {
     const prevNumero = prevNumeroDossierRef.current;
     prevNumeroDossierRef.current = numeroDossier;
 
@@ -170,51 +203,9 @@ export default function DocumentsStepForm({
     };
     doTransfer();
   }, [numeroDossier, arpenteurGeometre, clientInfo, refetch]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState("");
-  const [previewFile, setPreviewFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const [viewMode, setViewMode] = useState("list");
-  const [fileToDelete, setFileToDelete] = useState(null);
-  const [currentSubPath, setCurrentSubPath] = useState("");
-  const [folderToDelete, setFolderToDelete] = useState(null);
-
-  const initials = getArpenteurInitials(arpenteurGeometre);
-  
-  // Construire le chemin de base - toujours INTRANTS
-  let baseFolderPath;
-  if (isTemporaire && clientInfo) {
-    const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
-    const today = new Date().toISOString().split('T')[0];
-    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
-  } else {
-    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
-  }
-  
-  // Ajouter le sous-chemin s'il existe
-  const folderPath = currentSubPath ? `${baseFolderPath}/${currentSubPath}` : baseFolderPath;
-
-  // Fetch files from SharePoint - dossier spécifique
-  const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, currentSubPath],
-    queryFn: async () => {
-      const response = await base44.functions.invoke('sharepoint', {
-        action: 'list',
-        folderPath: folderPath
-      });
-      return response.data;
-    },
-    enabled: !!arpenteurGeometre && (!!numeroDossier || (isTemporaire && !!clientInfo)),
-    staleTime: 30000
-  });
-
-  const files = filesData?.files || [];
-  const folders = files.filter(f => f.type === 'folder');
-  const filesList = files.filter(f => f.type === 'file');
 
   // Notifier le parent quand le nombre de fichiers change
-  React.useEffect(() => {
+  useEffect(() => {
     if (onDocumentsChange) {
       onDocumentsChange(filesList.length > 0);
     }
