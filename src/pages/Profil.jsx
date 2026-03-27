@@ -167,11 +167,11 @@ export default function Profil() {
     }
   }, [user]);
 
-  // Scroll à 7h au chargement de la vue semaine
+  // Scroll à 6h au chargement de la vue semaine
   useEffect(() => {
     if (viewMode === "week" && weekScrollRef.current) {
       setTimeout(() => {
-        weekScrollRef.current.scrollTop = 7 * 60; // 7 heures * 60px par heure
+        weekScrollRef.current.scrollTop = 6 * 60; // 6 heures * 60px par heure
       }, 0);
     }
   }, [viewMode]);
