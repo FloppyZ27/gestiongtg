@@ -81,7 +81,8 @@ export default function Profil() {
     date: new Date().toISOString().split('T')[0],
     heure_debut: "",
     heure_fin: "",
-    description: ""
+    description: "",
+    type: "Pointage"
   });
   const weekScrollRef = React.useRef(null);
 
@@ -1342,6 +1343,21 @@ export default function Profil() {
 
               <TabsContent value="pointage" className="space-y-4">
                 <form onSubmit={handleSubmitAddPointage} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
+                    <Select value={addPointageForm.type || "Pointage"} onValueChange={(value) => {
+                      setAddPointageForm({...addPointageForm, type: value});
+                    }}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
+                        <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
+                        <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
                     <Input
