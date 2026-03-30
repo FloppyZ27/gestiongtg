@@ -1000,6 +1000,9 @@ export default function Profil() {
                 {(() => {
                   const days = entreeTempsTab === "semaine" ? getEntreeTempsWeekDays() : getEntreeTempsMonthDays();
                   const daysWithEntries = days.filter(day => getEntreeTempsForDate(day).length > 0);
+                  const totalPeriode = days.reduce((sum, day) => {
+                    return sum + getEntreeTempsForDate(day).reduce((s, e) => s + (e.heures || 0), 0);
+                  }, 0);
 
                   if (daysWithEntries.length === 0) {
                     return (
@@ -1009,7 +1012,9 @@ export default function Profil() {
                     );
                   }
 
-                  return daysWithEntries.map(day => {
+                  return (
+                    <>
+                    {daysWithEntries.map(day => {
                     const entries = getEntreeTempsForDate(day);
                     const total = calculateTotalHours(day.toISOString().split('T')[0]);
                     const isToday = day.toDateString() === new Date().toDateString();
@@ -1071,7 +1076,15 @@ export default function Profil() {
                         </div>
                       </div>
                     );
-                  });
+                  })}
+                  <div className="flex items-center justify-end px-4 py-2 mt-1 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                    <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider mr-3">
+                      Total {entreeTempsTab === "semaine" ? "semaine" : "mois"}
+                    </span>
+                    <span className="text-base font-bold text-purple-400">{totalPeriode.toFixed(1)}h</span>
+                  </div>
+                </>
+                );
                 })()}
               </div>
             </CardContent>
