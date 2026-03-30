@@ -54,6 +54,17 @@ const getMandatColor = (typeMandat) => {
   return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 
 export default function Profil() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -1028,7 +1039,7 @@ export default function Profil() {
                                 </div>
                                 <div className="col-span-3">
                                    {entry.mandat ? (
-                                     <span className="text-xs px-2 py-0.5 rounded border font-medium bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{entry.mandat}</span>
+                                     <span className={`text-xs px-2 py-0.5 rounded border font-medium ${getMandatColor(entry.mandat)}`}>{getAbbreviatedMandatType(entry.mandat)}</span>
                                    ) : <span className="text-xs text-slate-500">-</span>}
                                  </div>
                                 <div className="col-span-4">
