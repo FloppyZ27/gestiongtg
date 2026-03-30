@@ -1055,9 +1055,15 @@ export default function Profil() {
                                   ) : <span className="text-xs text-slate-500">-</span>}
                                 </div>
                                 <div className="col-span-2">
-                                  {dossier?.mandats?.[0]?.adresse_travaux?.ville ? (
-                                    <span className="text-xs text-slate-400 truncate block">{dossier.mandats[0].adresse_travaux.ville}</span>
-                                  ) : <span className="text-xs text-slate-500">-</span>}
+                                  {dossier?.mandats?.[0]?.adresse_travaux ? (() => {
+                                    const addr = dossier.mandats[0].adresse_travaux;
+                                    const parts = [];
+                                    if (addr.numeros_civiques?.filter(n => n).length > 0) parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+                                    if (addr.rue) parts.push(addr.rue);
+                                    if (addr.ville) parts.push(addr.ville);
+                                    const full = parts.filter(p => p).join(', ');
+                                    return full ? <span className="text-xs text-slate-400 truncate block" title={full}>{full}</span> : <span className="text-xs text-slate-500">-</span>;
+                                  })() : <span className="text-xs text-slate-500">-</span>}
                                 </div>
                               </div>
                             );
