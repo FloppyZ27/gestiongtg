@@ -1046,7 +1046,7 @@ export default function Profil() {
                                  </div>
                                 <div className="col-span-2">
                                   {entry.tache ? (
-                                    <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">{entry.tache}</span>
+                                    <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded">{entry.tache}</span>
                                   ) : <span className="text-xs text-slate-500">-</span>}
                                 </div>
                                 <div className="col-span-3">
