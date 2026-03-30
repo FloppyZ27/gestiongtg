@@ -958,12 +958,18 @@ export default function Profil() {
 
               {/* Liste des jours avec entrées */}
               <div className="space-y-2">
+                {/* En-tête colonnes */}
+                <div className="grid grid-cols-12 gap-2 px-4 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700">
+                  <div className="col-span-1">Heures</div>
+                  <div className="col-span-3">Dossier</div>
+                  <div className="col-span-2">Mandat</div>
+                  <div className="col-span-2">Tâche</div>
+                  <div className="col-span-4">Description</div>
+                </div>
+
                 {(() => {
                   const days = entreeTempsTab === "semaine" ? getEntreeTempsWeekDays() : getEntreeTempsMonthDays();
-                  const daysWithEntries = days.filter(day => {
-                    const entries = getEntreeTempsForDate(day);
-                    return entries.length > 0;
-                  });
+                  const daysWithEntries = days.filter(day => getEntreeTempsForDate(day).length > 0);
 
                   if (daysWithEntries.length === 0) {
                     return (
@@ -978,7 +984,7 @@ export default function Profil() {
                     const total = calculateTotalHours(day.toISOString().split('T')[0]);
                     const isToday = day.toDateString() === new Date().toDateString();
                     return (
-                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-purple-500/50 bg-purple-900/10' : 'border-slate-700 bg-slate-800/30'}`}>
+                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-purple-500/50' : 'border-slate-700'}`}>
                         {/* En-tête du jour */}
                         <div className={`flex items-center justify-between px-4 py-2 rounded-t-lg ${isToday ? 'bg-purple-900/20' : 'bg-slate-800/50'}`}>
                           <span className={`font-semibold text-sm ${isToday ? 'text-purple-300' : 'text-slate-300'}`}>
@@ -986,24 +992,31 @@ export default function Profil() {
                           </span>
                           <span className={`text-sm font-bold ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>{total.toFixed(1)}h</span>
                         </div>
-                        {/* Entrées du jour */}
+                        {/* Lignes d'entrées */}
                         <div className="divide-y divide-slate-700/50">
-                          {entries.map(entry => (
-                            <div key={entry.id} className="px-4 py-2 flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <span className="text-xs font-semibold text-slate-500 w-16 flex-shrink-0">{entry.heures}h</span>
-                                {entry.mandat && (
-                                  <span className="text-xs bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded flex-shrink-0">{entry.mandat}</span>
-                                )}
-                                {entry.tache && (
-                                  <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded flex-shrink-0">{entry.tache}</span>
-                                )}
-                                {entry.description && (
-                                  <span className="text-xs text-slate-400 truncate">{entry.description}</span>
-                                )}
+                          {entries.map(entry => {
+                            const dossier = dossiers.find(d => d.id === entry.dossier_id);
+                            const dossierLabel = dossier
+                              ? `${dossier.arpenteur_geometre?.split(' ').map(w => w[0]).join('')}-${dossier.numero_dossier}`
+                              : (entry.dossier_id ? entry.dossier_id.slice(0, 8) : '-');
+                            return (
+                              <div key={entry.id} className="grid grid-cols-12 gap-2 px-4 py-2 items-center hover:bg-slate-800/30 transition-colors">
+                                <div className="col-span-1 text-sm font-bold text-emerald-400">{entry.heures}h</div>
+                                <div className="col-span-3 text-xs text-slate-300 truncate">{dossierLabel}</div>
+                                <div className="col-span-2">
+                                  {entry.mandat && (
+                                    <span className="text-xs bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded truncate block">{entry.mandat}</span>
+                                  )}
+                                </div>
+                                <div className="col-span-2">
+                                  {entry.tache && (
+                                    <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded truncate block">{entry.tache}</span>
+                                  )}
+                                </div>
+                                <div className="col-span-4 text-xs text-slate-400 truncate">{entry.description || '-'}</div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     );
