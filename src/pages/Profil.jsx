@@ -1021,7 +1021,7 @@ export default function Profil() {
                                 <div className="col-span-1 text-sm font-bold text-emerald-400">{entry.heures}h</div>
                                 <div className="col-span-4">
                                   {dossier ? (
-                                    <span className={`text-xs px-2 py-0.5 rounded border font-semibold ${getMandatColor(dossier.arpenteur_geometre)}`}>
+                                    <span className={`text-xs px-2 py-0.5 rounded border font-semibold ${getArpenteurColor(dossier.arpenteur_geometre)}`}>
                                       {dossierLabel}
                                     </span>
                                   ) : <span className="text-xs text-slate-500">-</span>}
