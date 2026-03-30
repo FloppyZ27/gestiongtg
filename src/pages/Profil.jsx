@@ -990,9 +990,11 @@ export default function Profil() {
                 {/* En-tête colonnes */}
                 <div className="grid grid-cols-12 gap-2 px-4 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700">
                   <div className="col-span-1">Heures</div>
-                  <div className="col-span-4">Dossier</div>
-                  <div className="col-span-3">Mandat</div>
-                  <div className="col-span-4">Tâche</div>
+                  <div className="col-span-2">Dossier</div>
+                  <div className="col-span-2">Mandat</div>
+                  <div className="col-span-2">Tâche</div>
+                  <div className="col-span-3">Client</div>
+                  <div className="col-span-2">Adresse</div>
                 </div>
 
                 {(() => {
@@ -1030,21 +1032,31 @@ export default function Profil() {
                             return (
                               <div key={entry.id} className="grid grid-cols-12 gap-2 px-4 py-2 items-center hover:bg-slate-800/30 transition-colors">
                                 <div className="col-span-1 text-sm font-bold text-emerald-400">{entry.heures}h</div>
-                                <div className="col-span-4">
+                                <div className="col-span-2">
                                   {dossier ? (
                                     <span className={`text-xs px-2 py-0.5 rounded border font-semibold ${getArpenteurColor(dossier.arpenteur_geometre)}`}>
                                       {dossierLabel}
                                     </span>
                                   ) : <span className="text-xs text-slate-500">-</span>}
                                 </div>
-                                <div className="col-span-3">
+                                <div className="col-span-2">
                                    {entry.mandat ? (
                                      <span className={`text-xs px-2 py-0.5 rounded border font-medium ${getMandatColor(entry.mandat)}`}>{getAbbreviatedMandatType(entry.mandat)}</span>
                                    ) : <span className="text-xs text-slate-500">-</span>}
                                  </div>
-                                <div className="col-span-4">
+                                <div className="col-span-2">
                                   {entry.tache ? (
                                     <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">{entry.tache}</span>
+                                  ) : <span className="text-xs text-slate-500">-</span>}
+                                </div>
+                                <div className="col-span-3">
+                                  {dossier?.clients_ids?.length > 0 ? (
+                                    <span className="text-xs text-slate-300 truncate block">{getClientsNames(dossier.clients_ids)}</span>
+                                  ) : <span className="text-xs text-slate-500">-</span>}
+                                </div>
+                                <div className="col-span-2">
+                                  {dossier?.mandats?.[0]?.adresse_travaux?.ville ? (
+                                    <span className="text-xs text-slate-400 truncate block">{dossier.mandats[0].adresse_travaux.ville}</span>
                                   ) : <span className="text-xs text-slate-500">-</span>}
                                 </div>
                               </div>
