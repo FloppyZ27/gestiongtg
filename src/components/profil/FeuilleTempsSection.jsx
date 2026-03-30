@@ -455,77 +455,93 @@ export default function FeuilleTempsSection({
             </TabsContent>
 
             <TabsContent value="month" className="space-y-3">
-              <div className="grid grid-cols-7 w-full mb-1" style={{ gap: '2px' }}>
-                {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map(j => (
-                  <div key={j} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{j}</div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-7 w-full" style={{ gap: '2px' }}>
-                {getMonthDaysWithFullWeeks().map((day, index) => {
-                  const dateStr = format(day, "yyyy-MM-dd");
-                  const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-                  const isCurrentMonth = day.getMonth() === pointageCurrentDate.getMonth();
-                  const dayPointages = getPointageForDate(day);
-                  const totalInitial = dayPointages.reduce((sum, p) => {
-                    const debut = new Date(p.heure_debut);
-                    const fin = new Date(p.heure_fin);
-                    return sum + (fin - debut) / (1000 * 60 * 60);
-                  }, 0);
-                  const totalModifie = dayPointages.reduce((sum, p) => {
-                    if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                      return sum + (p.duree_heures_modifiee || 0);
-                    } else {
-                      const debut = new Date(p.heure_debut);
-                      const fin = new Date(p.heure_fin);
-                      return sum + (fin - debut) / (1000 * 60 * 60);
-                    }
-                  }, 0);
+              <div>
+                {/* En-têtes des jours */}
+                <div className="grid grid-cols-7 w-full mb-1" style={{ gap: '2px' }}>
+                  {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map(j => (
+                    <div key={j} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{j}</div>
+                  ))}
+                </div>
 
-                  return (
-                    <Card 
-                    key={dateStr}
-                    className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
-                    style={{ minHeight: '120px' }}
-                    >
-                     <div className="mb-2 w-full">
-                      <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                        <div className="flex items-center justify-center mb-1">
-                          <div className="flex-1">
-                            <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
-                              {format(day, "EEE", { locale: fr })}
-                            </p>
-                            <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
-                              {format(day, "d", { locale: fr })}
-                            </p>
+                <div className="grid grid-cols-7 w-full" style={{ gap: '2px' }}>
+                  {getMonthDaysWithFullWeeks().map((day, index) => {
+                    const dateStr = format(day, "yyyy-MM-dd");
+                    const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+                    const isCurrentMonth = day.getMonth() === pointageCurrentDate.getMonth();
+                    const dayPointages = getPointageForDate(day);
+
+                    return (
+                      <Card
+                        key={dateStr}
+                        className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
+                        style={{ minHeight: '210px' }}
+                      >
+                        <div className="mb-2 w-full">
+                          <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
+                            <div className="flex items-center justify-center mb-1">
+                              <div className="flex-1">
+                                <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
+                                  {format(day, "EEE", { locale: fr })}
+                                </p>
+                                <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
+                                  {format(day, "d", { locale: fr })}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="space-y-1 flex-1 overflow-y-auto text-center px-1">
-                      {dayPointages.map((p) => {
-                        const typeColor = p.type?.includes('Vacance') 
-                          ? 'text-purple-400' 
-                          : p.type?.includes('Mieux')
-                          ? 'text-cyan-400'
-                          : 'text-slate-400';
-                        return (
-                          <div key={p.id} className={`text-xs font-semibold ${typeColor}`}>
-                            {p.type}: {p.duree_heures?.toFixed(1) || '0'}h
-                          </div>
-                        );
-                      })}
-                      {dayPointages.length === 0 && totalInitial > 0 && (
-                        <div className="text-xs text-slate-400">Init: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
-                      )}
-                      {totalModifie > 0 && (
-                        <div className="text-xs text-orange-400">Mod: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
-                      )}
-                    </div>
-                    </Card>
-                  );
-                })}
+                        <div className="space-y-1 flex-1 overflow-y-auto" style={{ maxHeight: '170px' }}>
+                          {dayPointages.map(p => {
+                            const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                            const isVacance = p.type?.includes('Vacance');
+                            const isMieuxEtre = p.type?.includes('Mieux');
+                            const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                            const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+                            const duree = (fin - debut) / (1000 * 60 * 60);
+
+                            const colorClass = isModified
+                              ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                              : isVacance
+                              ? 'bg-gradient-to-r from-purple-500/60 to-violet-500/60 border border-purple-500 text-purple-50'
+                              : isMieuxEtre
+                              ? 'bg-gradient-to-r from-cyan-500/60 to-blue-500/60 border border-cyan-500 text-cyan-50'
+                              : p.confirme
+                              ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                              : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
+
+                            const titleColor = isModified ? 'text-orange-300'
+                              : isVacance ? 'text-purple-300'
+                              : isMieuxEtre ? 'text-cyan-300'
+                              : p.confirme ? 'text-green-300'
+                              : 'text-blue-300';
+
+                            return (
+                              <div
+                                key={p.id}
+                                className={`relative text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity flex flex-col gap-1 overflow-hidden ${colorClass}`}
+                                onClick={() => handleOpenEditPointage(p)}
+                              >
+                                <div className="truncate text-[11px] font-bold opacity-90 uppercase">
+                                  {isModified ? 'Modifié' : isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : p.confirme ? 'Confirmé' : 'En attente'}
+                                </div>
+                                {p.description && (
+                                  <div className={`truncate font-bold text-sm ${titleColor}`}>{p.description}</div>
+                                )}
+                                <div className="truncate text-[11px] opacity-90">
+                                  {format(debut, "HH:mm")} - {format(fin, "HH:mm")} ({duree.toFixed(1)}h)
+                                </div>
+                                <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
+                                  <div className="truncate">Modif: {format(new Date(p.updated_date), "dd/MM/yy")}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             </TabsContent>
           </Tabs>
