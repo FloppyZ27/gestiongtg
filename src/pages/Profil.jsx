@@ -1127,7 +1127,7 @@ export default function Profil() {
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Ajouter une entrée de temps</DialogTitle>
+              <DialogTitle className="text-2xl">Ajouter une entrée de pointage</DialogTitle>
             </DialogHeader>
             
             <Tabs defaultValue="pointage" className="w-full">
