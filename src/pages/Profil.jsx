@@ -169,12 +169,14 @@ export default function Profil() {
 
   // Scroll à 6h au chargement de la vue semaine
   useEffect(() => {
-    if (viewMode === "week" && weekScrollRef.current) {
+    if (viewMode === "week" && !pointageCollapsed) {
       setTimeout(() => {
-        weekScrollRef.current.scrollTop = 6 * 60; // 6 heures * 60px par heure
-      }, 0);
+        if (weekScrollRef.current) {
+          weekScrollRef.current.scrollTop = 6 * 60; // 6 heures * 60px par heure
+        }
+      }, 100);
     }
-  }, [viewMode]);
+  }, [viewMode, pointageCollapsed]);
 
   const updateProfileMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
