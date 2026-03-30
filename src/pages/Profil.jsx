@@ -1027,10 +1027,10 @@ export default function Profil() {
                                   ) : <span className="text-xs text-slate-500">-</span>}
                                 </div>
                                 <div className="col-span-3">
-                                  {entry.mandat ? (
-                                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${getMandatColor(entry.mandat)}`}>{entry.mandat}</span>
-                                  ) : <span className="text-xs text-slate-500">-</span>}
-                                </div>
+                                   {entry.mandat ? (
+                                     <span className="text-xs px-2 py-0.5 rounded border font-medium bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{entry.mandat}</span>
+                                   ) : <span className="text-xs text-slate-500">-</span>}
+                                 </div>
                                 <div className="col-span-4">
                                   {entry.tache ? (
                                     <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">{entry.tache}</span>
