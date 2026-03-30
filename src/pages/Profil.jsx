@@ -937,18 +937,38 @@ export default function Profil() {
           deleteRendezVousMutation={deleteRendezVousMutation}
         />
 
+        {/* Section Feuille de temps (Pointage) - Utilisation du composant */}
+         <FeuilleTempsSection
+           pointageCollapsed={pointageCollapsed}
+           setPointageCollapsed={setPointageCollapsed}
+           viewMode={viewMode}
+           setViewMode={setViewMode}
+           pointageCurrentDate={pointageCurrentDate}
+           setIsAddingPointage={setIsAddingPointage}
+           goToPointagePrevious={goToPointagePrevious}
+           goToPointageToday={goToPointageToday}
+           goToPointageNext={goToPointageNext}
+           getPointageWeekDays={getPointageWeekDays}
+           getPointageMonthDays={getPointageMonthDays}
+           getPointageForDate={getPointageForDate}
+           getEventsForDate={getEventsForDate}
+           handleOpenEditPointage={handleOpenEditPointage}
+           handleConfirmPointage={handleConfirmPointage}
+           weekScrollRef={weekScrollRef}
+         />
+
         {/* Section Entrée de temps */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <div 
-            className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/20 border-b border-slate-800"
+          <div
+            className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800"
             onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-purple-500/30 flex items-center justify-center">
-                  <Timer className="w-3 h-3 text-purple-400" />
+                <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                  <Timer className="w-3 h-3 text-cyan-400" />
                 </div>
-                <h3 className="text-purple-300 text-sm font-semibold">Entrée de temps</h3>
+                <h3 className="text-cyan-300 text-sm font-semibold">Entrée de temps</h3>
               </div>
               {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -960,7 +980,7 @@ export default function Profil() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={goToEntreeTemPrevious} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">← Précédent</Button>
-                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8">Aujourd'hui</Button>
+                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 h-8">Aujourd'hui</Button>
                   <Button variant="outline" size="sm" onClick={goToEntreeTempsNext} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">Suivant →</Button>
                 </div>
                 <div className="flex gap-1">
@@ -969,7 +989,7 @@ export default function Profil() {
                       key={tab}
                       size="sm"
                       onClick={() => setEntreeTempsTab(tab)}
-                      className={`h-8 capitalize ${entreeTempsTab === tab ? "bg-purple-500/30 text-purple-300 border border-purple-500/50" : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"}`}
+                      className={`h-8 capitalize ${entreeTempsTab === tab ? "bg-cyan-500/30 text-cyan-300 border border-cyan-500/50" : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"}`}
                     >
                       {tab === "semaine" ? "Semaine" : "Mois"}
                     </Button>
@@ -1019,13 +1039,13 @@ export default function Profil() {
                     const total = calculateTotalHours(day.toISOString().split('T')[0]);
                     const isToday = day.toDateString() === new Date().toDateString();
                     return (
-                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-purple-500/50' : 'border-slate-700'}`}>
+                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-cyan-500/50' : 'border-slate-700'}`}>
                         {/* En-tête du jour */}
-                        <div className={`flex items-center justify-between px-4 py-2 rounded-t-lg ${isToday ? 'bg-purple-900/20' : 'bg-slate-800/50'}`}>
-                          <span className={`font-semibold text-sm ${isToday ? 'text-purple-300' : 'text-slate-300'}`}>
+                        <div className={`flex items-center justify-between px-4 py-2 rounded-t-lg ${isToday ? 'bg-cyan-900/20' : 'bg-slate-800/50'}`}>
+                          <span className={`font-semibold text-sm ${isToday ? 'text-cyan-300' : 'text-slate-300'}`}>
                             {format(day, "EEEE d MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(day, "EEEE d MMMM yyyy", { locale: fr }).slice(1)}
                           </span>
-                          <span className={`text-sm font-bold ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>{total.toFixed(1)}h</span>
+                          <span className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-slate-400'}`}>{total.toFixed(1)}h</span>
                         </div>
                         {/* Lignes d'entrées */}
                         <div className="divide-y divide-slate-700/50">
@@ -1077,39 +1097,19 @@ export default function Profil() {
                       </div>
                     );
                   })}
-                  <div className="flex items-center justify-end px-4 py-2 mt-1 bg-purple-900/20 rounded-lg border border-purple-500/30">
-                    <span className="text-xs text-purple-300 font-semibold uppercase tracking-wider mr-3">
+                  <div className="flex items-center justify-end px-4 py-2 mt-1 bg-cyan-900/20 rounded-lg border border-cyan-500/30">
+                    <span className="text-xs text-cyan-300 font-semibold uppercase tracking-wider mr-3">
                       Total {entreeTempsTab === "semaine" ? "semaine" : "mois"}
                     </span>
-                    <span className="text-base font-bold text-purple-400">{totalPeriode.toFixed(1)}h</span>
+                    <span className="text-base font-bold text-cyan-400">{totalPeriode.toFixed(1)}h</span>
                   </div>
-                </>
-                );
+                  </>
+                  );
                 })()}
               </div>
             </CardContent>
           )}
         </Card>
-
-        {/* Section Feuille de temps (Pointage) - Utilisation du composant */}
-         <FeuilleTempsSection
-           pointageCollapsed={pointageCollapsed}
-           setPointageCollapsed={setPointageCollapsed}
-           viewMode={viewMode}
-           setViewMode={setViewMode}
-           pointageCurrentDate={pointageCurrentDate}
-           setIsAddingPointage={setIsAddingPointage}
-           goToPointagePrevious={goToPointagePrevious}
-           goToPointageToday={goToPointageToday}
-           goToPointageNext={goToPointageNext}
-           getPointageWeekDays={getPointageWeekDays}
-           getPointageMonthDays={getPointageMonthDays}
-           getPointageForDate={getPointageForDate}
-           getEventsForDate={getEventsForDate}
-           handleOpenEditPointage={handleOpenEditPointage}
-           handleConfirmPointage={handleConfirmPointage}
-           weekScrollRef={weekScrollRef}
-         />
 
         {/* Add Pointage Dialog - Full featured with Tabs */}
         <Dialog open={isAddingPointage} onOpenChange={(open) => {
