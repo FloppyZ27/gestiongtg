@@ -988,7 +988,7 @@ export default function Profil() {
               {/* Liste des jours avec entrées */}
               <div className="space-y-2">
                 {/* En-tête colonnes */}
-                <div className="grid grid-cols-12 gap-2 px-4 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700">
+                <div className="grid grid-cols-12 gap-2 px-4 py-1 text-xs font-semibold text-slate-300 border-b border-slate-700">
                   <div className="col-span-2">N° Dossier</div>
                   <div className="col-span-3">Clients</div>
                   <div className="col-span-2">Mandat</div>
