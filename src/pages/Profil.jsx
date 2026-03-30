@@ -994,7 +994,7 @@ export default function Profil() {
                   <div className="col-span-2">Mandat</div>
                   <div className="col-span-3">Adresse Travaux</div>
                   <div className="col-span-1">Tâche actuelle</div>
-                  <div className="col-span-1">Heures</div>
+                  <div className="col-span-1 text-right">Heures</div>
                 </div>
 
                 {(() => {
@@ -1069,7 +1069,7 @@ export default function Profil() {
                                     <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded">{entry.tache}</span>
                                     ) : <span className="text-xs text-slate-500">-</span>}
                                     </div>
-                                    <div className="col-span-1 text-sm font-bold text-emerald-400">{entry.heures}h</div>
+                                    <div className="col-span-1 text-sm font-bold text-emerald-400 text-right">{entry.heures}h</div>
                                     </div>
                             );
                           })}
