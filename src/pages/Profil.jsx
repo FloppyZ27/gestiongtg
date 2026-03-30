@@ -927,63 +927,88 @@ export default function Profil() {
 
           {!entreeTempsCollapsed && (
             <CardContent className="p-6">
-              <div className="space-y-4">
-                {/* Navigation et contrôles */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => goToEntreeTemPrevious()}>&lt;</Button>
-                    <Button variant="outline" size="sm" onClick={() => goToEntreeTempsToday()}>Aujourd'hui</Button>
-                    <Button variant="outline" size="sm" onClick={() => goToEntreeTempsNext()}>&gt;</Button>
-                  </div>
-                  <Tabs value={entreeTempsTab} onValueChange={setEntreeTempsTab} className="w-auto">
-                    <TabsList className="bg-slate-800/50">
-                      <TabsTrigger value="semaine">Semaine</TabsTrigger>
-                      <TabsTrigger value="mois">Mois</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+              {/* Navigation */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={goToEntreeTemPrevious} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">← Précédent</Button>
+                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8">Aujourd'hui</Button>
+                  <Button variant="outline" size="sm" onClick={goToEntreeTempsNext} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">Suivant →</Button>
                 </div>
+                <div className="flex gap-1">
+                  {["semaine", "mois"].map(tab => (
+                    <Button
+                      key={tab}
+                      size="sm"
+                      onClick={() => setEntreeTempsTab(tab)}
+                      className={`h-8 capitalize ${entreeTempsTab === tab ? "bg-purple-500/30 text-purple-300 border border-purple-500/50" : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"}`}
+                    >
+                      {tab === "semaine" ? "Semaine" : "Mois"}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-                {/* Vue Semaine */}
-                {entreeTempsTab === "semaine" && (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-7 gap-2">
-                      {getEntreeTempsWeekDays().map((day, idx) => {
-                        const entries = getEntreeTempsForDate(day);
-                        const total = calculateTotalHours(day.toISOString().split('T')[0]);
-                        const isToday = day.toDateString() === new Date().toDateString();
-                        return (
-                          <Card key={idx} className={`p-3 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                            <p className="text-xs text-slate-400">{format(day, "EEE dd", { locale: fr })}</p>
-                            <p className="text-lg font-bold text-white mt-2">{total.toFixed(1)}h</p>
-                            {entries.length > 0 && (
-                              <div className="text-xs text-slate-400 mt-2 space-y-1">
-                                {entries.map(e => (
-                                  <div key={e.id}>{e.tache}: {e.heures}h</div>
-                                ))}
+              {/* Label période */}
+              <div className="text-slate-300 font-semibold text-base mb-3">
+                {entreeTempsTab === "semaine"
+                  ? `Semaine du ${format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                  : format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)
+                }
+              </div>
+
+              {/* Liste des jours avec entrées */}
+              <div className="space-y-2">
+                {(() => {
+                  const days = entreeTempsTab === "semaine" ? getEntreeTempsWeekDays() : getEntreeTempsMonthDays();
+                  const daysWithEntries = days.filter(day => {
+                    const entries = getEntreeTempsForDate(day);
+                    return entries.length > 0;
+                  });
+
+                  if (daysWithEntries.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-slate-500">
+                        Aucune entrée de temps pour cette période
+                      </div>
+                    );
+                  }
+
+                  return daysWithEntries.map(day => {
+                    const entries = getEntreeTempsForDate(day);
+                    const total = calculateTotalHours(day.toISOString().split('T')[0]);
+                    const isToday = day.toDateString() === new Date().toDateString();
+                    return (
+                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-purple-500/50 bg-purple-900/10' : 'border-slate-700 bg-slate-800/30'}`}>
+                        {/* En-tête du jour */}
+                        <div className={`flex items-center justify-between px-4 py-2 rounded-t-lg ${isToday ? 'bg-purple-900/20' : 'bg-slate-800/50'}`}>
+                          <span className={`font-semibold text-sm ${isToday ? 'text-purple-300' : 'text-slate-300'}`}>
+                            {format(day, "EEEE d MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(day, "EEEE d MMMM yyyy", { locale: fr }).slice(1)}
+                          </span>
+                          <span className={`text-sm font-bold ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>{total.toFixed(1)}h</span>
+                        </div>
+                        {/* Entrées du jour */}
+                        <div className="divide-y divide-slate-700/50">
+                          {entries.map(entry => (
+                            <div key={entry.id} className="px-4 py-2 flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <span className="text-xs font-semibold text-slate-500 w-16 flex-shrink-0">{entry.heures}h</span>
+                                {entry.mandat && (
+                                  <span className="text-xs bg-slate-700/50 text-slate-300 px-2 py-0.5 rounded flex-shrink-0">{entry.mandat}</span>
+                                )}
+                                {entry.tache && (
+                                  <span className="text-xs bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded flex-shrink-0">{entry.tache}</span>
+                                )}
+                                {entry.description && (
+                                  <span className="text-xs text-slate-400 truncate">{entry.description}</span>
+                                )}
                               </div>
-                            )}
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Vue Mois */}
-                {entreeTempsTab === "mois" && (
-                  <div className="grid grid-cols-7 gap-2">
-                    {getEntreeTempsMonthDays().map((day, idx) => {
-                      const total = calculateTotalHours(day.toISOString().split('T')[0]);
-                      const isToday = day.toDateString() === new Date().toDateString();
-                      return (
-                        <Card key={idx} className={`p-2 text-center text-xs ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                          <p className="font-bold text-white">{day.getDate()}</p>
-                          <p className="text-slate-400">{total.toFixed(1)}h</p>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </CardContent>
           )}
