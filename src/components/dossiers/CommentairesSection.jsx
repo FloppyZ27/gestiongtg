@@ -10,7 +10,7 @@ import { fr } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
+export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange, onAddHistoriqueEntry }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");

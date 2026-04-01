@@ -22,6 +22,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import { motion } from "framer-motion";
+import { getArpenteurInitials, getArpenteurColor } from "@/lib/arpenteurUtils";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
@@ -447,11 +448,6 @@ export default function Lots() {
     });
     
     return Array.from(uniqueMap.values());
-  };
-
-  const handleDossierClick = (dossier) => {
-    const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
-    window.open(url, '_blank');
   };
 
   const handleSubmit = (e) => {

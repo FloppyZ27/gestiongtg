@@ -29,6 +29,10 @@ Deno.serve(async (req) => {
     });
 
     const tokenData = await tokenResponse.json();
+    if (!tokenData.access_token) {
+      console.error('Token error:', JSON.stringify(tokenData));
+      return Response.json({ success: false, error: 'Failed to get MS access token', details: tokenData }, { status: 500 });
+    }
     const accessToken = tokenData.access_token;
 
     const baseUrl = `https://graph.microsoft.com/v1.0/users/${user.email}/events`;
@@ -59,7 +63,11 @@ Deno.serve(async (req) => {
         body: JSON.stringify(msEvent),
       });
       const data = await res.json();
-      return Response.json({ success: res.ok, msEventId: data.id });
+      if (!res.ok) {
+        console.error('MS Graph create error:', JSON.stringify(data));
+        return Response.json({ success: false, error: data?.error?.message || 'Unknown error', details: data });
+      }
+      return Response.json({ success: true, msEventId: data.id });
     }
 
     if (action === 'update') {
