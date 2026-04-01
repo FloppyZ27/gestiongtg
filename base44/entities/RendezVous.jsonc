@@ -1,0 +1,55 @@
+{
+  "name": "RendezVous",
+  "type": "object",
+  "properties": {
+    "titre": {
+      "type": "string",
+      "description": "Titre du rendez-vous"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description du rendez-vous"
+    },
+    "date_debut": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date et heure de d\u00e9but"
+    },
+    "date_fin": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date et heure de fin"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "rendez-vous",
+        "absence"
+      ],
+      "default": "rendez-vous",
+      "description": "Type d'\u00e9v\u00e9nement"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur concern\u00e9"
+    },
+    "ms_event_id": {
+      "type": "string",
+      "description": "ID de l'\u00e9v\u00e9nement dans Microsoft Calendar"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "app",
+        "microsoft"
+      ],
+      "default": "app",
+      "description": "Source de l'\u00e9v\u00e9nement"
+    }
+  },
+  "required": [
+    "titre",
+    "date_debut",
+    "type"
+  ]
+}

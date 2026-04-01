@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   try {
@@ -9,6 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const body = await req.json().catch(() => ({}));
     const clientId = Deno.env.get('MICROSOFT_CLIENT_ID');
     const clientSecret = Deno.env.get('MICROSOFT_CLIENT_SECRET');
     const tenantId = Deno.env.get('MICROSOFT_TENANT_ID');
@@ -17,12 +18,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Microsoft configuration missing' }, { status: 500 });
     }
 
-    // Get access token from Microsoft
     const tokenResponse = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         client_id: clientId,
         client_secret: clientSecret,
@@ -38,31 +36,29 @@ Deno.serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Get calendar events for today and next 7 days
+    // Use provided date range or fallback to next 30 days
     const now = new Date();
-    const startDateTime = now.toISOString();
-    const endDateTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const startDateTime = body.startDateTime || new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const endDateTime = body.endDateTime || new Date(now.getFullYear(), now.getMonth() + 2, 0).toISOString();
 
     const eventsResponse = await fetch(
-      `https://graph.microsoft.com/v1.0/users/${user.email}/calendarview?startDateTime=${startDateTime}&endDateTime=${endDateTime}`,
+      `https://graph.microsoft.com/v1.0/users/${user.email}/calendarview?startDateTime=${startDateTime}&endDateTime=${endDateTime}&$top=100&$orderby=start/dateTime`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: 'application/json',
+          Prefer: 'outlook.timezone="America/Toronto"',
         },
       }
     );
 
     if (!eventsResponse.ok) {
-      return Response.json({ error: 'Failed to fetch calendar events' }, { status: 500 });
+      const errText = await eventsResponse.text();
+      return Response.json({ error: 'Failed to fetch calendar events', details: errText }, { status: 500 });
     }
 
     const eventsData = await eventsResponse.json();
-
-    return Response.json({
-      success: true,
-      events: eventsData.value || [],
-    });
+    return Response.json({ success: true, events: eventsData.value || [] });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

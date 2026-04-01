@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CalendarDays, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, Plus, Trash2, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -21,7 +21,9 @@ export default function AgendaSection({
   getAgendaMonthDays,
   getRendezVousForDate,
   handleEditEvent,
-  deleteRendezVousMutation
+  deleteRendezVousMutation,
+  refetchMsEvents,
+  isMsLoading
 }) {
   const [eventToDelete, setEventToDelete] = useState(null);
   
@@ -116,6 +118,15 @@ export default function AgendaSection({
                 </div>
               </div>
               <div className="flex gap-2 items-center">
+                <Button
+                  size="sm"
+                  onClick={() => refetchMsEvents?.()}
+                  disabled={isMsLoading}
+                  className="h-8 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isMsLoading ? 'animate-spin' : ''}`} />
+                  Sync MS
+                </Button>
                 <Button
                   size="sm"
                   onClick={() => setIsAddingEvent(true)}
@@ -247,45 +258,50 @@ export default function AgendaSection({
                               const topPx = (startHour * 90) + (startMin * 1.5);
 
                               const isAbsence = event.type === "absence";
+                              const isMsOnly = event.source === 'microsoft';
 
                               return (
-                                <Tooltip key={event.id}>
+                               <Tooltip key={event.id}>
                                   <TooltipTrigger asChild>
                                     <div
                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-xs font-semibold z-10 cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-0.5 overflow-hidden ${
                                         isAbsence
-                                          ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
-                                          : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                           ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                           : isMsOnly
+                                           ? 'bg-gradient-to-r from-sky-500/60 to-blue-600/60 border border-sky-400 text-sky-50'
+                                           : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
                                       }`}
                                       style={{
                                         height: `${Math.max(40, durationMinutes * 1.5)}px`,
                                         top: `${topPx}px`
                                       }}
-                                      onClick={() => handleEditEvent(event)}
-                                    >
+                                      onClick={() => !isMsOnly && handleEditEvent(event)}
+                                      >
+                                      {!isMsOnly && (
                                       <button
                                         onClick={(e) => handleDeleteClick(e, event)}
                                         style={{ top: '2px' }}
                                         className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
                                       >
                                         <Trash2 className="w-2.5 h-2.5 group-hover:text-red-300 transition-colors" />
-                                        </button>
+                                      </button>
+                                      )}
                                         {durationMinutes <= 60 ? (
                                         <>
-                                          <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
-                                            {isAbsence ? 'Absence' : 'Rendez-vous'}
-                                          </div>
+                                         <div className="truncate text-[10px] font-bold opacity-90 uppercase leading-tight">
+                                           {isAbsence ? 'Absence' : isMsOnly ? 'Microsoft' : 'Rendez-vous'}
+                                         </div>
                                           <div className={`truncate font-bold text-xs ${
-                                            isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                           isAbsence ? 'text-orange-300' : isMsOnly ? 'text-sky-300' : 'text-purple-300'
                                           }`}>{event.titre}</div>
                                         </>
                                       ) : (
                                         <>
                                           <div className="truncate text-[11px] font-bold opacity-90 uppercase">
-                                            {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                            {isAbsence ? 'Absence' : isMsOnly ? 'Microsoft' : 'Rendez-vous'}
                                           </div>
                                           <div className={`truncate font-bold text-sm ${
-                                            isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                           isAbsence ? 'text-orange-300' : isMsOnly ? 'text-sky-300' : 'text-purple-300'
                                           }`}>{event.titre}</div>
                                           {event.date_fin && (
                                             <div className="truncate text-[11px] opacity-90">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
@@ -304,10 +320,10 @@ export default function AgendaSection({
                                   <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
                                     <div className="space-y-2">
                                       <div className="text-xs font-bold opacity-90 uppercase">
-                                        {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                        {isAbsence ? 'Absence' : isMsOnly ? 'Microsoft' : 'Rendez-vous'}
                                       </div>
                                       <div className={`font-bold text-base ${
-                                        isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                        isAbsence ? 'text-orange-300' : isMsOnly ? 'text-sky-300' : 'text-purple-300'
                                       }`}>{event.titre}</div>
                                       {event.date_fin && (
                                         <div className="text-sm opacity-90">
@@ -378,6 +394,7 @@ export default function AgendaSection({
                     <div className="space-y-1 flex-1 overflow-y-auto" style={{ maxHeight: '170px' }}>
                       {dayEvents.map(event => {
                         const isAbsence = event.type === "absence";
+                        const isMsOnly = event.source === 'microsoft';
                         
                         const eventStart = new Date(event.date_debut);
                         const eventEnd = event.date_fin ? new Date(event.date_fin) : eventStart;
@@ -396,23 +413,27 @@ export default function AgendaSection({
                               <div
                                 className={`relative text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity group flex flex-col gap-1 overflow-hidden ${
                                   isAbsence
-                                    ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
-                                    : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
+                                     ? 'bg-gradient-to-r from-red-500/60 to-orange-500/60 border border-red-500 text-red-50'
+                                     : isMsOnly
+                                     ? 'bg-gradient-to-r from-sky-500/60 to-blue-600/60 border border-sky-400 text-sky-50'
+                                     : 'bg-gradient-to-r from-purple-500/60 to-indigo-500/60 border border-purple-500 text-purple-50'
                                 }`}
-                                onClick={() => handleEditEvent(event)}
-                              >
-                                <button
-                                  onClick={(e) => handleDeleteClick(e, event)}
-                                  style={{ top: '2px' }}
-                                  className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
+                                onClick={() => !isMsOnly && handleEditEvent(event)}
                                 >
-                                  <Trash2 className="w-2.5 h-2.5 group-hover:text-red-300 transition-colors" />
-                                  </button>
+                                 {!isMsOnly && (
+                                 <button
+                                   onClick={(e) => handleDeleteClick(e, event)}
+                                   style={{ top: '2px' }}
+                                   className="absolute right-1 z-20 w-5 h-5 bg-red-600 hover:bg-red-700 border border-red-300 rounded text-white flex items-center justify-center transition-all group"
+                                 >
+                                   <Trash2 className="w-2.5 h-2.5 group-hover:text-red-300 transition-colors" />
+                                 </button>
+                                 )}
                                   <div className="truncate text-[11px] font-bold opacity-90 uppercase">
-                                  {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                  {isAbsence ? 'Absence' : isMsOnly ? 'Microsoft' : 'Rendez-vous'}
                                 </div>
                                 <div className={`truncate font-bold text-sm ${
-                                  isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                  isAbsence ? 'text-orange-300' : isMsOnly ? 'text-sky-300' : 'text-purple-300'
                                 }`}>{event.titre}</div>
                                 {event.date_fin && (
                                   <div className="truncate text-[11px] opacity-90">{format(displayStart, "HH:mm")} - {format(displayEnd, "HH:mm")}</div>
@@ -427,10 +448,10 @@ export default function AgendaSection({
                             <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
                               <div className="space-y-2">
                                 <div className="text-xs font-bold opacity-90 uppercase">
-                                  {isAbsence ? 'Absence' : 'Rendez-vous'}
+                                  {isAbsence ? 'Absence' : isMsOnly ? 'Microsoft' : 'Rendez-vous'}
                                 </div>
                                 <div className={`font-bold text-base ${
-                                  isAbsence ? 'text-orange-300' : 'text-purple-300'
+                                  isAbsence ? 'text-orange-300' : isMsOnly ? 'text-sky-300' : 'text-purple-300'
                                 }`}>{event.titre}</div>
                                 {event.date_fin && (
                                   <div className="text-sm opacity-90">

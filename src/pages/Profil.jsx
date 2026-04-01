@@ -157,10 +157,19 @@ export default function Profil() {
     enabled: !!user,
   });
 
-  const { data: microsoftEvents = [] } = useQuery({
-    queryKey: ['microsoftCalendarEvents', user?.email],
+  const getMsDateRange = () => {
+    const year = agendaCurrentDate.getFullYear();
+    const month = agendaCurrentDate.getMonth();
+    const startDateTime = new Date(year, month - 1, 1).toISOString();
+    const endDateTime = new Date(year, month + 2, 0).toISOString();
+    return { startDateTime, endDateTime };
+  };
+
+  const { data: microsoftEvents = [], refetch: refetchMsEvents, isFetching: isMsLoading } = useQuery({
+    queryKey: ['microsoftCalendarEvents', user?.email, agendaCurrentDate.getFullYear(), agendaCurrentDate.getMonth()],
     queryFn: async () => {
-      const response = await base44.functions.invoke('getMicrosoftCalendarEvents', {});
+      const range = getMsDateRange();
+      const response = await base44.functions.invoke('getMicrosoftCalendarEvents', range);
       return response.data?.events || [];
     },
     initialData: [],
@@ -278,9 +287,21 @@ export default function Profil() {
       });
 
   const createRendezVousMutation = useMutation({
-    mutationFn: (data) => base44.entities.RendezVous.create({ ...data, utilisateur_email: user?.email }),
+    mutationFn: async (data) => {
+      // Create in app DB
+      const created = await base44.entities.RendezVous.create({ ...data, utilisateur_email: user?.email, source: 'app' });
+      // Sync to Microsoft Calendar
+      try {
+        const res = await base44.functions.invoke('syncMicrosoftCalendarEvent', { action: 'create', event: data });
+        if (res.data?.msEventId) {
+          await base44.entities.RendezVous.update(created.id, { ms_event_id: res.data.msEventId });
+        }
+      } catch (e) { /* silent */ }
+      return created;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rendezVous', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['microsoftCalendarEvents'] });
       setIsAddingEvent(false);
       setEditingEvent(null);
       setEventForm({
@@ -296,18 +317,43 @@ export default function Profil() {
   });
 
   const updateRendezVousMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.RendezVous.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const updated = await base44.entities.RendezVous.update(id, data);
+      try {
+        const existing = rendezVous.find(r => r.id === id);
+        await base44.functions.invoke('syncMicrosoftCalendarEvent', {
+          action: existing?.ms_event_id ? 'update' : 'create',
+          event: data,
+          msEventId: existing?.ms_event_id
+        });
+      } catch (e) { /* silent */ }
+      return updated;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rendezVous', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['microsoftCalendarEvents'] });
       setIsAddingEvent(false);
       setEditingEvent(null);
     },
   });
 
   const deleteRendezVousMutation = useMutation({
-    mutationFn: (id) => base44.entities.RendezVous.delete(id),
+    mutationFn: async (id) => {
+      const existing = rendezVous.find(r => r.id === id);
+      await base44.entities.RendezVous.delete(id);
+      // Sync deletion to Microsoft Calendar
+      if (existing?.ms_event_id) {
+        try {
+          await base44.functions.invoke('syncMicrosoftCalendarEvent', {
+            action: 'delete',
+            msEventId: existing.ms_event_id
+          });
+        } catch (e) { /* silent */ }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rendezVous', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['microsoftCalendarEvents'] });
     },
   });
 
@@ -710,21 +756,45 @@ export default function Profil() {
     setAgendaCurrentDate(new Date());
   };
 
-  const getRendezVousForDate = (date) => {
+  // Merge app rendez-vous + MS-only events (not yet in app)
+  const getMergedEventsForDate = (date) => {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date);
     dayEnd.setHours(23, 59, 59, 999);
-    
-    return rendezVous.filter(rv => {
+
+    const appEvents = rendezVous.filter(rv => {
       const eventStart = new Date(rv.date_debut);
       const eventEnd = new Date(rv.date_fin || rv.date_debut);
-      
-      // L'événement chevauche ce jour s'il commence avant la fin du jour 
-      // ET se termine après le début du jour
       return eventStart <= dayEnd && eventEnd >= dayStart;
     });
+
+    // MS events not already tracked in app
+    const appMsIds = new Set(rendezVous.map(r => r.ms_event_id).filter(Boolean));
+    const msOnlyEvents = microsoftEvents
+      .filter(msEv => !appMsIds.has(msEv.id))
+      .filter(msEv => {
+        const start = new Date(msEv.start?.dateTime || msEv.start?.date);
+        const end = new Date(msEv.end?.dateTime || msEv.end?.date);
+        return start <= dayEnd && end >= dayStart;
+      })
+      .map(msEv => ({
+        id: `ms_${msEv.id}`,
+        ms_event_id: msEv.id,
+        titre: msEv.subject || '(Sans titre)',
+        description: msEv.bodyPreview || '',
+        date_debut: msEv.start?.dateTime || msEv.start?.date,
+        date_fin: msEv.end?.dateTime || msEv.end?.date,
+        type: 'rendez-vous',
+        source: 'microsoft',
+        created_date: msEv.createdDateTime,
+        updated_date: msEv.lastModifiedDateTime,
+      }));
+
+    return [...appEvents, ...msOnlyEvents];
   };
+
+  const getRendezVousForDate = (date) => getMergedEventsForDate(date);
 
   const handleSubmitEvent = async (e) => {
     e.preventDefault();
@@ -921,21 +991,23 @@ export default function Profil() {
 
         {/* Section Agenda */}
         <AgendaSection 
-          agendaCollapsed={agendaCollapsed}
-          setAgendaCollapsed={setAgendaCollapsed}
-          agendaViewMode={agendaViewMode}
-          setAgendaViewMode={setAgendaViewMode}
-          agendaCurrentDate={agendaCurrentDate}
-          setIsAddingEvent={setIsAddingEvent}
-          goToAgendaPrevious={goToAgendaPrevious}
-          goToAgendaToday={goToAgendaToday}
-          goToAgendaNext={goToAgendaNext}
-          getAgendaWeekDays={getAgendaWeekDays}
-          getAgendaMonthDays={getAgendaMonthDays}
-          getRendezVousForDate={getRendezVousForDate}
-          handleEditEvent={handleEditEvent}
-          deleteRendezVousMutation={deleteRendezVousMutation}
-        />
+           agendaCollapsed={agendaCollapsed}
+           setAgendaCollapsed={setAgendaCollapsed}
+           agendaViewMode={agendaViewMode}
+           setAgendaViewMode={setAgendaViewMode}
+           agendaCurrentDate={agendaCurrentDate}
+           setIsAddingEvent={setIsAddingEvent}
+           goToAgendaPrevious={goToAgendaPrevious}
+           goToAgendaToday={goToAgendaToday}
+           goToAgendaNext={goToAgendaNext}
+           getAgendaWeekDays={getAgendaWeekDays}
+           getAgendaMonthDays={getAgendaMonthDays}
+           getRendezVousForDate={getRendezVousForDate}
+           handleEditEvent={handleEditEvent}
+           deleteRendezVousMutation={deleteRendezVousMutation}
+           refetchMsEvents={refetchMsEvents}
+           isMsLoading={isMsLoading}
+         />
 
         {/* Section Feuille de temps (Pointage) - Utilisation du composant */}
          <FeuilleTempsSection
