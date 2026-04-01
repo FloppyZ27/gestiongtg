@@ -34,13 +34,16 @@ export default function AgendaSection({
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
+    // Commencer le lundi (comme le calendrier Microsoft)
     const firstDayOfWeek = firstDay.getDay();
     const startDate = new Date(firstDay);
-    startDate.setDate(firstDay.getDate() - firstDayOfWeek);
+    const daysToSubtract = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    startDate.setDate(firstDay.getDate() - daysToSubtract);
     
     const lastDayOfWeek = lastDay.getDay();
     const endDate = new Date(lastDay);
-    endDate.setDate(lastDay.getDate() + (6 - lastDayOfWeek));
+    const daysToAdd = lastDayOfWeek === 0 ? 0 : 7 - lastDayOfWeek;
+    endDate.setDate(lastDay.getDate() + daysToAdd);
     
     const days = [];
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
@@ -359,7 +362,7 @@ export default function AgendaSection({
             <div>
               {/* En-têtes des jours */}
               <div className="grid grid-cols-7 w-full mb-1" style={{ gap: '2px' }}>
-                {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map(j => (
+                {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map(j => (
                   <div key={j} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{j}</div>
                 ))}
               </div>

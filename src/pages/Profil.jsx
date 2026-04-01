@@ -711,13 +711,13 @@ export default function Profil() {
   // Fonctions pour l'agenda
   const getAgendaWeekDays = () => {
     const dayOfWeek = agendaCurrentDate.getDay();
-    const sunday = new Date(agendaCurrentDate);
-    sunday.setDate(agendaCurrentDate.getDate() - dayOfWeek);
+    const monday = new Date(agendaCurrentDate);
+    monday.setDate(agendaCurrentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(sunday);
-      day.setDate(sunday.getDate() + i);
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
       days.push(day);
     }
     return days;
