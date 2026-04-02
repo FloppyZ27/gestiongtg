@@ -423,7 +423,7 @@ export default function EditDossierForm({
     { id: "entree-temps", label: "Entrée de temps", icon: Clock, color: "text-lime-400" },
     { id: "retour-appel", label: "Retour d'appel", icon: Phone, color: "text-blue-400" },
     { id: "documents", label: "Documents", icon: FolderOpen, color: "text-yellow-400" }
-  ];
+  ].filter(s => !hideSections.includes(s.id));
 
   const scrollToSection = (sectionId) => {
     // Fermer toutes les sections
