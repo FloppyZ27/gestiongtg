@@ -74,11 +74,10 @@ export default function OuvrirDossierDialog({
     });
 
     const recapContent = lines.join('\n');
-    setInternalCommentaires(prev => {
-      // Replace or insert recap as first comment
-      const others = (prev || []).filter(c => !c._isRecap);
-      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: '', utilisateur_nom: 'Système' }, ...others];
-    });
+    setInternalCommentaires([
+      { _isRecap: true, contenu: recapContent, utilisateur_email: '', utilisateur_nom: 'Système' },
+      ...(commentaires || [])
+    ]);
   }, [formData, clients]);
 
   const getLotById = (id) => (lots || []).find(l => l.id === id);
