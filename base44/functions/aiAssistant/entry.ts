@@ -11,11 +11,9 @@ Règles importantes:
 
 Modules de l'application:
 - DOSSIERS: mandats (CL, Implantation, Piquetage, OCTR, Lotissement, Bornage), tâches, statuts
-- CLIENTS: particuliers, notaires, courtiers, compagnies
+- CLIENTS: particuliers, notaires, courtiers, compagnies avec leurs coordonnées complètes
 - LOTS: cadastraux avec circonscription, concordances
 - CÉDULE TERRAIN: équipes, techniciens, véhicules
-- RENDEZ-VOUS: agenda personnel, absences
-- ENTRÉES DE TEMPS: heures par dossier/mandat/tâche
 `;
 
 const ARPENTEUR_INITIALS = {
@@ -31,39 +29,66 @@ function formatDate(dateStr) {
   try {
     const d = new Date(dateStr + (dateStr.length === 10 ? 'T00:00:00' : ''));
     return d.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-  } catch { return dateStr; }
+  } catch(e) { return dateStr; }
+}
+
+function buildClientDetails(client) {
+  if (!client) return '';
+  const tels = (client.telephones || []).filter(t => t.telephone).map(t => t.telephone + (t.actuel ? ' (actuel)' : '')).join(', ');
+  const emails = (client.courriels || []).filter(e => e.courriel).map(e => e.courriel + (e.actuel ? ' (actuel)' : '')).join(', ');
+  const adresses = (client.adresses || []).filter(a => a.rue || a.ville).map(a => {
+    return [a.numeros_civiques?.filter(n=>n).join(', '), a.rue, a.ville, a.code_postal].filter(Boolean).join(' ');
+  }).join(' | ');
+  const parts = [];
+  if (tels) parts.push('Tél: ' + tels);
+  if (emails) parts.push('Courriel: ' + emails);
+  if (adresses) parts.push('Adresse: ' + adresses);
+  if (client.notes) parts.push('Notes: ' + client.notes);
+  return parts.join(' | ');
 }
 
 function buildDossierContext(dossiers, clients) {
   if (!dossiers || dossiers.length === 0) return "Aucun dossier disponible.";
-  
+
   const clientMap = {};
-  (clients || []).forEach(c => { clientMap[c.id] = `${c.prenom} ${c.nom}`; });
+  (clients || []).forEach(c => { clientMap[c.id] = c; });
 
   return dossiers.map(d => {
     const prefix = ARPENTEUR_INITIALS[d.arpenteur_geometre] || "";
-    const num = `${prefix}${d.numero_dossier || ''}`;
-    const clientNames = (d.clients_ids || []).map(id => clientMap[id]).filter(Boolean).join(", ") || d.clients_texte || "N/A";
-    
+    const num = prefix + (d.numero_dossier || '');
+    const clientObjs = (d.clients_ids || []).map(id => clientMap[id]).filter(Boolean);
+    const clientNames = clientObjs.map(c => c.prenom + ' ' + c.nom).join(", ") || d.clients_texte || "N/A";
+
+    // Détails complets des clients avec coordonnées
+    const clientsDetails = clientObjs.map(c => {
+      const details = buildClientDetails(c);
+      return '    [Client] ' + c.prenom + ' ' + c.nom + ' (' + (c.type_client || 'Client') + ')' + (details ? ' — ' + details : '');
+    }).join('\n');
+
+    // Mandats
     const mandatsStr = (d.mandats || []).map(m => {
       const adresse = m.adresse_travaux
         ? [m.adresse_travaux.numeros_civiques?.filter(n=>n).join(', '), m.adresse_travaux.rue, m.adresse_travaux.ville].filter(Boolean).join(' ')
         : m.adresse_travaux_texte || '';
-      
+
       const terrainDates = (m.terrains_list || []).map(t => t.date_cedulee || t.date_terrain).filter(Boolean);
-      const terrainStr = terrainDates.length > 0 ? ` | Terrain(s): ${terrainDates.map(formatDate).join(', ')}` : '';
-      
-      const minuteStr = m.date_minute ? ` | Minute: ${formatDate(m.date_minute)}` : '';
-      const livraisonStr = m.date_livraison ? ` | Livraison: ${formatDate(m.date_livraison)}` : '';
-      const signatureStr = m.date_signature ? ` | Signature: ${formatDate(m.date_signature)}` : '';
-      const tacheStr = m.tache_actuelle ? ` | Tâche: ${m.tache_actuelle}` : '';
-      const assigneStr = m.utilisateur_assigne ? ` | Assigné: ${m.utilisateur_assigne}` : '';
-      
-      return `    - ${m.type_mandat || 'N/A'}${adresse ? ` @ ${adresse}` : ''}${tacheStr}${livraisonStr}${signatureStr}${minuteStr}${terrainStr}${assigneStr}`;
+      const terrainStr = terrainDates.length > 0 ? ' | Terrain(s): ' + terrainDates.map(formatDate).join(', ') : '';
+
+      const minuteStr = m.date_minute ? ' | Minute: ' + formatDate(m.date_minute) : '';
+      const livraisonStr = m.date_livraison ? ' | Livraison: ' + formatDate(m.date_livraison) : '';
+      const signatureStr = m.date_signature ? ' | Signature: ' + formatDate(m.date_signature) : '';
+      const tacheStr = m.tache_actuelle ? ' | Tâche: ' + m.tache_actuelle : '';
+      const assigneStr = m.utilisateur_assigne ? ' | Assigné: ' + m.utilisateur_assigne : '';
+      const prixStr = m.prix_estime ? ' | Prix estimé: ' + m.prix_estime + '$' : '';
+
+      return '    [Mandat] ' + (m.type_mandat || 'N/A') + (adresse ? ' @ ' + adresse : '') + tacheStr + livraisonStr + signatureStr + minuteStr + terrainStr + assigneStr + prixStr;
     }).join('\n');
 
-    return `Dossier ${num} | Client: ${clientNames} | Arpenteur: ${d.arpenteur_geometre} | Statut: ${d.statut || 'N/A'} | Ouvert: ${formatDate(d.date_ouverture)}
-${mandatsStr || '    (aucun mandat)'}`;
+    let result = 'Dossier ' + num + ' | Client(s): ' + clientNames + ' | Arpenteur: ' + d.arpenteur_geometre + ' | Statut: ' + (d.statut || 'N/A') + ' | Ouvert: ' + formatDate(d.date_ouverture);
+    if (clientsDetails) result += '\n' + clientsDetails;
+    if (mandatsStr) result += '\n' + mandatsStr;
+    else result += '\n    (aucun mandat)';
+    return result;
   }).join('\n\n');
 }
 
@@ -77,48 +102,40 @@ Deno.serve(async (req) => {
   const { question, history } = await req.json();
 
   // Fetch all relevant data in parallel
-  const [dossiers, clients, equipesTerrains, rendezVous] = await Promise.all([
+  const [dossiers, clients, equipesTerrains] = await Promise.all([
     base44.entities.Dossier.list(),
     base44.entities.Client.list(),
-    base44.entities.EquipeTerrain.list('-date_terrain', 100),
-    base44.entities.RendezVous.filter({ utilisateur_email: user.email }, '-date_debut', 50),
+    base44.entities.EquipeTerrain.list('-date_terrain', 50),
   ]);
 
   const dossierContext = buildDossierContext(dossiers, clients);
-  
-  const equipeContext = (equipesTerrains || []).slice(0, 30).map(e => 
-    `Équipe "${e.nom}" - ${formatDate(e.date_terrain)} - ${e.place_affaire}`
-  ).join('\n');
 
-  const rdvContext = (rendezVous || []).slice(0, 20).map(r =>
-    `${r.titre} - ${formatDate(r.date_debut)}${r.date_fin ? ` au ${formatDate(r.date_fin)}` : ''} (${r.type})`
+  const equipeContext = (equipesTerrains || []).slice(0, 20).map(e =>
+    'Équipe "' + e.nom + '" - ' + formatDate(e.date_terrain) + ' - ' + e.place_affaire
   ).join('\n');
 
   const historyStr = (history || [])
-    .map(m => `${m.role === 'user' ? 'Utilisateur' : 'Assistant'}: ${m.content}`)
+    .map(m => (m.role === 'user' ? 'Utilisateur' : 'Assistant') + ': ' + m.content)
     .join('\n');
 
-  const prompt = `${SYSTEM_CONTEXT}
+  const prompt = SYSTEM_CONTEXT + `
 
 === DONNÉES RÉELLES DE LA BASE DE DONNÉES ===
 
---- DOSSIERS ET MANDATS (${dossiers.length} dossiers) ---
+--- DOSSIERS, CLIENTS ET MANDATS (${dossiers.length} dossiers, ${clients.length} clients) ---
 ${dossierContext}
 
 --- ÉQUIPES TERRAIN RÉCENTES ---
 ${equipeContext || 'Aucune équipe terrain.'}
 
---- MES RENDEZ-VOUS (${user.full_name}) ---
-${rdvContext || 'Aucun rendez-vous.'}
-
 === FIN DES DONNÉES ===
 
-${historyStr ? `Historique de la conversation:\n${historyStr}\n` : ''}
+${historyStr ? 'Historique de la conversation:\n' + historyStr + '\n' : ''}
 Utilisateur: ${question}
 
-Réponds avec précision en te basant sur les données réelles ci-dessus. Si une information est dans les données, donne-la exactement. Sois concis.`;
+Réponds avec précision en te basant sur les données réelles ci-dessus. Si une information est présente dans les données (téléphone, courriel, date, adresse, numéro), donne-la exactement. Sois concis mais complet.`;
 
-  const response = await base44.integrations.Core.InvokeLLM({ prompt, model: 'gpt_5' });
+  const response = await base44.integrations.Core.InvokeLLM({ prompt, model: 'claude_sonnet_4_6' });
 
   return Response.json({ answer: response });
 });
