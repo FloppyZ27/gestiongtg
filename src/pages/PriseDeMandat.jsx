@@ -38,6 +38,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2417,10 +2418,23 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                               await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`, destinationFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS` });
                             }
                           } catch (error) {
-                            console.error("[OUVRIR DOSSIER] Erreur:", error);
+                            console.error("[OUVRIR DOSSIER] Erreur SharePoint:", error);
                           }
 
-                          const dossierData = {
+                          // Construire commentaire récap
+                          let infoComment = "";
+                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
+                            infoComment += `<strong><u>Client</u></strong>\n${`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim()}\n`;
+                            if (clientInfo.telephone) infoComment += `Tél: ${clientInfo.telephone}\n`;
+                            if (clientInfo.courriel) infoComment += `Email: ${clientInfo.courriel}\n`;
+                          }
+                          if (professionnelInfo.notaire) infoComment += `<strong><u>Notaire</u></strong>\n${professionnelInfo.notaire}\n`;
+                          if (professionnelInfo.courtier) infoComment += `<strong><u>Courtier</u></strong>\n${professionnelInfo.courtier}\n`;
+                          const commentsForDossier = infoComment
+                            ? [{ contenu: "<h2><strong>📋 Informations du mandat</strong></h2>\n\n" + infoComment, utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système" }, ...commentairesTemporaires]
+                            : commentairesTemporaires;
+
+                          const dossierFormData = {
                             numero_dossier: prochainNumero,
                             arpenteur_geometre: formData.arpenteur_geometre,
                             place_affaire: formData.placeAffaire,
@@ -2440,35 +2454,15 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                               date_signature: m.date_signature || "",
                               date_debut_travaux: m.date_debut_travaux || "",
                               date_livraison: m.date_livraison || "",
-                              lots: [],
-                              tache_actuelle: "Ouverture",
-                              utilisateur_assigne: "",
+                              lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "",
                               minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [],
                               terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },
                               factures: [], notes: ""
                             }))
                           };
-
-                          // Créer commentaire récap si infos manuelles
-                          let infoComment = "";
-                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                            infoComment += `<strong><u>Client</u></strong>\n${`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim()}\n`;
-                            if (clientInfo.telephone) infoComment += `Tél: ${clientInfo.telephone}\n`;
-                            if (clientInfo.courriel) infoComment += `Email: ${clientInfo.courriel}\n`;
-                          }
-                          if (professionnelInfo.notaire) infoComment += `<strong><u>Notaire</u></strong>\n${professionnelInfo.notaire}\n`;
-                          if (professionnelInfo.courtier) infoComment += `<strong><u>Courtier</u></strong>\n${professionnelInfo.courtier}\n`;
-                          const commentsToCreate = infoComment
-                            ? [{ id: `info-${Date.now()}`, contenu: "<h2><strong>📋 Informations du mandat</strong></h2>\n\n" + infoComment, utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", created_date: new Date().toISOString() }, ...commentairesTemporaires]
-                            : commentairesTemporaires;
-
-                          await createDossierMutation.mutateAsync({ dossierData, commentairesToCreate: commentsToCreate });
-                          if (editingPriseMandat) {
-                            await base44.entities.PriseMandat.update(editingPriseMandat.id, { ...editingPriseMandat, statut: "Mandat non octroyé", locked_by: null, locked_at: null });
-                            queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                          }
-                          setIsDialogOpen(false);
-                          resetFullForm();
+                          setNouveauDossierForm(dossierFormData);
+                          setCommentairesTemporairesDossier(commentsForDossier);
+                          setIsOuvrirDossierDialogOpen(true);
                         }}
                       >
                         <FolderOpen className="w-5 h-5 mr-2" />
@@ -2975,61 +2969,16 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de confirmation d'annulation - Ouvrir dossier */}
-        <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Attention
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                  onClick={() => {
-                    setShowCancelConfirmDossier(false);
-                    setIsOuvrirDossierDialogOpen(false);
-                    setNouveauDossierForm({
-                      numero_dossier: "",
-                      arpenteur_geometre: "",
-                      date_ouverture: new Date().toISOString().split('T')[0],
-                      statut: "Ouvert",
-                      ttl: "Non",
-                      clients_ids: [],
-                      notaires_ids: [],
-                      courtiers_ids: [],
-                      mandats: []
-                    });
-                    setCommentairesTemporairesDossier([]);
-                    setDossierDocuments([]);
-                    setActiveTabMandatDossier("0");
-                  }}
-                >
-                  Abandonner
-                </Button>
-                <Button 
-                  type="button" 
-                  onClick={() => setShowCancelConfirmDossier(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Continuer l'édition
-                </Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        {/* Dialog Ouvrir Dossier */}
+        <OuvrirDossierDialog
+          open={isOuvrirDossierDialogOpen}
+          onOpenChange={setIsOuvrirDossierDialogOpen}
+          dossierForm={nouveauDossierForm}
+          commentaires={commentairesTemporairesDossier}
+          users={users}
+          editingPriseMandat={editingPriseMandat}
+          onSuccess={() => { setIsOuvrirDossierDialogOpen(false); setIsDialogOpen(false); resetFullForm(); }}
+        />
 
         {/* Dialog de confirmation de suppression de mandat */}
         <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
