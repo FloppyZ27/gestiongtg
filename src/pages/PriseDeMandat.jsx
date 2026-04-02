@@ -2346,7 +2346,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             }else{setIsDialogOpen(open);}
           }}>
 
-            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}>
+            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50`} style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2403,55 +2403,24 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         type="button"
                         className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 border-2 border-purple-500 text-purple-300"
                         onClick={async () => {
-                          // Calculer le prochain numéro de dossier
                           const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                           const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
-                          
+
                           try {
-                            // Créer le dossier SharePoint
-                            console.log(`[OUVRIR DOSSIER] Création dossier SharePoint`);
                             await base44.functions.invoke('createSharePointFolder', {
                               arpenteur_geometre: formData.arpenteur_geometre,
                               numero_dossier: prochainNumero
                             });
-
-                            // Transférer les documents depuis le dossier temporaire (si il existe)
-                            const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || 
-                                             (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");
-                            const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
-                            const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS`;
-                            
-                            console.log(`[OUVRIR DOSSIER] Vérification documents temporaires`);
-                            console.log(`[OUVRIR DOSSIER] Source: ${tempFolderPath}`);
-                            console.log(`[OUVRIR DOSSIER] Destination: ${finalFolderPath}`);
-                            
-                            // Vérifier si le dossier temporaire existe avant de transférer
-                            const checkResponse = await base44.functions.invoke('sharepoint', {
-                              action: 'list',
-                              folderPath: tempFolderPath
-                            });
-                            
-                            if (checkResponse.data?.files && checkResponse.data.files.length > 0) {
-                              console.log(`[OUVRIR DOSSIER] ${checkResponse.data.files.length} document(s) trouvé(s), transfert en cours...`);
-                              
-                              const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
-                                sourceFolderPath: tempFolderPath,
-                                destinationFolderPath: finalFolderPath
-                              });
-                              
-                              console.log(`[OUVRIR DOSSIER] Réponse transfert:`, moveResponse.data);
-                              
-                              if (moveResponse.data?.movedCount > 0) {
-                                console.log(`[OUVRIR DOSSIER] ✓ ${moveResponse.data.movedCount} fichier(s) transféré(s)`);
-                              }
-                            } else {
-                              console.log(`[OUVRIR DOSSIER] Aucun document temporaire trouvé`);
+                            const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");
+                            const checkResponse = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS` });
+                            if (checkResponse.data?.files?.length > 0) {
+                              await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`, destinationFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS` });
                             }
                           } catch (error) {
                             console.error("[OUVRIR DOSSIER] Erreur:", error);
                           }
-                          
-                          setNouveauDossierForm({
+
+                          const dossierData = {
                             numero_dossier: prochainNumero,
                             arpenteur_geometre: formData.arpenteur_geometre,
                             place_affaire: formData.placeAffaire,
@@ -2466,8 +2435,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                               type_mandat: m.type_mandat,
                               adresse_travaux: workAddress,
                               prix_estime: m.prix_estime || 0,
-                              prix_premier_lot: m.prix_premier_lot || 0,
-                              prix_autres_lots: m.prix_autres_lots || 0,
                               rabais: m.rabais || 0,
                               taxes_incluses: m.taxes_incluses || false,
                               date_signature: m.date_signature || "",
@@ -2476,113 +2443,32 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                               lots: [],
                               tache_actuelle: "Ouverture",
                               utilisateur_assigne: "",
-                              minute: "",
-                              date_minute: "",
-                              type_minute: "Initiale",
-                              minutes_list: [],
-                              terrain: {
-                                date_limite_leve: "",
-                                instruments_requis: "",
-                                a_rendez_vous: false,
-                                date_rendez_vous: "",
-                                heure_rendez_vous: "",
-                                donneur: "",
-                                technicien: "",
-                                dossier_simultane: "",
-                                temps_prevu: "",
-                                notes: ""
-                              },
-                              factures: [],
-                              notes: ""
+                              minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [],
+                              terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },
+                              factures: [], notes: ""
                             }))
-                          });
-                          // Créer un commentaire récapitulatif avec les infos MANUELLES du mandat
-                          let commentaireInfoMandat = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
-                          
-                          // Vérifier si un texte saisi correspond à un professionnel sélectionné
-                          const selectedClientsNames = formData.clients_ids.map(id => {
-                            const c = clients.find(cl => cl.id === id);
-                            return c ? `${c.prenom} ${c.nom}`.trim() : '';
-                          });
-                          const selectedNotairesNames = (formData.notaires_ids || []).map(id => {
-                            const n = notaires.find(nt => nt.id === id);
-                            return n ? `${n.prenom} ${n.nom}`.trim() : '';
-                          });
-                          const selectedCourtiersNames = (formData.courtiers_ids || []).map(id => {
-                            const ct = courtiers.find(cr => cr.id === id);
-                            return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
-                          });
-                          const compagnies = clients.filter(c => c.type_client === 'Compagnie');
-                          const selectedCompagniesNames = (formData.compagnies_ids || []).map(id => {
-                            const cp = compagnies.find(cmp => cmp.id === id);
-                            return cp ? `${cp.prenom} ${cp.nom}`.trim() : '';
-                          });
-                          
-                          // Client saisi manuellement (si différent des sélectionnés)
-                          const clientSaisiManuel = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
-                          if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && 
-                              !selectedClientsNames.includes(clientSaisiManuel)) {
-                            commentaireInfoMandat += `<strong><u>Client</u></strong>\n`;
-                            if (clientInfo.prenom || clientInfo.nom) {
-                              commentaireInfoMandat += clientSaisiManuel + "\n";
-                            }
-                            if (clientInfo.telephone) commentaireInfoMandat += `Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
-                            if (clientInfo.courriel) commentaireInfoMandat += `Email: ${clientInfo.courriel}\n`;
-                            commentaireInfoMandat += "\n";
+                          };
+
+                          // Créer commentaire récap si infos manuelles
+                          let infoComment = "";
+                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
+                            infoComment += `<strong><u>Client</u></strong>\n${`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim()}\n`;
+                            if (clientInfo.telephone) infoComment += `Tél: ${clientInfo.telephone}\n`;
+                            if (clientInfo.courriel) infoComment += `Email: ${clientInfo.courriel}\n`;
                           }
-                          
-                          // Notaire saisi manuellement (si différent des sélectionnés)
-                          if (professionnelInfo.notaire && !selectedNotairesNames.includes(professionnelInfo.notaire.trim())) {
-                            commentaireInfoMandat += `<strong><u>Notaire</u></strong>\n`;
-                            commentaireInfoMandat += `${professionnelInfo.notaire}\n\n`;
+                          if (professionnelInfo.notaire) infoComment += `<strong><u>Notaire</u></strong>\n${professionnelInfo.notaire}\n`;
+                          if (professionnelInfo.courtier) infoComment += `<strong><u>Courtier</u></strong>\n${professionnelInfo.courtier}\n`;
+                          const commentsToCreate = infoComment
+                            ? [{ id: `info-${Date.now()}`, contenu: "<h2><strong>📋 Informations du mandat</strong></h2>\n\n" + infoComment, utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", created_date: new Date().toISOString() }, ...commentairesTemporaires]
+                            : commentairesTemporaires;
+
+                          await createDossierMutation.mutateAsync({ dossierData, commentairesToCreate: commentsToCreate });
+                          if (editingPriseMandat) {
+                            await base44.entities.PriseMandat.update(editingPriseMandat.id, { ...editingPriseMandat, statut: "Mandat non octroyé", locked_by: null, locked_at: null });
+                            queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
                           }
-                          
-                          // Courtier saisi manuellement (si différent des sélectionnés)
-                          if (professionnelInfo.courtier && !selectedCourtiersNames.includes(professionnelInfo.courtier.trim())) {
-                            commentaireInfoMandat += `<strong><u>Courtier immobilier</u></strong>\n`;
-                            commentaireInfoMandat += `${professionnelInfo.courtier}\n\n`;
-                          }
-                          
-                          // Compagnie saisie manuellement (si différente des sélectionnées)
-                          if (professionnelInfo.compagnie && !selectedCompagniesNames.includes(professionnelInfo.compagnie.trim())) {
-                            commentaireInfoMandat += `<strong><u>Compagnie</u></strong>\n`;
-                            commentaireInfoMandat += `${professionnelInfo.compagnie}\n\n`;
-                          }
-                          
-                          // Lots (saisis manuellement)
-                          if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
-                            const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
-                            if (lotsArray.length > 0) {
-                              commentaireInfoMandat += `<strong><u>Lots</u></strong>\n`;
-                              lotsArray.forEach(lot => {
-                                commentaireInfoMandat += `${lot.trim()}\n`;
-                              });
-                              commentaireInfoMandat += "\n";
-                            }
-                          }
-                          
-                          // Ajouter ce commentaire au début des commentaires temporaires s'il contient des infos MANUELLES
-                          const hasManualInfo = (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
-                                                professionnelInfo.notaire || professionnelInfo.courtier || professionnelInfo.compagnie ||
-                                                workAddress.numero_lot);
-                          
-                          const commentairesAvecInfo = hasManualInfo ? [
-                            {
-                              id: `info-mandat-${Date.now()}`,
-                              contenu: commentaireInfoMandat,
-                              utilisateur_email: user?.email || "",
-                              utilisateur_nom: user?.full_name || "Système",
-                              created_date: new Date().toISOString()
-                            },
-                            ...commentairesTemporaires
-                          ] : commentairesTemporaires;
-                          
-                          setCommentairesTemporairesDossier(commentairesAvecInfo);
-                          setHistoriqueDossier(historique);
-                          setActiveTabMandatDossier("0");
-                          setInfoDossierCollapsed(false);
-                          setMandatStepCollapsed(false);
-                          setIsOuvrirDossierDialogOpen(true);
+                          setIsDialogOpen(false);
+                          resetFullForm();
                         }}
                       >
                         <FolderOpen className="w-5 h-5 mr-2" />
