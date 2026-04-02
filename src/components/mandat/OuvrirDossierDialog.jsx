@@ -206,7 +206,7 @@ export default function OuvrirDossierDialog({
           setViewingClientDetails={() => {}}
           calculerProchainNumeroDossier={() => formData.numero_dossier}
           editingDossier={null}
-          hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
+          hideSections={['terrain', 'minutes']}
           onOpenNewLotDialog={() => {}}
           setEditingClient={() => {}}
           setEditingLot={() => {}}
