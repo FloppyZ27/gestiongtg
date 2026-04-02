@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import NotificationBanner from "@/components/shared/NotificationBanner";
+import AIChatbot from "@/components/shared/AIChatbot";
 import NotificationButton from "@/components/shared/NotificationButton";
 import DossierSearchBar from "@/components/shared/DossierSearchBar";
 import PermissionGuard from "@/components/shared/PermissionGuard";
@@ -1069,6 +1070,9 @@ function LayoutContent({ children, currentPageName }) {
       
       {/* Notification Banner */}
       <NotificationBanner user={user} />
+      
+      {/* AI Chatbot flottant */}
+      <AIChatbot />
       
       {/* Dialog global pour modifier un dossier depuis n'importe quelle page */}
       <GlobalDossierEditDialog />
