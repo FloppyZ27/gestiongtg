@@ -2421,18 +2421,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                             console.error("[OUVRIR DOSSIER] Erreur SharePoint:", error);
                           }
 
-                          // Construire commentaire récap
-                          let infoComment = "";
-                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                            infoComment += `<strong><u>Client</u></strong>\n${`${clientInfo.prenom||''} ${clientInfo.nom||''}`.trim()}\n`;
-                            if (clientInfo.telephone) infoComment += `Tél: ${clientInfo.telephone}\n`;
-                            if (clientInfo.courriel) infoComment += `Email: ${clientInfo.courriel}\n`;
-                          }
-                          if (professionnelInfo.notaire) infoComment += `<strong><u>Notaire</u></strong>\n${professionnelInfo.notaire}\n`;
-                          if (professionnelInfo.courtier) infoComment += `<strong><u>Courtier</u></strong>\n${professionnelInfo.courtier}\n`;
-                          const commentsForDossier = infoComment
-                            ? [{ contenu: "<h2><strong>📋 Informations du mandat</strong></h2>\n\n" + infoComment, utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système" }, ...commentairesTemporaires]
-                            : commentairesTemporaires;
+                          const commentsForDossier = commentairesTemporaires;
 
                           const dossierFormData = {
                             numero_dossier: prochainNumero,
