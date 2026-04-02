@@ -4977,14 +4977,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                     })
                     .map((pm) => {
-                      const getUrgenceColor = (urgence) => {
-                        switch (urgence) {
-                          case "Pas pressé": return "bg-slate-500/20 text-slate-400 border-slate-500/30";
-                          case "Normal": return "bg-slate-500/20 text-slate-400 border-slate-500/30";
-                          case "Rapide": return "bg-red-500/20 text-red-400 border-red-500/30";
-                          default: return "bg-slate-500/20 text-slate-400 border-slate-500/30";
-                        }
-                      };
+                      const getUrgenceColor = (u) => (u === "Rapide" || u === "Urgent") ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30";
 
                       return (
                         <TableRow 
@@ -5063,7 +5056,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                           <TableCell>
                             {pm.urgence_percue ? (
                               <Badge className={`${getUrgenceColor(pm.urgence_percue)} border text-xs`}>
-                                {pm.urgence_percue}
+                                {pm.urgence_percue === "Rapide" ? "Urgent" : pm.urgence_percue}
                               </Badge>
                             ) : (
                               <span className="text-slate-600 text-xs">-</span>
