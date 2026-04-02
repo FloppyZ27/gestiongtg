@@ -17,14 +17,69 @@ export default function OuvrirDossierDialog({
 }) {
   const [formData, setFormData] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [internalCommentaires, setInternalCommentaires] = useState([]);
   const queryClient = useQueryClient();
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
     if (dossierForm && open) {
       setFormData({ ...dossierForm });
+      setInternalCommentaires(commentaires || []);
     }
   }, [dossierForm, open]);
+
+  // Build recap comment when formData changes
+  useEffect(() => {
+    if (!formData) return;
+    const lines = ['<h2><strong>📋 Informations du mandat</strong></h2>'];
+
+    // Clients
+    const clientNames = (formData.clients_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom} ${c.nom}` : null;
+    }).filter(Boolean);
+    if (clientNames.length > 0) lines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+
+    // Notaires
+    const notaireNames = (formData.notaires_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom} ${c.nom}` : null;
+    }).filter(Boolean);
+    if (notaireNames.length > 0) lines.push(`<strong>Notaire(s):</strong> ${notaireNames.join(', ')}`);
+
+    // Courtiers
+    const courtierNames = (formData.courtiers_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom} ${c.nom}` : null;
+    }).filter(Boolean);
+    if (courtierNames.length > 0) lines.push(`<strong>Courtier(s):</strong> ${courtierNames.join(', ')}`);
+
+    // Mandats
+    (formData.mandats || []).forEach((m, i) => {
+      if (!m.type_mandat) return;
+      lines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
+      const addr = m.adresse_travaux;
+      if (addr && (addr.rue || addr.ville)) {
+        const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
+        lines.push(`📍 Adresse: ${parts.join(', ')}`);
+      }
+      if (m.date_signature) lines.push(`📅 Signature: ${m.date_signature}`);
+      if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
+      if (m.date_debut_travaux) lines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
+      if (m.prix_estime) lines.push(`💰 Prix estimé: ${m.prix_estime} $`);
+      if (m.rabais) lines.push(`🏷️ Rabais: ${m.rabais} $`);
+      if (m.taxes_incluses) lines.push(`✅ Taxes incluses`);
+      if (m.prix_convenu) lines.push(`🤝 Prix convenu avec le client`);
+      if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
+    });
+
+    const recapContent = lines.join('\n');
+    setInternalCommentaires(prev => {
+      // Replace or insert recap as first comment
+      const others = (prev || []).filter(c => !c._isRecap);
+      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: '', utilisateur_nom: 'Système' }, ...others];
+    });
+  }, [formData, clients]);
 
   const getLotById = (id) => (lots || []).find(l => l.id === id);
 
@@ -72,13 +127,14 @@ export default function OuvrirDossierDialog({
     try {
       const newDossier = await base44.entities.Dossier.create(formData);
 
-      if (commentaires?.length > 0) {
-        await Promise.all(commentaires.map(c =>
+      const allComments = internalCommentaires || [];
+      if (allComments.length > 0) {
+        await Promise.all(allComments.filter(c => c.contenu).map(c =>
           base44.entities.CommentaireDossier.create({
             dossier_id: newDossier.id,
             contenu: c.contenu,
-            utilisateur_email: c.utilisateur_email,
-            utilisateur_nom: c.utilisateur_nom
+            utilisateur_email: c.utilisateur_email || '',
+            utilisateur_nom: c.utilisateur_nom || 'Système'
           })
         ));
       }
@@ -150,6 +206,7 @@ export default function OuvrirDossierDialog({
           setViewingClientDetails={() => {}}
           calculerProchainNumeroDossier={() => formData.numero_dossier}
           editingDossier={null}
+          hideSections={['terrain', 'minutes']}
           onOpenNewLotDialog={() => {}}
           setEditingClient={() => {}}
           setEditingLot={() => {}}

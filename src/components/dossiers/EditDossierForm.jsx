@@ -112,7 +112,7 @@ export default function EditDossierForm({
   setEditingLot,
   setNewLotForm,
   setLotActionLogs,
-  allDossiers
+  allDossiers, hideSections = []
 }) {
   // Initialiser activeTabMandat avec l'index du mandat choisi
   React.useEffect(() => {
@@ -1707,7 +1707,7 @@ export default function EditDossierForm({
             </div>
 
             {/* Section Terrain */}
-            {formData.mandats.length > 0 && (
+            {formData.mandats.length > 0 && !hideSections.includes('terrain') && (
               <Card className="border-slate-700 bg-slate-800/30" data-section="terrain">
                 <CardHeader 
                   className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
@@ -2088,7 +2088,7 @@ export default function EditDossierForm({
             )}
 
             {/* Section Minutes */}
-            {formData.mandats.length > 0 && (
+            {formData.mandats.length > 0 && !hideSections.includes('minutes') && (
               <Card className="border-slate-700 bg-slate-800/30" data-section="minutes">
                 <CardHeader 
                   className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
