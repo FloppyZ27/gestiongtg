@@ -207,6 +207,13 @@ export default function OuvrirDossierDialog({
           calculerProchainNumeroDossier={() => formData.numero_dossier}
           editingDossier={null}
           hideSections={['terrain', 'minutes']}
+          commentairesTemporaires={internalCommentaires.filter(c => !c._isRecap)}
+          onCommentairesTemporairesChange={(newComments) => {
+            setInternalCommentaires(prev => {
+              const recap = prev.filter(c => c._isRecap);
+              return [...recap, ...newComments];
+            });
+          }}
           onOpenNewLotDialog={() => {}}
           setEditingClient={() => {}}
           setEditingLot={() => {}}

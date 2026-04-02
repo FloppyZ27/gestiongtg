@@ -112,7 +112,7 @@ export default function EditDossierForm({
   setEditingLot,
   setNewLotForm,
   setLotActionLogs,
-  allDossiers, hideSections = []
+  allDossiers, hideSections = [], commentairesTemporaires = [], onCommentairesTemporairesChange
 }) {
   // Initialiser activeTabMandat avec l'index du mandat choisi
   React.useEffect(() => {
@@ -2965,7 +2965,7 @@ export default function EditDossierForm({
               </TabsList>
               
               <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={false} />
+                <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={!editingDossier} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} />
               </TabsContent>
               
               <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
