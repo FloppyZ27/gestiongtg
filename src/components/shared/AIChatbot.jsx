@@ -1,55 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { MessageCircle, X, Send, Bot, User, Loader2, ChevronDown } from "lucide-react";
+import { Send, Bot, User, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 
-const SYSTEM_CONTEXT = `Tu es un assistant IA intégré à GestionGTG, un logiciel de gestion interne pour une firme d'arpenteurs-géomètres (GTG). Tu connais parfaitement toutes les procédures et fonctionnalités de l'application.
 
-Voici les modules et procédures de l'application :
-
-**DOSSIERS** : Gestion des dossiers clients. Chaque dossier contient des mandats (Certificat de localisation, Implantation, Piquetage, OCTR, Projet de lotissement, Bornage, etc.). Les dossiers ont des statuts (Ouvert/Fermé), un arpenteur-géomètre assigné (Samuel Guay, Dany Gaboury, Pierre-Luc Pilote, Benjamin Larouche, Frédéric Gilbert), une place d'affaire (Alma ou Saguenay). Les numéros de dossier sont préfixés par les initiales de l'arpenteur (SG-, DG-, PLP-, BL-, FG-).
-
-**MANDATS** : Chaque dossier peut avoir plusieurs mandats. Chaque mandat a une tâche actuelle (Ouverture, Cédule, Montage, Terrain, Compilation, Reliage, Décision/Calcul, Mise en plan, Analyse, Rapport, Vérification, Facturer), un utilisateur assigné, des dates (livraison, signature, début travaux), un prix estimé, et des lots associés.
-
-**CLIENTS** : Base de données des clients (particuliers, notaires, courtiers immobiliers, compagnies). Chaque client a des adresses, courriels, téléphones et préférences de livraison.
-
-**GESTION DE MANDAT / KANBAN** : Vue Kanban des mandats organisés par tâche actuelle. Permet de déplacer les mandats d'une tâche à l'autre.
-
-**CÉDULE TERRAIN** : Planification des équipes terrain. Assignation des techniciens, véhicules et équipements aux terrains planifiés.
-
-**LEVÉ TERRAIN** : Gestion des levés terrain, suivi des statuts terrain (en vérification, à céduler, pas de terrain).
-
-**PRISE DE MANDAT** : Formulaire de réception de nouveaux mandats avec statuts (Nouveau mandat/Demande d'information, Mandats à ouvrir, Mandat non octroyé).
-
-**LOTS** : Base de données des lots cadastraux. Import de fichiers .d01. Chaque lot a une circonscription foncière, un cadastre, un rang, des types d'opération et des concordances antérieures.
-
-**ACTES** : Gestion des actes notariés (Vente, Cession, Donation, Déclaration de Transmission, Jugement, Rectification, Rétrocession, Servitude, Bornage). Liés aux lots via la chaîne de titre.
-
-**RECHERCHES / CHAÎNE DE TITRE** : Consultation des lots et leurs actes associés pour établir la chaîne de titre.
-
-**CALENDRIER / PROFIL** : Agenda personnel avec synchronisation Microsoft Outlook. Rendez-vous et absences. Feuille de temps hebdomadaire/mensuelle avec entrées de temps par dossier/mandat/tâche.
-
-**ENTRÉES DE TEMPS** : Chaque employé saisit ses heures par dossier, mandat et tâche. Possibilité d'assigner la tâche suivante à un autre utilisateur.
-
-**TABLEAU DE BORD** : Vue d'ensemble avec statistiques sur les dossiers, mandats, retours d'appel, et activités récentes.
-
-**RETOURS D'APPEL** : Gestion des rappels clients (Retour d'appel, Message laissé, Aucune réponse, Terminé).
-
-**COMMUNICATION CLIENTS** : Module de communication avec les clients.
-
-**COMPTABILITÉ** : Gestion des factures générées par mandat.
-
-**POINTAGE** : Système de punch in/out pour enregistrer les heures de présence.
-
-**ADMINISTRATION** : Gestion des utilisateurs, permissions par page, rôles (admin/user).
-
-**CLUB SOCIAL** : Section sociale interne.
-
-**SHAREPOINT** : Intégration avec SharePoint pour les documents. Les dossiers ont des dossiers correspondants dans SharePoint.
-
-Réponds toujours en français, de manière concise et utile. Si on te pose une question sur l'application, explique clairement la procédure ou fonctionnalité. Tu peux aussi aider avec des questions générales liées au travail d'arpentage.`;
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,21 +35,14 @@ export default function AIChatbot() {
     setInput("");
     setIsLoading(true);
 
-    const history = messages
-      .map(m => `${m.role === "user" ? "Utilisateur" : "Assistant"}: ${m.content}`)
-      .join("\n");
+    const history = messages.slice(1); // exclude initial greeting
 
-    const prompt = `${SYSTEM_CONTEXT}
+    const response = await base44.functions.invoke('aiAssistant', {
+      question: trimmed,
+      history
+    });
 
-Historique de la conversation:
-${history}
-
-Utilisateur: ${trimmed}
-
-Réponds de manière utile et concise en français.`;
-
-    const response = await base44.integrations.Core.InvokeLLM({ prompt });
-    setMessages(prev => [...prev, { role: "assistant", content: response }]);
+    setMessages(prev => [...prev, { role: "assistant", content: response.data.answer }]);
     setIsLoading(false);
   };
 
