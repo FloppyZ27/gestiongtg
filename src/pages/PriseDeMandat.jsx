@@ -2971,11 +2971,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
         {/* Dialog Ouvrir Dossier */}
         <OuvrirDossierDialog
-          open={isOuvrirDossierDialogOpen}
-          onOpenChange={setIsOuvrirDossierDialogOpen}
-          dossierForm={nouveauDossierForm}
-          commentaires={commentairesTemporairesDossier}
-          users={users}
+          open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}
+          dossierForm={nouveauDossierForm} commentaires={commentairesTemporairesDossier}
+          clients={clients} lots={lots} users={users}
           editingPriseMandat={editingPriseMandat}
           onSuccess={() => { setIsOuvrirDossierDialogOpen(false); setIsDialogOpen(false); resetFullForm(); }}
         />
