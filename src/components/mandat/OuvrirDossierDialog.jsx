@@ -28,19 +28,41 @@ export default function OuvrirDossierDialog({
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
-    if (dossierForm && open) {
+    if (dossierForm && open && currentUser) {
       setFormData({ ...dossierForm });
-      setInternalCommentaires(commentaires || []);
-      // Créer automatiquement le commentaire récapitulatif
-      createAutoRecap();
+      // Créer automatiquement le commentaire récapitulatif en passant les données directement
+      createAutoRecapFromData(dossierForm, commentaires || []);
     }
-  }, [dossierForm, open]);
+  }, [dossierForm, open, currentUser]);
 
-  const createAutoRecap = async () => {
-    if (!formData || !currentUser) return;
+  const createAutoRecapFromData = (data, existingCommentaires) => {
+    if (!data || !currentUser) return;
+    const recapComment = buildRecapComment(data, currentUser);
+    if (recapComment) {
+      const filtered = (existingCommentaires || []).filter(c => !c._isRecap);
+      setInternalCommentaires([recapComment, ...filtered]);
+    } else {
+      setInternalCommentaires(existingCommentaires || []);
+    }
+  };
+
+  const createAutoRecap = () => {
+    if (!formData || !currentUser) return null;
+    const recapComment = buildRecapComment(formData, currentUser);
+    if (recapComment) {
+      setInternalCommentaires(prev => {
+        const filtered = prev.filter(c => !c._isRecap);
+        return [recapComment, ...filtered];
+      });
+    }
+    return recapComment;
+  };
+
+  const buildRecapComment = (data, user) => {
+    if (!data) return null;
     
     const recapLines = ['=== RÉCAPITULATIF DES MANDATS ===', ''];
-    (formData.mandats || []).forEach((m, i) => {
+    (data.mandats || []).forEach((m, i) => {
       recapLines.push(`📋 MANDAT ${i + 1}: ${m.type_mandat || 'N/A'}`);
       recapLines.push('─'.repeat(40));
       
@@ -108,26 +130,22 @@ export default function OuvrirDossierDialog({
     });
 
     if (recapLines.length > 2) {
-      const recapComment = {
+      return {
         contenu: recapLines.join('\n'),
-        utilisateur_email: currentUser?.email || '',
-        utilisateur_nom: currentUser?.full_name || 'Système',
+        utilisateur_email: user?.email || '',
+        utilisateur_nom: user?.full_name || 'Système',
         _isRecap: true
       };
-      setInternalCommentaires(prev => {
-        const filtered = prev.filter(c => !c._isRecap);
-        return [recapComment, ...filtered];
-      });
-      return recapComment;
     }
+    return null;
   };
 
   const handleOuvrirDossier = async () => {
     if (!currentUser || !formData) return;
     setIsCreating(true);
     try {
-      // Créer le commentaire récapitulatif
-      const recap = await createAutoRecap();
+      // Reconstruire le recap depuis formData actuel
+      const recap = buildRecapComment(formData, currentUser);
       
       // Créer le dossier
       const newDossier = await base44.entities.Dossier.create(formData);
