@@ -39,45 +39,75 @@ export default function OuvrirDossierDialog({
   const createAutoRecap = async () => {
     if (!formData || !currentUser) return;
     
-    const recapLines = [];
+    const recapLines = ['=== RÉCAPITULATIF DES MANDATS ===', ''];
     (formData.mandats || []).forEach((m, i) => {
-      recapLines.push(`📋 Mandat ${i + 1}: ${m.type_mandat || 'N/A'}`);
+      recapLines.push(`📋 MANDAT ${i + 1}: ${m.type_mandat || 'N/A'}`);
+      recapLines.push('─'.repeat(40));
+      
+      // Informations de localisation
       if (m.adresse_travaux?.rue || m.adresse_travaux?.ville) {
         const parts = [m.adresse_travaux?.numeros_civiques?.[0], m.adresse_travaux?.rue, m.adresse_travaux?.ville].filter(Boolean);
         recapLines.push(`📍 Adresse: ${parts.join(', ')}`);
       }
-      if (m.lots_texte) recapLines.push(`Lots (texte): ${m.lots_texte}`);
+      if (m.adresse_travaux?.code_postal) recapLines.push(`   Code postal: ${m.adresse_travaux.code_postal}`);
+      if (m.adresse_travaux?.province) recapLines.push(`   Province: ${m.adresse_travaux.province}`);
+      
+      // Lots
+      if (m.lots_texte) recapLines.push(`🗂️ Lots (texte): ${m.lots_texte}`);
       if (m.lots?.length > 0) {
         const lotNumbers = m.lots.map(lotId => {
           const lot = lots?.find(l => l.id === lotId);
           return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
         }).join(', ');
-        recapLines.push(`Lots: ${lotNumbers}`);
+        recapLines.push(`🗂️ Lots: ${lotNumbers}`);
       }
-      if (m.date_ouverture) recapLines.push(`Date ouverture: ${m.date_ouverture}`);
-      if (m.date_signature) recapLines.push(`Date signature: ${m.date_signature}`);
-      if (m.date_debut_travaux) recapLines.push(`Date début travaux: ${m.date_debut_travaux}`);
-      if (m.date_livraison) recapLines.push(`Date livraison: ${m.date_livraison}`);
-      if (m.minute) recapLines.push(`Minute: ${m.minute}`);
-      if (m.date_minute) recapLines.push(`Date minute: ${m.date_minute}`);
-      if (m.type_minute) recapLines.push(`Type minute: ${m.type_minute}`);
-      if (m.prix_estime) recapLines.push(`💰 Prix estimé: ${m.prix_estime} $`);
-      if (m.prix_premier_lot) recapLines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
-      if (m.prix_autres_lots) recapLines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
-      if (m.rabais) recapLines.push(`Rabais: ${m.rabais} $`);
-      if (m.taxes_incluses) recapLines.push(`✅ Taxes incluses`);
-      if (m.prix_convenu) recapLines.push(`✅ Prix convenu`);
-      if (m.utilisateur_assigne) {
-        const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
-        recapLines.push(`Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+      
+      // Dates importantes
+      if (m.date_ouverture || m.date_signature || m.date_debut_travaux || m.date_livraison) {
+        recapLines.push('📅 Dates:');
+        if (m.date_ouverture) recapLines.push(`   Ouverture: ${m.date_ouverture}`);
+        if (m.date_signature) recapLines.push(`   Signature: ${m.date_signature}`);
+        if (m.date_debut_travaux) recapLines.push(`   Début travaux: ${m.date_debut_travaux}`);
+        if (m.date_livraison) recapLines.push(`   Livraison: ${m.date_livraison}`);
       }
-      if (m.tache_actuelle) recapLines.push(`Tâche actuelle: ${m.tache_actuelle}`);
-      if (m.equipe_assignee) recapLines.push(`Équipe: ${m.equipe_assignee}`);
-      if (m.notes) recapLines.push(`Notes: ${m.notes}`);
+      
+      // Minutes
+      if (m.minute || m.date_minute || m.type_minute) {
+        recapLines.push('📄 Minutes:');
+        if (m.minute) recapLines.push(`   Numéro: ${m.minute}`);
+        if (m.date_minute) recapLines.push(`   Date: ${m.date_minute}`);
+        if (m.type_minute) recapLines.push(`   Type: ${m.type_minute}`);
+      }
+      
+      // Tarification
+      if (m.prix_estime || m.prix_premier_lot || m.prix_autres_lots || m.rabais) {
+        recapLines.push('💰 Tarification:');
+        if (m.prix_estime) recapLines.push(`   Prix estimé: ${m.prix_estime} $`);
+        if (m.prix_premier_lot) recapLines.push(`   Prix 1er lot: ${m.prix_premier_lot} $`);
+        if (m.prix_autres_lots) recapLines.push(`   Prix autres lots: ${m.prix_autres_lots} $`);
+        if (m.rabais) recapLines.push(`   Rabais: ${m.rabais} $`);
+        if (m.taxes_incluses) recapLines.push(`   ✅ Taxes incluses`);
+        if (m.prix_convenu) recapLines.push(`   ✅ Prix convenu`);
+      }
+      
+      // Assignation
+      if (m.utilisateur_assigne || m.tache_actuelle || m.equipe_assignee) {
+        recapLines.push('👤 Assignation:');
+        if (m.utilisateur_assigne) {
+          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
+          recapLines.push(`   Responsable: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+        }
+        if (m.tache_actuelle) recapLines.push(`   Tâche actuelle: ${m.tache_actuelle}`);
+        if (m.equipe_assignee) recapLines.push(`   Équipe: ${m.equipe_assignee}`);
+      }
+      
+      // Notes
+      if (m.notes) recapLines.push(`📝 Notes: ${m.notes}`);
+      
       recapLines.push('');
     });
 
-    if (recapLines.length > 0) {
+    if (recapLines.length > 2) {
       const recapComment = {
         contenu: recapLines.join('\n'),
         utilisateur_email: currentUser?.email || '',
@@ -228,13 +258,7 @@ export default function OuvrirDossierDialog({
     }
   };
 
-  // Export handleOuvrirDossier pour utilisation externe (le bouton qui crée directement)
-  React.useEffect(() => {
-    // Expose this method to parent if needed via ref
-    if (typeof onOpenChange === 'function') {
-      // On peut aussi l'appeler directement du parent via une ref
-    }
-  }, []);
+
 
   if (!formData) return null;
 
