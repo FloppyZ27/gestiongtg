@@ -206,7 +206,7 @@ export default function OuvrirDossierDialog({
           setViewingClientDetails={() => {}}
           calculerProchainNumeroDossier={() => formData.numero_dossier}
           editingDossier={null}
-          hideSections={['terrain', 'minutes']}
+          hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
           commentairesTemporaires={internalCommentaires.filter(c => !c._isRecap)}
           onCommentairesTemporairesChange={(newComments) => {
             setInternalCommentaires(prev => {
