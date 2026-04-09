@@ -80,7 +80,9 @@ export default function OuvrirDossierDialog({
     e?.preventDefault();
     setIsCreating(true);
     try {
+      console.log('handleCreate appelé, currentUser:', currentUser);
       const newDossier = await base44.entities.Dossier.create(formData);
+      console.log('Dossier créé:', newDossier);
 
       // Créer commentaire récapitulatif des mandats
       const recapLines = [];
