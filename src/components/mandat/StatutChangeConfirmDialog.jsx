@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -185,7 +186,7 @@ export default function StatutChangeConfirmDialog({
           temporaryPath={transferPaths.temporaryPath}
           destinationPath={transferPaths.destinationPath}
           arpenteur={formData.arpenteur_geometre}
-          numeroDossier={newNumeroDossier}
+          numeroDossier={newNumeroDossier || formData.numero_dossier}
           clientName={`${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`}
         />
       )}
