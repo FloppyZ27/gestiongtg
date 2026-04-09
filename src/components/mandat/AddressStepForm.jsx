@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 export default function AddressStepForm({ 
   address,
   onAddressChange,
+  onImmediateSave,
   isCollapsed,
   onToggleCollapse,
   clientDossiers = [],
@@ -116,14 +117,16 @@ export default function AddressStepForm({
     setAddressForm(newForm);
     setSearchQuery("");
     setSuggestions([]);
-    onAddressChange({
+    const newAddr = {
       numeros_civiques: [newForm.numero_civique],
       rue: newForm.rue,
       ville: newForm.ville,
       province: newForm.province,
       code_postal: newForm.code_postal,
       numero_lot: newForm.numero_lot
-    });
+    };
+    onAddressChange(newAddr);
+    if (onImmediateSave) onImmediateSave(newAddr);
   };
 
   const hasAddress = addressForm.rue || addressForm.ville;

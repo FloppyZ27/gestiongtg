@@ -702,10 +702,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     }
   }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat, commentairesTemporaires]);
 
-  const handleAutoSave = async (overrideCommentaires) => {
+  const handleAutoSave = async (overrideCommentaires, overrideAddress) => {
     const currentCommentaires = Array.isArray(overrideCommentaires) ? overrideCommentaires : commentairesTemporaires;
     if (!initialPriseMandatData || !editingPriseMandat || isLocked) return;
-    if (!overrideCommentaires && !hasFormChanges) return;
+    if (!overrideCommentaires && !overrideAddress && !hasFormChanges) return;
     const mandatsToSave = mandatsInfo
       .filter(m => m.type_mandat)
       .map(m => ({
@@ -728,7 +728,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       compagnies_ids: formData.compagnies_ids || [],
       client_info: clientInfo,
       professionnel_info: professionnelInfo,
-      adresse_travaux: workAddress,
+      adresse_travaux: overrideAddress || workAddress,
       mandats: mandatsToSave,
       echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
       date_signature: mandatsInfo[0]?.date_signature || "",
@@ -2573,31 +2573,15 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     disabled={isLocked}
                     address={workAddress}
                     onAddressChange={(addr) => { if (isLocked) return; setWorkAddress(addr); setHasFormChanges(true); }}
+                    onImmediateSave={(addr) => { if (isLocked || !editingPriseMandat) return; setWorkAddress(addr); setHasFormChanges(true); handleAutoSave(null, addr); }}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
-                    clientDossiers={dossiers.filter(d => 
-                      formData.clients_ids.length > 0 && 
-                      formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId))
-                    )}
+                    clientDossiers={dossiers.filter(d => formData.clients_ids.length > 0 && formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId)))}
                     allLots={lots}
                     onSelectExistingAddress={(addr, mandatLots) => {
                       if (addr) {
-                        let lotNumbers = "";
-                        if (mandatLots && mandatLots.length > 0) {
-                          const lotNumeros = mandatLots.map(lotId => {
-                            const foundLot = lots.find(l => l.id === lotId);
-                            return foundLot?.numero_lot || lotId;
-                          });
-                          lotNumbers = lotNumeros.join('\n');
-                        }
-                        setWorkAddress({
-                          numeros_civiques: addr.numeros_civiques || [""],
-                          rue: addr.rue || "",
-                          ville: addr.ville || "",
-                          province: addr.province || "QC",
-                          code_postal: addr.code_postal || "",
-                          numero_lot: lotNumbers
-                        });
+                        const lotNumbers = mandatLots?.length > 0 ? mandatLots.map(lotId => { const foundLot = lots.find(l => l.id === lotId); return foundLot?.numero_lot || lotId; }).join('\n') : "";
+                        setWorkAddress({ numeros_civiques: addr.numeros_civiques || [""], rue: addr.rue || "", ville: addr.ville || "", province: addr.province || "QC", code_postal: addr.code_postal || "", numero_lot: lotNumbers });
                       }
                     }}
                   /></div>
