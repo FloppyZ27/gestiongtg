@@ -606,7 +606,7 @@ export default function DocumentsStepForm({
                         ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
+                      <div className="grid grid-cols-4 gap-1.5 max-h-60 overflow-y-auto p-1">
                         {folders.map((folder) => (
                           <div key={folder.id} className="relative bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden hover:bg-blue-500/20 transition-colors group cursor-pointer" onClick={() => handleFolderClick(folder)}>
                             <div className="aspect-square flex items-center justify-center bg-blue-500/5"><Folder className="w-12 h-12 text-blue-400" /></div>
