@@ -11,9 +11,9 @@ Deno.serve(async (req) => {
 
     const { arpenteurInitials, clientName } = await req.json();
 
-    console.log(`[FIND] Recherche dossier TEMPORAIRE:`);
-    console.log(`[FIND]   arpenteurInitials: "${arpenteurInitials}"`);
-    console.log(`[FIND]   clientName: "${clientName}"`);
+    console.log(`[FIND] ===== DÉBUT RECHERCHE =====`);
+    console.log(`[FIND] arpenteurInitials: "${arpenteurInitials}"`);
+    console.log(`[FIND] clientName: "${clientName}"`);
 
     const tenantId = "31adb05b-e471-4daf-8831-4d46014be9b8";
     const clientId = "1291551b-48b1-4e33-beff-d3cb64fa888a";
@@ -43,30 +43,76 @@ Deno.serve(async (req) => {
 
     const access_token = tokenData.access_token;
 
-    // Construire le nom exact du dossier attendu: XX-ClientName-YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
-    const expectedFolderName = `${arpenteurInitials}-${clientName}-${today}`;
-    
-    console.log(`[FIND]   Nom attendu: "${expectedFolderName}"`);
-
-    // Construire le chemin complet du dossier attendu
-    const temporairePath = `ARPENTEUR/${arpenteurInitials}/DOSSIER/TEMPORAIRE/${expectedFolderName}/INTRANTS`;
+    // Lister les dossiers dans TEMPORAIRE
+    const temporairePath = `ARPENTEUR/${arpenteurInitials}/DOSSIER/TEMPORAIRE`;
     const encodedPath = encodeURIComponent(temporairePath).replace(/%2F/g, '/');
-    const checkUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/${encodedPath}`;
+    const listUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/${encodedPath}:/children`;
     
-    console.log(`[FIND] Vérification du chemin: ${temporairePath}`);
-
-    const checkResponse = await fetch(checkUrl, {
+    console.log(`[FIND] Listage: ${temporairePath}`);
+    
+    const listResponse = await fetch(listUrl, {
       headers: { 'Authorization': `Bearer ${access_token}` }
     });
 
-    if (checkResponse.ok) {
-      console.log(`[FIND] ✅ Dossier trouvé!`);
-      return Response.json({ foundPath: temporairePath });
+    if (!listResponse.ok) {
+      console.log(`[FIND] Dossier TEMPORAIRE non trouvé (404)`);
+      return Response.json({ foundPath: null, message: 'Dossier TEMPORAIRE introuvable' });
     }
 
-    console.log(`[FIND] ❌ Dossier non trouvé avec la date exacte`);
-    return Response.json({ foundPath: null, message: 'Dossier temporaire introuvable' });
+    const listData = await listResponse.json();
+    const folders = (listData.value || []).filter(item => item.folder);
+    
+    console.log(`[FIND] ${folders.length} dossier(s) trouvé(s):`);
+    folders.forEach(f => console.log(`[FIND]   - "${f.name}"`));
+
+    // Format attendu: XX-ClientName-YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const arpenteurLower = arpenteurInitials.toLowerCase();
+    const clientNameLower = clientName.toLowerCase();
+    
+    console.log(`[FIND] Critères de recherche:`);
+    console.log(`[FIND]   - arpenteur: "${arpenteurLower}"`);
+    console.log(`[FIND]   - client: "${clientNameLower}"`);
+    console.log(`[FIND]   - date: "${today}"`);
+    console.log(`[FIND] Format attendu: "${arpenteurLower}-${clientNameLower}-${today}"`);
+    
+    // Chercher avec la date exacte
+    let matchingFolder = folders.find(folder => {
+      const folderName = folder.name.toLowerCase();
+      const match = folderName.includes(`${arpenteurLower}-`) && 
+                    folderName.includes(clientNameLower) && 
+                    folderName.includes(today);
+      if (match) {
+        console.log(`[FIND] ✓ Correspondance AVEC date: "${folder.name}"`);
+      }
+      return match;
+    });
+
+    if (matchingFolder) {
+      const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
+      console.log(`[FIND] ✅ Dossier trouvé: ${foundPath}`);
+      return Response.json({ foundPath, folderName: matchingFolder.name });
+    }
+
+    // Fallback: chercher sans date si pas trouvé
+    console.log(`[FIND] ⚠️ Aucune correspondance avec date exacte, recherche fallback...`);
+    matchingFolder = folders.find(folder => {
+      const folderName = folder.name.toLowerCase();
+      const match = folderName.includes(`${arpenteurLower}-`) && folderName.includes(clientNameLower);
+      if (match) {
+        console.log(`[FIND] ✓ Correspondance SANS date: "${folder.name}"`);
+      }
+      return match;
+    });
+
+    if (matchingFolder) {
+      const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
+      console.log(`[FIND] ⚠️ Trouvé (fallback): ${foundPath}`);
+      return Response.json({ foundPath, folderName: matchingFolder.name });
+    }
+
+    console.log(`[FIND] ❌ Aucun dossier correspondant`);
+    return Response.json({ foundPath: null, message: 'Aucun dossier temporaire trouvé' });
 
   } catch (error) {
     console.error('[FIND] Erreur:', error);
