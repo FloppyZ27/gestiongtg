@@ -2622,7 +2622,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     </div>
 
                     {/* Sidebar - 30% */}
-                     <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                     <div className="flex-[0_0_30%] flex flex-col overflow-hidden min-w-0 w-full">
                     {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -2683,7 +2683,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         </TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-3 mt-0 min-w-0">
                         <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); handleAutoSave(newComments); }} />
                       </TabsContent>
                       
