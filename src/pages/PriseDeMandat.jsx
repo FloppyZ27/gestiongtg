@@ -2399,65 +2399,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         )}
                       </div>
                     )}
-                    {formData.statut === "Mandats à ouvrir" && (
-                      <Button
-                        type="button"
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 border-2 border-purple-500 text-purple-300"
-                        onClick={async () => {
-                          const prochainNumero = formData.numero_dossier || calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                          const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
-
-                          try {
-                            await base44.functions.invoke('createSharePointFolder', {
-                              arpenteur_geometre: formData.arpenteur_geometre,
-                              numero_dossier: prochainNumero
-                            });
-                            const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");
-                            const checkResponse = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS` });
-                            if (checkResponse.data?.files?.length > 0) {
-                              await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`, destinationFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS` });
-                            }
-                          } catch (error) {
-                            console.error("[OUVRIR DOSSIER] Erreur SharePoint:", error);
-                          }
-
-                          const commentsForDossier = commentairesTemporaires;
-
-                          const dossierFormData = {
-                            numero_dossier: prochainNumero,
-                            arpenteur_geometre: formData.arpenteur_geometre,
-                            place_affaire: formData.placeAffaire,
-                            date_ouverture: new Date().toISOString().split('T')[0],
-                            statut: "Ouvert",
-                            ttl: "Non",
-                            clients_ids: formData.clients_ids,
-                            notaires_ids: formData.notaires_ids || [],
-                            courtiers_ids: formData.courtiers_ids || [],
-                            compagnies_ids: formData.compagnies_ids || [],
-                            mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({
-                              type_mandat: m.type_mandat,
-                              adresse_travaux: workAddress,
-                              prix_estime: m.prix_estime || 0,
-                              rabais: m.rabais || 0,
-                              taxes_incluses: m.taxes_incluses || false,
-                              date_signature: m.date_signature || "",
-                              date_debut_travaux: m.date_debut_travaux || "",
-                              date_livraison: m.date_livraison || "",
-                              lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "",
-                              minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [],
-                              terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },
-                              factures: [], notes: ""
-                            }))
-                          };
-                          setNouveauDossierForm(dossierFormData);
-                          setCommentairesTemporairesDossier(commentsForDossier);
-                          setIsOuvrirDossierDialogOpen(true);
-                        }}
-                      >
-                        <FolderOpen className="w-5 h-5 mr-2" />
-                        Ouvrir dossier
-                      </Button>
-                    )}
+                    {formData.statut === "Mandats à ouvrir" && (<div className="p-1.5 rounded-lg border-2 border-purple-400/60 bg-purple-500/10 shadow-lg shadow-purple-500/20"><Button type="button" className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 border-2 border-purple-500 text-purple-300" onClick={async () => {const prochainNumero = formData.numero_dossier || calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');try {await base44.functions.invoke('createSharePointFolder', {arpenteur_geometre: formData.arpenteur_geometre,numero_dossier: prochainNumero});const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");const checkResponse = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS` });if (checkResponse.data?.files?.length > 0) {await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`, destinationFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS` });}} catch (error) {console.error("[OUVRIR DOSSIER] Erreur SharePoint:", error);}const commentsForDossier = commentairesTemporaires;const dossierFormData = {numero_dossier: prochainNumero,arpenteur_geometre: formData.arpenteur_geometre,place_affaire: formData.placeAffaire,date_ouverture: new Date().toISOString().split('T')[0],statut: "Ouvert",ttl: "Non",clients_ids: formData.clients_ids,notaires_ids: formData.notaires_ids || [],courtiers_ids: formData.courtiers_ids || [],compagnies_ids: formData.compagnies_ids || [],mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({type_mandat: m.type_mandat,adresse_travaux: workAddress,prix_estime: m.prix_estime || 0,rabais: m.rabais || 0,taxes_incluses: m.taxes_incluses || false,date_signature: m.date_signature || "",date_debut_travaux: m.date_debut_travaux || "",date_livraison: m.date_livraison || "",lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "",minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [],terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },factures: [], notes: ""}))};setNouveauDossierForm(dossierFormData);setCommentairesTemporairesDossier(commentsForDossier);setIsOuvrirDossierDialogOpen(true);}}><FolderOpen className="w-5 h-5 mr-2" />Ouvrir dossier</Button></div>)}
                   </div>
                 </div>
 
