@@ -52,25 +52,25 @@ export default function OuvrirDossierDialog({
     }
 
     // Clients
-    const clientNames = (formData.clients_ids || []).map(id => {
+    const clientNamesList = (formData.clients_ids || []).map(id => {
       const c = (clients || []).find(cl => cl.id === id);
       return c ? `${c.prenom} ${c.nom}` : null;
     }).filter(Boolean);
-    if (clientNames.length > 0) lines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+    if (clientNamesList.length > 0) lines.push(`<strong>Client(s):</strong> ${clientNamesList.join(', ')}`);
 
     // Notaires
-    const notaireNames = (formData.notaires_ids || []).map(id => {
+    const notaireNamesList = (formData.notaires_ids || []).map(id => {
       const c = (clients || []).find(cl => cl.id === id);
       return c ? `${c.prenom} ${c.nom}` : null;
     }).filter(Boolean);
-    if (notaireNames.length > 0) lines.push(`<strong>Notaire(s):</strong> ${notaireNames.join(', ')}`);
+    if (notaireNamesList.length > 0) lines.push(`<strong>Notaire(s):</strong> ${notaireNamesList.join(', ')}`);
 
     // Courtiers
-    const courtierNames = (formData.courtiers_ids || []).map(id => {
+    const courtierNamesList = (formData.courtiers_ids || []).map(id => {
       const c = (clients || []).find(cl => cl.id === id);
       return c ? `${c.prenom} ${c.nom}` : null;
     }).filter(Boolean);
-    if (courtierNames.length > 0) lines.push(`<strong>Courtier(s):</strong> ${courtierNames.join(', ')}`);
+    if (courtierNamesList.length > 0) lines.push(`<strong>Courtier(s):</strong> ${courtierNamesList.join(', ')}`);
 
     // Texte libre pour TTL
     if (formData.ttl === 'Oui') {
@@ -85,14 +85,12 @@ export default function OuvrirDossierDialog({
       if (!m.type_mandat) return;
       lines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
       
-      // Adresse
       const addr = m.adresse_travaux;
       if (addr && (addr.rue || addr.ville)) {
         const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
         lines.push(`📍 Adresse: ${parts.join(', ')}`);
       }
       
-      // Lots
       if (m.lots && m.lots.length > 0) {
         const lotNumbers = m.lots.map(lotId => {
           const lot = lots ? lots.find(l => l.id === lotId) : null;
@@ -102,18 +100,15 @@ export default function OuvrirDossierDialog({
       }
       if (m.lots_texte) lines.push(`🏘️ Lots: ${m.lots_texte}`);
       
-      // Dates
       if (m.date_ouverture) lines.push(`📅 Ouverture: ${m.date_ouverture}`);
       if (m.date_signature) lines.push(`📅 Signature: ${m.date_signature}`);
       if (m.date_debut_travaux) lines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
       if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
       
-      // Minutes
       if (m.minute) lines.push(`📄 Minute: ${m.minute}`);
       if (m.date_minute) lines.push(`📅 Date minute: ${m.date_minute}`);
       if (m.type_minute) lines.push(`📋 Type minute: ${m.type_minute}`);
       
-      // Tarification
       if (m.prix_estime) lines.push(`💰 Prix estimé: ${m.prix_estime} $`);
       if (m.prix_premier_lot) lines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
       if (m.prix_autres_lots) lines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
@@ -121,7 +116,6 @@ export default function OuvrirDossierDialog({
       if (m.taxes_incluses) lines.push(`✅ Taxes incluses`);
       if (m.prix_convenu) lines.push(`🤝 Prix convenu avec le client`);
       
-      // Assignation et tâche
       if (m.utilisateur_assigne) {
         const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
         lines.push(`👤 Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
@@ -129,7 +123,6 @@ export default function OuvrirDossierDialog({
       if (m.tache_actuelle) lines.push(`✏️ Tâche actuelle: ${m.tache_actuelle}`);
       if (m.equipe_assignee) lines.push(`👥 Équipe: ${m.equipe_assignee}`);
       
-      // Terrain
       if (m.terrain) {
         if (m.terrain.date_limite_leve) lines.push(`🏔️ Date limite levé: ${m.terrain.date_limite_leve}`);
         if (m.terrain.instruments_requis) lines.push(`🔧 Instruments: ${m.terrain.instruments_requis}`);
@@ -144,7 +137,6 @@ export default function OuvrirDossierDialog({
         if (m.terrain.notes) lines.push(`📝 Terrain notes: ${m.terrain.notes}`);
       }
       
-      // Notes générales
       if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
     });
 
@@ -291,6 +283,117 @@ export default function OuvrirDossierDialog({
         
         // Notes générales
         if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
+      });
+
+      // Créer le commentaire récapitulatif avec les infos du dossier et mandats
+      const recapLines = ['<h2><strong>📋 Informations du dossier</strong></h2>'];
+      
+      // Infos dossier
+      if (formData.numero_dossier) recapLines.push(`<strong>Numéro dossier:</strong> ${formData.numero_dossier}`);
+      if (formData.arpenteur_geometre) recapLines.push(`<strong>Arpenteur-géomètre:</strong> ${formData.arpenteur_geometre}`);
+      if (formData.place_affaire) recapLines.push(`<strong>Place d'affaire:</strong> ${formData.place_affaire}`);
+      if (formData.date_ouverture) recapLines.push(`<strong>Date ouverture:</strong> ${formData.date_ouverture}`);
+      if (formData.statut) recapLines.push(`<strong>Statut:</strong> ${formData.statut}`);
+      if (formData.utilisateur_assigne) {
+        const assignedUser = (users || []).find(u => u.email === formData.utilisateur_assigne);
+        recapLines.push(`<strong>Retour d'appel assigné à:</strong> ${assignedUser?.full_name || formData.utilisateur_assigne}`);
+      }
+
+      // Clients
+      const clientNames = (formData.clients_ids || []).map(id => {
+        const c = (clients || []).find(cl => cl.id === id);
+        return c ? `${c.prenom} ${c.nom}` : null;
+      }).filter(Boolean);
+      if (clientNames.length > 0) recapLines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+
+      // Notaires
+      const notaireNames = (formData.notaires_ids || []).map(id => {
+        const c = (clients || []).find(cl => cl.id === id);
+        return c ? `${c.prenom} ${c.nom}` : null;
+      }).filter(Boolean);
+      if (notaireNames.length > 0) recapLines.push(`<strong>Notaire(s):</strong> ${notaireNames.join(', ')}`);
+
+      // Courtiers
+      const courtierNames = (formData.courtiers_ids || []).map(id => {
+        const c = (clients || []).find(cl => cl.id === id);
+        return c ? `${c.prenom} ${c.nom}` : null;
+      }).filter(Boolean);
+      if (courtierNames.length > 0) recapLines.push(`<strong>Courtier(s):</strong> ${courtierNames.join(', ')}`);
+
+      // Texte libre pour TTL
+      if (formData.ttl === 'Oui') {
+        if (formData.clients_texte) recapLines.push(`<strong>Clients (texte):</strong> ${formData.clients_texte}`);
+        if (formData.notaires_texte) recapLines.push(`<strong>Notaires (texte):</strong> ${formData.notaires_texte}`);
+        if (formData.courtiers_texte) recapLines.push(`<strong>Courtiers (texte):</strong> ${formData.courtiers_texte}`);
+        if (formData.adresse_texte) recapLines.push(`<strong>Adresse (texte):</strong> ${formData.adresse_texte}`);
+      }
+
+      // Mandats
+      (formData.mandats || []).forEach((m, i) => {
+        if (!m.type_mandat) return;
+        recapLines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
+        
+        const addr = m.adresse_travaux;
+        if (addr && (addr.rue || addr.ville)) {
+          const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
+          recapLines.push(`📍 Adresse: ${parts.join(', ')}`);
+        }
+        
+        if (m.lots && m.lots.length > 0) {
+          const lotNumbers = m.lots.map(lotId => {
+            const lot = getLotById(lotId);
+            return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
+          }).join(', ');
+          recapLines.push(`🏘️ Lots: ${lotNumbers}`);
+        }
+        if (m.lots_texte) recapLines.push(`🏘️ Lots: ${m.lots_texte}`);
+        
+        if (m.date_ouverture) recapLines.push(`📅 Ouverture: ${m.date_ouverture}`);
+        if (m.date_signature) recapLines.push(`📅 Signature: ${m.date_signature}`);
+        if (m.date_debut_travaux) recapLines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
+        if (m.date_livraison) recapLines.push(`📅 Livraison: ${m.date_livraison}`);
+        
+        if (m.minute) recapLines.push(`📄 Minute: ${m.minute}`);
+        if (m.date_minute) recapLines.push(`📅 Date minute: ${m.date_minute}`);
+        if (m.type_minute) recapLines.push(`📋 Type minute: ${m.type_minute}`);
+        
+        if (m.prix_estime) recapLines.push(`💰 Prix estimé: ${m.prix_estime} $`);
+        if (m.prix_premier_lot) recapLines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
+        if (m.prix_autres_lots) recapLines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
+        if (m.rabais) recapLines.push(`🏷️ Rabais: ${m.rabais} $`);
+        if (m.taxes_incluses) recapLines.push(`✅ Taxes incluses`);
+        if (m.prix_convenu) recapLines.push(`🤝 Prix convenu avec le client`);
+        
+        if (m.utilisateur_assigne) {
+          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
+          recapLines.push(`👤 Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+        }
+        if (m.tache_actuelle) recapLines.push(`✏️ Tâche actuelle: ${m.tache_actuelle}`);
+        if (m.equipe_assignee) recapLines.push(`👥 Équipe: ${m.equipe_assignee}`);
+        
+        if (m.terrain) {
+          if (m.terrain.date_limite_leve) recapLines.push(`🏔️ Date limite levé: ${m.terrain.date_limite_leve}`);
+          if (m.terrain.instruments_requis) recapLines.push(`🔧 Instruments: ${m.terrain.instruments_requis}`);
+          if (m.terrain.a_rendez_vous) {
+            if (m.terrain.date_rendez_vous) recapLines.push(`📍 RDV le: ${m.terrain.date_rendez_vous}`);
+            if (m.terrain.heure_rendez_vous) recapLines.push(`⏰ À: ${m.terrain.heure_rendez_vous}`);
+          }
+          if (m.terrain.donneur) recapLines.push(`🔑 Donneur: ${m.terrain.donneur}`);
+          if (m.terrain.technicien) recapLines.push(`👨‍🔧 Technicien: ${m.terrain.technicien}`);
+          if (m.terrain.dossier_simultane) recapLines.push(`📁 Dossier simultané: ${m.terrain.dossier_simultane}`);
+          if (m.terrain.temps_prevu) recapLines.push(`⏱️ Temps prévu: ${m.terrain.temps_prevu}`);
+          if (m.terrain.notes) recapLines.push(`📝 Terrain notes: ${m.terrain.notes}`);
+        }
+        
+        if (m.notes) recapLines.push(`📝 Notes: ${m.notes}`);
+      });
+
+      // Créer le commentaire récapitulatif
+      await base44.entities.CommentaireDossier.create({
+        dossier_id: newDossier.id,
+        contenu: recapLines.join('\n'),
+        utilisateur_email: currentUser?.email || '',
+        utilisateur_nom: currentUser?.full_name || 'Système'
       });
 
       const allComments = internalCommentaires || [];
