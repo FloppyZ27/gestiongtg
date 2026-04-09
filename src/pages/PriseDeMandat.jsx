@@ -758,7 +758,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     const _occ=initialPriseMandatData.commentaires?.length||0,_ncc=currentCommentaires.length;
     if(_ncc>_occ){const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';const newComments=currentCommentaires.slice(0,_ncc-_occ);newComments.forEach(c=>{const txt=strip(c.contenu);const preview=txt.length>120?txt.substring(0,120)+'...':txt;_h("Commentaire ajouté",preview||'(commentaire vide)');});}
     else if(_ncc<_occ)_h("Commentaire supprimé",`${_occ-_ncc} commentaire(s) supprimé(s)`);
-    else{const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=currentCommentaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`Avant: "${ot}" → Après: "${nt}"`);}}}
+    else{const oldC=(initialPriseMandatData.commentaires||[]).map(c=>c.contenu);const newC=currentCommentaires.map(c=>c.contenu);const strip=(h)=>h?.replace(/<[^>]*>/g,'').trim()||'';for(let i=0;i<Math.min(oldC.length,newC.length);i++){if(oldC[i]!==newC[i]){const ot=strip(oldC[i]).substring(0,80)+(strip(oldC[i]).length>80?'...':'');const nt=strip(newC[i]).substring(0,80)+(strip(newC[i]).length>80?'...':'');_h('Commentaire modifié',`"${ot}" → "${nt}"`);}}}
     const updatedHistorique=[...newHistoriqueEntries,...historique];
 
     try {
