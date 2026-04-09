@@ -193,19 +193,23 @@ export default function OuvrirDossierDialog({
     try {
       const newDossier = await base44.entities.Dossier.create(formData);
 
-      // Créer le commentaire récapitulatif des mandats à ouvrir
-      const recapLines = ['<h2><strong>📋 Récapitulatif des mandats</strong></h2>'];
+      // Créer le commentaire récapitulatif avec le nom du client
+      const recapLines = ['<h2><strong>📋 Récapitulatif du dossier</strong></h2>'];
 
-      // Boucler sur chaque mandat
+      // Afficher le(s) client(s)
+      const clientNames = (formData.clients_ids || []).map(id => {
+        const c = (clients || []).find(cl => cl.id === id);
+        return c ? `${c.prenom} ${c.nom}` : null;
+      }).filter(Boolean);
+      
+      if (clientNames.length > 0) {
+        recapLines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+      }
+      
+      // Afficher les mandats
       (formData.mandats || []).forEach((m, i) => {
         if (!m.type_mandat) return;
-        recapLines.push(`<br><strong>Mandat ${i + 1}: ${m.type_mandat}</strong>`);
-        if (m.prix_estime) recapLines.push(`💰 Prix estimé: ${m.prix_estime} $`);
-        if (m.prix_premier_lot) recapLines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
-        if (m.prix_autres_lots) recapLines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
-        if (m.rabais) recapLines.push(`🏷️ Rabais: ${m.rabais} $`);
-        if (m.taxes_incluses) recapLines.push(`✅ Taxes incluses`);
-        if (m.prix_convenu) recapLines.push(`🤝 Prix convenu avec le client`);
+        recapLines.push(`<strong>Mandat ${i + 1}: ${m.type_mandat}</strong>`);
       });
 
       // Créer le commentaire récapitulatif
