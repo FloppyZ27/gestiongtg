@@ -37,7 +37,19 @@ export default function OuvrirDossierDialog({
   // Build recap comment when formData changes
   useEffect(() => {
     if (!formData) return;
-    const lines = ['<h2><strong>📋 Informations du mandat</strong></h2>'];
+    const lines = ['<h2><strong>📋 Informations du dossier</strong></h2>'];
+
+    // Infos dossier
+    if (formData.numero_dossier) lines.push(`<strong>Numéro dossier:</strong> ${formData.numero_dossier}`);
+    if (formData.arpenteur_geometre) lines.push(`<strong>Arpenteur-géomètre:</strong> ${formData.arpenteur_geometre}`);
+    if (formData.place_affaire) lines.push(`<strong>Place d'affaire:</strong> ${formData.place_affaire}`);
+    if (formData.date_ouverture) lines.push(`<strong>Date ouverture:</strong> ${formData.date_ouverture}`);
+    if (formData.statut) lines.push(`<strong>Statut:</strong> ${formData.statut}`);
+    if (formData.ttl) lines.push(`<strong>TTL:</strong> ${formData.ttl}`);
+    if (formData.utilisateur_assigne) {
+      const assignedUser = (users || []).find(u => u.email === formData.utilisateur_assigne);
+      lines.push(`<strong>Retour d'appel assigné à:</strong> ${assignedUser?.full_name || formData.utilisateur_assigne}`);
+    }
 
     // Clients
     const clientNames = (formData.clients_ids || []).map(id => {
@@ -60,6 +72,14 @@ export default function OuvrirDossierDialog({
     }).filter(Boolean);
     if (courtierNames.length > 0) lines.push(`<strong>Courtier(s):</strong> ${courtierNames.join(', ')}`);
 
+    // Texte libre pour TTL
+    if (formData.ttl === 'Oui') {
+      if (formData.clients_texte) lines.push(`<strong>Clients (texte):</strong> ${formData.clients_texte}`);
+      if (formData.notaires_texte) lines.push(`<strong>Notaires (texte):</strong> ${formData.notaires_texte}`);
+      if (formData.courtiers_texte) lines.push(`<strong>Courtiers (texte):</strong> ${formData.courtiers_texte}`);
+      if (formData.adresse_texte) lines.push(`<strong>Adresse (texte):</strong> ${formData.adresse_texte}`);
+    }
+
     // Mandats
     (formData.mandats || []).forEach((m, i) => {
       if (!m.type_mandat) return;
@@ -75,7 +95,7 @@ export default function OuvrirDossierDialog({
       // Lots
       if (m.lots && m.lots.length > 0) {
         const lotNumbers = m.lots.map(lotId => {
-          const lot = getLotById(lotId);
+          const lot = lots ? lots.find(l => l.id === lotId) : null;
           return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
         }).join(', ');
         lines.push(`🏘️ Lots: ${lotNumbers}`);
