@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
@@ -144,6 +144,9 @@ export default function StatutChangeConfirmDialog({
             Attention
             <span className="text-2xl">⚠️</span>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Confirmation de changement de statut du mandat
+          </DialogDescription>
         </DialogHeader>
         <motion.div
           className="space-y-4"

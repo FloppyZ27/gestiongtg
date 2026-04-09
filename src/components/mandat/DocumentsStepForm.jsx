@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List, Folder, ArrowLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -638,6 +638,9 @@ export default function DocumentsStepForm({
                 {getFileIcon(previewFile?.name)}
                 <span className="truncate">{previewFile?.name}</span>
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Aperçu du fichier {previewFile?.name}
+              </DialogDescription>
             </DialogHeader>
             <div className="flex-1 overflow-hidden">
               {isLoadingPreview ? (
@@ -686,6 +689,9 @@ export default function DocumentsStepForm({
                 Attention
                 <span className="text-2xl">⚠️</span>
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Confirmation de suppression du fichier {fileToDelete?.name}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-slate-300 text-center">
@@ -729,6 +735,9 @@ export default function DocumentsStepForm({
                 Confirmer la suppression
                 <span className="text-2xl">⚠️</span>
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Confirmation de suppression du dossier {folderToDelete?.name}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-slate-300 text-center">
