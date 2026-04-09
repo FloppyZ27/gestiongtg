@@ -299,26 +299,26 @@ export default function OuvrirDossierDialog({
         recapLines.push(`<strong>Retour d'appel assigné à:</strong> ${assignedUser?.full_name || formData.utilisateur_assigne}`);
       }
 
-      // Clients
-      const clientNames = (formData.clients_ids || []).map(id => {
+      // Clients (rename to avoid conflict with useEffect)
+      const recapClientNames = (formData.clients_ids || []).map(id => {
         const c = (clients || []).find(cl => cl.id === id);
         return c ? `${c.prenom} ${c.nom}` : null;
       }).filter(Boolean);
-      if (clientNames.length > 0) recapLines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+      if (recapClientNames.length > 0) recapLines.push(`<strong>Client(s):</strong> ${recapClientNames.join(', ')}`);
 
       // Notaires
-      const notaireNames = (formData.notaires_ids || []).map(id => {
+      const recapNotaireNames = (formData.notaires_ids || []).map(id => {
         const c = (clients || []).find(cl => cl.id === id);
         return c ? `${c.prenom} ${c.nom}` : null;
       }).filter(Boolean);
-      if (notaireNames.length > 0) recapLines.push(`<strong>Notaire(s):</strong> ${notaireNames.join(', ')}`);
+      if (recapNotaireNames.length > 0) recapLines.push(`<strong>Notaire(s):</strong> ${recapNotaireNames.join(', ')}`);
 
       // Courtiers
-      const courtierNames = (formData.courtiers_ids || []).map(id => {
+      const recapCourtierNames = (formData.courtiers_ids || []).map(id => {
         const c = (clients || []).find(cl => cl.id === id);
         return c ? `${c.prenom} ${c.nom}` : null;
       }).filter(Boolean);
-      if (courtierNames.length > 0) recapLines.push(`<strong>Courtier(s):</strong> ${courtierNames.join(', ')}`);
+      if (recapCourtierNames.length > 0) recapLines.push(`<strong>Courtier(s):</strong> ${recapCourtierNames.join(', ')}`);
 
       // Texte libre pour TTL
       if (formData.ttl === 'Oui') {
