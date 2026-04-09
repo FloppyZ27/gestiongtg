@@ -241,6 +241,20 @@ export default function OuvrirDossierDialog({
         }
       }
 
+      // Générer la fiche mandat PDF pour chaque mandat
+      if (formData.mandats && formData.mandats.length > 0) {
+        for (const mandat of formData.mandats) {
+          try {
+            await base44.functions.invoke('generateFicheMandat', {
+              dossierData: formData,
+              mandatType: mandat
+            });
+          } catch (error) {
+            console.error('Erreur génération fiche mandat:', error);
+          }
+        }
+      }
+
       // Supprimer la prise de mandat associée
       if (editingPriseMandat?.id) {
         await base44.entities.PriseMandat.delete(editingPriseMandat.id);
