@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import EditDossierForm from "../dossiers/EditDossierForm";
 
@@ -21,6 +21,10 @@ export default function OuvrirDossierDialog({
   const [internalCommentaires, setInternalCommentaires] = useState([]);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me()
+  });
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
@@ -79,9 +83,9 @@ export default function OuvrirDossierDialog({
     setInternalCommentaires(prev => {
       // Replace or insert recap as first comment
       const others = (prev || []).filter(c => !c._isRecap);
-      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: '', utilisateur_nom: 'Système' }, ...others];
+      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: currentUser?.email || '', utilisateur_nom: currentUser?.full_name || 'Système' }, ...others];
     });
-  }, [formData, clients]);
+  }, [formData, clients, currentUser]);
 
   const getLotById = (id) => (lots || []).find(l => l.id === id);
 
@@ -178,8 +182,8 @@ export default function OuvrirDossierDialog({
       await base44.entities.CommentaireDossier.create({
         dossier_id: newDossier.id,
         contenu: recapContent,
-        utilisateur_email: '',
-        utilisateur_nom: 'Système'
+        utilisateur_email: currentUser?.email || '',
+        utilisateur_nom: currentUser?.full_name || 'Système'
       });
 
       const allComments = internalCommentaires || [];
