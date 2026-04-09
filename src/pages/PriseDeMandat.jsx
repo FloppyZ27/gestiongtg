@@ -2723,7 +2723,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           user={user}
           editingPriseMandat={editingPriseMandat}
           isLocked={isLocked}
-          updatePriseMandatMutation={updatePriseMandatMutation}
+          updatePriseMandatMutation={updatePriseMandatMutation} newNumeroDossier={pendingStatutChange==="Mandats à ouvrir"?calculerProchainNumeroDossier(formData.arpenteur_geometre,editingPriseMandat?.id):null}
           onConfirm={(newFormData) => { setFormData(newFormData); setShowStatutChangeConfirm(false); setPendingStatutChange(null); setHasDocuments(false); }}
         />
 

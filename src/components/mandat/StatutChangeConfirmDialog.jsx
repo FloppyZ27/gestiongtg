@@ -31,29 +31,48 @@ export default function StatutChangeConfirmDialog({
   editingPriseMandat,
   isLocked,
   onConfirm,
-  updatePriseMandatMutation
+  updatePriseMandatMutation,
+  newNumeroDossier
 }) {
   const handleConfirm = async () => {
     const value = pendingStatutChange;
 
-    // Supprimer les documents du dossier SharePoint si nécessaire
-    if (formData.numero_dossier && formData.arpenteur_geometre) {
+    if (formData.arpenteur_geometre) {
+      const initials = getArpenteurInitials(formData.arpenteur_geometre);
       try {
-        const initials = getArpenteurInitials(formData.arpenteur_geometre);
-        const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
-        const response = await base44.functions.invoke('sharepoint', { action: 'list', folderPath });
-        const files = response.data?.files || [];
-        for (const file of files) {
-          await base44.functions.invoke('sharepoint', { action: 'delete', fileId: file.id });
+        if (value === "Mandats à ouvrir" && newNumeroDossier) {
+          // Transférer les documents du dossier temporaire vers le nouveau dossier numéroté
+          const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || "Client";
+          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
+          const destPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${newNumeroDossier}/INTRANTS`;
+          try {
+            const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
+            if (checkRes.data?.files?.length > 0) {
+              await base44.functions.invoke('moveSharePointFiles', {
+                sourceFolderPath: sourcePath,
+                destinationFolderPath: destPath
+              });
+            }
+          } catch (e) {
+            console.error("Erreur transfert documents SharePoint:", e);
+          }
+        } else if (value !== "Mandats à ouvrir" && formData.numero_dossier) {
+          // Supprimer les documents du dossier numéroté si on revient à un statut sans numéro
+          const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
+          const response = await base44.functions.invoke('sharepoint', { action: 'list', folderPath });
+          const files = response.data?.files || [];
+          for (const file of files) {
+            await base44.functions.invoke('sharepoint', { action: 'delete', fileId: file.id });
+          }
         }
       } catch (error) {
-        console.error("Erreur suppression documents SharePoint:", error);
+        console.error("Erreur gestion documents SharePoint:", error);
       }
     }
 
     const newFormData = value !== "Mandats à ouvrir"
       ? { ...formData, statut: value, numero_dossier: "", date_ouverture: "" }
-      : { ...formData, statut: value };
+      : { ...formData, statut: value, numero_dossier: newNumeroDossier };
 
     // Sauvegarder immédiatement si en mode édition
     if (editingPriseMandat && !isLocked) {
@@ -81,7 +100,7 @@ export default function StatutChangeConfirmDialog({
           data: {
             arpenteur_geometre: newFormData.arpenteur_geometre,
             place_affaire: newFormData.placeAffaire,
-            numero_dossier: newFormData.numero_dossier,
+            numero_dossier: value === "Mandats à ouvrir" ? (newNumeroDossier || newFormData.numero_dossier) : newFormData.numero_dossier,
             date_ouverture: newFormData.date_ouverture,
             clients_ids: newFormData.clients_ids,
             notaires_ids: newFormData.notaires_ids || [],
