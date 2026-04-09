@@ -212,7 +212,7 @@ export default function TarificationStepForm({
                             {isMultiLotType ? (
                               <Input type="text" inputMode="decimal" value={getLocalValue(index, 'prix_autres_lots')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'prix_autres_lots', val); }} onBlur={() => handleInputBlur(index, 'prix_autres_lots')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
                             ) : (
-                              <span className="text-slate-600">-</span>
+                              <span className="text-slate-600 block text-center">-</span>
                             )}
                           </td>
                           <td className="p-2">
