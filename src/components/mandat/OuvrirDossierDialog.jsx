@@ -285,67 +285,20 @@ export default function OuvrirDossierDialog({
         if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
       });
 
-      // Créer le commentaire récapitulatif avec les infos des mandats
-      const recapLines = ['<h2><strong>📋 Informations des mandats</strong></h2>'];
+      // Créer le commentaire récapitulatif avec infos de tarification de la prise de mandat
+      const recapLines = ['<h2><strong>📋 Informations de tarification des mandats</strong></h2>'];
 
-      // Mandats
+      // Mandats - afficher uniquement les infos tarifaires et types
       (formData.mandats || []).forEach((m, i) => {
         if (!m.type_mandat) return;
-        recapLines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
-        
-        const addr = m.adresse_travaux;
-        if (addr && (addr.rue || addr.ville)) {
-          const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
-          recapLines.push(`📍 Adresse: ${parts.join(', ')}`);
-        }
-        
-        if (m.lots && m.lots.length > 0) {
-          const lotNumbers = m.lots.map(lotId => {
-            const lot = getLotById(lotId);
-            return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
-          }).join(', ');
-          recapLines.push(`🏘️ Lots: ${lotNumbers}`);
-        }
-        if (m.lots_texte) recapLines.push(`🏘️ Lots: ${m.lots_texte}`);
-        
-        if (m.date_ouverture) recapLines.push(`📅 Ouverture: ${m.date_ouverture}`);
-        if (m.date_signature) recapLines.push(`📅 Signature: ${m.date_signature}`);
-        if (m.date_debut_travaux) recapLines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
-        if (m.date_livraison) recapLines.push(`📅 Livraison: ${m.date_livraison}`);
-        
-        if (m.minute) recapLines.push(`📄 Minute: ${m.minute}`);
-        if (m.date_minute) recapLines.push(`📅 Date minute: ${m.date_minute}`);
-        if (m.type_minute) recapLines.push(`📋 Type minute: ${m.type_minute}`);
-        
+        recapLines.push(`<strong>Mandat ${i + 1}: ${m.type_mandat}</strong>`);
         if (m.prix_estime) recapLines.push(`💰 Prix estimé: ${m.prix_estime} $`);
         if (m.prix_premier_lot) recapLines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
         if (m.prix_autres_lots) recapLines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
         if (m.rabais) recapLines.push(`🏷️ Rabais: ${m.rabais} $`);
         if (m.taxes_incluses) recapLines.push(`✅ Taxes incluses`);
         if (m.prix_convenu) recapLines.push(`🤝 Prix convenu avec le client`);
-        
-        if (m.utilisateur_assigne) {
-          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
-          recapLines.push(`👤 Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
-        }
-        if (m.tache_actuelle) recapLines.push(`✏️ Tâche actuelle: ${m.tache_actuelle}`);
-        if (m.equipe_assignee) recapLines.push(`👥 Équipe: ${m.equipe_assignee}`);
-        
-        if (m.terrain) {
-          if (m.terrain.date_limite_leve) recapLines.push(`🏔️ Date limite levé: ${m.terrain.date_limite_leve}`);
-          if (m.terrain.instruments_requis) recapLines.push(`🔧 Instruments: ${m.terrain.instruments_requis}`);
-          if (m.terrain.a_rendez_vous) {
-            if (m.terrain.date_rendez_vous) recapLines.push(`📍 RDV le: ${m.terrain.date_rendez_vous}`);
-            if (m.terrain.heure_rendez_vous) recapLines.push(`⏰ À: ${m.terrain.heure_rendez_vous}`);
-          }
-          if (m.terrain.donneur) recapLines.push(`🔑 Donneur: ${m.terrain.donneur}`);
-          if (m.terrain.technicien) recapLines.push(`👨‍🔧 Technicien: ${m.terrain.technicien}`);
-          if (m.terrain.dossier_simultane) recapLines.push(`📁 Dossier simultané: ${m.terrain.dossier_simultane}`);
-          if (m.terrain.temps_prevu) recapLines.push(`⏱️ Temps prévu: ${m.terrain.temps_prevu}`);
-          if (m.terrain.notes) recapLines.push(`📝 Terrain notes: ${m.terrain.notes}`);
-        }
-        
-        if (m.notes) recapLines.push(`📝 Notes: ${m.notes}`);
+        recapLines.push('');
       });
 
       // Créer le commentaire récapitulatif
