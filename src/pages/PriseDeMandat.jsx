@@ -2613,15 +2613,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   {/* Étape 6: Documents */}
                   <div id="section-documents">
                   {formData.arpenteur_geometre && (clientInfo.prenom || clientInfo.nom || formData.numero_dossier) && (
-                    <DocumentsStepForm
-                      arpenteurGeometre={formData.arpenteur_geometre}
-                      numeroDossier={formData.numero_dossier}
-                      isCollapsed={documentsStepCollapsed}
-                      onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)}
-                      onDocumentsChange={setHasDocuments}
-                      isTemporaire={!formData.numero_dossier}
-                      clientInfo={clientInfo}
-                    />
+                    <DocumentsStepForm arpenteurGeometre={formData.arpenteur_geometre} numeroDossier={formData.numero_dossier} isCollapsed={documentsStepCollapsed} onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)} onDocumentsChange={setHasDocuments} isTemporaire={!formData.numero_dossier} clientInfo={clientInfo} priseMandatId={editingPriseMandat?.id} onAddHistoriqueEntry={(entry) => setHistorique(prev => [entry, ...prev])} />
                     )}
                   </div>
 
