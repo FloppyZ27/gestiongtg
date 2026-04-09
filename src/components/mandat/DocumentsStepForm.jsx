@@ -203,16 +203,8 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
-               console.log('[TRANSFERT AUTO] Démarrage du transfert avec moveSharePointFiles...');
-               try {
-                 const moveRes = await base44.functions.invoke('moveSharePointFiles', {
-                   sourcePath: sourcePath,
-                   destPath: finalPath
-                 });
-                 console.log('[TRANSFERT AUTO] Résultat:', moveRes.data);
-               } catch (err) {
-                 console.error('[TRANSFERT AUTO] Erreur:', err.message);
-               }
+               // Transfert désactivé — moveSharePointFiles échoue
+               console.log('[TRANSFERT AUTO] Transfert désactivé (bug backend)');
                // Rafraîchir
                await new Promise(resolve => setTimeout(resolve, 1000));
                refetch();
