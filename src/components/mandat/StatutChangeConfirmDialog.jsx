@@ -39,25 +39,32 @@ export default function StatutChangeConfirmDialog({
 
     if (formData.arpenteur_geometre) {
       const initials = getArpenteurInitials(formData.arpenteur_geometre);
+      console.log(`[CONFIRM] Changement statut: ${formData.statut} → ${value}`);
+      console.log(`[CONFIRM] newNumeroDossier: ${newNumeroDossier}`);
+      console.log(`[CONFIRM] Initials: ${initials}`);
+      console.log(`[CONFIRM] clientInfo:`, clientInfo);
       try {
         if (value === "Mandats à ouvrir" && newNumeroDossier) {
-          // Transférer les documents du dossier temporaire vers le nouveau dossier numéroté
           const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || "Client";
           const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
           const destPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${newNumeroDossier}/INTRANTS`;
+          console.log(`[CONFIRM] Tentative transfert: ${sourcePath} → ${destPath}`);
           try {
+            console.log(`[CONFIRM] Check fichiers source...`);
             const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
+            console.log(`[CONFIRM] Fichiers trouvés:`, checkRes.data?.files?.length);
             if (checkRes.data?.files?.length > 0) {
+              console.log(`[CONFIRM] Déplacement en cours...`);
               await base44.functions.invoke('moveSharePointFiles', {
                 sourceFolderPath: sourcePath,
                 destinationFolderPath: destPath
               });
+              console.log(`[CONFIRM] Déplacement terminé`);
             }
           } catch (e) {
-            console.error("Erreur transfert documents SharePoint:", e);
+            console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
           }
         } else if (value !== "Mandats à ouvrir" && formData.numero_dossier) {
-          // Supprimer les documents du dossier numéroté si on revient à un statut sans numéro
           const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
           const response = await base44.functions.invoke('sharepoint', { action: 'list', folderPath });
           const files = response.data?.files || [];
