@@ -166,7 +166,7 @@ export default function DocumentsStepForm({
       return response.data;
     },
     enabled: !!arpenteurGeometre && (!!numeroDossier || (isTemporaire && !!clientInfo)),
-    staleTime: 30000
+    staleTime: 0
   });
 
   const files = filesData?.files || [];
@@ -208,6 +208,8 @@ export default function DocumentsStepForm({
               destinationFolderPath: finalPath
             });
             console.log('[TRANSFERT AUTO] Transfert reussi');
+            // Attendre un peu que SharePoint mette à jour puis forcer le refetch
+            await new Promise(resolve => setTimeout(resolve, 500));
             refetch();
           }
         }
