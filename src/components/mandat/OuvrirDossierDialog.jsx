@@ -14,7 +14,9 @@ export default function OuvrirDossierDialog({
   lots,
   users,
   onSuccess,
-  editingPriseMandat
+  editingPriseMandat,
+  clientInfo,
+  workAddress
 }) {
   const [formData, setFormData] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -270,6 +272,46 @@ export default function OuvrirDossierDialog({
             dossier_id: newDossier.id,
             lue: false
           });
+        }
+      }
+
+      // Générer la fiche mandat PDF pour chaque mandat
+      if (formData.mandats && formData.mandats.length > 0) {
+        for (const mandat of formData.mandats) {
+          try {
+            const response = await fetch('/api/generateFicheMandat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                dossierData: formData,
+                clientInfo: clientInfo,
+                workAddress: workAddress,
+                mandatType: mandat
+              })
+            });
+            
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `Fiche_Mandat_${formData.numero_dossier}_${mandat.type_mandat}.pdf`;
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }
+          } catch (error) {
+            console.error('Erreur génération fiche mandat:', error);
+          }
+        }
+      }
+
+      // Supprimer la prise de mandat si elle existe
+      if (editingPriseMandat?.id) {
+        try {
+          await base44.entities.PriseMandat.delete(editingPriseMandat.id);
+          queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+        } catch (error) {
+          console.error('Erreur suppression prise de mandat:', error);
         }
       }
 
