@@ -540,15 +540,32 @@ export default function DocumentsStepForm({
               )}
 
               {!isDragOver && !isUploading && (
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {currentSubPath && (
-                      <Button type="button" variant="ghost" size="sm" onClick={handleGoBack} className="text-slate-400 hover:text-white h-6 px-2 flex-shrink-0" title="Retour">
-                        <ArrowLeft className="w-3 h-3" />
-                      </Button>
-                    )}
-                    <p className="text-slate-500 text-xs truncate">📁 {folderPath}</p>
+                <div className="space-y-2 mb-2">
+                  {/* Barre de navigation type explorateur */}
+                  <div className="flex items-center gap-2 bg-slate-800/50 p-2 rounded border border-slate-700">
+                    <Button type="button" variant="ghost" size="sm" onClick={handleGoBack} disabled={!currentSubPath} className="text-slate-400 hover:text-white h-6 px-2 flex-shrink-0 disabled:opacity-50" title="Retour">
+                      <ArrowLeft className="w-3 h-3" />
+                    </Button>
+                    <div className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto text-xs text-slate-400">
+                      <button onClick={() => setCurrentSubPath('')} className="hover:text-white whitespace-nowrap px-1 py-0.5 hover:bg-slate-700/50 rounded transition-colors flex-shrink-0">📁</button>
+                      {currentSubPath.split('/').map((part, idx, arr) => {
+                        const pathUpToHere = arr.slice(0, idx + 1).join('/');
+                        return (
+                          <div key={pathUpToHere} className="flex items-center gap-1">
+                            <span className="text-slate-600">/</span>
+                            <button onClick={() => setCurrentSubPath(pathUpToHere)} className="hover:text-white whitespace-nowrap px-1 py-0.5 hover:bg-slate-700/50 rounded transition-colors">
+                              {part}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
+                  <p className="text-slate-500 text-xs px-2">📂 Chemin: {folderPath}</p>
+                </div>
+              )}
+              {!isDragOver && !isUploading && (
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1">
                     <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setViewMode(viewMode === "list" ? "grid" : "list"); }} className="text-slate-400 hover:text-white h-6 px-2" title={viewMode === "list" ? "Vue grille" : "Vue liste"}>
                       {viewMode === "list" ? <Grid3x3 className="w-3 h-3" /> : <List className="w-3 h-3" />}
