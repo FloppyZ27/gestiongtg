@@ -203,6 +203,19 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
+            // Créer les dossiers destination avec createSharePointFolder
+            console.log('[TRANSFERT AUTO] Creation structure destination');
+            try {
+              const dossierParent = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
+              // Créer le dossier parent
+              await base44.functions.invoke('createSharePointFolder', { folderPath: `ARPENTEUR/${initials}/DOSSIER`, folderName: `${initials}-${numeroDossier}` });
+              // Créer INTRANTS dedans
+              await base44.functions.invoke('createSharePointFolder', { folderPath: dossierParent, folderName: 'INTRANTS' });
+              console.log('[TRANSFERT AUTO] Structure destination creee');
+            } catch (e) {
+              console.log('[TRANSFERT AUTO] Dossiers existent deja ou erreur:', e.message);
+            }
+            // Puis déplacer les fichiers
             const moveRes = await base44.functions.invoke('moveSharePointFiles', {
               sourceFolderPath: sourcePath,
               destinationFolderPath: finalPath
