@@ -625,13 +625,13 @@ export default function Profil() {
 
   const getPointageWeekDays = () => {
     const dayOfWeek = pointageCurrentDate.getDay();
-    const monday = new Date(pointageCurrentDate);
-    monday.setDate(pointageCurrentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const sunday = new Date(pointageCurrentDate);
+    sunday.setDate(pointageCurrentDate.getDate() - dayOfWeek);
     
     const days = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(monday);
-      day.setDate(monday.getDate() + i);
+      const day = new Date(sunday);
+      day.setDate(sunday.getDate() + i);
       days.push(day);
     }
     return days;
