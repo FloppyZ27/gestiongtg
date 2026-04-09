@@ -246,6 +246,61 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: 'Élément supprimé' });
     }
 
+    if (action === 'copyFile') {
+      // Copier un fichier vers une destination
+      const sourceFileId = body.sourceFileId;
+      const destinationPath = body.destinationPath;
+
+      if (!sourceFileId || !destinationPath) {
+        return Response.json({ error: 'sourceFileId et destinationPath requis' }, { status: 400 });
+      }
+
+      // Récupérer le fichier source pour son nom
+      const sourceResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${sourceFileId}`,
+        { headers: { 'Authorization': `Bearer ${accessToken}` } }
+      );
+      const sourceData = await sourceResponse.json();
+      if (!sourceResponse.ok) {
+        throw new Error(sourceData.error?.message || 'Erreur récupération fichier source');
+      }
+
+      // Obtenir l'ID du dossier destination
+      const encodedPath = encodeURIComponent(destinationPath).replace(/%2F/g, '/');
+      const destFolderResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${encodedPath}`,
+        { headers: { 'Authorization': `Bearer ${accessToken}` } }
+      );
+      const destFolderData = await destFolderResponse.json();
+      if (!destFolderResponse.ok) {
+        throw new Error(destFolderData.error?.message || 'Erreur accès dossier destination');
+      }
+
+      // Copier le fichier
+      const copyResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${sourceFileId}/copy`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            parentReference: { id: destFolderData.id },
+            name: sourceData.name
+          })
+        }
+      );
+
+      const copyData = await copyResponse.json();
+      if (!copyResponse.ok) {
+        console.error("Copy error:", JSON.stringify(copyData));
+        throw new Error(copyData.error?.message || 'Erreur lors de la copie');
+      }
+
+      return Response.json({ success: true, itemId: copyData.id });
+    }
+
     if (action === 'getThumbnail') {
       // Obtenir le thumbnail d'un fichier
       if (!fileId) {
