@@ -203,9 +203,9 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
-               console.log('[TRANSFERT AUTO] Démarrage du transfert avec transferFilesSimple...');
+               console.log('[TRANSFERT AUTO] Démarrage du transfert avec moveSharePointFiles...');
                try {
-                 const moveRes = await base44.functions.invoke('transferFilesSimple', {
+                 const moveRes = await base44.functions.invoke('moveSharePointFiles', {
                    sourcePath: sourcePath,
                    destPath: finalPath
                  });
