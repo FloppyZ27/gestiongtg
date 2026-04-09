@@ -46,9 +46,10 @@ export default function StatutChangeConfirmDialog({
       try {
         if (value === "Mandats à ouvrir" && newNumeroDossier) {
           const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || "Client";
-          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
+          const today = new Date().toISOString().split('T')[0];
+          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANT`;
           const destPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${newNumeroDossier}/INTRANTS`;
-          console.log(`[CONFIRM] Tentative transfert: ${sourcePath} → ${destPath}`);
+          console.log(`[CONFIRM] Tentative copie: ${sourcePath} → ${destPath}`);
           try {
             console.log(`[CONFIRM] Check fichiers source...`);
             const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
@@ -63,13 +64,6 @@ export default function StatutChangeConfirmDialog({
             }
           } catch (e) {
             console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
-          }
-        } else if (value !== "Mandats à ouvrir" && formData.numero_dossier) {
-          const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
-          const response = await base44.functions.invoke('sharepoint', { action: 'list', folderPath });
-          const files = response.data?.files || [];
-          for (const file of files) {
-            await base44.functions.invoke('sharepoint', { action: 'delete', fileId: file.id });
           }
         }
       } catch (error) {
