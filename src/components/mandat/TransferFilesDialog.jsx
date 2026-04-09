@@ -136,7 +136,7 @@ export default function TransferFilesDialog({
       <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-6xl h-[80vh] p-4 overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-lg">
-            Transfert de fichiers — {initials}{numeroDossier ? `-${numeroDossier}` : ''} - {clientName}
+            {initials}-{numeroDossier} - {clientName}
           </DialogTitle>
         </DialogHeader>
 
