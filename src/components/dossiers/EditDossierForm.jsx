@@ -984,7 +984,7 @@ export default function EditDossierForm({
             </form>
 
             {/* Section Mandats */}
-            <Card className="border-slate-700 bg-slate-800/30" data-section="mandats">
+            <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="mandats">
               <CardHeader 
                 className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
                 onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
@@ -1691,7 +1691,7 @@ export default function EditDossierForm({
             </Card>
 
             {/* Section Tarification */}
-            <div data-section="tarification">
+            <div className="mt-3" data-section="tarification">
               <TarificationStepForm
                 disabled={false}
                 mandats={formData.mandats}
@@ -1708,7 +1708,7 @@ export default function EditDossierForm({
 
             {/* Section Terrain */}
             {formData.mandats.length > 0 && !hideSections.includes('terrain') && (
-              <Card className="border-slate-700 bg-slate-800/30" data-section="terrain">
+              <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="terrain">
                 <CardHeader 
                   className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
                   onClick={() => {
@@ -2089,7 +2089,7 @@ export default function EditDossierForm({
 
             {/* Section Minutes */}
             {formData.mandats.length > 0 && !hideSections.includes('minutes') && (
-              <Card className="border-slate-700 bg-slate-800/30" data-section="minutes">
+              <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="minutes">
                 <CardHeader 
                   className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
                   onClick={() => setMinutesCollapsed(!minutesCollapsed)}
@@ -2399,7 +2399,7 @@ export default function EditDossierForm({
 
             {/* Section Entrée de temps */}
               {editingDossier && (
-                <Card className="border-slate-700 bg-slate-800/30" data-section="entree-temps">
+                <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="entree-temps">
                  <CardHeader 
                    className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
                    onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
@@ -2625,7 +2625,7 @@ export default function EditDossierForm({
 
             {/* Section Retour d'appel */}
              {editingDossier && (
-               <Card className="border-slate-700 bg-slate-800/30" data-section="retour-appel">
+               <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="retour-appel">
                 <CardHeader 
                   className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                   onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
@@ -2880,7 +2880,7 @@ export default function EditDossierForm({
 
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {formData.numero_dossier && formData.arpenteur_geometre && (
-              <div data-section="documents">
+              <div className="mt-3" data-section="documents">
                 <DocumentsStepForm
                   arpenteurGeometre={formData.arpenteur_geometre}
                   numeroDossier={formData.numero_dossier}
