@@ -11,6 +11,10 @@ Deno.serve(async (req) => {
 
     const { arpenteurInitials, clientName } = await req.json();
 
+    console.log(`[FIND] ===== DÉBUT RECHERCHE =====`);
+    console.log(`[FIND] arpenteurInitials: "${arpenteurInitials}"`);
+    console.log(`[FIND] clientName: "${clientName}"`);
+
     const tenantId = "31adb05b-e471-4daf-8831-4d46014be9b8";
     const clientId = "1291551b-48b1-4e33-beff-d3cb64fa888a";
     const clientSecret = "vTQ8Q~uhNn1dsGeHfGr3VZvLnQmkYZQ54~gcXcim";
@@ -58,42 +62,57 @@ Deno.serve(async (req) => {
     const listData = await listResponse.json();
     const folders = (listData.value || []).filter(item => item.folder);
     
-    console.log(`[FIND] ${folders.length} dossier(s) trouvé(s)`);
-    folders.forEach(f => console.log(`[FIND] - ${f.name}`));
+    console.log(`[FIND] ${folders.length} dossier(s) trouvé(s):`);
+    folders.forEach(f => console.log(`[FIND]   - "${f.name}"`));
 
-    // Chercher le dossier correspondant au client avec la date
     // Format attendu: XX-ClientName-YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
     const arpenteurLower = arpenteurInitials.toLowerCase();
     const clientNameLower = clientName.toLowerCase();
     
-    console.log(`[FIND] Cherchant: ${arpenteurLower}-...-${clientNameLower}-${today}`);
+    console.log(`[FIND] Critères de recherche:`);
+    console.log(`[FIND]   - arpenteur: "${arpenteurLower}"`);
+    console.log(`[FIND]   - client: "${clientNameLower}"`);
+    console.log(`[FIND]   - date: "${today}"`);
+    console.log(`[FIND] Format attendu: "${arpenteurLower}-${clientNameLower}-${today}"`);
     
+    // Chercher avec la date exacte
     let matchingFolder = folders.find(folder => {
       const folderName = folder.name.toLowerCase();
-      // Format: XX-ClientName-YYYY-MM-DD
-      return folderName.includes(`${arpenteurLower}-`) && 
-             folderName.includes(clientNameLower) && 
-             folderName.includes(today);
+      const match = folderName.includes(`${arpenteurLower}-`) && 
+                    folderName.includes(clientNameLower) && 
+                    folderName.includes(today);
+      if (match) {
+        console.log(`[FIND] ✓ Correspondance AVEC date: "${folder.name}"`);
+      }
+      return match;
     });
-
-    // Fallback: chercher sans date exacte si pas trouvé
-    if (!matchingFolder) {
-      console.log(`[FIND] Pas de correspondance avec date exacte, recherche fallback...`);
-      matchingFolder = folders.find(folder => {
-        const folderName = folder.name.toLowerCase();
-        return folderName.includes(`${arpenteurLower}-`) && folderName.includes(clientNameLower);
-      });
-    }
 
     if (matchingFolder) {
       const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
-      console.log(`[FIND] Dossier trouvé: ${foundPath}`);
+      console.log(`[FIND] ✅ Dossier trouvé: ${foundPath}`);
       return Response.json({ foundPath, folderName: matchingFolder.name });
-    } else {
-      console.log(`[FIND] Aucun dossier correspondant pour ${clientName}`);
-      return Response.json({ foundPath: null, message: 'Aucun dossier temporaire trouvé' });
     }
+
+    // Fallback: chercher sans date si pas trouvé
+    console.log(`[FIND] ⚠️ Aucune correspondance avec date exacte, recherche fallback...`);
+    matchingFolder = folders.find(folder => {
+      const folderName = folder.name.toLowerCase();
+      const match = folderName.includes(`${arpenteurLower}-`) && folderName.includes(clientNameLower);
+      if (match) {
+        console.log(`[FIND] ✓ Correspondance SANS date: "${folder.name}"`);
+      }
+      return match;
+    });
+
+    if (matchingFolder) {
+      const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
+      console.log(`[FIND] ⚠️ Trouvé (fallback): ${foundPath}`);
+      return Response.json({ foundPath, folderName: matchingFolder.name });
+    }
+
+    console.log(`[FIND] ❌ Aucun dossier correspondant`);
+    return Response.json({ foundPath: null, message: 'Aucun dossier temporaire trouvé' });
 
   } catch (error) {
     console.error('[FIND] Erreur:', error);
