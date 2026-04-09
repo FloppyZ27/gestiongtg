@@ -237,30 +237,10 @@ export default function TarificationStepForm({
                     })}
                   </tbody>
                   <tfoot>
-                    {(() => {
-                      const activeMandats = mandats.filter(m => m.type_mandat);
-                      const totalQte = activeMandats.reduce((s, m) => s + (parseFloat(m.quantite) || 1), 0);
-                      const totalP1 = activeMandats.reduce((s, m) => s + (parseFloat(m.type_mandat === 'Description Technique' || m.type_mandat === 'OCTR' ? m.prix_premier_lot : m.prix_estime) || 0), 0);
-                      const totalAutres = activeMandats.filter(m => m.type_mandat === 'Description Technique' || m.type_mandat === 'OCTR').reduce((s, m) => s + (parseFloat(m.prix_autres_lots) || 0), 0);
-                      const totalRab = activeMandats.reduce((s, m) => s + (parseFloat(m.rabais) || 0), 0);
-                      const totalNet = activeMandats.reduce((s, m) => {
-                        const isMulti = m.type_mandat === 'Description Technique' || m.type_mandat === 'OCTR';
-                        const base = isMulti ? ((parseFloat(m.prix_premier_lot) || 0) + (parseFloat(m.prix_autres_lots) || 0)) : (parseFloat(m.prix_estime) || 0);
-                        return s + base * (parseFloat(m.quantite) || 1) - (parseFloat(m.rabais) || 0);
-                      }, 0);
-                      return (
-                        <tr className="bg-slate-800/50 border-t-2 border-slate-600">
-                          <td className="p-2 text-slate-400 text-xs font-medium">Total</td>
-                          <td className="p-2 text-slate-400 text-xs font-semibold">{totalQte}</td>
-                          <td className="p-2 text-slate-400 text-xs font-semibold">{totalP1.toFixed(2)} $</td>
-                          <td className="p-2 text-slate-400 text-xs font-semibold">{totalAutres > 0 ? `${totalAutres.toFixed(2)} $` : '-'}</td>
-                          <td className="p-2 text-slate-400 text-xs font-semibold">{totalRab > 0 ? `${totalRab.toFixed(2)} $` : '-'}</td>
-                          <td></td>
-                          <td></td>
-                          <td className="p-2 text-right text-purple-400 text-xs font-bold">{totalNet.toFixed(2)} $</td>
-                        </tr>
-                      );
-                    })()}
+                    <tr className="bg-slate-800/50 border-t-2 border-slate-600">
+                      <td className="p-2 text-slate-400 text-xs font-medium" colSpan="7">Total</td>
+                      <td className="p-2 text-right text-purple-400 text-xs font-bold">{(totalEstime - totalRabais).toFixed(2)} $</td>
+                    </tr>
                   </tfoot>
                 </table>
               </div>
