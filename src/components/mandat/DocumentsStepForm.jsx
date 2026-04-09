@@ -203,11 +203,18 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
-               console.log('[TRANSFERT AUTO] Fichiers à transférer:', filesFound.length);
-               // Transfert temporairement désactivé - problème backend à diagnostiquer
-               console.log('[TRANSFERT AUTO] Transfert désactivé (bug backend)');
-               // Rafraîchir quand même au cas où
-               await new Promise(resolve => setTimeout(resolve, 500));
+               console.log('[TRANSFERT AUTO] Démarrage du transfert avec transferFilesSimple...');
+               try {
+                 const moveRes = await base44.functions.invoke('transferFilesSimple', {
+                   sourcePath: sourcePath,
+                   destPath: finalPath
+                 });
+                 console.log('[TRANSFERT AUTO] Résultat:', moveRes.data);
+               } catch (err) {
+                 console.error('[TRANSFERT AUTO] Erreur:', err.message);
+               }
+               // Rafraîchir
+               await new Promise(resolve => setTimeout(resolve, 1000));
                refetch();
              }
         }
