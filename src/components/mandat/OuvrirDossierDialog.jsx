@@ -122,12 +122,20 @@ export default function OuvrirDossierDialog({
       });
 
       if (recapLines.length > 0) {
-        await base44.entities.CommentaireDossier.create({
-          dossier_id: newDossier.id,
-          contenu: recapLines.join('\n'),
-          utilisateur_email: currentUser?.email || '',
-          utilisateur_nom: currentUser?.full_name || 'Système'
-        });
+        try {
+          console.log('Création commentaire pour dossier', newDossier.id);
+          const comment = await base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: recapLines.join('\n'),
+            utilisateur_email: currentUser?.email || '',
+            utilisateur_nom: currentUser?.full_name || 'Système'
+          });
+          console.log('Commentaire créé:', comment);
+        } catch (error) {
+          console.error('Erreur création commentaire:', error);
+        }
+      } else {
+        console.log('Aucun contenu pour le commentaire');
       }
 
       const allComments = internalCommentaires || [];
