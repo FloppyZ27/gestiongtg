@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ const getArpenteurInitials = (arpenteur) => {
     "Dany Gaboury": "DG",
     "Pierre-Luc Pilote": "PLP",
     "Benjamin Larouche": "BL",
+    "Frederic Gilbert": "FG",
     "Frédéric Gilbert": "FG"
   };
   return mapping[arpenteur] || "";
@@ -172,42 +173,48 @@ export default function DocumentsStepForm({
   const folders = files.filter(f => f.type === 'folder');
   const filesList = files.filter(f => f.type === 'file');
 
-  // Transfert automatique quand le numéro de dossier est assigné (temporaire -> numéroté)
+  // Transfert automatique quand le numero de dossier est assigne (temporaire -> numerote)
+  // Utilise findTemporaryFolder pour trouver le chemin avec la date correcte
   useEffect(() => {
     const prevNumero = prevNumeroDossierRef.current;
     prevNumeroDossierRef.current = numeroDossier;
 
     const doTransfer = async () => {
-      // Se déclenche uniquement quand on passe de vide à un numéro renseigné
       if (!numeroDossier || !arpenteurGeometre) return;
-      if (prevNumero) return; // était déjà renseigné, pas de transfert
-      {
-        const initials = getArpenteurInitials(arpenteurGeometre).replace('-', '');
-        const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || 'Client';
-        const tempPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
-        const finalPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+      if (prevNumero) return; // etait deja renseigne, pas de transfert
 
-        console.log('[TRANSFERT AUTO] Source:', tempPath);
+      const initials = getArpenteurInitials(arpenteurGeometre).replace('-', '');
+      const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || 'Client';
+      const finalPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+
+      try {
+        setIsTransferring(true);
+        // Utiliser findTemporaryFolder pour trouver le bon dossier avec la date
+        const findRes = await base44.functions.invoke('findTemporaryFolder', {
+          arpenteurInitials: initials,
+          clientName: clientName
+        });
+        const sourcePath = findRes.data?.foundPath;
+        console.log('[TRANSFERT AUTO] Source trouve:', sourcePath);
         console.log('[TRANSFERT AUTO] Destination:', finalPath);
 
-        try {
-          setIsTransferring(true);
-          const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: tempPath });
-          const files = checkRes.data?.files || [];
-          console.log('[TRANSFERT AUTO] Fichiers trouvés:', files.length);
-          if (files.length > 0) {
+        if (sourcePath) {
+          const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
+          const filesFound = checkRes.data?.files || [];
+          console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
+          if (filesFound.length > 0) {
             await base44.functions.invoke('moveSharePointFiles', {
-              sourceFolderPath: tempPath,
+              sourceFolderPath: sourcePath,
               destinationFolderPath: finalPath
             });
-            console.log('[TRANSFERT AUTO] Transfert réussi');
+            console.log('[TRANSFERT AUTO] Transfert reussi');
             refetch();
           }
-        } catch (err) {
-          console.error('[TRANSFERT AUTO] Erreur:', err);
-        } finally {
-          setIsTransferring(false);
         }
+      } catch (err) {
+        console.error('[TRANSFERT AUTO] Erreur:', err);
+      } finally {
+        setIsTransferring(false);
       }
     };
     doTransfer();
@@ -275,13 +282,10 @@ export default function DocumentsStepForm({
         date: new Date().toISOString()
       };
 
-      // Notifier le parent (met à jour l'état local d'historique)
       if (onAddHistoriqueEntry) {
         onAddHistoriqueEntry(historiqueEntry);
       }
 
-      // Mettre à jour directement l'entité PriseMandat si on a l'id
-      // OU chercher par arpenteur + numero_dossier
       const pmId = priseMandatId;
       if (pmId) {
         const priseMandat = await base44.entities.PriseMandat.filter({ id: pmId }, '', 1);
@@ -293,7 +297,6 @@ export default function DocumentsStepForm({
           });
         }
       } else if (arpenteurGeometre && numeroDossier) {
-        // Chercher le PriseMandat par arpenteur + numero_dossier
         const priseMandats = await base44.entities.PriseMandat.filter(
           { arpenteur_geometre: arpenteurGeometre, numero_dossier: numeroDossier },
           '',
@@ -308,7 +311,6 @@ export default function DocumentsStepForm({
         }
       }
 
-      // Mettre aussi à jour l'entité Dossier si en mode dossier ouvert
       if (numeroDossier && arpenteurGeometre && !isTemporaire) {
         const dossiersData = await base44.entities.Dossier.filter(
           { numero_dossier: numeroDossier, arpenteur_geometre: arpenteurGeometre },
@@ -391,7 +393,6 @@ export default function DocumentsStepForm({
     setIsLoadingPreview(true);
     
     try {
-      // Pour les images, utiliser directement le downloadUrl
       if (isImageFile(file.name)) {
         const response = await base44.functions.invoke('sharepoint', {
           action: 'getDownloadUrl',
@@ -404,7 +405,6 @@ export default function DocumentsStepForm({
           setPreviewUrl(file.downloadUrl);
         }
       } else {
-        // Pour les autres fichiers, utiliser l'API preview
         const response = await base44.functions.invoke('sharepoint', {
           action: 'preview',
           fileId: file.id
