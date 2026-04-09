@@ -61,12 +61,30 @@ Deno.serve(async (req) => {
     console.log(`[FIND] ${folders.length} dossier(s) trouvé(s)`);
     folders.forEach(f => console.log(`[FIND] - ${f.name}`));
 
-    // Chercher le dossier correspondant au client
-    const matchingFolder = folders.find(folder => {
+    // Chercher le dossier correspondant au client avec la date
+    // Format attendu: XX-ClientName-YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const arpenteurLower = arpenteurInitials.toLowerCase();
+    const clientNameLower = clientName.toLowerCase();
+    
+    console.log(`[FIND] Cherchant: ${arpenteurLower}-...-${clientNameLower}-${today}`);
+    
+    let matchingFolder = folders.find(folder => {
       const folderName = folder.name.toLowerCase();
-      const clientNameLower = clientName.toLowerCase();
-      return folderName.includes(arpenteurInitials.toLowerCase()) && folderName.includes(clientNameLower);
+      // Format: XX-ClientName-YYYY-MM-DD
+      return folderName.includes(`${arpenteurLower}-`) && 
+             folderName.includes(clientNameLower) && 
+             folderName.includes(today);
     });
+
+    // Fallback: chercher sans date exacte si pas trouvé
+    if (!matchingFolder) {
+      console.log(`[FIND] Pas de correspondance avec date exacte, recherche fallback...`);
+      matchingFolder = folders.find(folder => {
+        const folderName = folder.name.toLowerCase();
+        return folderName.includes(`${arpenteurLower}-`) && folderName.includes(clientNameLower);
+      });
+    }
 
     if (matchingFolder) {
       const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
