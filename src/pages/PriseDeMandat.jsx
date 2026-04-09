@@ -2683,7 +2683,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         </TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-3 mt-0 min-w-0">
+                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-3 mt-0 min-w-0 w-full">
                         <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); handleAutoSave(newComments); }} />
                       </TabsContent>
                       
