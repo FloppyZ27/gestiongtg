@@ -78,6 +78,10 @@ export default function OuvrirDossierDialog({
 
   const handleCreate = async (e) => {
     e?.preventDefault();
+    if (!currentUser) {
+      console.error('currentUser is undefined!');
+      return;
+    }
     setIsCreating(true);
     try {
       console.log('handleCreate appelé, currentUser:', currentUser);
