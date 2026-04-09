@@ -618,7 +618,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                   <div className="flex-1 flex justify-between items-center">
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
                     <span className="text-xs text-slate-400">
-                      {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
+                      {commentaire.created_date ? format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr }) : 'À l\'instant'}
                     </span>
                   </div>
                 </div>
