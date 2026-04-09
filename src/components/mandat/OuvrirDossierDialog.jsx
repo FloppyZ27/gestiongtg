@@ -151,51 +151,7 @@ export default function OuvrirDossierDialog({
     return null;
   };
 
-  const handleOuvrirDossier = async () => {
-    if (!currentUser || !formData) return;
-    setIsCreating(true);
-    try {
-      // Reconstruire le recap depuis formData actuel
-      const recap = buildRecapComment(formData, currentUser);
-      
-      // Créer le dossier
-      const newDossier = await base44.entities.Dossier.create(formData);
 
-      // Créer le commentaire s'il existe
-      if (recap) {
-        await base44.entities.CommentaireDossier.create({
-          dossier_id: newDossier.id,
-          contenu: recap.contenu,
-          utilisateur_email: recap.utilisateur_email,
-          utilisateur_nom: recap.utilisateur_nom
-        });
-      }
-
-      // Créer les notifications pour les mandats assignés
-      for (const mandat of (formData.mandats || [])) {
-        if (mandat.utilisateur_assigne && mandat.type_mandat) {
-          await base44.entities.Notification.create({
-            utilisateur_email: mandat.utilisateur_assigne,
-            titre: "Nouveau mandat assigné",
-            message: `Un mandat "${mandat.type_mandat}" vous a été assigné dans le dossier ${formData.numero_dossier}.`,
-            type: "dossier",
-            dossier_id: newDossier.id,
-            lue: false
-          });
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      onSuccess?.();
-      onOpenChange(false);
-      navigate(`/Dossiers?id=${newDossier.id}`);
-    } catch (error) {
-      console.error("Erreur création dossier:", error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
 
 
 
@@ -247,7 +203,17 @@ export default function OuvrirDossierDialog({
     }
     setIsCreating(true);
     try {
-      const newDossier = await base44.entities.Dossier.create(formData);
+      // Vérifier si le dossier existe déjà (éviter doublon)
+      const existingDossiers = await base44.entities.Dossier.filter({
+        arpenteur_geometre: formData.arpenteur_geometre,
+        numero_dossier: formData.numero_dossier
+      });
+      let newDossier;
+      if (existingDossiers && existingDossiers.length > 0) {
+        newDossier = existingDossiers[0];
+      } else {
+        newDossier = await base44.entities.Dossier.create(formData);
+      }
 
       // Créer tous les commentaires (y compris le récapitulatif auto-généré)
       const allComments = internalCommentaires || [];
@@ -275,44 +241,10 @@ export default function OuvrirDossierDialog({
         }
       }
 
-      // Générer la fiche mandat PDF pour chaque mandat
-      if (formData.mandats && formData.mandats.length > 0) {
-        for (const mandat of formData.mandats) {
-          try {
-            const response = await fetch('/api/generateFicheMandat', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                dossierData: formData,
-                clientInfo: clientInfo,
-                workAddress: workAddress,
-                mandatType: mandat
-              })
-            });
-            
-            if (response.ok) {
-              const blob = await response.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `Fiche_Mandat_${formData.numero_dossier}_${mandat.type_mandat}.pdf`;
-              a.click();
-              window.URL.revokeObjectURL(url);
-            }
-          } catch (error) {
-            console.error('Erreur génération fiche mandat:', error);
-          }
-        }
-      }
-
-      // Supprimer la prise de mandat si elle existe
+      // Supprimer la prise de mandat associée
       if (editingPriseMandat?.id) {
-        try {
-          await base44.entities.PriseMandat.delete(editingPriseMandat.id);
-          queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-        } catch (error) {
-          console.error('Erreur suppression prise de mandat:', error);
-        }
+        await base44.entities.PriseMandat.delete(editingPriseMandat.id);
+        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
       }
 
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
