@@ -4,3 +4,5 @@ export const createStatutChangeHandler = (formData, calculerProchainNumeroDossie
     setFormData({ ...formData, statut: value });
   };
 };
+}
+};
