@@ -203,10 +203,11 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
-            await base44.functions.invoke('moveSharePointFiles', {
+            const moveRes = await base44.functions.invoke('moveSharePointFiles', {
               sourceFolderPath: sourcePath,
               destinationFolderPath: finalPath
             });
+            console.log('[TRANSFERT AUTO] Resultat move:', JSON.stringify(moveRes.data));
             console.log('[TRANSFERT AUTO] Transfert reussi');
             // Attendre un peu que SharePoint mette à jour puis forcer le refetch
             await new Promise(resolve => setTimeout(resolve, 500));
