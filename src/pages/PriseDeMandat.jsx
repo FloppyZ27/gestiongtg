@@ -2312,7 +2312,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
   return (
     <>
-      <div className="w-full -mx-4 md:-mx-8 px-4 md:px-8">
+      <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
           </div>
@@ -2477,100 +2477,1132 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     }}
                     statut={formData.statut}
                     onStatutChange={async (value) => {
-                       if (isLocked) return;
-                       if (formData.numero_dossier && value !== formData.statut) {
-                         setPendingStatutChange(value);
-                         setShowStatutChangeConfirm(true);
-                         return;
-                       }
-                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
-                         const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                      if (isLocked) return;
+                      if (formData.numero_dossier && value !== formData.statut) {
+                        setPendingStatutChange(value);
+                        setShowStatutChangeConfirm(true);
+                        return;
+                      }
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
+                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                        setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
+                      } else if (value !== "Mandats à ouvrir") {
+                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                      } else {
+                        setFormData({...formData, statut: value});
+                      }
+                    }}
+                    numeroDossier={formData.numero_dossier}
+                    onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
+                    dateOuverture={formData.date_ouverture}
+                    onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
+                    placeAffaire={formData.placeAffaire}
+                    onPlaceAffaireChange={(value) => setFormData({...formData, placeAffaire: value})}
+                    isCollapsed={dossierInfoStepCollapsed}
+                    onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
+                  /></div>
 
-                         // Transférer les documents du dossier temporaire vers le dossier permanent
-                         try {
-                           const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
-                           const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");
-                           const sourcePath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
-                           const destPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS`;
+                  {/* Étape 1: Informations du client */}
+                  <div id="section-client"><ClientStepForm
+                    disabled={isLocked}
+                    clients={clientsReguliers}
+                    selectedClientIds={formData.clients_ids}
+                    onSelectClient={(clientId) => {
+                      if (isLocked) return;
+                      setFormData(prev => ({
+                        ...prev,
+                        clients_ids: prev.clients_ids.includes(clientId)
+                          ? prev.clients_ids.filter(id => id !== clientId)
+                          : [...prev.clients_ids, clientId]
+                      }));
+                      setHasFormChanges(true);
+                    }}
+                    isCollapsed={clientStepCollapsed}
+                    onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
+                    clientInfo={clientInfo}
+                    onClientInfoChange={(info) => {
+                      setClientInfo(info);
+                      setHasFormChanges(true);
+                    }}
+                  /></div>
 
-                           // Vérifier s'il y a des fichiers à transférer
-                           const checkResponse = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
-                           if (checkResponse.data?.files?.length > 0) {
-                             await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: sourcePath, destinationFolderPath: destPath });
-                           }
-                         } catch (error) {
-                           console.error("[Statut Mandats à ouvrir] Erreur transfert documents SharePoint:", error);
-                         }
+                  {/* Étape 2: Professionnel */}
+                  <div id="section-professionnel"><ProfessionnelStepForm
+                    disabled={isLocked}
+                    notaires={notaires}
+                    courtiers={courtiers}
+                    compagnies={clients.filter(c => c.type_client === 'Compagnie')}
+                    selectedNotaireIds={formData.notaires_ids || []}
+                    selectedCourtierIds={formData.courtiers_ids || []}
+                    selectedCompagnieIds={formData.compagnies_ids || []}
+                    onSelectNotaire={(id) => {
+                      if (isLocked) return;
+                      setFormData(prev => ({
+                        ...prev,
+                        notaires_ids: (prev.notaires_ids || []).includes(id)
+                          ? prev.notaires_ids.filter(nid => nid !== id)
+                          : [...(prev.notaires_ids || []), id]
+                      }));
+                    }}
+                    onSelectCourtier={(id) => {
+                      if (isLocked) return;
+                      setFormData(prev => ({
+                        ...prev,
+                        courtiers_ids: (prev.courtiers_ids || []).includes(id)
+                          ? prev.courtiers_ids.filter(cid => cid !== id)
+                          : [...(prev.courtiers_ids || []), id]
+                      }));
+                    }}
+                    onSelectCompagnie={(id) => {
+                      if (isLocked) return;
+                      setFormData(prev => ({
+                        ...prev,
+                        compagnies_ids: (prev.compagnies_ids || []).includes(id)
+                          ? prev.compagnies_ids.filter(cid => cid !== id)
+                          : [...(prev.compagnies_ids || []), id]
+                      }));
+                    }}
+                    professionnelInfo={professionnelInfo}
+                    onProfessionnelInfoChange={setProfessionnelInfo}
+                    isCollapsed={professionnelStepCollapsed}
+                    onToggleCollapse={() => setProfessionnelStepCollapsed(!professionnelStepCollapsed)}
+                  /></div>
 
-                         setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
-                       } else if (value !== "Mandats à ouvrir") {
-                         setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
-                       } else {
-                         setFormData({...formData, statut: value});
-                       }
-                       }}
-                       numeroDossier={formData.numero_dossier}
-                       onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
-                       dateOuverture={formData.date_ouverture}
-                       onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
-                       placeAffaire={formData.placeAffaire}
-                       onPlaceAffaireChange={(value) => setFormData({...formData, placeAffaire: value})}
-                       isCollapsed={dossierInfoStepCollapsed}
-                       onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
-                       /></div>
+                  {/* Étape 3: Adresse des travaux */}
+                  <div id="section-adresse"><AddressStepForm
+                    disabled={isLocked}
+                    address={workAddress}
+                    onAddressChange={(addr) => { if (isLocked) return; setWorkAddress(addr); setHasFormChanges(true); }}
+                    onImmediateSave={(addr) => { if (isLocked || !editingPriseMandat) return; setWorkAddress(addr); setHasFormChanges(true); handleAutoSave(null, addr); }}
+                    isCollapsed={addressStepCollapsed}
+                    onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
+                    clientDossiers={dossiers.filter(d => formData.clients_ids.length > 0 && formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId)))}
+                    allLots={lots}
+                    onSelectExistingAddress={(addr, mandatLots) => {
+                      if (addr) {
+                        const lotNumbers = mandatLots?.length > 0 ? mandatLots.map(lotId => { const foundLot = lots.find(l => l.id === lotId); return foundLot?.numero_lot || lotId; }).join('\n') : "";
+                        setWorkAddress({ numeros_civiques: addr.numeros_civiques || [""], rue: addr.rue || "", ville: addr.ville || "", province: addr.province || "QC", code_postal: addr.code_postal || "", numero_lot: lotNumbers });
+                      }
+                    }}
+                  /></div>
 
-                       {/* Étape 1: Client */}
-                       <div id="section-client"><ClientStepForm disabled={isLocked} clients={clientsReguliers} selectedClientIds={formData.clients_ids} onSelectClient={(clientId)=>{if(isLocked)return;setFormData(prev=>({...prev,clients_ids:prev.clients_ids.includes(clientId)?prev.clients_ids.filter(id=>id!==clientId):[...prev.clients_ids,clientId]}));setHasFormChanges(true);}} isCollapsed={clientStepCollapsed} onToggleCollapse={()=>setClientStepCollapsed(!clientStepCollapsed)} clientInfo={clientInfo} onClientInfoChange={(info)=>{setClientInfo(info);setHasFormChanges(true);}}/></div>
-                       {/* Étape 2: Professionnel */}
-                       <div id="section-professionnel"><ProfessionnelStepForm disabled={isLocked} notaires={notaires} courtiers={courtiers} compagnies={clients.filter(c=>c.type_client==='Compagnie')} selectedNotaireIds={formData.notaires_ids||[]} selectedCourtierIds={formData.courtiers_ids||[]} selectedCompagnieIds={formData.compagnies_ids||[]} onSelectNotaire={(id)=>{if(isLocked)return;setFormData(prev=>({...prev,notaires_ids:(prev.notaires_ids||[]).includes(id)?prev.notaires_ids.filter(nid=>nid!==id):[...(prev.notaires_ids||[]),id]}));}} onSelectCourtier={(id)=>{if(isLocked)return;setFormData(prev=>({...prev,courtiers_ids:(prev.courtiers_ids||[]).includes(id)?prev.courtiers_ids.filter(cid=>cid!==id):[...(prev.courtiers_ids||[]),id]}));}} onSelectCompagnie={(id)=>{if(isLocked)return;setFormData(prev=>({...prev,compagnies_ids:(prev.compagnies_ids||[]).includes(id)?prev.compagnies_ids.filter(cid=>cid!==id):[...(prev.compagnies_ids||[]),id]}));}} professionnelInfo={professionnelInfo} onProfessionnelInfoChange={setProfessionnelInfo} isCollapsed={professionnelStepCollapsed} onToggleCollapse={()=>setProfessionnelStepCollapsed(!professionnelStepCollapsed)}/></div>
-                       {/* Étape 3: Adresse */}
-                       <div id="section-adresse"><AddressStepForm disabled={isLocked} address={workAddress} onAddressChange={(addr)=>{if(isLocked)return;setWorkAddress(addr);setHasFormChanges(true);}} onImmediateSave={(addr)=>{if(isLocked||!editingPriseMandat)return;setWorkAddress(addr);setHasFormChanges(true);handleAutoSave(null,addr);}} isCollapsed={addressStepCollapsed} onToggleCollapse={()=>setAddressStepCollapsed(!addressStepCollapsed)} clientDossiers={dossiers.filter(d=>formData.clients_ids.length>0&&formData.clients_ids.some(cid=>d.clients_ids?.includes(cid)))} allLots={lots} onSelectExistingAddress={(addr,mandatLots)=>{if(addr){const ln=mandatLots?.length>0?mandatLots.map(lid=>{const fl=lots.find(l=>l.id===lid);return fl?.numero_lot||lid;}).join('\n'):"";setWorkAddress({numeros_civiques:addr.numeros_civiques||[""],rue:addr.rue||"",ville:addr.ville||"",province:addr.province||"QC",code_postal:addr.code_postal||"",numero_lot:ln});}}}/></div>
-                       {/* Étape 4: Mandats */}
-                       <div id="section-mandats"><MandatStepForm disabled={isLocked} mandats={mandatsInfo} onMandatsChange={(nm)=>{if(isLocked)return;setMandatsInfo(nm);setHasFormChanges(true);}} onImmediateSave={(nm)=>{if(isLocked||!editingPriseMandat)return;setMandatsInfo(nm);setHasFormChanges(true);setTimeout(()=>handleAutoSave(null,null),0);}} isCollapsed={mandatStepCollapsed} onToggleCollapse={()=>setMandatStepCollapsed(!mandatStepCollapsed)} statut={formData.statut}/></div>
-                       {/* Étape 5: Tarification */}
-                       <div id="section-tarification"><TarificationStepForm disabled={isLocked} mandats={mandatsInfo} onTarificationChange={(nm)=>{if(isLocked)return;setMandatsInfo(nm);setHasFormChanges(true);}} isCollapsed={tarificationStepCollapsed} onToggleCollapse={()=>setTarificationStepCollapsed(!tarificationStepCollapsed)}/></div>
-                       {/* Étape 6: Documents */}
-                       <div id="section-documents">{formData.arpenteur_geometre&&(clientInfo.prenom||clientInfo.nom||formData.numero_dossier)&&(<DocumentsStepForm arpenteurGeometre={formData.arpenteur_geometre} numeroDossier={formData.numero_dossier} isCollapsed={documentsStepCollapsed} onToggleCollapse={()=>setDocumentsStepCollapsed(!documentsStepCollapsed)} onDocumentsChange={setHasDocuments} isTemporaire={!formData.numero_dossier} clientInfo={clientInfo} priseMandatId={editingPriseMandat?.id} onAddHistoriqueEntry={(entry)=>setHistorique(prev=>[entry,...prev])}/>)}</div>
-                       </form></div></div>
-                       {/* Sidebar 30% */}
-                       <div className="flex-[0_0_30%] flex flex-col overflow-hidden overflow-x-hidden min-w-0 w-full">
-                       <div className="cursor-pointer hover:bg-slate-800/50 py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between" onClick={()=>setMapCollapsedDossier(!mapCollapsedDossier)}>
-                       <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-slate-400"/><h3 className="text-slate-300 text-base font-semibold">Carte</h3></div>
-                       {mapCollapsedDossier?<ChevronDown className="w-4 h-4 text-slate-400"/>:<ChevronUp className="w-4 h-4 text-slate-400"/>}
-                       </div>
-                       {!mapCollapsedDossier&&(workAddress.rue||workAddress.ville)&&(<div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]"><div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full"><div className="aspect-square w-full max-h-[calc(100%-28px)]"><iframe width="100%" height="100%" style={{border:0}} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(`${workAddress.numeros_civiques?.[0]||''} ${workAddress.rue||''}, ${workAddress.ville||''}, ${workAddress.province||'Québec'}, Canada`)}&zoom=15`}/></div><div className="p-2 bg-slate-800/80"><p className="text-xs text-slate-300 truncate">📍 {workAddress.numeros_civiques?.[0]} {workAddress.rue}, {workAddress.ville}</p></div></div></div>)}
-                       <div className="cursor-pointer hover:bg-slate-800/50 py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between" onClick={()=>setSidebarCollapsedDossier(!sidebarCollapsedDossier)}>
-                       <div className="flex items-center gap-2">{sidebarTabDossier==="commentaires"?<MessageSquare className="w-5 h-5 text-slate-400"/>:<Clock className="w-5 h-5 text-slate-400"/>}<h3 className="text-slate-300 text-base font-semibold">{sidebarTabDossier==="commentaires"?"Commentaires":"Historique"}</h3></div>
-                       {sidebarCollapsedDossier?<ChevronDown className="w-4 h-4 text-slate-400"/>:<ChevronUp className="w-4 h-4 text-slate-400"/>}
-                       </div>
-                       {!sidebarCollapsedDossier&&(<Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
-                       <TabsList className="grid grid-cols-2 h-9 mx-3 mt-2 flex-shrink-0 bg-transparent gap-2">
-                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1"/>Commentaires{commentairesTemporaires.length>0&&<span className="ml-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none">{commentairesTemporaires.length}</span>}</TabsTrigger>
-                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1"/>Historique</TabsTrigger>
-                       </TabsList>
-                       <TabsContent value="commentaires" className="flex-1 overflow-hidden p-3 mt-0 min-w-0 w-full"><CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(nc)=>{setCommentairesTemporaires(nc);handleAutoSave(nc);}}/></TabsContent>
-                       <TabsContent value="historique" className="flex-1 overflow-hidden p-3 mt-0 min-w-0"><HistoriquePanel historique={historique} users={users}/></TabsContent>
-                       </Tabs>)}
-                       </div>
-                       </div>
-                       {!editingPriseMandat&&<div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0"><Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const hasC=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(hasC){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button><Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button></div>}
-                       </motion.div></DialogContent></Dialog>
+                  {/* Étape 4: Mandats */}
+                  <div id="section-mandats"><MandatStepForm
+                   disabled={isLocked}
+                   mandats={mandatsInfo}
+                   onMandatsChange={(nm)=>{if(isLocked)return;setMandatsInfo(nm);setHasFormChanges(true);}}
+                   onImmediateSave={(nm)=>{if(isLocked||!editingPriseMandat)return;setMandatsInfo(nm);setHasFormChanges(true);setTimeout(()=>handleAutoSave(null,null),0);}}
+                   isCollapsed={mandatStepCollapsed}
+                   onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
+                   statut={formData.statut}
+                  /></div>
 
-                       {/* Dialog confirmation statut */}
-                       <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-                       <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-                       <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-                       <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-                       <p className="text-slate-300 text-center">Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.</p>
-                       <div className="flex justify-center gap-3 pt-4">
-                       <Button type="button" onClick={()=>{setShowStatutChangeConfirm(false);setPendingStatutChange(null);}} className="bg-gradient-to-r from-red-500 to-red-600 border-none">Annuler</Button>
-                       <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none" onClick={async()=>{const value=pendingStatutChange;if(formData.numero_dossier&&formData.arpenteur_geometre){try{const initials=getArpenteurInitials(formData.arpenteur_geometre).replace('-','');const fp=`ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;const resp=await base44.functions.invoke('sharepoint',{action:'list',folderPath:fp});for(const f of(resp.data?.files||[])){await base44.functions.invoke('sharepoint',{action:'delete',fileId:f.id});}}catch(e){console.error(e);}}if(value!=="Mandats à ouvrir"){setFormData({...formData,statut:value,numero_dossier:"",date_ouverture:""});}else{setFormData({...formData,statut:value});}setShowStatutChangeConfirm(false);setPendingStatutChange(null);setHasDocuments(false);}}>Confirmer</Button>
-                       </div>
-                       </motion.div>
-                       </DialogContent>
-                       </Dialog>
+                  {/* Étape 5: Tarification */}
+                  <div id="section-tarification"><TarificationStepForm
+                    disabled={isLocked}
+                    mandats={mandatsInfo}
+                    onTarificationChange={(newMandats) => {
+                      if (isLocked) return;
+                      setMandatsInfo(newMandats);
+                      setHasFormChanges(true);
+                    }}
+                    isCollapsed={tarificationStepCollapsed}
+                    onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+                  /></div>
 
-                       {/* PDF Viewer Dialog */}
+                  {/* Étape 6: Documents */}
+                  <div id="section-documents">
+                  {formData.arpenteur_geometre && (clientInfo.prenom || clientInfo.nom || formData.numero_dossier) && (
+                    <DocumentsStepForm arpenteurGeometre={formData.arpenteur_geometre} numeroDossier={formData.numero_dossier} isCollapsed={documentsStepCollapsed} onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)} onDocumentsChange={setHasDocuments} isTemporaire={!formData.numero_dossier} clientInfo={clientInfo} priseMandatId={editingPriseMandat?.id} onAddHistoriqueEntry={(entry) => setHistorique(prev => [entry, ...prev])} />
+                    )}
+                  </div>
+
+                    </form>
+                    </div>
+                    </div>
+
+                    {/* Sidebar - 30% */}
+                     <div className="flex-[0_0_30%] flex flex-col overflow-hidden overflow-x-hidden min-w-0 w-full">
+                    {/* Carte de l'adresse des travaux - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setMapCollapsedDossier(!mapCollapsedDossier)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-slate-400" />
+                      <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
+                    </div>
+                    {mapCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                  {!mapCollapsedDossier && (workAddress.rue || workAddress.ville) && (
+                    <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
+                      <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
+                        <div className="aspect-square w-full max-h-[calc(100%-28px)]">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                              `${workAddress.numeros_civiques?.[0] || ''} ${workAddress.rue || ''}, ${workAddress.ville || ''}, ${workAddress.province || 'Québec'}, Canada`
+                            )}&zoom=15`}
+                          />
+                        </div>
+                        <div className="p-2 bg-slate-800/80">
+                          <p className="text-xs text-slate-300 truncate">
+                            📍 {workAddress.numeros_civiques?.[0]} {workAddress.rue}, {workAddress.ville}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Header Tabs Commentaires/Historique - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {sidebarTabDossier === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                      <h3 className="text-slate-300 text-base font-semibold">
+                        {sidebarTabDossier === "commentaires" ? "Commentaires" : "Historique"}
+                      </h3>
+                    </div>
+                    {sidebarCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+
+                  {!sidebarCollapsedDossier && (
+                    <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
+                      <TabsList className="grid grid-cols-2 h-9 mx-3 mt-2 flex-shrink-0 bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires{commentairesTemporaires.length > 0 && <span className="ml-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none">{commentairesTemporaires.length}</span>}</TabsTrigger>
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Historique
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-3 mt-0 min-w-0 w-full">
+                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); handleAutoSave(newComments); }} />
+                      </TabsContent>
+                      
+                      <TabsContent value="historique" className="flex-1 overflow-hidden p-3 mt-0 min-w-0">
+                        <HistoriquePanel historique={historique} users={users} />
+                      </TabsContent>
+                      </Tabs>
+                      )}
+                      </div>
+                      </div>
+                      {!editingPriseMandat && <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                        <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
+                        <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button>
+                       </div>}
+                      </motion.div>
+                      </DialogContent>
+                      </Dialog>
+
+                      {/* Dialogs de sélection pour le formulaire de dossier */}
+
+
+
+        </div>
+
+        {/* Dialog de confirmation de changement de statut */}
+        <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
+              </p>
+              <p className="text-slate-400 text-sm text-center">
+                Êtes-vous sûr de vouloir continuer ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                  }}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                  onClick={async () => {
+                    const value = pendingStatutChange;
+                    
+                    // Supprimer les documents du dossier SharePoint
+                    if (formData.numero_dossier && formData.arpenteur_geometre) {
+                      try {
+                        const initials = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
+                        const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
+                        
+                        // Récupérer la liste des fichiers
+                        const response = await base44.functions.invoke('sharepoint', {
+                          action: 'list',
+                          folderPath: folderPath
+                        });
+                        const files = response.data?.files || [];
+                        
+                        // Supprimer chaque fichier
+                        for (const file of files) {
+                          await base44.functions.invoke('sharepoint', {
+                            action: 'delete',
+                            fileId: file.id
+                          });
+                        }
+                      } catch (error) {
+                        console.error("Erreur suppression documents SharePoint:", error);
+                      }
+                    }
+                    
+                    if (value !== "Mandats à ouvrir") {
+                      setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                    } else {
+                      setFormData({...formData, statut: value});
+                    }
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                    setHasDocuments(false);
+                  }}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation - Nouveau mandat */}
+        <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={async () => {
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                    setShowCancelConfirm(false);
+                    setIsDialogOpen(false);
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour avertissement modifications non sauvegardées */}
+        <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={async () => {
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                    setShowUnsavedWarning(false);
+                    setIsDialogOpen(false);
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowUnsavedWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Ouvrir Dossier */}
+        <OuvrirDossierDialog
+          open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}
+          dossierForm={nouveauDossierForm} commentaires={commentairesTemporairesDossier}
+          clients={clients} lots={lots} users={users}
+          editingPriseMandat={editingPriseMandat}
+          onSuccess={() => { setIsOuvrirDossierDialogOpen(false); setIsDialogOpen(false); resetFullForm(); }}
+        />
+
+        {/* Dialog de confirmation de suppression de mandat */}
+        <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (mandatIndexToDelete !== null) {
+                      setNouveauDossierForm(prev => ({
+                        ...prev,
+                        mandats: prev.mandats.filter((_, i) => i !== mandatIndexToDelete)
+                      }));
+                      setActiveTabMandatDossier(Math.max(0, mandatIndexToDelete - 1).toString());
+                    }
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement utilisateur assigné manquant */}
+        <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Tous les mandats doivent avoir un utilisateur assigné avant de créer le dossier.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowMissingUserWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour validation arpenteur requis */}
+        <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez sélectionner un arpenteur-géomètre.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowArpenteurRequiredDialog(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  OK
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de succès d'import .d01 */}
+        <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader><DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3"><span className="text-2xl">✅</span>Succès<span className="text-2xl">✅</span></DialogTitle></DialogHeader>
+            <div className="space-y-4 p-2">
+              <p className="text-slate-300 text-center">Données importées avec succès depuis le fichier .d01</p>
+              <div className="flex justify-center pt-4"><Button type="button" onClick={() => setShowD01ImportSuccess(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">OK</Button></div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression de concordance */}
+        <Dialog open={showDeleteConcordanceConfirm} onOpenChange={setShowDeleteConcordanceConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer cette concordance ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeleteConcordanceConfirm(false);
+                    setConcordanceIndexToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (concordanceIndexToDelete !== null) {
+                      setNewLotForm(prev => ({
+                        ...prev,
+                        concordances_anterieures: prev.concordances_anterieures.filter((_, i) => i !== concordanceIndexToDelete)
+                      }));
+                    }
+                    setShowDeleteConcordanceConfirm(false);
+                    setConcordanceIndexToDelete(null);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation de création de lot */}
+        <Dialog open={showCancelLotConfirm} onOpenChange={setShowCancelLotConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    setShowCancelLotConfirm(false);
+                    setIsNewLotDialogOpen(false);
+                    resetLotForm();
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelLotConfirm(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement lot existant */}
+        <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotExistsWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement champs obligatoires manquants */}
+        <Dialog open={showLotMissingFieldsWarning} onOpenChange={setShowLotMissingFieldsWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotMissingFieldsWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression de prise de mandat */}
+        <Dialog open={showDeletePriseMandatConfirm} onOpenChange={setShowDeletePriseMandatConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer cette prise de mandat ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeletePriseMandatConfirm(false);
+                    setPriseMandatIdToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (priseMandatIdToDelete) {
+                      deletePriseMandatMutation.mutate(priseMandatIdToDelete);
+                    }
+                    setShowDeletePriseMandatConfirm(false);
+                    setPriseMandatIdToDelete(null);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement concordance incomplète */}
+        <Dialog open={showConcordanceWarning} onOpenChange={setShowConcordanceWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez remplir le numéro de lot, la circonscription foncière et le cadastre pour ajouter une concordance.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowConcordanceWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour ajouter une minute */}
+        <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="space-y-2">
+                <Label>Minute <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newMinuteForm.minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
+                  placeholder="Ex: 12345"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date de minute <span className="text-red-400">*</span></Label>
+                <Input
+                  type="date"
+                  value={newMinuteForm.date_minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type de minute <span className="text-red-400">*</span></Label>
+                <Select
+                  value={newMinuteForm.type_minute}
+                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
+                >
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
+                    <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
+                    <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleAddMinuteFromDialog}
+                  disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Ajouter
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Selector Dialog */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des clients</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un client..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Client");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredClientsForSelector.map((client) => (
+                    <div
+                      key={client.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.clients_ids.includes(client.id)
+                          ? 'bg-blue-500/20 border border-blue-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(client.id, 'clients')}
+                    >
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {client.adresses?.length > 0 && formatAdresse(client.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle || a.actuel))}</p>
+                        )}
+                        {getCurrentValue(client.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(client.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(client.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsClientSelectorOpen(false);
+                          handleEdit(client);
+                        }}
+                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notaire Selector Dialog */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un notaire..."
+                    value={notaireSearchTerm}
+                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Notaire");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-purple-500 hover:bg-purple-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.map((notaire) => (
+                    <div
+                      key={notaire.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.notaires_ids.includes(notaire.id)
+                          ? 'bg-purple-500/20 border border-purple-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(notaire.id, 'notaires')}
+                    >
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {notaire.adresses?.length > 0 && formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel))}</p>
+                        )}
+                        {getCurrentValue(notaire.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(notaire.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(notaire.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsNotaireSelectorOpen(false);
+                          handleEdit(notaire);
+                        }}
+                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Courtier Selector Dialog */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un courtier..."
+                    value={courtierSearchTerm}
+                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Courtier immobilier");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.map((courtier) => (
+                    <div
+                      key={courtier.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.courtiers_ids.includes(courtier.id)
+                          ? 'bg-orange-500/20 border border-orange-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}
+                    >
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel)) && (
+                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel))}</p>
+                        )}
+                        {getCurrentValue(courtier.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(courtier.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(courtier.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCourtierSelectorOpen(false);
+                          handleEdit(courtier);
+                        }}
+                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* PDF Viewer Dialog */}
         <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
             <div className="flex items-center px-3 py-1.5 border-b border-slate-800 flex-shrink-0 min-h-0">
@@ -3342,9 +4374,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           </DialogContent>
         </Dialog>
 
+
         {/* Table des prises de mandat */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl -mx-4 md:-mx-8 rounded-none border-l-0 border-r-0">
-          <CardHeader className="border-b border-slate-800 pb-0 pt-0 px-4 md:px-8">
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardHeader className="border-b border-slate-800 pb-1 pt-0">
             <div className="flex flex-col gap-2">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
@@ -3825,7 +4858,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             </div>
           </CardContent>
         </Card>
-      </div></div>
+      </div>
     </>
   );
 });

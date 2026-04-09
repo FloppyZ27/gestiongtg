@@ -52,8 +52,8 @@ export default function CommunicationClients() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <div className="p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <div className="w-full">
         <div className="flex items-start justify-between gap-3 mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export default function CommunicationClients() {
             </div>
           </div>
 
-          <TabsContent value="prise-mandat" className="mt-0 overflow-visible -mx-4 md:-mx-8 px-4 md:px-8">
+          <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
             <PriseDeMandat ref={priseMandatRef} />
           </TabsContent>
 
