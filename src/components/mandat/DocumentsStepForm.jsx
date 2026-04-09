@@ -203,25 +203,47 @@ export default function DocumentsStepForm({
           const filesFound = checkRes.data?.files || [];
           console.log('[TRANSFERT AUTO] Fichiers trouves:', filesFound.length);
           if (filesFound.length > 0) {
-            // Créer les dossiers destination avec createSharePointFolder
-            console.log('[TRANSFERT AUTO] Creation structure destination');
+            // Utiliser copySharePointFiles qui gère mieux la création de dossiers
+            console.log('[TRANSFERT AUTO] Copie des fichiers vers:', finalPath);
             try {
-              const dossierParent = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
-              // Créer le dossier parent
-              await base44.functions.invoke('createSharePointFolder', { folderPath: `ARPENTEUR/${initials}/DOSSIER`, folderName: `${initials}-${numeroDossier}` });
-              // Créer INTRANTS dedans
-              await base44.functions.invoke('createSharePointFolder', { folderPath: dossierParent, folderName: 'INTRANTS' });
-              console.log('[TRANSFERT AUTO] Structure destination creee');
+              const copyRes = await base44.functions.invoke('copySharePointFiles', {
+                sourceFolderPath: sourcePath,
+                destinationFolderPath: finalPath
+              });
+              console.log('[TRANSFERT AUTO] Copie terminee:', JSON.stringify(copyRes.data));
+              
+              // Si la copie a échoué (dossier dest n'existe pas), créer la structure et réessayer
+              if (!copyRes.data?.success && copyRes.data?.error?.includes('introuvable')) {
+                console.log('[TRANSFERT AUTO] Destination inexistante, création en cours...');
+                // Créer les dossiers parent via createSharePointFolder
+                const dossierPath = `ARPENTEUR/${initials}/DOSSIER`;
+                const dossierName = `${initials}-${numeroDossier}`;
+                try {
+                  await base44.functions.invoke('createSharePointFolder', {
+                    folderPath: dossierPath,
+                    folderName: dossierName
+                  });
+                  console.log('[TRANSFERT AUTO] Dossier parent cree');
+                  // Créer INTRANTS
+                  await base44.functions.invoke('createSharePointFolder', {
+                    folderPath: `${dossierPath}/${dossierName}`,
+                    folderName: 'INTRANTS'
+                  });
+                  console.log('[TRANSFERT AUTO] Dossier INTRANTS cree');
+                  // Attendre et réessayer la copie
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  const retryRes = await base44.functions.invoke('copySharePointFiles', {
+                    sourceFolderPath: sourcePath,
+                    destinationFolderPath: finalPath
+                  });
+                  console.log('[TRANSFERT AUTO] Copie apres creation:', JSON.stringify(retryRes.data));
+                } catch (createErr) {
+                  console.error('[TRANSFERT AUTO] Erreur creation dossiers:', createErr.message);
+                }
+              }
             } catch (e) {
-              console.log('[TRANSFERT AUTO] Dossiers existent deja ou erreur:', e.message);
+              console.error('[TRANSFERT AUTO] Erreur copie:', e.message);
             }
-            // Puis déplacer les fichiers
-            const moveRes = await base44.functions.invoke('moveSharePointFiles', {
-              sourceFolderPath: sourcePath,
-              destinationFolderPath: finalPath
-            });
-            console.log('[TRANSFERT AUTO] Resultat move:', JSON.stringify(moveRes.data));
-            console.log('[TRANSFERT AUTO] Transfert reussi');
             // Attendre un peu que SharePoint mette à jour puis forcer le refetch
             await new Promise(resolve => setTimeout(resolve, 500));
             refetch();
