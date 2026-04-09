@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import EditDossierForm from "../dossiers/EditDossierForm";
 
 export default function OuvrirDossierDialog({
@@ -19,6 +20,7 @@ export default function OuvrirDossierDialog({
   const [isCreating, setIsCreating] = useState(false);
   const [internalCommentaires, setInternalCommentaires] = useState([]);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
@@ -182,7 +184,7 @@ export default function OuvrirDossierDialog({
 
       const allComments = internalCommentaires || [];
       if (allComments.length > 0) {
-        await Promise.all(allComments.filter(c => c.contenu).map(c =>
+        await Promise.all(allComments.filter(c => c.contenu && !c._isRecap).map(c =>
           base44.entities.CommentaireDossier.create({
             dossier_id: newDossier.id,
             contenu: c.contenu,
@@ -209,6 +211,7 @@ export default function OuvrirDossierDialog({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       onSuccess?.();
       onOpenChange(false);
+      navigate(`/Dossiers?id=${newDossier.id}`);
     } catch (error) {
       console.error("Erreur création dossier:", error);
     } finally {
