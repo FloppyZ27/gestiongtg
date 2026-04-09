@@ -2572,11 +2572,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   <div id="section-adresse"><AddressStepForm
                     disabled={isLocked}
                     address={workAddress}
-                    onAddressChange={(addr) => {
-                      if (isLocked) return;
-                      setWorkAddress(addr);
-                      setHasFormChanges(true);
-                    }}
+                    onAddressChange={(addr) => { if (isLocked) return; setWorkAddress(addr); setHasFormChanges(true); }}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
                     clientDossiers={dossiers.filter(d => 
