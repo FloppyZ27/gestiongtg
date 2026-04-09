@@ -10,6 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const { arpenteurInitials, clientName } = await req.json();
+    console.log(`[FIND] === CLIENT NAME RECU: "${clientName}" ===`);
 
     const tenantId = "31adb05b-e471-4daf-8831-4d46014be9b8";
     const clientId = "1291551b-48b1-4e33-beff-d3cb64fa888a";
@@ -51,14 +52,14 @@ Deno.serve(async (req) => {
     });
 
     if (!listResponse.ok) {
-      console.log(`[FIND] Dossier TEMPORAIRE non trouvé (404)`);
+      console.log(`[FIND] Dossier TEMPORAIRE non trouve (404)`);
       return Response.json({ foundPath: null, message: 'Dossier TEMPORAIRE introuvable' });
     }
 
     const listData = await listResponse.json();
     const folders = (listData.value || []).filter(item => item.folder);
     
-    console.log(`[FIND] ${folders.length} dossier(s) trouvé(s)`);
+    console.log(`[FIND] ${folders.length} dossier(s) trouve(s)`);
     folders.forEach(f => console.log(`[FIND] - ${f.name}`));
 
     // Chercher le dossier correspondant au client avec la date
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
              folderName.includes(today);
     });
 
-    // Fallback: chercher sans date exacte si pas trouvé
+    // Fallback: chercher sans date exacte si pas trouve
     if (!matchingFolder) {
       console.log(`[FIND] Pas de correspondance avec date exacte, recherche fallback...`);
       matchingFolder = folders.find(folder => {
@@ -88,11 +89,11 @@ Deno.serve(async (req) => {
 
     if (matchingFolder) {
       const foundPath = `${temporairePath}/${matchingFolder.name}/INTRANTS`;
-      console.log(`[FIND] Dossier trouvé: ${foundPath}`);
+      console.log(`[FIND] Dossier trouve: ${foundPath}`);
       return Response.json({ foundPath, folderName: matchingFolder.name });
     } else {
       console.log(`[FIND] Aucun dossier correspondant pour ${clientName}`);
-      return Response.json({ foundPath: null, message: 'Aucun dossier temporaire trouvé' });
+      return Response.json({ foundPath: null, message: 'Aucun dossier temporaire trouve' });
     }
 
   } catch (error) {
