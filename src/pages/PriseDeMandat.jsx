@@ -40,7 +40,6 @@ import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
 import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";
-import { createStatutChangeHandler } from "../hooks/useStatutChangeHandler";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2477,7 +2476,22 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       setHasFormChanges(true);
                     }}
                     statut={formData.statut}
-                    onStatutChange={createStatutChangeHandler(formData, calculerProchainNumeroDossier, editingPriseMandat, isLocked, setFormData)}
+                    onStatutChange={async (value) => {
+                      if (isLocked) return;
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && value !== formData.statut) {
+                        setPendingStatutChange(value);
+                        setShowStatutChangeConfirm(true);
+                        return;
+                      }
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
+                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                        setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
+                      } else if (value !== "Mandats à ouvrir") {
+                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                      } else {
+                        setFormData({...formData, statut: value});
+                      }
+                    }}
                     numeroDossier={formData.numero_dossier}
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
                     dateOuverture={formData.date_ouverture}
