@@ -2478,7 +2478,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     statut={formData.statut}
                     onStatutChange={async (value) => {
                       if (isLocked) return;
-                      if (formData.numero_dossier && value !== formData.statut) {
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && value !== formData.statut) {
                         setPendingStatutChange(value);
                         setShowStatutChangeConfirm(true);
                         return;
