@@ -126,6 +126,8 @@ export default function OuvrirDossierDialog({
       if (recapLines.length > 0) {
         try {
           console.log('Création commentaire pour dossier', newDossier.id);
+          console.log('currentUser:', currentUser);
+          console.log('recapLines:', recapLines);
           const comment = await base44.entities.CommentaireDossier.create({
             dossier_id: newDossier.id,
             contenu: recapLines.join('\n'),
