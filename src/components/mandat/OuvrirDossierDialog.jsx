@@ -64,26 +64,68 @@ export default function OuvrirDossierDialog({
     (formData.mandats || []).forEach((m, i) => {
       if (!m.type_mandat) return;
       lines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
+      
+      // Adresse
       const addr = m.adresse_travaux;
       if (addr && (addr.rue || addr.ville)) {
         const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
         lines.push(`📍 Adresse: ${parts.join(', ')}`);
       }
+      
+      // Lots
+      if (m.lots && m.lots.length > 0) {
+        const lotNumbers = m.lots.map(lotId => {
+          const lot = getLotById(lotId);
+          return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
+        }).join(', ');
+        lines.push(`🏘️ Lots: ${lotNumbers}`);
+      }
+      if (m.lots_texte) lines.push(`🏘️ Lots: ${m.lots_texte}`);
+      
+      // Dates
+      if (m.date_ouverture) lines.push(`📅 Ouverture: ${m.date_ouverture}`);
       if (m.date_signature) lines.push(`📅 Signature: ${m.date_signature}`);
-      if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
       if (m.date_debut_travaux) lines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
+      if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
+      
+      // Minutes
+      if (m.minute) lines.push(`📄 Minute: ${m.minute}`);
+      if (m.date_minute) lines.push(`📅 Date minute: ${m.date_minute}`);
+      if (m.type_minute) lines.push(`📋 Type minute: ${m.type_minute}`);
+      
+      // Tarification
       if (m.prix_estime) lines.push(`💰 Prix estimé: ${m.prix_estime} $`);
+      if (m.prix_premier_lot) lines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
+      if (m.prix_autres_lots) lines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
       if (m.rabais) lines.push(`🏷️ Rabais: ${m.rabais} $`);
       if (m.taxes_incluses) lines.push(`✅ Taxes incluses`);
       if (m.prix_convenu) lines.push(`🤝 Prix convenu avec le client`);
+      
+      // Assignation et tâche
+      if (m.utilisateur_assigne) {
+        const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
+        lines.push(`👤 Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+      }
+      if (m.tache_actuelle) lines.push(`✏️ Tâche actuelle: ${m.tache_actuelle}`);
+      if (m.equipe_assignee) lines.push(`👥 Équipe: ${m.equipe_assignee}`);
+      
+      // Terrain
+      if (m.terrain) {
+        if (m.terrain.date_limite_leve) lines.push(`🏔️ Date limite levé: ${m.terrain.date_limite_leve}`);
+        if (m.terrain.instruments_requis) lines.push(`🔧 Instruments: ${m.terrain.instruments_requis}`);
+        if (m.terrain.a_rendez_vous) {
+          if (m.terrain.date_rendez_vous) lines.push(`📍 RDV le: ${m.terrain.date_rendez_vous}`);
+          if (m.terrain.heure_rendez_vous) lines.push(`⏰ À: ${m.terrain.heure_rendez_vous}`);
+        }
+        if (m.terrain.donneur) lines.push(`🔑 Donneur: ${m.terrain.donneur}`);
+        if (m.terrain.technicien) lines.push(`👨‍🔧 Technicien: ${m.terrain.technicien}`);
+        if (m.terrain.dossier_simultane) lines.push(`📁 Dossier simultané: ${m.terrain.dossier_simultane}`);
+        if (m.terrain.temps_prevu) lines.push(`⏱️ Temps prévu: ${m.terrain.temps_prevu}`);
+        if (m.terrain.notes) lines.push(`📝 Terrain notes: ${m.terrain.notes}`);
+      }
+      
+      // Notes générales
       if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
-    });
-
-    const recapContent = lines.join('\n');
-    setInternalCommentaires(prev => {
-      // Replace or insert recap as first comment
-      const others = (prev || []).filter(c => !c._isRecap);
-      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: currentUser?.email || '', utilisateur_nom: currentUser?.full_name || 'Système' }, ...others];
     });
   }, [formData, clients, currentUser]);
 
@@ -161,29 +203,68 @@ export default function OuvrirDossierDialog({
       (formData.mandats || []).forEach((m, i) => {
         if (!m.type_mandat) return;
         lines.push(`<br><strong>─── Mandat ${i + 1}: ${m.type_mandat} ───</strong>`);
+        
+        // Adresse
         const addr = m.adresse_travaux;
         if (addr && (addr.rue || addr.ville)) {
           const parts = [addr.numeros_civiques?.[0], addr.rue, addr.ville, addr.province, addr.code_postal].filter(Boolean);
           lines.push(`📍 Adresse: ${parts.join(', ')}`);
         }
+        
+        // Lots
+        if (m.lots && m.lots.length > 0) {
+          const lotNumbers = m.lots.map(lotId => {
+            const lot = getLotById(lotId);
+            return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
+          }).join(', ');
+          lines.push(`🏘️ Lots: ${lotNumbers}`);
+        }
+        if (m.lots_texte) lines.push(`🏘️ Lots: ${m.lots_texte}`);
+        
+        // Dates
+        if (m.date_ouverture) lines.push(`📅 Ouverture: ${m.date_ouverture}`);
         if (m.date_signature) lines.push(`📅 Signature: ${m.date_signature}`);
-        if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
         if (m.date_debut_travaux) lines.push(`📅 Début travaux: ${m.date_debut_travaux}`);
+        if (m.date_livraison) lines.push(`📅 Livraison: ${m.date_livraison}`);
+        
+        // Minutes
+        if (m.minute) lines.push(`📄 Minute: ${m.minute}`);
+        if (m.date_minute) lines.push(`📅 Date minute: ${m.date_minute}`);
+        if (m.type_minute) lines.push(`📋 Type minute: ${m.type_minute}`);
+        
+        // Tarification
         if (m.prix_estime) lines.push(`💰 Prix estimé: ${m.prix_estime} $`);
+        if (m.prix_premier_lot) lines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
+        if (m.prix_autres_lots) lines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
         if (m.rabais) lines.push(`🏷️ Rabais: ${m.rabais} $`);
         if (m.taxes_incluses) lines.push(`✅ Taxes incluses`);
         if (m.prix_convenu) lines.push(`🤝 Prix convenu avec le client`);
+        
+        // Assignation et tâche
+        if (m.utilisateur_assigne) {
+          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
+          lines.push(`👤 Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+        }
+        if (m.tache_actuelle) lines.push(`✏️ Tâche actuelle: ${m.tache_actuelle}`);
+        if (m.equipe_assignee) lines.push(`👥 Équipe: ${m.equipe_assignee}`);
+        
+        // Terrain
+        if (m.terrain) {
+          if (m.terrain.date_limite_leve) lines.push(`🏔️ Date limite levé: ${m.terrain.date_limite_leve}`);
+          if (m.terrain.instruments_requis) lines.push(`🔧 Instruments: ${m.terrain.instruments_requis}`);
+          if (m.terrain.a_rendez_vous) {
+            if (m.terrain.date_rendez_vous) lines.push(`📍 RDV le: ${m.terrain.date_rendez_vous}`);
+            if (m.terrain.heure_rendez_vous) lines.push(`⏰ À: ${m.terrain.heure_rendez_vous}`);
+          }
+          if (m.terrain.donneur) lines.push(`🔑 Donneur: ${m.terrain.donneur}`);
+          if (m.terrain.technicien) lines.push(`👨‍🔧 Technicien: ${m.terrain.technicien}`);
+          if (m.terrain.dossier_simultane) lines.push(`📁 Dossier simultané: ${m.terrain.dossier_simultane}`);
+          if (m.terrain.temps_prevu) lines.push(`⏱️ Temps prévu: ${m.terrain.temps_prevu}`);
+          if (m.terrain.notes) lines.push(`📝 Terrain notes: ${m.terrain.notes}`);
+        }
+        
+        // Notes générales
         if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
-      });
-
-      const recapContent = lines.join('\n');
-
-      // Ajouter le commentaire récapitulatif au dossier
-      await base44.entities.CommentaireDossier.create({
-        dossier_id: newDossier.id,
-        contenu: recapContent,
-        utilisateur_email: currentUser?.email || '',
-        utilisateur_nom: currentUser?.full_name || 'Système'
       });
 
       const allComments = internalCommentaires || [];
