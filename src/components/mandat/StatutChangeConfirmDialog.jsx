@@ -46,25 +46,26 @@ export default function StatutChangeConfirmDialog({
       try {
         if (value === "Mandats à ouvrir" && newNumeroDossier) {
           const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || "Client";
-          const today = new Date().toISOString().split('T')[0];
-          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
           const destPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${newNumeroDossier}/INTRANTS`;
-          console.log(`[CONFIRM] Tentative copie: ${sourcePath} → ${destPath}`);
+          console.log(`[CONFIRM] Recherche dossier temporaire pour: ${clientName}`);
           try {
-            console.log(`[CONFIRM] Check fichiers source...`);
-            const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
-            console.log(`[CONFIRM] Réponse complète sharepoint:`, JSON.stringify(checkRes.data));
-            const fileCount = checkRes.data?.files?.length || 0;
-            console.log(`[CONFIRM] Fichiers trouvés: ${fileCount}`);
-            if (fileCount > 0) {
-              console.log(`[CONFIRM] Démarrage copie (${fileCount} fichier(s))...`);
+            // Trouver le dossier TEMPORAIRE existant
+            const findRes = await base44.functions.invoke('findTemporaryFolder', {
+              arpenteurInitials: initials,
+              clientName: clientName
+            });
+            
+            if (findRes.data?.foundPath) {
+              const sourcePath = findRes.data.foundPath;
+              console.log(`[CONFIRM] Dossier trouvé: ${sourcePath}`);
+              console.log(`[CONFIRM] Démarrage copie vers: ${destPath}`);
               const copyRes = await base44.functions.invoke('copySharePointFiles', {
                 sourceFolderPath: sourcePath,
                 destinationFolderPath: destPath
               });
               console.log(`[CONFIRM] Copie terminée:`, JSON.stringify(copyRes.data));
             } else {
-              console.log(`[CONFIRM] Aucun fichier à copier`);
+              console.log(`[CONFIRM] Aucun dossier temporaire trouvé`);
             }
           } catch (e) {
             console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
