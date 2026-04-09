@@ -82,6 +82,54 @@ export default function OuvrirDossierDialog({
     try {
       const newDossier = await base44.entities.Dossier.create(formData);
 
+      // Créer commentaire récapitulatif des mandats
+      const recapLines = [];
+      (formData.mandats || []).forEach((m, i) => {
+        recapLines.push(`📋 Mandat ${i + 1}: ${m.type_mandat || 'N/A'}`);
+        if (m.adresse_travaux?.rue || m.adresse_travaux?.ville) {
+          const parts = [m.adresse_travaux?.numeros_civiques?.[0], m.adresse_travaux?.rue, m.adresse_travaux?.ville].filter(Boolean);
+          recapLines.push(`📍 Adresse: ${parts.join(', ')}`);
+        }
+        if (m.lots_texte) recapLines.push(`Lots (texte): ${m.lots_texte}`);
+        if (m.lots?.length > 0) {
+          const lotNumbers = m.lots.map(lotId => {
+            const lot = lots?.find(l => l.id === lotId);
+            return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
+          }).join(', ');
+          recapLines.push(`Lots: ${lotNumbers}`);
+        }
+        if (m.date_ouverture) recapLines.push(`Date ouverture: ${m.date_ouverture}`);
+        if (m.date_signature) recapLines.push(`Date signature: ${m.date_signature}`);
+        if (m.date_debut_travaux) recapLines.push(`Date début travaux: ${m.date_debut_travaux}`);
+        if (m.date_livraison) recapLines.push(`Date livraison: ${m.date_livraison}`);
+        if (m.minute) recapLines.push(`Minute: ${m.minute}`);
+        if (m.date_minute) recapLines.push(`Date minute: ${m.date_minute}`);
+        if (m.type_minute) recapLines.push(`Type minute: ${m.type_minute}`);
+        if (m.prix_estime) recapLines.push(`💰 Prix estimé: ${m.prix_estime} $`);
+        if (m.prix_premier_lot) recapLines.push(`💰 Prix 1er lot: ${m.prix_premier_lot} $`);
+        if (m.prix_autres_lots) recapLines.push(`💰 Prix autres lots: ${m.prix_autres_lots} $`);
+        if (m.rabais) recapLines.push(`Rabais: ${m.rabais} $`);
+        if (m.taxes_incluses) recapLines.push(`✅ Taxes incluses`);
+        if (m.prix_convenu) recapLines.push(`✅ Prix convenu`);
+        if (m.utilisateur_assigne) {
+          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
+          recapLines.push(`Assigné à: ${assignedUser?.full_name || m.utilisateur_assigne}`);
+        }
+        if (m.tache_actuelle) recapLines.push(`Tâche actuelle: ${m.tache_actuelle}`);
+        if (m.equipe_assignee) recapLines.push(`Équipe: ${m.equipe_assignee}`);
+        if (m.notes) recapLines.push(`Notes: ${m.notes}`);
+        recapLines.push('');
+      });
+
+      if (recapLines.length > 0) {
+        await base44.entities.CommentaireDossier.create({
+          dossier_id: newDossier.id,
+          contenu: recapLines.join('\n'),
+          utilisateur_email: currentUser?.email || '',
+          utilisateur_nom: currentUser?.full_name || 'Système'
+        });
+      }
+
       const allComments = internalCommentaires || [];
       if (allComments.length > 0) {
         await Promise.all(allComments.filter(c => c.contenu && !c._isRecap).map(c =>
