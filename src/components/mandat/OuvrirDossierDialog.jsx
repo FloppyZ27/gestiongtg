@@ -257,7 +257,7 @@ export default function OuvrirDossierDialog({
           calculerProchainNumeroDossier={() => formData.numero_dossier}
           editingDossier={null}
           hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
-          commentairesTemporaires={internalCommentaires.filter(c => !c._isRecap)}
+          commentairesTemporaires={internalCommentaires}
           onCommentairesTemporairesChange={(newComments) => {
             setInternalCommentaires(prev => {
               const recap = prev.filter(c => c._isRecap);
