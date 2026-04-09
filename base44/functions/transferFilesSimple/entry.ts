@@ -9,10 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { sourcePath, destPath } = await req.json();
+    const body = await req.json();
+    const { sourcePath, destPath } = body;
     
-    console.log('[TRANSFER] Source:', sourcePath);
-    console.log('[TRANSFER] Dest:', destPath);
+    if (!sourcePath || !destPath) {
+      return Response.json({ error: 'sourcePath and destPath required' }, { status: 400 });
+    }
 
     const tenantId = Deno.env.get('MICROSOFT_TENANT_ID');
     const clientId = Deno.env.get('MICROSOFT_CLIENT_ID');
@@ -31,34 +33,41 @@ Deno.serve(async (req) => {
       })
     });
 
-    const { access_token } = await tokenRes.json();
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) {
+      return Response.json({ error: 'Failed to get token' }, { status: 500 });
+    }
+
+    const access_token = tokenData.access_token;
     const headers = {
       'Authorization': `Bearer ${access_token}`,
       'Content-Type': 'application/json'
     };
 
-    // Find source folder
-    const parts = sourcePath.split('/').filter(p => p);
+    // Find source folder ID
+    const sourceParts = sourcePath.split('/').filter(p => p);
     let currentId = 'root';
-    for (const part of parts) {
+    for (const part of sourceParts) {
       const res = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part.replace(/'/g, "''")}'`,
+        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part}'`,
         { headers }
       );
       const data = await res.json();
       const folder = data.value?.find(f => f.folder);
-      if (!folder) return Response.json({ error: `Source not found: ${part}` }, { status: 404 });
+      if (!folder) {
+        console.log(`Source folder not found: ${part} in ${currentId}`);
+        return Response.json({ success: true, movedCount: 0 });
+      }
       currentId = folder.id;
     }
     const sourceId = currentId;
-    console.log('[TRANSFER] Source ID:', sourceId);
 
-    // Create dest folder path
+    // Find/create dest folder path
     const destParts = destPath.split('/').filter(p => p);
     currentId = 'root';
     for (const part of destParts) {
       const res = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part.replace(/'/g, "''")}'`,
+        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part}'`,
         { headers }
       );
       const data = await res.json();
@@ -71,17 +80,19 @@ Deno.serve(async (req) => {
             headers,
             body: JSON.stringify({
               name: part,
-              folder: {},
-              '@microsoft.graph.conflictBehavior': 'rename'
+              folder: {}
             })
           }
         );
+        if (!createRes.ok) {
+          console.error(`Failed to create folder ${part}`, createRes.status);
+          continue;
+        }
         folder = await createRes.json();
       }
       currentId = folder.id;
     }
     const destId = currentId;
-    console.log('[TRANSFER] Dest ID:', destId);
 
     // List files in source
     const listRes = await fetch(
@@ -90,35 +101,33 @@ Deno.serve(async (req) => {
     );
     const listData = await listRes.json();
     const files = (listData.value || []).filter(f => !f.folder);
-    console.log('[TRANSFER] Files:', files.length);
 
     // Move each file
     let movedCount = 0;
     for (const file of files) {
-      console.log('[TRANSFER] Moving:', file.name);
-      const moveRes = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${file.id}`,
-        {
-          method: 'PATCH',
-          headers,
-          body: JSON.stringify({
-            parentReference: { driveId, id: destId }
-          })
+      try {
+        const moveRes = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${file.id}`,
+          {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({
+              parentReference: { id: destId }
+            })
+          }
+        );
+        if (moveRes.ok) {
+          movedCount++;
         }
-      );
-      if (moveRes.ok) {
-        movedCount++;
-        console.log('[TRANSFER] OK:', file.name);
-      } else {
-        console.error('[TRANSFER] Failed:', file.name, moveRes.status);
+      } catch (e) {
+        console.error(`Error moving ${file.name}:`, e.message);
       }
     }
 
-    console.log('[TRANSFER] Done:', movedCount, 'moved');
     return Response.json({ success: true, movedCount });
 
   } catch (error) {
-    console.error('[TRANSFER] Error:', error.message);
+    console.error('Error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
