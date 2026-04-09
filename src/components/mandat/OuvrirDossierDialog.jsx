@@ -209,12 +209,12 @@ export default function OuvrirDossierDialog({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       onSuccess?.();
       onOpenChange(false);
-      } catch (error) {
+    } catch (error) {
       console.error("Erreur création dossier:", error);
-      } finally {
+    } finally {
       setIsCreating(false);
-      }
-      };
+    }
+  };
 
   if (!formData) return null;
 
