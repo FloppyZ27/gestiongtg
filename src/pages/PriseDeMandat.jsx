@@ -3342,7 +3342,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           </DialogContent>
         </Dialog>
 
-
         {/* Table des prises de mandat */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader className="border-b border-slate-800 pb-1 pt-0">
