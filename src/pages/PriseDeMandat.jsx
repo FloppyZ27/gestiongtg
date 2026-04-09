@@ -2477,7 +2477,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       setHasFormChanges(true);
                     }}
                     statut={formData.statut}
-                    onStatutChange={createStatutChangeHandler(formData, mandatsInfo, workAddress, commentairesTemporaires, calculerProchainNumeroDossier, editingPriseMandat, isLocked, setFormData, setNouveauDossierForm, setCommentairesTemporairesDossier, setIsOuvrirDossierDialogOpen)}
+                    onStatutChange={createStatutChangeHandler(formData, mandatsInfo, workAddress, commentairesTemporaires, calculerProchainNumeroDossier, editingPriseMandat, isLocked, setFormData, setTransferFilesConfig, setIsTransferFilesDialogOpen)}
                     numeroDossier={formData.numero_dossier}
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
                     dateOuverture={formData.date_ouverture}
