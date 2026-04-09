@@ -135,44 +135,6 @@ export default function TarificationStepForm({
     onTarificationChange(updatedMandats);
   };
 
-  // Initialiser depuis les mandats
-  const globalTaxesIncluses = mandatsWithType.some(m => m.taxes_incluses === true);
-  const prixConvenu = mandatsWithType.some(m => m.prix_convenu === true);
-  const notes = mandatsWithType.length > 0 ? (mandats[0]?.notes || "") : "";
-
-  const handleTaxesInclusesChange = (newValue) => {
-    const updatedMandats = mandats.map((m) => {
-      const copy = JSON.parse(JSON.stringify(m));
-      if (m.type_mandat) {
-        copy.taxes_incluses = newValue;
-      }
-      return copy;
-    });
-    onTarificationChange(updatedMandats);
-  };
-
-  const handlePrixConvenuChange = (newValue) => {
-    const updatedMandats = mandats.map((m) => {
-      const copy = JSON.parse(JSON.stringify(m));
-      if (m.type_mandat) {
-        copy.prix_convenu = newValue;
-      }
-      return copy;
-    });
-    onTarificationChange(updatedMandats);
-  };
-
-  const handleNotesChange = (newValue) => {
-    const updatedMandats = mandats.map((m, i) => {
-      const copy = JSON.parse(JSON.stringify(m));
-      if (i === 0) {
-        copy.notes = newValue;
-      }
-      return copy;
-    });
-    onTarificationChange(updatedMandats);
-  };
-
   const totalEstime = mandatsWithType.reduce((sum, m) => {
     const isMultiLot = m.type_mandat === "Description Technique" || m.type_mandat === "OCTR";
     const quantite = parseFloat(m.quantite) || 1;
