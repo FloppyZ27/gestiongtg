@@ -139,8 +139,37 @@ Deno.serve(async (req) => {
           body: JSON.stringify(copyBody)
         });
 
-        if (copyResponse.ok) {
-          console.log(`[COPY] ✓ ${file.name} copié`);
+        if (copyResponse.ok || copyResponse.status === 202) {
+          // 202 = copie lancée en arrière-plan
+          if (copyResponse.status === 202) {
+            const locationHeader = copyResponse.headers.get('Location');
+            if (locationHeader) {
+              console.log(`[COPY] ${file.name} - en attente de completion...`);
+              // Attendre la fin de la copie (polling)
+              let copyStatus = 'inProgress';
+              let attempts = 0;
+              const maxAttempts = 60; // max 5 min
+              
+              while (copyStatus === 'inProgress' && attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                const statusResponse = await fetch(locationHeader, {
+                  headers: { 'Authorization': `Bearer ${access_token}` }
+                });
+                
+                if (statusResponse.ok) {
+                  const statusData = await statusResponse.json();
+                  copyStatus = statusData.status;
+                  console.log(`[COPY] ${file.name} - status: ${copyStatus}`);
+                  attempts++;
+                }
+              }
+              console.log(`[COPY] ✓ ${file.name} copié (${copyStatus})`);
+            } else {
+              console.log(`[COPY] ✓ ${file.name} copié (202)`);
+            }
+          } else {
+            console.log(`[COPY] ✓ ${file.name} copié (200)`);
+          }
           copiedCount++;
         } else {
           const errorText = await copyResponse.text();
