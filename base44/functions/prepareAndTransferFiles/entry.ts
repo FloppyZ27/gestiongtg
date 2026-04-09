@@ -11,11 +11,7 @@ Deno.serve(async (req) => {
 
     const { sourceFolderPath, destinationFolderPath } = await req.json();
     
-    if (!sourceFolderPath || !destinationFolderPath) {
-      return Response.json({ error: 'Missing paths' }, { status: 400 });
-    }
-
-    console.log('[PREPARE] Début');
+    console.log('[PREPARE] Start');
     console.log('[PREPARE] Source:', sourceFolderPath);
     console.log('[PREPARE] Dest:', destinationFolderPath);
 
@@ -25,11 +21,10 @@ Deno.serve(async (req) => {
     const driveId = Deno.env.get('SHAREPOINT_DRIVE_ID');
 
     if (!tenantId || !clientId || !clientSecret || !driveId) {
-      console.error('[PREPARE] Config manquante');
-      return Response.json({ error: 'Missing config' }, { status: 500 });
+      return Response.json({ error: 'Config missing' }, { status: 500 });
     }
 
-    // Token
+    // Get token
     const tokenRes = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -42,63 +37,77 @@ Deno.serve(async (req) => {
     });
 
     if (!tokenRes.ok) {
-      console.error('[PREPARE] Token failed:', tokenRes.status);
       return Response.json({ error: 'Token error' }, { status: 500 });
     }
 
     const { access_token } = await tokenRes.json();
-    console.log('[PREPARE] Token ok');
 
-    // Rechercher source par chemin
-    const getItemByPath = async (path) => {
-      const encoded = encodeURIComponent(path);
-      const res = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/${encoded}`,
-        { headers: { 'Authorization': `Bearer ${access_token}` } }
-      );
-      if (!res.ok) return null;
-      return await res.json();
+    const headers = {
+      'Authorization': `Bearer ${access_token}`,
+      'Content-Type': 'application/json'
     };
 
-    // Créer dossier parent si besoin
-    const ensureFolder = async (path) => {
-      let item = await getItemByPath(path);
-      if (item && item.folder) {
-        console.log('[PREPARE] Dossier existe:', path);
-        return item.id;
+    // Find folder by path, navigating by name
+    const findFolderByPath = async (path) => {
+      const parts = path.split('/').filter(p => p);
+      let currentId = 'root';
+
+      for (const part of parts) {
+        const res = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part.replace(/'/g, "''")}'`,
+          { headers }
+        );
+
+        if (!res.ok) {
+          console.error('[PREPARE] Find failed for:', part, res.status);
+          return null;
+        }
+
+        const data = await res.json();
+        const folder = data.value?.find(f => f.folder);
+        if (!folder) {
+          console.log('[PREPARE] Not found:', part);
+          return null;
+        }
+        currentId = folder.id;
       }
 
+      return currentId;
+    };
+
+    // Create folder by path, creating missing ones
+    const createFolderPath = async (path) => {
       const parts = path.split('/').filter(p => p);
-      let parentPath = '';
-      
+      let currentId = 'root';
+
       for (let i = 0; i < parts.length; i++) {
-        const folderName = parts[i];
-        parentPath = parts.slice(0, i).join('/');
-        const fullPath = parentPath ? `${parentPath}/${folderName}` : folderName;
+        const part = parts[i];
         
-        let existing = await getItemByPath(fullPath);
-        if (existing && existing.folder) {
-          console.log('[PREPARE] ✓ Existe:', folderName);
-          continue;
+        // Check if exists
+        const res = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children?$filter=name eq '${part.replace(/'/g, "''")}'`,
+          { headers }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const folder = data.value?.find(f => f.folder);
+          if (folder) {
+            currentId = folder.id;
+            console.log('[PREPARE] Found:', part);
+            continue;
+          }
         }
 
-        // Créer
-        const parentItem = parentPath ? await getItemByPath(parentPath) : { id: 'root' };
-        if (!parentItem) {
-          console.error('[PREPARE] Parent not found:', parentPath);
-          throw new Error('Parent not found');
-        }
-
+        // Create it
+        console.log('[PREPARE] Creating:', part);
         const createRes = await fetch(
-          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${parentItem.id}/children`,
+          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${currentId}/children`,
           {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${access_token}`,
-              'Content-Type': 'application/json'
-            },
+            headers,
             body: JSON.stringify({
-              name: folderName,
+              name: part,
               folder: {},
               '@microsoft.graph.conflictBehavior': 'rename'
             })
@@ -107,84 +116,81 @@ Deno.serve(async (req) => {
 
         if (!createRes.ok) {
           const err = await createRes.text();
-          console.error('[PREPARE] Create failed:', folderName, createRes.status, err);
-          throw new Error(`Create failed: ${folderName}`);
+          console.error('[PREPARE] Create error:', part, createRes.status, err);
+          throw new Error(`Create failed: ${part}`);
         }
 
         const created = await createRes.json();
-        console.log('[PREPARE] ✓ Créé:', folderName);
+        currentId = created.id;
+        console.log('[PREPARE] Created:', part, currentId);
       }
 
-      return (await getItemByPath(path))?.id;
+      return currentId;
     };
 
-    // Récupérer source
-    console.log('[PREPARE] Récupération source');
-    const sourceItem = await getItemByPath(sourceFolderPath);
-    if (!sourceItem) {
+    // Find source
+    console.log('[PREPARE] Finding source...');
+    const sourceId = await findFolderByPath(sourceFolderPath);
+    if (!sourceId) {
       console.error('[PREPARE] Source not found');
       return Response.json({ error: 'Source not found' }, { status: 404 });
     }
+    console.log('[PREPARE] Source ID:', sourceId);
 
-    // Créer destination
-    console.log('[PREPARE] Création destination');
-    const destId = await ensureFolder(destinationFolderPath);
+    // Create dest path
+    console.log('[PREPARE] Creating dest path...');
+    const destId = await createFolderPath(destinationFolderPath);
     console.log('[PREPARE] Dest ID:', destId);
 
-    // Récupérer fichiers source
-    console.log('[PREPARE] Liste fichiers');
-    const filesRes = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${sourceItem.id}/children`,
-      { headers: { 'Authorization': `Bearer ${access_token}` } }
+    // Get source files
+    console.log('[PREPARE] Listing files...');
+    const listRes = await fetch(
+      `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${sourceId}/children`,
+      { headers }
     );
 
-    if (!filesRes.ok) {
-      console.error('[PREPARE] List failed:', filesRes.status);
+    if (!listRes.ok) {
+      console.error('[PREPARE] List failed:', listRes.status);
       return Response.json({ error: 'List failed' }, { status: 500 });
     }
 
-    const filesData = await filesRes.json();
-    const files = (filesData.value || []).filter(f => !f.folder);
-    console.log('[PREPARE] Fichiers:', files.length);
+    const listData = await listRes.json();
+    const files = (listData.value || []).filter(f => !f.folder);
+    console.log('[PREPARE] Files count:', files.length);
 
-    // Déplacer fichiers
+    // Move files
     let movedCount = 0;
     for (const file of files) {
-      try {
-        console.log('[PREPARE] Move:', file.name);
-        const moveRes = await fetch(
-          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${file.id}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${access_token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              parentReference: {
-                driveId,
-                id: destId
-              }
-            })
-          }
-        );
-
-        if (moveRes.ok) {
-          movedCount++;
-          console.log('[PREPARE] ✓ Moved:', file.name);
-        } else {
-          console.error('[PREPARE] Move failed:', file.name, moveRes.status);
+      console.log('[PREPARE] Moving:', file.name);
+      
+      const moveRes = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${file.id}`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({
+            parentReference: {
+              driveId,
+              id: destId
+            }
+          })
         }
-      } catch (e) {
-        console.error('[PREPARE] Move error:', file.name, e.message);
+      );
+
+      if (moveRes.ok) {
+        movedCount++;
+        console.log('[PREPARE] OK:', file.name);
+      } else {
+        const err = await moveRes.text();
+        console.error('[PREPARE] Move error:', file.name, moveRes.status, err);
       }
     }
 
-    console.log('[PREPARE] Fini:', movedCount, 'fichiers');
+    console.log('[PREPARE] Done:', movedCount, 'moved');
     return Response.json({ success: true, movedCount });
 
   } catch (error) {
-    console.error('[PREPARE] Fatal:', error.message, error.stack);
+    console.error('[PREPARE] Exception:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
