@@ -47,7 +47,7 @@ export default function StatutChangeConfirmDialog({
         if (value === "Mandats à ouvrir" && newNumeroDossier) {
           const clientName = `${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`.trim() || "Client";
           const today = new Date().toISOString().split('T')[0];
-          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANT`;
+          const sourcePath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
           const destPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${newNumeroDossier}/INTRANTS`;
           console.log(`[CONFIRM] Tentative copie: ${sourcePath} → ${destPath}`);
           try {
