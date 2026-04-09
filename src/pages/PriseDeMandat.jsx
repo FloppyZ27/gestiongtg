@@ -2692,7 +2692,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </TabsContent>
                       
                       <TabsContent value="historique" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                        <HistoriquePanel historique={historique} />
+                        <HistoriquePanel historique={historique} users={users} />
                       </TabsContent>
                       </Tabs>
                       )}
