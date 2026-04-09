@@ -144,6 +144,8 @@ export default function TarificationStepForm({
     return sum + (parseFloat(m.prix_estime) || 0) * quantite;
   }, 0);
   const totalRabais = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.rabais) || 0), 0);
+  const totalPrixPremierLot = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.prix_premier_lot) || parseFloat(m.prix_estime) || 0), 0);
+  const totalAutresLots = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.prix_autres_lots) || 0), 0);
 
   return (
     <Card className="border-slate-700 bg-slate-800/30">
@@ -237,11 +239,15 @@ export default function TarificationStepForm({
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-slate-800/50 border-t-2 border-slate-600">
-                      <td className="p-2 text-slate-400 text-xs font-medium" colSpan="7">Total</td>
-                      <td className="p-2 text-right text-purple-400 text-xs font-bold">{(totalEstime - totalRabais).toFixed(2)} $</td>
-                    </tr>
-                  </tfoot>
+                     <tr className="bg-slate-800/50 border-t-2 border-slate-600">
+                       <td className="p-2 text-slate-400 text-xs font-medium" colSpan="2">Total</td>
+                       <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalPrixPremierLot.toFixed(2)} $</td>
+                       <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalAutresLots > 0 ? `${totalAutresLots.toFixed(2)} $` : <span className="block text-center text-slate-600">-</span>}</td>
+                       <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalRabais > 0 ? `${totalRabais.toFixed(2)} $` : <span className="block text-center text-slate-600">-</span>}</td>
+                       <td colSpan="2"></td>
+                       <td className="p-2 text-right text-purple-400 text-xs font-bold">{(totalEstime - totalRabais).toFixed(2)} $</td>
+                     </tr>
+                   </tfoot>
                 </table>
               </div>
             </div>
