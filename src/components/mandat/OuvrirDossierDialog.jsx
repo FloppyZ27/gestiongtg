@@ -285,48 +285,8 @@ export default function OuvrirDossierDialog({
         if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
       });
 
-      // Créer le commentaire récapitulatif avec les infos du dossier et mandats
-      const recapLines = ['<h2><strong>📋 Informations du dossier</strong></h2>'];
-      
-      // Infos dossier
-      if (formData.numero_dossier) recapLines.push(`<strong>Numéro dossier:</strong> ${formData.numero_dossier}`);
-      if (formData.arpenteur_geometre) recapLines.push(`<strong>Arpenteur-géomètre:</strong> ${formData.arpenteur_geometre}`);
-      if (formData.place_affaire) recapLines.push(`<strong>Place d'affaire:</strong> ${formData.place_affaire}`);
-      if (formData.date_ouverture) recapLines.push(`<strong>Date ouverture:</strong> ${formData.date_ouverture}`);
-      if (formData.statut) recapLines.push(`<strong>Statut:</strong> ${formData.statut}`);
-      if (formData.utilisateur_assigne) {
-        const assignedUser = (users || []).find(u => u.email === formData.utilisateur_assigne);
-        recapLines.push(`<strong>Retour d'appel assigné à:</strong> ${assignedUser?.full_name || formData.utilisateur_assigne}`);
-      }
-
-      // Clients (rename to avoid conflict with useEffect)
-      const recapClientNames = (formData.clients_ids || []).map(id => {
-        const c = (clients || []).find(cl => cl.id === id);
-        return c ? `${c.prenom} ${c.nom}` : null;
-      }).filter(Boolean);
-      if (recapClientNames.length > 0) recapLines.push(`<strong>Client(s):</strong> ${recapClientNames.join(', ')}`);
-
-      // Notaires
-      const recapNotaireNames = (formData.notaires_ids || []).map(id => {
-        const c = (clients || []).find(cl => cl.id === id);
-        return c ? `${c.prenom} ${c.nom}` : null;
-      }).filter(Boolean);
-      if (recapNotaireNames.length > 0) recapLines.push(`<strong>Notaire(s):</strong> ${recapNotaireNames.join(', ')}`);
-
-      // Courtiers
-      const recapCourtierNames = (formData.courtiers_ids || []).map(id => {
-        const c = (clients || []).find(cl => cl.id === id);
-        return c ? `${c.prenom} ${c.nom}` : null;
-      }).filter(Boolean);
-      if (recapCourtierNames.length > 0) recapLines.push(`<strong>Courtier(s):</strong> ${recapCourtierNames.join(', ')}`);
-
-      // Texte libre pour TTL
-      if (formData.ttl === 'Oui') {
-        if (formData.clients_texte) recapLines.push(`<strong>Clients (texte):</strong> ${formData.clients_texte}`);
-        if (formData.notaires_texte) recapLines.push(`<strong>Notaires (texte):</strong> ${formData.notaires_texte}`);
-        if (formData.courtiers_texte) recapLines.push(`<strong>Courtiers (texte):</strong> ${formData.courtiers_texte}`);
-        if (formData.adresse_texte) recapLines.push(`<strong>Adresse (texte):</strong> ${formData.adresse_texte}`);
-      }
+      // Créer le commentaire récapitulatif avec les infos des mandats
+      const recapLines = ['<h2><strong>📋 Informations des mandats</strong></h2>'];
 
       // Mandats
       (formData.mandats || []).forEach((m, i) => {
