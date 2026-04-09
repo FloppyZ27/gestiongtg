@@ -184,8 +184,9 @@ export default function StatutChangeConfirmDialog({
           }}
           temporaryPath={transferPaths.temporaryPath}
           destinationPath={transferPaths.destinationPath}
-          clientName={`${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`}
+          arpenteur={formData.arpenteur_geometre}
           numeroDossier={newNumeroDossier}
+          clientName={`${clientInfo?.prenom || ''} ${clientInfo?.nom || ''}`}
         />
       )}
     </>

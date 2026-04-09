@@ -4,6 +4,18 @@ import { Button } from '@/components/ui/button';
 import { FileText, Folder, Loader2, ArrowRight, RefreshCw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  const mapping = {
+    "Samuel Guay": "SG",
+    "Dany Gaboury": "DG",
+    "Pierre-Luc Pilote": "PLP",
+    "Benjamin Larouche": "BL",
+    "Frédéric Gilbert": "FG"
+  };
+  return mapping[arpenteur] || "";
+};
+
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || '';
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
@@ -27,14 +39,18 @@ export default function TransferFilesDialog({
   onOpenChange, 
   temporaryPath, 
   destinationPath,
-  clientName,
-  numeroDossier 
+  arpenteur,
+  numeroDossier,
+  clientName
 }) {
   const [tempFiles, setTempFiles] = useState([]);
   const [destFiles, setDestFiles] = useState([]);
   const [loadingTemp, setLoadingTemp] = useState(false);
   const [loadingDest, setLoadingDest] = useState(false);
   const [transferring, setTransferring] = useState(null);
+  
+  const initials = getArpenteurInitials(arpenteur);
+  const dossierTitle = `${initials}-${numeroDossier}`;
 
   const loadFiles = async (path, setSetter, setLoading) => {
     if (!path) return;
@@ -120,7 +136,7 @@ export default function TransferFilesDialog({
       <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-6xl h-[80vh] p-4 overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-lg">
-            Transfert de fichiers — {clientName} (Dossier {numeroDossier})
+            Transfert de fichiers — {initials}-{numeroDossier} - {clientName}
           </DialogTitle>
         </DialogHeader>
 
