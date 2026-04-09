@@ -56,11 +56,11 @@ export default function StatutChangeConfirmDialog({
             console.log(`[CONFIRM] Fichiers trouvés:`, checkRes.data?.files?.length);
             if (checkRes.data?.files?.length > 0) {
               console.log(`[CONFIRM] Copie en cours...`);
-              await base44.functions.invoke('copySharePointFiles', {
+              const copyRes = await base44.functions.invoke('copySharePointFiles', {
                 sourceFolderPath: sourcePath,
                 destinationFolderPath: destPath
               });
-              console.log(`[CONFIRM] Copie terminée`);
+              console.log(`[CONFIRM] Copie terminée:`, copyRes.data);
             }
           } catch (e) {
             console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
