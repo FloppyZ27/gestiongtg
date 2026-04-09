@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FileText, Folder, Loader2, ArrowRight, RefreshCw } from 'lucide-react';
@@ -127,10 +127,13 @@ export default function TransferFilesDialog({
         <div className="flex-1 overflow-hidden flex gap-4">
           {/* Côté gauche - Dossier temporaire */}
           <div className="flex-1 flex flex-col bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
               <Folder className="w-4 h-4 text-yellow-400" />
               Dossier Temporaire
             </h3>
+            <p className="text-xs text-slate-400 mb-3 truncate px-1 font-mono break-all">
+              📁 {temporaryPath}
+            </p>
             
             {loadingTemp ? (
               <div className="flex items-center justify-center h-full">
@@ -192,10 +195,13 @@ export default function TransferFilesDialog({
 
           {/* Côté droit - Dossier destination */}
           <div className="flex-1 flex flex-col bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
               <Folder className="w-4 h-4 text-blue-400" />
               Dossier Destination (N°{numeroDossier})
             </h3>
+            <p className="text-xs text-slate-400 mb-3 truncate px-1 font-mono break-all">
+              📁 {destinationPath}
+            </p>
             
             {loadingDest ? (
               <div className="flex items-center justify-center h-full">
