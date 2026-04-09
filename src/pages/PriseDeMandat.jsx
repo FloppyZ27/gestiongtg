@@ -2588,16 +2588,13 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
                   {/* Étape 4: Mandats */}
                   <div id="section-mandats"><MandatStepForm
-                    disabled={isLocked}
-                    mandats={mandatsInfo}
-                    onMandatsChange={(newMandats) => {
-                      if (isLocked) return;
-                      setMandatsInfo(newMandats);
-                      setHasFormChanges(true);
-                    }}
-                    isCollapsed={mandatStepCollapsed}
-                    onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
-                    statut={formData.statut}
+                   disabled={isLocked}
+                   mandats={mandatsInfo}
+                   onMandatsChange={(nm)=>{if(isLocked)return;setMandatsInfo(nm);setHasFormChanges(true);}}
+                   onImmediateSave={(nm)=>{if(isLocked||!editingPriseMandat)return;setMandatsInfo(nm);setHasFormChanges(true);setTimeout(()=>handleAutoSave(null,null),0);}}
+                   isCollapsed={mandatStepCollapsed}
+                   onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
+                   statut={formData.statut}
                   /></div>
 
                   {/* Étape 5: Tarification */}

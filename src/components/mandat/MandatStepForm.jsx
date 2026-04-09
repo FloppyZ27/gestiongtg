@@ -46,6 +46,7 @@ const getMandatColor = (typeMandat) => {
 export default function MandatStepForm({ 
   mandats = [],
   onMandatsChange,
+  onImmediateSave,
   isCollapsed,
   onToggleCollapse,
   statut = "",
@@ -74,7 +75,7 @@ export default function MandatStepForm({
     }
     
     if (newSelectedTypes.length === 0) {
-      onMandatsChange([{
+      const emptyMandats = [{
         type_mandat: "",
         ...sharedInfo,
         prix_estime: 0,
@@ -83,14 +84,14 @@ export default function MandatStepForm({
         rabais: 0,
         taxes_incluses: false,
         date_livraison: sharedInfo.date_livraison || ""
-      }]);
+      }];
+      onMandatsChange(emptyMandats);
+      onImmediateSave?.(emptyMandats);
     } else {
       const newMandats = newSelectedTypes.map(t => {
         const existingMandat = mandats.find(m => m.type_mandat === t);
         if (existingMandat) {
-          // Créer une copie profonde pour préserver les valeurs uniques
           const copy = JSON.parse(JSON.stringify(existingMandat));
-          // Mettre à jour seulement les infos partagées
           copy.echeance_souhaitee = sharedInfo.echeance_souhaitee;
           copy.date_signature = sharedInfo.date_signature;
           copy.date_debut_travaux = sharedInfo.date_debut_travaux;
@@ -98,7 +99,6 @@ export default function MandatStepForm({
           copy.urgence_percue = sharedInfo.urgence_percue;
           return copy;
         }
-        // Nouveau mandat - initialiser avec des valeurs par défaut
         return {
           type_mandat: t,
           echeance_souhaitee: sharedInfo.echeance_souhaitee,
@@ -114,6 +114,7 @@ export default function MandatStepForm({
         };
       });
       onMandatsChange(newMandats);
+      onImmediateSave?.(newMandats);
     }
   };
 
