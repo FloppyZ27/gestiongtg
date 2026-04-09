@@ -2312,7 +2312,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
   return (
     <>
-      <div className="w-full">
+      <div className="w-full -mx-4 md:-mx-8 px-4 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
           </div>
