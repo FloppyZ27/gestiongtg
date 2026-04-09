@@ -2478,11 +2478,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     statut={formData.statut}
                     onStatutChange={async (value) => {
                       if (isLocked) return;
-                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && value !== formData.statut) {
-                        setPendingStatutChange(value);
-                        setShowStatutChangeConfirm(true);
-                        return;
-                      }
                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
                         const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                         setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
