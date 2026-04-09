@@ -194,7 +194,7 @@ export default function OuvrirDossierDialog({
       const newDossier = await base44.entities.Dossier.create(formData);
 
       // Créer le commentaire récapitulatif avec le nom du client
-      const recapLines = ['<h2><strong>📋 Récapitulatif du dossier</strong></h2>'];
+      const recapLines = [];
 
       // Afficher le(s) client(s)
       const clientNames = (formData.clients_ids || []).map(id => {
@@ -203,22 +203,25 @@ export default function OuvrirDossierDialog({
       }).filter(Boolean);
       
       if (clientNames.length > 0) {
-        recapLines.push(`<strong>Client(s):</strong> ${clientNames.join(', ')}`);
+        recapLines.push(`Client(s): ${clientNames.join(', ')}`);
       }
       
       // Afficher les mandats
       (formData.mandats || []).forEach((m, i) => {
         if (!m.type_mandat) return;
-        recapLines.push(`<strong>Mandat ${i + 1}: ${m.type_mandat}</strong>`);
+        recapLines.push(`Mandat ${i + 1}: ${m.type_mandat}`);
       });
 
-      // Créer le commentaire récapitulatif
-      await base44.entities.CommentaireDossier.create({
-        dossier_id: newDossier.id,
-        contenu: recapLines.join('\n'),
-        utilisateur_email: currentUser?.email || '',
-        utilisateur_nom: currentUser?.full_name || 'Système'
-      });
+      // Créer le commentaire récapitulatif seulement s'il y a du contenu
+      if (recapLines.length > 0) {
+        console.log('Création commentaire:', recapLines.join('\n'));
+        await base44.entities.CommentaireDossier.create({
+          dossier_id: newDossier.id,
+          contenu: recapLines.join('\n'),
+          utilisateur_email: currentUser?.email || '',
+          utilisateur_nom: currentUser?.full_name || 'Système'
+        });
+      }
 
       const allComments = internalCommentaires || [];
       if (allComments.length > 0) {
