@@ -194,7 +194,8 @@ export default function TarificationStepForm({
                       const prixBase = isMultiLotType
                         ? (parseFloat(mandat.prix_premier_lot) || 0) + (parseFloat(mandat.prix_autres_lots) || 0)
                         : (parseFloat(mandat.prix_estime) || 0);
-                      const total = prixBase * quantite;
+                      const rabais = parseFloat(mandat.rabais) || 0;
+                      const total = prixBase * quantite - rabais;
                       return (
                         <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/30">
                           <td className="p-2">
