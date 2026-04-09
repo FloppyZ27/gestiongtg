@@ -38,6 +38,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
+import HistoriquePanel from "../components/mandat/HistoriquePanel";
 import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -2690,37 +2691,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={(newComments) => { setCommentairesTemporaires(newComments); handleAutoSave(newComments); }} />
                       </TabsContent>
                       
-                      <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                        {historique.length > 0 ? (
-                          <div className="space-y-2">
-                            {historique.map((entry, idx) => (
-                              <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                                <div className="flex items-start gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-white text-sm font-medium">{entry.action}</p>
-                                    {entry.details && (
-                                      <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
-                                    )}
-                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
-                                      <span className="text-emerald-400">{entry.utilisateur_nom}</span>
-                                      <span>•</span>
-                                      <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-center">
-                            <div>
-                              <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                              <p className="text-slate-500">Aucune action enregistrée</p>
-                              <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                            </div>
-                          </div>
-                        )}
+                      <TabsContent value="historique" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                        <HistoriquePanel historique={historique} />
                       </TabsContent>
                       </Tabs>
                       )}
