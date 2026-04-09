@@ -137,6 +137,15 @@ export default function OuvrirDossierDialog({
         _isRecap: true
       };
     }
+    // Créer un recap minimal si au moins un mandat existe
+    if (data.mandats && data.mandats.length > 0) {
+      return {
+        contenu: 'Nouveau dossier ouvert - ' + data.numero_dossier + ' - ' + (data.arpenteur_geometre || 'N/A'),
+        utilisateur_email: user?.email || '',
+        utilisateur_nom: user?.full_name || 'Système',
+        _isRecap: true
+      };
+    }
     return null;
   };
 
