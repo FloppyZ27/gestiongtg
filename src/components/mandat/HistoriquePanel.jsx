@@ -50,16 +50,16 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
             variant="ghost"
             size="sm"
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
+            className="h-7 px-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
           >
-            <Filter className="w-4 h-4 mr-2" />
-            <span className="text-sm">Filtres</span>
+            <Filter className="w-3 h-3 mr-1" />
+            <span className="text-xs">Filtres</span>
             {hasFilters && (
-              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+              <Badge className="ml-1.5 h-4 w-4 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
                 {filterCount}
               </Badge>
             )}
-            {filtersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+            {filtersOpen ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
           </Button>
         </div>
 
@@ -152,25 +152,22 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
               const initials = getInitials(entry.utilisateur_nom);
               return (
                 <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                  <div className="flex items-start gap-2">
-                    {/* Avatar */}
-                    <div className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center mt-0.5">
-                      {photo ? (
-                        <img src={photo} alt={entry.utilisateur_nom} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-[10px] font-semibold text-emerald-400">{initials}</span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium">{entry.action}</p>
-                      {entry.details && (
-                        <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
-                      )}
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
-                        <span className="text-emerald-400">{entry.utilisateur_nom}</span>
-                        <span>•</span>
-                        <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-white text-sm font-medium">{entry.action}</p>
+                    {entry.details && (
+                      <p className="text-slate-400 text-xs break-words">{entry.details}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
+                        {photo ? (
+                          <img src={photo} alt={entry.utilisateur_nom} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-[9px] font-semibold text-emerald-400">{initials}</span>
+                        )}
                       </div>
+                      <span className="text-emerald-400 text-xs">{entry.utilisateur_nom}</span>
+                      <span className="text-slate-600 text-xs">•</span>
+                      <span className="text-slate-500 text-xs">{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                     </div>
                   </div>
                 </div>
