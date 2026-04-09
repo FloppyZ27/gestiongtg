@@ -2556,8 +2556,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                        {!editingPriseMandat&&<div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0"><Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const hasC=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(hasC){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button><Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button></div>}
                        </motion.div></DialogContent></Dialog>
 
-                       </div>
-
                        {/* Dialog confirmation statut */}
                        <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
                        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
@@ -3828,7 +3826,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div></div>
     </>
   );
 });
