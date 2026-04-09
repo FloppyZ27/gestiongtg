@@ -81,7 +81,6 @@ export default function StatutChangeConfirmDialog({
       ? { ...formData, statut: value, numero_dossier: "", date_ouverture: "" }
       : { ...formData, statut: value, numero_dossier: newNumeroDossier };
 
-    // Sauvegarder immédiatement si en mode édition
     if (editingPriseMandat && !isLocked) {
       const mandatsToSave = mandatsInfo.filter(m => m.type_mandat).map(m => ({
         type_mandat: m.type_mandat,
@@ -154,7 +153,7 @@ export default function StatutChangeConfirmDialog({
           transition={{ duration: 0.15 }}
         >
           <p className="text-slate-300 text-center">
-            Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
+            Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront transférés.
           </p>
           <p className="text-slate-400 text-sm text-center">
             Êtes-vous sûr de vouloir continuer ?
