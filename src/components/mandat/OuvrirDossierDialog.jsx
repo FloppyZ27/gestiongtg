@@ -36,8 +36,8 @@ export default function OuvrirDossierDialog({
     }
   }, [dossierForm, open]);
 
-  const createAutoRecap = () => {
-    if (!formData) return;
+  const createAutoRecap = async () => {
+    if (!formData || !currentUser) return;
     
     const recapLines = [];
     (formData.mandats || []).forEach((m, i) => {
@@ -77,7 +77,7 @@ export default function OuvrirDossierDialog({
       recapLines.push('');
     });
 
-    if (recapLines.length > 0 && currentUser) {
+    if (recapLines.length > 0) {
       const recapComment = {
         contenu: recapLines.join('\n'),
         utilisateur_email: currentUser?.email || '',
@@ -88,6 +88,53 @@ export default function OuvrirDossierDialog({
         const filtered = prev.filter(c => !c._isRecap);
         return [recapComment, ...filtered];
       });
+      return recapComment;
+    }
+  };
+
+  const handleOuvrirDossier = async () => {
+    if (!currentUser || !formData) return;
+    setIsCreating(true);
+    try {
+      // Créer le commentaire récapitulatif
+      const recap = await createAutoRecap();
+      
+      // Créer le dossier
+      const newDossier = await base44.entities.Dossier.create(formData);
+
+      // Créer le commentaire s'il existe
+      if (recap) {
+        await base44.entities.CommentaireDossier.create({
+          dossier_id: newDossier.id,
+          contenu: recap.contenu,
+          utilisateur_email: recap.utilisateur_email,
+          utilisateur_nom: recap.utilisateur_nom
+        });
+      }
+
+      // Créer les notifications pour les mandats assignés
+      for (const mandat of (formData.mandats || [])) {
+        if (mandat.utilisateur_assigne && mandat.type_mandat) {
+          await base44.entities.Notification.create({
+            utilisateur_email: mandat.utilisateur_assigne,
+            titre: "Nouveau mandat assigné",
+            message: `Un mandat "${mandat.type_mandat}" vous a été assigné dans le dossier ${formData.numero_dossier}.`,
+            type: "dossier",
+            dossier_id: newDossier.id,
+            lue: false
+          });
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      onSuccess?.();
+      onOpenChange(false);
+      navigate(`/Dossiers?id=${newDossier.id}`);
+    } catch (error) {
+      console.error("Erreur création dossier:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -147,6 +194,14 @@ export default function OuvrirDossierDialog({
       const allComments = internalCommentaires || [];
       if (allComments.length > 0) {
         await Promise.all(allComments.filter(c => c.contenu).map(c =>
+          base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: c.contenu,
+            utilisateur_email: c.utilisateur_email || '',
+            utilisateur_nom: c.utilisateur_nom || 'Système'
+          })
+        ));
+      }
 
       for (const mandat of (formData.mandats || [])) {
         if (mandat.utilisateur_assigne && mandat.type_mandat) {
@@ -168,10 +223,18 @@ export default function OuvrirDossierDialog({
       navigate(`/Dossiers?id=${newDossier.id}`);
     } catch (error) {
       console.error("Erreur création dossier:", error);
-    } finally {
+     } finally {
       setIsCreating(false);
     }
   };
+
+  // Export handleOuvrirDossier pour utilisation externe (le bouton qui crée directement)
+  React.useEffect(() => {
+    // Expose this method to parent if needed via ref
+    if (typeof onOpenChange === 'function') {
+      // On peut aussi l'appeler directement du parent via une ref
+    }
+  }, []);
 
   if (!formData) return null;
 
