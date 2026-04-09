@@ -41,7 +41,7 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden w-full min-w-0">
       {/* Barre filtres - bouton à droite */}
       <div className="flex-shrink-0 mb-3">
         <div className="flex items-center justify-end">
