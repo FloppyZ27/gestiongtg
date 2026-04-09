@@ -127,7 +127,13 @@ export default function OuvrirDossierDialog({
       // Notes générales
       if (m.notes) lines.push(`📝 Notes: ${m.notes}`);
     });
-  }, [formData, clients, currentUser]);
+
+    const recapContent = lines.join('\n');
+    setInternalCommentaires(prev => {
+      const others = (prev || []).filter(c => !c._isRecap);
+      return [{ _isRecap: true, contenu: recapContent, utilisateur_email: currentUser?.email || '', utilisateur_nom: currentUser?.full_name || 'Système' }, ...others];
+    });
+  }, [formData, clients, users, currentUser, lots]);
 
   const getLotById = (id) => (lots || []).find(l => l.id === id);
 
