@@ -54,12 +54,12 @@ export default function StatutChangeConfirmDialog({
             const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
             console.log(`[CONFIRM] Fichiers trouvés:`, checkRes.data?.files?.length);
             if (checkRes.data?.files?.length > 0) {
-              console.log(`[CONFIRM] Déplacement en cours...`);
-              await base44.functions.invoke('moveSharePointFiles', {
+              console.log(`[CONFIRM] Copie en cours...`);
+              await base44.functions.invoke('copySharePointFiles', {
                 sourceFolderPath: sourcePath,
                 destinationFolderPath: destPath
               });
-              console.log(`[CONFIRM] Déplacement terminé`);
+              console.log(`[CONFIRM] Copie terminée`);
             }
           } catch (e) {
             console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
@@ -153,7 +153,7 @@ export default function StatutChangeConfirmDialog({
           transition={{ duration: 0.15 }}
         >
           <p className="text-slate-300 text-center">
-            Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront transférés.
+            Des documents sont liés à ce mandat. En changeant le statut, les documents associés seront copiés vers le nouveau dossier.
           </p>
           <p className="text-slate-400 text-sm text-center">
             Êtes-vous sûr de vouloir continuer ?
