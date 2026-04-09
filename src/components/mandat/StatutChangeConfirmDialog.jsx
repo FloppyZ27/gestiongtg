@@ -53,14 +53,18 @@ export default function StatutChangeConfirmDialog({
           try {
             console.log(`[CONFIRM] Check fichiers source...`);
             const checkRes = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: sourcePath });
-            console.log(`[CONFIRM] Fichiers trouvés:`, checkRes.data?.files?.length);
-            if (checkRes.data?.files?.length > 0) {
-              console.log(`[CONFIRM] Copie en cours...`);
+            console.log(`[CONFIRM] Réponse complète sharepoint:`, JSON.stringify(checkRes.data));
+            const fileCount = checkRes.data?.files?.length || 0;
+            console.log(`[CONFIRM] Fichiers trouvés: ${fileCount}`);
+            if (fileCount > 0) {
+              console.log(`[CONFIRM] Démarrage copie (${fileCount} fichier(s))...`);
               const copyRes = await base44.functions.invoke('copySharePointFiles', {
                 sourceFolderPath: sourcePath,
                 destinationFolderPath: destPath
               });
-              console.log(`[CONFIRM] Copie terminée:`, copyRes.data);
+              console.log(`[CONFIRM] Copie terminée:`, JSON.stringify(copyRes.data));
+            } else {
+              console.log(`[CONFIRM] Aucun fichier à copier`);
             }
           } catch (e) {
             console.error("[CONFIRM] Erreur transfert documents SharePoint:", e);
