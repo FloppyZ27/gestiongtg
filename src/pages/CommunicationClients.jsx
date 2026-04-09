@@ -116,7 +116,7 @@ export default function CommunicationClients() {
             </div>
           </div>
 
-          <TabsContent value="prise-mandat" className="mt-0">
+          <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
             <PriseDeMandat ref={priseMandatRef} />
           </TabsContent>
 
