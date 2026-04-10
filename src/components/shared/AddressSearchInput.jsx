@@ -9,39 +9,21 @@ export default function AddressSearchInput({ onAddressSelect, placeholder = "Ex:
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const handleAddressSearch = async (searchTerm) => {
-    if (!searchTerm.trim()) {
+  const handleAddressSearch = async (query) => {
+    if (!query || query.length < 2) {
       setSearchResults([]);
       return;
     }
-    
+
     setIsSearching(true);
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Trouve l'adresse complète pour: "${searchTerm}" au Québec, Canada (priorité Alma et région de Saguenay). Retourne les informations d'adresse avec distance approximative en km.`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            addresses: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  civic_number: { type: "string" },
-                  street: { type: "string" },
-                  city: { type: "string" },
-                  province: { type: "string" },
-                  postal_code: { type: "string" },
-                  distance: { type: "string", description: "Distance en km depuis Alma" }
-                }
-              }
-            }
-          }
-        }
-      });
+      const response = await base44.functions.invoke('searchAddressGoogleMaps', { query });
       
-      setSearchResults(response.addresses || []);
+      if (response.data.suggestions) {
+        setSearchResults(response.data.suggestions);
+      } else {
+        setSearchResults([]);
+      }
     } catch (error) {
       console.error("Error searching address:", error);
       setSearchResults([]);
