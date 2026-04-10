@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import EditDossierForm from "../dossiers/EditDossierForm";
+import ClientFormDialog from "../clients/ClientFormDialog";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +26,7 @@ export default function OuvrirDossierDialog({
   const [internalCommentaires, setInternalCommentaires] = useState([]);
   const [isClientFormOpen, setIsClientFormOpen] = useState(false);
   const [clientTypeForForm, setClientTypeForForm] = useState(null);
-  const [newClientForm, setNewClientForm] = useState({ prenom: '', nom: '' });
+  const [editingClientForForm, setEditingClientForForm] = useState(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
@@ -33,42 +34,7 @@ export default function OuvrirDossierDialog({
     queryFn: () => base44.auth.me()
   });
 
-  const handleAddClient = async () => {
-    if (!newClientForm.prenom.trim() || !newClientForm.nom.trim()) {
-      alert('Veuillez entrer le prénom et le nom');
-      return;
-    }
-    
-    try {
-      const newClient = await base44.entities.Client.create({
-        prenom: newClientForm.prenom,
-        nom: newClientForm.nom,
-        type_client: clientTypeForForm
-      });
-      
-      const fieldMap = {
-        'Client': 'clients_ids',
-        'Notaire': 'notaires_ids',
-        'Courtier immobilier': 'courtiers_ids',
-        'Compagnie': 'compagnies_ids'
-      };
-      
-      const field = fieldMap[clientTypeForForm];
-      if (field && formData) {
-        setFormData(prev => ({
-          ...prev,
-          [field]: [...(prev[field] || []), newClient.id]
-        }));
-      }
-      
-      setNewClientForm({ prenom: '', nom: '' });
-      setIsClientFormOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-    } catch (error) {
-      console.error('Erreur création client:', error);
-      alert('Erreur lors de la création du client');
-    }
-  };
+
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
@@ -369,52 +335,16 @@ export default function OuvrirDossierDialog({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              Ajouter {clientTypeForForm === 'Notaire' ? 'un notaire' : clientTypeForForm === 'Courtier immobilier' ? 'un courtier' : clientTypeForForm === 'Compagnie' ? 'une compagnie' : 'un client'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-slate-400 text-xs">Prénom</label>
-              <input
-                type="text"
-                placeholder="Prénom"
-                value={newClientForm.prenom}
-                onChange={(e) => setNewClientForm({ ...newClientForm, prenom: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-slate-400 text-xs">Nom</label>
-              <input
-                type="text"
-                placeholder="Nom"
-                value={newClientForm.nom}
-                onChange={(e) => setNewClientForm({ ...newClientForm, nom: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded text-sm"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button
-                onClick={() => setIsClientFormOpen(false)}
-                variant="outline"
-                className="border-slate-600 text-slate-400"
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={handleAddClient}
-                className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
-              >
-                Ajouter
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ClientFormDialog 
+        open={isClientFormOpen} 
+        onOpenChange={(open) => {setIsClientFormOpen(open); if (!open) setEditingClientForForm(null);}} 
+        editingClient={editingClientForForm} 
+        defaultType={clientTypeForForm} 
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['clients'] });
+          setIsClientFormOpen(false);
+        }} 
+      />
     </>
   );
 }
