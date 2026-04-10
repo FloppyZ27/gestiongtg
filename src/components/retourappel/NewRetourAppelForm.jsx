@@ -252,9 +252,29 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">Client <span className="text-red-400">*</span></Label>
+                   <div className="space-y-3">
+                     <div className="flex items-center gap-1.5 mb-1">
+                       <Checkbox
+                         id="aucunDossier"
+                         checked={aucunDossier}
+                         onCheckedChange={(checked) => {
+                           setAucunDossier(checked);
+                           if (!checked) {
+                             setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
+                             setDossierFound(false);
+                           } else {
+                             setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
+                             setDossierFound(true);
+                             setSelectedArpenteur("");
+                             setSelectedNumeroDossier("");
+                             setSelectedClient("");
+                           }
+                         }}
+                       />
+                       <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
+                     </div>
+                     <div className="space-y-1">
+                       <Label className="text-slate-400 text-xs">Client <span className="text-red-400">*</span></Label>
                       <Input
                         placeholder="Nom du client"
                         value={formData.client_nom || ""}
