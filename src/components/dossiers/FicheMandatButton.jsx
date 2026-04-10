@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function FicheMandatButton({ formData, clients, editingDossier }) {
@@ -27,9 +26,8 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
       type="button"
       size="sm"
       onClick={handleClick}
-      className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 h-8 text-xs"
+      className="bg-transparent hover:bg-amber-500/10 text-amber-400 border border-amber-500/50 h-8 text-xs px-3 rounded"
     >
-      <FileDown className="w-3.5 h-3.5 mr-1" />
       Fiche mandat
     </Button>
   );
