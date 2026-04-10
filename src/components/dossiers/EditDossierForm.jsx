@@ -304,7 +304,8 @@ export default function EditDossierForm({
     }
   };
 
-  // Auto-save avec debounce
+  // Auto-save avec debounce - uniquement pour les logs de changements
+  // (la sauvegarde réelle est gérée par EditDossierDialog)
   useEffect(() => {
     if (editingDossier) {
       if (saveTimeoutRef.current) {
@@ -315,7 +316,6 @@ export default function EditDossierForm({
         const oldData = prevFormDataRef.current;
         prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
         await detectAndLogChanges(oldData, formData);
-        autoSaveMutation.mutate(formData);
       }, 1500);
     }
 
