@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       }
     } catch(_) {}
 
-    const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+    const doc = new jsPDF({ unit: 'mm', format: 'legal' });
     const pW = doc.internal.pageSize.getWidth();
     const pH = doc.internal.pageSize.getHeight();
     const L = 10;
