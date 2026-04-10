@@ -193,18 +193,31 @@ Deno.serve(async (req) => {
     hline(p, y + typeH);
     label(p, "Type d'arpentage :", L + mm(1.5), y + mm(4.5), { bold:true, size:8 });
 
+    // Map mandat types to checkbox abbreviations
+    const mandatTypeMap = {
+      'Certificat de localisation': 'CL',
+      'Description Technique': 'DT',
+      'Piquetage': 'PIQ',
+      'Projet de lotissement': 'LOTIS',
+      'Implantation': 'IMP *',
+      'OCTR': 'OCTR',
+      'Levé topographique': 'LEVÉ',
+      'Bornage': 'BORN',
+    };
+    const activeMandatAbbrevs = new Set((dossierData.mandats||[]).map(m => mandatTypeMap[m.type_mandat]).filter(Boolean));
+
     const row1 = ['CL','DT','PIQ','LOTIS','AUT ___'];
     const row2 = ['IMP *','OCTR','LEVÉ','BORN'];
     const colStep = (W - mm(32)) / 5;
     let cx = L + mm(32);
     for (const lbl of row1) {
-      checkbox(p, cx, y + mm(2), mm(2.8));
+      checkbox(p, cx, y + mm(2), mm(2.8), activeMandatAbbrevs.has(lbl));
       label(p, lbl, cx + mm(4.5), y + mm(4), { size:8 });
       cx += colStep;
     }
     cx = L + mm(32);
     for (const lbl of row2) {
-      checkbox(p, cx, y + mm(7), mm(2.8));
+      checkbox(p, cx, y + mm(7), mm(2.8), activeMandatAbbrevs.has(lbl));
       label(p, lbl, cx + mm(4.5), y + mm(9), { size:8 });
       cx += colStep;
     }
@@ -220,6 +233,8 @@ Deno.serve(async (req) => {
     const clientTravail = client.telephones?.find(t=>!t.actuel)?.telephone || '';
     const clientEmail = client.courriels?.find(c=>c.actuel)?.courriel || client.courriels?.[0]?.courriel || '';
     const clientAddr = client.adresses?.find(a=>a.actuelle) || client.adresses?.[0] || {};
+    const clientNumCivique = (clientAddr.numeros_civiques||[]).filter(Boolean).join(', ');
+    const clientAdresseStr = [clientNumCivique, clientAddr.rue].filter(Boolean).join(' ');
     const cDiv = L + HALF;
 
     // Nom | Cellulaire
@@ -240,7 +255,7 @@ Deno.serve(async (req) => {
     hline(p, y + RH); vline(p, cDiv, y, y + RH);
     label(p, 'Adresse :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
     label(p, 'Maison :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_adresse', p, L + mm(18), y + mm(0.5), cDiv - L - mm(19), RH - mm(1), clientAddr.rue || '');
+    addField('client_adresse', p, L + mm(18), y + mm(0.5), cDiv - L - mm(19), RH - mm(1), clientAdresseStr);
     addField('client_maison', p, cDiv + mm(18), y + mm(0.5), R - cDiv - mm(19), RH - mm(1));
     y += RH;
 
