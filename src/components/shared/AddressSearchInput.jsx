@@ -65,7 +65,7 @@ export default function AddressSearchInput({ onAddressSelect, placeholder = "Ex:
               }}
               className="px-2 py-1.5 rounded text-xs bg-slate-700/50 hover:bg-slate-700 cursor-pointer text-slate-300"
             >
-              {addr.civic_number} {addr.street}, {addr.city}, {addr.province} {addr.postal_code}
+              {addr.numero_civique} {addr.rue}, {addr.ville}, {addr.province} {addr.code_postal}
               {addr.distance && <span className="text-slate-500 ml-2">({addr.distance} km)</span>}
             </div>
           ))}
