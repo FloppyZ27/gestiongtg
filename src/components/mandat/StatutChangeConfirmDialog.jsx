@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import TransferFilesDialog from "./TransferFilesDialog";
 
 const getArpenteurInitials = (arpenteur) => {
@@ -33,11 +34,58 @@ export default function StatutChangeConfirmDialog({
   isLocked,
   onConfirm,
   updatePriseMandatMutation,
-  newNumeroDossier
+  newNumeroDossier,
 }) {
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
+  const { data: priseMandats = [] } = useQuery({
+    queryKey: ['priseMandats'],
+    queryFn: () => base44.entities.PriseMandat.list(),
+    initialData: [],
+  });
+  // Valider l'unicité du N° dossier pour "Mandats à ouvrir"
+  const validateNumeroDossier = () => {
+    if (pendingStatutChange !== "Mandats à ouvrir" || !formData.arpenteur_geometre || !newNumeroDossier) {
+      return { valid: true };
+    }
+
+    // Vérifier dans les dossiers existants (Ouvert et Fermé)
+    const existDansDossiers = dossiers.some(d => 
+      d.arpenteur_geometre === formData.arpenteur_geometre && 
+      d.numero_dossier === newNumeroDossier
+    );
+
+    // Vérifier dans les prises de mandat "Mandats à ouvrir"
+    const existDansPriseMandats = priseMandats.some(p => 
+      p.arpenteur_geometre === formData.arpenteur_geometre && 
+      p.statut === "Mandats à ouvrir" && 
+      p.numero_dossier === newNumeroDossier &&
+      p.id !== editingPriseMandat?.id
+    );
+
+    if (existDansDossiers || existDansPriseMandats) {
+      return {
+        valid: false,
+        message: `Le numéro de dossier ${newNumeroDossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`
+      };
+    }
+
+    return { valid: true };
+  };
+
   // Appliquer directement le changement si "Mandats à ouvrir"
   useEffect(() => {
     if (open && pendingStatutChange === "Mandats à ouvrir") {
+      const validation = validateNumeroDossier();
+      if (!validation.valid) {
+        alert(validation.message);
+        onOpenChange(false);
+        return;
+      }
       onOpenChange(false);
       applyStatutChange("Mandats à ouvrir");
     }
