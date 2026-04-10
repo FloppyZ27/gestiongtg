@@ -397,7 +397,7 @@ export default function ClientFormDialog({
     queryFn: () => editingClient?.id ? base44.entities.CommentaireClient.filter({ client_id: editingClient.id }) : [],
     enabled: !!editingClient?.id, initialData: [],
   });
-  const nbCommentaires = commentairesCount.length + commentairesTemporaires.length;
+  const nbCommentaires = (commentairesCount?.length || 0) + (commentairesTemporaires?.length || 0);
 
   const getArpenteurInitials = (arpenteur) => {
     if (!arpenteur) return "";
