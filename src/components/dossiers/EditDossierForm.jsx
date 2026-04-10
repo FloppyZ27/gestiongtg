@@ -23,6 +23,7 @@ import MandatTabs from "./MandatTabs";
 import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
+import FicheMandatButton from "./FicheMandatButton";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -484,38 +485,33 @@ export default function EditDossierForm({
       {/* Header sur toute la largeur */}
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
-        
-        {formData.numero_dossier && formData.arpenteur_geometre && (
-          <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${
-            formData.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
-            formData.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
-            formData.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
-            formData.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
-            formData.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
-            "text-emerald-400"
-          }`}>
-            <span>
-              {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-              {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
-                <span> - {getClientsNames(formData.clients_ids)}</span>
-              )}
-            </span>
-            {formData.mandats && formData.mandats.length > 0 && (
-              <span className="flex gap-1">
-                {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
-                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                    {getAbbreviatedMandatType(m.type_mandat)}
-                  </Badge>
-                ))}
-                {formData.mandats.length > 3 && (
-                  <Badge className="bg-slate-700 text-slate-300 text-xs">
-                    +{formData.mandats.length - 3}
-                  </Badge>
+        <div className="flex items-center gap-3">
+          {formData.numero_dossier && formData.arpenteur_geometre && (
+            <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
+              <span>
+                {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
+                  <span> - {getClientsNames(formData.clients_ids)}</span>
                 )}
               </span>
-            )}
-          </div>
-        )}
+              {formData.mandats && formData.mandats.length > 0 && (
+                <span className="flex gap-1">
+                  {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
+                    <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(m.type_mandat)}
+                    </Badge>
+                  ))}
+                  {formData.mandats.length > 3 && (
+                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                      +{formData.mandats.length - 3}
+                    </Badge>
+                  )}
+                </span>
+              )}
+            </div>
+          )}
+          <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
+        </div>
       </div>
 
       {/* Division avec sidebar de navigation */}
