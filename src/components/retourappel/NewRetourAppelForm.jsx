@@ -251,27 +251,6 @@ export default function NewRetourAppelForm({
 
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
-                <div className="flex items-center gap-1.5 mb-3">
-                  <Checkbox
-                    id="aucunDossier"
-                    checked={aucunDossier}
-                    onCheckedChange={(checked) => {
-                      setAucunDossier(checked);
-                      if (!checked) {
-                        setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
-                        setDossierFound(false);
-                      } else {
-                        setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
-                        setDossierFound(true);
-                        setSelectedArpenteur("");
-                        setSelectedNumeroDossier("");
-                        setSelectedClient("");
-                      }
-                    }}
-                  />
-                  <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer">Aucun dossier</Label>
-                </div>
-
                 {aucunDossier ? (
                   <div className="space-y-3">
                     <div className="space-y-1">
@@ -311,10 +290,31 @@ export default function NewRetourAppelForm({
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-[30%_70%] gap-4">
-                    {/* Colonne gauche - Filtres */}
-                    <div className="space-y-2 border-r border-slate-700 pr-4">
-                      <div className="space-y-1">
+                  <div className="space-y-3">
+                    {/* Ligne de filtres */}
+                    <div className="flex items-end gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <Checkbox
+                          id="aucunDossier"
+                          checked={aucunDossier}
+                          onCheckedChange={(checked) => {
+                            setAucunDossier(checked);
+                            if (!checked) {
+                              setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
+                              setDossierFound(false);
+                            } else {
+                              setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
+                              setDossierFound(true);
+                              setSelectedArpenteur("");
+                              setSelectedNumeroDossier("");
+                              setSelectedClient("");
+                            }
+                          }}
+                        />
+                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
+                      </div>
+
+                      <div className="flex-1 space-y-1">
                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                         <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
@@ -329,7 +329,7 @@ export default function NewRetourAppelForm({
                         </Select>
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="w-32 space-y-1">
                         <Label className="text-slate-400 text-xs">N° de dossier</Label>
                         <Input
                           placeholder="Rechercher..."
@@ -339,7 +339,7 @@ export default function NewRetourAppelForm({
                         />
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="flex-1 space-y-1">
                         <Label className="text-slate-400 text-xs">Client</Label>
                         <Input
                           placeholder="Rechercher..."
@@ -350,9 +350,9 @@ export default function NewRetourAppelForm({
                       </div>
                     </div>
 
-                    {/* Colonne droite - Liste des dossiers */}
+                    {/* Liste des dossiers */}
                     <div className="overflow-hidden flex flex-col">
-                      <p className="text-slate-400 text-xs mb-2">
+                      <p className="text-slate-400 text-xs mb-1">
                         Sélectionner un dossier ({dossiers.filter(d => {
                           const matchesStatut = d.statut === "Ouvert" || d.statut === "Fermé";
                           const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
