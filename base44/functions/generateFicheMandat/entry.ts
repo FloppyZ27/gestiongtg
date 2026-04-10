@@ -1,19 +1,25 @@
-import { jsPDF, AcroFormTextField } from 'npm:jspdf@2.5.1';
+import { PDFDocument, rgb, StandardFonts, PDFName, PDFBool, PDFString } from 'npm:pdf-lib@1.17.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const getArpenteurInitials = (arpenteur) => {
-  const mapping = {
-    "Samuel Guay": "SG", "Dany Gaboury": "DG",
-    "Pierre-Luc Pilote": "PLP", "Benjamin Larouche": "BL", "Frédéric Gilbert": "FG"
-  };
-  return mapping[arpenteur] || "XX";
+  const m = { "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" };
+  return m[arpenteur] || "XX";
 };
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
-  try { return new Date(dateStr + 'T12:00:00').toLocaleDateString('fr-CA'); }
-  catch { return dateStr; }
+const formatDate = (d) => {
+  if (!d) return "";
+  try { return new Date(d + 'T12:00:00').toLocaleDateString('fr-CA'); } catch { return d; }
 };
+
+// Convert mm to points (72pt = 1 inch = 25.4mm)
+const mm = (v) => v * 2.83464566929;
+
+// Colors
+const BLACK = rgb(0,0,0);
+const DARK_BLUE = rgb(0, 0.15, 0.39);
+const GRAY = rgb(0.7, 0.7, 0.7);
+const LIGHT_GRAY = rgb(0.82, 0.82, 0.82);
+const WHITE = rgb(1,1,1);
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -32,341 +38,400 @@ Deno.serve(async (req) => {
     const pdfFileName = `FICHE_MANDAT_${arpInitials}-${dossierNum}.pdf`;
 
     // Fetch logo
-    let logoBase64 = null;
+    let logoBytes = null;
     try {
-      const logoResp = await fetch('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png');
-      if (logoResp.ok) {
-        const buf = await logoResp.arrayBuffer();
-        const u8 = new Uint8Array(buf);
-        let b64 = '';
-        for (let i = 0; i < u8.length; i += 8192) b64 += String.fromCharCode(...u8.subarray(i, i + 8192));
-        logoBase64 = btoa(b64);
-      }
+      const r = await fetch('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png');
+      if (r.ok) logoBytes = new Uint8Array(await r.arrayBuffer());
     } catch(_) {}
 
-    // ── Document setup ──────────────────────────────────────────────────────
-    const doc = new jsPDF({ unit: 'mm', format: 'legal' });
-    const pW = doc.internal.pageSize.getWidth();
-    const pH = doc.internal.pageSize.getHeight();
-    const L = 10, R = pW - 10, W = R - L;
-    const rH = 5.5;
-    const mmToPt = 2.83464566929;
+    // ── Document ───────────────────────────────────────────────────────────
+    const pdfDoc = await PDFDocument.create();
+    pdfDoc.setTitle(pdfFileName);
+    pdfDoc.setAuthor('Girard Tremblay Gilbert Inc.');
 
-    // ── Color helpers ───────────────────────────────────────────────────────
-    const blue  = () => doc.setTextColor(0, 38, 100);   // dark navy blue for pre-filled
-    const black = () => doc.setTextColor(0, 0, 0);
+    const form = pdfDoc.getForm();
 
-    // ── AcroForm text field helper (mm coords, top-left) ────────────────────
-    let fieldIndex = 0;
-    const addTextField = (name, x, y, w, h, value = '', multiline = false) => {
-      try {
-        const field = new AcroFormTextField();
-        field.fieldName = name + '_' + (fieldIndex++);
-        field.fontSize = 8;
-        field.multiline = multiline;
-        const pHpt = pH * mmToPt;
-        field.Rect = [
-          x * mmToPt,
-          pHpt - (y + h) * mmToPt,
-          (x + w) * mmToPt,
-          pHpt - y * mmToPt
-        ];
-        if (value) field.value = value;
-        doc.addField(field);
-      } catch(_) {}
+    // Legal: 8.5" x 14" = 612 x 1008 pt
+    const PW = 612, PH = 1008;
+    const ML = mm(10), MR = mm(10);
+    const W = PW - ML - MR;
+    const L = ML, R = PW - MR;
+    const RH = mm(5.5);
+
+    const page1 = pdfDoc.addPage([PW, PH]);
+    const page2 = pdfDoc.addPage([PW, PH]);
+
+    // Load fonts
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontReg  = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // ── Helper: pdf-lib y = from bottom, we work from top ──────────────────
+    // topY: position from top of page
+    const py = (topY) => PH - topY;
+
+    // ── Drawing helpers ─────────────────────────────────────────────────────
+    const hline = (page, topY, x1 = L, x2 = R, lw = 0.5) => {
+      page.drawLine({ start:{x:x1,y:py(topY)}, end:{x:x2,y:py(topY)}, thickness:lw, color:BLACK });
+    };
+    const vline = (page, x, topY1, topY2, lw = 0.5) => {
+      page.drawLine({ start:{x,y:py(topY1)}, end:{x,y:py(topY2)}, thickness:lw, color:BLACK });
+    };
+    const rect = (page, x, topY, w, h, options = {}) => {
+      page.drawRectangle({ x, y: py(topY + h), width: w, height: h,
+        borderColor: options.noBorder ? undefined : BLACK,
+        borderWidth: options.noBorder ? 0 : (options.bw || 0.5),
+        color: options.fill || undefined,
+        opacity: options.opacity ?? 1,
+      });
     };
 
-    // ── Drawing helpers ──────────────────────────────────────────────────────
-    const T  = () => { doc.setFont('times', 'normal'); };
-    const TB = () => { doc.setFont('times', 'bold'); };
-    const sz = (s) => doc.setFontSize(s);
-    const lw = (w) => doc.setLineWidth(w);
-
-    // Checkbox: center is at (x + size/2, cy)
-    const checkbox = (x, cy, size = 2.8) => {
-      lw(0.3);
-      doc.rect(x, cy - size / 2, size, size);
+    const label = (page, text, x, topY, options = {}) => {
+      const font = options.bold ? fontBold : fontReg;
+      const size = options.size || 8;
+      const color = options.color || BLACK;
+      const tW = font.widthOfTextAtSize(text, size);
+      let tx = x;
+      if (options.align === 'center') tx = x - tW / 2;
+      else if (options.align === 'right') tx = x - tW;
+      page.drawText(text, { x: tx, y: py(topY) - size * 0.35, font, size, color });
     };
 
-    const sectionBar = (title, x, y, w, h = 5) => {
-      doc.setFillColor(180, 180, 180);
-      doc.rect(x, y, w, h, 'FD');
-      TB(); sz(9); black();
-      doc.text(title, x + w / 2, y + h / 2, { align: 'center', baseline: 'middle' });
-      T(); sz(9);
+    const sectionBar = (page, title, x, topY, w, h = mm(5)) => {
+      rect(page, x, topY, w, h, { fill: LIGHT_GRAY });
+      label(page, title, x + w/2, topY + h/2 + mm(1), { bold:true, size:9, align:'center' });
     };
 
-    const hline = (y) => { lw(0.3); doc.line(L, y, R, y); };
-    const vline = (x, y1, y2) => { lw(0.3); doc.line(x, y1, x, y2); };
+    const checkbox = (page, x, topY, size = mm(2.8)) => {
+      rect(page, x, topY, size, size, { bw: 0.5 });
+    };
 
-    // ── PAGE 1 ──────────────────────────────────────────────────────────────
-    T(); sz(7); black();
-    doc.text('Rév. 13    Date : 2 juin 2022', L, 7.5);
+    // ── AcroForm text field helper ──────────────────────────────────────────
+    // x, topY: top-left in our coordinate system
+    // DA = default appearance string required by PDF spec
+    const DA_STRING = '/Helv 8 Tf 0 0 0 rg';
 
-    lw(0.5);
-    doc.rect(L, 9, W, pH - 16);
-    lw(0.3);
+    const addField = (name, page, x, topY, w, h, value = '', options = {}) => {
+      const field = form.createTextField(name);
+      if (value) field.setText(value);
+      if (options.multiline) field.enableMultiline();
+      // Set /DA directly on the acroField dict to avoid the missing DA error
+      field.acroField.dict.set(PDFName.of('DA'), PDFString.of(DA_STRING));
+      field.addToPage(page, {
+        x, y: py(topY + h), width: w, height: h,
+        borderWidth: 0, borderColor: rgb(1,1,1), backgroundColor: rgb(1,1,1),
+      });
+    };
+
+    // ────────────────────────────────────────────────────────────────────────
+    // PAGE 1
+    // ────────────────────────────────────────────────────────────────────────
+    const p = page1;
+
+    // Footer
+    label(p, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
+
+    // Outer border
+    rect(p, L, mm(9), W, PH - mm(9) - mm(7), { bw: 1.5 });
 
     // ── HEADER ──────────────────────────────────────────────────────────────
-    const hdrH = 15;
-    hline(9 + hdrH);
-    if (logoBase64) doc.addImage('data:image/png;base64,' + logoBase64, 'PNG', L + 1, 9.5, 11, 13);
-    TB(); sz(10.5); black();
-    doc.text('Girard Tremblay Gilbert Inc.', L + 14, 9 + hdrH / 2, { baseline: 'middle' });
-    TB(); sz(24);
-    doc.text('FICHE MANDAT', R - 2, 9 + hdrH / 2, { align: 'right', baseline: 'middle' });
-    T(); sz(9);
+    let y = mm(9);
+    const hdrH = mm(15);
 
-    // ── DATE MANDAT / N° DOSSIER ─────────────────────────────────────────────
-    let y = 9 + hdrH;
-    const half = W / 2;
-    const mid = (rowY) => rowY + rH / 2;
+    if (logoBytes) {
+      try {
+        const img = await pdfDoc.embedPng(logoBytes);
+        p.drawImage(img, { x: L + mm(1), y: py(y + hdrH) + mm(1), width: mm(11), height: mm(13) });
+      } catch(_) {}
+    }
 
-    hline(y + rH);
-    vline(L + half, y, y + rH);
-    TB(); sz(8.5); black();
-    doc.text('Date du mandat :', L + 1.5, mid(y), { baseline: 'middle' });
+    label(p, 'Girard Tremblay Gilbert Inc.', L + mm(14), y + mm(8.5), { bold:true, size:10.5 });
+    label(p, 'FICHE MANDAT', R - mm(2), y + mm(9), { bold:true, size:24, align:'right' });
+    hline(p, y + hdrH, L, R, 1);
+
+    y += hdrH;
+    const HALF = W / 2;
+
+    // ── DATE MANDAT / DOSSIER ────────────────────────────────────────────────
+    hline(p, y + RH);
+    vline(p, L + HALF, y, y + RH);
+    label(p, 'Date du mandat :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    label(p, `Numéro de dossier : ${arpInitials}-`, L + HALF + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+
     const dateMandat = formatDate(dossierData.date_ouverture);
-    if (dateMandat) { blue(); T(); sz(9); doc.text(dateMandat, L + 29, mid(y), { baseline: 'middle' }); black(); }
-    addTextField('date_mandat', L + 29, y, half - 30, rH, dateMandat);
-    TB(); sz(8.5);
-    doc.text(`Numéro de dossier : ${arpInitials}-`, L + half + 1.5, mid(y), { baseline: 'middle' });
-    if (dossierNum) { blue(); T(); sz(9); doc.text(dossierNum, L + half + 43, mid(y), { baseline: 'middle' }); black(); }
-    addTextField('numero_dossier', L + half + 43, y, half - 44, rH, dossierNum);
-    y += rH;
+    addField('date_mandat', p, L + mm(29), y + mm(0.5), HALF - mm(30), RH - mm(1), dateMandat);
+
+    const numAfterInitX = L + HALF + mm(1.5) + fontBold.widthOfTextAtSize(`Numéro de dossier : ${arpInitials}-`, 8);
+    addField('numero_dossier', p, numAfterInitX + mm(1), y + mm(0.5), R - numAfterInitX - mm(2), RH - mm(1), dossierNum);
+    y += RH;
 
     // ── DATE LIVRAISON ───────────────────────────────────────────────────────
-    hline(y + rH);
-    vline(L + half, y, y + rH);
-    TB(); sz(8.5); black();
-    doc.text('Date de livraison :', L + 1.5, mid(y), { baseline: 'middle' });
+    hline(p, y + RH);
+    vline(p, L + HALF, y, y + RH);
+    label(p, 'Date de livraison :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+
     const dateLiv = formatDate(mandat.date_livraison);
-    if (dateLiv) { blue(); T(); sz(9); doc.text(dateLiv, L + 30, mid(y), { baseline: 'middle' }); black(); }
-    addTextField('date_livraison', L + 30, y, half - 31, rH, dateLiv);
+    addField('date_livraison', p, L + mm(29), y + mm(0.5), HALF - mm(30), RH - mm(1), dateLiv);
+
     // FLEXIBLE / STRICTE
-    T(); sz(9); black();
-    const fxBase = L + half + 2;
-    checkbox(fxBase, mid(y)); TB(); doc.text('FLEXIBLE', fxBase + 4.5, mid(y), { baseline: 'middle' });
-    const stBase = L + half + half * 0.52;
-    checkbox(stBase, mid(y)); doc.text('STRICTE', stBase + 4.5, mid(y), { baseline: 'middle' });
-    T(); sz(9);
-    y += rH;
+    const fxX = L + HALF + mm(2);
+    checkbox(p, fxX, y + RH/2 - mm(1.4));
+    label(p, 'FLEXIBLE', fxX + mm(4), y + RH/2 + mm(1.2), { bold:true, size:8.5 });
+    const stX = L + HALF + HALF * 0.52;
+    checkbox(p, stX, y + RH/2 - mm(1.4));
+    label(p, 'STRICTE', stX + mm(4), y + RH/2 + mm(1.2), { bold:true, size:8.5 });
+    y += RH;
 
     // ── TYPE D'ARPENTAGE ─────────────────────────────────────────────────────
-    const typeH = 11;
-    hline(y + typeH);
-    TB(); sz(8.5); black();
-    doc.text("Type d'arpentage :", L + 1.5, y + 3.5, { baseline: 'middle' });
+    const typeH = mm(11);
+    hline(p, y + typeH);
+    label(p, "Type d'arpentage :", L + mm(1.5), y + mm(4.5), { bold:true, size:8 });
 
-    const row1 = [['CL', 'CL'], ['DT', 'DT'], ['PIQ', 'PIQ'], ['LOTIS', 'LOTIS'], ['AUT ___', null]];
-    const row2 = [['IMP *', 'IMP'], ['OCTR', 'OCTR'], ['LEVÉ', 'LEVÉ'], ['BORN', 'BORN']];
-    const colStep = (W - 32) / 5;
-    T(); sz(8.5); black();
-    let cx = L + 32;
-    for (const [label] of row1) { checkbox(cx, y + 3.5); doc.text(label, cx + 4.5, y + 3.5, { baseline: 'middle' }); cx += colStep; }
-    cx = L + 32;
-    for (const [label] of row2) { checkbox(cx, y + 8.5); doc.text(label, cx + 4.5, y + 8.5, { baseline: 'middle' }); cx += colStep; }
-    T(); sz(9);
+    const row1 = ['CL','DT','PIQ','LOTIS','AUT ___'];
+    const row2 = ['IMP *','OCTR','LEVÉ','BORN'];
+    const colStep = (W - mm(32)) / 5;
+    let cx = L + mm(32);
+    for (const lbl of row1) {
+      checkbox(p, cx, y + mm(2), mm(2.8));
+      label(p, lbl, cx + mm(4.5), y + mm(4), { size:8 });
+      cx += colStep;
+    }
+    cx = L + mm(32);
+    for (const lbl of row2) {
+      checkbox(p, cx, y + mm(7), mm(2.8));
+      label(p, lbl, cx + mm(4.5), y + mm(9), { size:8 });
+      cx += colStep;
+    }
     y += typeH;
 
     // ── CLIENT(S) ────────────────────────────────────────────────────────────
-    sectionBar('CLIENT(S)', L, y, W);
-    y += 5;
+    sectionBar(p, 'CLIENT(S)', L, y, W);
+    y += mm(5);
 
     const client = clientsData?.[0] || {};
-    const clientNom = `${client.prenom || ''} ${client.nom || ''}`.trim();
-    const clientTelCell = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || '';
-    const clientTelTravail = client.telephones?.find(t => !t.actuel)?.telephone || '';
-    const clientEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || '';
-    const clientAddr = client.adresses?.find(a => a.actuelle) || client.adresses?.[0] || {};
-    const cDiv = L + half;
+    const clientNom = `${client.prenom||''} ${client.nom||''}`.trim();
+    const clientCell = client.telephones?.find(t=>t.actuel)?.telephone || client.telephones?.[0]?.telephone || '';
+    const clientTravail = client.telephones?.find(t=>!t.actuel)?.telephone || '';
+    const clientEmail = client.courriels?.find(c=>c.actuel)?.courriel || client.courriels?.[0]?.courriel || '';
+    const clientAddr = client.adresses?.find(a=>a.actuelle) || client.adresses?.[0] || {};
+    const cDiv = L + HALF;
 
-    const clientRows = [
-      ['Nom(s) :', clientNom, 22, 'Cellulaire :', clientTelCell, 23],
-      ['', '', 0, 'Travail :', clientTelTravail, 19],
-      ['Adresse :', clientAddr.rue || '', 18, 'Maison :', '', 19],
-      ['Municipalité :', clientAddr.ville || '', 24, 'Autre :', '', 17],
-      ['Code postal :', clientAddr.code_postal || '', 23, '', '', 0],
-    ];
+    // Nom | Cellulaire
+    hline(p, y + RH); vline(p, cDiv, y, y + RH);
+    label(p, 'Nom(s) :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    label(p, 'Cellulaire :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_nom', p, L + mm(17), y + mm(0.5), cDiv - L - mm(18), RH - mm(1), clientNom);
+    addField('client_cell', p, cDiv + mm(22), y + mm(0.5), R - cDiv - mm(23), RH - mm(1), clientCell);
+    y += RH;
 
-    for (const [lL, vL, offL, lR, vR, offR] of clientRows) {
-      hline(y + rH); vline(cDiv, y, y + rH);
-      if (lL) { TB(); sz(8.5); black(); doc.text(lL, L + 1.5, mid(y), { baseline: 'middle' }); }
-      if (vL) { blue(); T(); sz(9); doc.text(vL, L + offL, mid(y), { baseline: 'middle' }); black(); }
-      if (vL !== undefined) addTextField('client_' + lL, L + offL, y + 0.5, cDiv - L - offL - 1, rH - 1, vL);
-      if (lR) { TB(); sz(8.5); black(); doc.text(lR, cDiv + 1.5, mid(y), { baseline: 'middle' }); }
-      if (vR) { blue(); T(); sz(9); doc.text(vR, cDiv + offR, mid(y), { baseline: 'middle' }); black(); }
-      if (lR) addTextField('client_r_' + lR, cDiv + offR, y + 0.5, R - cDiv - offR - 1, rH - 1, vR);
-      T(); sz(9);
-      y += rH;
-    }
+    // blank | Travail
+    hline(p, y + RH); vline(p, cDiv, y, y + RH);
+    label(p, 'Travail :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_travail', p, cDiv + mm(17), y + mm(0.5), R - cDiv - mm(18), RH - mm(1), clientTravail);
+    y += RH;
+
+    // Adresse | Maison
+    hline(p, y + RH); vline(p, cDiv, y, y + RH);
+    label(p, 'Adresse :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    label(p, 'Maison :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_adresse', p, L + mm(18), y + mm(0.5), cDiv - L - mm(19), RH - mm(1), clientAddr.rue || '');
+    addField('client_maison', p, cDiv + mm(18), y + mm(0.5), R - cDiv - mm(19), RH - mm(1));
+    y += RH;
+
+    // Municipalité | Autre
+    hline(p, y + RH); vline(p, cDiv, y, y + RH);
+    label(p, 'Municipalité :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    label(p, 'Autre :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_ville', p, L + mm(23), y + mm(0.5), cDiv - L - mm(24), RH - mm(1), clientAddr.ville || '');
+    addField('client_autre', p, cDiv + mm(14), y + mm(0.5), R - cDiv - mm(15), RH - mm(1));
+    y += RH;
+
+    // Code postal
+    hline(p, y + RH); vline(p, cDiv, y, y + RH);
+    label(p, 'Code postal :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_cp', p, L + mm(22), y + mm(0.5), cDiv - L - mm(23), RH - mm(1), clientAddr.code_postal || '');
+    y += RH;
+
     // Courriel
-    hline(y + rH);
-    TB(); sz(8.5); black(); doc.text('Courriel :', L + 1.5, mid(y), { baseline: 'middle' });
-    if (clientEmail) { blue(); T(); sz(9); doc.text(clientEmail, L + 18, mid(y), { baseline: 'middle' }); black(); }
-    addTextField('courriel', L + 18, y + 0.5, W - 19, rH - 1, clientEmail);
-    y += rH;
+    hline(p, y + RH);
+    label(p, 'Courriel :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('client_courriel', p, L + mm(18), y + mm(0.5), W - mm(19), RH - mm(1), clientEmail);
+    y += RH;
 
     // ── LOCALISATION / FICHIER ───────────────────────────────────────────────
     const locW = W * 0.54, noteW = W - locW;
-    sectionBar('LOCALISATION DES TRAVAUX', L, y, locW);
-    sectionBar('FICHIER :', L + locW, y, noteW);
-    y += 5;
+    sectionBar(p, 'LOCALISATION DES TRAVAUX', L, y, locW);
+    sectionBar(p, 'FICHIER :', L + locW, y, noteW);
+    y += mm(5);
 
     const addrT = mandat.adresse_travaux || {};
-    const addrStr = [(addrT.numeros_civiques || []).filter(Boolean).join(', '), addrT.rue].filter(Boolean).join(' ');
-    const lotsStr = (mandat.lots || []).join(', ') || mandat.lots_texte || '';
-    const locH = rH * 7;
-    lw(0.3);
-    doc.rect(L, y, locW, locH);
-    doc.rect(L + locW, y, noteW, locH);
+    const addrStr = [(addrT.numeros_civiques||[]).filter(Boolean).join(', '), addrT.rue].filter(Boolean).join(' ');
+    const lotsStr = (mandat.lots||[]).join(', ') || mandat.lots_texte || '';
 
-    TB(); sz(9); black();
-    doc.text('NOTES', L + locW + noteW / 2, y + 3.5, { align: 'center', baseline: 'middle' });
-    hline(y + 5);
-    addTextField('notes', L + locW + 1, y + 6, noteW - 2, locH - 7, '', true);
+    const locH = RH * 7;
+    rect(p, L, y, locW, locH, { bw: 0.5 });
+    rect(p, L + locW, y, noteW, locH, { bw: 0.5 });
+    label(p, 'NOTES', L + locW + noteW/2, y + mm(4), { bold:true, size:9, align:'center' });
+    hline(p, y + mm(5), L + locW, R);
 
-    const locRows = [['Adresse :', addrStr, 18], ['Municipalité :', addrT.ville || '', 24], ['Code postal :', addrT.code_postal || '', 23]];
+    // Notes field
+    addField('notes', p, L + locW + mm(1), y + mm(5.5), noteW - mm(2), locH - mm(6), '', { multiline: true });
+
+    // Localisation rows
     let ly = y;
-    for (const [label, val, off] of locRows) {
-      hline(ly + rH);
-      TB(); sz(8.5); black(); doc.text(label, L + 1.5, mid(ly), { baseline: 'middle' });
-      if (val) { blue(); T(); sz(9); doc.text(val, L + off, mid(ly), { baseline: 'middle' }); black(); }
-      addTextField('loc_' + label, L + off, ly + 0.5, locW - off - 1, rH - 1, val);
-      ly += rH;
-    }
-    hline(ly + rH);
-    checkbox(L + 1.5, mid(ly)); T(); sz(8); black();
-    doc.text("Identique à l'adresse contact", L + 5.5, mid(ly), { baseline: 'middle' });
-    ly += rH;
-    hline(ly + rH);
-    checkbox(L + 1.5, mid(ly));
-    doc.text('Litige avec voisin', L + 5.5, mid(ly), { baseline: 'middle' });
-    ly += rH;
-    TB(); sz(8.5); black(); doc.text('Lots :', L + 1.5, mid(ly), { baseline: 'middle' });
-    if (lotsStr) { blue(); T(); sz(9); doc.text(lotsStr, L + 12, mid(ly), { baseline: 'middle' }); black(); }
-    addTextField('lots', L + 12, ly + 0.5, locW - 13, rH - 1, lotsStr);
+    hline(p, ly + RH, L, L + locW);
+    label(p, 'Adresse :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('loc_adresse', p, L + mm(18), ly + mm(0.5), locW - mm(19), RH - mm(1), addrStr);
+    ly += RH;
+    hline(p, ly + RH, L, L + locW);
+    label(p, 'Municipalité :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('loc_ville', p, L + mm(23), ly + mm(0.5), locW - mm(24), RH - mm(1), addrT.ville || '');
+    ly += RH;
+    hline(p, ly + RH, L, L + locW);
+    label(p, 'Code postal :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('loc_cp', p, L + mm(22), ly + mm(0.5), locW - mm(23), RH - mm(1), addrT.code_postal || '');
+    ly += RH;
+    hline(p, ly + RH, L, L + locW);
+    checkbox(p, L + mm(1.5), ly + RH/2 - mm(1.4));
+    label(p, "Identique à l'adresse contact", L + mm(6), ly + RH/2 + mm(1.2), { size:8 });
+    ly += RH;
+    hline(p, ly + RH, L, L + locW);
+    checkbox(p, L + mm(1.5), ly + RH/2 - mm(1.4));
+    label(p, 'Litige avec voisin', L + mm(6), ly + RH/2 + mm(1.2), { size:8 });
+    ly += RH;
+    label(p, 'Lots :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('lots', p, L + mm(12), ly + mm(0.5), locW - mm(13), RH - mm(1), lotsStr);
 
     y += locH;
 
     // ── INTERVENANTS ──────────────────────────────────────────────────────────
-    sectionBar('INTERVENANTS', L, y, W);
-    y += 5;
+    sectionBar(p, 'INTERVENANTS', L, y, W);
+    y += mm(5);
 
     const notaire = notairesData?.[0] || {};
-    const notaireNom = `${notaire.prenom || ''} ${notaire.nom || ''}`.trim();
+    const notaireNom = `${notaire.prenom||''} ${notaire.nom||''}`.trim();
 
-    for (const [label, val] of [['Notaire :', notaireNom], ['Courtier :', ''], ['Autre :', '']]) {
-      hline(y + rH);
-      TB(); sz(8.5); black(); doc.text(label, L + 1.5, mid(y), { baseline: 'middle' });
-      if (val) { blue(); T(); sz(9); doc.text(val, L + 18, mid(y), { baseline: 'middle' }); black(); }
-      addTextField('interv_' + label, L + 18, y + 0.5, W - 19, rH - 1, val);
-      y += rH;
+    for (const [lbl, val] of [['Notaire :', notaireNom], ['Courtier :', ''], ['Autre :', '']]) {
+      hline(p, y + RH);
+      label(p, lbl, L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+      addField('interv_'+lbl, p, L + mm(18), y + mm(0.5), W - mm(19), RH - mm(1), val);
+      y += RH;
     }
 
-    hline(y + rH);
-    TB(); sz(8.5); black(); doc.text('Mandant :', L + 1.5, mid(y), { baseline: 'middle' });
-    checkbox(L + 19, mid(y)); T(); sz(8.5); doc.text('Identique client', L + 23, mid(y), { baseline: 'middle' });
-    checkbox(L + 52, mid(y)); doc.text('Autre :', L + 56, mid(y), { baseline: 'middle' });
-    addTextField('mandant_autre', L + 66, y + 0.5, W - 67, rH - 1);
-    y += rH;
+    hline(p, y + RH);
+    label(p, 'Mandant :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    checkbox(p, L + mm(19), y + RH/2 - mm(1.4));
+    label(p, 'Identique client', L + mm(23), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    checkbox(p, L + mm(52), y + RH/2 - mm(1.4));
+    label(p, 'Autre :', L + mm(56), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('mandant_autre', p, L + mm(66), y + mm(0.5), W - mm(67), RH - mm(1));
+    y += RH;
 
-    hline(y + rH);
-    TB(); sz(8.5); black(); doc.text('Propriétaire :', L + 1.5, mid(y), { baseline: 'middle' });
-    checkbox(L + 22, mid(y)); T(); sz(8.5); doc.text('Identique client', L + 26, mid(y), { baseline: 'middle' });
-    checkbox(L + 55, mid(y)); doc.text('Autre :', L + 59, mid(y), { baseline: 'middle' });
-    addTextField('proprio_autre', L + 69, y + 0.5, W - 70, rH - 1);
-    y += rH;
+    hline(p, y + RH);
+    label(p, 'Propriétaire :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    checkbox(p, L + mm(22), y + RH/2 - mm(1.4));
+    label(p, 'Identique client', L + mm(26), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    checkbox(p, L + mm(55), y + RH/2 - mm(1.4));
+    label(p, 'Autre :', L + mm(59), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('proprio_autre', p, L + mm(69), y + mm(0.5), W - mm(70), RH - mm(1));
+    y += RH;
 
     // ── LIVRAISON ─────────────────────────────────────────────────────────────
-    sectionBar('LIVRAISON', L, y, W);
-    y += 5;
+    sectionBar(p, 'LIVRAISON', L, y, W);
+    y += mm(5);
 
-    hline(y + rH);
-    TB(); sz(8.5); black(); doc.text('Date de signature:', L + 1.5, mid(y), { baseline: 'middle' });
+    hline(p, y + RH);
+    label(p, 'Date de signature:', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
     const dateSig = formatDate(mandat.date_signature);
-    if (dateSig) { blue(); T(); sz(9); doc.text(dateSig, L + 30, mid(y), { baseline: 'middle' }); black(); }
-    addTextField('date_signature', L + 30, y + 0.5, W - 31, rH - 1, dateSig);
-    y += rH;
+    addField('date_signature', p, L + mm(30), y + mm(0.5), W - mm(31), RH - mm(1), dateSig);
+    y += RH;
 
     // EN MAIN PROPRE | DOCUMENTS | FACTURE
-    const mpW = W * 0.19, docsW = W * 0.50, factW = W - mpW - docsW, barH = 5;
-    sectionBar('EN MAIN PROPRE :', L, y, mpW, barH);
-    checkbox(L + mpW - 5, y + barH / 2, 2.8);
-    sectionBar('DOCUMENTS', L + mpW, y, docsW, barH);
-    sectionBar('FACTURE', L + mpW + docsW, y, factW, barH);
+    const mpW = W * 0.19, docsW = W * 0.50, factW = W - mpW - docsW, barH = mm(5);
+    sectionBar(p, 'EN MAIN PROPRE :', L, y, mpW, barH);
+    checkbox(p, L + mpW - mm(5), y + barH/2 - mm(1.4));
+    sectionBar(p, 'DOCUMENTS', L + mpW, y, docsW, barH);
+    sectionBar(p, 'FACTURE', L + mpW + docsW, y, factW, barH);
     y += barH;
 
-    for (const rowLabel of ['Client', 'Notaire', 'Courtier', 'Aut. :']) {
-      hline(y + rH);
-      vline(L + mpW, y, y + rH);
-      vline(L + mpW + docsW, y, y + rH);
-      TB(); sz(8.5); black();
-      doc.text(rowLabel, L + mpW - 1.5, mid(y), { align: 'right', baseline: 'middle' });
-      T(); sz(8); black();
-      let dx = L + mpW + 3;
-      for (const opt of ['Poste', 'Courriel']) {
-        checkbox(dx, mid(y)); doc.text(opt, dx + 4.5, mid(y), { baseline: 'middle' }); dx += 26;
+    for (const rowLbl of ['Client','Notaire','Courtier','Aut. :']) {
+      hline(p, y + RH);
+      vline(p, L + mpW, y, y + RH);
+      vline(p, L + mpW + docsW, y, y + RH);
+      const lblW = fontBold.widthOfTextAtSize(rowLbl, 8);
+      label(p, rowLbl, L + mpW - mm(1.5) - lblW, y + RH/2 + mm(1.2), { bold:true, size:8 });
+      let dx = L + mpW + mm(3);
+      for (const opt of ['Poste','Courriel']) {
+        checkbox(p, dx, y + RH/2 - mm(1.4));
+        label(p, opt, dx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); dx += mm(26);
       }
-      dx = L + mpW + docsW + 2;
-      for (const opt of ['Papier', 'Courriel']) {
-        checkbox(dx, mid(y)); doc.text(opt, dx + 4.5, mid(y), { baseline: 'middle' }); dx += 26;
+      dx = L + mpW + docsW + mm(2);
+      for (const opt of ['Papier','Courriel']) {
+        checkbox(p, dx, y + RH/2 - mm(1.4));
+        label(p, opt, dx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); dx += mm(26);
       }
-      y += rH;
+      y += RH;
     }
 
     // ── PRIX ──────────────────────────────────────────────────────────────────
-    sectionBar('PRIX', L, y, W);
-    y += 5;
+    sectionBar(p, 'PRIX', L, y, W);
+    y += mm(5);
 
-    const pCols = [W * 0.26, W * 0.12, W * 0.12, W * 0.12];
+    const pCols = [W*0.26, W*0.12, W*0.12, W*0.12];
     const pRightX = L + pCols[0] + pCols[1] + pCols[2] + pCols[3];
     const pRightW = R - pRightX;
     const rightBlockRows = 5;
-    const rightBlockH = rH * rightBlockRows;
+    const rightBlockH = RH * rightBlockRows;
 
-    // Header row
+    // Header
     let px = L;
-    for (const [h, w] of [['Opération', pCols[0]], ['Prix', pCols[1]], ['Rabais', pCols[2]], ['Total', pCols[3]]]) {
-      doc.rect(px, y, w, rH);
-      TB(); sz(8.5); black(); doc.text(h, px + w / 2, mid(y), { align: 'center', baseline: 'middle' });
+    for (const [h, w] of [['Opération',pCols[0]],['Prix',pCols[1]],['Rabais',pCols[2]],['Total',pCols[3]]]) {
+      rect(p, px, y, w, RH, { bw: 0.5 });
+      label(p, h, px + w/2, y + RH/2 + mm(1.2), { bold:true, size:8.5, align:'center' });
       px += w;
     }
 
-    // Right block - draw outer rect and internal lines
-    doc.rect(pRightX, y, pRightW, rightBlockH);
-    for (let ri = 1; ri < rightBlockRows; ri++) hline(y + rH * ri); // not ideal but needed
+    // Right block
+    rect(p, pRightX, y, pRightW, rightBlockH, { bw: 0.5 });
 
-    // Right block rows - aligned properly
-    T(); sz(8); black();
+    // Right block row lines
+    for (let ri = 1; ri < rightBlockRows; ri++) {
+      hline(p, y + RH * ri, pRightX, R);
+    }
 
-    // Row 1: Taxes
+    // Right block content
     let ry = y;
-    doc.text('Taxes :', pRightX + 1.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 14, mid(ry)); doc.text('Non-Incluses', pRightX + 18, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 40, mid(ry)); doc.text('Incluses', pRightX + 44, mid(ry), { baseline: 'middle' });
-    ry += rH;
-    // Row 2: Frais dépôt
-    doc.text('Frais dépôt :', pRightX + 1.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 21, mid(ry)); doc.text('Oui', pRightX + 25.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 34, mid(ry)); doc.text('Non', pRightX + 38.5, mid(ry), { baseline: 'middle' });
-    ry += rH;
-    // Row 3: Frais ouvert
-    doc.text('Frais ouvert :', pRightX + 1.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 22, mid(ry)); doc.text('Oui', pRightX + 26.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 35, mid(ry)); doc.text('Non', pRightX + 39.5, mid(ry), { baseline: 'middle' });
-    ry += rH;
-    // Row 4: Modalités
-    TB(); sz(8); doc.text('Modalités :', pRightX + 1.5, mid(ry), { baseline: 'middle' });
-    addTextField('modalites', pRightX + 18, ry + 0.5, pRightW - 19, rH - 1);
-    ry += rH;
-    // Row 5: Piquetage suggéré
-    T(); sz(8);
-    doc.text('*Piquetage suggéré :', pRightX + 1.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 30, mid(ry)); doc.text('Oui', pRightX + 34.5, mid(ry), { baseline: 'middle' });
-    checkbox(pRightX + 43, mid(ry)); doc.text('Non', pRightX + 47.5, mid(ry), { baseline: 'middle' });
+    label(p, 'Taxes :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(14), ry + RH/2 - mm(1.4));
+    label(p, 'Non-Incluses', pRightX + mm(18), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(40), ry + RH/2 - mm(1.4));
+    label(p, 'Incluses', pRightX + mm(44), ry + RH/2 + mm(1.2), { size:8 });
+    ry += RH;
 
-    y += rH;
+    label(p, 'Frais dépôt :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(21), ry + RH/2 - mm(1.4));
+    label(p, 'Oui', pRightX + mm(25.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(34), ry + RH/2 - mm(1.4));
+    label(p, 'Non', pRightX + mm(38.5), ry + RH/2 + mm(1.2), { size:8 });
+    ry += RH;
+
+    label(p, 'Frais ouvert :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(22), ry + RH/2 - mm(1.4));
+    label(p, 'Oui', pRightX + mm(26.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(35), ry + RH/2 - mm(1.4));
+    label(p, 'Non', pRightX + mm(39.5), ry + RH/2 + mm(1.2), { size:8 });
+    ry += RH;
+
+    label(p, 'Modalités :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('modalites', p, pRightX + mm(19), ry + mm(0.5), pRightW - mm(20), RH - mm(1));
+    ry += RH;
+
+    label(p, '*Piquetage suggéré :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(30), ry + RH/2 - mm(1.4));
+    label(p, 'Oui', pRightX + mm(34.5), ry + RH/2 + mm(1.2), { size:8 });
+    checkbox(p, pRightX + mm(43), ry + RH/2 - mm(1.4));
+    label(p, 'Non', pRightX + mm(47.5), ry + RH/2 + mm(1.2), { size:8 });
+
+    y += RH;
 
     // Mandat data rows
     const mandats = dossierData.mandats?.length ? dossierData.mandats : [mandat];
@@ -375,149 +440,152 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < totalRows; i++) {
       const m = dataRows[i] || null;
-      const total = m ? ((m.prix_estime || 0) - (m.rabais || 0)) : 0;
+      const total = m ? ((m.prix_estime||0) - (m.rabais||0)) : 0;
       px = L;
       const vals = [
-        [m?.type_mandat || '', pCols[0]],
+        [m?.type_mandat||'', pCols[0]],
         [m?.prix_estime ? `${Number(m.prix_estime).toFixed(2)} $` : '', pCols[1]],
         [m?.rabais ? `${Number(m.rabais).toFixed(2)} $` : '', pCols[2]],
         [total > 0 ? `${total.toFixed(2)} $` : '', pCols[3]]
       ];
       for (const [val, w] of vals) {
-        doc.rect(px, y, w, rH);
-        if (val) { blue(); T(); sz(8); doc.text(String(val), px + 1.5, mid(y), { baseline: 'middle' }); black(); }
-        addTextField(`prix_r${i}_${px}`, px + 0.5, y + 0.5, w - 1, rH - 1, val);
+        rect(p, px, y, w, RH, { bw: 0.5 });
+        addField(`prix_r${i}_c${px.toFixed(0)}`, p, px + mm(0.5), y + mm(0.5), w - mm(1), RH - mm(1), val);
         px += w;
       }
-      y += rH;
+      y += RH;
     }
 
     // Total row
     px = L;
-    const grandTotal = mandats.reduce((s, m) => s + ((m?.prix_estime || 0) - (m?.rabais || 0)), 0);
-    for (const [val, w, bold] of [
-      ['', pCols[0], false], ['', pCols[1], false],
-      ['Total', pCols[2], true],
-      [grandTotal > 0 ? `${grandTotal.toFixed(2)} $` : '', pCols[3], false]
-    ]) {
-      doc.rect(px, y, w, rH);
-      if (bold) { TB(); sz(8.5); black(); doc.text(val, px + w / 2, mid(y), { align: 'center', baseline: 'middle' }); }
-      else if (val) { blue(); T(); sz(8); doc.text(val, px + 1.5, mid(y), { baseline: 'middle' }); black(); }
+    const grandTotal = mandats.reduce((s, m) => s + ((m?.prix_estime||0) - (m?.rabais||0)), 0);
+    for (const [val, w, bold] of [['',pCols[0],false],['',pCols[1],false],['Total',pCols[2],true],[grandTotal > 0 ? `${grandTotal.toFixed(2)} $` : '',pCols[3],false]]) {
+      rect(p, px, y, w, RH, { bw: 0.5 });
+      if (bold) label(p, val, px + w/2, y + RH/2 + mm(1.2), { bold:true, size:8.5, align:'center' });
+      else if (val) {
+        label(p, val, px + mm(1.5), y + RH/2 + mm(1.2), { size:8, color: DARK_BLUE });
+      }
       px += w;
     }
-    y += rH;
+    y += RH;
 
     // ── RÉFÉRENCE ─────────────────────────────────────────────────────────────
-    sectionBar('RÉFÉRENCE', L, y, W);
-    y += 5;
+    sectionBar(p, 'RÉFÉRENCE', L, y, W);
+    y += mm(5);
 
-    const refs1 = ['Courtier', 'Notaire', 'Connaissance', 'Site Web', 'Bouche à oreille'];
-    const refs2 = ['Bottin', 'Publicité', 'Réseaux sociaux', 'Greffe', 'Club sociaux/BNI'];
-    const refs3 = ['Magasineux', 'Anc. Client', 'Autre ___________________________'];
+    const refs1 = ['Courtier','Notaire','Connaissance','Site Web','Bouche à oreille'];
+    const refs2 = ['Bottin','Publicité','Réseaux sociaux','Greffe','Club sociaux/BNI'];
+    const refs3 = ['Magasineux','Anc. Client','Autre ___________________________'];
 
-    doc.rect(L, y, W, rH * 3);
-    hline(y + rH); hline(y + rH * 2);
-    T(); sz(8); black();
+    rect(p, L, y, W, RH * 3, { bw: 0.5 });
+    hline(p, y + RH); hline(p, y + RH * 2);
 
     const refStep = W / 5;
-    let rx = L + 1.5;
-    for (const r of refs1) { checkbox(rx, mid(y)); doc.text(r, rx + 4.5, mid(y), { baseline: 'middle' }); rx += refStep; }
-    rx = L + 1.5;
-    for (const r of refs2) { checkbox(rx, mid(y + rH)); doc.text(r, rx + 4.5, mid(y + rH), { baseline: 'middle' }); rx += refStep; }
-    rx = L + 1.5;
-    for (const r of refs3) { checkbox(rx, mid(y + rH * 2)); doc.text(r, rx + 4.5, mid(y + rH * 2), { baseline: 'middle' }); rx += refStep; }
-    y += rH * 3;
+    let rx = L + mm(1.5);
+    for (const r of refs1) { checkbox(p, rx, y + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
+    rx = L + mm(1.5);
+    for (const r of refs2) { checkbox(p, rx, y + RH*1 + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
+    rx = L + mm(1.5);
+    for (const r of refs3) { checkbox(p, rx, y + RH*2 + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH*2 + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
+    y += RH * 3;
 
     // ── VALIDATION DES OBSERVATIONS ───────────────────────────────────────────
-    sectionBar('VALIDATION DES OBSERVATIONS', L, y, W);
-    y += 5;
+    sectionBar(p, 'VALIDATION DES OBSERVATIONS', L, y, W);
+    y += mm(5);
 
-    const validH = 24;
-    doc.rect(L, y, W, validH);
-    T(); sz(8); black();
-    const validText = `Je, soussigné ${dossierData.arpenteur_geometre || ''}, arpenteur-géomètre, certifie par la présente avoir pris personnellement connaissance des observations relatives aux éléments visés aux paragraphes 9 et 13 à 17 du premier alinéa de l'article 9 du Règlement sur la norme de pratique relative au certificat de localisation et les avoir validées.`;
-    const vlines = doc.splitTextToSize(validText, W - 3);
-    doc.text(vlines, L + 1.5, y + 3.5);
-    const afterTxt = y + 3.5 + vlines.length * 2.9;
-    checkbox(L + 2, mid(afterTxt + 2.5)); TB(); sz(8.5); doc.text('Visite des lieux', L + 6.5, mid(afterTxt + 2.5), { baseline: 'middle' });
-    checkbox(L + 2, mid(afterTxt + 8)); doc.text('Photographies', L + 6.5, mid(afterTxt + 8), { baseline: 'middle' });
-    const sigY = y + validH - 3;
-    lw(0.3); T(); sz(8); black();
-    doc.text('Date de la validation :', L + 2, sigY, { baseline: 'middle' });
-    doc.line(L + 36, sigY, L + 76, sigY);
-    addTextField('date_validation', L + 36, sigY - 3, 40, 5);
-    doc.text('Signature :', L + 78, sigY, { baseline: 'middle' });
-    doc.line(L + 92, sigY, R - 1, sigY);
-    T(); sz(9);
+    const validH = mm(24);
+    rect(p, L, y, W, validH, { bw: 0.5 });
+
+    const validText = `Je, soussigné ${dossierData.arpenteur_geometre||''}, arpenteur-géomètre, certifie par la présente avoir pris personnellement connaissance des observations relatives aux éléments visés aux paragraphes 9 et 13 à 17 du premier alinéa de l'article 9 du Règlement sur la norme de pratique relative au certificat de localisation et les avoir validées.`;
+
+    // Word wrap manually
+    const words = validText.split(' ');
+    const maxLineW = W - mm(3);
+    let lines = [], line = '';
+    for (const word of words) {
+      const test = line ? line + ' ' + word : word;
+      if (fontReg.widthOfTextAtSize(test, 7.5) > maxLineW) { lines.push(line); line = word; }
+      else line = test;
+    }
+    if (line) lines.push(line);
+
+    for (let i = 0; i < lines.length; i++) {
+      label(p, lines[i], L + mm(1.5), y + mm(3.5) + i * mm(3.2), { size: 7.5 });
+    }
+
+    const afterTxt = y + mm(3.5) + lines.length * mm(3.2) + mm(2);
+    checkbox(p, L + mm(2), afterTxt - mm(1.4));
+    label(p, 'Visite des lieux', L + mm(6.5), afterTxt + mm(1.2), { bold:true, size:8 });
+    checkbox(p, L + mm(2), afterTxt + mm(4));
+    label(p, 'Photographies', L + mm(6.5), afterTxt + mm(6.6), { bold:true, size:8 });
+
+    const sigY = y + validH - mm(4);
+    label(p, 'Date de la validation :', L + mm(2), sigY + mm(1.2), { size:8 });
+    p.drawLine({ start:{x:L+mm(36),y:py(sigY)}, end:{x:L+mm(76),y:py(sigY)}, thickness:0.5, color:BLACK });
+    addField('date_validation', p, L + mm(36), sigY - mm(4), mm(40), mm(4.5));
+    label(p, 'Signature :', L + mm(78), sigY + mm(1.2), { size:8 });
+    p.drawLine({ start:{x:L+mm(92),y:py(sigY)}, end:{x:R-mm(1),y:py(sigY)}, thickness:0.5, color:BLACK });
     y += validH;
 
     // ── FERMETURE ─────────────────────────────────────────────────────────────
-    sectionBar('FERMETURE', L, y, W);
-    y += 5;
-    doc.rect(L, y, W / 2, rH);
-    doc.rect(L + W / 2, y, W / 2, rH);
-    TB(); sz(8.5); black();
-    doc.text('Date de fermeture :', L + 1.5, mid(y), { baseline: 'middle' });
-    doc.text('Signature :', L + W / 2 + 1.5, mid(y), { baseline: 'middle' });
-    addTextField('date_fermeture', L + 32, y + 0.5, W / 2 - 33, rH - 1);
+    sectionBar(p, 'FERMETURE', L, y, W);
+    y += mm(5);
+    rect(p, L, y, W/2, RH, { bw: 0.5 });
+    rect(p, L + W/2, y, W/2, RH, { bw: 0.5 });
+    label(p, 'Date de fermeture :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    label(p, 'Signature :', L + W/2 + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
+    addField('date_fermeture', p, L + mm(31), y + mm(0.5), W/2 - mm(32), RH - mm(1));
 
-    T(); sz(7); black();
-    doc.text('Rév. 13    Date : 2 juin 2022', L, pH - 5);
+    // ────────────────────────────────────────────────────────────────────────
+    // PAGE 2: TEMPS
+    // ────────────────────────────────────────────────────────────────────────
+    const p2 = page2;
+    label(p2, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
 
-    // ── PAGE 2: TEMPS ──────────────────────────────────────────────────────────
-    doc.addPage();
-    T(); sz(7); black();
-    doc.text('Rév. 13    Date : 2 juin 2022', L, 7.5);
+    const p2Y0 = mm(9);
+    const p2H = mm(175);
+    rect(p2, L, p2Y0, W, p2H, { bw: 1.5 });
+    sectionBar(p2, 'TEMPS', L, p2Y0, W, mm(6));
 
-    lw(0.5);
-    doc.rect(L, 9, W, 175);
-    lw(0.3);
-
-    sectionBar('TEMPS', L, 9, W, 6);
-
-    const tCols = [W * 0.17, W * 0.25, W * 0.44, W * 0.14];
-    const tHeaders = ['DATE', 'EMPLOYÉ(S)', 'DESCRIPTION', 'TEMPS'];
-    let ty = 15;
+    const tCols = [W*0.17, W*0.25, W*0.44, W*0.14];
+    const tHeaders = ['DATE','EMPLOYÉ(S)','DESCRIPTION','TEMPS'];
+    let ty = p2Y0 + mm(6);
 
     let tx = L;
     for (let i = 0; i < tHeaders.length; i++) {
-      doc.rect(tx, ty, tCols[i], 6);
-      TB(); sz(9); black();
-      doc.text(tHeaders[i], tx + tCols[i] / 2, ty + 3, { align: 'center', baseline: 'middle' });
+      rect(p2, tx, ty, tCols[i], mm(6), { bw: 0.5 });
+      label(p2, tHeaders[i], tx + tCols[i]/2, ty + mm(3.5), { bold:true, size:9, align:'center' });
       tx += tCols[i];
     }
-    ty += 6;
+    ty += mm(6);
 
     const subSections = [
-      ['PLANIFICATION', 2], ['TERRAIN', 6],
-      ['RECHERCHES ET ANALYSE FONCIÈRE', 4], ['TRAITEMENT ET DESSIN', 4], ['RAPPORT/RÉDACTION', 3],
+      ['PLANIFICATION',2],['TERRAIN',6],
+      ['RECHERCHES ET ANALYSE FONCIÈRE',4],['TRAITEMENT ET DESSIN',4],['RAPPORT/RÉDACTION',3],
     ];
 
     for (const [title, count] of subSections) {
-      doc.setFillColor(210, 210, 210);
-      doc.rect(L, ty, W, 5.5, 'FD');
-      TB(); sz(8.5); black();
-      doc.text(title, L + 2, ty + 2.75, { baseline: 'middle' });
-      ty += 5.5;
+      rect(p2, L, ty, W, mm(5.5), { fill: LIGHT_GRAY, bw: 0.5 });
+      label(p2, title, L + mm(2), ty + mm(4), { bold:true, size:8.5 });
+      ty += mm(5.5);
       for (let r = 0; r < count; r++) {
         tx = L;
         for (let ci = 0; ci < tCols.length; ci++) {
-          doc.rect(tx, ty, tCols[ci], 6);
-          addTextField(`temps_${title}_r${r}_c${ci}`, tx + 0.5, ty + 0.5, tCols[ci] - 1, 5);
+          rect(p2, tx, ty, tCols[ci], mm(6), { bw: 0.5 });
+          addField(`temps_${title.slice(0,8)}_r${r}_c${ci}`, p2, tx + mm(0.5), ty + mm(0.5), tCols[ci] - mm(1), mm(5));
           tx += tCols[ci];
         }
-        ty += 6;
+        ty += mm(6);
       }
     }
 
-    T(); sz(7); black();
-    doc.text('Rév. 13    Date : 2 juin 2022', L, pH - 5);
+    label(p2, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
 
     // ── OUTPUT ─────────────────────────────────────────────────────────────────
-    const pdfBytes = doc.output('arraybuffer');
-    const uint8 = new Uint8Array(pdfBytes);
+    form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
+    const pdfBytes = await pdfDoc.save({ updateFieldAppearances: false });
     let base64 = '';
-    for (let i = 0; i < uint8.length; i += 8192) base64 += String.fromCharCode(...uint8.subarray(i, i + 8192));
+    for (let i = 0; i < pdfBytes.length; i += 8192) base64 += String.fromCharCode(...pdfBytes.subarray(i, i + 8192));
     base64 = btoa(base64);
 
     return Response.json({ success: true, fileName: pdfFileName, pdf: `data:application/pdf;base64,${base64}` });
