@@ -95,8 +95,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     description: ""
   });
 
+  const lastDossierIdRef = React.useRef(null);
+
   useEffect(() => {
-    if (dossier) {
+    if (dossier && dossier.id !== lastDossierIdRef.current) {
+      lastDossierIdRef.current = dossier.id;
       const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
@@ -150,36 +153,39 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
       setHasChanges(false);
     }
-  }, [dossier, dossier?.id, JSON.stringify(dossier?.mandats)]);
+  }, [dossier?.id]);
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
-  
+
+  const formDataRef = React.useRef(formData);
+  formDataRef.current = formData;
+
   useEffect(() => {
-    if (dossier && initialFormData) {
-      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      setHasChanges(hasFormChanges);
-      
-      // Auto-save après 300ms sans changement
-      if (hasFormChanges) {
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
-        }
-        
-        saveTimeoutRef.current = setTimeout(() => {
-          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
-          setInitialFormData(JSON.parse(JSON.stringify(formData)));
-          setHasChanges(false);
-        }, 300);
-      }
+    if (!dossier || !initialFormData) return;
+
+    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    setHasChanges(hasFormChanges);
+
+    if (!hasFormChanges) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-    
+
+    saveTimeoutRef.current = setTimeout(() => {
+      const currentData = formDataRef.current;
+      autoSaveMutation.mutate({ id: dossier.id, dossierData: currentData });
+      setInitialFormData(JSON.parse(JSON.stringify(currentData)));
+      setHasChanges(false);
+    }, 800);
+
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [formData, dossier, initialFormData]);
+  }, [formData]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData }) => {
