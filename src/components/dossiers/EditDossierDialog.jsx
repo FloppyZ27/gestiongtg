@@ -96,7 +96,12 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   });
 
   useEffect(() => {
-    if (dossier) {
+    if (dossier && dossier.id) {
+      // Only reinitialize if we're opening a DIFFERENT dossier
+      if (initialFormData && initialFormData.numero_dossier === dossier.numero_dossier) {
+        return; // Same dossier, don't reinitialize
+      }
+      
       const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
@@ -247,8 +252,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       return updatedDossier;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      // On ne re-fetch pas les dossiers ici pour ne pas perturber le formulaire en cours d'édition
     }
   });
 
