@@ -483,9 +483,10 @@ export default function EditDossierForm({
       transition={{ duration: 0.2 }}
     >
       {/* Header sur toute la largeur */}
-      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
-        <div className="flex items-center gap-3">
+        <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
+        <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
             <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
               <span>
@@ -510,7 +511,6 @@ export default function EditDossierForm({
               )}
             </div>
           )}
-          <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
         </div>
       </div>
 
