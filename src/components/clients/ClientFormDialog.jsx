@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
+import AddressSearchInput from "@/components/shared/AddressSearchInput";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -96,10 +97,7 @@ export default function ClientFormDialog({
   // Delete confirmation dialogs
   const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, type: null, index: null, item: null });
   
-  // Address search
-  const [addressSearchTerm, setAddressSearchTerm] = useState("");
-  const [addressSearchResults, setAddressSearchResults] = useState([]);
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+
   
   // Telephone type state
   const [newTelephoneType, setNewTelephoneType] = useState("Cellulaire");
@@ -768,56 +766,11 @@ export default function ClientFormDialog({
     }));
   };
   
-  // Address search with LLM
-  const handleAddressSearch = async (searchTerm) => {
-    if (!searchTerm.trim()) {
-      setAddressSearchResults([]);
-      return;
-    }
-    
-    setIsSearchingAddress(true);
-    try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Trouve l'adresse complète pour: "${searchTerm}" au Québec, Canada. Retourne les informations d'adresse.`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            addresses: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  civic_number: { type: "string" },
-                  street: { type: "string" },
-                  city: { type: "string" },
-                  province: { type: "string" },
-                  postal_code: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
-      
-      setAddressSearchResults(response.addresses || []);
-    } catch (error) {
-      console.error("Error searching address:", error);
-      setAddressSearchResults([]);
-    } finally {
-      setIsSearchingAddress(false);
-    }
-  };
-  
-  const selectSearchedAddress = (address) => {
-    // Remplir les champs du formulaire au lieu d'ajouter automatiquement
+  const handleAddressSelect = (address) => {
     document.getElementById('new-civic-0').value = address.civic_number || "";
     document.getElementById('new-rue').value = address.street || "";
     document.getElementById('new-ville').value = address.city || "";
     document.getElementById('new-code-postal').value = address.postal_code || "";
-
-    setAddressSearchTerm("");
-    setAddressSearchResults([]);
   };
 
   const togglePreferenceLivraison = (mode) => {
@@ -1093,45 +1046,7 @@ export default function ClientFormDialog({
 
                 {!adressesCollapsed && (
                   <CardContent className="pt-3 pb-2 space-y-3">
-                    {/* Barre de recherche d'adresse avec LLM */}
-                    <div className="space-y-2">
-                      <Label className="text-xs">Rechercher une adresse</Label>
-                      <div className="relative">
-                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                        <Input
-                          placeholder="Ex: 123 rue Principale, Alma..."
-                          value={addressSearchTerm}
-                          onChange={(e) => {
-                            setAddressSearchTerm(e.target.value);
-                            if (e.target.value.length > 3) {
-                              handleAddressSearch(e.target.value);
-                            } else {
-                              setAddressSearchResults([]);
-                            }
-                          }}
-                          className="pl-7 bg-slate-700 border-slate-600 h-8 text-sm"
-                        />
-                      </div>
-                      
-                      {/* Résultats de recherche */}
-                      {addressSearchResults.length > 0 && (
-                        <div className="bg-slate-800 border border-slate-700 rounded-lg p-2 space-y-1 max-h-40 overflow-y-auto">
-                          {addressSearchResults.map((addr, idx) => (
-                            <div
-                              key={idx}
-                              onClick={() => selectSearchedAddress(addr)}
-                              className="px-2 py-1.5 rounded text-xs bg-slate-700/50 hover:bg-slate-700 cursor-pointer text-slate-300"
-                            >
-                              {addr.civic_number} {addr.street}, {addr.city}, {addr.province} {addr.postal_code}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {isSearchingAddress && (
-                        <p className="text-xs text-slate-500">Recherche en cours...</p>
-                      )}
-                    </div>
+                    <AddressSearchInput onAddressSelect={handleAddressSelect} />
 
                     {/* Formulaire pour nouvelle adresse */}
                     <div className="p-2 bg-slate-800/30 rounded-lg space-y-2">
