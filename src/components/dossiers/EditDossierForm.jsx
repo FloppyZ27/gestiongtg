@@ -192,18 +192,6 @@ export default function EditDossierForm({
 
   const prevFormDataRef = useRef(null);
 
-  // Auto-save mutation
-  const autoSaveMutation = useMutation({
-    mutationFn: async (dossierData) => {
-      if (!editingDossier) return;
-      const updatedDossier = await base44.entities.Dossier.update(editingDossier.id, dossierData);
-      return updatedDossier;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-    },
-  });
-
   // Détecter les changements de champs et créer des logs
   const detectAndLogChanges = async (oldData, newData) => {
     if (!oldData || !editingDossier?.id) return;
@@ -304,40 +292,18 @@ export default function EditDossierForm({
     }
   };
 
-  // Auto-save avec debounce
-  useEffect(() => {
-    if (editingDossier) {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
 
-      saveTimeoutRef.current = setTimeout(async () => {
-        const oldData = prevFormDataRef.current;
-        prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
-        await detectAndLogChanges(oldData, formData);
-        autoSaveMutation.mutate(formData);
-      }, 1500);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [formData, editingDossier]);
 
   const [actionLogs, setActionLogs] = useState([]);
 
-  // Charger les logs d'actions pour le dossier + initialiser prevFormDataRef
+  // Charger les logs d'actions pour le dossier
   React.useEffect(() => {
     if (editingDossier?.id) {
       base44.entities.ActionLog.filter({ entite: 'Dossier', entite_id: editingDossier.id }, '-created_date', 100)
         .then(setActionLogs)
         .catch(() => setActionLogs([]));
-      prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
     } else {
       setActionLogs([]);
-      prevFormDataRef.current = null;
     }
   }, [editingDossier?.id]);
 
