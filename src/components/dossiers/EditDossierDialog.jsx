@@ -95,101 +95,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     description: ""
   });
 
-  useEffect(() => {
-    if (dossier && dossier.id) {
-      // Only reinitialize if we're opening a DIFFERENT dossier
-      if (initialFormData && initialFormData.numero_dossier === dossier.numero_dossier) {
-        return; // Same dossier, don't reinitialize
-      }
-      
-      const data = {
-        numero_dossier: dossier.numero_dossier || "",
-        arpenteur_geometre: dossier.arpenteur_geometre || "",
-        place_affaire: dossier.place_affaire || "",
-        date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-        date_fermeture: dossier.date_fermeture || "",
-        statut: dossier.statut || "Ouvert",
-        clients_ids: dossier.clients_ids || [],
-        notaires_ids: dossier.notaires_ids || [],
-        courtiers_ids: dossier.courtiers_ids || [],
-        mandats: dossier.mandats?.map((m) => ({
-          ...m,
-          date_ouverture: m.date_ouverture || "",
-          minute: m.minute || "",
-          date_minute: m.date_minute || "",
-          type_minute: m.type_minute || "Initiale",
-          minutes_list: m.minutes_list || [],
-          tache_actuelle: m.tache_actuelle || "",
-          utilisateur_assigne: m.utilisateur_assigne || "",
-          statut_terrain: m.statut_terrain || "",
-          date_terrain: m.date_terrain || "",
-          equipe_assignee: m.equipe_assignee || "",
-          adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
-          lots: m.lots || [],
-          prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
-          rabais: m.rabais !== undefined ? m.rabais : 0,
-          taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
-          date_livraison: m.date_livraison || "",
-          date_signature: m.date_signature || "",
-          date_debut_travaux: m.date_debut_travaux || "",
-          terrains_list: m.terrains_list || [],
-          terrain: m.terrain || {
-            date_limite_leve: "",
-            instruments_requis: "",
-            a_rendez_vous: false,
-            date_rendez_vous: "",
-            heure_rendez_vous: "",
-            donneur: "",
-            technicien: "",
-            dossier_simultane: "",
-            temps_prevu: "",
-            notes: ""
-          },
-          factures: m.factures || [],
-          notes: m.notes || ""
-        })) || [],
-        description: dossier.description || ""
-      };
-      setFormData(data);
-      setInitialFormData(JSON.parse(JSON.stringify(data)));
-      setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
-      setHasChanges(false);
-    }
-  }, [dossier?.id]);
-
-  // Auto-sauvegarde avec debounce
-  const saveTimeoutRef = React.useRef(null);
-  const initialFormDataRef = React.useRef(null);
-  
-  // Sync ref when initialFormData state changes
-  useEffect(() => {
-    initialFormDataRef.current = initialFormData;
-  }, [initialFormData]);
-
-  useEffect(() => {
-    if (!dossier || !initialFormDataRef.current) return;
-
-    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
-    setHasChanges(hasFormChanges);
-    
-    if (hasFormChanges) {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-      
-      saveTimeoutRef.current = setTimeout(() => {
-        const snapshot = JSON.parse(JSON.stringify(formData));
-        console.log('🔄 AUTO-SAVING dossier', dossier.id, snapshot);
-        autoSaveMutation.mutate({ id: dossier.id, dossierData: snapshot });
-        initialFormDataRef.current = snapshot;
-        setInitialFormData(snapshot);
-        setHasChanges(false);
-      }, 1200);
-    }
-    
-    return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    };
-  }, [formData, dossier?.id]);
-
+  // Define autoSaveMutation FIRST, before useEffects that use it
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData }) => {
       const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
@@ -256,6 +162,102 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     }
   });
+
+  // Refs for auto-save
+  const saveTimeoutRef = React.useRef(null);
+  const initialFormDataRef = React.useRef(null);
+
+  // Initialize dossier form
+  useEffect(() => {
+    if (dossier && dossier.id) {
+      if (initialFormData && initialFormData.numero_dossier === dossier.numero_dossier) {
+        return;
+      }
+      
+      const data = {
+        numero_dossier: dossier.numero_dossier || "",
+        arpenteur_geometre: dossier.arpenteur_geometre || "",
+        place_affaire: dossier.place_affaire || "",
+        date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+        date_fermeture: dossier.date_fermeture || "",
+        statut: dossier.statut || "Ouvert",
+        clients_ids: dossier.clients_ids || [],
+        notaires_ids: dossier.notaires_ids || [],
+        courtiers_ids: dossier.courtiers_ids || [],
+        mandats: dossier.mandats?.map((m) => ({
+          ...m,
+          date_ouverture: m.date_ouverture || "",
+          minute: m.minute || "",
+          date_minute: m.date_minute || "",
+          type_minute: m.type_minute || "Initiale",
+          minutes_list: m.minutes_list || [],
+          tache_actuelle: m.tache_actuelle || "",
+          utilisateur_assigne: m.utilisateur_assigne || "",
+          statut_terrain: m.statut_terrain || "",
+          date_terrain: m.date_terrain || "",
+          equipe_assignee: m.equipe_assignee || "",
+          adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+          lots: m.lots || [],
+          prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+          rabais: m.rabais !== undefined ? m.rabais : 0,
+          taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
+          date_livraison: m.date_livraison || "",
+          date_signature: m.date_signature || "",
+          date_debut_travaux: m.date_debut_travaux || "",
+          terrains_list: m.terrains_list || [],
+          terrain: m.terrain || {
+            date_limite_leve: "",
+            instruments_requis: "",
+            a_rendez_vous: false,
+            date_rendez_vous: "",
+            heure_rendez_vous: "",
+            donneur: "",
+            technicien: "",
+            dossier_simultane: "",
+            temps_prevu: "",
+            notes: ""
+          },
+          factures: m.factures || [],
+          notes: m.notes || ""
+        })) || [],
+        description: dossier.description || ""
+      };
+      setFormData(data);
+      setInitialFormData(JSON.parse(JSON.stringify(data)));
+      setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
+      setHasChanges(false);
+    }
+  }, [dossier?.id]);
+
+  // Sync ref when initialFormData state changes
+  useEffect(() => {
+    initialFormDataRef.current = initialFormData;
+  }, [initialFormData]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (!dossier || !initialFormDataRef.current) return;
+
+    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
+    setHasChanges(hasFormChanges);
+    
+    if (hasFormChanges) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      
+      saveTimeoutRef.current = setTimeout(() => {
+        const snapshot = JSON.parse(JSON.stringify(formData));
+        console.log('🔄 AUTO-SAVING dossier', dossier.id, snapshot);
+        autoSaveMutation.mutate({ id: dossier.id, dossierData: snapshot });
+        initialFormDataRef.current = snapshot;
+        setInitialFormData(snapshot);
+        setHasChanges(false);
+      }, 1200);
+    }
+    
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [formData, dossier?.id, autoSaveMutation]);
 
   const handleCloseAttempt = () => {
     if (hasChanges) {
@@ -356,8 +358,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // En mode édition, les modifications sont déjà sauvegardées automatiquement
     if (dossier) {
       onClose();
       return;
