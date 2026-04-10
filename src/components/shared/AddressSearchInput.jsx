@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AddressSearchInput({ onAddressSelect, placeholder = "Ex: 123 rue Principale, Alma..." }) {
@@ -54,7 +54,7 @@ export default function AddressSearchInput({ onAddressSelect, placeholder = "Ex:
       
       {/* Search results */}
       {searchResults.length > 0 && (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-2 space-y-1 max-h-40 overflow-y-auto">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-y-auto max-h-48">
           {searchResults.map((addr, idx) => (
             <div
               key={idx}
@@ -63,10 +63,17 @@ export default function AddressSearchInput({ onAddressSelect, placeholder = "Ex:
                 setSearchTerm("");
                 setSearchResults([]);
               }}
-              className="px-2 py-1.5 rounded text-xs bg-slate-700/50 hover:bg-slate-700 cursor-pointer text-slate-300"
+              className="px-3 py-2 hover:bg-slate-700/60 cursor-pointer flex items-center gap-3 border-b border-slate-700 last:border-0 transition-colors"
             >
-              {addr.numero_civique} {addr.rue}, {addr.ville}, {addr.province} {addr.code_postal}
-              {addr.distance && <span className="text-slate-500 ml-2">({addr.distance} km)</span>}
+              <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-200">
+                  {addr.numero_civique} {addr.rue}, {addr.ville}
+                </p>
+              </div>
+              {addr.distance !== undefined && (
+                <span className="text-xs text-slate-500 flex-shrink-0">{addr.distance} km</span>
+              )}
             </div>
           ))}
         </div>
