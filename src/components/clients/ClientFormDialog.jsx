@@ -767,20 +767,24 @@ export default function ClientFormDialog({
   };
   
   const handleAddressSelect = (address) => {
-    setFormData(prev => ({
-      ...prev,
-      adresses: [
-        {
-          numeros_civiques: [address.numero_civique || ""],
-          rue: address.rue || "",
-          ville: address.ville || "",
-          province: address.province || "QC",
-          code_postal: address.code_postal || "",
-          actuelle: true
-        },
-        ...prev.adresses.map(a => ({ ...a, actuelle: false }))
-      ]
-    }));
+    if (document.getElementById('new-civic-0')) {
+      document.getElementById('new-civic-0').value = address.numero_civique || "";
+    }
+    if (document.getElementById('new-rue')) {
+      document.getElementById('new-rue').value = address.rue || "";
+    }
+    if (document.getElementById('new-ville')) {
+      document.getElementById('new-ville').value = address.ville || "";
+    }
+    if (document.getElementById('new-code-postal')) {
+      document.getElementById('new-code-postal').value = address.code_postal || "";
+    }
+    const provinceSelect = document.querySelector('[id="new-province"]');
+    if (provinceSelect && address.province) {
+      // Utiliser le select radix-ui
+      const trigger = provinceSelect.closest('[role="combobox"]') || provinceSelect;
+      trigger.value = address.province;
+    }
   };
 
   const togglePreferenceLivraison = (mode) => {
