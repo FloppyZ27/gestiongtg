@@ -129,6 +129,14 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
       {/* Barre de navigation explorateur */}
       <div className="flex items-center gap-1 bg-slate-800/60 border border-slate-700 rounded px-2 py-1.5">
         <button
+          onClick={navigateBack}
+          disabled={pathStack.length === 0}
+          className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-700/50 transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Retour"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+        </button>
+        <button
           onClick={navigateToRoot}
           className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-700/50 transition-colors flex-shrink-0"
           title="Racine"
@@ -166,16 +174,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
         </div>
       </div>
 
-      {/* Bouton retour */}
-      {pathStack.length > 0 && (
-        <button
-          onClick={navigateBack}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-2 py-1 rounded hover:bg-slate-700/50 transition-colors w-fit"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Retour
-        </button>
-      )}
+
 
       {/* Upload progress */}
       {isUploading && (
