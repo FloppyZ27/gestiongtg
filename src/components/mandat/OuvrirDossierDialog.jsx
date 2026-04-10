@@ -360,7 +360,6 @@ export default function OuvrirDossierDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Dialog pour ajouter un client */}
       <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
         <DialogContent className="bg-slate-800 border-slate-700 text-white">
           <DialogHeader>
