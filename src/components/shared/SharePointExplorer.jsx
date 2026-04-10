@@ -136,13 +136,6 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
         >
           <ArrowLeft className="w-3.5 h-3.5" />
         </button>
-        <button
-          onClick={navigateToRoot}
-          className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-700/50 transition-colors flex-shrink-0"
-          title="Racine"
-        >
-          <Home className="w-3.5 h-3.5" />
-        </button>
         <span className="text-slate-500 text-xs font-mono" title={currentPath}>{currentPath}</span>
         {pathStack.map((part, idx) => (
           <div key={idx} className="flex items-center gap-1 min-w-0 flex-shrink-0">
