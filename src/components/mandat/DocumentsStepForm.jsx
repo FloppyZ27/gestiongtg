@@ -125,7 +125,8 @@ export default function DocumentsStepForm({
   isTemporaire = false,
   clientInfo = null,
   onAddHistoriqueEntry = null,
-  priseMandatId = null
+  priseMandatId = null,
+  showAllSubfolders = false
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
@@ -142,12 +143,14 @@ export default function DocumentsStepForm({
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   
-  // Construire le chemin de base - toujours INTRANTS
+  // Construire le chemin de base
   let baseFolderPath;
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
     const today = new Date().toISOString().split('T')[0];
     baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
+  } else if (showAllSubfolders) {
+    baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
   } else {
     baseFolderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
   }
