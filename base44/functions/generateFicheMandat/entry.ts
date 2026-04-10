@@ -516,7 +516,13 @@ Deno.serve(async (req) => {
 
     // ─── OUTPUT ───────────────────────────────────────────────────────────
     const pdfBytes = doc.output('arraybuffer');
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+    const uint8 = new Uint8Array(pdfBytes);
+    let base64 = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8.length; i += chunkSize) {
+      base64 += String.fromCharCode(...uint8.subarray(i, i + chunkSize));
+    }
+    base64 = btoa(base64);
 
     return Response.json({
       success: true,
