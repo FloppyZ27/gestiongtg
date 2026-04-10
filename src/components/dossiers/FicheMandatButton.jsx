@@ -4,6 +4,7 @@ import { Loader2, X } from "lucide-react";
 
 export default function FicheMandatButton({ formData, clients, editingDossier }) {
   const [loading, setLoading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfData, setPdfData] = useState(null);
   const [pdfName, setPdfName] = useState("");
 
@@ -21,7 +22,14 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
     });
     setLoading(false);
     if (res.data?.pdf) {
+      const base64 = res.data.pdf.split(',')[1];
+      const byteChars = atob(base64);
+      const byteNumbers = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteNumbers], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
       setPdfData(res.data.pdf);
+      setPdfUrl(url);
       setPdfName(res.data.fileName || 'fiche_mandat.pdf');
     }
   };
@@ -35,9 +43,13 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
 
   const handlePrint = () => {
     const iframe = document.getElementById('fiche-mandat-iframe');
-    if (iframe) {
-      iframe.contentWindow.print();
-    }
+    if (iframe) iframe.contentWindow.print();
+  };
+
+  const handleClose = () => {
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
+    setPdfData(null);
   };
 
   return (
@@ -52,7 +64,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
         Fiche mandat
       </button>
 
-      {pdfData && (
+      {pdfUrl && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
           <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col" style={{ width: '85vw', height: '90vh' }}>
             {/* Header */}
@@ -72,7 +84,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
                   Enregistrer
                 </button>
                 <button
-                  onClick={() => setPdfData(null)}
+                  onClick={handleClose}
                   className="text-slate-400 hover:text-white ml-2"
                 >
                   <X className="w-5 h-5" />
@@ -82,7 +94,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
             {/* PDF Viewer */}
             <iframe
               id="fiche-mandat-iframe"
-              src={pdfData}
+              src={pdfUrl}
               className="flex-1 w-full rounded-b-xl"
               style={{ border: 'none' }}
             />
