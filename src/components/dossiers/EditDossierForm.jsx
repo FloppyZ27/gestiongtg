@@ -16,11 +16,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { format } from "date-fns"; import { fr } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import MandatTabs from "./MandatTabs";
 import PlaceAffaireSelect from "./PlaceAffaireSelect";
+import ContactsTabsSection from "./ContactsTabsSection";
+import TerrainEditDialog from "./TerrainEditDialog";
 import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
@@ -71,18 +71,7 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
-const formatAdresse = (addr) => {
-  if (!addr) return "";
-  const parts = [];
-  if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-    parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-  }
-  if (addr.rue) parts.push(addr.rue);
-  if (addr.ville) parts.push(addr.ville);
-  if (addr.province) parts.push(addr.province);
-  if (addr.code_postal) parts.push(addr.code_postal);
-  return parts.filter(p => p).join(', ');
-};
+
 
 const getUserInitials = (name) => {
   return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -151,7 +140,6 @@ export default function EditDossierForm({
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
   const [minutesCollapsed, setMinutesCollapsed] = useState(true);
-  const [activeMinuteMandat, setActiveMinuteMandat] = useState("0");
   const [newMinuteForm, setNewMinuteForm] = useState({});
   const [terrainCollapsed, setTerrainCollapsed] = useState(true);
   const [newTerrainFormCollapsed, setNewTerrainFormCollapsed] = useState(true);
@@ -168,8 +156,7 @@ export default function EditDossierForm({
   const [retoursAppel, setRetoursAppel] = useState([]);
   const [entreesTemps, setEntreesTemps] = useState([]);
   const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("");
+
   const [newMinuteFormCollapsed, setNewMinuteFormCollapsed] = useState(true);
   const [newRetourAppelFormCollapsed, setNewRetourAppelFormCollapsed] = useState(true);
   const [newEntreeTempsFormCollapsed, setNewEntreeTempsFormCollapsed] = useState(true);
@@ -379,45 +366,11 @@ export default function EditDossierForm({
     }
   }, [editingDossier?.id]);
 
-  const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
-  const notaires = (clients || []).filter(c => c?.type_client === 'Notaire');
-  const courtiers = (clients || []).filter(c => c?.type_client === 'Courtier immobilier');
-  const compagnies = (clients || []).filter(c => c?.type_client === 'Compagnie');
-
   const getClientById = (id) => (clients || []).find(c => c.id === id);
-
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
-      const client = getClientById(id);
-      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
-    }).join(", ");
+    return clientIds.map(id => { const client = getClientById(id); return client ? `${client.prenom} ${client.nom}` : "Client inconnu"; }).join(", ");
   };
-
-  const removeClient = (clientId, type) => {
-    const field = `${type}_ids`;
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].filter(id => id !== clientId)
-    }));
-  };
-
-  const filteredClientsForSelector = clientsReguliers.filter(c =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase())
-  );
-
-  const filteredNotairesForSelector = notaires.filter(n =>
-    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase())
-  );
-
-  const filteredCourtiersForSelector = courtiers.filter(c =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
-  );
-
-  const filteredCompagniesForSelector = compagnies.filter(c =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
-  );
-
   const sections = [
     { id: "infos", label: "Informations", icon: FolderOpen, color: "text-blue-400" },
     { id: "mandats", label: "Mandats", icon: FileText, color: "text-orange-400" },
@@ -2821,197 +2774,29 @@ export default function EditDossierForm({
         </DialogContent>
       </Dialog>
 
-      {/* Dialog d'édition du terrain */}
-      <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
-            {editingTerrainInfo && (
-              <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
-                formData.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
-                formData.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
-                formData.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
-                formData.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
-                formData.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
-                "text-emerald-400"
-              }`}>
-                <span>
-                  {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                  {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
-                    <span> - {getClientsNames(formData.clients_ids)}</span>
-                  )}
-                </span>
-                {editingTerrainInfo.mandat && (
-                  <span className="flex gap-1">
-                    <Badge className={`${getMandatColor(editingTerrainInfo.mandat.type_mandat)} border text-xs`}>
-                      {getAbbreviatedMandatType(editingTerrainInfo.mandat.type_mandat)}
-                    </Badge>
-                  </span>
-                )}
-              </div>
-            )}
-          </DialogHeader>
-
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Date limite cédule</Label>
-                <Input
-                  type="date"
-                  value={terrainForm.date_limite_leve || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Temps prévu</Label>
-                <Input
-                  value={terrainForm.temps_prevu || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
-                  placeholder="Ex: 2h30"
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Donneur</Label>
-                <Select value={terrainForm.donneur || ""} onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {(users || []).map((u) => (
-                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Instruments</Label>
-                <Input
-                  value={terrainForm.instruments_requis || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
-                  placeholder="GPS, Station totale.."
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Technicien</Label>
-                <Select 
-                  value={terrainForm.technicien || ""}
-                  onValueChange={(value) => setTerrainForm({...terrainForm, technicien: value})}
-                >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {(users || []).map((u) => (
-                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Switch 
-                  checked={terrainForm.a_rendez_vous || false}
-                  onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
-                  className="data-[state=checked]:bg-amber-400"
-                />
-                <Label>Rendez-vous</Label>
-              </div>
-              {terrainForm.a_rendez_vous && (
-                <div className="grid grid-cols-2 gap-3 ml-7">
-                  <div className="space-y-2">
-                    <Label>Date du rendez-vous</Label>
-                    <Input
-                      type="date"
-                      value={terrainForm.date_rendez_vous || ""}
-                      onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
-                      className="bg-slate-800 border-slate-700 text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Heure du rendez-vous</Label>
-                    <Input
-                      type="time"
-                      value={terrainForm.heure_rendez_vous || ""}
-                      onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
-                      className="bg-slate-800 border-slate-700 text-white"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Switch 
-                  checked={terrainForm.dossier_simultane ? true : false}
-                  onCheckedChange={(checked) => setTerrainForm({...terrainForm, dossier_simultane: checked ? terrainForm.dossier_simultane : ""})}
-                  className="data-[state=checked]:bg-amber-400"
-                />
-                <Label>Dossier à faire en même temps</Label>
-              </div>
-              {terrainForm.dossier_simultane && (
-                <div className="grid grid-cols-2 gap-4 ml-7">
-                  <div className="space-y-2">
-                    <Label>Dossier simultané</Label>
-                    <Select 
-                      value={terrainForm.dossier_simultane || ""}
-                      onValueChange={(value) => setTerrainForm({...terrainForm, dossier_simultane: value})}
-                    >
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {(allDossiers || []).filter(d => d.id !== editingDossier?.id).map((d) => (
-                          <SelectItem key={d.id} value={d.id} className="text-white">
-                            {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                            {d.clients_ids && d.clients_ids.length > 0 && ` - ${getClientsNames(d.clients_ids)}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button 
-              type="button"
-              variant="outline" 
-              onClick={() => setIsTerrainDialogOpen(false)}
-            >
-              Annuler
-            </Button>
-            <Button 
-              type="button"
-              onClick={() => {
-                if (editingTerrainInfo) {
-                  const updatedMandats = [...formData.mandats];
-                  updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex] = {
-                    ...updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex],
-                    ...terrainForm
-                  };
-                  setFormData({...formData, mandats: updatedMandats});
-                  addActionLog("Terrain modifié", `Terrain modifié pour le mandat: ${editingTerrainInfo.mandat?.type_mandat || 'Mandat ' + (editingTerrainInfo.mandatIndex + 1)}`);
-                  setIsTerrainDialogOpen(false);
-                }
-              }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600"
-            >
-              Enregistrer
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TerrainEditDialog
+        open={isTerrainDialogOpen}
+        onOpenChange={setIsTerrainDialogOpen}
+        editingTerrainInfo={editingTerrainInfo}
+        terrainForm={terrainForm}
+        setTerrainForm={setTerrainForm}
+        formData={formData}
+        users={users}
+        allDossiers={allDossiers}
+        getClientsNames={getClientsNames}
+        onSave={() => {
+          if (editingTerrainInfo) {
+            const updatedMandats = [...formData.mandats];
+            updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex] = {
+              ...updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex],
+              ...terrainForm
+            };
+            setFormData({...formData, mandats: updatedMandats});
+            addActionLog("Terrain modifié", `Terrain modifié pour le mandat: ${editingTerrainInfo.mandat?.type_mandat || 'Mandat ' + (editingTerrainInfo.mandatIndex + 1)}`);
+            setIsTerrainDialogOpen(false);
+          }
+        }}
+      />
 
       {!editingDossier && (
         <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
