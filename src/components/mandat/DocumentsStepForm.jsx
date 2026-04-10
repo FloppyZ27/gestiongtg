@@ -40,7 +40,7 @@ export default function DocumentsStepForm({
     initialPath = ["INTRANTS"];
   } else if (showAllSubfolders) {
     rootPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
-    initialPath = [];
+    initialPath = ["INTRANTS"];
   } else {
     rootPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
     initialPath = ["INTRANTS"];
