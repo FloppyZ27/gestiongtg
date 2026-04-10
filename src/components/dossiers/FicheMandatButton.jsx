@@ -26,7 +26,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
       type="button"
       size="sm"
       onClick={handleClick}
-      className="bg-transparent hover:bg-amber-500/10 text-amber-400 border border-amber-500/50 h-8 text-xs px-3 rounded"
+      className="bg-transparent hover:bg-amber-500/10 text-amber-400 border-2 border-amber-400 h-8 text-xs px-3 rounded"
     >
       Fiche mandat
     </Button>
