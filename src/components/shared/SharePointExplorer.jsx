@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Folder, ArrowLeft, ChevronRight, Home } from "lucide-react";
+import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Folder, ArrowLeft, ChevronRight, Home, LayoutGrid, List } from "lucide-react";
 
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || '';
@@ -25,6 +25,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [viewMode, setViewMode] = useState('grid');
 
   const currentPath = pathStack.length > 0
     ? `${rootPath}/${pathStack.join('/')}`
@@ -162,6 +163,9 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
               </span>
             </label>
           )}
+          <button onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} className="p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors" title={viewMode === 'grid' ? 'Vue liste' : 'Vue grille'}>
+            {viewMode === 'grid' ? <List className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
+          </button>
           <Button type="button" variant="ghost" size="sm" onClick={() => refetch()} className="h-6 w-6 p-0 text-slate-400 hover:text-white">
             <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
@@ -187,6 +191,43 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
             <Folder className="w-10 h-10 mx-auto mb-2 opacity-30" />
             <p>Dossier vide</p>
             <p className="text-xs mt-1">Glissez des fichiers ou cliquez sur "Ajouter"</p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-4 gap-2">
+            {folders.map((folder) => (
+              <div
+                key={folder.id}
+                className="flex flex-col items-center gap-1.5 p-3 bg-blue-500/10 border border-blue-500/20 rounded hover:bg-blue-500/20 transition-colors group cursor-pointer"
+                onClick={() => navigateInto(folder.name)}
+              >
+                <div className="relative w-full flex justify-center">
+                  <Folder className="w-10 h-10 text-blue-400" />
+                  {allowDelete && (
+                    <button onClick={(e) => { e.stopPropagation(); setFileToDelete(folder); }} className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <span className="text-blue-300 text-xs font-medium text-center break-all line-clamp-2 w-full">{folder.name}</span>
+              </div>
+            ))}
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="flex flex-col items-center gap-1.5 p-3 bg-slate-700/40 rounded hover:bg-slate-700/70 transition-colors group cursor-pointer"
+                onClick={() => handleOpen(file)}
+              >
+                <div className="relative w-full flex justify-center py-2">
+                  <span className="scale-[2.2] block">{getFileIcon(file.name)}</span>
+                  <div className="absolute top-0 right-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={(e) => { e.stopPropagation(); handleDownload(file); }} className="text-slate-400 hover:text-white"><Download className="w-3 h-3" /></button>
+                    {allowDelete && <button onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }} className="text-red-400 hover:text-red-300"><Trash2 className="w-3 h-3" /></button>}
+                  </div>
+                </div>
+                <span className="text-slate-300 text-xs text-center break-all line-clamp-2 w-full">{file.name}</span>
+                {file.size > 0 && <span className="text-slate-500 text-[10px]">{formatFileSize(file.size)}</span>}
+              </div>
+            ))}
           </div>
         ) : (
           <>
