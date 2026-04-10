@@ -172,11 +172,12 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       
       saveTimeoutRef.current = setTimeout(() => {
         const snapshot = JSON.parse(JSON.stringify(formData));
+        console.log('🔄 AUTO-SAVING dossier', dossier.id, snapshot);
         autoSaveMutation.mutate({ id: dossier.id, dossierData: snapshot });
         initialFormDataRef.current = snapshot;
         setInitialFormData(snapshot);
         setHasChanges(false);
-      }, 800);
+      }, 1200);
     }
     
     return () => {
