@@ -767,10 +767,20 @@ export default function ClientFormDialog({
   };
   
   const handleAddressSelect = (address) => {
-    document.getElementById('new-civic-0').value = address.civic_number || "";
-    document.getElementById('new-rue').value = address.street || "";
-    document.getElementById('new-ville').value = address.city || "";
-    document.getElementById('new-code-postal').value = address.postal_code || "";
+    setFormData(prev => ({
+      ...prev,
+      adresses: [
+        {
+          numeros_civiques: [address.numero_civique || ""],
+          rue: address.rue || "",
+          ville: address.ville || "",
+          province: address.province || "QC",
+          code_postal: address.code_postal || "",
+          actuelle: true
+        },
+        ...prev.adresses.map(a => ({ ...a, actuelle: false }))
+      ]
+    }));
   };
 
   const togglePreferenceLivraison = (mode) => {
