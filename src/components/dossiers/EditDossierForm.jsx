@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import MandatTabs from "./MandatTabs";
+import PlaceAffaireSelect from "./PlaceAffaireSelect";
 import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
@@ -590,20 +591,11 @@ export default function EditDossierForm({
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1">
-                            <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-                            <Select value={formData.place_affaire?.toString() || ""} onValueChange={(value) => {
-                              setFormData(prev => ({...prev, place_affaire: value}));
-                            }}>
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                <SelectValue placeholder="Sélectionner" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700">
-                                <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
-                                <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          <PlaceAffaireSelect
+                            value={formData.place_affaire}
+                            onChange={(val) => setFormData(prev => ({...prev, place_affaire: val}))}
+                            dossierKey={editingDossier?.id}
+                          />
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
                             <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
