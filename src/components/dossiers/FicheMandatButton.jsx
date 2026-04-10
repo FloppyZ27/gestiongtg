@@ -54,15 +54,17 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={loading}
-        style={{ border: '2px solid #fbbf24', color: '#fbbf24', background: 'transparent', borderRadius: '6px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-      >
-        {loading && <Loader2 className="w-3 h-3 animate-spin" />}
-        Fiche mandat
-      </button>
+      <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px 12px', background: 'rgba(15, 23, 42, 0.5)' }}>
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={loading}
+          style={{ border: '2px solid #fbbf24', color: '#fbbf24', background: 'transparent', borderRadius: '6px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+          Fiche mandat
+        </button>
+      </div>
 
       {pdfUrl && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
