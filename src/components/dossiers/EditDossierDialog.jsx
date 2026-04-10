@@ -95,85 +95,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     description: ""
   });
 
-  // Define autoSaveMutation FIRST, before useEffects that use it
-  const autoSaveMutation = useMutation({
-    mutationFn: async ({ id, dossierData }) => {
-      const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
-      const oldDossier = allDossiersCurrentState.find(d => d.id === id);
-      const cleanData = {
-        numero_dossier: dossierData.numero_dossier,
-        arpenteur_geometre: dossierData.arpenteur_geometre,
-        place_affaire: dossierData.place_affaire || "",
-        date_ouverture: dossierData.date_ouverture,
-        date_fermeture: dossierData.date_fermeture,
-        statut: dossierData.statut,
-        clients_ids: dossierData.clients_ids,
-        notaires_ids: dossierData.notaires_ids,
-        courtiers_ids: dossierData.courtiers_ids,
-        mandats: dossierData.mandats
-      };
-      const updatedDossier = await base44.entities.Dossier.update(id, cleanData);
-      
-      const currentUser = await base44.auth.me();
-      
-      if (oldDossier && dossierData.mandats) {
-        for (let i = 0; i < dossierData.mandats.length; i++) {
-          const newMandat = dossierData.mandats[i];
-          const oldMandat = oldDossier.mandats?.[i];
-          
-          if (newMandat.utilisateur_assigne && 
-              newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
-              newMandat.tache_actuelle) {
-            const clientsNames = dossierData.clients_ids?.map(cid => {
-              const client = (clients || []).find(c => c?.id === cid);
-              return client ? `${client.prenom} ${client.nom}` : "";
-            }).filter(n => n).join(", ");
-            
-            const getArpenteurInitials = (arpenteur) => {
-              if (!arpenteur) return "";
-              const mapping = {
-                "Samuel Guay": "SG-",
-                "Dany Gaboury": "DG-",
-                "Pierre-Luc Pilote": "PLP-",
-                "Benjamin Larouche": "BL-",
-                "Frédéric Gilbert": "FG-"
-              };
-              return mapping[arpenteur] || "";
-            };
-            
-            const numeroDossierDisplay = `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`;
-            
-            await base44.entities.Notification.create({
-              utilisateur_email: newMandat.utilisateur_assigne,
-              titre: "Nouvelle tâche assignée",
-              message: `${currentUser?.full_name || 'Un utilisateur'} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossierDisplay ? ` pour le dossier ${numeroDossierDisplay}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
-              type: "dossier",
-              dossier_id: id,
-              lue: false
-            });
-          }
-        }
-      }
-      
-      return updatedDossier;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    }
-  });
-
-  // Refs for auto-save
-  const saveTimeoutRef = React.useRef(null);
-  const initialFormDataRef = React.useRef(null);
-
-  // Initialize dossier form
   useEffect(() => {
-    if (dossier && dossier.id) {
-      if (initialFormData && initialFormData.numero_dossier === dossier.numero_dossier) {
-        return;
-      }
-      
+    if (dossier) {
       const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
@@ -227,37 +150,91 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
       setHasChanges(false);
     }
-  }, [dossier?.id]);
+  }, [dossier, dossier?.id, JSON.stringify(dossier?.mandats)]);
 
-  // Sync ref when initialFormData state changes
+  // Auto-sauvegarde avec debounce
+  const saveTimeoutRef = React.useRef(null);
+  
   useEffect(() => {
-    initialFormDataRef.current = initialFormData;
-  }, [initialFormData]);
-
-  // Auto-save with debounce
-  useEffect(() => {
-    if (!dossier || !initialFormDataRef.current) return;
-
-    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
-    setHasChanges(hasFormChanges);
-    
-    if (hasFormChanges) {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    if (dossier && initialFormData) {
+      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      setHasChanges(hasFormChanges);
       
-      saveTimeoutRef.current = setTimeout(() => {
-        const snapshot = JSON.parse(JSON.stringify(formData));
-        console.log('🔄 AUTO-SAVING dossier', dossier.id, snapshot);
-        autoSaveMutation.mutate({ id: dossier.id, dossierData: snapshot });
-        initialFormDataRef.current = snapshot;
-        setInitialFormData(snapshot);
-        setHasChanges(false);
-      }, 1200);
+      // Auto-save après 300ms sans changement
+      if (hasFormChanges) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        
+        saveTimeoutRef.current = setTimeout(() => {
+          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
+          setInitialFormData(JSON.parse(JSON.stringify(formData)));
+          setHasChanges(false);
+        }, 300);
+      }
     }
     
     return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
     };
-  }, [formData, dossier?.id]);
+  }, [formData, dossier, initialFormData]);
+
+  const autoSaveMutation = useMutation({
+    mutationFn: async ({ id, dossierData }) => {
+      const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
+      const oldDossier = allDossiersCurrentState.find(d => d.id === id);
+      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      const currentUser = await base44.auth.me();
+      
+      if (oldDossier && dossierData.mandats) {
+        for (let i = 0; i < dossierData.mandats.length; i++) {
+          const newMandat = dossierData.mandats[i];
+          const oldMandat = oldDossier.mandats?.[i];
+          
+          if (newMandat.utilisateur_assigne && 
+              newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
+              newMandat.tache_actuelle) {
+            const clientsNames = dossierData.clients_ids?.map(cid => {
+              const client = (clients || []).find(c => c?.id === cid);
+              return client ? `${client.prenom} ${client.nom}` : "";
+            }).filter(n => n).join(", ");
+            
+            const getArpenteurInitials = (arpenteur) => {
+              if (!arpenteur) return "";
+              const mapping = {
+                "Samuel Guay": "SG-",
+                "Dany Gaboury": "DG-",
+                "Pierre-Luc Pilote": "PLP-",
+                "Benjamin Larouche": "BL-",
+                "Frédéric Gilbert": "FG-"
+              };
+              return mapping[arpenteur] || "";
+            };
+            
+            const numeroDossierDisplay = `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`;
+            
+            await base44.entities.Notification.create({
+              utilisateur_email: newMandat.utilisateur_assigne,
+              titre: "Nouvelle tâche assignée",
+              message: `${currentUser?.full_name || 'Un utilisateur'} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossierDisplay ? ` pour le dossier ${numeroDossierDisplay}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+              type: "dossier",
+              dossier_id: id,
+              lue: false
+            });
+          }
+        }
+      }
+      
+      return updatedDossier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }
+  });
 
   const handleCloseAttempt = () => {
     if (hasChanges) {
@@ -358,6 +335,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // En mode édition, les modifications sont déjà sauvegardées automatiquement
     if (dossier) {
       onClose();
       return;
