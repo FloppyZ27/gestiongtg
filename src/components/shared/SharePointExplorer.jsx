@@ -26,8 +26,8 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   const [uploadProgress, setUploadProgress] = useState("");
   const [fileToDelete, setFileToDelete] = useState(null);
 
-  const currentPath = pathStack.length > 0 
-    ? `${rootPath}/${pathStack.join('/')}` 
+  const currentPath = pathStack.length > 0
+    ? `${rootPath}/${pathStack.join('/')}`
     : rootPath;
 
   const { data: filesData, isLoading, refetch } = useQuery({
@@ -127,7 +127,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   return (
     <div className="flex flex-col gap-2">
       {/* Barre de navigation explorateur */}
-      <div className="flex items-center gap-1 bg-slate-800/60 border border-slate-700 rounded px-2 py-1.5">
+      <div className="flex items-center gap-1 bg-slate-800/60 border border-slate-700 rounded px-2 py-1.5 overflow-hidden">
         <button
           onClick={navigateBack}
           disabled={pathStack.length === 0}
@@ -143,10 +143,10 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
         >
           <Home className="w-3.5 h-3.5" />
         </button>
-        <span className="text-slate-500 text-xs truncate max-w-[200px] font-mono" title={currentPath}>{rootPath}</span>
+        <span className="text-slate-500 text-xs font-mono truncate max-w-[200px]" title={currentPath}>{rootPath}</span>
         {pathStack.map((part, idx) => (
-          <div key={idx} className="flex items-center gap-1 min-w-0">
-            <ChevronRight className="w-3 h-3 text-slate-600 flex-shrink-0" />
+          <div key={idx} className="flex items-center gap-1 min-w-0 flex-shrink-0">
+            <ChevronRight className="w-3 h-3 text-slate-600" />
             <button
               onClick={() => navigateToIndex(idx)}
               className={`text-xs px-1 py-0.5 rounded hover:bg-slate-700/50 transition-colors truncate max-w-[120px] ${
@@ -174,8 +174,6 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
           </Button>
         </div>
       </div>
-
-
 
       {/* Upload progress */}
       {isUploading && (
