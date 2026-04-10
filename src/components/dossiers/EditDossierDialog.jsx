@@ -154,32 +154,35 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
+  const initialFormDataRef = React.useRef(null);
   
+  // Sync ref when initialFormData state changes
   useEffect(() => {
-    if (dossier && initialFormData) {
-      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      setHasChanges(hasFormChanges);
+    initialFormDataRef.current = initialFormData;
+  }, [initialFormData]);
+
+  useEffect(() => {
+    if (!dossier || !initialFormDataRef.current) return;
+
+    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormDataRef.current);
+    setHasChanges(hasFormChanges);
+    
+    if (hasFormChanges) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       
-      // Auto-save après 300ms sans changement
-      if (hasFormChanges) {
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
-        }
-        
-        saveTimeoutRef.current = setTimeout(() => {
-          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
-          setInitialFormData(JSON.parse(JSON.stringify(formData)));
-          setHasChanges(false);
-        }, 300);
-      }
+      saveTimeoutRef.current = setTimeout(() => {
+        const snapshot = JSON.parse(JSON.stringify(formData));
+        autoSaveMutation.mutate({ id: dossier.id, dossierData: snapshot });
+        initialFormDataRef.current = snapshot;
+        setInitialFormData(snapshot);
+        setHasChanges(false);
+      }, 800);
     }
     
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [formData, dossier, initialFormData]);
+  }, [formData, dossier?.id]);
 
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData }) => {
@@ -243,8 +246,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       return updatedDossier;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      // On ne re-fetch pas les dossiers ici pour ne pas perturber le formulaire en cours d'édition
     }
   });
 
