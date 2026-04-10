@@ -257,7 +257,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
-  }, [formData, dossier?.id, autoSaveMutation]);
+  }, [formData, dossier?.id]);
 
   const handleCloseAttempt = () => {
     if (hasChanges) {
