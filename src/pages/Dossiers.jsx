@@ -28,6 +28,7 @@ import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import { motion } from "framer-motion";
+import DossiersFilterBar from "../components/dossiers/DossiersFilterBar";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -180,6 +181,7 @@ export default function Dossiers() {
   const [showDeleteDossierConfirm, setShowDeleteDossierConfirm] = useState(false);
   const [dossierIdToDelete, setDossierIdToDelete] = useState(null);
   const [dossierNameToDelete, setDossierNameToDelete] = useState("");
+  const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("tous");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -1690,9 +1692,10 @@ export default function Dossiers() {
         return true;
       })();
       
-      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache && matchesDateRange;
+      const matchesPlaceAffaire = filterPlaceAffaire === "tous" || item.place_affaire === filterPlaceAffaire;
+      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache && matchesDateRange && matchesPlaceAffaire;
     });
-  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, filterDateDebut, filterDateFin, getClientsNames]);
+  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, filterDateDebut, filterDateFin, filterPlaceAffaire, getClientsNames]);
 
   const handleSort = (field) => {
     setSortField(prevField => {
@@ -3445,221 +3448,20 @@ export default function Dossiers() {
 
 
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
-          <CardHeader className="pb-2">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
-                </div>
-
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Filtres</span>
-                  {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) && (
-                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {filterArpenteur.length + filterStatut.length + filterMandat.length + filterTache.length + filterVille.length + (filterDateDebut ? 1 : 0) + (filterDateFin ? 1 : 0)}
-                    </Badge>
-                  )}
-                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                </Button>
-              </div>
-
-              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                <CollapsibleContent>
-                  <div className="p-2 border border-emerald-500/30 rounded-lg">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-3 h-3 text-emerald-500" />
-                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
-                        </div>
-                        {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setFilterArpenteur([]);
-                              setFilterStatut([]);
-                              setFilterMandat([]);
-                              setFilterTache([]);
-                              setFilterVille([]);
-                              setFilterDateDebut("");
-                              setFilterDateFin("");
-                            }}
-                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                          >
-                            <X className="w-2.5 h-2.5 mr-1" />
-                            Réinitialiser
-                          </Button>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-5 gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            {ARPENTEURS.map((arp) => (
-                              <div
-                                key={arp}
-                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFilterArpenteur(prev => prev.includes(arp) ? prev.filter(a => a !== arp) : [...prev, arp]);
-                                }}
-                              >
-                                <input type="checkbox" readOnly checked={filterArpenteur.includes(arp)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
-                                <span className="text-white text-xs">{arp}</span>
-                              </div>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Statuts ({filterStatut.length > 0 ? `${filterStatut.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            {["Ouvert", "Fermé"].map((s) => (
-                              <div
-                                key={s}
-                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFilterStatut(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
-                                }}
-                              >
-                                <input type="checkbox" readOnly checked={filterStatut.includes(s)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
-                                <span className="text-white text-xs">{s}</span>
-                              </div>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Mandats ({filterMandat.length > 0 ? `${filterMandat.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            {TYPES_MANDATS.map((type) => (
-                              <div
-                                key={type}
-                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFilterMandat(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
-                                }}
-                              >
-                                <input type="checkbox" readOnly checked={filterMandat.includes(type)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
-                                <span className="text-white text-xs">{type}</span>
-                              </div>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Tâches ({filterTache.length > 0 ? `${filterTache.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            {TACHES.map((tache) => (
-                              <div
-                                key={tache}
-                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFilterTache(prev => prev.includes(tache) ? prev.filter(t => t !== tache) : [...prev, tache]);
-                                }}
-                              >
-                                <input type="checkbox" readOnly checked={filterTache.includes(tache)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
-                                <span className="text-white text-xs">{tache}</span>
-                              </div>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            {uniqueVilles.map((ville) => (
-                              <div
-                                key={ville}
-                                className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFilterVille(prev => prev.includes(ville) ? prev.filter(v => v !== ville) : [...prev, ville]);
-                                }}
-                              >
-                                <input type="checkbox" readOnly checked={filterVille.includes(ville)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
-                                <span className="text-white text-xs">{ville}</span>
-                              </div>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <div className="space-y-1 pt-1 border-t border-emerald-500/30">
-                        <Label className="text-xs text-emerald-500">Période d'ouverture</Label>
-                        <div className="flex items-center gap-1.5">
-                          <Input
-                            type="date"
-                            value={filterDateDebut}
-                            onChange={(e) => setFilterDateDebut(e.target.value)}
-                            placeholder="Du"
-                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
-                          />
-                          <span className="text-emerald-500 text-xs">→</span>
-                          <Input
-                            type="date"
-                            value={filterDateFin}
-                            onChange={(e) => setFilterDateFin(e.target.value)}
-                            placeholder="Au"
-                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </CardHeader>
-        </Card>
+        <DossiersFilterBar
+          searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+          isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen}
+          filterArpenteur={filterArpenteur} setFilterArpenteur={setFilterArpenteur}
+          filterStatut={filterStatut} setFilterStatut={setFilterStatut}
+          filterMandat={filterMandat} setFilterMandat={setFilterMandat}
+          filterTache={filterTache} setFilterTache={setFilterTache}
+          filterVille={filterVille} setFilterVille={setFilterVille}
+          filterDateDebut={filterDateDebut} setFilterDateDebut={setFilterDateDebut}
+          filterDateFin={filterDateFin} setFilterDateFin={setFilterDateFin}
+          filterPlaceAffaire={filterPlaceAffaire} setFilterPlaceAffaire={setFilterPlaceAffaire}
+          uniqueVilles={uniqueVilles}
+          dossiersWithMandats={dossiersWithMandats}
+        />
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
