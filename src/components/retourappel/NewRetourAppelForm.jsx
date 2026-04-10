@@ -251,27 +251,6 @@ export default function NewRetourAppelForm({
 
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
-                <div className="flex items-center gap-1.5 mb-3">
-                  <Checkbox
-                    id="aucunDossier"
-                    checked={aucunDossier}
-                    onCheckedChange={(checked) => {
-                      setAucunDossier(checked);
-                      if (!checked) {
-                        setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
-                        setDossierFound(false);
-                      } else {
-                        setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
-                        setDossierFound(true);
-                        setSelectedArpenteur("");
-                        setSelectedNumeroDossier("");
-                        setSelectedClient("");
-                      }
-                    }}
-                  />
-                  <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer">Aucun dossier</Label>
-                </div>
-
                 {aucunDossier ? (
                   <div className="space-y-3">
                     <div className="space-y-1">
@@ -314,6 +293,27 @@ export default function NewRetourAppelForm({
                   <div className="space-y-3">
                     {/* Ligne de filtres */}
                     <div className="flex items-end gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <Checkbox
+                          id="aucunDossier"
+                          checked={aucunDossier}
+                          onCheckedChange={(checked) => {
+                            setAucunDossier(checked);
+                            if (!checked) {
+                              setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
+                              setDossierFound(false);
+                            } else {
+                              setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
+                              setDossierFound(true);
+                              setSelectedArpenteur("");
+                              setSelectedNumeroDossier("");
+                              setSelectedClient("");
+                            }
+                          }}
+                        />
+                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
+                      </div>
+
                       <div className="flex-1 space-y-1">
                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                         <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
