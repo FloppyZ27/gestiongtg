@@ -593,7 +593,7 @@ export default function EditDossierForm({
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Place d'affaire</Label>
                             <Select value={formData.place_affaire || ""} onValueChange={(value) => {
-                              setFormData(prev => ({...prev, place_affaire: value}));
+                              setFormData(prev => ({...prev, place_affaire: value || ""}));
                             }}>
                               <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                 <SelectValue placeholder="Sélectionner" />
@@ -603,10 +603,6 @@ export default function EditDossierForm({
                                 <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
-                            <Input value={formData.numero_dossier} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
                           </div>
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
