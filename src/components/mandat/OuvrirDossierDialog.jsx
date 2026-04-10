@@ -5,6 +5,7 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import EditDossierForm from "../dossiers/EditDossierForm";
 import ClientFormDialog from "../clients/ClientFormDialog";
+import ClientSelectionCard from "./ClientSelectionCard";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -308,7 +309,14 @@ export default function OuvrirDossierDialog({
             getLotById={getLotById}
             setIsClientFormDialogOpen={setIsClientFormOpen}
             setClientTypeForForm={setClientTypeForForm}
+            setEditingClientForForm={setEditingClientForForm}
             setViewingClientDetails={() => {}}
+            clientSelectionCardComponent={ClientSelectionCard}
+            onClientCardClick={(client) => {
+              setEditingClientForForm(client);
+              setClientTypeForForm(client.type_client);
+              setIsClientFormOpen(true);
+            }}
             calculerProchainNumeroDossier={(arpenteur) => {
               const existingDossiers = clients.filter((d) => d?.arpenteur_geometre === arpenteur && d?.numero_dossier);
               const maxDossier = existingDossiers.reduce((max, d) => {
