@@ -111,15 +111,18 @@ export default function DossiersFilterBar({
         </div>
       </div>
 
-      <PlaceAffaireTabs
-        value={filterPlaceAffaire}
-        onChange={setFilterPlaceAffaire}
-        counts={{
-          tous: dossiersWithMandats.length,
-          alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
-          saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
-        }}
-      />
+      <div className="mb-2">
+        <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
+        <PlaceAffaireTabs
+          value={filterPlaceAffaire}
+          onChange={setFilterPlaceAffaire}
+          counts={{
+            tous: dossiersWithMandats.length,
+            alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
+            saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
+          }}
+        />
+      </div>
     </>
   );
 }
