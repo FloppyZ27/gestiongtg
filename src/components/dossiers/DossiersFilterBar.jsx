@@ -55,6 +55,19 @@ export default function DossiersFilterBar({
 
   return (
     <>
+      <div className="mb-2">
+        <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
+        <PlaceAffaireTabs
+          value={filterPlaceAffaire}
+          onChange={setFilterPlaceAffaire}
+          counts={{
+            tous: dossiersWithMandats.length,
+            alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
+            saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
+          }}
+        />
+      </div>
+
       <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg mb-2 p-3">
         <div className="space-y-3">
           <div className="flex justify-between items-center gap-2">
@@ -110,19 +123,6 @@ export default function DossiersFilterBar({
           </Collapsible>
         </div>
       </div>
-
-      <div className="mb-2">
-        <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
-        <PlaceAffaireTabs
-          value={filterPlaceAffaire}
-          onChange={setFilterPlaceAffaire}
-          counts={{
-            tous: dossiersWithMandats.length,
-            alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
-            saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
-          }}
-        />
-      </div>
-    </>
-  );
-}
+      </>
+      );
+      }
