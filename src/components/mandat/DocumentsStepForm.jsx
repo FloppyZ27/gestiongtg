@@ -32,14 +32,18 @@ export default function DocumentsStepForm({
   const initials = getArpenteurInitials(arpenteurGeometre);
 
   let rootPath;
+  let initialPath = [];
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
     const today = new Date().toISOString().split('T')[0];
-    rootPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}/INTRANTS`;
+    rootPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}-${today}`;
+    initialPath = ["INTRANTS"];
   } else if (showAllSubfolders) {
     rootPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
+    initialPath = [];
   } else {
-    rootPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+    rootPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}`;
+    initialPath = ["INTRANTS"];
   }
 
   return (
@@ -62,6 +66,7 @@ export default function DocumentsStepForm({
         <CardContent className="pt-2 pb-3">
           <SharePointExplorer
             rootPath={rootPath}
+            initialPath={initialPath}
             maxHeight="420px"
             allowUpload={true}
             allowDelete={true}

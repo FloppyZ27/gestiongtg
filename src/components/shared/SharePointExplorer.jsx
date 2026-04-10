@@ -20,8 +20,8 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
-export default function SharePointExplorer({ rootPath, maxHeight = "400px", allowUpload = true, allowDelete = false }) {
-  const [pathStack, setPathStack] = useState([]);
+export default function SharePointExplorer({ rootPath, initialPath = [], maxHeight = "400px", allowUpload = true, allowDelete = false }) {
+  const [pathStack, setPathStack] = useState(initialPath);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [fileToDelete, setFileToDelete] = useState(null);
