@@ -21,12 +21,52 @@ export default function OuvrirDossierDialog({
   const [formData, setFormData] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [internalCommentaires, setInternalCommentaires] = useState([]);
+  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
+  const [clientTypeForForm, setClientTypeForForm] = useState(null);
+  const [newClientForm, setNewClientForm] = useState({ prenom: '', nom: '' });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me()
   });
+
+  const handleAddClient = async () => {
+    if (!newClientForm.prenom.trim() || !newClientForm.nom.trim()) {
+      alert('Veuillez entrer le prénom et le nom');
+      return;
+    }
+    
+    try {
+      const newClient = await base44.entities.Client.create({
+        prenom: newClientForm.prenom,
+        nom: newClientForm.nom,
+        type_client: clientTypeForForm
+      });
+      
+      const fieldMap = {
+        'Client': 'clients_ids',
+        'Notaire': 'notaires_ids',
+        'Courtier immobilier': 'courtiers_ids',
+        'Compagnie': 'compagnies_ids'
+      };
+      
+      const field = fieldMap[clientTypeForForm];
+      if (field && formData) {
+        setFormData(prev => ({
+          ...prev,
+          [field]: [...(prev[field] || []), newClient.id]
+        }));
+      }
+      
+      setNewClientForm({ prenom: '', nom: '' });
+      setIsClientFormOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    } catch (error) {
+      console.error('Erreur création client:', error);
+      alert('Erreur lors de la création du client');
+    }
+  };
 
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
@@ -151,10 +191,6 @@ export default function OuvrirDossierDialog({
     return null;
   };
 
-
-
-
-
   const getLotById = (id) => (lots || []).find(l => l.id === id);
 
   const updateMandat = (index, field, value) => {
@@ -268,61 +304,108 @@ export default function OuvrirDossierDialog({
       navigate(`/Dossiers?id=${newDossier.id}`);
     } catch (error) {
       console.error("Erreur création dossier:", error);
-     } finally {
+    } finally {
       setIsCreating(false);
     }
   };
 
-
-
   if (!formData) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
-        style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}
-      >
-        <DialogHeader className="sr-only">
-          <DialogTitle>Ouvrir le dossier</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+          style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Ouvrir le dossier</DialogTitle>
+          </DialogHeader>
 
-        <EditDossierForm
-          formData={formData}
-          setFormData={setFormData}
-          clients={clients || []}
-          lots={lots || []}
-          users={users || []}
-          onSubmit={handleCreate}
-          onCancel={() => onOpenChange(false)}
-          updateMandat={updateMandat}
-          addMandat={addMandat}
-          removeMandat={removeMandat}
-          openLotSelector={() => {}}
-          removeLotFromMandat={removeLotFromMandat}
-          openAddMinuteDialog={() => {}}
-          removeMinuteFromMandat={() => {}}
-          getLotById={getLotById}
-          setIsClientFormDialogOpen={() => {}}
-          setClientTypeForForm={() => {}}
-          setViewingClientDetails={() => {}}
-          calculerProchainNumeroDossier={() => formData.numero_dossier}
-          editingDossier={null}
-          hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
-          commentairesTemporaires={internalCommentaires}
-          onCommentairesTemporairesChange={(newComments) => {
-            setInternalCommentaires(prev => {
-              const recap = prev.filter(c => c._isRecap);
-              return [...recap, ...newComments];
-            });
-          }}
-          onOpenNewLotDialog={() => {}}
-          setEditingClient={() => {}}
-          setEditingLot={() => {}}
-          setNewLotForm={() => {}}
-          setLotActionLogs={() => {}}
-        />
-      </DialogContent>
-    </Dialog>
+          <EditDossierForm
+            formData={formData}
+            setFormData={setFormData}
+            clients={clients || []}
+            lots={lots || []}
+            users={users || []}
+            onSubmit={handleCreate}
+            onCancel={() => onOpenChange(false)}
+            updateMandat={updateMandat}
+            addMandat={addMandat}
+            removeMandat={removeMandat}
+            openLotSelector={() => {}}
+            removeLotFromMandat={removeLotFromMandat}
+            openAddMinuteDialog={() => {}}
+            removeMinuteFromMandat={() => {}}
+            getLotById={getLotById}
+            setIsClientFormDialogOpen={setIsClientFormOpen}
+            setClientTypeForForm={setClientTypeForForm}
+            setViewingClientDetails={() => {}}
+            calculerProchainNumeroDossier={() => formData.numero_dossier}
+            editingDossier={null}
+            hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
+            commentairesTemporaires={internalCommentaires}
+            onCommentairesTemporairesChange={(newComments) => {
+              setInternalCommentaires(prev => {
+                const recap = prev.filter(c => c._isRecap);
+                return [...recap, ...newComments];
+              });
+            }}
+            onOpenNewLotDialog={() => {}}
+            setEditingClient={() => {}}
+            setEditingLot={() => {}}
+            setNewLotForm={() => {}}
+            setLotActionLogs={() => {}}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog pour ajouter un client */}
+      <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
+        <DialogContent className="bg-slate-800 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>
+              Ajouter {clientTypeForForm === 'Notaire' ? 'un notaire' : clientTypeForForm === 'Courtier immobilier' ? 'un courtier' : clientTypeForForm === 'Compagnie' ? 'une compagnie' : 'un client'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-slate-400 text-xs">Prénom</label>
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={newClientForm.prenom}
+                onChange={(e) => setNewClientForm({ ...newClientForm, prenom: e.target.value })}
+                className="w-full bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-slate-400 text-xs">Nom</label>
+              <input
+                type="text"
+                placeholder="Nom"
+                value={newClientForm.nom}
+                onChange={(e) => setNewClientForm({ ...newClientForm, nom: e.target.value })}
+                className="w-full bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded text-sm"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setIsClientFormOpen(false)}
+                className="px-4 py-2 border border-slate-600 text-slate-400 rounded hover:bg-slate-700"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleAddClient}
+                className="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500/30"
+              >
+                Ajouter
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
