@@ -898,8 +898,7 @@ export default function Dossiers() {
     setViewingDossier(null);
     setEditingDossier(entity);
     setFormData({
-      numero_dossier: entity.numero_dossier || "",
-      arpenteur_geometre: entity.arpenteur_geometre || "",
+      numero_dossier: entity.numero_dossier || "", arpenteur_geometre: entity.arpenteur_geometre || "", place_affaire: entity.place_affaire || "",
       date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
       date_fermeture: entity.date_fermeture || "",
       statut: entity.statut || "Ouvert",
