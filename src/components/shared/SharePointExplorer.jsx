@@ -143,7 +143,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
         >
           <Home className="w-3.5 h-3.5" />
         </button>
-        <span className="text-slate-500 text-xs font-mono truncate max-w-[200px]" title={currentPath}>{rootPath}</span>
+        <span className="text-slate-500 text-xs font-mono" title={currentPath}>{currentPath}</span>
         {pathStack.map((part, idx) => (
           <div key={idx} className="flex items-center gap-1 min-w-0 flex-shrink-0">
             <ChevronRight className="w-3 h-3 text-slate-600" />
