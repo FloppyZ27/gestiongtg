@@ -101,8 +101,15 @@ Deno.serve(async (req) => {
       label(page, title, x + w/2, topY + h/2 + mm(1), { bold:true, size:9, align:'center' });
     };
 
-    const checkbox = (page, x, topY, size = mm(2.8)) => {
-      rect(page, x, topY, size, size, { bw: 0.5 });
+    let _cbIdx = 0;
+    const checkbox = (page, x, topY, size = mm(2.8), checked = false) => {
+      const field = form.createCheckBox(`cb_${_cbIdx++}`);
+      if (checked) field.check();
+      field.acroField.dict.set(PDFName.of('DA'), PDFString.of('/ZaDb 8 Tf 0 0 0 rg'));
+      field.addToPage(page, {
+        x, y: py(topY + size), width: size, height: size,
+        borderWidth: 0.5, borderColor: BLACK, backgroundColor: WHITE,
+      });
     };
 
     // ── AcroForm text field helper ──────────────────────────────────────────
