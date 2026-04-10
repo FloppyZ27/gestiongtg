@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import EditDossierForm from "../dossiers/EditDossierForm";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function OuvrirDossierDialog({
   open,
@@ -341,7 +343,14 @@ export default function OuvrirDossierDialog({
             setIsClientFormDialogOpen={setIsClientFormOpen}
             setClientTypeForForm={setClientTypeForForm}
             setViewingClientDetails={() => {}}
-            calculerProchainNumeroDossier={() => formData.numero_dossier}
+            calculerProchainNumeroDossier={(arpenteur) => {
+              const existingDossiers = clients.filter((d) => d?.arpenteur_geometre === arpenteur && d?.numero_dossier);
+              const maxDossier = existingDossiers.reduce((max, d) => {
+                const num = parseInt(d.numero_dossier, 10);
+                return isNaN(num) ? max : Math.max(max, num);
+              }, 0);
+              return (maxDossier + 1).toString();
+            }}
             editingDossier={null}
             hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
             commentairesTemporaires={internalCommentaires}
@@ -361,7 +370,7 @@ export default function OuvrirDossierDialog({
       </Dialog>
 
       <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
-        <DialogContent className="bg-slate-800 border-slate-700 text-white">
+        <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
           <DialogHeader>
             <DialogTitle>
               Ajouter {clientTypeForForm === 'Notaire' ? 'un notaire' : clientTypeForForm === 'Courtier immobilier' ? 'un courtier' : clientTypeForForm === 'Compagnie' ? 'une compagnie' : 'un client'}
@@ -389,18 +398,19 @@ export default function OuvrirDossierDialog({
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <button
+              <Button
                 onClick={() => setIsClientFormOpen(false)}
-                className="px-4 py-2 border border-slate-600 text-slate-400 rounded hover:bg-slate-700"
+                variant="outline"
+                className="border-slate-600 text-slate-400"
               >
                 Annuler
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleAddClient}
-                className="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500/30"
+                className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
               >
                 Ajouter
-              </button>
+              </Button>
             </div>
           </div>
         </DialogContent>
