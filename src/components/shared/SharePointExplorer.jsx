@@ -163,7 +163,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
               </span>
             </label>
           )}
-          <button onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} className="p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors" title={viewMode === 'grid' ? 'Vue liste' : 'Vue grille'}>
+          <button type="button" onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} className="p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors" title={viewMode === 'grid' ? 'Vue liste' : 'Vue grille'}>
             {viewMode === 'grid' ? <List className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
           </button>
           <Button type="button" variant="ghost" size="sm" onClick={() => refetch()} className="h-6 w-6 p-0 text-slate-400 hover:text-white">
