@@ -2322,10 +2322,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               // Vérifier s'il y a des changements avant de fermer
               const hasChanges = 
                 formData.arpenteur_geometre ||
-                formData.clients_ids.length > 0 ||
-                formData.notaires_ids.length > 0 ||
-                formData.courtiers_ids.length > 0 ||
-                formData.compagnies_ids.length > 0 ||
+                (formData.clients_ids?.length ?? 0) > 0 ||
+                (formData.notaires_ids?.length ?? 0) > 0 ||
+                (formData.courtiers_ids?.length ?? 0) > 0 ||
+                (formData.compagnies_ids?.length ?? 0) > 0 ||
                 clientInfo.prenom ||
                 clientInfo.nom ||
                 clientInfo.telephone ||
@@ -2338,7 +2338,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 workAddress.numeros_civiques?.[0] ||
                 workAddress.numero_lot ||
                 mandatsInfo.some(m => m.type_mandat) ||
-                commentairesTemporaires.length > 0;
+                (commentairesTemporaires?.length ?? 0) > 0;
               
               if(hasChanges&&!editingPriseMandat&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
               if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}
