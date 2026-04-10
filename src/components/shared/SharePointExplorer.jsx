@@ -202,11 +202,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
               >
                 <div className="relative w-full flex justify-center">
                   <Folder className="w-10 h-10 text-blue-400" />
-                  {allowDelete && (
-                    <button onClick={(e) => { e.stopPropagation(); setFileToDelete(folder); }} className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  )}
+
                 </div>
                 <span className="text-blue-300 text-xs font-medium text-center break-all line-clamp-2 w-full">{folder.name}</span>
               </div>
@@ -243,14 +239,6 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <ChevronRight className="w-4 h-4 text-slate-500" />
-                  {allowDelete && (
-                    <Button type="button" variant="ghost" size="sm"
-                      onClick={(e) => { e.stopPropagation(); setFileToDelete(folder); }}
-                      className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  )}
                 </div>
               </div>
             ))}
