@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -192,139 +192,16 @@ export default function EditDossierForm({
 
   const prevFormDataRef = useRef(null);
 
-  // Auto-save mutation
-  const autoSaveMutation = useMutation({
-    mutationFn: async (dossierData) => {
-      if (!editingDossier) return;
-      const updatedDossier = await base44.entities.Dossier.update(editingDossier.id, dossierData);
-      return updatedDossier;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-    },
-  });
-
-  // Détecter les changements de champs et créer des logs
-  const detectAndLogChanges = async (oldData, newData) => {
-    if (!oldData || !editingDossier?.id) return;
-    const changes = [];
-
-    const fieldLabels = {
-      arpenteur_geometre: "Arpenteur-géomètre",
-      numero_dossier: "N° dossier",
-      statut: "Statut",
-      place_affaire: "Place d'affaire",
-      date_ouverture: "Date d'ouverture",
-      date_fermeture: "Date de fermeture",
-      ttl: "TTL",
-    };
-
-    // Champs simples
-    for (const [field, label] of Object.entries(fieldLabels)) {
-      if (oldData[field] !== newData[field]) {
-        changes.push(`${label}: "${oldData[field] || '-'}" → "${newData[field] || '-'}"`);
-      }
-    }
-
-    // Clients
-    const oldClients = (oldData.clients_ids || []).join(',');
-    const newClients = (newData.clients_ids || []).join(',');
-    if (oldClients !== newClients) {
-      changes.push(`Clients modifiés`);
-    }
-
-    // Notaires
-    const oldNotaires = (oldData.notaires_ids || []).join(',');
-    const newNotaires = (newData.notaires_ids || []).join(',');
-    if (oldNotaires !== newNotaires) {
-      changes.push(`Notaires modifiés`);
-    }
-
-    // Courtiers
-    const oldCourtiers = (oldData.courtiers_ids || []).join(',');
-    const newCourtiers = (newData.courtiers_ids || []).join(',');
-    if (oldCourtiers !== newCourtiers) {
-      changes.push(`Courtiers modifiés`);
-    }
-
-    // Mandats - tâche et utilisateur assigné
-    const oldMandats = oldData.mandats || [];
-    const newMandats = newData.mandats || [];
-    newMandats.forEach((newMandat, idx) => {
-      const oldMandat = oldMandats[idx];
-      if (!oldMandat) return;
-      const mandatLabel = newMandat.type_mandat || `Mandat ${idx + 1}`;
-      if (oldMandat.tache_actuelle !== newMandat.tache_actuelle) {
-        changes.push(`[${mandatLabel}] Tâche: "${oldMandat.tache_actuelle || '-'}" → "${newMandat.tache_actuelle || '-'}"`);
-      }
-      if (oldMandat.utilisateur_assigne !== newMandat.utilisateur_assigne) {
-        changes.push(`[${mandatLabel}] Utilisateur assigné modifié`);
-      }
-      if (oldMandat.type_mandat !== newMandat.type_mandat) {
-        changes.push(`Mandat ${idx + 1}: type "${oldMandat.type_mandat || '-'}" → "${newMandat.type_mandat || '-'}"`);
-      }
-      // Adresse travaux
-      const oldAddr = JSON.stringify(oldMandat.adresse_travaux || {});
-      const newAddr = JSON.stringify(newMandat.adresse_travaux || {});
-      if (oldAddr !== newAddr) {
-        changes.push(`[${mandatLabel}] Adresse des travaux modifiée`);
-      }
-      // Dates
-      if (oldMandat.date_livraison !== newMandat.date_livraison) {
-        changes.push(`[${mandatLabel}] Date livraison: "${oldMandat.date_livraison || '-'}" → "${newMandat.date_livraison || '-'}"`);
-      }
-      if (oldMandat.date_signature !== newMandat.date_signature) {
-        changes.push(`[${mandatLabel}] Date signature: "${oldMandat.date_signature || '-'}" → "${newMandat.date_signature || '-'}"`);
-      }
-      // Tarification
-      if (oldMandat.prix_estime !== newMandat.prix_estime) {
-        changes.push(`[${mandatLabel}] Prix estimé: "${oldMandat.prix_estime ?? '-'}" → "${newMandat.prix_estime ?? '-'}"`);
-      }
-      if (oldMandat.rabais !== newMandat.rabais) {
-        changes.push(`[${mandatLabel}] Rabais: "${oldMandat.rabais ?? '-'}" → "${newMandat.rabais ?? '-'}"`);
-      }
-      if (oldMandat.taxes_incluses !== newMandat.taxes_incluses) {
-        changes.push(`[${mandatLabel}] Taxes incluses: "${oldMandat.taxes_incluses ? 'Oui' : 'Non'}" → "${newMandat.taxes_incluses ? 'Oui' : 'Non'}"`);
-      }
-      if (oldMandat.prix_convenu !== newMandat.prix_convenu) {
-        changes.push(`[${mandatLabel}] Prix convenu: "${oldMandat.prix_convenu ? 'Oui' : 'Non'}" → "${newMandat.prix_convenu ? 'Oui' : 'Non'}"`);
-      }
-    });
-
-    if (changes.length > 0) {
-      const log = await base44.entities.ActionLog.create({
-        utilisateur_email: user?.email || "",
-        utilisateur_nom: user?.full_name || "",
-        action: "Modification",
-        entite: "Dossier",
-        entite_id: editingDossier.id,
-        details: changes.join(' • ')
-      });
-      setActionLogs(prev => [log, ...prev]);
-    }
+  // eslint-disable-next-line no-unused-vars
+  const detectAndLogChanges = async (o, n) => {
+    if (!o || !editingDossier?.id) return;
+    const chg = [];
+    for (const [f, l] of Object.entries({arpenteur_geometre:"Arpenteur",numero_dossier:"N° dossier",statut:"Statut",place_affaire:"Place d'affaire",date_ouverture:"Date ouverture"})) { if (o[f]!==n[f]) chg.push(`${l}: "${o[f]||'-'}" → "${n[f]||'-'}"`); }
+    if ((o.clients_ids||[]).join(',')!==(n.clients_ids||[]).join(',')) chg.push('Clients modifiés');
+    (n.mandats||[]).forEach((m,i)=>{ const p=(o.mandats||[])[i]; if(!p) return; const lb=m.type_mandat||`Mandat ${i+1}`; if(p.tache_actuelle!==m.tache_actuelle) chg.push(`[${lb}] Tâche modifiée`); if(p.utilisateur_assigne!==m.utilisateur_assigne) chg.push(`[${lb}] Utilisateur modifié`); });
+    if (chg.length>0) { const lg=await base44.entities.ActionLog.create({utilisateur_email:user?.email||"",utilisateur_nom:user?.full_name||"",action:"Modification",entite:"Dossier",entite_id:editingDossier.id,details:chg.join(' • ')}); setActionLogs(prev=>[lg,...prev]); }
   };
-
-  // Auto-save avec debounce
-  useEffect(() => {
-    if (editingDossier) {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      saveTimeoutRef.current = setTimeout(async () => {
-        const oldData = prevFormDataRef.current;
-        prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
-        await detectAndLogChanges(oldData, formData);
-        autoSaveMutation.mutate(formData);
-      }, 1500);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [formData, editingDossier]);
+  useEffect(()=>{ if(editingDossier){if(saveTimeoutRef.current)clearTimeout(saveTimeoutRef.current);saveTimeoutRef.current=setTimeout(async()=>{const o=prevFormDataRef.current;prevFormDataRef.current=JSON.parse(JSON.stringify(formData));if(o)await detectAndLogChanges(o,formData);},1500);}return()=>{if(saveTimeoutRef.current)clearTimeout(saveTimeoutRef.current);};},[formData,editingDossier]);
 
   const [actionLogs, setActionLogs] = useState([]);
 
