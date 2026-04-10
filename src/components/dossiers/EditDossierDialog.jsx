@@ -185,7 +185,19 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     mutationFn: async ({ id, dossierData }) => {
       const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
       const oldDossier = allDossiersCurrentState.find(d => d.id === id);
-      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      const cleanData = {
+        numero_dossier: dossierData.numero_dossier,
+        arpenteur_geometre: dossierData.arpenteur_geometre,
+        place_affaire: dossierData.place_affaire || "",
+        date_ouverture: dossierData.date_ouverture,
+        date_fermeture: dossierData.date_fermeture,
+        statut: dossierData.statut,
+        clients_ids: dossierData.clients_ids,
+        notaires_ids: dossierData.notaires_ids,
+        courtiers_ids: dossierData.courtiers_ids,
+        mandats: dossierData.mandats
+      };
+      const updatedDossier = await base44.entities.Dossier.update(id, cleanData);
       
       const currentUser = await base44.auth.me();
       
