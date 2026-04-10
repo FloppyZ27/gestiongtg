@@ -392,6 +392,12 @@ export default function ClientFormDialog({
     queryFn: () => base44.entities.Dossier.list('-created_date'),
     initialData: [],
   });
+  const { data: commentairesCount = [] } = useQuery({
+    queryKey: ['commentairesClient', editingClient?.id],
+    queryFn: () => editingClient?.id ? base44.entities.CommentaireClient.filter({ client_id: editingClient.id }) : [],
+    enabled: !!editingClient?.id, initialData: [],
+  });
+  const nbCommentaires = commentairesCount.length + commentairesTemporaires.length;
 
   const getArpenteurInitials = (arpenteur) => {
     if (!arpenteur) return "";
@@ -1790,9 +1796,10 @@ export default function ClientFormDialog({
             <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-slate-800 flex-shrink-0">
                 <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
-                  <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                    <MessageSquare className="w-4 h-4 mr-1" />
+                  <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300 flex items-center gap-1">
+                    <MessageSquare className="w-4 h-4" />
                     Commentaires
+                    {nbCommentaires > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">{nbCommentaires}</span>}
                   </TabsTrigger>
                   <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                     <Clock className="w-4 h-4 mr-1" />
