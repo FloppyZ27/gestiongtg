@@ -15,129 +15,139 @@ const getArpenteurInitials = (arpenteur) => {
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   try {
-    const d = new Date(dateStr);
+    const d = new Date(dateStr + 'T12:00:00');
     return d.toLocaleDateString('fr-CA');
   } catch { return dateStr; }
 };
 
-const checkbox = (doc, x, y, checked = false) => {
-  doc.rect(x, y - 3, 3.5, 3.5);
-  if (checked) {
-    doc.text('X', x + 0.5, y, { baseline: 'bottom' });
-  }
-};
-
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return Response.json({ error: 'Method not allowed' }, { status: 405 });
-  }
+  if (req.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 });
 
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { dossierData, mandatType, clientsData, notairesData } = await req.json();
-
-    if (!dossierData) {
-      return Response.json({ error: 'Missing required data' }, { status: 400 });
-    }
+    if (!dossierData) return Response.json({ error: 'Missing required data' }, { status: 400 });
 
     const mandat = mandatType || dossierData.mandats?.[0] || {};
     const arpInitials = getArpenteurInitials(dossierData.arpenteur_geometre);
     const dossierNum = dossierData.numero_dossier || '';
     const pdfFileName = `FICHE_MANDAT_${arpInitials}-${dossierNum}.pdf`;
 
+    // Fetch logo
+    let logoBase64 = null;
+    try {
+      const logoResp = await fetch('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png');
+      if (logoResp.ok) {
+        const buf = await logoResp.arrayBuffer();
+        logoBase64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      }
+    } catch(_) {}
+
     const doc = new jsPDF({ unit: 'mm', format: 'letter' });
-    const pW = doc.internal.pageSize.getWidth();   // 215.9
-    const pH = doc.internal.pageSize.getHeight();  // 279.4
-    const L = 10; // left margin
-    const R = pW - 10; // right margin
+    const pW = doc.internal.pageSize.getWidth();
+    const pH = doc.internal.pageSize.getHeight();
+    const L = 10;
+    const R = pW - 10;
     const W = R - L;
 
-    // ── Helper functions ──────────────────────────────────────────────
-    const hline = (y) => { doc.line(L, y, R, y); };
-    const vline = (x, y1, y2) => { doc.line(x, y1, x, y2); };
-    const cell = (text, x, y, w, h, opts = {}) => {
-      doc.rect(x, y, w, h);
-      if (text) {
-        doc.setFontSize(opts.fontSize || 8);
-        doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
-        const tx = x + (opts.center ? w / 2 : 2);
-        const ty = y + h / 2 + (opts.fontSize || 8) * 0.35 / 2;
-        doc.text(String(text), tx, ty, { align: opts.center ? 'center' : 'left', baseline: 'middle' });
+    // ─── HELPERS ──────────────────────────────────────────────────────────
+    const cb = (x, y, checked = false, size = 3) => {
+      doc.setLineWidth(0.3);
+      doc.rect(x, y - size, size, size);
+      if (checked) {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text('X', x + 0.5, y - 0.3);
+        doc.setFont('helvetica', 'normal');
       }
     };
-    const labelVal = (label, val, x, y, labelW, totalW, h = 6) => {
-      doc.rect(x, y, totalW, h);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica', 'bold');
-      doc.text(label + ' :', x + 1, y + h / 2, { baseline: 'middle' });
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.text(String(val || ''), x + labelW + 2, y + h / 2, { baseline: 'middle' });
-    };
-    const sectionHeader = (title, x, y, w, h = 5) => {
-      doc.setFillColor(200, 200, 200);
+
+    const bold = (size = 8) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(size); };
+    const normal = (size = 8) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(size); };
+
+    const sectionBar = (title, x, y, w, h = 5) => {
+      doc.setFillColor(180, 180, 180);
       doc.rect(x, y, w, h, 'FD');
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
+      bold(8);
       doc.text(title, x + w / 2, y + h / 2, { align: 'center', baseline: 'middle' });
-      doc.setFont('helvetica', 'normal');
+      normal(8);
     };
 
-    // ── HEADER ──────────────────────────────────────────────────────
-    doc.rect(L, 10, W, 14);
-    // Left: company
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Girard Tremblay Gilbert Inc.', L + 3, 18, { baseline: 'middle' });
-    // Right: FICHE MANDAT
-    doc.setFontSize(18);
-    doc.text('FICHE MANDAT', R - 3, 18, { align: 'right', baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
+    const rowH = 5.5;
 
-    // Rev line top-left
-    doc.setFontSize(6.5);
-    doc.text('Rév. 13    Date : 2 juin 2022', L, 9);
+    // ─── PAGE 1 ───────────────────────────────────────────────────────────
 
-    // ── Row 1: Date mandat | N° dossier ───────────────────────────────
-    let y = 24;
-    const halfW = W / 2;
-    labelVal('Date du mandat', formatDate(dossierData.date_ouverture), L, y, 22, halfW);
-    vline(L + halfW, y, y + 6);
-    // N° dossier
-    doc.rect(L + halfW, y, halfW, 6);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.text('Numéro de dossier :', L + halfW + 1, y + 3, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text(`${arpInitials}-${dossierNum}`, L + halfW + 30, y + 3, { baseline: 'middle' });
+    // Rev line top
+    normal(6.5);
+    doc.text('Rév. 13    Date : 2 juin 2022', L, 8);
 
-    // ── Row 2: Date livraison | FLEXIBLE/STRICTE ──────────────────────
-    y += 6;
-    labelVal('Date de livraison', formatDate(mandat.date_livraison), L, y, 22, halfW);
-    doc.rect(L + halfW, y, halfW, 6);
-    // FLEXIBLE checkbox
-    checkbox(doc, L + halfW + 2, y + 4.5);
-    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-    doc.text('FLEXIBLE', L + halfW + 6.5, y + 3, { baseline: 'middle' });
-    // STRICTE checkbox
-    checkbox(doc, L + halfW + halfW / 2, y + 4.5);
-    doc.text('STRICTE', L + halfW + halfW / 2 + 4.5, y + 3, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
+    // Outer border
+    doc.setLineWidth(0.5);
+    doc.rect(L, 10, W, pH - 18);
+    doc.setLineWidth(0.3);
 
-    // ── Row 3: Type d'arpentage ──────────────────────────────────────
-    y += 6;
-    doc.rect(L, y, W, 11);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.text("Type d'arpentage :", L + 1, y + 3);
-    doc.setFont('helvetica', 'normal');
+    // HEADER row
+    const headerH = 14;
+    doc.setLineWidth(0.3);
+    doc.line(L, 10 + headerH, R, 10 + headerH);
+
+    // Logo
+    if (logoBase64) {
+      doc.addImage('data:image/png;base64,' + logoBase64, 'PNG', L + 1, 11, 12, 12);
+    }
+
+    // Company name
+    bold(10);
+    doc.text('Girard Tremblay Gilbert Inc.', L + 15, 10 + headerH / 2, { baseline: 'middle' });
+
+    // FICHE MANDAT title
+    bold(20);
+    doc.text('FICHE MANDAT', R - 2, 10 + headerH / 2, { align: 'right', baseline: 'middle' });
+    normal(8);
+
+    // ─── DATE MANDAT / N° DOSSIER ─────────────────────────────────────────
+    let y = 10 + headerH;
+    const half = W / 2;
+
+    doc.line(L, y + rowH, R, y + rowH);
+    doc.line(L + half, y, L + half, y + rowH);
+    bold(7.5);
+    doc.text('Date du mandat :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8);
+    doc.text(formatDate(dossierData.date_ouverture), L + 28, y + rowH / 2, { baseline: 'middle' });
+    bold(7.5);
+    doc.text('Numéro de dossier :', L + half + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8);
+    doc.text(`${arpInitials}-${dossierNum}`, L + half + 32, y + rowH / 2, { baseline: 'middle' });
+
+    // ─── DATE LIVRAISON / FLEXIBLE STRICTE ───────────────────────────────
+    y += rowH;
+    doc.line(L, y + rowH, R, y + rowH);
+    doc.line(L + half, y, L + half, y + rowH);
+    bold(7.5);
+    doc.text('Date de livraison :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8);
+    doc.text(formatDate(mandat.date_livraison), L + 30, y + rowH / 2, { baseline: 'middle' });
+    // FLEXIBLE / STRICTE
+    const flexX = L + half + 2;
+    cb(flexX, y + rowH - 1);
+    bold(8);
+    doc.text('FLEXIBLE', flexX + 4, y + rowH / 2, { baseline: 'middle' });
+    const strictX = L + half + half * 0.55;
+    cb(strictX, y + rowH - 1);
+    doc.text('STRICTE', strictX + 4, y + rowH / 2, { baseline: 'middle' });
+    normal(8);
+
+    // ─── TYPE D'ARPENTAGE ─────────────────────────────────────────────────
+    y += rowH;
+    const typeH = 11;
+    doc.line(L, y + typeH, R, y + typeH);
+    bold(7.5);
+    doc.text("Type d'arpentage :", L + 1, y + 3.5, { baseline: 'middle' });
+    normal(8);
 
     const typeMap = {
       "Certificat de localisation": "CL",
@@ -149,343 +159,362 @@ Deno.serve(async (req) => {
       "Levé topographique": "LEVÉ",
       "Bornage": "BORN",
     };
-    const activeTypes = (dossierData.mandats || [mandat]).map(m => typeMap[m.type_mandat] || null);
+    const activeTypes = new Set((dossierData.mandats || [mandat]).map(m => typeMap[m.type_mandat]).filter(Boolean));
 
-    const row1Types = [['CL', 'Certificat de localisation'], ['DT', 'Description Technique'], ['PIQ', 'Piquetage'], ['LOTIS', 'Projet de lotissement'], ['AUT', null]];
-    const row2Types = [['IMP *', 'Implantation'], ['OCTR', 'OCTR'], ['LEVÉ', 'Levé topographique'], ['BORN', 'Bornage'], ['', null]];
+    const row1 = [['CL', 'CL'], ['DT', 'DT'], ['PIQ', 'PIQ'], ['LOTIS', 'LOTIS'], ['AUT ___', null]];
+    const row2 = [['IMP *', 'IMP'], ['OCTR', 'OCTR'], ['LEVÉ', 'LEVÉ'], ['BORN', 'BORN']];
 
-    let cx = L + 28;
-    for (const [label, key] of row1Types) {
-      const checked = key ? activeTypes.includes(typeMap[key] || label) : false;
-      checkbox(doc, cx, y + 5, checked);
-      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-      doc.text(label, cx + 4.5, y + 3.5, { baseline: 'middle' });
-      cx += 30;
+    let cx = L + 30;
+    const colStep = 34;
+    for (const [label, key] of row1) {
+      cb(cx, y + 5, key ? activeTypes.has(key) : false);
+      bold(7.5);
+      doc.text(label, cx + 4, y + 3.5, { baseline: 'middle' });
+      cx += colStep;
     }
-    cx = L + 28;
-    for (const [label, key] of row2Types) {
-      if (!label) { cx += 30; continue; }
-      const checked = key ? activeTypes.includes(typeMap[key] || label) : false;
-      checkbox(doc, cx, y + 10, checked);
-      doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-      doc.text(label, cx + 4.5, y + 8.5, { baseline: 'middle' });
-      cx += 30;
+    cx = L + 30;
+    for (const [label, key] of row2) {
+      cb(cx, y + 10, key ? activeTypes.has(key) : false);
+      bold(7.5);
+      doc.text(label, cx + 4, y + 8.5, { baseline: 'middle' });
+      cx += colStep;
     }
-    doc.setFont('helvetica', 'normal');
+    normal(8);
 
-    // ── CLIENTS section ──────────────────────────────────────────────
-    y += 11;
-    sectionHeader('CLIENT(S)', L, y, W);
+    // ─── CLIENT(S) ────────────────────────────────────────────────────────
+    y += typeH;
+    sectionBar('CLIENT(S)', L, y, W);
     y += 5;
 
     const client = clientsData?.[0] || {};
-    const clientNom = client ? `${client.prenom || ''} ${client.nom || ''}`.trim() : '';
-    const clientTel = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || '';
+    const clientNom = `${client.prenom || ''} ${client.nom || ''}`.trim();
+    const clientTelCell = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || '';
     const clientEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || '';
-    const clientAddr = client.adresses?.find(a => a.actuelle)?.rue || '';
-    const clientVille = client.adresses?.find(a => a.actuelle)?.ville || '';
-    const clientCP = client.adresses?.find(a => a.actuelle)?.code_postal || '';
+    const clientAddr = client.adresses?.find(a => a.actuelle) || client.adresses?.[0] || {};
 
-    const col1 = W * 0.52;
-    const col2 = W - col1;
+    const c1 = W * 0.52;
+    const c2 = W - c1;
 
-    // Nom | Cellulaire
-    doc.rect(L, y, col1, 5); doc.rect(L + col1, y, col2, 5);
-    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-    doc.text('Nom(s) :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.text('Cellulaire :', L + col1 + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(clientNom, L + 14, y + 2.5, { baseline: 'middle' });
-    doc.text(clientTel, L + col1 + 17, y + 2.5, { baseline: 'middle' });
+    const clientRow = (labelL, valL, labelR, valR, rowY) => {
+      doc.line(L, rowY + rowH, R, rowY + rowH);
+      doc.line(L + c1, rowY, L + c1, rowY + rowH);
+      bold(7.5);
+      doc.text(labelL, L + 1, rowY + rowH / 2, { baseline: 'middle' });
+      if (valL) { normal(8); doc.text(valL, L + c1 * 0.32, rowY + rowH / 2, { baseline: 'middle' }); }
+      if (labelR) { bold(7.5); doc.text(labelR, L + c1 + 1, rowY + rowH / 2, { baseline: 'middle' }); }
+      if (valR) { normal(8); doc.text(valR, L + c1 + 22, rowY + rowH / 2, { baseline: 'middle' }); }
+    };
 
-    y += 5;
-    // blank | Travail
-    doc.rect(L, y, col1, 5); doc.rect(L + col1, y, col2, 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Travail :', L + col1 + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
+    clientRow('Nom(s) :', clientNom, 'Cellulaire :', clientTelCell, y);
+    y += rowH;
+    clientRow('', '', 'Travail :', '', y);
+    y += rowH;
+    clientRow('Adresse :', clientAddr.rue || '', 'Maison :', '', y);
+    y += rowH;
+    clientRow('Municipalité :', clientAddr.ville || '', 'Autre :', '', y);
+    y += rowH;
+    clientRow('Code postal :', clientAddr.code_postal || '', '', '', y);
+    y += rowH;
+    // Courriel (full width)
+    doc.line(L, y + rowH, R, y + rowH);
+    bold(7.5); doc.text('Courriel :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8); doc.text(clientEmail, L + 17, y + rowH / 2, { baseline: 'middle' });
+    y += rowH;
 
-    y += 5;
-    // Adresse | Maison
-    doc.rect(L, y, col1, 5); doc.rect(L + col1, y, col2, 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Adresse :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.text('Maison :', L + col1 + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(clientAddr, L + 17, y + 2.5, { baseline: 'middle' });
-
-    y += 5;
-    // Municipalité | Autre
-    doc.rect(L, y, col1, 5); doc.rect(L + col1, y, col2, 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Municipalité :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.text('Autre :', L + col1 + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(clientVille, L + 22, y + 2.5, { baseline: 'middle' });
-
-    y += 5;
-    // Code postal
-    doc.rect(L, y, col1, 5); doc.rect(L + col1, y, col2, 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Code postal :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(clientCP, L + 22, y + 2.5, { baseline: 'middle' });
-
-    y += 5;
-    // Courriel
-    doc.rect(L, y, W, 5);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Courriel :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    doc.text(clientEmail, L + 17, y + 2.5, { baseline: 'middle' });
-
-    // ── LOCALISATION / NOTES section ─────────────────────────────────
-    y += 5;
-    sectionHeader('LOCALISATION DES TRAVAUX', L, y, col1);
-    sectionHeader('FICHIER :', L + col1, y, col2);
+    // ─── LOCALISATION DES TRAVAUX + NOTES ────────────────────────────────
+    const locW = W * 0.52;
+    const noteW = W - locW;
+    sectionBar('LOCALISATION DES TRAVAUX', L, y, locW);
+    sectionBar('FICHIER :', L + locW, y, noteW);
     y += 5;
 
-    const addrTravaux = mandat.adresse_travaux || {};
-    const addrStr = [addrTravaux.numeros_civiques?.[0], addrTravaux.rue].filter(Boolean).join(' ');
-    const villeStr = addrTravaux.ville || '';
-    const cpStr = addrTravaux.code_postal || '';
-    const lotsStr = (mandat.lots_texte) || '';
+    const addrT = mandat.adresse_travaux || {};
+    const addrStr = [(addrT.numeros_civiques || []).filter(Boolean).join(', '), addrT.rue].filter(Boolean).join(' ');
+    const lotsStr = (mandat.lots || []).join(', ') || mandat.lots_texte || '';
 
-    const notesH = 30;
-    doc.rect(L, y, col1, notesH);
-    doc.rect(L + col1, y, col2, notesH);
-    doc.setFont('helvetica', 'bold');
-    doc.text('NOTES', L + col1 + col2 / 2, y + 3, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
+    const locH = rowH * 6;
+    doc.rect(L, y, locW, locH);
+    doc.rect(L + locW, y, noteW, locH);
+    bold(7.5);
+    doc.text('NOTES', L + locW + noteW / 2, y + 4, { align: 'center', baseline: 'middle' });
+    normal(8);
+    doc.line(L + locW, y + 5, R, y + 5);
 
-    // Adresse travaux
-    let ty2 = y + 5;
-    doc.setFont('helvetica', 'bold'); doc.text('Adresse :', L + 1, ty2, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal'); doc.text(addrStr, L + 17, ty2, { baseline: 'middle' });
-    ty2 += 5;
-    doc.setFont('helvetica', 'bold'); doc.text('Municipalité :', L + 1, ty2, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal'); doc.text(villeStr, L + 22, ty2, { baseline: 'middle' });
-    ty2 += 5;
-    doc.setFont('helvetica', 'bold'); doc.text('Code postal :', L + 1, ty2, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal'); doc.text(cpStr, L + 22, ty2, { baseline: 'middle' });
-    ty2 += 5;
-    // Identique checkbox
-    checkbox(doc, L + 1, ty2 + 0.5);
-    doc.setFontSize(7); doc.text("Identique à l'adresse contact", L + 5.5, ty2, { baseline: 'middle' });
-    ty2 += 5;
-    checkbox(doc, L + 1, ty2 + 0.5);
-    doc.text("Litige avec voisin", L + 5.5, ty2, { baseline: 'middle' });
-    ty2 += 5;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.text('Lots :', L + 1, ty2, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal'); doc.text(lotsStr, L + 11, ty2, { baseline: 'middle' });
+    let ly = y + rowH;
+    bold(7.5); doc.text('Adresse :', L + 1, ly, { baseline: 'middle' });
+    normal(8); doc.text(addrStr, L + 17, ly, { baseline: 'middle' });
+    ly += rowH;
+    bold(7.5); doc.text('Municipalité :', L + 1, ly, { baseline: 'middle' });
+    normal(8); doc.text(addrT.ville || '', L + 22, ly, { baseline: 'middle' });
+    ly += rowH;
+    bold(7.5); doc.text('Code postal :', L + 1, ly, { baseline: 'middle' });
+    normal(8); doc.text(addrT.code_postal || '', L + 22, ly, { baseline: 'middle' });
+    ly += rowH;
+    cb(L + 1, ly + 0.5);
+    normal(7); doc.text("Identique à l'adresse contact", L + 5.5, ly, { baseline: 'middle' });
+    ly += rowH;
+    cb(L + 1, ly + 0.5);
+    doc.text("Litige avec voisin", L + 5.5, ly, { baseline: 'middle' });
+    ly += rowH;
+    bold(7.5); doc.text('Lots :', L + 1, ly, { baseline: 'middle' });
+    normal(8); doc.text(lotsStr, L + 11, ly, { baseline: 'middle' });
 
-    // ── INTERVENANTS ─────────────────────────────────────────────────
-    y += notesH;
-    sectionHeader('INTERVENANTS', L, y, W);
+    y += locH;
+
+    // ─── INTERVENANTS ─────────────────────────────────────────────────────
+    sectionBar('INTERVENANTS', L, y, W);
     y += 5;
 
     const notaire = notairesData?.[0] || {};
-    const notaireNom = notaire ? `${notaire.prenom || ''} ${notaire.nom || ''}`.trim() : '';
-    const courtierNom = ''; // from dossierData.courtiers_ids
+    const notaireNom = `${notaire.prenom || ''} ${notaire.nom || ''}`.trim();
 
-    const rows = [
-      ['Notaire :', notaireNom],
-      ['Courtier :', courtierNom],
-      ['Autre :', ''],
-    ];
-    for (const [label, val] of rows) {
-      doc.rect(L, y, W, 5);
-      doc.setFont('helvetica', 'bold'); doc.text(label, L + 1, y + 2.5, { baseline: 'middle' });
-      doc.setFont('helvetica', 'normal'); doc.text(val, L + 18, y + 2.5, { baseline: 'middle' });
-      y += 5;
+    for (const [label, val] of [['Notaire :', notaireNom], ['Courtier :', ''], ['Autre :', '']]) {
+      doc.line(L, y + rowH, R, y + rowH);
+      bold(7.5); doc.text(label, L + 1, y + rowH / 2, { baseline: 'middle' });
+      normal(8); if (val) doc.text(val, L + 20, y + rowH / 2, { baseline: 'middle' });
+      y += rowH;
     }
-    // Mandant / Propriétaire
-    doc.rect(L, y, W, 5);
-    doc.setFont('helvetica', 'bold'); doc.text('Mandant :', L + 1, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 19, y + 4); doc.text('Identique client', L + 23, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 50, y + 4); doc.text('Autre :', L + 54, y + 2.5, { baseline: 'middle' });
-    y += 5;
-    doc.rect(L, y, W, 5);
-    doc.setFont('helvetica', 'bold'); doc.text('Propriétaire :', L + 1, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 22, y + 4); doc.text('Identique client', L + 26, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 53, y + 4); doc.text('Autre :', L + 57, y + 2.5, { baseline: 'middle' });
 
-    // ── LIVRAISON ────────────────────────────────────────────────────
-    y += 5;
-    sectionHeader('LIVRAISON', L, y, W);
-    y += 5;
-    doc.rect(L, y, W, 5);
-    doc.setFont('helvetica', 'bold'); doc.text('Date de signature:', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal'); doc.text(formatDate(mandat.date_signature), L + 30, y + 2.5, { baseline: 'middle' });
+    // Mandant
+    doc.line(L, y + rowH, R, y + rowH);
+    bold(7.5); doc.text('Mandant :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    cb(L + 20, y + rowH - 1); doc.text('Identique client', L + 24, y + rowH / 2, { baseline: 'middle' });
+    cb(L + 54, y + rowH - 1); doc.text('Autre :', L + 58, y + rowH / 2, { baseline: 'middle' });
+    y += rowH;
 
-    // EN MAIN PROPRE header
-    y += 5;
-    const colMP = W * 0.15, colDocs = W * 0.5, colFact = W - colMP - colDocs;
-    sectionHeader('EN MAIN PROPRE :', L, y, colMP, 4);
-    sectionHeader('DOCUMENTS', L + colMP, y, colDocs, 4);
-    sectionHeader('FACTURE', L + colMP + colDocs, y, colFact, 4);
+    // Propriétaire
+    doc.line(L, y + rowH, R, y + rowH);
+    bold(7.5); doc.text('Propriétaire :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    cb(L + 23, y + rowH - 1); doc.text('Identique client', L + 27, y + rowH / 2, { baseline: 'middle' });
+    cb(L + 57, y + rowH - 1); doc.text('Autre :', L + 61, y + rowH / 2, { baseline: 'middle' });
+    y += rowH;
 
-    y += 4;
-    const deliveryRows = ['Client', 'Notaire', 'Courtier', 'Aut. :'];
-    for (const row of deliveryRows) {
-      doc.rect(L, y, colMP, 5); doc.rect(L + colMP, y, colDocs, 5); doc.rect(L + colMP + colDocs, y, colFact, 5);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-      doc.text(row, L + colMP - 1, y + 2.5, { align: 'right', baseline: 'middle' });
-      // doc checkbox Poste, Courriel
-      let dx = L + colMP + 2;
+    // ─── LIVRAISON ────────────────────────────────────────────────────────
+    sectionBar('LIVRAISON', L, y, W);
+    y += 5;
+    doc.line(L, y + rowH, R, y + rowH);
+    bold(7.5); doc.text('Date de signature:', L + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8); doc.text(formatDate(mandat.date_signature), L + 30, y + rowH / 2, { baseline: 'middle' });
+    y += rowH;
+
+    // EN MAIN PROPRE / DOCUMENTS / FACTURE header
+    const mpW = W * 0.18;
+    const docsW = W * 0.49;
+    const factW = W - mpW - docsW;
+    const barH = 4;
+    sectionBar('EN MAIN PROPRE :', L, y, mpW, barH);
+    // checkbox in header
+    cb(L + mpW - 4.5, y + barH - 0.5, false, 3);
+    sectionBar('DOCUMENTS', L + mpW, y, docsW, barH);
+    sectionBar('FACTURE', L + mpW + docsW, y, factW, barH);
+    y += barH;
+
+    for (const rowLabel of ['Client', 'Notaire', 'Courtier', 'Aut. :']) {
+      doc.line(L, y + rowH, R, y + rowH);
+      doc.line(L + mpW, y, L + mpW, y + rowH);
+      doc.line(L + mpW + docsW, y, L + mpW + docsW, y + rowH);
+      bold(7.5);
+      doc.text(rowLabel, L + mpW - 1, y + rowH / 2, { align: 'right', baseline: 'middle' });
+      normal(7.5);
+      let dx = L + mpW + 2;
       for (const opt of ['Poste', 'Courriel']) {
-        checkbox(doc, dx, y + 4); doc.setFont('helvetica', 'normal'); doc.text(opt, dx + 4.5, y + 2.5, { baseline: 'middle' }); dx += 25;
+        cb(dx, y + rowH - 1); doc.text(opt, dx + 4, y + rowH / 2, { baseline: 'middle' }); dx += 26;
       }
-      dx = L + colMP + colDocs + 2;
+      dx = L + mpW + docsW + 2;
       for (const opt of ['Papier', 'Courriel']) {
-        checkbox(doc, dx, y + 4); doc.text(opt, dx + 4.5, y + 2.5, { baseline: 'middle' }); dx += 25;
+        cb(dx, y + rowH - 1); doc.text(opt, dx + 4, y + rowH / 2, { baseline: 'middle' }); dx += 25;
       }
-      y += 5;
+      y += rowH;
     }
 
-    // ── PRIX ─────────────────────────────────────────────────────────
-    sectionHeader('PRIX', L, y, W);
+    // ─── PRIX ─────────────────────────────────────────────────────────────
+    sectionBar('PRIX', L, y, W);
     y += 5;
 
-    const pCol = [W * 0.3, W * 0.15, W * 0.15, W * 0.15];
-    const pHeaders = ['Opération', 'Prix', 'Rabais', 'Total'];
-    let px = L;
-    for (let i = 0; i < pHeaders.length; i++) {
-      cell(pHeaders[i], px, y, pCol[i], 5, { bold: true, center: true, fontSize: 7.5 });
-      px += pCol[i];
+    const pCols = [W * 0.28, W * 0.13, W * 0.13, W * 0.13];
+    const pRight = L + pCols[0] + pCols[1] + pCols[2] + pCols[3];
+    const pRightW = R - pRight;
+
+    // Headers
+    let px2 = L;
+    for (const [h, w] of [['Opération', pCols[0]], ['Prix', pCols[1]], ['Rabais', pCols[2]], ['Total', pCols[3]]]) {
+      doc.rect(px2, y, w, rowH);
+      bold(7.5); doc.text(h, px2 + w / 2, y + rowH / 2, { align: 'center', baseline: 'middle' });
+      px2 += w;
     }
-    // Taxes info on right
-    const rightX = L + pCol[0] + pCol[1] + pCol[2] + pCol[3];
-    const rightW = W - (rightX - L);
-    doc.rect(rightX, y, rightW, 20);
-    doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-    doc.text('Taxes :', rightX + 1, y + 3);
-    checkbox(doc, rightX + 14, y + 4.5); doc.text('Non-Incluses', rightX + 18, y + 3);
-    checkbox(doc, rightX + 38, y + 4.5); doc.text('Incluses', rightX + 42, y + 3);
-    doc.text('Frais dépôt :', rightX + 1, y + 9);
-    checkbox(doc, rightX + 18, y + 10.5); doc.text('Oui', rightX + 22, y + 9);
-    checkbox(doc, rightX + 32, y + 10.5); doc.text('Non', rightX + 36, y + 9);
-    doc.text('Frais ouvert :', rightX + 1, y + 15);
-    checkbox(doc, rightX + 19, y + 16.5); doc.text('Oui', rightX + 23, y + 15);
-    checkbox(doc, rightX + 33, y + 16.5); doc.text('Non', rightX + 37, y + 15);
 
-    y += 5;
-    // Mandat rows
-    for (const m of (dossierData.mandats || [mandat])) {
-      if (!m.type_mandat) continue;
+    // Right side info block (spans multiple rows)
+    const rightBlockH = rowH * 5;
+    doc.rect(pRight, y, pRightW, rightBlockH);
+    normal(7);
+    let ry2 = y + rowH * 0.6;
+    doc.text('Taxes :', pRight + 1, ry2);
+    cb(pRight + 14, ry2 + 2.5); doc.text('Non-Incluses', pRight + 18, ry2);
+    cb(pRight + 40, ry2 + 2.5); doc.text('Incluses', pRight + 44, ry2);
+    ry2 += rowH;
+    doc.text('Frais dépôt :', pRight + 1, ry2);
+    cb(pRight + 18, ry2 + 2.5); doc.text('Oui', pRight + 22, ry2);
+    cb(pRight + 32, ry2 + 2.5); doc.text('Non', pRight + 36, ry2);
+    ry2 += rowH;
+    doc.text('Frais ouvert :', pRight + 1, ry2);
+    cb(pRight + 19, ry2 + 2.5); doc.text('Oui', pRight + 23, ry2);
+    cb(pRight + 33, ry2 + 2.5); doc.text('Non', pRight + 37, ry2);
+    ry2 += rowH;
+    bold(7); doc.text('Modalités :', pRight + 1, ry2);
+    ry2 += rowH;
+    normal(7); doc.text('*Piquetage suggéré :', pRight + 1, ry2);
+    cb(pRight + 30, ry2 + 2.5); doc.text('Oui', pRight + 34, ry2);
+    cb(pRight + 42, ry2 + 2.5); doc.text('Non', pRight + 46, ry2);
+    normal(8);
+
+    y += rowH;
+    // Mandat data rows
+    const mandats = dossierData.mandats?.length ? dossierData.mandats : [mandat];
+    for (const m of mandats) {
+      if (!m?.type_mandat) continue;
       const total = (m.prix_estime || 0) - (m.rabais || 0);
-      px = L;
-      for (let i = 0; i < pCol.length; i++) {
-        const vals = [m.type_mandat, m.prix_estime ? `${m.prix_estime} $` : '', m.rabais ? `${m.rabais} $` : '', total > 0 ? `${total.toFixed(2)} $` : ''];
-        cell(vals[i], px, y, pCol[i], 5, { fontSize: 7 });
-        px += pCol[i];
+      px2 = L;
+      for (const [val, w] of [
+        [m.type_mandat, pCols[0]],
+        [m.prix_estime ? `${Number(m.prix_estime).toFixed(2)} $` : '', pCols[1]],
+        [m.rabais ? `${Number(m.rabais).toFixed(2)} $` : '', pCols[2]],
+        [total > 0 ? `${total.toFixed(2)} $` : '', pCols[3]]
+      ]) {
+        doc.rect(px2, y, w, rowH);
+        normal(7); doc.text(String(val), px2 + 1, y + rowH / 2, { baseline: 'middle' });
+        px2 += w;
       }
-      y += 5;
+      y += rowH;
     }
-    // Modalités
-    doc.rect(L, y, rightX - L, 5);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.text('Modalités :', L + 1, y + 2.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'normal');
-    y += 5;
-    doc.rect(L, y, rightX - L, 5);
-    checkbox(doc, L + 1, y + 4); doc.text('*Piquetage suggéré :', L + 5, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 35, y + 4); doc.text('Oui', L + 39, y + 2.5, { baseline: 'middle' });
-    checkbox(doc, L + 50, y + 4); doc.text('Non', L + 54, y + 2.5, { baseline: 'middle' });
-    y += 5;
+
+    // Blank rows to fill up to right block
+    const mandatRowCount = mandats.filter(m => m?.type_mandat).length;
+    const blankRows = Math.max(0, 3 - mandatRowCount);
+    for (let i = 0; i < blankRows; i++) {
+      px2 = L;
+      for (const w of pCols) { doc.rect(px2, y, w, rowH); px2 += w; }
+      y += rowH;
+    }
+
     // Total row
-    px = L;
-    for (let i = 0; i < pCol.length; i++) {
-      const totalAll = (dossierData.mandats || [mandat]).reduce((s, m) => s + ((m.prix_estime || 0) - (m.rabais || 0)), 0);
-      const vals = ['', '', 'Total', totalAll > 0 ? `${totalAll.toFixed(2)} $` : ''];
-      cell(vals[i], px, y, pCol[i], 5, { bold: i === 2, center: i === 2, fontSize: 7.5 });
-      px += pCol[i];
+    px2 = L;
+    for (const [val, w, isBold] of [
+      ['', pCols[0], false],
+      ['', pCols[1], false],
+      ['Total', pCols[2], true],
+      [mandats.reduce((s, m) => s + ((m?.prix_estime || 0) - (m?.rabais || 0)), 0).toFixed(2) + ' $', pCols[3], false]
+    ]) {
+      doc.rect(px2, y, w, rowH);
+      if (isBold) { bold(7.5); doc.text(val, px2 + w / 2, y + rowH / 2, { align: 'center', baseline: 'middle' }); }
+      else { normal(7); if (val && val !== '0.00 $') doc.text(val, px2 + 1, y + rowH / 2, { baseline: 'middle' }); }
+      px2 += w;
     }
+    y += rowH;
 
-    // ── RÉFÉRENCE ────────────────────────────────────────────────────
+    // ─── RÉFÉRENCE ────────────────────────────────────────────────────────
+    sectionBar('RÉFÉRENCE', L, y, W);
     y += 5;
-    sectionHeader('RÉFÉRENCE', L, y, W);
-    y += 5;
-    doc.rect(L, y, W, 8);
-    const refs = ['Courtier', 'Notaire', 'Connaissance', 'Site Web', 'Bouche à oreille', 'Bottin', 'Publicité', 'Réseaux sociaux', 'Greffe', 'Club sociaux/BNI', 'Magasineux', 'Anc. Client', 'Autre'];
-    let rx = L + 1; let ry = y + 2;
-    for (let i = 0; i < refs.length; i++) {
-      if (i === 5) { rx = L + 1; ry = y + 6; }
-      checkbox(doc, rx, ry + 1); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5);
-      doc.text(refs[i], rx + 4.5, ry, { baseline: 'middle' });
-      rx += i < 4 ? 28 : (i < 9 ? 28 : 26);
-    }
+    doc.rect(L, y, W, rowH * 2);
+    const refs1 = ['Courtier', 'Notaire', 'Connaissance', 'Site Web', 'Bouche à oreille'];
+    const refs2 = ['Bottin', 'Publicité', 'Réseaux sociaux', 'Greffe', 'Club sociaux/BNI'];
+    const refs3 = ['Magasineux', 'Anc. Client', 'Autre _______________'];
+    normal(7);
+    let refX = L + 1;
+    for (const r of refs1) { cb(refX, y + 3); doc.text(r, refX + 4, y + 1.5, { baseline: 'middle' }); refX += 37; }
+    refX = L + 1;
+    for (const r of refs2) { cb(refX, y + rowH + 3); doc.text(r, refX + 4, y + rowH + 1.5, { baseline: 'middle' }); refX += 37; }
+    y += rowH * 2;
+    doc.rect(L, y, W, rowH);
+    refX = L + 1;
+    for (const r of refs3) { cb(refX, y + 3); doc.text(r, refX + 4, y + 1.5, { baseline: 'middle' }); refX += 42; }
+    y += rowH;
 
-    // ── VALIDATION ──────────────────────────────────────────────────
-    y += 8;
-    sectionHeader('VALIDATION DES OBSERVATIONS', L, y, W);
+    // ─── VALIDATION DES OBSERVATIONS ─────────────────────────────────────
+    sectionBar('VALIDATION DES OBSERVATIONS', L, y, W);
     y += 5;
-    doc.rect(L, y, W, 22);
-    doc.setFontSize(6.8); doc.setFont('helvetica', 'normal');
+    const validH = 22;
+    doc.rect(L, y, W, validH);
+    normal(6.8);
     const validText = `Je, soussigné ${dossierData.arpenteur_geometre || ''}, arpenteur-géomètre, certifie par la présente avoir pris personnellement connaissance des observations relatives aux éléments visés aux paragraphes 9 et 13 à 17 du premier alinéa de l'article 9 du Règlement sur la norme de pratique relative au certificat de localisation et les avoir validées.`;
-    const lines = doc.splitTextToSize(validText, W - 4);
-    doc.text(lines, L + 2, y + 3);
-    const ly = y + 3 + lines.length * 3;
-    checkbox(doc, L + 2, ly + 2.5); doc.text('Visite des lieux', L + 7, ly + 1, { baseline: 'middle' });
-    checkbox(doc, L + 2, ly + 7); doc.text('Photographies', L + 7, ly + 5.5, { baseline: 'middle' });
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-    doc.text('Date de la validation :', L + 2, y + 18.5, { baseline: 'middle' });
-    doc.line(L + 30, y + 18.5, L + 65, y + 18.5);
-    doc.text('Signature :', L + 70, y + 18.5, { baseline: 'middle' });
-    doc.line(L + 85, y + 18.5, R, y + 18.5);
+    const vlines = doc.splitTextToSize(validText, W - 4);
+    doc.text(vlines, L + 2, y + 3);
+    const afterText = y + 3 + vlines.length * 2.8;
+    cb(L + 2, afterText + 3); bold(7.5); doc.text('Visite des lieux', L + 6.5, afterText + 1.5, { baseline: 'middle' });
+    cb(L + 2, afterText + 7.5); bold(7.5); doc.text('Photographies', L + 6.5, afterText + 6, { baseline: 'middle' });
+    const sigY = y + validH - 3;
+    bold(7.5); doc.text('Date de la validation :', L + 2, sigY, { baseline: 'middle' });
+    doc.setLineWidth(0.3); doc.line(L + 35, sigY, L + 72, sigY);
+    doc.text('Signature :', L + 74, sigY, { baseline: 'middle' });
+    doc.line(L + 88, sigY, R - 1, sigY);
+    normal(8);
+    y += validH;
 
-    // ── FERMETURE ────────────────────────────────────────────────────
-    y += 22;
-    sectionHeader('FERMETURE', L, y, W);
+    // ─── FERMETURE ────────────────────────────────────────────────────────
+    sectionBar('FERMETURE', L, y, W);
     y += 5;
-    doc.rect(L, y, W / 2, 6); doc.rect(L + W / 2, y, W / 2, 6);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-    doc.text('Date de fermeture :', L + 1, y + 3, { baseline: 'middle' });
-    doc.text('Signature :', L + W / 2 + 1, y + 3, { baseline: 'middle' });
+    doc.rect(L, y, W / 2, rowH); doc.rect(L + W / 2, y, W / 2, rowH);
+    bold(7.5);
+    doc.text('Date de fermeture :', L + 1, y + rowH / 2, { baseline: 'middle' });
+    doc.text('Signature :', L + W / 2 + 1, y + rowH / 2, { baseline: 'middle' });
+    normal(8);
 
-    // ── REV footer ───────────────────────────────────────────────────
-    doc.setFontSize(6.5); doc.setFont('helvetica', 'normal');
+    // Rev footer p1
+    doc.setFontSize(6.5);
     doc.text('Rév. 13    Date : 2 juin 2022', L, pH - 5);
 
-    // ── PAGE 2 : TEMPS ───────────────────────────────────────────────
+    // ─── PAGE 2: TEMPS ────────────────────────────────────────────────────
     doc.addPage();
-    doc.setFontSize(6.5); doc.text('Rév. 13    Date : 2 juin 2022', L, 9);
-    sectionHeader('TEMPS', L, 12, W, 6);
+    doc.setFontSize(6.5);
+    doc.text('Rév. 13    Date : 2 juin 2022', L, 8);
 
-    const tCols = [W * 0.2, W * 0.25, W * 0.4, W * 0.15];
+    // Outer border p2
+    doc.setLineWidth(0.5);
+    doc.rect(L, 10, W, 180);
+    doc.setLineWidth(0.3);
+
+    sectionBar('TEMPS', L, 10, W, 6);
+
+    const tCols = [W * 0.18, W * 0.25, W * 0.43, W * 0.14];
     const tHeaders = ['DATE', 'EMPLOYÉ(S)', 'DESCRIPTION', 'TEMPS'];
-    let ty3 = 18;
+    let ty3 = 16;
+
+    // Header row
     let tx3 = L;
-    for (let i = 0; i < tCols.length; i++) {
-      cell(tHeaders[i], tx3, ty3, tCols[i], 6, { bold: true, center: true, fontSize: 8 });
+    for (let i = 0; i < tHeaders.length; i++) {
+      doc.rect(tx3, ty3, tCols[i], 6);
+      bold(8);
+      doc.text(tHeaders[i], tx3 + tCols[i] / 2, ty3 + 3, { align: 'center', baseline: 'middle' });
       tx3 += tCols[i];
     }
     ty3 += 6;
+    normal(8);
 
-    const subSections = ['PLANIFICATION', 'TERRAIN', 'RECHERCHES ET ANALYSE FONCIÈRE', 'TRAITEMENT ET DESSIN', 'RAPPORT/RÉDACTION'];
-    const subRows = [2, 6, 4, 4, 3];
-    for (let si = 0; si < subSections.length; si++) {
-      // sub header
+    const subSections = [
+      ['PLANIFICATION', 2],
+      ['TERRAIN', 6],
+      ['RECHERCHES ET ANALYSE FONCIÈRE', 4],
+      ['TRAITEMENT ET DESSIN', 4],
+      ['RAPPORT/RÉDACTION', 3],
+    ];
+
+    for (const [title, count] of subSections) {
       doc.setFillColor(220, 220, 220);
       doc.rect(L, ty3, W, 5, 'FD');
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
-      doc.text(subSections[si], L + 2, ty3 + 2.5, { baseline: 'middle' });
-      doc.setFont('helvetica', 'normal');
+      bold(8);
+      doc.text(title, L + 2, ty3 + 2.5, { baseline: 'middle' });
       ty3 += 5;
-      for (let r = 0; r < subRows[si]; r++) {
+      for (let r = 0; r < count; r++) {
         tx3 = L;
-        for (let c = 0; c < tCols.length; c++) {
-          doc.rect(tx3, ty3, tCols[c], 6);
-          tx3 += tCols[c];
-        }
+        for (const tc of tCols) { doc.rect(tx3, ty3, tc, 6); tx3 += tc; }
         ty3 += 6;
       }
     }
+    normal(8);
 
-    doc.setFontSize(6.5); doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
     doc.text('Rév. 13    Date : 2 juin 2022', L, pH - 5);
 
-    // ── OUTPUT ───────────────────────────────────────────────────────
+    // ─── OUTPUT ───────────────────────────────────────────────────────────
     const pdfBytes = doc.output('arraybuffer');
     const base64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
 
@@ -496,7 +525,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Erreur génération PDF:', error);
+    console.error('Erreur:', error);
     return Response.json({ error: error.message || 'Erreur' }, { status: 500 });
   }
 });
