@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import AddressStepForm from "../mandat/AddressStepForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -1094,33 +1093,140 @@ export default function ClientFormDialog({
 
                 {!adressesCollapsed && (
                   <CardContent className="pt-3 pb-2 space-y-3">
-                    {/* Composant AddressStepForm */}
-                    <AddressStepForm 
-                      address={{}} 
-                      onAddressChange={(newAddr) => {
-                        // Ajouter l'adresse au formulaire
+                    {/* Barre de recherche d'adresse avec LLM */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Rechercher une adresse</Label>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                        <Input
+                          placeholder="Ex: 123 rue Principale, Alma..."
+                          value={addressSearchTerm}
+                          onChange={(e) => {
+                            setAddressSearchTerm(e.target.value);
+                            if (e.target.value.length > 3) {
+                              handleAddressSearch(e.target.value);
+                            } else {
+                              setAddressSearchResults([]);
+                            }
+                          }}
+                          className="pl-7 bg-slate-700 border-slate-600 h-8 text-sm"
+                        />
+                      </div>
+                      
+                      {/* Résultats de recherche */}
+                      {addressSearchResults.length > 0 && (
+                        <div className="bg-slate-800 border border-slate-700 rounded-lg p-2 space-y-1 max-h-40 overflow-y-auto">
+                          {addressSearchResults.map((addr, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => selectSearchedAddress(addr)}
+                              className="px-2 py-1.5 rounded text-xs bg-slate-700/50 hover:bg-slate-700 cursor-pointer text-slate-300"
+                            >
+                              {addr.civic_number} {addr.street}, {addr.city}, {addr.province} {addr.postal_code}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {isSearchingAddress && (
+                        <p className="text-xs text-slate-500">Recherche en cours...</p>
+                      )}
+                    </div>
+
+                    {/* Formulaire pour nouvelle adresse */}
+                    <div className="p-2 bg-slate-800/30 rounded-lg space-y-2">
+                  <div className="grid grid-cols-[150px_1fr] gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Numéro(s) civique(s)</Label>
+                      <Input
+                        id="new-civic-0"
+                        placeholder="Ex: 123"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Rue</Label>
+                      <Input
+                        id="new-rue"
+                        placeholder="Nom de la rue"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Ville</Label>
+                      <Input
+                        id="new-ville"
+                        placeholder="Ville"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Province</Label>
+                      <Select id="new-province" defaultValue="QC">
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {PROVINCES_CANADIENNES.map(prov => (
+                            <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">{prov.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs">Code Postal</Label>
+                    <Input
+                      id="new-code-postal"
+                      placeholder="Code postal"
+                      className="bg-slate-700 border-slate-600 h-7 text-sm"
+                    />
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      const civic = document.getElementById('new-civic-0')?.value || "";
+                      const rue = document.getElementById('new-rue').value;
+                      const ville = document.getElementById('new-ville').value;
+                      const provinceSelect = document.querySelector('[id="new-province"]');
+                      const province = provinceSelect?.getAttribute('data-value') || provinceSelect?.textContent?.split(' - ')[0] || "QC";
+                      const codePostal = document.getElementById('new-code-postal').value;
+                      
+                      if (civic || rue || ville) {
                         setFormData(prev => ({
                           ...prev,
                           adresses: [
                             {
-                              numeros_civiques: newAddr.numeros_civiques,
-                              rue: newAddr.rue,
-                              ville: newAddr.ville,
-                              province: newAddr.province,
-                              code_postal: newAddr.code_postal,
+                              numeros_civiques: civic ? [civic] : [""],
+                              rue,
+                              ville,
+                              province,
+                              code_postal: codePostal,
                               actuelle: true
                             },
                             ...prev.adresses.map(a => ({ ...a, actuelle: false }))
                           ]
                         }));
-                      }}
-                      isCollapsed={false}
-                      onToggleCollapse={() => {}}
-                      clientDossiers={[]}
-                      disabled={false}
-                    />
-
-
+                        
+                        // Clear inputs
+                        if (document.getElementById('new-civic-0')) document.getElementById('new-civic-0').value = "";
+                        document.getElementById('new-rue').value = "";
+                        document.getElementById('new-ville').value = "";
+                        document.getElementById('new-code-postal').value = "";
+                      }
+                    }}
+                    className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 text-xs"
+                    >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Ajouter cette adresse
+                    </Button>
+                    </div>
 
                     {/* Liste des adresses */}
                     <div className="border border-slate-700 rounded-lg overflow-hidden">
