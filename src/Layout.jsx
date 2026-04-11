@@ -1031,22 +1031,33 @@ function LayoutContent({ children, currentPageName }) {
 
 
         /* Scrollbar personnalisée globale */
-        *::-webkit-scrollbar {
-          width: 5px;
-          height: 5px;
+        *::-webkit-scrollbar,
+        *::-webkit-scrollbar:vertical,
+        *::-webkit-scrollbar:horizontal {
+          width: 5px !important;
+          height: 5px !important;
         }
 
-        *::-webkit-scrollbar-track {
-          background: transparent;
+        *::-webkit-scrollbar-track,
+        *::-webkit-scrollbar-corner {
+          background: transparent !important;
+          border: none !important;
         }
 
         *::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
+          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166)) !important;
+          border-radius: 10px !important;
+          border: none !important;
         }
 
         *::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136)) !important;
+        }
+
+        *::-webkit-scrollbar-button {
+          display: none !important;
+          height: 0 !important;
+          width: 0 !important;
         }
 
         /* Switch actif en brun clair (amber) - section terrain */
