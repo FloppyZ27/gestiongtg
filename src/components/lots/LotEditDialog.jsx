@@ -244,6 +244,7 @@ export default function LotEditDialog({
                       lotTemporaire={!editingLot}
                       commentairesTemp={commentairesTemporairesLot}
                       onCommentairesTempChange={setCommentairesTemporairesLot}
+                      onCommentairesCountChange={setCommentairesCount}
                     />
                   </TabsContent>
 
@@ -290,21 +291,21 @@ export default function LotEditDialog({
 
 
         </motion.div>
-        
-        {/* Dialog d'avertissement doublon */}
-        <Dialog open={showLotDuplicateWarning} onOpenChange={setShowLotDuplicateWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">
-                Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>
-                {newLotForm.cadastre ? <>, cadastre <span className="text-emerald-400 font-semibold">{newLotForm.cadastre}</span></> : null}
-                {newLotForm.rang ? <>, rang <span className="text-emerald-400 font-semibold">{newLotForm.rang}</span></> : null}.
-              </p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowLotDuplicateWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+      </DialogContent>
+    </Dialog>
+    
+    {/* Dialog d'avertissement doublon */}
+    <Dialog open={showLotDuplicateWarning} onOpenChange={setShowLotDuplicateWarning}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
+        <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+        <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
+          <p className="text-slate-300 text-center">
+            Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>
+            {newLotForm.cadastre ? <>, cadastre <span className="text-emerald-400 font-semibold">{newLotForm.cadastre}</span></> : null}
+            {newLotForm.rang ? <>, rang <span className="text-emerald-400 font-semibold">{newLotForm.rang}</span></> : null}.
+          </p>
+          <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowLotDuplicateWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export default function CommentairesSectionLot({ lotId, lotTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
+export default function CommentairesSectionLot({ lotId, lotTemporaire, commentairesTemp = [], onCommentairesTempChange, onCommentairesCountChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
@@ -107,6 +107,9 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     mutationFn: (commentaireData) => base44.entities.CommentaireLot.create(commentaireData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentairesLot', lotId] });
+      if (onCommentairesCountChange) {
+        onCommentairesCountChange(commentaires.length + 1);
+      }
       setNouveauCommentaire("");
       setAudioUrl("");
     },
@@ -125,6 +128,9 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     mutationFn: (id) => base44.entities.CommentaireLot.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentairesLot', lotId] });
+      if (onCommentairesCountChange) {
+        onCommentairesCountChange(Math.max(0, commentaires.length - 1));
+      }
     },
   });
 
