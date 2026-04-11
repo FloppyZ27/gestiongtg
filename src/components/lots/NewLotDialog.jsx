@@ -181,7 +181,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     if (newValue !== oldValue) {
       setHistorique(prev => [...prev, {
         action: 'Modification',
-        details: `${fieldName} changé de "${oldValue || '(vide)'}" à "${newValue || '(vide)'}"`,
+        details: `${fieldName}: "${oldValue || '(vide)'}" → "${newValue || '(vide)'}"`,
         timestamp: new Date().toISOString()
       }]);
     }
