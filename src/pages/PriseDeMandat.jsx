@@ -3336,11 +3336,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
 
         {/* New Lot Dialog */}
         <Dialog open={isNewLotDialogOpen} onOpenChange={async (open) => {
-          if (!open) {
-            if (editingLot) {if(newLotForm.numero_lot&&newLotForm.circonscription_fonciere){await updateLotMutation.mutateAsync({id:editingLot.id,lotData:newLotForm});}setIsNewLotDialogOpen(false);resetLotForm();return;}
-            const hasChanges = newLotForm.numero_lot||newLotForm.circonscription_fonciere||newLotForm.rang||newLotForm.types_operation.length>0||commentairesTemporairesLot.length>0;
-            if (hasChanges) {setShowCancelLotConfirm(true);} else {setIsNewLotDialogOpen(false);resetLotForm();}
-          } else {
+          if (open) {
             // Charger l'historique du lot lors de l'ouverture en mode édition
             if (open && editingLot) {
               const loadActionLogs = async () => {
