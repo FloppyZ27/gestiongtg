@@ -391,62 +391,68 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                         const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
                         const uniqueActions = [...new Set(historique.map(e => e.action))];
                         return (
-                        <div className="mb-3 p-3 bg-slate-800/30 border border-emerald-500/30 rounded flex-shrink-0 space-y-3">
-                          <div className="flex gap-2">
-                            <Select value={historiqueFilters.users.length === 0 ? "all" : historiqueFilters.users[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
-                              ...prev,
-                              users: val === "all" ? [] : [val]
-                            }))}>
-                              <SelectTrigger className="h-8 text-xs border-emerald-500/50 bg-slate-800/50 text-emerald-400">
-                                <SelectValue placeholder="Utilisateurs" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700">
-                                <SelectItem value="all" className="text-xs text-slate-300">Utilisateurs (Tous)</SelectItem>
-                                {uniqueUsers.map(user => (
-                                  <SelectItem key={user.email} value={user.email} className="text-xs text-slate-300">{user.nom}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select value={historiqueFilters.actions.length === 0 ? "all" : historiqueFilters.actions[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
-                              ...prev,
-                              actions: val === "all" ? [] : [val]
-                            }))}>
-                              <SelectTrigger className="h-8 text-xs border-emerald-500/50 bg-slate-800/50 text-emerald-400">
-                                <SelectValue placeholder="Types" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700">
-                                <SelectItem value="all" className="text-xs text-slate-300">Types (Tous)</SelectItem>
-                                {uniqueActions.map(action => (
-                                  <SelectItem key={action} value={action} className="text-xs text-slate-300">{action}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                        <div className="mb-3 p-3 bg-slate-900/50 border border-emerald-500/40 rounded-lg flex-shrink-0">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Filter className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Filtre</span>
                           </div>
-                          <div>
-                            <p className="text-xs font-semibold text-slate-300 mb-2">Période</p>
-                            <div className="flex gap-2 items-center">
-                              <input
-                                type="date"
-                                value={historiqueFilters.dateRange?.start || ""}
-                                onChange={(e) => setHistoriqueFilters(prev => ({
-                                  ...prev,
-                                  dateRange: { ...prev.dateRange, start: e.target.value }
-                                }))}
-                                className="h-8 text-xs bg-slate-800/50 border border-emerald-500/50 rounded text-emerald-400 placeholder-slate-500"
-                              />
-                              <span className="text-slate-400">→</span>
-                              <input
-                                type="date"
-                                value={historiqueFilters.dateRange?.end || ""}
-                                onChange={(e) => setHistoriqueFilters(prev => ({
-                                  ...prev,
-                                  dateRange: { ...prev.dateRange, end: e.target.value }
-                                }))}
-                                className="h-8 text-xs bg-slate-800/50 border border-emerald-500/50 rounded text-emerald-400 placeholder-slate-500"
-                              />
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <Select value={historiqueFilters.users.length === 0 ? "all" : historiqueFilters.users[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                                ...prev,
+                                users: val === "all" ? [] : [val]
+                              }))}>
+                                <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
+                                  <SelectValue placeholder="Utilisateurs" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="all" className="text-xs text-slate-300">Utilisateurs (Tous)</SelectItem>
+                                  {uniqueUsers.map(user => (
+                                    <SelectItem key={user.email} value={user.email} className="text-xs text-slate-300">{user.nom}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select value={historiqueFilters.actions.length === 0 ? "all" : historiqueFilters.actions[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                                ...prev,
+                                actions: val === "all" ? [] : [val]
+                              }))}>
+                                <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
+                                  <SelectValue placeholder="Types" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="all" className="text-xs text-slate-300">Types (Tous)</SelectItem>
+                                  {uniqueActions.map(action => (
+                                    <SelectItem key={action} value={action} className="text-xs text-slate-300">{action}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
+                            <div>
+                              <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-2">Période</p>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="date"
+                                  value={historiqueFilters.dateRange?.start || ""}
+                                  onChange={(e) => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, start: e.target.value }
+                                  }))}
+                                  className="flex-1 h-9 text-xs bg-slate-800/60 border border-emerald-500/40 rounded-lg text-emerald-300 placeholder-slate-500 hover:border-emerald-500/60 focus:border-emerald-500/60"
+                                />
+                                <span className="text-emerald-500/60">→</span>
+                                <input
+                                  type="date"
+                                  value={historiqueFilters.dateRange?.end || ""}
+                                  onChange={(e) => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, end: e.target.value }
+                                  }))}
+                                  className="flex-1 h-9 text-xs bg-slate-800/60 border border-emerald-500/40 rounded-lg text-emerald-300 placeholder-slate-500 hover:border-emerald-500/60 focus:border-emerald-500/60"
+                                />
+                              </div>
+                            </div>
+                            <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-emerald-400/70 hover:text-emerald-300 transition-colors">Réinitialiser</button>
                           </div>
-                          <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-emerald-400 hover:text-emerald-300">Réinitialiser</button>
                         </div>
                         );
                        })()}
