@@ -31,6 +31,7 @@ export default function OuvrirDossierDialog({
   const [editingClientForForm, setEditingClientForForm] = useState(null);
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
   const [newLotMandatIndex, setNewLotMandatIndex] = useState(null);
+  const [editingLotForDialog, setEditingLotForDialog] = useState(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
@@ -341,8 +342,8 @@ export default function OuvrirDossierDialog({
               setNewLotMandatIndex(mandatIndex);
               setIsNewLotDialogOpen(true);
             }}
+            setEditingLot={setEditingLotForDialog}
             setEditingClient={() => {}}
-            setEditingLot={() => {}}
             setNewLotForm={() => {}}
             setLotActionLogs={() => {}}
           />
@@ -362,8 +363,9 @@ export default function OuvrirDossierDialog({
 
       <NewLotDialog
         open={isNewLotDialogOpen}
-        onOpenChange={setIsNewLotDialogOpen}
+        onOpenChange={(o) => { setIsNewLotDialogOpen(o); if (!o) setEditingLotForDialog(null); }}
         mandatIndex={newLotMandatIndex}
+        editingLot={editingLotForDialog}
         onLotCreated={(newLot, mandatIndex) => {
           if (mandatIndex !== null && formData) {
             setFormData(prev => ({

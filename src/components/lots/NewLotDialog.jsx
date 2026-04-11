@@ -25,9 +25,28 @@ const CADASTRE_CODES = {
   "080010": "Canton de Boilleau","080020": "Canton de Périgny","080040": "Canton de Dumas","080050": "Canton de Labrosse","080060": "Canton de Saint-Jean","080080": "Canton de Hébert","080100": "Canton d'Otis","080110": "Canton de Ferland","080120": "Paroisse de Saint-Alexis","080130": "Paroisse de Saint-Alphonse","080140": "Village de Grande-Baie","080160": "Village de Bagotville","080180": "Canton de Bagot","080200": "Canton de Laterrière","080210": "Paroisse de Chicoutimi","080220": "Ville de Chicoutimi","080240": "Canton de Chicoutimi","080260": "Cité d'Arvida","080280": "Canton de Jonquière","080300": "Canton de Kénogami","080310": "Canton de Labarre","080320": "Canton de Taché","080340": "Canton de Bourget","080360": "Canton de Simard","080380": "Canton de Tremblay","080400": "Village de Sainte-Anne-de-Chicoutimi","080410": "Canton de Harvey","080420": "Canton de Saint-Germains","080440": "Canton de Durocher","080460": "Canton de Falardeau","080480": "Canton de Bégin","080500": "Canton de Labrecque","080510": "Canton de Rouleau","080610": "Canton de Mésy","080620": "Village d'Héberville","080630": "Canton de Saint-Hilaire","080640": "Canton de Caron","080660": "Canton de Métabetchouan","080700": "Canton de Signay","080710": "Canton de De l'Île","080720": "Canton de Taillon","080740": "Canton de Garnier","080780": "Canton de Malherbe","080810": "Canton de Dablon","080820": "Canton de Dequen","080840": "Canton de Charlevoix","080860": "Canton de Roberval","080920": "Canton de Ouiatchouan","080960": "Canton de Demeulles","080980": "Canton de Parent","081000": "Canton de Racine","081010": "Canton de Dolbeau","081020": "Canton de Dalmas","081040": "Canton de Jogues","081110": "Canton de Milot","081200": "Canton d'Albanel","081210": "Canton de Normandin"
 };
 
-export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatIndex }) {
+export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatIndex, editingLot }) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "", types_operation: [] });
+
+  // Sync formData when editingLot changes
+  React.useEffect(() => {
+    if (editingLot && open) {
+      setFormData({
+        numero_lot: editingLot.numero_lot || "",
+        circonscription_fonciere: editingLot.circonscription_fonciere || "",
+        cadastre: editingLot.cadastre || "Québec",
+        rang: editingLot.rang || "",
+        types_operation: editingLot.types_operation || []
+      });
+      if (editingLot.circonscription_fonciere) {
+        setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[editingLot.circonscription_fonciere] || []);
+      }
+      setHasFormChanges(false);
+    } else if (!editingLot && open) {
+      resetForm();
+    }
+  }, [editingLot, open]);
   const [availableCadastres, setAvailableCadastres] = useState([]);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
@@ -43,6 +62,19 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const [showLotExists, setShowLotExists] = useState(false);
 
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list('-created_date'), initialData: [] });
+
+  const updateLotMutation = useMutation({
+    mutationFn: async (lotData) => {
+      const updatedLot = await base44.entities.Lot.update(editingLot.id, lotData);
+      await base44.entities.ActionLog.create({ utilisateur_email: user?.email || '', utilisateur_nom: user?.full_name || '', action: 'Modification', entite: 'Lot', entite_id: editingLot.id, details: `Lot ${lotData.numero_lot} modifié` });
+      return updatedLot;
+    },
+    onSuccess: (updatedLot) => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      onLotCreated?.(updatedLot, mandatIndex);
+      resetAndClose();
+    }
+  });
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
 
   const createLotMutation = useMutation({
@@ -82,9 +114,13 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.numero_lot || !formData.circonscription_fonciere) { setShowMissingFields(true); return; }
-    const lotExistant = lots.find(l => l.numero_lot === formData.numero_lot && l.cadastre === formData.cadastre && l.circonscription_fonciere === formData.circonscription_fonciere);
-    if (lotExistant) { setShowLotExists(true); return; }
-    createLotMutation.mutate(formData);
+    if (!editingLot) {
+      const lotExistant = lots.find(l => l.numero_lot === formData.numero_lot && l.cadastre === formData.cadastre && l.circonscription_fonciere === formData.circonscription_fonciere);
+      if (lotExistant) { setShowLotExists(true); return; }
+      createLotMutation.mutate(formData);
+    } else {
+      updateLotMutation.mutate(formData);
+    }
   };
 
   const handleD01Import = async (file) => {
@@ -137,15 +173,22 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
             <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
-              <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
+                {editingLot && (
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                    Lot {editingLot.numero_lot}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden">
               {/* Main form - 70% */}
               <div className="flex-[0_0_70%] overflow-y-auto p-6 pt-3 border-r border-slate-800">
                 <form id="new-lot-form" onSubmit={handleSubmit} className="space-y-3">
-                  {/* Import .d01 */}
-                  <div
+                  {/* Import .d01 - Visible uniquement en mode création */}
+                  {!editingLot && <div
                     className={`border border-dashed rounded-lg p-2 transition-all ${isDragOverD01 ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'}`}
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(true); }}
                     onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false); }}
@@ -157,9 +200,9 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-slate-400" /><span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span></div>
                         <label><input type="file" accept=".d01" onChange={(e) => { const f = e.target.files[0]; if (f) handleD01Import(f); }} className="hidden" /><span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">Parcourir</span></label>
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                        )}
+                        </div>}
 
                   <LotInfoStepForm
                     lotForm={formData}
@@ -220,8 +263,8 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
             <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
               <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
-              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                {createLotMutation.isPending ? "Création..." : "Créer"}
+              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending || updateLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                {editingLot ? (updateLotMutation.isPending ? "Modification..." : "Modifier") : (createLotMutation.isPending ? "Création..." : "Créer")}
               </Button>
             </div>
           </motion.div>
