@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
@@ -53,6 +54,7 @@ export default function LotEditDialog({
 }) {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  const [showLotDuplicateWarning, setShowLotDuplicateWarning] = useState(false);
 
   useEffect(() => {
     if (isOpen && editingLot) {
@@ -69,6 +71,19 @@ export default function LotEditDialog({
 
   const handleAutoSave = async () => {
     if (!editingLot || isSaving) return;
+
+    // Vérifier que la combinaison n'existe pas (sauf pour le lot actuel)
+    const lotExistant = lots.find(l =>
+      l.numero_lot === newLotForm.numero_lot &&
+      l.circonscription_fonciere === newLotForm.circonscription_fonciere &&
+      (l.rang || "") === (newLotForm.rang || "") &&
+      (l.cadastre || "") === (newLotForm.cadastre || "") &&
+      l.id !== editingLot.id
+    );
+    if (lotExistant) {
+      setShowLotDuplicateWarning(true);
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -101,6 +116,15 @@ export default function LotEditDialog({
     onOpenChange(open);
   };
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!editingLot) {
+      handleNewLotSubmit(e);
+    } else {
+      handleAutoSave();
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
@@ -126,7 +150,7 @@ export default function LotEditDialog({
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 pt-2">
-                <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
+                <form id="lot-form" onSubmit={handleFormSubmit} className="space-y-3">
                   {/* Import .d01 section - Only in create mode */}
                   {!editingLot && (
                     <div
@@ -320,6 +344,21 @@ export default function LotEditDialog({
             )}
           </div>
         </motion.div>
+        
+        {/* Dialog d'avertissement doublon */}
+        <Dialog open={showLotDuplicateWarning} onOpenChange={setShowLotDuplicateWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
+            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
+              <p className="text-slate-300 text-center">
+                Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>
+                {newLotForm.cadastre ? <>, cadastre <span className="text-emerald-400 font-semibold">{newLotForm.cadastre}</span></> : null}
+                {newLotForm.rang ? <>, rang <span className="text-emerald-400 font-semibold">{newLotForm.rang}</span></> : null}.
+              </p>
+              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowLotDuplicateWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
