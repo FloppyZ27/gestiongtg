@@ -58,7 +58,7 @@ const formatPhoneNumber = (phone) => {
   return phone;
 };
 
-const RetoursAppel = React.forwardRef((props, ref) => {
+const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
       setEditingRetourAppel(null);
@@ -534,7 +534,9 @@ const RetoursAppel = React.forwardRef((props, ref) => {
       const matchesDateStart = filterDateStart === "" || retourDate >= new Date(filterDateStart);
       const matchesDateEnd = filterDateEnd === "" || retourDate <= new Date(filterDateEnd + "T23:59:59");
       
-      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesDateStart && matchesDateEnd;
+      const dossierForPlace = retour.dossier;
+      const matchesPlaceAffaire = filterPlaceAffaire === "tous" || !dossierForPlace || dossierForPlace.place_affaire === filterPlaceAffaire;
+      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesDateStart && matchesDateEnd && matchesPlaceAffaire;
     }).sort((a, b) => {
       const dateA = new Date(a.date_appel || 0).getTime();
       const dateB = new Date(b.date_appel || 0).getTime();

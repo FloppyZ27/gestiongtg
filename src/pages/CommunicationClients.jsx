@@ -4,11 +4,13 @@ import { FilePlus, Phone, Plus, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import PlaceAffaireTabs from "@/components/dossiers/PlaceAffaireTabs";
 import PriseDeMandat from "./PriseDeMandat";
 import RetoursAppel from "./RetoursAppel";
 
 export default function CommunicationClients() {
   const [activeTab, setActiveTab] = useState("prise-mandat");
+  const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("tous");
   const priseMandatRef = useRef();
   const retoursAppelRef = useRef();
 
@@ -32,6 +34,12 @@ export default function CommunicationClients() {
   const retourAppelCount = user ? retoursAppels.filter(r => 
     r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
   ).length : 0;
+
+  const placeAffaireCounts = {
+    tous: priseMandats.length,
+    alma: priseMandats.filter(p => p.place_affaire === "Alma").length,
+    saguenay: priseMandats.filter(p => p.place_affaire === "Saguenay").length,
+  };
 
   const handleNewMandat = () => {
     setActiveTab("prise-mandat");
@@ -64,6 +72,15 @@ export default function CommunicationClients() {
             </div>
             <p className="text-slate-400">Gestion des prises de mandat et retours d'appel</p>
           </div>
+        </div>
+
+        <div className="mb-2">
+          <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
+          <PlaceAffaireTabs
+            value={filterPlaceAffaire}
+            onChange={setFilterPlaceAffaire}
+            counts={placeAffaireCounts}
+          />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -117,11 +134,11 @@ export default function CommunicationClients() {
           </div>
 
           <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
-            <PriseDeMandat ref={priseMandatRef} />
+            <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-0">
-            <RetoursAppel ref={retoursAppelRef} />
+            <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
         </Tabs>
       </div>
