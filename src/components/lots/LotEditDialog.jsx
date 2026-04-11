@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import { MessageSquare, Clock, ChevronDown, ChevronUp, Upload, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
@@ -298,51 +298,7 @@ export default function LotEditDialog({
             </div>
           </div>
 
-          {/* Buttons at bottom */}
-          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-            {!editingLot ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    let hasChanges = false;
-                    hasChanges = newLotForm.numero_lot ||
-                      newLotForm.circonscription_fonciere ||
-                      newLotForm.rang ||
-                      newLotForm.types_operation.length > 0 ||
-                      commentairesTemporairesLot.length > 0;
 
-                    if (hasChanges) {
-                      setShowCancelLotConfirm(true);
-                    } else {
-                      onOpenChange(false);
-                      resetLotForm();
-                    }
-                  }}
-                  className="border-red-500 text-red-400 hover:bg-red-500/10"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  form="lot-form"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
-                  Créer
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="border-slate-600 text-slate-400 hover:bg-slate-700/50"
-              >
-                Fermer
-              </Button>
-            )}
-          </div>
         </motion.div>
         
         {/* Dialog d'avertissement doublon */}
