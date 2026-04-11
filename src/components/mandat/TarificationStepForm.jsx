@@ -2,7 +2,8 @@ import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, DollarSign, Receipt, ToggleLeft, ToggleRight } from "lucide-react";
+import { ChevronDown, ChevronUp, DollarSign, Receipt, ToggleLeft, ToggleRight, MessageSquare } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 
 const getAbbreviatedMandatType = (type) => {
@@ -46,6 +47,7 @@ export default function TarificationStepForm({
   // Stocker les valeurs locales pour éviter les problèmes de curseur
   const [localInputs, setLocalInputs] = useState({});
   const debounceTimers = useRef({});
+  const [openCommentIndex, setOpenCommentIndex] = useState(null);
 
   const getLocalValue = (index, field) => {
     const key = `${index}_${field}`;
@@ -185,57 +187,90 @@ export default function TarificationStepForm({
                       <th className="text-left text-slate-300 p-2 font-medium">Rabais</th>
                       <th className="text-center text-slate-300 p-2 font-medium">Taxes incl.</th>
                       <th className="text-center text-slate-300 p-2 font-medium">Prix convenu</th>
+                      <th className="text-center text-slate-300 p-2 font-medium">Note</th>
                       <th className="text-right text-slate-300 p-2 font-medium">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {mandats.map((mandat, index) => {
-                      if (!mandat.type_mandat) return null;
-                      const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
-                      const quantite = parseFloat(mandat.quantite) || 1;
-                      const prixBase = isMultiLotType
-                        ? (parseFloat(mandat.prix_premier_lot) || 0) + (parseFloat(mandat.prix_autres_lots) || 0)
-                        : (parseFloat(mandat.prix_estime) || 0);
-                      const rabais = parseFloat(mandat.rabais) || 0;
-                      const total = prixBase * quantite - rabais;
-                      return (
-                        <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/30">
-                          <td className="p-2">
-                            <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                              {getAbbreviatedMandatType(mandat.type_mandat)}
-                            </Badge>
-                          </td>
-                          <td className="p-2">
-                            <Input type="text" inputMode="decimal" value={getLocalValue(index, 'quantite')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'quantite', val || '1'); }} onBlur={() => handleInputBlur(index, 'quantite')} placeholder="1" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-16" />
-                          </td>
-                          <td className="p-2">
-                            <Input type="text" inputMode="decimal" value={getLocalValue(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime', val); }} onBlur={() => handleInputBlur(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
-                          </td>
-                          <td className="p-2">
-                            {isMultiLotType ? (
-                              <Input type="text" inputMode="decimal" value={getLocalValue(index, 'prix_autres_lots')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'prix_autres_lots', val); }} onBlur={() => handleInputBlur(index, 'prix_autres_lots')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
-                            ) : (
-                              <span className="text-slate-600 block text-center">-</span>
-                            )}
-                          </td>
-                          <td className="p-2">
-                            <Input type="text" inputMode="decimal" value={getLocalValue(index, 'rabais')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'rabais', val); }} onBlur={() => handleInputBlur(index, 'rabais')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
-                          </td>
-                          <td className="p-2 text-center">
-                            <button type="button" onClick={() => handleCheckboxChange(index, 'taxes_incluses', !mandat.taxes_incluses)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
-                              {mandat.taxes_incluses ? <ToggleRight className="w-5 h-5 text-purple-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
-                            </button>
-                          </td>
-                          <td className="p-2 text-center">
-                            <button type="button" onClick={() => handleCheckboxChange(index, 'prix_convenu', !mandat.prix_convenu)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
-                              {mandat.prix_convenu ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
-                            </button>
-                          </td>
-                          <td className="p-2 text-right text-white font-semibold">
-                            {total.toFixed(2)} $
-                          </td>
-                        </tr>
-                      );
+                     if (!mandat.type_mandat) return null;
+                     const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
+                     const quantite = parseFloat(mandat.quantite) || 1;
+                     const prixBase = isMultiLotType
+                       ? (parseFloat(mandat.prix_premier_lot) || 0) + (parseFloat(mandat.prix_autres_lots) || 0)
+                       : (parseFloat(mandat.prix_estime) || 0);
+                     const rabais = parseFloat(mandat.rabais) || 0;
+                     const total = prixBase * quantite - rabais;
+                     return (
+                       <React.Fragment key={index}>
+                       <tr className="border-b border-slate-800 hover:bg-slate-800/30">
+                         <td className="p-2">
+                           <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                             {getAbbreviatedMandatType(mandat.type_mandat)}
+                           </Badge>
+                         </td>
+                         <td className="p-2">
+                           <Input type="text" inputMode="decimal" value={getLocalValue(index, 'quantite')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'quantite', val || '1'); }} onBlur={() => handleInputBlur(index, 'quantite')} placeholder="1" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-16" />
+                         </td>
+                         <td className="p-2">
+                           <Input type="text" inputMode="decimal" value={getLocalValue(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime', val); }} onBlur={() => handleInputBlur(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
+                         </td>
+                         <td className="p-2">
+                           {isMultiLotType ? (
+                             <Input type="text" inputMode="decimal" value={getLocalValue(index, 'prix_autres_lots')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'prix_autres_lots', val); }} onBlur={() => handleInputBlur(index, 'prix_autres_lots')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
+                           ) : (
+                             <span className="text-slate-600 block text-center">-</span>
+                           )}
+                         </td>
+                         <td className="p-2">
+                           <Input type="text" inputMode="decimal" value={getLocalValue(index, 'rabais')} onChange={(e) => { const val = e.target.value.replace(/[^0-9.]/g, ''); handleInputChange(index, 'rabais', val); }} onBlur={() => handleInputBlur(index, 'rabais')} placeholder="0.00" disabled={disabled} className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20" />
+                         </td>
+                         <td className="p-2 text-center">
+                           <button type="button" onClick={() => handleCheckboxChange(index, 'taxes_incluses', !mandat.taxes_incluses)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
+                             {mandat.taxes_incluses ? <ToggleRight className="w-5 h-5 text-purple-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                           </button>
+                         </td>
+                         <td className="p-2 text-center">
+                           <button type="button" onClick={() => handleCheckboxChange(index, 'prix_convenu', !mandat.prix_convenu)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
+                             {mandat.prix_convenu ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                           </button>
+                         </td>
+                         <td className="p-2 text-center">
+                           <button
+                             type="button"
+                             onClick={() => setOpenCommentIndex(openCommentIndex === index ? null : index)}
+                             className={`border-0 bg-transparent shadow-none p-0 hover:bg-transparent ${mandat.commentaire_tarification ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'}`}
+                             title={mandat.commentaire_tarification || "Ajouter un commentaire"}
+                           >
+                             <MessageSquare className="w-4 h-4" />
+                           </button>
+                         </td>
+                         <td className="p-2 text-right text-white font-semibold">
+                           {total.toFixed(2)} $
+                         </td>
+                       </tr>
+                       {openCommentIndex === index && (
+                         <tr className="bg-slate-900/50 border-b border-slate-800">
+                           <td colSpan="9" className="p-2">
+                             <Textarea
+                               value={mandat.commentaire_tarification || ""}
+                               onChange={(e) => {
+                                 const updatedMandats = mandats.map((m, i) => {
+                                   const copy = JSON.parse(JSON.stringify(m));
+                                   if (i === index) copy.commentaire_tarification = e.target.value;
+                                   return copy;
+                                 });
+                                 onTarificationChange(updatedMandats);
+                               }}
+                               placeholder="Commentaire sur la tarification de ce mandat..."
+                               disabled={disabled}
+                               className="bg-slate-800 border-slate-600 text-white text-xs h-16 resize-none"
+                             />
+                           </td>
+                         </tr>
+                       )}
+                       </React.Fragment>
+                     );
                     })}
                   </tbody>
                   <tfoot>
