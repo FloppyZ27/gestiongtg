@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
   const [audioUrl, setAudioUrl] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [imageUrlTemp, setImageUrlTemp] = useState("");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const imageInputRef = useRef(null);
@@ -218,7 +220,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
-  const allCommentaires = lotTemporaire ? commentairesTemp : commentaires;
+  const allCommentaires = lotTemporaire ? (commentairesTemp || []) : commentaires;
 
   return (
     <>
@@ -372,24 +374,41 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             className="bg-slate-700 border-slate-600 text-white resize-none h-20"
             disabled={createCommentaireMutation.isPending || isRecording || isUploadingImage}
           />
-          {imageUrl && (
-            <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <div className="flex-1">
-                <p className="text-xs text-blue-400 mb-1">Image prête</p>
-                <img src={imageUrl} alt="Preview" className="max-w-full h-auto rounded max-h-32" />
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setImageUrl("")}
-                className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+          {imageUrl && !lotTemporaire && (
+           <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+             <div className="flex-1">
+               <p className="text-xs text-blue-400 mb-1">Image prête</p>
+               <img src={imageUrl} alt="Preview" className="max-w-full h-auto rounded max-h-32" />
+             </div>
+             <Button
+               type="button"
+               size="sm"
+               variant="ghost"
+               onClick={() => setImageUrl("")}
+               className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+             >
+               <X className="w-4 h-4" />
+             </Button>
+           </div>
           )}
-          {audioUrl && (
+          {imageUrlTemp && lotTemporaire && (
+           <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+             <div className="flex-1">
+               <p className="text-xs text-blue-400 mb-1">Image prête</p>
+               <img src={imageUrlTemp} alt="Preview" className="max-w-full h-auto rounded max-h-32" />
+             </div>
+             <Button
+               type="button"
+               size="sm"
+               variant="ghost"
+               onClick={() => setImageUrlTemp("")}
+               className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+             >
+               <X className="w-4 h-4" />
+             </Button>
+           </div>
+          )}
+          {audioUrl && !lotTemporaire && (
             <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
               <div className="flex-1">
                 <p className="text-xs text-emerald-400 mb-1">Enregistrement audio prêt</p>
@@ -422,7 +441,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                 size="icon"
                 variant="ghost"
                 onClick={() => imageInputRef.current?.click()}
-                disabled={isUploadingImage || imageUrl}
+                disabled={isUploadingImage || imageUrl || (lotTemporaire && imageUrlTemp)}
                 className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400"
               >
                 <Image className="w-5 h-5" />
@@ -433,8 +452,8 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                   size="icon"
                   variant="ghost"
                   onClick={startRecording}
-                  disabled={isUploadingAudio || audioUrl}
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-emerald-400"
+                   disabled={isUploadingAudio || audioUrl || (lotTemporaire && audioUrl)}
+                   className="h-8 w-8 p-0 text-slate-400 hover:text-emerald-400"
                 >
                   <Mic className="w-5 h-5" />
                 </Button>
@@ -459,7 +478,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             <Button
               type="submit"
               size="sm"
-              disabled={(!nouveauCommentaire.trim() && !audioUrl && !imageUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio || isUploadingImage}
+              disabled={(lotTemporaire ? (!nouveauCommentaire.trim() && !audioUrl && !imageUrlTemp) : (!nouveauCommentaire.trim() && !audioUrl && !imageUrl)) || createCommentaireMutation.isPending || isRecording || isUploadingAudio || isUploadingImage}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
             >
               <Send className="w-4 h-4 mr-2" />

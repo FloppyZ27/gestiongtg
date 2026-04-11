@@ -251,7 +251,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
                     </TabsList>
                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                      <CommentairesSectionLot lotId={null} lotTemporaire={true} onCommentairesTempChange={setCommentairesTemporaires} />
+                      <CommentairesSectionLot lotId={null} lotTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                       <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p></div></div>
