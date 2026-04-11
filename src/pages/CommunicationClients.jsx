@@ -31,6 +31,12 @@ export default function CommunicationClients() {
     initialData: [],
   });
 
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
   const retourAppelCount = user ? retoursAppels.filter(r => 
     r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
   ).length : 0;
@@ -40,6 +46,15 @@ export default function CommunicationClients() {
     alma: priseMandats.filter(p => p.place_affaire === "Alma").length,
     saguenay: priseMandats.filter(p => p.place_affaire === "Saguenay").length,
   };
+
+  const retourAppelCountsByPlace = React.useMemo(() => {
+    const dossierMap = Object.fromEntries(dossiers.map(d => [d.id, d]));
+    return {
+      tous: retoursAppels.length,
+      alma: retoursAppels.filter(r => dossierMap[r.dossier_id]?.place_affaire === "Alma").length,
+      saguenay: retoursAppels.filter(r => dossierMap[r.dossier_id]?.place_affaire === "Saguenay").length,
+    };
+  }, [retoursAppels, dossiers]);
 
   const handleNewMandat = () => {
     setActiveTab("prise-mandat");
@@ -72,15 +87,6 @@ export default function CommunicationClients() {
             </div>
             <p className="text-slate-400">Gestion des prises de mandat et retours d'appel</p>
           </div>
-        </div>
-
-        <div className="mb-2">
-          <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
-          <PlaceAffaireTabs
-            value={filterPlaceAffaire}
-            onChange={setFilterPlaceAffaire}
-            counts={placeAffaireCounts}
-          />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -134,10 +140,24 @@ export default function CommunicationClients() {
           </div>
 
           <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
+            <div className="mb-3">
+              <PlaceAffaireTabs
+                value={filterPlaceAffaire}
+                onChange={setFilterPlaceAffaire}
+                counts={placeAffaireCounts}
+              />
+            </div>
             <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-0">
+            <div className="mb-3">
+              <PlaceAffaireTabs
+                value={filterPlaceAffaire}
+                onChange={setFilterPlaceAffaire}
+                counts={retourAppelCountsByPlace}
+              />
+            </div>
             <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
         </Tabs>
