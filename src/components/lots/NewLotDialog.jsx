@@ -299,24 +299,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
             </div>
 
-            {/* Footer buttons */}
-            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-              {!editingLot ? (
-                <>
-                  <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
-                  <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {createLotMutation.isPending ? "Création..." : "Créer"}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button type="button" variant="outline" onClick={resetAndClose} className="border-slate-600 text-slate-400 hover:bg-slate-700/50">Fermer</Button>
-                  <Button type="button" onClick={() => updateLotMutation.mutate(formData)} disabled={updateLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {updateLotMutation.isPending ? "Sauvegarde..." : "Sauvegarder"}
-                  </Button>
-                </>
-              )}
-            </div>
+
           </motion.div>
         </DialogContent>
       </Dialog>

@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import { MessageSquare, Clock, ChevronDown, ChevronUp, Upload, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
