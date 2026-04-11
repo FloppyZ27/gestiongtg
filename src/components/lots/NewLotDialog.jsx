@@ -54,6 +54,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
   const [sidebarTab, setSidebarTab] = useState("commentaires");
+  const [historique, setHistorique] = useState([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
@@ -109,7 +110,12 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
     setHasFormChanges(true);
+    addHistoriqueEntry('Modification', `Circonscription foncière changée en ${value}`);
   };
+
+  const addHistoriqueEntry = (action, details) => {
+    setHistorique(prev => [{ action, details, timestamp: new Date().toISOString() }, ...prev]);
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -247,15 +253,29 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                 {!sidebarCollapsed && (
                   <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
                     <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
-                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires</TabsTrigger>
-                      <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
+                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {commentairesTemporaires.length > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{commentairesTemporaires.length}</Badge>}</TabsTrigger>
+                      <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique {historique.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{historique.length}</Badge>}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
                       <CommentairesSectionLot lotId={null} lotTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                      <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p></div></div>
-                    </TabsContent>
+                       {historique.length === 0 ? (
+                         <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p></div></div>
+                       ) : (
+                         <div className="space-y-2">
+                           {historique.map((entry, idx) => (
+                             <div key={idx} className="text-xs bg-slate-800/40 border border-slate-700 rounded p-2 space-y-1">
+                               <div className="flex items-center justify-between">
+                                 <span className="font-semibold text-slate-300">{entry.action}</span>
+                                 <span className="text-slate-500 text-[10px]">{format(new Date(entry.timestamp), 'HH:mm:ss', { locale: fr })}</span>
+                               </div>
+                               {entry.details && <p className="text-slate-400">{entry.details}</p>}
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                     </TabsContent>
                   </Tabs>
                 )}
               </div>
