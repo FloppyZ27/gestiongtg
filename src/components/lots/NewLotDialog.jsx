@@ -116,7 +116,12 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     e.preventDefault();
     if (!formData.numero_lot || !formData.circonscription_fonciere) { setShowMissingFields(true); return; }
     if (!editingLot) {
-      const lotExistant = lots.find(l => l.numero_lot === formData.numero_lot && l.cadastre === formData.cadastre && l.circonscription_fonciere === formData.circonscription_fonciere);
+      const lotExistant = lots.find(l =>
+        l.numero_lot === formData.numero_lot &&
+        l.circonscription_fonciere === formData.circonscription_fonciere &&
+        (l.rang || "") === (formData.rang || "") &&
+        (l.cadastre || "") === (formData.cadastre || "")
+      );
       if (lotExistant) { setShowLotExists(true); return; }
       createLotMutation.mutate(formData);
     } else {
@@ -340,7 +345,11 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
         <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
           <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <p className="text-slate-300 text-center">Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.</p>
+            <p className="text-slate-300 text-center">
+              Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>
+              {formData.cadastre ? <>, cadastre <span className="text-emerald-400 font-semibold">{formData.cadastre}</span></> : null}
+              {formData.rang ? <>, rang <span className="text-emerald-400 font-semibold">{formData.rang}</span></> : null}.
+            </p>
             <div className="flex justify-center"><Button type="button" onClick={() => setShowLotExists(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
           </div>
         </DialogContent>
