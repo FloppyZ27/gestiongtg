@@ -72,6 +72,17 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list('-created_date'), initialData: [] });
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
+  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [], retry: false });
+
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getUserPhoto = (email) => {
+    const u = users.find(u => u.email === email);
+    return u?.photo_url || null;
+  };
 
   const updateLotMutation = useMutation({
     mutationFn: async ({ id, lotData }) => {
@@ -353,7 +364,14 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                                     <p className="text-slate-400 text-xs break-words">{entry.details}</p>
                                   )}
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-emerald-400 text-xs">Vous</span>
+                                    <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
+                                      {user?.photo_url ? (
+                                        <img src={user.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span className="text-[9px] font-semibold text-emerald-400">{getInitials(user?.full_name)}</span>
+                                      )}
+                                    </div>
+                                    <span className="text-emerald-400 text-xs">{user?.full_name}</span>
                                     <span className="text-slate-600 text-xs">•</span>
                                     <span className="text-slate-500 text-xs">{entry.timestamp && format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                                   </div>
