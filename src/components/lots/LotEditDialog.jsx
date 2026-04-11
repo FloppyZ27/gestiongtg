@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { checkLotDuplicate } from "@/lib/lotValidation";
 import { MessageSquare, Clock, ChevronDown, ChevronUp, Upload, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
@@ -73,13 +74,7 @@ export default function LotEditDialog({
     if (!editingLot || isSaving) return;
 
     // Vérifier que la combinaison n'existe pas (sauf pour le lot actuel)
-    const lotExistant = lots.find(l =>
-      l.numero_lot === newLotForm.numero_lot &&
-      l.circonscription_fonciere === newLotForm.circonscription_fonciere &&
-      (l.rang || "") === (newLotForm.rang || "") &&
-      (l.cadastre || "") === (newLotForm.cadastre || "") &&
-      l.id !== editingLot.id
-    );
+    const lotExistant = checkLotDuplicate(newLotForm, lots, editingLot.id);
     if (lotExistant) {
       setShowLotDuplicateWarning(true);
       return;
