@@ -107,7 +107,18 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     onOpenChange(false);
   };
 
+  const handleFieldChange = (fieldName, newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      setHistorique(prev => [...prev, {
+        action: 'Modification',
+        details: `${fieldName} changé de "${oldValue || '(vide)'}" à "${newValue || '(vide)'}"`,
+        timestamp: new Date().toISOString()
+      }]);
+    }
+  };
+
   const handleCirconscriptionChange = (value) => {
+    handleFieldChange('Circonscription foncière', value, formData.circonscription_fonciere);
     setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
     setHasFormChanges(true);
@@ -231,7 +242,20 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
                   <LotInfoStepForm
                     lotForm={formData}
-                    onLotFormChange={(data) => { setFormData(data); setHasFormChanges(true); }}
+                    onLotFormChange={(data) => {
+                      // Track changes for each modified field
+                      if (data.numero_lot !== formData.numero_lot) {
+                        handleFieldChange('Numéro de lot', data.numero_lot, formData.numero_lot);
+                      }
+                      if (data.cadastre !== formData.cadastre) {
+                        handleFieldChange('Cadastre', data.cadastre, formData.cadastre);
+                      }
+                      if (data.rang !== formData.rang) {
+                        handleFieldChange('Rang', data.rang, formData.rang);
+                      }
+                      setFormData(data);
+                      setHasFormChanges(true);
+                    }}
                     availableCadastres={availableCadastres}
                     onCirconscriptionChange={handleCirconscriptionChange}
                     isCollapsed={lotInfoCollapsed}
@@ -242,7 +266,13 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
                   <TypesOperationStepForm
                     typesOperation={formData.types_operation || []}
-                    onTypesOperationChange={(data) => { setFormData({...formData, types_operation: data}); setHasFormChanges(true); }}
+                    onTypesOperationChange={(data) => {
+                      if (JSON.stringify(data) !== JSON.stringify(formData.types_operation)) {
+                        handleFieldChange('Types d\'opération', `${data.length} opération(s)`, `${(formData.types_operation || []).length} opération(s)`);
+                      }
+                      setFormData({...formData, types_operation: data});
+                      setHasFormChanges(true);
+                    }}
                     isCollapsed={typesOperationCollapsed}
                     onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
                     disabled={false}
