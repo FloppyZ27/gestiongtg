@@ -1,0 +1,266 @@
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import LotInfoStepForm from "./LotInfoStepForm";
+import TypesOperationStepForm from "./TypesOperationStepForm";
+import DocumentsStepFormLot from "./DocumentsStepFormLot";
+import CommentairesSectionLot from "./CommentairesSectionLot";
+import { Dialog as WarningDialog, DialogContent as WarningDialogContent, DialogHeader as WarningDialogHeader, DialogTitle as WarningDialogTitle } from "@/components/ui/dialog";
+
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Lac-Saint-Jean-Est": ["Québec","Canton de Caron","Canton de de l'Île","Canton de Garnier","Village d'Héberville","Canton d'Hébertville-Station","Canton de Labarre","Canton de Mésy","Canton de Métabetchouan","Canton de Signay","Canton de Taillon"],
+  "Lac-Saint-Jean-Ouest": ["Québec","Canton d'Albanel","Canton de Charlevoix","Canton de Dablon","Canton de Dalmas","Canton de Demeules","Canton de Dequen","Canton de Dolbeau","Canton de Girard","Canton de Jogues","Canton de Malherbe","Canton de Métabetchouan","Canton de Milot","Canton de Normandin","Canton de Ouiatchouan","Canton de Racine","Canton de Roberval","Canton de Saint-Hilaire"],
+  "Chicoutimi": ["Québec","Cité d'Arvida","Canton de Bagot","Village de Bagotville","Canton de Bégin","Canton de Boileau","Canton de Bourget","Canton de Chicoutimi","Paroisse de Chicoutimi","Ville de Chicoutimi","Canton de Dumas","Canton de Durocher","Canton de Falardeau","Canton de Ferland","Ville de Grande-Baie","Canton de Harvey","Canton de Hébert","Canton de Jonquière","Canton de Kénogami","Canton de Labrecque","Canton de Laterrière","Canton d'Otis","Canton de Périgny","Canton de Rouleau","Canton de Simard","Paroisse de Saint-Alexis","Paroisse de Saint-Alphonse","Ville de Sainte-Anne-de-Chicoutimi","Canton de Saint-Germains","Canton de Saint-Jean","Canton de Taché","Canton de Tremblay"]
+};
+
+const CADASTRE_CODES = {
+  "080010": "Canton de Boilleau","080020": "Canton de Périgny","080040": "Canton de Dumas","080050": "Canton de Labrosse","080060": "Canton de Saint-Jean","080080": "Canton de Hébert","080100": "Canton d'Otis","080110": "Canton de Ferland","080120": "Paroisse de Saint-Alexis","080130": "Paroisse de Saint-Alphonse","080140": "Village de Grande-Baie","080160": "Village de Bagotville","080180": "Canton de Bagot","080200": "Canton de Laterrière","080210": "Paroisse de Chicoutimi","080220": "Ville de Chicoutimi","080240": "Canton de Chicoutimi","080260": "Cité d'Arvida","080280": "Canton de Jonquière","080300": "Canton de Kénogami","080310": "Canton de Labarre","080320": "Canton de Taché","080340": "Canton de Bourget","080360": "Canton de Simard","080380": "Canton de Tremblay","080400": "Village de Sainte-Anne-de-Chicoutimi","080410": "Canton de Harvey","080420": "Canton de Saint-Germains","080440": "Canton de Durocher","080460": "Canton de Falardeau","080480": "Canton de Bégin","080500": "Canton de Labrecque","080510": "Canton de Rouleau","080610": "Canton de Mésy","080620": "Village d'Héberville","080630": "Canton de Saint-Hilaire","080640": "Canton de Caron","080660": "Canton de Métabetchouan","080700": "Canton de Signay","080710": "Canton de De l'Île","080720": "Canton de Taillon","080740": "Canton de Garnier","080780": "Canton de Malherbe","080810": "Canton de Dablon","080820": "Canton de Dequen","080840": "Canton de Charlevoix","080860": "Canton de Roberval","080920": "Canton de Ouiatchouan","080960": "Canton de Demeulles","080980": "Canton de Parent","081000": "Canton de Racine","081010": "Canton de Dolbeau","081020": "Canton de Dalmas","081040": "Canton de Jogues","081110": "Canton de Milot","081200": "Canton d'Albanel","081210": "Canton de Normandin"
+};
+
+export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatIndex }) {
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "", types_operation: [] });
+  const [availableCadastres, setAvailableCadastres] = useState([]);
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
+  const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
+  const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState("commentaires");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isImportingD01, setIsImportingD01] = useState(false);
+  const [isDragOverD01, setIsDragOverD01] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showMissingFields, setShowMissingFields] = useState(false);
+  const [showLotExists, setShowLotExists] = useState(false);
+
+  const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list('-created_date'), initialData: [] });
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
+
+  const createLotMutation = useMutation({
+    mutationFn: async (lotData) => {
+      const newLot = await base44.entities.Lot.create(lotData);
+      if (commentairesTemporaires.length > 0) {
+        await Promise.all(commentairesTemporaires.map(c => base44.entities.CommentaireLot.create({ lot_id: newLot.id, contenu: c.contenu, utilisateur_email: c.utilisateur_email, utilisateur_nom: c.utilisateur_nom })));
+      }
+      await base44.entities.ActionLog.create({ utilisateur_email: user?.email || '', utilisateur_nom: user?.full_name || '', action: 'Création', entite: 'Lot', entite_id: newLot.id, details: `Lot ${lotData.numero_lot} créé` });
+      return newLot;
+    },
+    onSuccess: (newLot) => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      onLotCreated?.(newLot, mandatIndex);
+      resetAndClose();
+    }
+  });
+
+  const resetForm = () => {
+    setFormData({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "", types_operation: [] });
+    setAvailableCadastres([]);
+    setCommentairesTemporaires([]);
+    setHasFormChanges(false);
+  };
+
+  const resetAndClose = () => {
+    resetForm();
+    onOpenChange(false);
+  };
+
+  const handleCirconscriptionChange = (value) => {
+    setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
+    setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+    setHasFormChanges(true);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.numero_lot || !formData.circonscription_fonciere) { setShowMissingFields(true); return; }
+    const lotExistant = lots.find(l => l.numero_lot === formData.numero_lot && l.cadastre === formData.cadastre && l.circonscription_fonciere === formData.circonscription_fonciere);
+    if (lotExistant) { setShowLotExists(true); return; }
+    createLotMutation.mutate(formData);
+  };
+
+  const handleD01Import = async (file) => {
+    setIsImportingD01(true);
+    try {
+      const fileContent = await file.text();
+      const lines = fileContent.split('\n');
+      const lotLine = lines.find(line => line.startsWith('LO'));
+      const suLines = lines.filter(line => line.startsWith('SU'));
+      let coLines = [];
+      if (suLines.length >= 2) {
+        const firstSuIndex = lines.indexOf(suLines[0]);
+        const secondSuIndex = lines.indexOf(suLines[1]);
+        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
+      }
+      const suLine = suLines[0];
+      let extractedData = {};
+      if (lotLine) { const lotParts = lotLine.split(';'); extractedData.numero_lot = lotParts[1] || ''; }
+      if (suLine) {
+        const suParts = suLine.split(';');
+        extractedData.circonscription_fonciere = suParts[2] || '';
+        const dateBpd = suParts[3] || '';
+        if (dateBpd) {
+          if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
+            extractedData.date_bpd = `${dateBpd.substring(0,4)}-${dateBpd.substring(4,6)}-${dateBpd.substring(6,8)}`;
+          } else { extractedData.date_bpd = dateBpd; }
+        }
+      }
+      const concordances_anterieures = [];
+      coLines.forEach(coLine => {
+        const coParts = coLine.split(';');
+        const cadastreCode = coParts[1] || '';
+        const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
+        let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
+        if (rang.match(/^Rang 0(\d+)$/)) rang = rang.replace(/^Rang 0/, 'Rang ');
+        concordances_anterieures.push({ circonscription_fonciere: extractedData.circonscription_fonciere, cadastre, numero_lot: coParts[3] || '', rang, est_partie: coParts[4] === 'O' });
+      });
+      if (extractedData.circonscription_fonciere) setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
+      setFormData(prev => ({ ...prev, numero_lot: extractedData.numero_lot || prev.numero_lot, circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere, cadastre: 'Québec', types_operation: [{ type_operation: "Remplacement", date_bpd: extractedData.date_bpd || '', concordances_anterieures }] }));
+      setHasFormChanges(true);
+    } catch (error) {
+      alert("Erreur lors de l'importation du fichier .d01");
+    } finally { setIsImportingD01(false); }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={(o) => { if (!o && hasFormChanges) { setShowCancelConfirm(true); return; } if (!o) resetAndClose(); onOpenChange(o); }}>
+        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+          <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
+          <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
+            <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+              <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
+            </div>
+
+            <div className="flex flex-1 overflow-hidden">
+              {/* Main form - 70% */}
+              <div className="flex-[0_0_70%] overflow-y-auto p-6 pt-3 border-r border-slate-800">
+                <form id="new-lot-form" onSubmit={handleSubmit} className="space-y-3">
+                  {/* Import .d01 */}
+                  <div
+                    className={`border border-dashed rounded-lg p-2 transition-all ${isDragOverD01 ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'}`}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false); }}
+                    onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false); const file = e.dataTransfer.files[0]; if (file?.name.endsWith('.d01')) handleD01Import(file); else alert("Veuillez déposer un fichier .d01"); }}
+                  >
+                    {isImportingD01 ? (
+                      <div className="flex items-center justify-center gap-2 text-teal-400"><Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">Importation...</span></div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-slate-400" /><span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span></div>
+                        <label><input type="file" accept=".d01" onChange={(e) => { const f = e.target.files[0]; if (f) handleD01Import(f); }} className="hidden" /><span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">Parcourir</span></label>
+                      </div>
+                    )}
+                  </div>
+
+                  <LotInfoStepForm
+                    lotForm={formData}
+                    onLotFormChange={(data) => { setFormData(data); setHasFormChanges(true); }}
+                    availableCadastres={availableCadastres}
+                    onCirconscriptionChange={handleCirconscriptionChange}
+                    isCollapsed={lotInfoCollapsed}
+                    onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
+                    disabled={false}
+                    CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                  />
+
+                  <TypesOperationStepForm
+                    typesOperation={formData.types_operation || []}
+                    onTypesOperationChange={(data) => { setFormData({...formData, types_operation: data}); setHasFormChanges(true); }}
+                    isCollapsed={typesOperationCollapsed}
+                    onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
+                    disabled={false}
+                    CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                    allLots={lots}
+                  />
+
+                  <DocumentsStepFormLot
+                    lotNumero={formData.numero_lot}
+                    circonscription={formData.circonscription_fonciere}
+                    isCollapsed={documentsCollapsed}
+                    onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
+                    disabled={false}
+                  />
+                </form>
+              </div>
+
+              {/* Sidebar - 30% */}
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                <div className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+                  <div className="flex items-center gap-2">
+                    {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                    <h3 className="text-slate-300 text-base font-semibold">{sidebarTab === "commentaires" ? "Commentaires" : "Historique"}</h3>
+                  </div>
+                  {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                </div>
+                {!sidebarCollapsed && (
+                  <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                    <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires</TabsTrigger>
+                      <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                      <CommentairesSectionLot lotId={null} lotTemporaire={true} onCommentairesTempChange={setCommentairesTemporaires} />
+                    </TabsContent>
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+                      <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p></div></div>
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+              <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                {createLotMutation.isPending ? "Création..." : "Créer"}
+              </Button>
+            </div>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialogs d'avertissement */}
+      <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.</p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button type="button" onClick={() => { setShowCancelConfirm(false); resetAndClose(); }} className="bg-gradient-to-r from-red-500 to-red-600 border-none">Abandonner</Button>
+              <Button type="button" onClick={() => setShowCancelConfirm(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Continuer l'édition</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMissingFields} onOpenChange={setShowMissingFields}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.</p>
+            <div className="flex justify-center"><Button type="button" onClick={() => setShowMissingFields(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showLotExists} onOpenChange={setShowLotExists}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.</p>
+            <div className="flex justify-center"><Button type="button" onClick={() => setShowLotExists(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
