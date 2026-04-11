@@ -3335,25 +3335,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
         </Dialog>
 
         {/* New Lot Dialog */}
-        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
+        <Dialog open={isNewLotDialogOpen} onOpenChange={async (open) => {
           if (!open) {
-            let hasChanges = false;
-            if (editingLot) {
-                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
-            } else {
-                hasChanges = newLotForm.numero_lot || 
-                  newLotForm.circonscription_fonciere || 
-                  newLotForm.rang || 
-                  newLotForm.types_operation.length > 0 ||
-                  commentairesTemporairesLot.length > 0;
-            }
-            
-            if (hasChanges) {
-              setShowCancelLotConfirm(true);
-            } else {
-              setIsNewLotDialogOpen(false);
-              resetLotForm();
-            }
+            if (editingLot) {if(newLotForm.numero_lot&&newLotForm.circonscription_fonciere){await updateLotMutation.mutateAsync({id:editingLot.id,lotData:newLotForm});}setIsNewLotDialogOpen(false);resetLotForm();return;}
+            const hasChanges = newLotForm.numero_lot||newLotForm.circonscription_fonciere||newLotForm.rang||newLotForm.types_operation.length>0||commentairesTemporairesLot.length>0;
+            if (hasChanges) {setShowCancelLotConfirm(true);} else {setIsNewLotDialogOpen(false);resetLotForm();}
           } else {
             // Charger l'historique du lot lors de l'ouverture en mode édition
             if (open && editingLot) {
@@ -3480,14 +3466,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  {!sidebarCollapsedLot && (
                    <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
                      <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
-                       <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                         <MessageSquare className="w-4 h-4 mr-1" />
-                         Commentaires
-                       </TabsTrigger>
-                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                         <Clock className="w-4 h-4 mr-1" />
-                         Historique
-                       </TabsTrigger>
+                       <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {commentairesTemporairesLot.length > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{commentairesTemporairesLot.length}</Badge>}</TabsTrigger>
+                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique {lotActionLogs.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{lotActionLogs.length}</Badge>}</TabsTrigger>
                      </TabsList>
 
                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
@@ -3541,18 +3521,14 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
               </div>
 
               {/* Boutons tout en bas - pleine largeur */}
-              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+              {!editingLot && (<div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
                 <Button type="button" variant="outline" onClick={() => {
                  let hasChanges = false;
-                 if (editingLot) {
-                     hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
-                 } else {
-                     hasChanges = newLotForm.numero_lot || 
-                       newLotForm.circonscription_fonciere || 
-                       newLotForm.rang || 
-                       newLotForm.types_operation.length > 0 ||
-                       commentairesTemporairesLot.length > 0;
-                 }
+                 hasChanges = newLotForm.numero_lot || 
+                   newLotForm.circonscription_fonciere || 
+                   newLotForm.rang || 
+                   newLotForm.types_operation.length > 0 ||
+                   commentairesTemporairesLot.length > 0;
 
                   if (hasChanges) {
                     setShowCancelLotConfirm(true);
@@ -3560,13 +3536,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                     setIsNewLotDialogOpen(false);
                     resetLotForm();
                   }
-                }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                  Annuler
-                </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                   {editingLot ? "Modifier" : "Créer"}
-                 </Button>
-              </div>
+                }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
+              </div>)}
             </motion.div>
           </DialogContent>
         </Dialog>
