@@ -55,6 +55,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const [sidebarTab, setSidebarTab] = useState("commentaires");
   const [historique, setHistorique] = useState([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [commentairesCount, setCommentairesCount] = useState(0);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -271,11 +272,11 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                 {!sidebarCollapsed && (
                   <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
                     <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
-                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {commentairesTemporaires.length > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{commentairesTemporaires.length}</Badge>}</TabsTrigger>
+                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporaires.length}</Badge>}</TabsTrigger>
                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique {historique.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{historique.length}</Badge>}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
+                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                        {historique.length === 0 ? (
