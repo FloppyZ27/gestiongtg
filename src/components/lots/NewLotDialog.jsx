@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -65,6 +65,8 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [commentairesCount, setCommentairesCount] = useState(0);
   const [isImportingD01, setIsImportingD01] = useState(false);
+  const [historiqueFilters, setHistoriqueFilters] = useState({ users: [], actions: [], dateRange: null });
+  const [showHistoriqueFilters, setShowHistoriqueFilters] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showMissingFields, setShowMissingFields] = useState(false);
@@ -375,12 +377,44 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
                       <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
                     </TabsContent>
-                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                       {historique.length === 0 ? (
-                          <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p><p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p></div></div>
-                       ) : (
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0 flex flex-col">
+                       <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+                        <Button size="sm" variant="outline" onClick={() => setShowHistoriqueFilters(!showHistoriqueFilters)} className="text-xs text-slate-300 border-slate-600 hover:bg-slate-700">
+                          <Filter className="w-3 h-3 mr-1" /> Filtrer
+                        </Button>
+                        {(historiqueFilters.users.length > 0 || historiqueFilters.actions.length > 0) && (
+                          <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{historiqueFilters.users.length + historiqueFilters.actions.length}</Badge>
+                        )}
+                       </div>
+                       {showHistoriqueFilters && (
+                        <div className="mb-3 p-2 bg-slate-800/50 rounded border border-slate-700 flex-shrink-0">
                           <div className="space-y-2">
-                            {historique.map((entry, idx) => (
+                            <div>
+                              <p className="text-xs font-semibold text-slate-300 mb-1">Actions</p>
+                              <div className="flex flex-wrap gap-1">
+                                {['Création', 'Modification'].map(action => (
+                                  <button key={action} onClick={() => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    actions: prev.actions.includes(action) ? prev.actions.filter(a => a !== action) : [...prev.actions, action]
+                                  }))} className={`text-xs px-2 py-1 rounded transition-colors ${
+                                    historiqueFilters.actions.includes(action) ? 'bg-emerald-500/30 text-emerald-400' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                  }`}>{action}</button>
+                                ))}
+                              </div>
+                            </div>
+                            <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-slate-400 hover:text-slate-200 mt-1">Réinitialiser</button>
+                          </div>
+                        </div>
+                       )}
+                       {(() => {
+                        const filtered = historique
+                          .filter(e => historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action))
+                          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        return filtered.length === 0 ? (
+                          <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action</p></div></div>
+                        ) : (
+                          <div className="space-y-2">
+                            {filtered.map((entry, idx) => (
                               <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <div className="flex flex-col gap-1.5">
                                   <p className="text-white text-sm font-medium">{entry.action}</p>
@@ -403,7 +437,8 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                               </div>
                             ))}
                           </div>
-                        )}
+                        );
+                       })()}
                      </TabsContent>
                   </Tabs>
                 )}
