@@ -342,20 +342,26 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                        {historique.length === 0 ? (
-                         <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p></div></div>
+                          <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p><p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p></div></div>
                        ) : (
-                         <div className="space-y-2">
-                           {historique.map((entry, idx) => (
-                             <div key={idx} className="text-xs bg-slate-800/40 border border-slate-700 rounded p-2 space-y-1">
-                               <div className="flex items-center justify-between">
-                                 <span className="font-semibold text-slate-300">{entry.action}</span>
-                                 <span className="text-slate-500 text-[10px]">{entry.timestamp && format(new Date(entry.timestamp), 'HH:mm:ss', { locale: fr })}</span>
-                               </div>
-                               {entry.details && <p className="text-slate-400">{entry.details}</p>}
-                             </div>
-                           ))}
-                         </div>
-                       )}
+                          <div className="space-y-2">
+                            {historique.map((entry, idx) => (
+                              <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <div className="flex flex-col gap-1.5">
+                                  <p className="text-white text-sm font-medium">{entry.action}</p>
+                                  {entry.details && (
+                                    <p className="text-slate-400 text-xs break-words">{entry.details}</p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-emerald-400 text-xs">Vous</span>
+                                    <span className="text-slate-600 text-xs">•</span>
+                                    <span className="text-slate-500 text-xs">{entry.timestamp && format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                      </TabsContent>
                   </Tabs>
                 )}
