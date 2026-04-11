@@ -56,7 +56,6 @@ export default function DossiersFilterBar({
   return (
     <>
       <div className="mb-2">
-        <p className="text-xs text-slate-400 font-semibold mb-1.5">Filtrer par place d'affaire</p>
         <PlaceAffaireTabs
           value={filterPlaceAffaire}
           onChange={setFilterPlaceAffaire}
