@@ -174,12 +174,15 @@ export default function ClientFormDialog({
       if ((oldData.notes || '') !== (clientData.notes || '')) {
         changes.push({ action: 'Modification des notes', details: 'Les notes ont été modifiées' });
       }
+      const addrKey = (a) => [a.numeros_civiques?.join(','), a.rue, a.ville, a.province, a.code_postal].join('|').toLowerCase();
+      const oldAddrKeys = new Set((oldData.adresses || []).map(addrKey));
+      const newAddrKeys = new Set((clientData.adresses || []).map(addrKey));
       (clientData.adresses || []).forEach(newAddr => {
-        if (!(oldData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(newAddr)))
+        if (!oldAddrKeys.has(addrKey(newAddr)))
           changes.push({ action: "Ajout d'une adresse", details: formatAdresse(newAddr) });
       });
       (oldData.adresses || []).forEach(oldAddr => {
-        if (!(clientData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(oldAddr)))
+        if (!newAddrKeys.has(addrKey(oldAddr)))
           changes.push({ action: "Suppression d'une adresse", details: formatAdresse(oldAddr) });
       });
       (clientData.courriels || []).forEach(newC => {
