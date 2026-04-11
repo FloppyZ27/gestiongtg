@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -56,19 +55,15 @@ export default function LotEditDialog({
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
   const [showLotDuplicateWarning, setShowLotDuplicateWarning] = useState(false);
+  const [commentairesCount, setCommentairesCount] = useState(0);
 
   useEffect(() => {
     if (isOpen && editingLot) {
-      const loadActionLogs = async () => {
-        const logs = await base44.entities.ActionLog.filter(
-          { entite: 'Lot', entite_id: editingLot.id },
-          '-created_date'
-        );
-        setLotActionLogs(logs);
+      const loadCommentairesCount = async () => {
+        const comments = await base44.entities.CommentaireLot.filter({ lot_id: editingLot.id });
+        setCommentairesCount(comments.length);
       };
-      loadActionLogs();
-    }
-  }, [isOpen, editingLot]);
+      loadCommentairesCount();
 
   const handleAutoSave = async () => {
     if (!editingLot || isSaving) return;
@@ -236,7 +231,7 @@ export default function LotEditDialog({
                 <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
                   <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
                     <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                      <MessageSquare className="w-4 h-4 mr-1" />Commentaires {commentairesTemporairesLot.length > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{commentairesTemporairesLot.length}</Badge>}
+                                       <MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporairesLot.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporairesLot.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                       <Clock className="w-4 h-4 mr-1" />Historique {lotActionLogs.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{lotActionLogs.length}</Badge>}
