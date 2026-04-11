@@ -110,7 +110,6 @@ export default function ClientFormDialog({
   
   // Auto-save
   const saveTimeoutRef = React.useRef(null);
-  const lastLoggedRef = React.useRef(null);
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -151,28 +150,168 @@ export default function ClientFormDialog({
     },
   });
 
-  // Auto-save mutation (avec historique pour prénom/nom, type, livraison)
+  // Auto-save mutation
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, clientData }) => {
       if (!editingClient) return;
+      
       const updatedClient = await base44.entities.Client.update(id, clientData);
-      const prev = lastLoggedRef.current;
-      if (prev) {
-        const chgs = [];
-        if (prev.prenom !== clientData.prenom || prev.nom !== clientData.nom)
-          chgs.push({ action: "Modification du nom", details: `${prev.prenom} ${prev.nom} → ${clientData.prenom} ${clientData.nom}` });
-        if (prev.type_client !== clientData.type_client)
-          chgs.push({ action: "Modification du type", details: `${prev.type_client || 'Non défini'} → ${clientData.type_client}` });
-        if (JSON.stringify(prev.preferences_livraison) !== JSON.stringify(clientData.preferences_livraison))
-          chgs.push({ action: "Modification des préférences de livraison", details: `${prev.preferences_livraison?.join(', ') || 'Aucune'} → ${clientData.preferences_livraison?.join(', ') || 'Aucune'}` });
-        for (const c of chgs) {
-          await base44.entities.ActionLog.create({ utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", action: c.action, entite: "Client", entite_id: id, details: c.details });
-        }
-        if (chgs.length > 0) { lastLoggedRef.current = { ...clientData }; queryClient.invalidateQueries({ queryKey: ['actionLogs'] }); }
-      }
       return updatedClient;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['clients'] }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+
+  const updateClientMutation = useMutation({
+    mutationFn: async ({ id, clientData, oldData }) => {
+      const updatedClient = await base44.entities.Client.update(id, clientData);
+
+      // Détecter les changements et créer des entrées d'historique
+      const changes = [];
+      
+      if (oldData.prenom !== clientData.prenom || oldData.nom !== clientData.nom) {
+        changes.push({
+          action: "Modification du nom",
+          details: `${oldData.prenom} ${oldData.nom} → ${clientData.prenom} ${clientData.nom}`
+        });
+      }
+      
+      if (oldData.type_client !== clientData.type_client) {
+        changes.push({
+          action: "Modification du type",
+          details: `${oldData.type_client || 'Non défini'} → ${clientData.type_client}`
+        });
+      }
+
+      if (JSON.stringify(oldData.preferences_livraison) !== JSON.stringify(clientData.preferences_livraison)) {
+        changes.push({
+          action: "Modification des préférences de livraison",
+          details: `${oldData.preferences_livraison?.join(', ') || 'Aucune'} → ${clientData.preferences_livraison?.join(', ') || 'Aucune'}`
+        });
+      }
+
+      if (oldData.notes !== clientData.notes) {
+        changes.push({
+          action: "Modification des notes",
+          details: "Les notes ont été modifiées"
+        });
+      }
+
+      // Détecter les changements d'adresses
+      const oldAdresses = oldData.adresses || [];
+      const newAdresses = clientData.adresses || [];
+      
+      // Adresses ajoutées
+      newAdresses.forEach(newAddr => {
+        const existsInOld = oldAdresses.some(oldAddr => 
+          JSON.stringify(oldAddr) === JSON.stringify(newAddr)
+        );
+        if (!existsInOld) {
+          const formattedAddr = formatAdresse(newAddr);
+          changes.push({
+            action: "Ajout d'une adresse",
+            details: formattedAddr
+          });
+        }
+      });
+
+      // Adresses supprimées
+      oldAdresses.forEach(oldAddr => {
+        const existsInNew = newAdresses.some(newAddr => 
+          JSON.stringify(newAddr) === JSON.stringify(oldAddr)
+        );
+        if (!existsInNew) {
+          const formattedAddr = formatAdresse(oldAddr);
+          changes.push({
+            action: "Suppression d'une adresse",
+            details: formattedAddr
+          });
+        }
+      });
+
+      // Détecter les changements de courriels
+      const oldCourriels = oldData.courriels || [];
+      const newCourriels = clientData.courriels || [];
+      
+      // Courriels ajoutés
+      newCourriels.forEach(newCourriel => {
+        const existsInOld = oldCourriels.some(oldCourriel => 
+          oldCourriel.courriel === newCourriel.courriel
+        );
+        if (!existsInOld) {
+          changes.push({
+            action: "Ajout d'un courriel",
+            details: newCourriel.courriel
+          });
+        }
+      });
+
+      // Courriels supprimés
+      oldCourriels.forEach(oldCourriel => {
+        const existsInNew = newCourriels.some(newCourriel => 
+          newCourriel.courriel === oldCourriel.courriel
+        );
+        if (!existsInNew) {
+          changes.push({
+            action: "Suppression d'un courriel",
+            details: oldCourriel.courriel
+          });
+        }
+      });
+
+      // Détecter les changements de téléphones
+      const oldTelephones = oldData.telephones || [];
+      const newTelephones = clientData.telephones || [];
+      
+      // Téléphones ajoutés
+      newTelephones.forEach(newTel => {
+        const existsInOld = oldTelephones.some(oldTel => 
+          oldTel.telephone === newTel.telephone
+        );
+        if (!existsInOld) {
+          changes.push({
+            action: "Ajout d'un téléphone",
+            details: `${newTel.telephone} (${newTel.type || 'Cellulaire'})`
+          });
+        }
+      });
+
+      // Téléphones supprimés
+      oldTelephones.forEach(oldTel => {
+        const existsInNew = newTelephones.some(newTel => 
+          newTel.telephone === oldTel.telephone
+        );
+        if (!existsInNew) {
+          changes.push({
+            action: "Suppression d'un téléphone",
+            details: `${oldTel.telephone} (${oldTel.type || 'Cellulaire'})`
+          });
+        }
+      });
+
+      // Créer les entrées d'historique
+      for (const change of changes) {
+        await base44.entities.ActionLog.create({
+          utilisateur_email: user?.email || "",
+          utilisateur_nom: user?.full_name || "Système",
+          action: change.action,
+          entite: "Client",
+          entite_id: id,
+          details: change.details,
+        });
+      }
+
+      return updatedClient;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+      setHasChanges(false);
+      resetForm();
+      onOpenChange(false);
+      if (onSuccess) onSuccess();
+    },
   });
 
   // Détecter les changements et auto-save
@@ -684,7 +823,6 @@ export default function ClientFormDialog({
       };
       setFormData(data);
       setInitialFormData(JSON.parse(JSON.stringify(data)));
-      lastLoggedRef.current = JSON.parse(JSON.stringify(data));
       setCommentairesTemporaires([]);
       setHasChanges(false);
     } else if (open && !editingClient) {
