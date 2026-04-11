@@ -119,6 +119,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     setHasFormChanges(false);
     setInitialFormData(null);
     setHasChanges(false);
+    setHistorique([]);
   };
 
   // Auto-save avec debounce
