@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -27,17 +28,25 @@ const CADASTRE_CODES = {
 export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatIndex, editingLot }) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "", types_operation: [] });
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const saveTimeoutRef = useRef(null);
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
 
   // Sync formData when editingLot changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingLot && open) {
-      setFormData({
+      const data = {
         numero_lot: editingLot.numero_lot || "",
         circonscription_fonciere: editingLot.circonscription_fonciere || "",
         cadastre: editingLot.cadastre || "Québec",
         rang: editingLot.rang || "",
         types_operation: editingLot.types_operation || []
-      });
+      };
+      setFormData(data);
+      setInitialFormData(JSON.parse(JSON.stringify(data)));
+      setHasChanges(false);
       if (editingLot.circonscription_fonciere) {
         setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[editingLot.circonscription_fonciere] || []);
       }
@@ -66,16 +75,14 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
 
   const updateLotMutation = useMutation({
-    mutationFn: async (lotData) => {
-      const updatedLot = await base44.entities.Lot.update(editingLot.id, lotData);
-      await base44.entities.ActionLog.create({ utilisateur_email: user?.email || '', utilisateur_nom: user?.full_name || '', action: 'Modification', entite: 'Lot', entite_id: editingLot.id, details: `Lot ${lotData.numero_lot} modifié` });
+    mutationFn: async ({ id, lotData }) => {
+      const updatedLot = await base44.entities.Lot.update(id, lotData);
+      await base44.entities.ActionLog.create({ utilisateur_email: user?.email || '', utilisateur_nom: user?.full_name || '', action: 'Modification', entite: 'Lot', entite_id: id, details: `Lot ${lotData.numero_lot} modifié` });
       return updatedLot;
     },
-    onSuccess: (updatedLot) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      onLotCreated?.(updatedLot, mandatIndex);
-      resetAndClose();
     }
   });
 
@@ -100,7 +107,36 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     setAvailableCadastres([]);
     setCommentairesTemporaires([]);
     setHasFormChanges(false);
+    setInitialFormData(null);
+    setHasChanges(false);
   };
+
+  // Auto-save avec debounce
+  useEffect(() => {
+    if (!editingLot || !initialFormData) return;
+
+    const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    setHasChanges(hasFormChanges);
+
+    if (!hasFormChanges) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      const currentData = formDataRef.current;
+      updateLotMutation.mutate({ id: editingLot.id, lotData: currentData });
+      setInitialFormData(JSON.parse(JSON.stringify(currentData)));
+      setHasChanges(false);
+    }, 800);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, editingLot, initialFormData]);
 
   const resetAndClose = () => {
     resetForm();
@@ -140,8 +176,10 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     
     if (!editingLot) {
       createLotMutation.mutate(formData);
-    } else {
-      updateLotMutation.mutate(formData);
+    }
+    // En mode édition : les modifications sont déjà sauvegardées automatiquement
+    if (editingLot) {
+      resetAndClose();
     }
   };
 
@@ -194,11 +232,6 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
         if (!o) {
           if (!editingLot && hasFormChanges) {
             setShowCancelConfirm(true);
-            return;
-          }
-          // En mode édition : toujours sauvegarder à la fermeture
-          if (editingLot) {
-            updateLotMutation.mutate(formData);
             return;
           }
           resetAndClose();
