@@ -174,8 +174,30 @@ export default function ClientFormDialog({
       if ((oldData.notes || '') !== (clientData.notes || '')) {
         changes.push({ action: 'Modification des notes', details: 'Les notes ont été modifiées' });
       }
-      // Adresses/courriels/téléphones: gérés directement lors des actions (ajout/suppression)
-      // pour éviter les doublons dans l'historique
+      (clientData.adresses || []).forEach(newAddr => {
+        if (!(oldData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(newAddr)))
+          changes.push({ action: "Ajout d'une adresse", details: formatAdresse(newAddr) });
+      });
+      (oldData.adresses || []).forEach(oldAddr => {
+        if (!(clientData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(oldAddr)))
+          changes.push({ action: "Suppression d'une adresse", details: formatAdresse(oldAddr) });
+      });
+      (clientData.courriels || []).forEach(newC => {
+        if (!(oldData.courriels || []).some(c => c.courriel === newC.courriel))
+          changes.push({ action: "Ajout d'un courriel", details: newC.courriel });
+      });
+      (oldData.courriels || []).forEach(oldC => {
+        if (!(clientData.courriels || []).some(c => c.courriel === oldC.courriel))
+          changes.push({ action: "Suppression d'un courriel", details: oldC.courriel });
+      });
+      (clientData.telephones || []).forEach(newT => {
+        if (!(oldData.telephones || []).some(t => t.telephone === newT.telephone))
+          changes.push({ action: "Ajout d'un téléphone", details: `${newT.telephone} (${newT.type || 'Cellulaire'})` });
+      });
+      (oldData.telephones || []).forEach(oldT => {
+        if (!(clientData.telephones || []).some(t => t.telephone === oldT.telephone))
+          changes.push({ action: "Suppression d'un téléphone", details: `${oldT.telephone} (${oldT.type || 'Cellulaire'})` });
+      });
 
       for (const change of changes) {
         await base44.entities.ActionLog.create({
@@ -696,17 +718,10 @@ export default function ClientFormDialog({
     const { type: fieldName, index, item: itemToRemove } = deleteConfirmation;
     
     if (formData[fieldName].length > 0) {
-      const newFieldData = formData[fieldName].filter((_, i) => i !== index);
-      
       setFormData(prev => ({
         ...prev,
         [fieldName]: prev[fieldName].filter((_, i) => i !== index)
       }));
-
-      // Sync lastSavedDataRef immédiatement pour éviter les doublons dans autoSave
-      if (lastSavedDataRef.current) {
-        lastSavedDataRef.current = { ...lastSavedDataRef.current, [fieldName]: newFieldData };
-      }
 
       // Créer une entrée d'historique immédiate si on modifie un client existant
       if (editingClient?.id) {
@@ -733,7 +748,7 @@ export default function ClientFormDialog({
           details: details,
         });
 
-        queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
+        queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       }
     }
     
@@ -1168,7 +1183,7 @@ export default function ClientFormDialog({
                   <Button
                     type="button"
                     size="sm"
-                    onClick={async () => {
+                    onClick={() => {
                       const civic = document.getElementById('new-civic-0')?.value || "";
                       const rue = document.getElementById('new-rue').value;
                       const ville = document.getElementById('new-ville').value;
@@ -1177,42 +1192,22 @@ export default function ClientFormDialog({
                       const codePostal = document.getElementById('new-code-postal').value;
                       
                       if (civic || rue || ville) {
-                        const newAddr = {
-                          numeros_civiques: civic ? [civic] : [""],
-                          rue,
-                          ville,
-                          province,
-                          code_postal: codePostal,
-                          actuelle: true
-                        };
                         setFormData(prev => ({
                           ...prev,
                           adresses: [
-                            newAddr,
+                            {
+                              numeros_civiques: civic ? [civic] : [""],
+                              rue,
+                              ville,
+                              province,
+                              code_postal: codePostal,
+                              actuelle: true
+                            },
                             ...prev.adresses.map(a => ({ ...a, actuelle: false }))
                           ]
                         }));
-
-                        // Sync lastSavedDataRef pour éviter doublon dans autoSave
-                        if (lastSavedDataRef.current) {
-                          lastSavedDataRef.current = {
-                            ...lastSavedDataRef.current,
-                            adresses: [newAddr, ...(lastSavedDataRef.current.adresses || []).map(a => ({ ...a, actuelle: false }))]
-                          };
-                        }
-
-                        if (editingClient?.id) {
-                          await base44.entities.ActionLog.create({
-                            utilisateur_email: user?.email || "",
-                            utilisateur_nom: user?.full_name || "Système",
-                            action: "Ajout d'une adresse",
-                            entite: "Client",
-                            entite_id: editingClient.id,
-                            details: formatAdresse(newAddr),
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
-                        }
                         
+                        // Clear inputs
                         if (document.getElementById('new-civic-0')) document.getElementById('new-civic-0').value = "";
                         document.getElementById('new-rue').value = "";
                         document.getElementById('new-ville').value = "";
@@ -1226,414 +1221,575 @@ export default function ClientFormDialog({
                     </Button>
                     </div>
 
-                    {/* Liste des adresses existantes */}
-                    {formData.adresses.length > 0 && (
-                      <div className="space-y-1.5">
+                    {/* Liste des adresses */}
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                          <TableHead className="text-slate-300">Adresse complète</TableHead>
+                          <TableHead className="text-slate-300">Statut</TableHead>
+                          <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {formData.adresses.map((addr, index) => (
-                          <div key={index} className={`flex items-center justify-between p-2 rounded-lg border text-sm ${addr.actuelle ? 'bg-purple-900/20 border-purple-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white text-xs truncate">{formatAdresse(addr)}</p>
-                              {addr.actuelle && <span className="text-purple-400 text-xs">Actuelle</span>}
-                            </div>
-                            <div className="flex items-center gap-1 ml-2">
-                              <button type="button" onClick={() => toggleActuel('adresses', index)} className={`px-1.5 py-0.5 rounded text-xs border transition-all ${addr.actuelle ? 'bg-purple-500/20 border-purple-500/30 text-purple-400' : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'}`}>
-                                {addr.actuelle ? '★' : '☆'}
-                              </button>
-                              <button type="button" onClick={() => handleDeleteRequest('adresses', index)} className="p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded">
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    </CardContent>
-                    )}
-                    </Card>
+                          <React.Fragment key={index}>
+                            <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white">
+                                  {formatAdresse(addr) || "-"}
+                                </TableCell>
+                                <TableCell>
+                                  <Select 
+                                    value={addr.actuelle ? "Actuel" : "Ancien"} 
+                                    onValueChange={(value) => toggleActuel('adresses', index)}
+                                  >
+                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                      <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                     type="button"
+                                     size="sm"
+                                     variant="ghost"
+                                     onClick={() => handleDeleteRequest('adresses', index)}
+                                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                     >
+                                     <Trash2 className="w-4 h-4" />
+                                     </Button>
+                                      </div>
+                                      </TableCell>
+                                      </TableRow>
+                                      </React.Fragment>
+                                      ))}
+                                      {formData.adresses.length === 0 && (
+                                      <TableRow>
+                                      <TableCell colSpan={3} className="text-center py-4 text-slate-500 text-xs">
+                                      Aucune adresse ajoutée
+                                      </TableCell>
+                                      </TableRow>
+                                      )}
+                                      </TableBody>
+                                      </Table>
+                                      </div>
+                                      </CardContent>
+                                      )}
+                                      </Card>
 
-                    {/* Section Communication */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                    <CardHeader 
-                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
-                    onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
-                    >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                          <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                        </div>
-                        <CardTitle className="text-emerald-300 text-base">Communication</CardTitle>
+                  {/* Section Communication */}
+                  <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
+                  onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                        <Mail className="w-3.5 h-3.5 text-orange-400" />
                       </div>
-                      {communicationCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                      <CardTitle className="text-orange-300 text-base">Communication</CardTitle>
                     </div>
-                    </CardHeader>
+                    {communicationCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
 
-                    {!communicationCollapsed && (
-                    <CardContent className="pt-3 pb-2 space-y-3">
+                {!communicationCollapsed && (
+                  <CardContent className="pt-3 pb-2">
+                    <div className="space-y-4">
                       {/* Courriels */}
                       <div className="space-y-2">
-                        <Label className="text-xs text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> Courriels</Label>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs">Courriels</Label>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="disable-courriel"
+                              checked={courrielDisabled}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setDisableType("courriel");
+                                  setShowDisableWarning(true);
+                                } else {
+                                  setCourrielDisabled(false);
+                                }
+                              }}
+                            />
+                            <Label htmlFor="disable-courriel" className="text-xs text-slate-400 cursor-pointer">
+                              Désactiver
+                            </Label>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <Input
+                            type="email"
                             id="new-courriel"
-                            placeholder="Ajouter un courriel"
-                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                            placeholder="Courriel"
+                            disabled={courrielDisabled}
+                            className="bg-slate-700 border-slate-600 h-7 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           <Button
                             type="button"
                             size="sm"
-                            onClick={async () => {
-                              const val = document.getElementById('new-courriel')?.value?.trim();
-                              if (val) {
-                                const newCourriel = { courriel: val, actuel: formData.courriels.length === 0 };
-                                setFormData(prev => ({ ...prev, courriels: [...prev.courriels, newCourriel] }));
-                                if (lastSavedDataRef.current) {
-                                  lastSavedDataRef.current = { ...lastSavedDataRef.current, courriels: [...(lastSavedDataRef.current.courriels || []), newCourriel] };
-                                }
-                                if (editingClient?.id) {
-                                  await base44.entities.ActionLog.create({ utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", action: "Ajout d'un courriel", entite: "Client", entite_id: editingClient.id, details: val });
-                                  queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
-                                }
+                            disabled={courrielDisabled}
+                            onClick={() => {
+                              const courriel = document.getElementById('new-courriel').value;
+                              if (courriel.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  courriels: [
+                                    { courriel, actuel: true },
+                                    ...prev.courriels.map(c => ({ ...c, actuel: false }))
+                                  ]
+                                }));
                                 document.getElementById('new-courriel').value = "";
                               }
                             }}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 px-2"
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        {formData.courriels.length > 0 && (
-                          <div className="space-y-1">
-                            {formData.courriels.map((c, index) => (
-                              <div key={index} className={`flex items-center justify-between p-1.5 rounded border text-xs ${c.actuel ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
-                                <span className="text-white truncate flex-1">{c.courriel}</span>
-                                <div className="flex items-center gap-1 ml-2">
-                                  <button type="button" onClick={() => toggleActuel('courriels', index)} className={`px-1 py-0.5 rounded text-xs border transition-all ${c.actuel ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-700/30 border-slate-600 text-slate-400'}`}>{c.actuel ? '★' : '☆'}</button>
-                                  <button type="button" onClick={() => handleDeleteRequest('courriels', index)} className="p-0.5 text-red-400 hover:text-red-300 rounded"><Trash2 className="w-3 h-3" /></button>
-                                </div>
-                              </div>
+
+                          <div className={`border border-slate-700 rounded-lg overflow-hidden ${courrielDisabled ? 'opacity-50' : ''}`}>
+                            <Table>
+                          <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Statut</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                          {formData.courriels.map((item, index) => (
+                            <React.Fragment key={index}>
+                              <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                    <TableCell className={`text-sm ${courrielDisabled ? 'text-slate-600' : 'text-white'}`}>
+                                     {courrielDisabled ? (
+                                       <span className="text-slate-600">{item.courriel}</span>
+                                     ) : (
+                                       <a href={`mailto:${item.courriel}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                         {item.courriel}
+                                       </a>
+                                     )}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Select 
+                                        value={item.actuel ? "Actuel" : "Ancien"} 
+                                        onValueChange={(value) => toggleActuel('courriels', index)}
+                                        disabled={courrielDisabled}
+                                      >
+                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                          <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         disabled={courrielDisabled}
+                                         onClick={() => handleDeleteRequest('courriels', index)}
+                                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                         <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                            </React.Fragment>
                             ))}
-                          </div>
-                        )}
+                            {formData.courriels.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={3} className="text-center py-4 text-slate-500 text-xs">
+                                {courrielDisabled ? "Courriels désactivés" : "Aucun courriel ajouté"}
+                              </TableCell>
+                            </TableRow>
+                            )}
+                            </TableBody>
+                            </Table>
+                            </div>
                       </div>
 
                       {/* Téléphones */}
                       <div className="space-y-2">
-                        <Label className="text-xs text-slate-400 flex items-center gap-1"><Phone className="w-3 h-3" /> Téléphones</Label>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs">Téléphones</Label>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="disable-telephone"
+                              checked={telephoneDisabled}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setDisableType("telephone");
+                                  setShowDisableWarning(true);
+                                } else {
+                                  setTelephoneDisabled(false);
+                                }
+                              }}
+                            />
+                            <Label htmlFor="disable-telephone" className="text-xs text-slate-400 cursor-pointer">
+                              Désactiver
+                            </Label>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
-                          <Select value={newTelephoneType} onValueChange={setNewTelephoneType}>
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-28">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Cellulaire" className="text-white text-xs">Cellulaire</SelectItem>
-                              <SelectItem value="Résidence" className="text-white text-xs">Résidence</SelectItem>
-                              <SelectItem value="Bureau" className="text-white text-xs">Bureau</SelectItem>
-                              <SelectItem value="Fax" className="text-white text-xs">Fax</SelectItem>
-                            </SelectContent>
-                          </Select>
                           <Input
                             id="new-telephone"
                             placeholder="Téléphone"
-                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                            disabled={telephoneDisabled}
+                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
+                          <Select 
+                            value={newTelephoneType}
+                            onValueChange={setNewTelephoneType}
+                            disabled={telephoneDisabled}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
+                              <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
+                              <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button
                             type="button"
                             size="sm"
-                            onClick={async () => {
-                              const val = document.getElementById('new-telephone')?.value?.trim();
-                              if (val) {
-                                const newTel = { telephone: val, type: newTelephoneType, actuel: formData.telephones.length === 0 };
-                                setFormData(prev => ({ ...prev, telephones: [...prev.telephones, newTel] }));
-                                if (lastSavedDataRef.current) {
-                                  lastSavedDataRef.current = { ...lastSavedDataRef.current, telephones: [...(lastSavedDataRef.current.telephones || []), newTel] };
-                                }
-                                if (editingClient?.id) {
-                                  await base44.entities.ActionLog.create({ utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", action: "Ajout d'un téléphone", entite: "Client", entite_id: editingClient.id, details: `${val} (${newTelephoneType})` });
-                                  queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
-                                }
+                            disabled={telephoneDisabled}
+                            onClick={() => {
+                              const telephone = document.getElementById('new-telephone').value;
+                              if (telephone.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  telephones: [
+                                    { telephone, type: newTelephoneType, actuel: true },
+                                    ...prev.telephones.map(t => ({ ...t, actuel: false }))
+                                  ]
+                                }));
                                 document.getElementById('new-telephone').value = "";
+                                setNewTelephoneType("Cellulaire");
                               }
                             }}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 px-2"
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        {formData.telephones.length > 0 && (
-                          <div className="space-y-1">
-                            {formData.telephones.map((t, index) => (
-                              <div key={index} className={`flex items-center justify-between p-1.5 rounded border text-xs ${t.actuel ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
-                                <span className="text-white truncate flex-1">{t.telephone} <span className="text-slate-400">({t.type || 'Cellulaire'})</span></span>
-                                <div className="flex items-center gap-1 ml-2">
-                                  <button type="button" onClick={() => toggleActuel('telephones', index)} className={`px-1 py-0.5 rounded text-xs border transition-all ${t.actuel ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-700/30 border-slate-600 text-slate-400'}`}>{t.actuel ? '★' : '☆'}</button>
-                                  <button type="button" onClick={() => handleDeleteRequest('telephones', index)} className="p-0.5 text-red-400 hover:text-red-300 rounded"><Trash2 className="w-3 h-3" /></button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                    )}
-                    </Card>
-                    </div>
 
-                    {/* Notes */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                    <CardHeader className="py-2 bg-slate-800/50 rounded-t-lg">
-                    <CardTitle className="text-slate-300 text-base flex items-center gap-2">
+                          <div className={`border border-slate-700 rounded-lg overflow-hidden ${telephoneDisabled ? 'opacity-50' : ''}`}>
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                  <TableHead className="text-slate-300">Téléphone</TableHead>
+                                  <TableHead className="text-slate-300">Type</TableHead>
+                                  <TableHead className="text-slate-300">Statut</TableHead>
+                                  <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {formData.telephones.map((item, index) => (
+                                  <React.Fragment key={index}>
+                                    <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                        <TableCell className={`text-sm ${telephoneDisabled ? 'text-slate-600' : 'text-white'}`}>
+                                         {telephoneDisabled ? (
+                                           <span className="text-slate-600">{item.telephone}</span>
+                                         ) : (
+                                           <a 
+                                             href={`tel:${item.telephone.replace(/\D/g, '')}`}
+                                             onClick={(e) => e.stopPropagation()}
+                                             className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                           >
+                                             {item.telephone}
+                                           </a>
+                                         )}
+                                        </TableCell>
+                                        <TableCell className={`text-xs ${telephoneDisabled ? 'text-slate-700' : 'text-slate-400'}`}>{item.type || "Cellulaire"}</TableCell>
+                                        <TableCell>
+                                          <Select 
+                                            value={item.actuel ? "Actuel" : "Ancien"} 
+                                            onValueChange={(value) => toggleActuel('telephones', index)}
+                                            disabled={telephoneDisabled}
+                                          >
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                              <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                              <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       variant="ghost"
+                                       disabled={telephoneDisabled}
+                                       onClick={() => handleDeleteRequest('telephones', index)}
+                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                       <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                      </div>
+                                      </TableCell>
+                                      </TableRow>
+                                      </React.Fragment>
+                                      ))}
+                                      {formData.telephones.length === 0 && (
+                                      <TableRow>
+                                      <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-xs">
+                                        {telephoneDisabled ? "Téléphones désactivés" : "Aucun téléphone ajouté"}
+                                      </TableCell>
+                                      </TableRow>
+                                      )}
+                                      </TableBody>
+                                      </Table>
+                                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+              </Card>
+              </div>
+
+              {/* Section Dossiers associés - Uniquement en mode édition */}
+              {editingClient && (
+                <ClientDossiersSection clientDossiers={clientDossiers} />
+              )}
+                  </form>
+                  </div>
+                  </div>
+
+                  {/* Right side - Commentaires et Historique Sidebar - 30% */}
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+            {/* Header Tabs Commentaires/Historique - Collapsible */}
+            <div 
+              className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              <div className="flex items-center gap-2">
+                {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                <h3 className="text-slate-300 text-base font-semibold">
+                  {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
+                </h3>
+              </div>
+              {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+            </div>
+
+            {!sidebarCollapsed && (
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                  <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300 flex items-center gap-1">
                     <MessageSquare className="w-4 h-4" />
-                    Notes
-                    </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-2 pb-2">
-                    <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    placeholder="Notes supplémentaires..."
-                    className="bg-slate-700 border-slate-600 text-white resize-none h-20 text-sm"
-                    />
-                    </CardContent>
-                    </Card>
+                    Commentaires
+                    {nbCommentaires > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">{nbCommentaires}</span>}
+                  </TabsTrigger>
+                  <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                    <Clock className="w-4 h-4 mr-1" />
+                    Historique
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-                    {/* Dossiers associés */}
-                    {editingClient && (
-                    <ClientDossiersSection
-                    clientDossiers={sortedClientDossiers}
-                    dossiersCollapsed={dossiersCollapsed}
-                    setDossiersCollapsed={setDossiersCollapsed}
-                    dossierSearchTerm={dossierSearchTerm}
-                    setDossierSearchTerm={setDossierSearchTerm}
-                    filterArpenteur={filterArpenteur}
-                    setFilterArpenteur={setFilterArpenteur}
-                    filterMandat={filterMandat}
-                    setFilterMandat={setFilterMandat}
-                    filterVille={filterVille}
-                    setFilterVille={setFilterVille}
-                    filterStatut={filterStatut}
-                    setFilterStatut={setFilterStatut}
-                    isFiltersOpenDossiers={isFiltersOpenDossiers}
-                    setIsFiltersOpenDossiers={setIsFiltersOpenDossiers}
-                    handleSortDossiers={handleSortDossiers}
-                    sortFieldDossiers={sortFieldDossiers}
-                    sortDirectionDossiers={sortDirectionDossiers}
-                    getArpenteurInitials={getArpenteurInitials}
-                    getArpenteurColor={getArpenteurColor}
-                    getMandatColor={getMandatColor}
-                    getAbbreviatedMandatType={getAbbreviatedMandatType}
-                    formatAdresseTravaux={formatAdresseTravaux}
-                    ARPENTEURS={ARPENTEURS}
-                    TYPES_MANDATS={TYPES_MANDATS}
-                    STATUTS={STATUTS}
-                    allVilles={allVilles}
-                    />
-                    )}
-                    </form>
-                    </div>
+              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                <CommentairesSectionClient
+                  clientId={editingClient?.id}
+                  clientTemporaire={!editingClient}
+                  commentairesTemp={commentairesTemporaires}
+                  onCommentairesTempChange={setCommentairesTemporaires}
+                />
+              </TabsContent>
 
-                    {/* Footer actions - création seulement */}
-                    {!editingClient && (
-                    <div className="sticky bottom-0 bg-slate-900 border-t border-slate-800 px-6 py-3 flex items-center justify-end gap-3">
-                    <Button type="button" variant="ghost" onClick={handleCloseAttempt} className="text-slate-400 border-slate-600">
-                    Annuler
-                    </Button>
-                    <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none">
-                    Créer le client
-                    </Button>
-                    </div>
-                    )}
-                    </div>
-
-                    {/* Sidebar 30% */}
-                    <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                    <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800">
-                    <div className="flex items-center justify-between px-4 py-3">
-                    <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSidebarTab("commentaires")}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all border-b-2 ${sidebarTab === "commentaires" ? "text-emerald-400 border-emerald-500" : "text-slate-400 border-transparent hover:text-slate-200"}`}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 inline mr-1" />
-                      Commentaires {nbCommentaires > 0 && <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-xs">{nbCommentaires}</span>}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSidebarTab("historique")}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all border-b-2 ${sidebarTab === "historique" ? "text-blue-400 border-blue-500" : "text-slate-400 border-transparent hover:text-slate-200"}`}
-                    >
-                      <Clock className="w-3.5 h-3.5 inline mr-1" />
-                      Historique {actionLogs.length > 0 && <span className="ml-1 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-full text-xs">{actionLogs.length}</span>}
-                    </button>
-                    </div>
-                    <button type="button" onClick={() => onOpenChange(false)} className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800">
-                    <X className="w-4 h-4" />
-                    </button>
-                    </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto">
-                    {sidebarTab === "commentaires" && (
-                    <CommentairesSectionClient
-                    clientId={editingClient?.id}
-                    commentairesTemporaires={commentairesTemporaires}
-                    setCommentairesTemporaires={setCommentairesTemporaires}
-                    />
-                    )}
-                    {sidebarTab === "historique" && (
-                    <div className="p-3 space-y-2">
-                    {actionLogs.length === 0 ? (
-                      <p className="text-slate-500 text-sm text-center py-8">Aucun historique</p>
-                    ) : (
-                      actionLogs.map((log) => (
-                        <div key={log.id} className="p-2.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white text-xs font-medium">{log.action}</p>
-                              {log.details && <p className="text-slate-400 text-xs mt-0.5 truncate">{log.details}</p>}
-                              <p className="text-slate-500 text-xs mt-1">{log.utilisateur_nom}</p>
+              <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                {editingClient && actionLogs.length > 0 ? (
+                  <div className="space-y-2">
+                    {actionLogs.map((entry, idx) => (
+                      <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-medium">{entry.action}</p>
+                            {entry.details && (
+                              <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                            )}
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                              <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                              <span>•</span>
+                              <span>{format(new Date(entry.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                             </div>
-                            <span className="text-slate-500 text-xs whitespace-nowrap">
-                              {log.created_date ? format(new Date(log.created_date), "dd MMM HH:mm", { locale: fr }) : ""}
-                            </span>
                           </div>
                         </div>
-                      ))
-                    )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-center">
+                    <div>
+                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                      <p className="text-slate-500">Aucune action enregistrée</p>
+                      <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
                     </div>
-                    )}
-                    </div>
-                    </div>
-                    </div>
-                    </motion.div>
-                    </DialogContent>
-                    </Dialog>
+                  </div>
+                )}
+              </TabsContent>
+              </Tabs>
+              )}
+              </div>
+          </div>
 
-                    {/* Avertissement modifications non sauvegardées */}
-                    <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
-                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                    <DialogHeader>
-                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                    <span className="text-2xl">⚠️</span>
-                    Attention
-                    <span className="text-2xl">⚠️</span>
-                    </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                    <p className="text-slate-300 text-center">
-                    Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-                    </p>
-                    <div className="flex justify-center gap-3 pt-4">
-                    <Button
-                    type="button"
-                    onClick={handleConfirmClose}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                    >
-                    Abandonner
-                    </Button>
-                    <Button 
-                    type="button" 
-                    onClick={() => setShowUnsavedWarning(false)}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                    >
-                    Continuer l'édition
-                    </Button>
-                    </div>
-                    </div>
-                    </DialogContent>
-                    </Dialog>
+          {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
+          {!editingClient && (
+            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+              <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                Annuler
+              </Button>
+              <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                Créer
+              </Button>
+            </div>
+          )}
+        </motion.div>
+      </DialogContent>
+    </Dialog>
 
-                    {/* Confirmation de suppression */}
-                    <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, type: null, index: null, item: null })}>
-                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                    <DialogHeader>
-                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                    <span className="text-2xl">⚠️</span>
-                    Confirmation
-                    <span className="text-2xl">⚠️</span>
-                    </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                    <p className="text-slate-300 text-center">
-                    Êtes-vous sûr de vouloir supprimer {deleteConfirmation.label} ?
-                    </p>
-                    {deleteConfirmation.item && (
-                    <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
-                    <p className="text-white text-sm">
-                    {deleteConfirmation.type === 'adresses' && formatAdresse(deleteConfirmation.item)}
-                    {deleteConfirmation.type === 'courriels' && deleteConfirmation.item.courriel}
-                    {deleteConfirmation.type === 'telephones' && `${deleteConfirmation.item.telephone} (${deleteConfirmation.item.type || 'Cellulaire'})`}
-                    </p>
-                    </div>
-                    )}
-                    <div className="flex justify-center gap-3 pt-4">
-                    <Button
-                    type="button"
-                    onClick={() => setDeleteConfirmation({ show: false, type: null, index: null, item: null })}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                    >
-                    Annuler
-                    </Button>
-                    <Button 
-                    type="button" 
-                    onClick={confirmDelete}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                    >
-                    Confirmer
-                    </Button>
-                    </div>
-                    </div>
-                    </DialogContent>
-                    </Dialog>
+    {/* Avertissement modifications non sauvegardées */}
+    <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Attention
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+          </p>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={handleConfirmClose}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Abandonner
+            </Button>
+            <Button 
+              type="button" 
+              onClick={() => setShowUnsavedWarning(false)}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Continuer l'édition
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
 
-                    {/* Avertissement désactivation communication */}
-                    <Dialog open={showDisableWarning} onOpenChange={setShowDisableWarning}>
-                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                    <DialogHeader>
-                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                    <span className="text-2xl">⚠️</span>
-                    Avertissement
-                    <span className="text-2xl">⚠️</span>
-                    </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                    <p className="text-slate-300 text-center">
-                    En désactivant {disableType === "courriel" ? "les courriels" : "les téléphones"}, certaines fonctions de communication seront désactivées pour ce client.
-                    </p>
-                    <p className="text-slate-400 text-sm text-center">
-                    Voulez-vous poursuivre ?
-                    </p>
-                    <div className="flex justify-center gap-3 pt-4">
-                    <Button
-                    type="button"
-                    onClick={() => {
-                    setShowDisableWarning(false);
-                    setDisableType(null);
-                    }}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                    >
-                    Annuler
-                    </Button>
-                    <Button 
-                    type="button" 
-                    onClick={() => {
-                    if (disableType === "courriel") {
-                    setCourrielDisabled(true);
-                    } else if (disableType === "telephone") {
-                    setTelephoneDisabled(true);
-                    }
-                    setShowDisableWarning(false);
-                    setDisableType(null);
-                    }}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                    >
-                    Poursuivre
-                    </Button>
-                    </div>
-                    </div>
-                    </DialogContent>
-                    </Dialog>
-                    </>
-                    );
-                    }
+    {/* Confirmation de suppression */}
+    <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, type: null, index: null, item: null })}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Confirmation
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            Êtes-vous sûr de vouloir supprimer {deleteConfirmation.label} ?
+          </p>
+          {deleteConfirmation.item && (
+            <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
+              <p className="text-white text-sm">
+                {deleteConfirmation.type === 'adresses' && formatAdresse(deleteConfirmation.item)}
+                {deleteConfirmation.type === 'courriels' && deleteConfirmation.item.courriel}
+                {deleteConfirmation.type === 'telephones' && `${deleteConfirmation.item.telephone} (${deleteConfirmation.item.type || 'Cellulaire'})`}
+              </p>
+            </div>
+          )}
+          <div className="flex justify-center gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={() => setDeleteConfirmation({ show: false, type: null, index: null, item: null })}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="button" 
+              onClick={confirmDelete}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Confirmer
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Avertissement désactivation communication */}
+    <Dialog open={showDisableWarning} onOpenChange={setShowDisableWarning}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Avertissement
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            En désactivant {disableType === "courriel" ? "les courriels" : "les téléphones"}, certaines fonctions de communication seront désactivées pour ce client.
+          </p>
+          <p className="text-slate-400 text-sm text-center">
+            Voulez-vous poursuivre ?
+          </p>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={() => {
+                setShowDisableWarning(false);
+                setDisableType(null);
+              }}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="button" 
+              onClick={() => {
+                if (disableType === "courriel") {
+                  setCourrielDisabled(true);
+                } else if (disableType === "telephone") {
+                  setTelephoneDisabled(true);
+                }
+                setShowDisableWarning(false);
+                setDisableType(null);
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Poursuivre
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
+    );
+    }
