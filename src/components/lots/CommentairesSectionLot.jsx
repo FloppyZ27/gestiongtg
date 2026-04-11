@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState, useRef, useEffect } from 'react';
 import { Send, Edit, Trash2, X, Check, Mic, Square, Loader2, Image } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -43,6 +44,12 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     enabled: !!lotId && !lotTemporaire,
     initialData: [],
   });
+
+  useEffect(() => {
+    if (onCommentairesCountChange && !lotTemporaire) {
+      onCommentairesCountChange(commentaires.length);
+    }
+  }, [commentaires.length, onCommentairesCountChange, lotTemporaire]);
 
   const startRecording = async () => {
     try {

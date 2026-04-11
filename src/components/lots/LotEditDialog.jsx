@@ -64,6 +64,8 @@ export default function LotEditDialog({
         setCommentairesCount(comments.length);
       };
       loadCommentairesCount();
+    }
+  }, [isOpen, editingLot]);
 
   const handleAutoSave = async () => {
     if (!editingLot || isSaving) return;
