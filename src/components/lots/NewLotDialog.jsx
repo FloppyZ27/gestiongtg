@@ -119,8 +119,31 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     setHasFormChanges(false);
     setInitialFormData(null);
     setHasChanges(false);
-    setHistorique([]);
+    if (!editingLot) {
+      setHistorique([]);
+    }
   };
+
+  // Charger l'historique depuis ActionLog quand on édite un lot
+  useEffect(() => {
+    if (!editingLot) return;
+    
+    const loadHistorique = async () => {
+      const logs = await base44.entities.ActionLog.filter(
+        { entite: 'Lot', entite_id: editingLot.id },
+        '-created_date'
+      );
+      setHistorique(logs.map(log => ({
+        action: log.action,
+        details: log.details,
+        timestamp: log.created_date,
+        utilisateur_nom: log.utilisateur_nom,
+        utilisateur_email: log.utilisateur_email
+      })));
+    };
+    
+    loadHistorique();
+  }, [editingLot?.id]);
 
   // Auto-save avec debounce
   useEffect(() => {
