@@ -6,9 +6,7 @@ export default function PlaceAffaireTabs({ value, onChange, counts }) {
   ];
 
   return (
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Place d'affaire :</span>
-      <div className="flex gap-1">
+    <div className="flex gap-1 mb-2">
       {tabs.map(tab => (
         <button
           key={tab.value}
@@ -25,7 +23,6 @@ export default function PlaceAffaireTabs({ value, onChange, counts }) {
           }`}>{tab.count}</span>
         </button>
       ))}
-      </div>
     </div>
   );
 }
