@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter } from "lucide-react";
+import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter, ChevronUp as ChevronUpIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -378,50 +379,50 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                       <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0 flex flex-col">
-                       <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-                        <Button size="sm" variant="outline" onClick={() => setShowHistoriqueFilters(!showHistoriqueFilters)} className="text-xs text-slate-300 border-slate-600 hover:bg-slate-700">
-                          <Filter className="w-3 h-3 mr-1" /> Filtrer
-                        </Button>
-                        {(historiqueFilters.users.length > 0 || historiqueFilters.actions.length > 0) && (
-                          <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{historiqueFilters.users.length + historiqueFilters.actions.length}</Badge>
-                        )}
+                       <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                        <div />
+                        <button onClick={() => setShowHistoriqueFilters(!showHistoriqueFilters)} className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1.5 rounded transition-colors">
+                          <Filter className="w-3.5 h-3.5" />
+                          Filtres
+                          {showHistoriqueFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
                        </div>
                        {showHistoriqueFilters && (() => {
                         const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
                         const uniqueActions = [...new Set(historique.map(e => e.action))];
                         return (
-                        <div className="mb-3 p-3 bg-slate-800/50 rounded border border-slate-700 flex-shrink-0 space-y-3">
-                          {uniqueUsers.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-slate-300 mb-1.5">Utilisateurs</p>
-                              <div className="flex flex-wrap gap-1.5">
+                        <div className="mb-3 p-3 bg-slate-800/30 border border-emerald-500/30 rounded flex-shrink-0 space-y-3">
+                          <div className="flex gap-2">
+                            <Select value={historiqueFilters.users.length === 0 ? "all" : historiqueFilters.users[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                              ...prev,
+                              users: val === "all" ? [] : [val]
+                            }))}>
+                              <SelectTrigger className="h-8 text-xs border-emerald-500/50 bg-slate-800/50 text-emerald-400">
+                                <SelectValue placeholder="Utilisateurs" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectItem value="all" className="text-xs text-slate-300">Utilisateurs (Tous)</SelectItem>
                                 {uniqueUsers.map(user => (
-                                  <button key={user.email} onClick={() => setHistoriqueFilters(prev => ({
-                                    ...prev,
-                                    users: prev.users.includes(user.email) ? prev.users.filter(u => u !== user.email) : [...prev.users, user.email]
-                                  }))} className={`text-xs px-2.5 py-1.5 rounded transition-colors ${
-                                    historiqueFilters.users.includes(user.email) ? 'bg-emerald-500/30 text-emerald-400 border border-emerald-500/50' : 'bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-700'
-                                  }`}>{user.nom}</button>
+                                  <SelectItem key={user.email} value={user.email} className="text-xs text-slate-300">{user.nom}</SelectItem>
                                 ))}
-                              </div>
-                            </div>
-                          )}
-                          {uniqueActions.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-slate-300 mb-1.5">Actions</p>
-                              <div className="flex flex-wrap gap-1.5">
+                              </SelectContent>
+                            </Select>
+                            <Select value={historiqueFilters.actions.length === 0 ? "all" : historiqueFilters.actions[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                              ...prev,
+                              actions: val === "all" ? [] : [val]
+                            }))}>
+                              <SelectTrigger className="h-8 text-xs border-emerald-500/50 bg-slate-800/50 text-emerald-400">
+                                <SelectValue placeholder="Types" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectItem value="all" className="text-xs text-slate-300">Types (Tous)</SelectItem>
                                 {uniqueActions.map(action => (
-                                  <button key={action} onClick={() => setHistoriqueFilters(prev => ({
-                                    ...prev,
-                                    actions: prev.actions.includes(action) ? prev.actions.filter(a => a !== action) : [...prev.actions, action]
-                                  }))} className={`text-xs px-2.5 py-1.5 rounded transition-colors ${
-                                    historiqueFilters.actions.includes(action) ? 'bg-blue-500/30 text-blue-400 border border-blue-500/50' : 'bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-700'
-                                  }`}>{action}</button>
+                                  <SelectItem key={action} value={action} className="text-xs text-slate-300">{action}</SelectItem>
                                 ))}
-                              </div>
-                            </div>
-                          )}
-                          <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-slate-400 hover:text-slate-200 mt-1">Réinitialiser</button>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-emerald-400 hover:text-emerald-300">Réinitialiser</button>
                         </div>
                         );
                        })()}
