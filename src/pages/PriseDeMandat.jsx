@@ -2340,8 +2340,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                 mandatsInfo.some(m => m.type_mandat) ||
                 (commentairesTemporaires?.length ?? 0) > 0;
               
-              if(hasChanges&&!editingPriseMandat&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
-              if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}
+              if(editingPriseMandat){await handleAutoSave();if(!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");return;}
+              if(hasChanges&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
               queryClient.invalidateQueries({queryKey:['priseMandats']});
               setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
             }else{setIsDialogOpen(open);}
