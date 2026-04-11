@@ -115,48 +115,42 @@ export default function CommunicationClients() {
               </TabsList>
             </div>
 
-            <div className="flex justify-end gap-2">
-              {activeTab === "prise-mandat" && (
-                <Button 
-                  onClick={handleNewMandat}
-                  size="sm"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau mandat
-                </Button>
-              )}
-              {activeTab === "retours-appel" && (
-                <Button 
-                  onClick={handleNewRetourAppel}
-                  size="sm"
-                  className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/50"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau retour d'appel
-                </Button>
-              )}
-            </div>
           </div>
 
           <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
-            <div className="mb-3">
+            <div className="flex items-center justify-between mb-3">
               <PlaceAffaireTabs
                 value={filterPlaceAffaire}
                 onChange={setFilterPlaceAffaire}
                 counts={placeAffaireCounts}
               />
+              <Button 
+                onClick={handleNewMandat}
+                size="sm"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau mandat
+              </Button>
             </div>
             <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-0">
-            <div className="mb-3">
+            <div className="flex items-center justify-between mb-3">
               <PlaceAffaireTabs
                 value={filterPlaceAffaire}
                 onChange={setFilterPlaceAffaire}
                 counts={retourAppelCountsByPlace}
               />
+              <Button 
+                onClick={handleNewRetourAppel}
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/50"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau retour d'appel
+              </Button>
             </div>
             <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} />
           </TabsContent>
