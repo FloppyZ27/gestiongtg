@@ -1224,135 +1224,416 @@ export default function ClientFormDialog({
                     <Plus className="w-3 h-3 mr-1" />
                     Ajouter cette adresse
                     </Button>
-          )}
-        </motion.div>
-      </DialogContent>
-    </Dialog>
+                    </div>
 
-    {/* Avertissement modifications non sauvegardées */}
-    <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
-      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-        <DialogHeader>
-          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            Attention
-            <span className="text-2xl">⚠️</span>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-slate-300 text-center">
-            Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-          </p>
-          <div className="flex justify-center gap-3 pt-4">
-            <Button
-              type="button"
-              onClick={handleConfirmClose}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-            >
-              Abandonner
-            </Button>
-            <Button 
-              type="button" 
-              onClick={() => setShowUnsavedWarning(false)}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-            >
-              Continuer l'édition
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+                    {/* Liste des adresses existantes */}
+                    {formData.adresses.length > 0 && (
+                      <div className="space-y-1.5">
+                        {formData.adresses.map((addr, index) => (
+                          <div key={index} className={`flex items-center justify-between p-2 rounded-lg border text-sm ${addr.actuelle ? 'bg-purple-900/20 border-purple-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-xs truncate">{formatAdresse(addr)}</p>
+                              {addr.actuelle && <span className="text-purple-400 text-xs">Actuelle</span>}
+                            </div>
+                            <div className="flex items-center gap-1 ml-2">
+                              <button type="button" onClick={() => toggleActuel('adresses', index)} className={`px-1.5 py-0.5 rounded text-xs border transition-all ${addr.actuelle ? 'bg-purple-500/20 border-purple-500/30 text-purple-400' : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'}`}>
+                                {addr.actuelle ? '★' : '☆'}
+                              </button>
+                              <button type="button" onClick={() => handleDeleteRequest('adresses', index)} className="p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded">
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    </CardContent>
+                    )}
+                    </Card>
 
-    {/* Confirmation de suppression */}
-    <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, type: null, index: null, item: null })}>
-      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-        <DialogHeader>
-          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            Confirmation
-            <span className="text-2xl">⚠️</span>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-slate-300 text-center">
-            Êtes-vous sûr de vouloir supprimer {deleteConfirmation.label} ?
-          </p>
-          {deleteConfirmation.item && (
-            <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
-              <p className="text-white text-sm">
-                {deleteConfirmation.type === 'adresses' && formatAdresse(deleteConfirmation.item)}
-                {deleteConfirmation.type === 'courriels' && deleteConfirmation.item.courriel}
-                {deleteConfirmation.type === 'telephones' && `${deleteConfirmation.item.telephone} (${deleteConfirmation.item.type || 'Cellulaire'})`}
-              </p>
-            </div>
-          )}
-          <div className="flex justify-center gap-3 pt-4">
-            <Button
-              type="button"
-              onClick={() => setDeleteConfirmation({ show: false, type: null, index: null, item: null })}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-            >
-              Annuler
-            </Button>
-            <Button 
-              type="button" 
-              onClick={confirmDelete}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-            >
-              Confirmer
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+                    {/* Section Communication */}
+                    <Card className="border-slate-700 bg-slate-800/30">
+                    <CardHeader 
+                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
+                    onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
+                    >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                          <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                        </div>
+                        <CardTitle className="text-emerald-300 text-base">Communication</CardTitle>
+                      </div>
+                      {communicationCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                    </div>
+                    </CardHeader>
 
-    {/* Avertissement désactivation communication */}
-    <Dialog open={showDisableWarning} onOpenChange={setShowDisableWarning}>
-      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-        <DialogHeader>
-          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            Avertissement
-            <span className="text-2xl">⚠️</span>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-slate-300 text-center">
-            En désactivant {disableType === "courriel" ? "les courriels" : "les téléphones"}, certaines fonctions de communication seront désactivées pour ce client.
-          </p>
-          <p className="text-slate-400 text-sm text-center">
-            Voulez-vous poursuivre ?
-          </p>
-          <div className="flex justify-center gap-3 pt-4">
-            <Button
-              type="button"
-              onClick={() => {
-                setShowDisableWarning(false);
-                setDisableType(null);
-              }}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-            >
-              Annuler
-            </Button>
-            <Button 
-              type="button" 
-              onClick={() => {
-                if (disableType === "courriel") {
-                  setCourrielDisabled(true);
-                } else if (disableType === "telephone") {
-                  setTelephoneDisabled(true);
-                }
-                setShowDisableWarning(false);
-                setDisableType(null);
-              }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-            >
-              Poursuivre
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-    </>
-    );
-    }
+                    {!communicationCollapsed && (
+                    <CardContent className="pt-3 pb-2 space-y-3">
+                      {/* Courriels */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-slate-400 flex items-center gap-1"><Mail className="w-3 h-3" /> Courriels</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="new-courriel"
+                            placeholder="Ajouter un courriel"
+                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={async () => {
+                              const val = document.getElementById('new-courriel')?.value?.trim();
+                              if (val) {
+                                const newCourriel = { courriel: val, actuel: formData.courriels.length === 0 };
+                                setFormData(prev => ({ ...prev, courriels: [...prev.courriels, newCourriel] }));
+                                if (lastSavedDataRef.current) {
+                                  lastSavedDataRef.current = { ...lastSavedDataRef.current, courriels: [...(lastSavedDataRef.current.courriels || []), newCourriel] };
+                                }
+                                if (editingClient?.id) {
+                                  await base44.entities.ActionLog.create({ utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", action: "Ajout d'un courriel", entite: "Client", entite_id: editingClient.id, details: val });
+                                  queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
+                                }
+                                document.getElementById('new-courriel').value = "";
+                              }
+                            }}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 px-2"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        {formData.courriels.length > 0 && (
+                          <div className="space-y-1">
+                            {formData.courriels.map((c, index) => (
+                              <div key={index} className={`flex items-center justify-between p-1.5 rounded border text-xs ${c.actuel ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
+                                <span className="text-white truncate flex-1">{c.courriel}</span>
+                                <div className="flex items-center gap-1 ml-2">
+                                  <button type="button" onClick={() => toggleActuel('courriels', index)} className={`px-1 py-0.5 rounded text-xs border transition-all ${c.actuel ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-700/30 border-slate-600 text-slate-400'}`}>{c.actuel ? '★' : '☆'}</button>
+                                  <button type="button" onClick={() => handleDeleteRequest('courriels', index)} className="p-0.5 text-red-400 hover:text-red-300 rounded"><Trash2 className="w-3 h-3" /></button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Téléphones */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-slate-400 flex items-center gap-1"><Phone className="w-3 h-3" /> Téléphones</Label>
+                        <div className="flex gap-2">
+                          <Select value={newTelephoneType} onValueChange={setNewTelephoneType}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Cellulaire" className="text-white text-xs">Cellulaire</SelectItem>
+                              <SelectItem value="Résidence" className="text-white text-xs">Résidence</SelectItem>
+                              <SelectItem value="Bureau" className="text-white text-xs">Bureau</SelectItem>
+                              <SelectItem value="Fax" className="text-white text-xs">Fax</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id="new-telephone"
+                            placeholder="Téléphone"
+                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={async () => {
+                              const val = document.getElementById('new-telephone')?.value?.trim();
+                              if (val) {
+                                const newTel = { telephone: val, type: newTelephoneType, actuel: formData.telephones.length === 0 };
+                                setFormData(prev => ({ ...prev, telephones: [...prev.telephones, newTel] }));
+                                if (lastSavedDataRef.current) {
+                                  lastSavedDataRef.current = { ...lastSavedDataRef.current, telephones: [...(lastSavedDataRef.current.telephones || []), newTel] };
+                                }
+                                if (editingClient?.id) {
+                                  await base44.entities.ActionLog.create({ utilisateur_email: user?.email || "", utilisateur_nom: user?.full_name || "Système", action: "Ajout d'un téléphone", entite: "Client", entite_id: editingClient.id, details: `${val} (${newTelephoneType})` });
+                                  queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient.id] });
+                                }
+                                document.getElementById('new-telephone').value = "";
+                              }
+                            }}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 px-2"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        {formData.telephones.length > 0 && (
+                          <div className="space-y-1">
+                            {formData.telephones.map((t, index) => (
+                              <div key={index} className={`flex items-center justify-between p-1.5 rounded border text-xs ${t.actuel ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700'}`}>
+                                <span className="text-white truncate flex-1">{t.telephone} <span className="text-slate-400">({t.type || 'Cellulaire'})</span></span>
+                                <div className="flex items-center gap-1 ml-2">
+                                  <button type="button" onClick={() => toggleActuel('telephones', index)} className={`px-1 py-0.5 rounded text-xs border transition-all ${t.actuel ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-700/30 border-slate-600 text-slate-400'}`}>{t.actuel ? '★' : '☆'}</button>
+                                  <button type="button" onClick={() => handleDeleteRequest('telephones', index)} className="p-0.5 text-red-400 hover:text-red-300 rounded"><Trash2 className="w-3 h-3" /></button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    )}
+                    </Card>
+                    </div>
+
+                    {/* Notes */}
+                    <Card className="border-slate-700 bg-slate-800/30">
+                    <CardHeader className="py-2 bg-slate-800/50 rounded-t-lg">
+                    <CardTitle className="text-slate-300 text-base flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Notes
+                    </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-2 pb-2">
+                    <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    placeholder="Notes supplémentaires..."
+                    className="bg-slate-700 border-slate-600 text-white resize-none h-20 text-sm"
+                    />
+                    </CardContent>
+                    </Card>
+
+                    {/* Dossiers associés */}
+                    {editingClient && (
+                    <ClientDossiersSection
+                    clientDossiers={sortedClientDossiers}
+                    dossiersCollapsed={dossiersCollapsed}
+                    setDossiersCollapsed={setDossiersCollapsed}
+                    dossierSearchTerm={dossierSearchTerm}
+                    setDossierSearchTerm={setDossierSearchTerm}
+                    filterArpenteur={filterArpenteur}
+                    setFilterArpenteur={setFilterArpenteur}
+                    filterMandat={filterMandat}
+                    setFilterMandat={setFilterMandat}
+                    filterVille={filterVille}
+                    setFilterVille={setFilterVille}
+                    filterStatut={filterStatut}
+                    setFilterStatut={setFilterStatut}
+                    isFiltersOpenDossiers={isFiltersOpenDossiers}
+                    setIsFiltersOpenDossiers={setIsFiltersOpenDossiers}
+                    handleSortDossiers={handleSortDossiers}
+                    sortFieldDossiers={sortFieldDossiers}
+                    sortDirectionDossiers={sortDirectionDossiers}
+                    getArpenteurInitials={getArpenteurInitials}
+                    getArpenteurColor={getArpenteurColor}
+                    getMandatColor={getMandatColor}
+                    getAbbreviatedMandatType={getAbbreviatedMandatType}
+                    formatAdresseTravaux={formatAdresseTravaux}
+                    ARPENTEURS={ARPENTEURS}
+                    TYPES_MANDATS={TYPES_MANDATS}
+                    STATUTS={STATUTS}
+                    allVilles={allVilles}
+                    />
+                    )}
+                    </form>
+                    </div>
+
+                    {/* Footer actions - création seulement */}
+                    {!editingClient && (
+                    <div className="sticky bottom-0 bg-slate-900 border-t border-slate-800 px-6 py-3 flex items-center justify-end gap-3">
+                    <Button type="button" variant="ghost" onClick={handleCloseAttempt} className="text-slate-400 border-slate-600">
+                    Annuler
+                    </Button>
+                    <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none">
+                    Créer le client
+                    </Button>
+                    </div>
+                    )}
+                    </div>
+
+                    {/* Sidebar 30% */}
+                    <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                    <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800">
+                    <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSidebarTab("commentaires")}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all border-b-2 ${sidebarTab === "commentaires" ? "text-emerald-400 border-emerald-500" : "text-slate-400 border-transparent hover:text-slate-200"}`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 inline mr-1" />
+                      Commentaires {nbCommentaires > 0 && <span className="ml-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-xs">{nbCommentaires}</span>}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSidebarTab("historique")}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all border-b-2 ${sidebarTab === "historique" ? "text-blue-400 border-blue-500" : "text-slate-400 border-transparent hover:text-slate-200"}`}
+                    >
+                      <Clock className="w-3.5 h-3.5 inline mr-1" />
+                      Historique {actionLogs.length > 0 && <span className="ml-1 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-full text-xs">{actionLogs.length}</span>}
+                    </button>
+                    </div>
+                    <button type="button" onClick={() => onOpenChange(false)} className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800">
+                    <X className="w-4 h-4" />
+                    </button>
+                    </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto">
+                    {sidebarTab === "commentaires" && (
+                    <CommentairesSectionClient
+                    clientId={editingClient?.id}
+                    commentairesTemporaires={commentairesTemporaires}
+                    setCommentairesTemporaires={setCommentairesTemporaires}
+                    />
+                    )}
+                    {sidebarTab === "historique" && (
+                    <div className="p-3 space-y-2">
+                    {actionLogs.length === 0 ? (
+                      <p className="text-slate-500 text-sm text-center py-8">Aucun historique</p>
+                    ) : (
+                      actionLogs.map((log) => (
+                        <div key={log.id} className="p-2.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-xs font-medium">{log.action}</p>
+                              {log.details && <p className="text-slate-400 text-xs mt-0.5 truncate">{log.details}</p>}
+                              <p className="text-slate-500 text-xs mt-1">{log.utilisateur_nom}</p>
+                            </div>
+                            <span className="text-slate-500 text-xs whitespace-nowrap">
+                              {log.created_date ? format(new Date(log.created_date), "dd MMM HH:mm", { locale: fr }) : ""}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    </div>
+                    )}
+                    </div>
+                    </div>
+                    </div>
+                    </motion.div>
+                    </DialogContent>
+                    </Dialog>
+
+                    {/* Avertissement modifications non sauvegardées */}
+                    <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                    <DialogHeader>
+                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    Attention
+                    <span className="text-2xl">⚠️</span>
+                    </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                    <p className="text-slate-300 text-center">
+                    Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+                    </p>
+                    <div className="flex justify-center gap-3 pt-4">
+                    <Button
+                    type="button"
+                    onClick={handleConfirmClose}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                    >
+                    Abandonner
+                    </Button>
+                    <Button 
+                    type="button" 
+                    onClick={() => setShowUnsavedWarning(false)}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                    >
+                    Continuer l'édition
+                    </Button>
+                    </div>
+                    </div>
+                    </DialogContent>
+                    </Dialog>
+
+                    {/* Confirmation de suppression */}
+                    <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, type: null, index: null, item: null })}>
+                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                    <DialogHeader>
+                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    Confirmation
+                    <span className="text-2xl">⚠️</span>
+                    </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                    <p className="text-slate-300 text-center">
+                    Êtes-vous sûr de vouloir supprimer {deleteConfirmation.label} ?
+                    </p>
+                    {deleteConfirmation.item && (
+                    <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
+                    <p className="text-white text-sm">
+                    {deleteConfirmation.type === 'adresses' && formatAdresse(deleteConfirmation.item)}
+                    {deleteConfirmation.type === 'courriels' && deleteConfirmation.item.courriel}
+                    {deleteConfirmation.type === 'telephones' && `${deleteConfirmation.item.telephone} (${deleteConfirmation.item.type || 'Cellulaire'})`}
+                    </p>
+                    </div>
+                    )}
+                    <div className="flex justify-center gap-3 pt-4">
+                    <Button
+                    type="button"
+                    onClick={() => setDeleteConfirmation({ show: false, type: null, index: null, item: null })}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                    >
+                    Annuler
+                    </Button>
+                    <Button 
+                    type="button" 
+                    onClick={confirmDelete}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                    >
+                    Confirmer
+                    </Button>
+                    </div>
+                    </div>
+                    </DialogContent>
+                    </Dialog>
+
+                    {/* Avertissement désactivation communication */}
+                    <Dialog open={showDisableWarning} onOpenChange={setShowDisableWarning}>
+                    <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                    <DialogHeader>
+                    <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    Avertissement
+                    <span className="text-2xl">⚠️</span>
+                    </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                    <p className="text-slate-300 text-center">
+                    En désactivant {disableType === "courriel" ? "les courriels" : "les téléphones"}, certaines fonctions de communication seront désactivées pour ce client.
+                    </p>
+                    <p className="text-slate-400 text-sm text-center">
+                    Voulez-vous poursuivre ?
+                    </p>
+                    <div className="flex justify-center gap-3 pt-4">
+                    <Button
+                    type="button"
+                    onClick={() => {
+                    setShowDisableWarning(false);
+                    setDisableType(null);
+                    }}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                    >
+                    Annuler
+                    </Button>
+                    <Button 
+                    type="button" 
+                    onClick={() => {
+                    if (disableType === "courriel") {
+                    setCourrielDisabled(true);
+                    } else if (disableType === "telephone") {
+                    setTelephoneDisabled(true);
+                    }
+                    setShowDisableWarning(false);
+                    setDisableType(null);
+                    }}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                    >
+                    Poursuivre
+                    </Button>
+                    </div>
+                    </div>
+                    </DialogContent>
+                    </Dialog>
+                    </>
+                    );
+                    }
