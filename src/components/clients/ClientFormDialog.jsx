@@ -714,42 +714,14 @@ export default function ClientFormDialog({
     });
   };
 
-  const confirmDelete = async () => {
-    const { type: fieldName, index, item: itemToRemove } = deleteConfirmation;
+  const confirmDelete = () => {
+    const { type: fieldName, index } = deleteConfirmation;
     
     if (formData[fieldName].length > 0) {
       setFormData(prev => ({
         ...prev,
         [fieldName]: prev[fieldName].filter((_, i) => i !== index)
       }));
-
-      // Créer une entrée d'historique immédiate si on modifie un client existant
-      if (editingClient?.id) {
-        let details = "";
-        let action = "";
-        
-        if (fieldName === "adresses") {
-          action = "Suppression d'une adresse";
-          details = formatAdresse(itemToRemove);
-        } else if (fieldName === "courriels") {
-          action = "Suppression d'un courriel";
-          details = itemToRemove.courriel;
-        } else if (fieldName === "telephones") {
-          action = "Suppression d'un téléphone";
-          details = `${itemToRemove.telephone} (${itemToRemove.type || 'Cellulaire'})`;
-        }
-
-        await base44.entities.ActionLog.create({
-          utilisateur_email: user?.email || "",
-          utilisateur_nom: user?.full_name || "Système",
-          action: action,
-          entite: "Client",
-          entite_id: editingClient.id,
-          details: details,
-        });
-
-        queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      }
     }
     
     setDeleteConfirmation({ show: false, type: null, index: null, item: null });
