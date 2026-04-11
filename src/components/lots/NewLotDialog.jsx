@@ -386,29 +386,50 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                           <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{historiqueFilters.users.length + historiqueFilters.actions.length}</Badge>
                         )}
                        </div>
-                       {showHistoriqueFilters && (
-                        <div className="mb-3 p-2 bg-slate-800/50 rounded border border-slate-700 flex-shrink-0">
-                          <div className="space-y-2">
+                       {showHistoriqueFilters && (() => {
+                        const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
+                        const uniqueActions = [...new Set(historique.map(e => e.action))];
+                        return (
+                        <div className="mb-3 p-3 bg-slate-800/50 rounded border border-slate-700 flex-shrink-0 space-y-3">
+                          {uniqueUsers.length > 0 && (
                             <div>
-                              <p className="text-xs font-semibold text-slate-300 mb-1">Actions</p>
-                              <div className="flex flex-wrap gap-1">
-                                {['Création', 'Modification'].map(action => (
+                              <p className="text-xs font-semibold text-slate-300 mb-1.5">Utilisateurs</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {uniqueUsers.map(user => (
+                                  <button key={user.email} onClick={() => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    users: prev.users.includes(user.email) ? prev.users.filter(u => u !== user.email) : [...prev.users, user.email]
+                                  }))} className={`text-xs px-2.5 py-1.5 rounded transition-colors ${
+                                    historiqueFilters.users.includes(user.email) ? 'bg-emerald-500/30 text-emerald-400 border border-emerald-500/50' : 'bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-700'
+                                  }`}>{user.nom}</button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {uniqueActions.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-slate-300 mb-1.5">Actions</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {uniqueActions.map(action => (
                                   <button key={action} onClick={() => setHistoriqueFilters(prev => ({
                                     ...prev,
                                     actions: prev.actions.includes(action) ? prev.actions.filter(a => a !== action) : [...prev.actions, action]
-                                  }))} className={`text-xs px-2 py-1 rounded transition-colors ${
-                                    historiqueFilters.actions.includes(action) ? 'bg-emerald-500/30 text-emerald-400' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                  }))} className={`text-xs px-2.5 py-1.5 rounded transition-colors ${
+                                    historiqueFilters.actions.includes(action) ? 'bg-blue-500/30 text-blue-400 border border-blue-500/50' : 'bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-700'
                                   }`}>{action}</button>
                                 ))}
                               </div>
                             </div>
-                            <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-slate-400 hover:text-slate-200 mt-1">Réinitialiser</button>
-                          </div>
+                          )}
+                          <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-slate-400 hover:text-slate-200 mt-1">Réinitialiser</button>
                         </div>
-                       )}
+                        );
+                       })()}
                        {(() => {
+                        const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
+                        const uniqueActions = [...new Set(historique.map(e => e.action))];
                         const filtered = historique
-                          .filter(e => historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action))
+                          .filter(e => (historiqueFilters.users.length === 0 || historiqueFilters.users.includes(e.utilisateur_email)) && (historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action)))
                           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                         return filtered.length === 0 ? (
                           <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action</p></div></div>
