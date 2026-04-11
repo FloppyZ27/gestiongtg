@@ -42,10 +42,12 @@ export default function CommunicationClients() {
     r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
   ).length : 0;
 
+  const validStatuts = ["Nouveau mandat/Demande d'information", "Mandats à ouvrir", "Mandat non octroyé"];
+  const validPriseMandats = priseMandats.filter(p => validStatuts.includes(p.statut));
   const placeAffaireCounts = {
-    tous: priseMandats.length,
-    alma: priseMandats.filter(p => p.place_affaire === "Alma").length,
-    saguenay: priseMandats.filter(p => p.place_affaire === "Saguenay").length,
+    tous: validPriseMandats.length,
+    alma: validPriseMandats.filter(p => p.place_affaire === "Alma").length,
+    saguenay: validPriseMandats.filter(p => p.place_affaire === "Saguenay").length,
   };
 
   const retourAppelCountsByPlace = React.useMemo(() => {
