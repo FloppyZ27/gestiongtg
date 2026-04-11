@@ -422,6 +422,30 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                               </SelectContent>
                             </Select>
                           </div>
+                          <div>
+                            <p className="text-xs font-semibold text-slate-300 mb-2">Période</p>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="date"
+                                value={historiqueFilters.dateRange?.start || ""}
+                                onChange={(e) => setHistoriqueFilters(prev => ({
+                                  ...prev,
+                                  dateRange: { ...prev.dateRange, start: e.target.value }
+                                }))}
+                                className="h-8 text-xs bg-slate-800/50 border border-emerald-500/50 rounded text-emerald-400 placeholder-slate-500"
+                              />
+                              <span className="text-slate-400">→</span>
+                              <input
+                                type="date"
+                                value={historiqueFilters.dateRange?.end || ""}
+                                onChange={(e) => setHistoriqueFilters(prev => ({
+                                  ...prev,
+                                  dateRange: { ...prev.dateRange, end: e.target.value }
+                                }))}
+                                className="h-8 text-xs bg-slate-800/50 border border-emerald-500/50 rounded text-emerald-400 placeholder-slate-500"
+                              />
+                            </div>
+                          </div>
                           <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-emerald-400 hover:text-emerald-300">Réinitialiser</button>
                         </div>
                         );
@@ -430,7 +454,17 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                         const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
                         const uniqueActions = [...new Set(historique.map(e => e.action))];
                         const filtered = historique
-                          .filter(e => (historiqueFilters.users.length === 0 || historiqueFilters.users.includes(e.utilisateur_email)) && (historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action)))
+                          .filter(e => {
+                            const userMatch = historiqueFilters.users.length === 0 || historiqueFilters.users.includes(e.utilisateur_email);
+                            const actionMatch = historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action);
+                            let dateMatch = true;
+                            if (historiqueFilters.dateRange?.start || historiqueFilters.dateRange?.end) {
+                              const entryDate = new Date(e.timestamp).toISOString().split('T')[0];
+                              if (historiqueFilters.dateRange.start && entryDate < historiqueFilters.dateRange.start) dateMatch = false;
+                              if (historiqueFilters.dateRange.end && entryDate > historiqueFilters.dateRange.end) dateMatch = false;
+                            }
+                            return userMatch && actionMatch && dateMatch;
+                          })
                           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                         return filtered.length === 0 ? (
                           <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action</p></div></div>
