@@ -281,12 +281,12 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+            {!editingLot && (<div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
               <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
-              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending || updateLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                {editingLot ? (updateLotMutation.isPending ? "Modification..." : "Modifier") : (createLotMutation.isPending ? "Création..." : "Créer")}
+              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                {createLotMutation.isPending ? "Création..." : "Créer"}
               </Button>
-            </div>
+            </div>)}
           </motion.div>
         </DialogContent>
       </Dialog>
