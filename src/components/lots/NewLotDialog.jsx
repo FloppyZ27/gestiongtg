@@ -13,7 +13,6 @@ import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
 import CommentairesSectionLot from "./CommentairesSectionLot";
-import { Dialog as WarningDialog, DialogContent as WarningDialogContent, DialogHeader as WarningDialogHeader, DialogTitle as WarningDialogTitle } from "@/components/ui/dialog";
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": ["Québec","Canton de Caron","Canton de de l'Île","Canton de Garnier","Village d'Héberville","Canton d'Hébertville-Station","Canton de Labarre","Canton de Mésy","Canton de Métabetchouan","Canton de Signay","Canton de Taillon"],
@@ -42,11 +41,11 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
       if (editingLot.circonscription_fonciere) {
         setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[editingLot.circonscription_fonciere] || []);
       }
-      setHasFormChanges(false);
     } else if (!editingLot && open) {
       resetForm();
     }
   }, [editingLot, open]);
+
   const [availableCadastres, setAvailableCadastres] = useState([]);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
@@ -63,6 +62,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const [showLotExists, setShowLotExists] = useState(false);
 
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list('-created_date'), initialData: [] });
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
 
   const updateLotMutation = useMutation({
     mutationFn: async (lotData) => {
@@ -72,11 +72,11 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     },
     onSuccess: (updatedLot) => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       onLotCreated?.(updatedLot, mandatIndex);
       resetAndClose();
     }
   });
-  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
 
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
@@ -110,12 +110,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
     setHasFormChanges(true);
-    addHistoriqueEntry('Modification', `Circonscription foncière changée en ${value}`);
   };
-
-  const addHistoriqueEntry = (action, details) => {
-    setHistorique(prev => [{ action, details, timestamp: new Date().toISOString() }, ...prev]);
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -174,7 +169,21 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => { if (!o) { if (!editingLot && hasFormChanges) { setShowCancelConfirm(true); return; } if (editingLot && hasFormChanges) { updateLotMutation.mutate(formData); } else { resetAndClose(); } } onOpenChange(o); }}>
+      <Dialog open={open} onOpenChange={(o) => {
+        if (!o) {
+          if (!editingLot && hasFormChanges) {
+            setShowCancelConfirm(true);
+            return;
+          }
+          // En mode édition : toujours sauvegarder à la fermeture
+          if (editingLot) {
+            updateLotMutation.mutate(formData);
+            return;
+          }
+          resetAndClose();
+        }
+        onOpenChange(o);
+      }}>
         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
@@ -206,9 +215,9 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2"><Upload className="w-4 h-4 text-slate-400" /><span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span></div>
                         <label><input type="file" accept=".d01" onChange={(e) => { const f = e.target.files[0]; if (f) handleD01Import(f); }} className="hidden" /><span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">Parcourir</span></label>
-                        </div>
-                        )}
-                        </div>}
+                      </div>
+                    )}
+                  </div>}
 
                   <LotInfoStepForm
                     lotForm={formData}
@@ -257,7 +266,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique {historique.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{historique.length}</Badge>}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                      <CommentairesSectionLot lotId={null} lotTemporaire={true} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
+                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                        {historique.length === 0 ? (
@@ -268,7 +277,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                              <div key={idx} className="text-xs bg-slate-800/40 border border-slate-700 rounded p-2 space-y-1">
                                <div className="flex items-center justify-between">
                                  <span className="font-semibold text-slate-300">{entry.action}</span>
-                                 <span className="text-slate-500 text-[10px]">{format(new Date(entry.timestamp), 'HH:mm:ss', { locale: fr })}</span>
+                                 <span className="text-slate-500 text-[10px]">{entry.timestamp && format(new Date(entry.timestamp), 'HH:mm:ss', { locale: fr })}</span>
                                </div>
                                {entry.details && <p className="text-slate-400">{entry.details}</p>}
                              </div>
@@ -281,12 +290,24 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
             </div>
 
-            {!editingLot && (<div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-              <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
-              <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                {createLotMutation.isPending ? "Création..." : "Créer"}
-              </Button>
-            </div>)}
+            {/* Footer buttons */}
+            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+              {!editingLot ? (
+                <>
+                  <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) setShowCancelConfirm(true); else resetAndClose(); }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                  <Button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {createLotMutation.isPending ? "Création..." : "Créer"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button type="button" variant="outline" onClick={resetAndClose} className="border-slate-600 text-slate-400 hover:bg-slate-700/50">Fermer</Button>
+                  <Button type="button" onClick={() => updateLotMutation.mutate(formData)} disabled={updateLotMutation.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {updateLotMutation.isPending ? "Sauvegarde..." : "Sauvegarder"}
+                  </Button>
+                </>
+              )}
+            </div>
           </motion.div>
         </DialogContent>
       </Dialog>
