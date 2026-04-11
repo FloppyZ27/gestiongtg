@@ -174,7 +174,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => { if (!o && !editingLot && hasFormChanges) { setShowCancelConfirm(true); return; } if (!o) resetAndClose(); onOpenChange(o); }}>
+      <Dialog open={open} onOpenChange={(o) => { if (!o) { if (!editingLot && hasFormChanges) { setShowCancelConfirm(true); return; } if (editingLot && hasFormChanges) { updateLotMutation.mutate(formData); } else { resetAndClose(); } } onOpenChange(o); }}>
         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
