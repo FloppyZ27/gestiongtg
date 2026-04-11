@@ -472,13 +472,27 @@ export default function Clients() {
                         <TableCell className="text-slate-300">
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-slate-500" />
-                            {getCurrentValue(client.courriels, 'courriel')}
+                            {(() => {
+                              const courriel = getCurrentValue(client.courriels, 'courriel');
+                              return courriel !== '-' ? (
+                                <a href={`mailto:${courriel}`} onClick={(e) => e.stopPropagation()} className="text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer">
+                                  {courriel}
+                                </a>
+                              ) : courriel;
+                            })()}
                           </div>
                         </TableCell>
                         <TableCell className="text-slate-300">
                           <div className="flex items-center gap-2">
                             <Phone className="w-4 h-4 text-slate-500" />
-                            {getCurrentValue(client.telephones, 'telephone')}
+                            {(() => {
+                              const telephone = getCurrentValue(client.telephones, 'telephone');
+                              return telephone !== '-' ? (
+                                <a href={`tel:${telephone}`} onClick={(e) => e.stopPropagation()} className="text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer">
+                                  {telephone}
+                                </a>
+                              ) : telephone;
+                            })()}
                           </div>
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
