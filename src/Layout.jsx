@@ -1030,6 +1030,25 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
+        /* Scrollbar personnalisée globale */
+        *::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+        }
+
+        *::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
+
         /* Switch actif en brun clair (amber) - section terrain */
         button[role="switch"][data-state="checked"] {
           background-color: rgb(251, 191, 36) !important;
