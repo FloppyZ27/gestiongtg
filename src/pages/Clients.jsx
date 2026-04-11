@@ -411,31 +411,51 @@ export default function Clients() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className={`cursor-pointer transition-colors ${
+                        sortField === 'nom'
+                          ? 'text-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
                       onClick={() => handleSort('nom')}
                     >
                       Nom complet {sortField === 'nom' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className={`cursor-pointer transition-colors ${
+                        sortField === 'type'
+                          ? 'text-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
                       onClick={() => handleSort('type')}
                     >
                       Type {sortField === 'type' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className={`cursor-pointer transition-colors ${
+                        sortField === 'adresse'
+                          ? 'text-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
                       onClick={() => handleSort('adresse')}
                     >
                       Adresse actuelle {sortField === 'adresse' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className={`cursor-pointer transition-colors ${
+                        sortField === 'courriel'
+                          ? 'text-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
                       onClick={() => handleSort('courriel')}
                     >
                       Courriel actuel {sortField === 'courriel' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className={`cursor-pointer transition-colors ${
+                        sortField === 'telephone'
+                          ? 'text-emerald-400 bg-emerald-500/10'
+                          : 'text-slate-300 hover:text-emerald-400'
+                      }`}
                       onClick={() => handleSort('telephone')}
                     >
                       Téléphone actuel {sortField === 'telephone' && (sortDirection === 'asc' ? '↑' : '↓')}
