@@ -8,6 +8,9 @@ import ClientFormDialog from "../clients/ClientFormDialog";
 import ClientSelectionCard from "./ClientSelectionCard";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function OuvrirDossierDialog({
   open,
@@ -28,6 +31,10 @@ export default function OuvrirDossierDialog({
   const [isClientFormOpen, setIsClientFormOpen] = useState(false);
   const [clientTypeForForm, setClientTypeForForm] = useState(null);
   const [editingClientForForm, setEditingClientForForm] = useState(null);
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
+  const [newLotMandatIndex, setNewLotMandatIndex] = useState(null);
+  const [newLotForm, setNewLotForm] = useState({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "" });
+  const [isCreatingLot, setIsCreatingLot] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
@@ -334,7 +341,11 @@ export default function OuvrirDossierDialog({
                 return [...recap, ...newComments];
               });
             }}
-            onOpenNewLotDialog={() => {}}
+            onOpenNewLotDialog={(mandatIndex) => {
+              setNewLotMandatIndex(mandatIndex);
+              setNewLotForm({ numero_lot: "", circonscription_fonciere: "", cadastre: "Québec", rang: "" });
+              setIsNewLotDialogOpen(true);
+            }}
             setEditingClient={() => {}}
             setEditingLot={() => {}}
             setNewLotForm={() => {}}
@@ -353,6 +364,71 @@ export default function OuvrirDossierDialog({
           setIsClientFormOpen(false);
         }} 
       />
+
+      {/* Dialog création de lot */}
+      <Dialog open={isNewLotDialogOpen} onOpenChange={setIsNewLotDialogOpen}>
+        <DialogContent className="text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-orange-300">Nouveau lot</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
+              <Input value={newLotForm.numero_lot} onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})} placeholder="Ex: 1234567" className="bg-slate-700 border-slate-600 text-white" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
+              <Select value={newLotForm.circonscription_fonciere} onValueChange={(v) => setNewLotForm({...newLotForm, circonscription_fonciere: v})}>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="Sélectionner..." />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="Lac-Saint-Jean-Est" className="text-white">Lac-Saint-Jean-Est</SelectItem>
+                  <SelectItem value="Lac-Saint-Jean-Ouest" className="text-white">Lac-Saint-Jean-Ouest</SelectItem>
+                  <SelectItem value="Chicoutimi" className="text-white">Chicoutimi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Cadastre</Label>
+              <Input value={newLotForm.cadastre} onChange={(e) => setNewLotForm({...newLotForm, cadastre: e.target.value})} placeholder="Ex: Québec" className="bg-slate-700 border-slate-600 text-white" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Rang</Label>
+              <Input value={newLotForm.rang} onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})} placeholder="Ex: Canton" className="bg-slate-700 border-slate-600 text-white" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" className="border-slate-600 text-slate-300" onClick={() => setIsNewLotDialogOpen(false)}>Annuler</Button>
+              <Button
+                type="button"
+                disabled={isCreatingLot || !newLotForm.numero_lot || !newLotForm.circonscription_fonciere}
+                onClick={async () => {
+                  setIsCreatingLot(true);
+                  const newLot = await base44.entities.Lot.create({
+                    numero_lot: newLotForm.numero_lot,
+                    circonscription_fonciere: newLotForm.circonscription_fonciere,
+                    cadastre: newLotForm.cadastre || "Québec",
+                    rang: newLotForm.rang || ""
+                  });
+                  queryClient.invalidateQueries({ queryKey: ['lots'] });
+                  // Ajouter le lot au mandat
+                  if (newLotMandatIndex !== null && formData) {
+                    setFormData(prev => ({
+                      ...prev,
+                      mandats: prev.mandats.map((m, i) => i === newLotMandatIndex ? { ...m, lots: [...(m.lots || []), newLot.id] } : m)
+                    }));
+                  }
+                  setIsCreatingLot(false);
+                  setIsNewLotDialogOpen(false);
+                }}
+                className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border-orange-500/30"
+              >
+                {isCreatingLot ? "Création..." : "Créer le lot"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
