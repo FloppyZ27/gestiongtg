@@ -4220,7 +4220,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) =>
                       const matchesDateStart = filterDateStart === "" || pmDate >= new Date(filterDateStart);
                       const matchesDateEnd = filterDateEnd === "" || pmDate <= new Date(filterDateEnd + "T23:59:59");
                       
-                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence && matchesDateStart && matchesDateEnd;
+                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence && matchesDateStart && matchesDateEnd && (filterPlaceAffaire === "tous" || pm.place_affaire === filterPlaceAffaire);
                     })
                     .sort((a, b) => {
                       if (!sortField) return 0;
