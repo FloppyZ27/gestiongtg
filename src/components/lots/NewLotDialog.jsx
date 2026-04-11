@@ -115,14 +115,18 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.numero_lot || !formData.circonscription_fonciere) { setShowMissingFields(true); return; }
+    
+    // Vérifier que la combinaison (numero_lot, circonscription, rang, cadastre) n'existe pas
+    const lotExistant = lots.find(l =>
+      l.numero_lot === formData.numero_lot &&
+      l.circonscription_fonciere === formData.circonscription_fonciere &&
+      (l.rang || "") === (formData.rang || "") &&
+      (l.cadastre || "") === (formData.cadastre || "") &&
+      l.id !== editingLot?.id // Exclure le lot en cours d'édition
+    );
+    if (lotExistant) { setShowLotExists(true); return; }
+    
     if (!editingLot) {
-      const lotExistant = lots.find(l =>
-        l.numero_lot === formData.numero_lot &&
-        l.circonscription_fonciere === formData.circonscription_fonciere &&
-        (l.rang || "") === (formData.rang || "") &&
-        (l.cadastre || "") === (formData.cadastre || "")
-      );
-      if (lotExistant) { setShowLotExists(true); return; }
       createLotMutation.mutate(formData);
     } else {
       updateLotMutation.mutate(formData);
