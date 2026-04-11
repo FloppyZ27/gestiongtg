@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
+import ClientDossiersSection from "./ClientDossiersSection";
 import AddressSearchInput from "@/components/shared/AddressSearchInput";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -110,6 +111,7 @@ export default function ClientFormDialog({
   
   // Auto-save
   const saveTimeoutRef = React.useRef(null);
+  const lastSavedDataRef = React.useRef(null);
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -154,12 +156,66 @@ export default function ClientFormDialog({
   const autoSaveMutation = useMutation({
     mutationFn: async ({ id, clientData }) => {
       if (!editingClient) return;
-      
       const updatedClient = await base44.entities.Client.update(id, clientData);
+
+      // Détecter les changements par rapport au dernier état sauvegardé
+      const oldData = lastSavedDataRef.current || {};
+      const changes = [];
+
+      if ((oldData.prenom || '') !== (clientData.prenom || '') || (oldData.nom || '') !== (clientData.nom || '')) {
+        changes.push({ action: 'Modification du nom', details: `${oldData.prenom || ''} ${oldData.nom || ''} → ${clientData.prenom || ''} ${clientData.nom || ''}`.trim() });
+      }
+      if ((oldData.type_client || '') !== (clientData.type_client || '')) {
+        changes.push({ action: 'Modification du type', details: `${oldData.type_client || 'Non défini'} → ${clientData.type_client}` });
+      }
+      if (JSON.stringify(oldData.preferences_livraison || []) !== JSON.stringify(clientData.preferences_livraison || [])) {
+        changes.push({ action: 'Modification des préférences de livraison', details: `${(oldData.preferences_livraison || []).join(', ') || 'Aucune'} → ${(clientData.preferences_livraison || []).join(', ') || 'Aucune'}` });
+      }
+      if ((oldData.notes || '') !== (clientData.notes || '')) {
+        changes.push({ action: 'Modification des notes', details: 'Les notes ont été modifiées' });
+      }
+      (clientData.adresses || []).forEach(newAddr => {
+        if (!(oldData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(newAddr)))
+          changes.push({ action: "Ajout d'une adresse", details: formatAdresse(newAddr) });
+      });
+      (oldData.adresses || []).forEach(oldAddr => {
+        if (!(clientData.adresses || []).some(a => JSON.stringify(a) === JSON.stringify(oldAddr)))
+          changes.push({ action: "Suppression d'une adresse", details: formatAdresse(oldAddr) });
+      });
+      (clientData.courriels || []).forEach(newC => {
+        if (!(oldData.courriels || []).some(c => c.courriel === newC.courriel))
+          changes.push({ action: "Ajout d'un courriel", details: newC.courriel });
+      });
+      (oldData.courriels || []).forEach(oldC => {
+        if (!(clientData.courriels || []).some(c => c.courriel === oldC.courriel))
+          changes.push({ action: "Suppression d'un courriel", details: oldC.courriel });
+      });
+      (clientData.telephones || []).forEach(newT => {
+        if (!(oldData.telephones || []).some(t => t.telephone === newT.telephone))
+          changes.push({ action: "Ajout d'un téléphone", details: `${newT.telephone} (${newT.type || 'Cellulaire'})` });
+      });
+      (oldData.telephones || []).forEach(oldT => {
+        if (!(clientData.telephones || []).some(t => t.telephone === oldT.telephone))
+          changes.push({ action: "Suppression d'un téléphone", details: `${oldT.telephone} (${oldT.type || 'Cellulaire'})` });
+      });
+
+      for (const change of changes) {
+        await base44.entities.ActionLog.create({
+          utilisateur_email: user?.email || '',
+          utilisateur_nom: user?.full_name || 'Système',
+          action: change.action,
+          entite: 'Client',
+          entite_id: id,
+          details: change.details,
+        });
+      }
+
+      lastSavedDataRef.current = JSON.parse(JSON.stringify(clientData));
       return updatedClient;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs', editingClient?.id] });
     },
   });
 
@@ -824,6 +880,7 @@ export default function ClientFormDialog({
       };
       setFormData(data);
       setInitialFormData(JSON.parse(JSON.stringify(data)));
+      lastSavedDataRef.current = JSON.parse(JSON.stringify(data));
       setCommentairesTemporaires([]);
       setHasChanges(false);
     } else if (open && !editingClient) {
@@ -1510,269 +1567,8 @@ export default function ClientFormDialog({
 
               {/* Section Dossiers associés - Uniquement en mode édition */}
               {editingClient && (
-                <Card className="border-slate-700 bg-slate-800/30">
-                  <CardHeader 
-                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
-                    onClick={() => setDossiersCollapsed(!dossiersCollapsed)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                          <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
-                        </div>
-                        <CardTitle className="text-emerald-300 text-base">Dossiers associés</CardTitle>
-                        {clientDossiers.length > 0 && (
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                            {clientDossiers.length}
-                          </Badge>
-                        )}
-                      </div>
-                      {dossiersCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                    </div>
-                  </CardHeader>
-
-                  {!dossiersCollapsed && (
-                    <CardContent className="pt-3 pb-2">
-                      {/* Barre de recherche et filtres */}
-                      <div className="space-y-3 mb-3">
-                        <div className="flex justify-between items-center gap-2">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                            <Input
-                              placeholder="Rechercher..."
-                              value={dossierSearchTerm}
-                              onChange={(e) => setDossierSearchTerm(e.target.value)}
-                              className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                            />
-                          </div>
-
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setIsFiltersOpenDossiers(!isFiltersOpenDossiers)}
-                            className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                          >
-                            <Filter className="w-4 h-4 mr-2" />
-                            <span className="text-sm">Filtres</span>
-                            {(filterArpenteur.length > 0 || filterMandat.length > 0 || filterVille.length > 0 || filterStatut !== "all") && (
-                              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                {filterArpenteur.length + filterMandat.length + filterVille.length + (filterStatut !== "all" ? 1 : 0)}
-                              </Badge>
-                            )}
-                            {isFiltersOpenDossiers ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                          </Button>
-                        </div>
-
-                        <Collapsible open={isFiltersOpenDossiers} onOpenChange={setIsFiltersOpenDossiers}>
-                          <CollapsibleContent>
-                            <div className="p-2 border border-emerald-500/30 rounded-lg">
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                                  <div className="flex items-center gap-2">
-                                    <Filter className="w-3 h-3 text-emerald-500" />
-                                    <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
-                                  </div>
-                                  {(filterArpenteur.length > 0 || filterMandat.length > 0 || filterVille.length > 0 || filterStatut !== "all") && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setFilterArpenteur([]);
-                                        setFilterMandat([]);
-                                        setFilterVille([]);
-                                        setFilterStatut("all");
-                                      }}
-                                      className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                                    >
-                                      <X className="w-2.5 h-2.5 mr-1" />
-                                      Réinitialiser
-                                    </Button>
-                                  )}
-                                </div>
-                                
-                                <div className="grid grid-cols-3 gap-2">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                        <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
-                                        <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                      {ARPENTEURS.map((arp) => (
-                                        <DropdownMenuCheckboxItem
-                                          key={arp}
-                                          checked={filterArpenteur.includes(arp)}
-                                          onCheckedChange={(checked) => {
-                                            setFilterArpenteur(
-                                              checked
-                                                ? [...filterArpenteur, arp]
-                                                : filterArpenteur.filter((a) => a !== arp)
-                                            );
-                                          }}
-                                          className="text-white"
-                                        >
-                                          {arp}
-                                        </DropdownMenuCheckboxItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                        <span className="truncate">Types ({filterMandat.length > 0 ? `${filterMandat.length}` : 'Tous'})</span>
-                                        <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                      {TYPES_MANDATS.map((type) => (
-                                        <DropdownMenuCheckboxItem
-                                          key={type}
-                                          checked={filterMandat.includes(type)}
-                                          onCheckedChange={(checked) => {
-                                            setFilterMandat(
-                                              checked
-                                                ? [...filterMandat, type]
-                                                : filterMandat.filter((t) => t !== type)
-                                            );
-                                          }}
-                                          className="text-white"
-                                        >
-                                          {type}
-                                        </DropdownMenuCheckboxItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                        <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
-                                        <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                      {allVilles.map((ville) => (
-                                        <DropdownMenuCheckboxItem
-                                          key={ville}
-                                          checked={filterVille.includes(ville)}
-                                          onCheckedChange={(checked) => {
-                                            setFilterVille(
-                                              checked
-                                                ? [...filterVille, ville]
-                                                : filterVille.filter((v) => v !== ville)
-                                            );
-                                          }}
-                                          className="text-white"
-                                        >
-                                          {ville}
-                                        </DropdownMenuCheckboxItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </div>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-
-                      {filteredClientDossiers.length > 0 ? (
-                        <div className="border border-slate-700 rounded-lg overflow-hidden">
-                    <Table>
-                            <TableHeader>
-                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                <TableHead 
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                                  onClick={() => handleSortDossiers('numero_dossier')}
-                                >
-                                  N° Dossier {sortFieldDossiers === 'numero_dossier' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
-                                </TableHead>
-                                <TableHead 
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                                  onClick={() => handleSortDossiers('mandats')}
-                                >
-                                  Mandats {sortFieldDossiers === 'mandats' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
-                                </TableHead>
-                                <TableHead 
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                                  onClick={() => handleSortDossiers('adresse')}
-                                >
-                                  Adresse des travaux {sortFieldDossiers === 'adresse' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
-                                </TableHead>
-                                <TableHead 
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                                  onClick={() => handleSortDossiers('statut')}
-                                >
-                                  Statut {sortFieldDossiers === 'statut' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
-                                </TableHead>
-                                <TableHead 
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
-                                  onClick={() => handleSortDossiers('date')}
-                                >
-                                  Date {sortFieldDossiers === 'date' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {sortedClientDossiers.map((dossier) => (
-                                <TableRow 
-                                  key={dossier.id} 
-                                  className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                                  onClick={() => {
-                                    window.open(createPageUrl('Dossiers') + `?dossier_id=${dossier.id}`, '_blank');
-                                  }}
-                                >
-                                  <TableCell>
-                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                    </Badge>
-                                  </TableCell>
-                                  <TableCell>
-                                    {dossier.mandats && dossier.mandats.length > 0 ? (
-                                      <div className="flex gap-1 flex-wrap">
-                                        {dossier.mandats.slice(0, 2).map((m, idx) => (
-                                          <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                                            {getAbbreviatedMandatType(m.type_mandat)}
-                                          </Badge>
-                                        ))}
-                                        {dossier.mandats.length > 2 && (
-                                          <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                            +{dossier.mandats.length - 2}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <span className="text-slate-600 text-xs">Aucun</span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                                    {dossier.mandats?.[0]?.adresse_travaux ? formatAdresseTravaux(dossier.mandats[0].adresse_travaux) : "-"}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                      {dossier.statut}
-                                    </Badge>
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">
-                                    {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      ) : (
-                        <div className="text-center py-6 text-slate-500">
-                          <FolderOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-xs">Aucun dossier associé</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  )}
-                  </Card>
-                  )}
+                <ClientDossiersSection clientDossiers={clientDossiers} />
+              )}
                   </form>
                   </div>
                   </div>
