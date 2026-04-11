@@ -370,7 +370,13 @@ export default function OuvrirDossierDialog({
           if (mandatIndex !== null && formData) {
             setFormData(prev => ({
               ...prev,
-              mandats: prev.mandats.map((m, i) => i === mandatIndex ? { ...m, lots: [...(m.lots || []), newLot.id] } : m)
+              mandats: prev.mandats.map((m, i) => {
+                if (i !== mandatIndex) return m;
+                const currentLots = m.lots || [];
+                // Ne pas ajouter si le lot est déjà présent (cas modification)
+                if (currentLots.includes(newLot.id)) return m;
+                return { ...m, lots: [...currentLots, newLot.id] };
+              })
             }));
           }
         }}
