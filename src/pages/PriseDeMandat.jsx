@@ -103,7 +103,7 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
-const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => {
+const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveTabChange }, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
       resetFullForm();
@@ -184,7 +184,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) =>
 
   const [filterArpenteur, setFilterArpenteur] = useState([]);
   const [filterStatut, setFilterStatut] = useState("all");
-  const [activeListTab, setActiveListTab] = useState("nouveau");
+  const [activeListTab, _setActiveListTab_] = useState("nouveau"); const setActiveListTab = v => { _setActiveListTab_(v); if (onActiveTabChange) onActiveTabChange(v); };
   const [filterVille, setFilterVille] = useState([]);
   const [filterTypeMandat, setFilterTypeMandat] = useState([]);
   const [filterUrgence, setFilterUrgence] = useState([]);

@@ -11,6 +11,7 @@ import RetoursAppel from "./RetoursAppel";
 export default function CommunicationClients() {
   const [activeTab, setActiveTab] = useState("prise-mandat");
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("tous");
+  const [activePriseMandatTab, setActivePriseMandatTab] = useState("nouveau");
   const priseMandatRef = useRef();
   const retoursAppelRef = useRef();
 
@@ -41,10 +42,13 @@ export default function CommunicationClients() {
     r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
   ).length : 0;
 
+  const getStatutForTab = (tab) => tab === "nouveau" ? "Nouveau mandat/Demande d'information" : tab === "ouvrir" ? "Mandats à ouvrir" : "Mandat non octroyé";
+  const currentStatut = getStatutForTab(activePriseMandatTab);
+  const filteredPriseMandats = priseMandats.filter(p => p.statut === currentStatut);
   const placeAffaireCounts = {
-    tous: priseMandats.length,
-    alma: priseMandats.filter(p => p.place_affaire === "Alma").length,
-    saguenay: priseMandats.filter(p => p.place_affaire === "Saguenay").length,
+    tous: filteredPriseMandats.length,
+    alma: filteredPriseMandats.filter(p => p.place_affaire === "Alma").length,
+    saguenay: filteredPriseMandats.filter(p => p.place_affaire === "Saguenay").length,
   };
 
   const retourAppelCountsByPlace = React.useMemo(() => {
@@ -133,7 +137,7 @@ export default function CommunicationClients() {
                 Nouveau mandat
               </Button>
             </div>
-            <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} />
+            <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} onActiveTabChange={setActivePriseMandatTab} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-0">
