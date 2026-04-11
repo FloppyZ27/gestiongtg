@@ -626,9 +626,10 @@ export default function ClientFormDialog({
   };
 
   const handleCloseAttempt = () => {
-    if (hasChanges) {
+    if (hasChanges && !editingClient) {
       setShowUnsavedWarning(true);
     } else {
+      resetForm();
       onOpenChange(false);
     }
   };
