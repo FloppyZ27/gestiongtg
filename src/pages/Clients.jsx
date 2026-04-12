@@ -160,7 +160,8 @@ export default function Clients() {
       client.prenom?.toLowerCase().includes(searchLower) ||
       client.type_client?.toLowerCase().includes(searchLower) ||
       client.courriels?.some(c => c.courriel?.toLowerCase().includes(searchLower)) ||
-      client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower))
+      client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower)) ||
+      client.adresses?.some(a => formatAdresse(a).toLowerCase().includes(searchLower))
     );
 
     const matchesType = filterType.length === 0 || 
@@ -321,7 +322,7 @@ export default function Clients() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
-                    placeholder="Rechercher..."
+                    placeholder="Rechercher par nom, téléphone, adresse, courriel..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 bg-slate-800/50 border-slate-700 text-white"
