@@ -1169,8 +1169,10 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
                           {col.label}
                           {col.key && (
                             sortField === col.key
-                              ? <span className="text-emerald-400">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              : <span className="text-slate-500">⇅</span>
+                              ? (sortDirection === 'asc'
+                                ? <ChevronUp className="w-3 h-3 text-emerald-400" />
+                                : <ChevronDown className="w-3 h-3 text-emerald-400" />)
+                              : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
                           )}
                         </div>
                       </TableHead>
