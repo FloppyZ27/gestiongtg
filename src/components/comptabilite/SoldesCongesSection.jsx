@@ -6,7 +6,8 @@ import { fr } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, Eye, EyeOff } from "lucide-react";
+import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
@@ -60,7 +61,7 @@ function EditableNumber({ value, onSave, className = "" }) {
   );
 }
 
-function UserEntriesPanel({ userEmail }) {
+function UserEntriesPanel({ userEmail, showDescription = false }) {
   const currentYear = new Date().getFullYear();
   const { data: entrees = [], isLoading } = useQuery({
     queryKey: ['entreeTempsConges', userEmail, currentYear],
@@ -87,7 +88,7 @@ function UserEntriesPanel({ userEmail }) {
             </span>
             <span className={`px-2 py-0.5 rounded-full border text-xs font-medium flex-shrink-0 ${info.bg} ${info.color}`}>{label}</span>
             <span className={`font-bold flex-shrink-0 ${info.color}`}>{e.heures}h</span>
-            {e.description && <span className="text-slate-500 truncate">{e.description}</span>}
+            {showDescription && e.description && <span className="text-slate-500 truncate">{e.description}</span>}
           </div>
         );
       })}
@@ -97,14 +98,13 @@ function UserEntriesPanel({ userEmail }) {
 
 export default function SoldesCongesSection() {
   const [collapsed, setCollapsed] = useState(false);
-  const [expandedUsers, setExpandedUsers] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
 
   const getSolde = (email) => soldes.find(s => s.utilisateur_email === email);
-  const toggleUser = (email) => setExpandedUsers(prev => ({ ...prev, [email]: !prev[email] }));
 
   const upsertMutation = useMutation({
     mutationFn: async ({ email, field, value }) => {
@@ -163,11 +163,10 @@ export default function SoldesCongesSection() {
               const maxMe = solde.max_mieux_etre ?? 40;
               const vacPct = Math.min((solde.heures_vacances / maxVac) * 100, 100);
               const mePct = Math.min((solde.heures_mieux_etre / maxMe) * 100, 100);
-              const isExpanded = expandedUsers[u.email];
+
 
               return (
                 <div key={u.id}>
-                  {/* Ligne principale */}
                   <div className="grid px-3 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
                     <div className="flex items-center gap-2">
                       <Avatar className="w-7 h-7">
@@ -209,23 +208,15 @@ export default function SoldesCongesSection() {
 
                     {/* Bouton voir entrées */}
                     <button
-                      onClick={() => toggleUser(u.email)}
-                      className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${isExpanded ? 'bg-slate-700 text-slate-200' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+                      onClick={() => setSelectedUser(u)}
+                      className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-slate-500 hover:text-slate-200 hover:bg-slate-700"
                       title="Voir les entrées de congé"
                     >
-                      {isExpanded ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <FileText className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
-                  {/* Panneau d'entrées détaillées */}
-                  {isExpanded && (
-                    <div className="border-b border-slate-700 bg-slate-900/60">
-                      <div className="px-3 py-1.5 border-b border-slate-800 flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entrées {new Date().getFullYear()} — Vacances, Mieux-être & Banque</span>
-                      </div>
-                      <UserEntriesPanel userEmail={u.email} />
-                    </div>
-                  )}
+
                 </div>
               );
             })}
@@ -236,6 +227,28 @@ export default function SoldesCongesSection() {
           </div>
         </CardContent>
       )}
+
+      {/* Dialog entrées de congé */}
+      <Dialog open={!!selectedUser} onOpenChange={(open) => { if (!open) setSelectedUser(null); }}>
+        <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <FileText className="w-5 h-5 text-emerald-400" />
+              Entrées de congé {new Date().getFullYear()} — {selectedUser?.full_name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="mt-2">
+              <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-2 mb-1">
+                <span>Date</span>
+                <span>Type</span>
+                <span>Heures</span>
+              </div>
+              <UserEntriesPanel userEmail={selectedUser.email} showDescription />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
