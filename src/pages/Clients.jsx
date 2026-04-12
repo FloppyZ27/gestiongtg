@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown, ChevronUp, Filter } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown, ChevronUp, ChevronsUpDown, Filter } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -419,8 +419,10 @@ export default function Clients() {
                         <div className="flex items-center gap-1">
                           {col.label}
                           {sortField === col.key
-                            ? <span className="text-emerald-400">{sortDirection === 'asc' ? ' ↑' : ' ↓'}</span>
-                            : <span className="text-slate-500"> ⇅</span>
+                            ? (sortDirection === 'asc'
+                              ? <ChevronUp className="w-3 h-3 text-emerald-400" />
+                              : <ChevronDown className="w-3 h-3 text-emerald-400" />)
+                            : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
                           }
                         </div>
                       </TableHead>
