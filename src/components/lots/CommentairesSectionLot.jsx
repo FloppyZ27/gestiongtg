@@ -265,11 +265,11 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
                     <div className="flex flex-col items-end gap-0.5">
                       <span className="text-xs text-slate-400">
-                        {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
+                        {format(new Date(commentaire.created_date.endsWith('Z') ? commentaire.created_date : commentaire.created_date + 'Z'), "dd MMM à HH:mm", { locale: fr })}
                       </span>
                       {commentaire.date_modification && (
                         <span className="text-[10px] text-slate-500 italic">
-                          modifié le {format(new Date(commentaire.date_modification), "dd MMM à HH:mm", { locale: fr })}
+                          modifié le {format(new Date(commentaire.date_modification.endsWith('Z') ? commentaire.date_modification : commentaire.date_modification + 'Z'), "dd MMM à HH:mm", { locale: fr })}
                         </span>
                       )}
                     </div>
