@@ -154,14 +154,14 @@ export default function Clients() {
   };
 
   const filteredClients = clients.filter(client => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = (
-      client.nom?.toLowerCase().includes(searchLower) ||
-      client.prenom?.toLowerCase().includes(searchLower) ||
-      client.type_client?.toLowerCase().includes(searchLower) ||
-      client.courriels?.some(c => c.courriel?.toLowerCase().includes(searchLower)) ||
-      client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower)) ||
-      client.adresses?.some(a => formatAdresse(a).toLowerCase().includes(searchLower))
+    const words = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+    const matchesSearch = words.length === 0 || words.every(word =>
+      client.nom?.toLowerCase().includes(word) ||
+      client.prenom?.toLowerCase().includes(word) ||
+      client.type_client?.toLowerCase().includes(word) ||
+      client.courriels?.some(c => c.courriel?.toLowerCase().includes(word)) ||
+      client.telephones?.some(t => t.telephone?.toLowerCase().includes(word)) ||
+      client.adresses?.some(a => formatAdresse(a).toLowerCase().includes(word))
     );
 
     const matchesType = filterType.length === 0 || 
