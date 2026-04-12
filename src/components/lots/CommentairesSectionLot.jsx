@@ -195,7 +195,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     } else {
       updateCommentaireMutation.mutate({
         id: commentaire.id,
-        data: { contenu: editingContent }
+        data: { contenu: editingContent, date_modification: new Date().toISOString() }
       });
     }
   };
@@ -263,9 +263,16 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                   </Avatar>
                   <div className="flex-1 flex justify-between items-center">
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
-                    <span className="text-xs text-slate-400">
-                      {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="text-xs text-slate-400">
+                        {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
+                      </span>
+                      {commentaire.date_modification && (
+                        <span className="text-[10px] text-slate-500 italic">
+                          modifié le {format(new Date(commentaire.date_modification), "dd MMM à HH:mm", { locale: fr })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="bg-slate-700/50 rounded-lg p-3">
