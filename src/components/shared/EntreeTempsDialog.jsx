@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -34,8 +36,16 @@ export default function EntreeTempsDialog({
   pointages,
   onSubmit,
   onReset,
+  userEmail,
 }) {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
+
+  const { data: soldesConges = [] } = useQuery({
+    queryKey: ['soldesConges'],
+    queryFn: () => base44.entities.SoldeConges.list(),
+    initialData: [],
+  });
+  const solde = soldesConges.find(s => s.utilisateur_email === userEmail) || {};
   const [detailsCollapsed, setDetailsCollapsed] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filterArpenteur, setFilterArpenteur] = useState([]);
@@ -179,24 +189,26 @@ export default function EntreeTempsDialog({
             </TabsList>
 
             <TabsContent value="pointage" className="space-y-3">
-              {/* Résumé des heures restantes */}
+              {/* Résumé des soldes de congés */}
               <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                 <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Vacances restantes</Label>
-                  <div className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white text-sm font-semibold h-8 flex items-center">
-                    {(40 - (pointages?.filter(p => p.type === 'Vacance').reduce((sum, p) => sum + (p.duree_heures || 0), 0) || 0)).toFixed(1)} h
+                  <Label className="text-emerald-400 text-xs">🌴 Vacances disponibles</Label>
+                  <div className="bg-slate-700 border border-emerald-600/40 rounded px-3 py-2 text-emerald-400 text-sm font-bold h-8 flex items-center">
+                    {(solde.heures_vacances ?? 0)} h
+                    {solde.max_vacances != null && <span className="text-slate-500 text-xs font-normal ml-1">/ {solde.max_vacances}h</span>}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Mieux-Être restants</Label>
-                  <div className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white text-sm font-semibold h-8 flex items-center">
-                    {(16 - (pointages?.filter(p => p.type === 'Mieux-Être').reduce((sum, p) => sum + (p.duree_heures || 0), 0) || 0)).toFixed(1)} h
+                  <Label className="text-pink-400 text-xs">💙 Mieux-être disponibles</Label>
+                  <div className="bg-slate-700 border border-pink-600/40 rounded px-3 py-2 text-pink-400 text-sm font-bold h-8 flex items-center">
+                    {(solde.heures_mieux_etre ?? 0)} h
+                    {solde.max_mieux_etre != null && <span className="text-slate-500 text-xs font-normal ml-1">/ {solde.max_mieux_etre}h</span>}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Banques restantes</Label>
-                  <div className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white text-sm font-semibold h-8 flex items-center">
-                    {(0 - (pointages?.filter(p => p.type === 'Banque').reduce((sum, p) => sum + (p.duree_heures || 0), 0) || 0)).toFixed(1)} h
+                  <Label className="text-amber-400 text-xs">🏦 Heures en banque</Label>
+                  <div className="bg-slate-700 border border-amber-600/40 rounded px-3 py-2 text-amber-400 text-sm font-bold h-8 flex items-center">
+                    {(solde.heures_en_banque ?? 0)} h
                   </div>
                 </div>
               </div>

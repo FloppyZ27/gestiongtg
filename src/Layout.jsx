@@ -1099,6 +1099,7 @@ function LayoutContent({ children, currentPageName }) {
         pointages={pointages}
         onSubmit={handleSubmit}
         onReset={resetForm}
+        userEmail={user?.email}
       />
       
       
