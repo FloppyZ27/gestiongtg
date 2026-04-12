@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -437,7 +438,10 @@ export default function Comptabilite() {
             )}
           </Card>
 
-          {/* ===== SECTION 2 : Mandats ouverts avec tabs arpenteurs ===== */}
+          {/* ===== SECTION 2 : Soldes de congés ===== */}
+          <SoldesCongesSection />
+
+          {/* ===== SECTION 3 : Mandats ouverts avec tabs arpenteurs ===== */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
             <div className="cursor-pointer hover:bg-violet-900/40 transition-colors rounded-t-lg py-2 px-3 bg-violet-900/20 border-b border-slate-800" onClick={() => setMandatsCollapsed(!mandatsCollapsed)}>
               <div className="flex items-center justify-between">

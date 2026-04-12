@@ -1,0 +1,38 @@
+{
+  "name": "SoldeConges",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    },
+    "heures_vacances": {
+      "type": "number",
+      "default": 0,
+      "description": "Heures de vacances disponibles"
+    },
+    "heures_mieux_etre": {
+      "type": "number",
+      "default": 0,
+      "description": "Heures de mieux-\u00eatre disponibles"
+    },
+    "heures_en_banque": {
+      "type": "number",
+      "default": 0,
+      "description": "Heures en banque"
+    },
+    "max_vacances": {
+      "type": "number",
+      "default": 120,
+      "description": "Maximum d'heures de vacances (global si utilisateur_email est __global__)"
+    },
+    "max_mieux_etre": {
+      "type": "number",
+      "default": 40,
+      "description": "Maximum d'heures de mieux-\u00eatre (global si utilisateur_email est __global__)"
+    }
+  },
+  "required": [
+    "utilisateur_email"
+  ]
+}
