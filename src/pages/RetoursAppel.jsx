@@ -520,9 +520,18 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
       
       if (!matchesTabStatut) return false;
       
-      const matchesSearch = searchRetoursAppel === "" || 
-        retour.raison?.toLowerCase().includes(searchRetoursAppel.toLowerCase()) ||
-        retour.dossier?.numero_dossier?.toLowerCase().includes(searchRetoursAppel.toLowerCase());
+      const words = searchRetoursAppel.toLowerCase().split(/\s+/).filter(Boolean);
+      const dossier = retour.dossier;
+      const clientsNames = retour.client_nom || (dossier ? getClientsNames(dossier.clients_ids) : '');
+      const firstClient = dossier?.clients_ids?.[0] ? clients.find(c => c.id === dossier.clients_ids[0]) : null;
+      const phoneNumber = retour.client_telephone || firstClient?.telephones?.find(t => t.actuel)?.telephone || firstClient?.telephones?.[0]?.telephone || '';
+      const dossierNumber = dossier ? (getArpenteurInitials(dossier.arpenteur_geometre) + (dossier.numero_dossier || '')) : '';
+      const matchesSearch = words.length === 0 || words.every(word =>
+        retour.raison?.toLowerCase().includes(word) ||
+        dossierNumber.toLowerCase().includes(word) ||
+        clientsNames.toLowerCase().includes(word) ||
+        phoneNumber.toLowerCase().includes(word)
+      );
       
       const matchesArpenteur = filterArpenteurs.length === 0 || 
         (retour.dossier && filterArpenteurs.includes(retour.dossier.arpenteur_geometre));
@@ -1014,7 +1023,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
-                    placeholder="Rechercher..."
+                    placeholder="Rechercher par client, téléphone, dossier..."
                     value={searchRetoursAppel}
                     onChange={(e) => setSearchRetoursAppel(e.target.value)}
                     className="pl-10 bg-slate-800/50 border-slate-700 text-white"
