@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare, ChevronUp, Filter } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare, ChevronUp, Filter, ChevronsUpDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
@@ -506,7 +506,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
   });
 
   const getFilteredRetoursAppels = () => {
-    return allRetoursAppelsWithDossier.filter(retour => {
+    const filtered = allRetoursAppelsWithDossier.filter(retour => {
       // Filtre par tab actif
       const tabStatut = activeListTab === "retour_appel" 
         ? "Retour d'appel"
@@ -537,7 +537,44 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
       const dossierForPlace = retour.dossier;
       const matchesPlaceAffaire = filterPlaceAffaire === "tous" || !dossierForPlace || dossierForPlace.place_affaire === filterPlaceAffaire;
       return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesDateStart && matchesDateEnd && matchesPlaceAffaire;
-    }).sort((a, b) => {
+    });
+
+    if (sortField) {
+      return [...filtered].sort((a, b) => {
+        let aVal, bVal;
+        switch (sortField) {
+          case 'dossier':
+            aVal = a.dossier ? (getArpenteurInitials(a.dossier.arpenteur_geometre) + (a.dossier.numero_dossier || '')).toLowerCase() : '';
+            bVal = b.dossier ? (getArpenteurInitials(b.dossier.arpenteur_geometre) + (b.dossier.numero_dossier || '')).toLowerCase() : '';
+            break;
+          case 'clients':
+            aVal = (a.client_nom || (a.dossier ? getClientsNames(a.dossier.clients_ids) : '')).toLowerCase();
+            bVal = (b.client_nom || (b.dossier ? getClientsNames(b.dossier.clients_ids) : '')).toLowerCase();
+            break;
+          case 'utilisateur':
+            aVal = (users.find(u => u.email === a.utilisateur_assigne)?.full_name || a.utilisateur_assigne || '').toLowerCase();
+            bVal = (users.find(u => u.email === b.utilisateur_assigne)?.full_name || b.utilisateur_assigne || '').toLowerCase();
+            break;
+          case 'date_appel':
+            aVal = new Date(a.date_appel || 0).getTime();
+            bVal = new Date(b.date_appel || 0).getTime();
+            break;
+          case 'statut':
+            aVal = (a.statut || '').toLowerCase();
+            bVal = (b.statut || '').toLowerCase();
+            break;
+          default:
+            aVal = (a[sortField] || '').toString().toLowerCase();
+            bVal = (b[sortField] || '').toString().toLowerCase();
+        }
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        return sortDirection === 'asc' ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
+      });
+    }
+
+    return filtered.sort((a, b) => {
       const dateA = new Date(a.date_appel || 0).getTime();
       const dateB = new Date(b.date_appel || 0).getTime();
       return dateB - dateA;
@@ -1120,13 +1157,28 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300 text-xs">Dossier</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Clients</TableHead>
-                    <TableHead className="text-slate-300 text-xs">N° de téléphone</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Utilisateur assigné</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Date de l'appel</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Raison</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                    {[{key:'dossier',label:'Dossier'},{key:'clients',label:'Clients'},{key:null,label:'N° de téléphone'},{key:'utilisateur',label:'Utilisateur assigné'},{key:'date_appel',label:"Date de l'appel"},{key:null,label:'Raison'},{key:'statut',label:'Statut'}].map(col => (
+                      <TableHead
+                        key={col.label}
+                        onClick={col.key ? () => handleSort(col.key) : undefined}
+                        className={`text-xs select-none ${
+                          col.key ? 'cursor-pointer' : ''
+                        } ${
+                          sortField === col.key
+                            ? 'text-emerald-400 bg-emerald-500/10'
+                            : col.key ? 'text-slate-300 hover:text-emerald-400' : 'text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1">
+                          {col.label}
+                          {col.key && (
+                            sortField === col.key
+                              ? <span className="text-emerald-400">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
+                          )}
+                        </div>
+                      </TableHead>
+                    ))}
                     <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
