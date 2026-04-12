@@ -1,0 +1,33 @@
+{
+  "name": "CommentaireDossier",
+  "type": "object",
+  "properties": {
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Contenu du commentaire"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a \u00e9crit le commentaire"
+    },
+    "utilisateur_nom": {
+      "type": "string",
+      "description": "Nom complet de l'utilisateur"
+    },
+    "date_modification": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de la derni\u00e8re modification du commentaire"
+    }
+  },
+  "required": [
+    "dossier_id",
+    "contenu",
+    "utilisateur_email",
+    "utilisateur_nom"
+  ]
+}

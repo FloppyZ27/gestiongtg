@@ -1,0 +1,33 @@
+{
+  "name": "CommentaireClient",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID du client associ\u00e9"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Contenu du commentaire"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a \u00e9crit le commentaire"
+    },
+    "utilisateur_nom": {
+      "type": "string",
+      "description": "Nom complet de l'utilisateur"
+    },
+    "date_modification": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de la derni\u00e8re modification du commentaire"
+    }
+  },
+  "required": [
+    "client_id",
+    "contenu",
+    "utilisateur_email",
+    "utilisateur_nom"
+  ]
+}
