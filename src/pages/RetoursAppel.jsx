@@ -1161,12 +1161,8 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
                       <TableHead
                         key={col.label}
                         onClick={col.key ? () => handleSort(col.key) : undefined}
-                        className={`text-xs select-none ${
-                          col.key ? 'cursor-pointer' : ''
-                        } ${
-                          sortField === col.key
-                            ? 'text-emerald-400 bg-emerald-500/10'
-                            : col.key ? 'text-slate-300 hover:text-emerald-400' : 'text-slate-300'
+                        className={`text-xs select-none text-slate-300 ${
+                          col.key ? 'cursor-pointer hover:text-white' : ''
                         }`}
                       >
                         <div className="flex items-center gap-1">
@@ -1174,7 +1170,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
                           {col.key && (
                             sortField === col.key
                               ? <span className="text-emerald-400">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
+                              : <span className="text-slate-500">⇅</span>
                           )}
                         </div>
                       </TableHead>
