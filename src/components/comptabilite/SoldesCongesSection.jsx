@@ -2,11 +2,9 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Settings, Check, X } from "lucide-react";
+import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X } from "lucide-react";
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
@@ -16,9 +14,7 @@ function EditableNumber({ value, onSave, className = "" }) {
 
   const handleSave = () => {
     const parsed = parseFloat(val);
-    if (!isNaN(parsed) && parsed >= 0) {
-      onSave(parsed);
-    }
+    if (!isNaN(parsed) && parsed >= 0) onSave(parsed);
     setEditing(false);
   };
 
@@ -35,11 +31,11 @@ function EditableNumber({ value, onSave, className = "" }) {
           value={val}
           onChange={(e) => setVal(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-20 h-6 text-xs bg-slate-700 border-slate-500 text-white px-1"
+          className="w-16 h-6 text-xs bg-slate-700 border-slate-500 text-white px-1"
           autoFocus
         />
-        <button onClick={handleSave} className="text-emerald-400 hover:text-emerald-300"><Check className="w-3.5 h-3.5" /></button>
-        <button onClick={() => setEditing(false)} className="text-red-400 hover:text-red-300"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={handleSave} className="text-emerald-400 hover:text-emerald-300"><Check className="w-3 h-3" /></button>
+        <button onClick={() => setEditing(false)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
       </div>
     );
   }
@@ -47,7 +43,7 @@ function EditableNumber({ value, onSave, className = "" }) {
   return (
     <button
       onClick={() => { setVal(value); setEditing(true); }}
-      className={`text-sm font-semibold hover:underline cursor-pointer transition-colors ${className}`}
+      className={`text-sm font-semibold hover:underline cursor-pointer ${className}`}
     >
       {value % 1 === 0 ? value : value.toFixed(1)}h
     </button>
@@ -62,9 +58,6 @@ export default function SoldesCongesSection() {
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
 
   const getSolde = (email) => soldes.find(s => s.utilisateur_email === email);
-  const globalConfig = soldes.find(s => s.utilisateur_email === '__global__');
-  const maxVacances = globalConfig?.max_vacances ?? 120;
-  const maxMieuxEtre = globalConfig?.max_mieux_etre ?? 40;
 
   const upsertMutation = useMutation({
     mutationFn: async ({ email, field, value }) => {
@@ -72,20 +65,16 @@ export default function SoldesCongesSection() {
       if (existing) {
         return base44.entities.SoldeConges.update(existing.id, { ...existing, [field]: value });
       } else {
-        return base44.entities.SoldeConges.create({ utilisateur_email: email, heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, [field]: value });
+        return base44.entities.SoldeConges.create({
+          utilisateur_email: email,
+          heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0,
+          max_vacances: 120, max_mieux_etre: 40,
+          [field]: value
+        });
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['soldesConges'] }),
   });
-
-  const upsertGlobal = async (field, value) => {
-    if (globalConfig) {
-      await base44.entities.SoldeConges.update(globalConfig.id, { ...globalConfig, [field]: value });
-    } else {
-      await base44.entities.SoldeConges.create({ utilisateur_email: '__global__', max_vacances: 120, max_mieux_etre: 40, [field]: value });
-    }
-    queryClient.invalidateQueries({ queryKey: ['soldesConges'] });
-  };
 
   const activeUsers = users.filter(u => u.statut !== 'Inactif');
 
@@ -108,56 +97,33 @@ export default function SoldesCongesSection() {
 
       {!collapsed && (
         <CardContent className="p-4">
-          {/* Config maximums globaux */}
-          <div className="flex items-center gap-6 mb-4 px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
-            <div className="flex items-center gap-2">
-              <Settings className="w-4 h-4 text-slate-400" />
-              <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Maximums globaux</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Palmtree className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-xs text-slate-400">Vacances max :</span>
-              <EditableNumber
-                value={maxVacances}
-                onSave={(v) => upsertGlobal('max_vacances', v)}
-                className="text-emerald-400"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Heart className="w-3.5 h-3.5 text-pink-400" />
-              <span className="text-xs text-slate-400">Mieux-être max :</span>
-              <EditableNumber
-                value={maxMieuxEtre}
-                onSave={(v) => upsertGlobal('max_mieux_etre', v)}
-                className="text-pink-400"
-              />
-            </div>
-          </div>
-
-          {/* Tableau */}
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             {/* En-tête */}
-            <div className="grid grid-cols-[2fr,1fr,1fr,1fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
+            <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
               <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
-              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Palmtree className="w-3 h-3 text-emerald-400" /> Vacances
               </div>
-              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-emerald-600">Max vac.</div>
+              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Heart className="w-3 h-3 text-pink-400" /> Mieux-être
               </div>
-              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-pink-700">Max m.-ê.</div>
+              <div className="text-xs font-semibold text-slate-400 flex items-center gap-1">
                 <Banknote className="w-3 h-3 text-amber-400" /> En banque
               </div>
             </div>
 
             {/* Lignes */}
             {activeUsers.map(u => {
-              const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0 };
-              const vacPct = Math.min((solde.heures_vacances / maxVacances) * 100, 100);
-              const mePct = Math.min((solde.heures_mieux_etre / maxMieuxEtre) * 100, 100);
+              const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
+              const maxVac = solde.max_vacances ?? 120;
+              const maxMe = solde.max_mieux_etre ?? 40;
+              const vacPct = Math.min((solde.heures_vacances / maxVac) * 100, 100);
+              const mePct = Math.min((solde.heures_mieux_etre / maxMe) * 100, 100);
 
               return (
-                <div key={u.id} className="grid grid-cols-[2fr,1fr,1fr,1fr] px-3 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center">
+                <div key={u.id} className="grid px-3 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
                   {/* Utilisateur */}
                   <div className="flex items-center gap-2">
                     <Avatar className="w-7 h-7">
@@ -170,7 +136,7 @@ export default function SoldesCongesSection() {
                     </div>
                   </div>
 
-                  {/* Vacances */}
+                  {/* Vacances utilisées */}
                   <div className="space-y-1">
                     <EditableNumber
                       value={solde.heures_vacances}
@@ -180,10 +146,19 @@ export default function SoldesCongesSection() {
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all" style={{ width: `${vacPct}%` }} />
                     </div>
-                    <p className="text-[10px] text-slate-600">/ {maxVacances}h</p>
+                    <p className="text-[10px] text-slate-600">/ {maxVac}h</p>
                   </div>
 
-                  {/* Mieux-être */}
+                  {/* Max vacances */}
+                  <div>
+                    <EditableNumber
+                      value={maxVac}
+                      onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'max_vacances', value: v })}
+                      className="text-emerald-700"
+                    />
+                  </div>
+
+                  {/* Mieux-être utilisés */}
                   <div className="space-y-1">
                     <EditableNumber
                       value={solde.heures_mieux_etre}
@@ -193,7 +168,16 @@ export default function SoldesCongesSection() {
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 transition-all" style={{ width: `${mePct}%` }} />
                     </div>
-                    <p className="text-[10px] text-slate-600">/ {maxMieuxEtre}h</p>
+                    <p className="text-[10px] text-slate-600">/ {maxMe}h</p>
+                  </div>
+
+                  {/* Max mieux-être */}
+                  <div>
+                    <EditableNumber
+                      value={maxMe}
+                      onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'max_mieux_etre', value: v })}
+                      className="text-pink-700"
+                    />
                   </div>
 
                   {/* En banque */}
