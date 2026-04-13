@@ -113,11 +113,29 @@ export default function SoldesCongesSection() {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const queryClient = useQueryClient();
+  const currentYear = new Date().getFullYear();
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
+  const { data: toutesEntrees = [] } = useQuery({
+    queryKey: ['entreeTempsCongesAll', currentYear],
+    queryFn: () => base44.entities.EntreeTemps.filter({}, '-date', 2000),
+    initialData: [],
+  });
 
-  const getSolde = (email) => soldes.find(s => s.utilisateur_email === email);
+  const getSolde = (email) => {
+    const base = soldes.find(s => s.utilisateur_email === email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
+    const entrees = toutesEntrees.filter(e => e.utilisateur_email === email && e.date?.startsWith(String(currentYear)));
+    const usedVac = entrees.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
+    const usedMe = entrees.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
+    const usedBanque = entrees.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+    return {
+      ...base,
+      heures_vacances: Math.max(0, (base.heures_vacances ?? 0) - usedVac),
+      heures_mieux_etre: Math.max(0, (base.heures_mieux_etre ?? 0) - usedMe),
+      heures_en_banque: Math.max(0, (base.heures_en_banque ?? 0) - usedBanque),
+    };
+  };
 
   const upsertMutation = useMutation({
     mutationFn: async ({ email, field, value }) => {
