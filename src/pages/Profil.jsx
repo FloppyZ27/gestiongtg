@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2 } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2, Palmtree, Heart, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -145,7 +145,7 @@ export default function Profil() {
 
   const { data: entreeTemps = [] } = useQuery({
     queryKey: ['entreeTemps', user?.email],
-    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 100),
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 500),
     initialData: [],
     enabled: !!user,
   });
@@ -1240,17 +1240,20 @@ export default function Profil() {
                 {/* Soldes de temps */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">🌴 Vacances dispo.</div>
+                    <Palmtree className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                    <div className="text-xs text-slate-400">Vacances</div>
                     <div className="text-lg font-bold text-emerald-400">{soldeRestant.vacances % 1 === 0 ? soldeRestant.vacances : soldeRestant.vacances.toFixed(1)}h</div>
                     {soldeBase.max_vacances != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_vacances}h</div>}
                   </div>
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">💙 Mieux-Être dispo.</div>
+                    <Heart className="w-4 h-4 text-pink-400 mx-auto mb-1" />
+                    <div className="text-xs text-slate-400">Mieux-Être</div>
                     <div className="text-lg font-bold text-pink-400">{soldeRestant.mieuxEtre % 1 === 0 ? soldeRestant.mieuxEtre : soldeRestant.mieuxEtre.toFixed(1)}h</div>
                     {soldeBase.max_mieux_etre != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_mieux_etre}h</div>}
                   </div>
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">🏦 En banque dispo.</div>
+                    <Wallet className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                    <div className="text-xs text-slate-400">En banque</div>
                     <div className="text-lg font-bold text-amber-400">{soldeRestant.enBanque % 1 === 0 ? soldeRestant.enBanque : soldeRestant.enBanque.toFixed(1)}h</div>
                   </div>
                 </div>
