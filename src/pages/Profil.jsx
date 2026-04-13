@@ -157,6 +157,34 @@ export default function Profil() {
     enabled: !!user,
   });
 
+  const { data: soldesConges = [] } = useQuery({
+    queryKey: ['soldesConges'],
+    queryFn: () => base44.entities.SoldeConges.list(),
+    initialData: [],
+  });
+
+  const { data: entreeTempsConges = [] } = useQuery({
+    queryKey: ['entreeTempsConges', user?.email],
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 500),
+    initialData: [],
+    enabled: !!user,
+  });
+
+  const soldeBase = soldesConges.find(s => s.utilisateur_email === user?.email) || {};
+  const currentYear = new Date().getFullYear();
+  const entreesCongesAnnee = entreeTempsConges.filter(e =>
+    ['Vacances', 'Mieux-Être', 'Mieux-etre', 'En banque'].includes(e.tache) &&
+    e.date?.startsWith(String(currentYear))
+  );
+  const usedVacances = entreesCongesAnnee.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
+  const usedMieuxEtre = entreesCongesAnnee.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
+  const usedEnBanque = entreesCongesAnnee.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+  const soldeRestant = {
+    vacances: Math.max(0, (soldeBase.heures_vacances ?? 0) - usedVacances),
+    mieuxEtre: Math.max(0, (soldeBase.heures_mieux_etre ?? 0) - usedMieuxEtre),
+    enBanque: Math.max(0, (soldeBase.heures_en_banque ?? 0) - usedEnBanque),
+  };
+
   const getMsDateRange = () => {
     const year = agendaCurrentDate.getFullYear();
     const month = agendaCurrentDate.getMonth();
@@ -1212,16 +1240,18 @@ export default function Profil() {
                 {/* Soldes de temps */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">Vacances</div>
-                    <div className="text-lg font-bold text-emerald-400">0h</div>
+                    <div className="text-xs text-slate-400">🌴 Vacances dispo.</div>
+                    <div className="text-lg font-bold text-emerald-400">{soldeRestant.vacances % 1 === 0 ? soldeRestant.vacances : soldeRestant.vacances.toFixed(1)}h</div>
+                    {soldeBase.max_vacances != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_vacances}h</div>}
                   </div>
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">Mieux-Être</div>
-                    <div className="text-lg font-bold text-blue-400">0h</div>
+                    <div className="text-xs text-slate-400">💙 Mieux-Être dispo.</div>
+                    <div className="text-lg font-bold text-pink-400">{soldeRestant.mieuxEtre % 1 === 0 ? soldeRestant.mieuxEtre : soldeRestant.mieuxEtre.toFixed(1)}h</div>
+                    {soldeBase.max_mieux_etre != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_mieux_etre}h</div>}
                   </div>
                   <div className="text-center">
-                    <div className="text-xs text-slate-400">Banques</div>
-                    <div className="text-lg font-bold text-yellow-400">0h</div>
+                    <div className="text-xs text-slate-400">🏦 En banque dispo.</div>
+                    <div className="text-lg font-bold text-amber-400">{soldeRestant.enBanque % 1 === 0 ? soldeRestant.enBanque : soldeRestant.enBanque.toFixed(1)}h</div>
                   </div>
                 </div>
                 
