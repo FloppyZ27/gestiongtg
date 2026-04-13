@@ -253,7 +253,29 @@ function LayoutContent({ children, currentPageName }) {
     queryFn: () => base44.entities.SoldeConges.list(),
     initialData: [],
   });
-  const soldeUtilisateur = soldesConges.find(s => s.utilisateur_email === user?.email) || {};
+
+  const { data: entreesTempsUser = [] } = useQuery({
+    queryKey: ['entreeTempsUser', user?.email],
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 500),
+    initialData: [],
+    enabled: !!user,
+  });
+
+  const soldeBase = soldesConges.find(s => s.utilisateur_email === user?.email) || {};
+  const currentYear = new Date().getFullYear();
+  const entreesConges = entreesTempsUser.filter(e =>
+    ['Vacances', 'Mieux-Être', 'Mieux-etre', 'En banque'].includes(e.tache) &&
+    e.date?.startsWith(String(currentYear))
+  );
+  const usedVacances = entreesConges.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
+  const usedMieuxEtre = entreesConges.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
+  const usedEnBanque = entreesConges.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+  const soldeUtilisateur = {
+    ...soldeBase,
+    heures_vacances: Math.max(0, (soldeBase.heures_vacances ?? 0) - usedVacances),
+    heures_mieux_etre: Math.max(0, (soldeBase.heures_mieux_etre ?? 0) - usedMieuxEtre),
+    heures_en_banque: Math.max(0, (soldeBase.heures_en_banque ?? 0) - usedEnBanque),
+  };
 
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
