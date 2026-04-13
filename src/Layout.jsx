@@ -248,6 +248,13 @@ function LayoutContent({ children, currentPageName }) {
     enabled: !!user,
   });
 
+  const { data: soldesConges = [] } = useQuery({
+    queryKey: ['soldesConges'],
+    queryFn: () => base44.entities.SoldeConges.list(),
+    initialData: [],
+  });
+  const soldeUtilisateur = soldesConges.find(s => s.utilisateur_email === user?.email) || {};
+
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
   const [entreeForm, setEntreeForm] = useState({
@@ -1099,7 +1106,7 @@ function LayoutContent({ children, currentPageName }) {
         pointages={pointages}
         onSubmit={handleSubmit}
         onReset={resetForm}
-        userEmail={user?.email}
+        solde={soldeUtilisateur}
       />
       
       
