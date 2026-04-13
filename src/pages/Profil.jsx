@@ -520,16 +520,35 @@ export default function Profil() {
     const fin = new Date(addPointageForm.date);
     fin.setHours(parseInt(heureF), parseInt(minF), 0);
     
-    const dureeHeures = (fin - debut) / (1000 * 60 * 60);
+    const dureeHeures = parseFloat(((fin - debut) / (1000 * 60 * 60)).toFixed(2));
 
     createPointageMutation.mutate({
       date: addPointageForm.date,
       heure_debut: debut.toISOString(),
       heure_fin: fin.toISOString(),
-      duree_heures: parseFloat(dureeHeures.toFixed(2)),
+      duree_heures: dureeHeures,
       description: addPointageForm.description,
       confirme: true
     });
+
+    // Si type de congé, créer une EntreeTemps pour soustraire du solde
+    const typeToTache = {
+      'Vacance': 'Vacances',
+      'Mieux-Être': 'Mieux-Être',
+      'En banque': 'En banque',
+    };
+    const tache = typeToTache[addPointageForm.type];
+    if (tache && dureeHeures > 0) {
+      await base44.entities.EntreeTemps.create({
+        date: addPointageForm.date,
+        heures: dureeHeures,
+        tache: tache,
+        description: addPointageForm.description,
+        utilisateur_email: user?.email,
+      });
+      queryClient.invalidateQueries({ queryKey: ['entreeTemps', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['entreeTempsConges', user?.email] });
+    }
   };
 
 
