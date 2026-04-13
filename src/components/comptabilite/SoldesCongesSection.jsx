@@ -19,34 +19,47 @@ const TYPE_INFO = {
 };
 const CONGE_TYPES = Object.keys(TYPE_INFO);
 
-function EditableNumber({ value, onSave, className = "" }) {
+function EditableNumber({ value, onSave, className = "", max = null }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(value);
+  const [error, setError] = useState(false);
 
   const handleSave = () => {
     const parsed = parseFloat(val);
-    if (!isNaN(parsed) && parsed >= 0) onSave(parsed);
+    if (!isNaN(parsed) && parsed >= 0) {
+      if (max !== null && parsed > max) {
+        setError(true);
+        return;
+      }
+      onSave(parsed);
+    }
     setEditing(false);
+    setError(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') setEditing(false);
+    if (e.key === 'Escape') { setEditing(false); setError(false); }
   };
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1">
-        <Input
-          type="number"
-          value={val}
-          onChange={(e) => setVal(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="w-16 h-6 text-xs bg-slate-700 border-slate-500 text-white px-1"
-          autoFocus
-        />
-        <button onClick={handleSave} className="text-emerald-400 hover:text-emerald-300"><Check className="w-3 h-3" /></button>
-        <button onClick={() => setEditing(false)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-1">
+          <Input
+            type="number"
+            value={val}
+            min={0}
+            max={max !== null ? max : undefined}
+            onChange={(e) => { setVal(e.target.value); setError(false); }}
+            onKeyDown={handleKeyDown}
+            className={`w-16 h-6 text-xs bg-slate-700 border-slate-500 text-white px-1 ${error ? 'border-red-500' : ''}`}
+            autoFocus
+          />
+          <button onClick={handleSave} className="text-emerald-400 hover:text-emerald-300"><Check className="w-3 h-3" /></button>
+          <button onClick={() => { setEditing(false); setError(false); }} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+        </div>
+        {error && <span className="text-[10px] text-red-400">Max: {max}h</span>}
       </div>
     );
   }
@@ -181,7 +194,7 @@ export default function SoldesCongesSection() {
 
                     {/* Vacances */}
                     <div className="space-y-1">
-                      <EditableNumber value={solde.heures_vacances} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_vacances', value: v })} className="text-emerald-400" />
+                      <EditableNumber value={solde.heures_vacances} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_vacances', value: v })} className="text-emerald-400" max={maxVac} />
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all" style={{ width: `${vacPct}%` }} />
                       </div>
@@ -193,7 +206,7 @@ export default function SoldesCongesSection() {
 
                     {/* Mieux-être */}
                     <div className="space-y-1">
-                      <EditableNumber value={solde.heures_mieux_etre} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_mieux_etre', value: v })} className="text-pink-400" />
+                      <EditableNumber value={solde.heures_mieux_etre} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_mieux_etre', value: v })} className="text-pink-400" max={maxMe} />
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 transition-all" style={{ width: `${mePct}%` }} />
                       </div>
