@@ -37,7 +37,7 @@ export default function EntreeTempsDialog({
   solde,
 }) {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
-  const soldeData = solde || {};
+  const soldeData = solde || { vacances: 0, mieux_etre: 0, en_banque: 0 };
   const [detailsCollapsed, setDetailsCollapsed] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filterArpenteur, setFilterArpenteur] = useState([]);
@@ -186,21 +186,21 @@ export default function EntreeTempsDialog({
                 <div className="space-y-1">
                   <Label className="text-emerald-400 text-xs">🌴 Vacances disponibles</Label>
                   <div className="bg-slate-700 border border-emerald-600/40 rounded px-3 py-2 text-emerald-400 text-sm font-bold h-8 flex items-center">
-                    {(soldeData.heures_vacances ?? 0)} h
+                    {(soldeData.vacances ?? 0).toFixed(1)} h
                     {soldeData.max_vacances != null && <span className="text-slate-500 text-xs font-normal ml-1">/ {soldeData.max_vacances}h</span>}
                   </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-pink-400 text-xs">💙 Mieux-être disponibles</Label>
                   <div className="bg-slate-700 border border-pink-600/40 rounded px-3 py-2 text-pink-400 text-sm font-bold h-8 flex items-center">
-                    {(soldeData.heures_mieux_etre ?? 0)} h
+                    {(soldeData.mieux_etre ?? 0).toFixed(1)} h
                     {soldeData.max_mieux_etre != null && <span className="text-slate-500 text-xs font-normal ml-1">/ {soldeData.max_mieux_etre}h</span>}
                   </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-amber-400 text-xs">🏦 Heures en banque</Label>
                   <div className="bg-slate-700 border border-amber-600/40 rounded px-3 py-2 text-amber-400 text-sm font-bold h-8 flex items-center">
-                    {(soldeData.heures_en_banque ?? 0)} h
+                    {(soldeData.en_banque ?? 0).toFixed(1)} h
                   </div>
                 </div>
               </div>

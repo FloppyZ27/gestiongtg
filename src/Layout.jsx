@@ -255,6 +255,28 @@ function LayoutContent({ children, currentPageName }) {
   });
   const soldeUtilisateur = soldesConges.find(s => s.utilisateur_email === user?.email) || {};
 
+  const currentYear = new Date().getFullYear();
+  const { data: entreeTempsConges = [] } = useQuery({
+    queryKey: ['entreeTempsCongesUser', user?.email, currentYear],
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 500),
+    initialData: [],
+    enabled: !!user,
+  });
+  const entreesCongesAnnee = entreeTempsConges.filter(e =>
+    ['Vacances', 'Mieux-être', 'Mieux-etre', 'En banque'].includes(e.tache) &&
+    e.date?.startsWith(String(currentYear))
+  );
+  const heuresUtiliseesVacances = entreesCongesAnnee.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
+  const heuresUtiliseesMieuxEtre = entreesCongesAnnee.filter(e => e.tache === 'Mieux-être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
+  const heuresUtiliseesEnBanque = entreesCongesAnnee.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+  const soldeRestant = {
+    vacances: (soldeUtilisateur.heures_vacances ?? 0) - heuresUtiliseesVacances,
+    mieux_etre: (soldeUtilisateur.heures_mieux_etre ?? 0) - heuresUtiliseesMieuxEtre,
+    en_banque: (soldeUtilisateur.heures_en_banque ?? 0) - heuresUtiliseesEnBanque,
+    max_vacances: soldeUtilisateur.max_vacances,
+    max_mieux_etre: soldeUtilisateur.max_mieux_etre,
+  };
+
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
   const [entreeForm, setEntreeForm] = useState({
@@ -1106,7 +1128,7 @@ function LayoutContent({ children, currentPageName }) {
         pointages={pointages}
         onSubmit={handleSubmit}
         onReset={resetForm}
-        solde={soldeUtilisateur}
+        solde={soldeRestant}
       />
       
       
