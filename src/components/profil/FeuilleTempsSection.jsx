@@ -361,8 +361,7 @@ export default function FeuilleTempsSection({
                                         {(() => { const m = parseFloat(p.multiplicateur || 1); return m !== 1 ? <span className="absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-30">×{m}</span> : null; })()}
                                         {/* Type de pointage */}
                                          <div className="text-[12px] font-bold uppercase opacity-80 tracking-wide flex items-center gap-1">
-                                           {p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')) ? 'Vacances' : p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux')) ? 'Mieux-Être' : p.type === 'En banque' ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}
-                                           {isModified && <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-orange-500/40 border border-orange-400/50 text-orange-200 leading-none normal-case">modifié</span>}
+                                           {p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')) ? 'Vacances' : p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux')) ? 'Mieux-Être' : p.type === 'En banque' ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}
                                          </div>
                                         {/* Description */}
                                         {p.description && (
@@ -429,8 +428,7 @@ export default function FeuilleTempsSection({
                                              : p.confirme ? 'text-green-400'
                                              : 'text-blue-400'
                                            }`}>
-                                            <span>{(p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'Vacances' : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'Mieux-Être' : p.type === 'En banque' ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
-                                            {isModified && <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-orange-500/30 border border-orange-400/40 text-orange-300 leading-none normal-case">modifié</span>}
+                                            <span>{(p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'Vacances' : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'Mieux-Être' : p.type === 'En banque' ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
                                           </div>
                                           {parseFloat(p.multiplicateur || 1) !== 1 && (
                                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 border border-white/30 text-white leading-none">×{parseFloat(p.multiplicateur)}</span>
@@ -554,8 +552,7 @@ export default function FeuilleTempsSection({
                                   <span className="absolute top-1 right-1 text-[10px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-10">×{mult}</span>
                                 )}
                                 <div className="truncate text-sm font-bold opacity-90 uppercase pr-6 flex items-center gap-1">
-                                  <span>{isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : isEnBanque ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
-                                  {isModified && <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-orange-500/40 border border-orange-400/50 text-orange-200 leading-none normal-case">modifié</span>}
+                                  <span>{isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : isEnBanque ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
                                 </div>
                                 {p.description && (
                                   <div className={`truncate font-bold text-sm ${titleColor}`}>{p.description}</div>
