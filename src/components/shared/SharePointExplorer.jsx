@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Folder, ArrowLeft, ChevronRight, Home, LayoutGrid, List } from "lucide-react";
+
+const { useState } = React;
 
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || '';
@@ -20,7 +23,7 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
-export default function SharePointExplorer({ rootPath, initialPath = [], maxHeight = "400px", allowUpload = true, allowDelete = false, minPathLength = 0 }) {
+export default function SharePointExplorer({ rootPath, initialPath = [], maxHeight = "400px", allowUpload = true, allowDelete = false, minPathLength = 0, onFileCountChange }) {
   const [pathStack, setPathStack] = useState(initialPath);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -48,6 +51,13 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   const allItems = filesData?.files || [];
   const folders = allItems.filter(f => f.type === 'folder');
   const files = allItems.filter(f => f.type === 'file');
+
+  // Notifier du nombre de fichiers
+  React.useEffect(() => {
+    if (onFileCountChange) {
+      onFileCountChange(files.length);
+    }
+  }, [files.length, onFileCountChange]);
 
   const navigateInto = (folderName) => {
     setPathStack(prev => [...prev, folderName]);

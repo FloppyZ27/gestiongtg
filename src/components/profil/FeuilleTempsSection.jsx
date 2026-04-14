@@ -33,6 +33,7 @@ export default function FeuilleTempsSection({
 }) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [fileCount, setFileCount] = useState(0);
   const queryClient = useQueryClient();
 
   const getWeekDateRange = () => {
@@ -649,7 +650,14 @@ export default function FeuilleTempsSection({
           <Tabs defaultValue="note" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
               <TabsTrigger value="note">Note</TabsTrigger>
-              <TabsTrigger value="factures">Factures</TabsTrigger>
+              <TabsTrigger value="factures" className="flex items-center gap-2">
+                Factures
+                {fileCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-xs font-bold">
+                    {fileCount}
+                  </span>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="note" className="space-y-4">
@@ -689,6 +697,7 @@ export default function FeuilleTempsSection({
                 allowUpload={true}
                 allowDelete={true}
                 minPathLength={1}
+                onFileCountChange={setFileCount}
               />
             </TabsContent>
           </Tabs>
