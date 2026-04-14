@@ -476,11 +476,6 @@ export default function Profil() {
 
   const handleSubmitEditPointage = async (e) => {
     e.preventDefault();
-    
-    if (!editPointageForm.description.trim()) {
-      alert('La description est obligatoire');
-      return;
-    }
 
     const [heureD, minD] = editPointageForm.heure_debut.split(':');
     const [heureF, minF] = editPointageForm.heure_fin.split(':');
