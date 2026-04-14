@@ -320,18 +320,14 @@ export default function Comptabilite() {
                                else dayPointage += ph;
                              });
                              return (
-                               <div key={idx} className="text-right space-y-0.5">
+                               <div key={idx} className="text-right space-y-1">
                                  <div className={`text-xs font-bold ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
-                                   {h > 0 ? `${h.toFixed(1)}h` : '-'}
+                                   Total: {h > 0 ? `${h.toFixed(1)}h` : '-'}
                                  </div>
-                                 {h > 0 && (
-                                   <div className="text-[9px] space-y-0.5 text-slate-500">
-                                     {dayPointage > 0 && <div className="text-green-400">P:{dayPointage.toFixed(1)}</div>}
-                                     {dayVacances > 0 && <div className="text-violet-400">V:{dayVacances.toFixed(1)}</div>}
-                                     {dayMieuxEtre > 0 && <div className="text-pink-400">ME:{dayMieuxEtre.toFixed(1)}</div>}
-                                     {dayBanque > 0 && <div className="text-yellow-400">B:{dayBanque.toFixed(1)}</div>}
-                                   </div>
-                                 )}
+                                 {dayPointage > 0 && <div className="text-[10px] text-green-400">Pointage: {dayPointage.toFixed(1)}h</div>}
+                                 {dayVacances > 0 && <div className="text-[10px] text-violet-400">Vacances: {dayVacances.toFixed(1)}h</div>}
+                                 {dayMieuxEtre > 0 && <div className="text-[10px] text-pink-400">Mieux-être: {dayMieuxEtre.toFixed(1)}h</div>}
+                                 {dayBanque > 0 && <div className="text-[10px] text-yellow-400">Banque: {dayBanque.toFixed(1)}h</div>}
                                </div>
                              );
                            })}
