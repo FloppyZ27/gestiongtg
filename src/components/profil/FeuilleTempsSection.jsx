@@ -341,9 +341,9 @@ export default function FeuilleTempsSection({
                                         className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
                                           isModified
                                             ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                            : p.type?.includes('Vacance')
-                                            ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
-                                            : p.type?.includes('Mieux')
+                                            : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')))
+                                                         ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
+                                                         : (p.type?.includes('Mieux') || (!p.type && (p.description?.toLowerCase().includes('mieux'))))
                                             ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
                                             : p.confirme
                                             ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
@@ -502,8 +502,8 @@ export default function FeuilleTempsSection({
                         <div className="space-y-1 flex-1 overflow-y-auto" style={{ maxHeight: '170px' }}>
                           {dayPointages.map(p => {
                             const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
-                            const isVacance = p.type?.includes('Vacance');
-                            const isMieuxEtre = p.type?.includes('Mieux');
+                            const isVacance = p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'));
+                            const isMieuxEtre = p.type?.includes('Mieux') || (!p.type && (p.description?.toLowerCase().includes('mieux') || p.description?.toLowerCase().includes('mieux-être')));
                             const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
                             const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
                             const mult = parseFloat(p.multiplicateur || 1);
