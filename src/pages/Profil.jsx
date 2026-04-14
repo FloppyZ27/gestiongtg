@@ -533,6 +533,7 @@ export default function Profil() {
       'Vacance': 'Vacances',
       'Mieux-Être': 'Mieux-Être',
       'En banque': 'En banque',
+      'Banque': 'En banque',
     };
     const tache = typeToTache[addPointageForm.type];
     if (tache && dureeHeures > 0) {
@@ -1288,6 +1289,7 @@ export default function Profil() {
                           <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
                           <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
                           <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                          <SelectItem value="En banque" className="text-white">Banque</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
