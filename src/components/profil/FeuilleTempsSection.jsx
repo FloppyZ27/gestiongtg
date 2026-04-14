@@ -686,7 +686,7 @@ export default function FeuilleTempsSection({
                   initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
                   maxHeight="500px"
                   allowUpload={true}
-                  allowDelete={false}
+                  allowDelete={true}
                 />
               </div>
             </TabsContent>
