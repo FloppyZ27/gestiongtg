@@ -419,15 +419,20 @@ export default function FeuilleTempsSection({
                                     </TooltipTrigger>
                                     <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
                                       <div className="space-y-2">
-                                        <div className={`text-xs font-bold uppercase ${
-                                           isModified ? 'text-orange-400'
-                                           : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-400'
-                                           : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-400'
-                                           : p.type === 'En banque' ? 'text-yellow-400'
-                                           : p.confirme ? 'text-green-400'
-                                           : 'text-blue-400'
-                                         }`}>
-                                          {isModified ? 'Pointage modifié' : p.confirme ? 'Pointage confirmé' : 'Pointage en attente'}
+                                        <div className="flex items-center justify-between gap-2">
+                                          <div className={`text-xs font-bold uppercase ${
+                                             isModified ? 'text-orange-400'
+                                             : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-400'
+                                             : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-400'
+                                             : p.type === 'En banque' ? 'text-yellow-400'
+                                             : p.confirme ? 'text-green-400'
+                                             : 'text-blue-400'
+                                           }`}>
+                                            {isModified ? 'Modifié' : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'Vacances' : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'Mieux-Être' : p.type === 'En banque' ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}
+                                          </div>
+                                          {parseFloat(p.multiplicateur || 1) !== 1 && (
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 border border-white/30 text-white leading-none">×{parseFloat(p.multiplicateur)}</span>
+                                          )}
                                         </div>
                                         <div className="text-sm text-slate-300">
                                           <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
