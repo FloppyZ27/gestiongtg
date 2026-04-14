@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare, Upload as UploadIcon, Folder, File } from "lucide-react";
+import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare, Upload as UploadIcon } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -32,7 +32,6 @@ export default function FeuilleTempsSection({
 }) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [uploadingFactures, setUploadingFactures] = useState(false);
   const queryClient = useQueryClient();
 
   const getWeekDateRange = () => {
@@ -40,50 +39,6 @@ export default function FeuilleTempsSection({
     const dimanche = format(days[0], "yyyy-MM-dd");
     const samedi = format(days[6], "yyyy-MM-dd");
     return `${dimanche}_${samedi}`;
-  };
-
-  const getSharePointFacturesPath = () => {
-    if (!currentUser?.full_name) return null;
-    const dateRange = getWeekDateRange();
-    return `COMPTABILITÉ/FACTURES/${currentUser.full_name}/${dateRange}`;
-  };
-
-  const handleFactureUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    setUploadingFactures(true);
-    try {
-      const path = getSharePointFacturesPath();
-      if (!path) {
-        alert('Impossible de déterminer le chemin SharePoint');
-        setUploadingFactures(false);
-        return;
-      }
-
-      for (const file of files) {
-        const fileData = await file.arrayBuffer();
-        // Appel à la fonction backend pour uploader vers SharePoint
-        await base44.functions.invoke('uploadToSharePoint', {
-          filePath: path,
-          fileName: file.name,
-          fileData: Array.from(new Uint8Array(fileData))
-        });
-      }
-      alert('Factures uploadées avec succès');
-    } catch (error) {
-      console.error('Erreur upload:', error);
-      alert('Erreur lors de l\'upload des factures');
-    } finally {
-      setUploadingFactures(false);
-    }
-  };
-
-  const openSharePointFolder = () => {
-    const path = getSharePointFacturesPath();
-    if (!path) return;
-    const sharePointUrl = `https://gestiongtg.sharepoint.com/sites/GestionGTG/Documents Partagés/${path}`;
-    window.open(sharePointUrl, '_blank');
   };
 
   // Clé unique pour la semaine en cours affichée
@@ -96,38 +51,6 @@ export default function FeuilleTempsSection({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
-
-  const handleFactureUploadDragDrop = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const files = Array.from(e.dataTransfer?.files || []);
-    if (files.length === 0) return;
-    
-    setUploadingFactures(true);
-    try {
-      const path = getSharePointFacturesPath();
-      if (!path) {
-        alert('Impossible de déterminer le chemin SharePoint');
-        setUploadingFactures(false);
-        return;
-      }
-
-      for (const file of files) {
-        const fileData = await file.arrayBuffer();
-        await base44.functions.invoke('uploadToSharePoint', {
-          filePath: path,
-          fileName: file.name,
-          fileData: Array.from(new Uint8Array(fileData))
-        });
-      }
-      alert('Factures uploadées avec succès');
-    } catch (error) {
-      console.error('Erreur upload:', error);
-      alert('Erreur lors de l\'upload des factures');
-    } finally {
-      setUploadingFactures(false);
-    }
-  };
 
   const { data: commentairesSemaine = [] } = useQuery({
     queryKey: ['commentairesSemaine', currentUser?.email],
@@ -755,58 +678,15 @@ export default function FeuilleTempsSection({
             </TabsContent>
 
             <TabsContent value="factures" className="space-y-4">
-              <div className="space-y-4">
-                {/* Upload zone */}
-                <div 
-                  className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5"
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onDrop={handleFactureUploadDragDrop}
-                >
-                  <UploadIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                  <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
-                  <p className="text-slate-500 text-xs mb-3">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    className="hidden"
-                    id="facture-input-feuille"
-                    onChange={handleFactureUpload}
-                    disabled={uploadingFactures}
-                  />
-                  <label htmlFor="facture-input-feuille" className="cursor-pointer">
-                    <Button type="button" variant="outline" size="sm" className="mt-3 mx-auto border-blue-500/50 text-blue-400 hover:bg-blue-500/10" disabled={uploadingFactures}>
-                      {uploadingFactures ? 'Upload en cours...' : 'Sélectionner des fichiers'}
-                    </Button>
-                  </label>
-                </div>
-
-                {/* Lien vers le dossier SharePoint */}
-                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <Folder className="w-5 h-5 text-amber-400" />
-                    <div className="flex-1">
-                      <p className="text-slate-300 text-sm font-medium">Dossier SharePoint</p>
-                      <p className="text-slate-500 text-xs">{getSharePointFacturesPath()}</p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={openSharePointFolder}
-                      className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400"
-                    >
-                      Ouvrir
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-400">
-                  <p className="mb-2">💡 Chemin de destination:</p>
-                  <p className="font-mono bg-slate-800 p-2 rounded">COMPTABILITÉ\FACTURES\{currentUser?.full_name || 'Votre Nom'}\{getWeekDateRange()}</p>
-                </div>
+              <div className="space-y-2">
+                <p className="text-slate-400 text-sm">Explorateur SharePoint pour les factures de la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM", { locale: fr }) : ""}:</p>
+                <SharePointExplorer 
+                  rootPath="COMPTABILITÉ/FACTURES" 
+                  initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
+                  maxHeight="500px"
+                  allowUpload={true}
+                  allowDelete={false}
+                />
               </div>
             </TabsContent>
           </Tabs>
