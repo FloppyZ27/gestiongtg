@@ -1,0 +1,23 @@
+{
+  "name": "CommentaireSemaine",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    },
+    "semaine_debut": {
+      "type": "string",
+      "format": "date",
+      "description": "Date du dimanche de la semaine (cl\u00e9 unique par semaine)"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Commentaire de la semaine pour la comptable"
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "semaine_debut"
+  ]
+}

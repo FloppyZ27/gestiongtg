@@ -1,13 +1,16 @@
 // v2
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar } from "lucide-react";
+import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function FeuilleTempsSection({ 
   pointageCollapsed, 
@@ -27,6 +30,53 @@ export default function FeuilleTempsSection({
   handleConfirmPointage,
   weekScrollRef
 }) {
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const queryClient = useQueryClient();
+
+  // Clé unique pour la semaine en cours affichée
+  const getWeekKey = () => {
+    const days = getPointageWeekDays();
+    return format(days[0], "yyyy-MM-dd");
+  };
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: commentairesSemaine = [] } = useQuery({
+    queryKey: ['commentairesSemaine', currentUser?.email],
+    queryFn: () => base44.entities.CommentaireSemaine.filter({ utilisateur_email: currentUser?.email }),
+    initialData: [],
+    enabled: !!currentUser,
+  });
+
+  const weekKey = viewMode === "week" ? getWeekKey() : null;
+  const commentaireActuel = commentairesSemaine.find(c => c.semaine_debut === weekKey);
+
+  const saveCommentMutation = useMutation({
+    mutationFn: async (contenu) => {
+      if (commentaireActuel) {
+        return base44.entities.CommentaireSemaine.update(commentaireActuel.id, { ...commentaireActuel, contenu });
+      } else {
+        return base44.entities.CommentaireSemaine.create({
+          utilisateur_email: currentUser?.email,
+          semaine_debut: weekKey,
+          contenu
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commentairesSemaine', currentUser?.email] });
+      setIsCommentOpen(false);
+    },
+  });
+
+  const handleOpenComment = () => {
+    setCommentText(commentaireActuel?.contenu || "");
+    setIsCommentOpen(true);
+  };
   
   const getTypeLabel = (p) => {
     if (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) return 'Vacances';
@@ -133,6 +183,17 @@ export default function FeuilleTempsSection({
                   <Plus className="w-4 h-4 mr-1" />
                   Ajouter
                 </Button>
+                {viewMode === "week" && (
+                  <Button
+                    size="sm"
+                    onClick={handleOpenComment}
+                    className={`h-8 ${commentaireActuel?.contenu ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Note
+                    {commentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
+                  </Button>
+                )}
                 <div className="h-6 w-px bg-slate-700 mx-1"></div>
                 <Button
                   size="sm"
@@ -563,6 +624,46 @@ export default function FeuilleTempsSection({
           </Tabs>
         </CardContent>
       )}
+
+      {/* Dialog commentaire semaine */}
+      <Dialog open={isCommentOpen} onOpenChange={setIsCommentOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-amber-400" />
+              Note pour la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM yyyy", { locale: fr }) : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-400 text-sm">Ajoutez une note à l'intention de la comptable pour cette semaine.</p>
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Ex: J'ai travaillé en dehors des heures normales le mercredi soir pour un urgence client..."
+              className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm resize-none"
+              rows={6}
+              autoFocus
+            />
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCommentOpen(false)}
+                className="border-red-500 text-red-400 hover:bg-red-500/10"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={() => saveCommentMutation.mutate(commentText)}
+                disabled={saveCommentMutation.isPending}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-none"
+              >
+                {saveCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
