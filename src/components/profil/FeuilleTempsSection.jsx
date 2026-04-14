@@ -253,37 +253,29 @@ export default function FeuilleTempsSection({
                       </div>
                       {getPointageWeekDays().map((day, idx) => {
                         const dayPointages = getPointageForDate(day);
-                        const hasModified = dayPointages.some(p => p.heure_debut_modifiee && p.heure_fin_modifiee);
                         const totalInitial = dayPointages.reduce((sum, p) => {
-                          if (!p.heure_debut || !p.heure_fin) return sum;
                           const debut = new Date(p.heure_debut);
                           const fin = new Date(p.heure_fin);
                           const mult = parseFloat(p.multiplicateur || 1);
-                          const h = ((fin - debut) / (1000 * 60 * 60)) * mult;
-                          return sum + (isNaN(h) ? 0 : h);
+                          return sum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                         }, 0);
                         const totalModifie = dayPointages.reduce((sum, p) => {
                           const mult = parseFloat(p.multiplicateur || 1);
                           if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
                             return sum + (p.duree_heures_modifiee || 0) * mult;
                           } else {
-                            if (!p.heure_debut || !p.heure_fin) return sum;
                             const debut = new Date(p.heure_debut);
                             const fin = new Date(p.heure_fin);
-                            const h = ((fin - debut) / (1000 * 60 * 60)) * mult;
-                            return sum + (isNaN(h) ? 0 : h);
+                            return sum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                           }
                         }, 0);
                         
                         return (
                           <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2">
-                            {!hasModified && totalInitial > 0 && (
-                              <div className="text-xs text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</div>
-                            )}
-                            {hasModified && totalInitial > 0 && (
+                            {totalInitial > 0 && (
                               <div className="text-xs text-slate-400">Initial: <span className="text-slate-300 font-semibold">{totalInitial.toFixed(1)}h</span></div>
                             )}
-                            {hasModified && totalModifie > 0 && (
+                            {totalModifie > 0 && (
                               <div className="text-xs text-orange-400">Modifié: <span className="text-orange-300 font-semibold">{totalModifie.toFixed(1)}h</span></div>
                             )}
                           </div>
