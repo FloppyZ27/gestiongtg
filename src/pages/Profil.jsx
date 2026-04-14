@@ -506,11 +506,6 @@ export default function Profil() {
   const handleSubmitAddPointage = async (e) => {
     e.preventDefault();
     
-    if (!addPointageForm.description.trim()) {
-      alert('La description est obligatoire');
-      return;
-    }
-
     const [heureD, minD] = addPointageForm.heure_debut.split(':');
     const [heureF, minF] = addPointageForm.heure_fin.split(':');
     
@@ -1328,8 +1323,15 @@ export default function Profil() {
                         value={addPointageForm.heure_debut}
                         onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
                         className="bg-slate-800 border-slate-700 text-white"
+                        step="60"
+                        style={{ colorScheme: 'dark' }}
                         required
                       />
+                      {addPointageForm.heure_debut && (
+                        <p className="text-xs text-slate-400">
+                          {(() => { const [h, m] = addPointageForm.heure_debut.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
@@ -1338,19 +1340,25 @@ export default function Profil() {
                         value={addPointageForm.heure_fin}
                         onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
                         className="bg-slate-800 border-slate-700 text-white"
+                        step="60"
+                        style={{ colorScheme: 'dark' }}
                         required
                       />
+                      {addPointageForm.heure_fin && (
+                        <p className="text-xs text-slate-400">
+                          {(() => { const [h, m] = addPointageForm.heure_fin.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                    <Label className="text-slate-400 text-sm">Description</Label>
                     <textarea
                       value={addPointageForm.description}
                       onChange={(e) => setAddPointageForm({...addPointageForm, description: e.target.value})}
-                      placeholder="Description de l'activité..."
+                      placeholder="Description de l'activité... (facultatif)"
                       className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
                       rows="3"
-                      required
                     />
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
