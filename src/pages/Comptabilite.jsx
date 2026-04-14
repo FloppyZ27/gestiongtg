@@ -320,7 +320,7 @@ export default function Comptabilite() {
                                else dayPointage += ph;
                              });
                              return (
-                               <div key={idx} className="text-right space-y-1">
+                               <div key={idx} className="text-right space-y-1 min-h-[5.5rem] flex flex-col justify-start">
                                  <div className={`text-xs font-bold ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
                                    Total: {h > 0 ? `${h.toFixed(1)}h` : '-'}
                                  </div>
@@ -331,7 +331,7 @@ export default function Comptabilite() {
                                </div>
                              );
                            })}
-                           <div className="text-right space-y-1">
+                           <div className="text-right space-y-1 min-h-[5.5rem] flex flex-col justify-start">
                              <div className={`text-xs font-bold ${weekH > 0 ? 'text-slate-200' : 'text-slate-700'}`}>
                                Total: {weekH > 0 ? `${weekH.toFixed(1)}h` : '-'}
                              </div>
@@ -367,9 +367,9 @@ export default function Comptabilite() {
                                        setSelectedNoteUser(u);
                                        setIsNoteModalOpen(true);
                                      }}
-                                     className="px-1.5 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors inline-flex items-center gap-1"
-                                   >
-                                     <MessageSquare className="w-3 h-3" />
+                                     className="px-2 py-1.5 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors inline-flex items-center gap-1"
+                                     >
+                                     <MessageSquare className="w-5 h-5" />
                                    </button>
                                  </TooltipTrigger>
                                  <TooltipContent side="left" className="bg-slate-800 border-slate-700 text-white max-w-xs">
