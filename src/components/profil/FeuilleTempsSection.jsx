@@ -371,8 +371,9 @@ export default function FeuilleTempsSection({
                                         {totalMinutes >= 30 && (
                                           <div className={`text-[11px] font-semibold ${
                                             isModified ? 'text-orange-300'
-                                            : p.type?.includes('Vacance') ? 'text-fuchsia-300'
-                                                                                         : p.type?.includes('Mieux') ? 'text-cyan-300'
+                                            : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-300'
+                                            : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-300'
+                                            : p.type === 'En banque' ? 'text-yellow-300'
                                             : p.confirme ? 'text-green-300'
                                             : 'text-blue-300'
                                           }`}>
@@ -382,7 +383,7 @@ export default function FeuilleTempsSection({
                                         {/* Heures visibles si >= 60px */}
                                         {totalMinutes >= 60 && (
                                           <div className="text-[11px] leading-tight">
-                                            <div className={isModified ? "opacity-50 text-slate-300" : p.type?.includes('Vacance') ? "opacity-90 text-fuchsia-400" : p.type?.includes('Mieux') ? "opacity-90 text-cyan-400" : p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>
+                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? "opacity-90 text-violet-300" : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? "opacity-90 text-pink-300" : p.type === 'En banque' ? "opacity-90 text-yellow-300" : p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>
                                               Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
                                             </div>
                                             {isModified && (
@@ -405,7 +406,7 @@ export default function FeuilleTempsSection({
                                           </button>
                                         )}
                                         {totalMinutes >= 90 && p.confirme && !isModified && (
-                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type?.includes('Vacance') ? 'border-fuchsia-400/30' : p.type?.includes('Mieux') ? 'border-cyan-400/30' : 'border-green-400/30'}`}>
+                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type?.includes('Vacance') ? 'border-violet-400/30' : p.type?.includes('Mieux') ? 'border-pink-400/30' : p.type === 'En banque' ? 'border-yellow-400/30' : 'border-green-400/30'}`}>
                                             Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
                                           </div>
                                         )}
@@ -420,8 +421,9 @@ export default function FeuilleTempsSection({
                                       <div className="space-y-2">
                                         <div className={`text-xs font-bold uppercase ${
                                            isModified ? 'text-orange-400'
-                                           : p.type?.includes('Vacance') ? 'text-fuchsia-400'
-                                                                                       : p.type?.includes('Mieux') ? 'text-cyan-400'
+                                           : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-400'
+                                           : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-400'
+                                           : p.type === 'En banque' ? 'text-yellow-400'
                                            : p.confirme ? 'text-green-400'
                                            : 'text-blue-400'
                                          }`}>
