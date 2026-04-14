@@ -106,7 +106,9 @@ export default function Profil() {
     date: "",
     heure_debut: "",
     heure_fin: "",
-    description: ""
+    description: "",
+    type: "Pointage",
+    multiplicateur: "1"
   });
   const [addPointageForm, setAddPointageForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -465,7 +467,9 @@ export default function Profil() {
       date: date,
       heure_debut: heureDebut,
       heure_fin: heureFin,
-      description: pointage.description || ""
+      description: pointage.description || "",
+      type: pointage.type || "Pointage",
+      multiplicateur: String(pointage.multiplicateur || "1")
     });
     setEditingPointage(pointage);
   };
@@ -498,6 +502,8 @@ export default function Profil() {
         heure_fin_modifiee: fin.toISOString(),
         duree_heures_modifiee: parseFloat(dureeHeuresModifiee.toFixed(2)),
         description: editPointageForm.description,
+        type: editPointageForm.type || "Pointage",
+        multiplicateur: parseFloat(editPointageForm.multiplicateur || 1),
         confirme: true
       }
     });
@@ -1417,51 +1423,120 @@ export default function Profil() {
 
         {/* Edit Pointage Dialog */}
         <Dialog open={!!editingPointage} onOpenChange={(open) => !open && setEditingPointage(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-2xl">Modifier l'entrée de pointage</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmitEditPointage} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Date</Label>
-                <Input
-                  type="date"
-                  value={editPointageForm.date}
-                  onChange={(e) => setEditPointageForm({...editPointageForm, date: e.target.value})}
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
+              {/* Soldes de temps */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                <div className="text-center">
+                  <Palmtree className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                  <div className="text-xs text-slate-400">Vacances</div>
+                  <div className="text-lg font-bold text-emerald-400">{soldeRestant.vacances % 1 === 0 ? soldeRestant.vacances : soldeRestant.vacances.toFixed(1)}h</div>
+                  {soldeBase.max_vacances != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_vacances}h</div>}
+                </div>
+                <div className="text-center">
+                  <Heart className="w-4 h-4 text-pink-400 mx-auto mb-1" />
+                  <div className="text-xs text-slate-400">Mieux-Être</div>
+                  <div className="text-lg font-bold text-pink-400">{soldeRestant.mieuxEtre % 1 === 0 ? soldeRestant.mieuxEtre : soldeRestant.mieuxEtre.toFixed(1)}h</div>
+                  {soldeBase.max_mieux_etre != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_mieux_etre}h</div>}
+                </div>
+                <div className="text-center">
+                  <Wallet className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                  <div className="text-xs text-slate-400">En banque</div>
+                  <div className="text-lg font-bold text-amber-400">{soldeRestant.enBanque % 1 === 0 ? soldeRestant.enBanque : soldeRestant.enBanque.toFixed(1)}h</div>
+                </div>
               </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Type <span className="text-red-400">*</span></Label>
+                  <Select value={editPointageForm.type || "Pointage"} onValueChange={(value) => setEditPointageForm({...editPointageForm, type: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="Pointage" className="text-white">Pointage</SelectItem>
+                      <SelectItem value="Mieux-Être" className="text-white">Mieux-Être</SelectItem>
+                      <SelectItem value="Vacance" className="text-white">Vacance</SelectItem>
+                      <SelectItem value="En banque" className="text-white">Banque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Multiplicateur <span className="text-red-400">*</span></Label>
+                  <Select value={editPointageForm.multiplicateur || "1"} onValueChange={(value) => setEditPointageForm({...editPointageForm, multiplicateur: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="1" className="text-white">1</SelectItem>
+                      <SelectItem value="1.5" className="text-white">1.5</SelectItem>
+                      <SelectItem value="2" className="text-white">2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Date <span className="text-red-400">*</span></Label>
+                  <Input
+                    type="date"
+                    value={editPointageForm.date}
+                    onChange={(e) => setEditPointageForm({...editPointageForm, date: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Heure de départ</Label>
+                  <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
                   <Input
                     type="time"
                     value={editPointageForm.heure_debut}
                     onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
                     className="bg-slate-800 border-slate-700 text-white"
+                    step="60"
+                    style={{ colorScheme: 'dark' }}
+                    required
                   />
+                  {editPointageForm.heure_debut && (
+                    <p className="text-xs text-slate-400">
+                      {(() => { const [h, m] = editPointageForm.heure_debut.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Heure de fin</Label>
+                  <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
                   <Input
                     type="time"
                     value={editPointageForm.heure_fin}
                     onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
                     className="bg-slate-800 border-slate-700 text-white"
+                    step="60"
+                    style={{ colorScheme: 'dark' }}
+                    required
                   />
+                  {editPointageForm.heure_fin && (
+                    <p className="text-xs text-slate-400">
+                      {(() => { const [h, m] = editPointageForm.heure_fin.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
+                    </p>
+                  )}
                 </div>
               </div>
+
               <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                <Label className="text-slate-400 text-sm">Description</Label>
                 <textarea
                   value={editPointageForm.description}
                   onChange={(e) => setEditPointageForm({...editPointageForm, description: e.target.value})}
-                  placeholder="Description de l'activité..."
+                  placeholder="Description de l'activité... (facultatif)"
                   className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
                   rows="3"
-                  required
                 />
               </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
