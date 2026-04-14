@@ -1,9 +1,9 @@
 // v2
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare, Upload as UploadIcon } from "lucide-react";
+import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare, Camera } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -34,6 +34,11 @@ export default function FeuilleTempsSection({
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [fileCount, setFileCount] = useState(0);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const deviceOrientationRef = useRef(null);
   const queryClient = useQueryClient();
 
   const getWeekDateRange = () => {
@@ -86,6 +91,31 @@ export default function FeuilleTempsSection({
     setCommentText(commentaireActuel?.contenu || "");
     setIsCommentOpen(true);
   };
+
+  // Initialiser la caméra au montage du modal
+  React.useEffect(() => {
+    if (showCamera && videoRef.current && !streamRef.current) {
+      navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' }, 
+        audio: false 
+      }).then(stream => {
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }).catch(() => {
+        navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: false 
+        }).then(stream => {
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        });
+      });
+    }
+  }, [showCamera]);
   
   const getTypeLabel = (p) => {
     if (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) return 'Vacances';
@@ -673,43 +703,12 @@ export default function FeuilleTempsSection({
             </TabsContent>
 
             <TabsContent value="factures" className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  capture="environment"
-                  id="photo-input"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file && currentUser?.full_name) {
-                      const reader = new FileReader();
-                      reader.onload = async () => {
-                        const base64 = reader.result.split(',')[1];
-                        try {
-                          await base44.functions.invoke('uploadToSharePoint', {
-                            folderPath: `COMPTABILITÉ/FACTURES/${currentUser.full_name}/${getWeekDateRange()}`,
-                            fileName: `photo_${Date.now()}.jpg`,
-                            fileContent: base64,
-                            contentType: 'image/jpeg'
-                          });
-                          setFileCount(prev => prev + 1);
-                          e.target.value = '';
-                        } catch (error) {
-                          console.error('Erreur lors du téléversement:', error);
-                        }
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={() => document.getElementById('photo-input').click()}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                >
-                  📸 Prendre une photo
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setShowCamera(true)}
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+              >
+                <Camera className="w-4 h-4 mr-1" /> Prendre une photo
+              </Button>
               <SharePointExplorer 
                 rootPath="COMPTABILITÉ/FACTURES" 
                 initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
@@ -740,6 +739,75 @@ export default function FeuilleTempsSection({
           </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Modal caméra */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full max-w-2xl rounded-lg"
+            style={{ maxHeight: '70vh', objectFit: 'cover' }}
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          <div className="flex gap-4 mt-6">
+            <Button
+              onClick={() => {
+                if (streamRef.current) {
+                  streamRef.current.getTracks().forEach(t => t.stop());
+                  streamRef.current = null;
+                }
+                setShowCamera(false);
+              }}
+              size="lg"
+              className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!videoRef.current || !canvasRef.current || !currentUser?.full_name) return;
+                const canvas = canvasRef.current;
+                const video = videoRef.current;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.toBlob(async (blob) => {
+                  if (!blob) return;
+                  const fileName = `photo_${Date.now()}.jpg`;
+                  const file = new File([blob], fileName, { type: 'image/jpeg' });
+                  try {
+                    const base64 = await new Promise((resolve) => {
+                      const reader = new FileReader();
+                      reader.onload = () => resolve(reader.result.split(',')[1]);
+                      reader.readAsDataURL(file);
+                    });
+                    await base44.functions.invoke('uploadToSharePoint', {
+                      folderPath: `COMPTABILITÉ/FACTURES/${currentUser.full_name}/${getWeekDateRange()}`,
+                      fileName: fileName,
+                      fileContent: base64,
+                      contentType: 'image/jpeg'
+                    });
+                    setFileCount(prev => prev + 1);
+                    if (streamRef.current) {
+                      streamRef.current.getTracks().forEach(t => t.stop());
+                      streamRef.current = null;
+                    }
+                    setShowCamera(false);
+                  } catch (error) {
+                    console.error('Erreur lors du téléversement:', error);
+                  }
+                }, 'image/jpeg', 0.92);
+              }}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
+            >
+              <Camera className="w-5 h-5 mr-2" /> Capturer
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
