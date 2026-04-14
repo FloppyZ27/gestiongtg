@@ -342,9 +342,9 @@ export default function FeuilleTempsSection({
                                           isModified
                                             ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
                                             : p.type?.includes('Vacance')
-                                            ? 'bg-gradient-to-r from-fuchsia-500/60 to-pink-500/60 border border-fuchsia-500 text-fuchsia-50'
+                                            ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
                                             : p.type?.includes('Mieux')
-                                            ? 'bg-gradient-to-r from-cyan-500/60 to-blue-500/60 border border-cyan-500 text-cyan-50'
+                                            ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
                                             : p.confirme
                                             ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                             : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
@@ -510,20 +510,20 @@ export default function FeuilleTempsSection({
                             const duree = ((fin - debut) / (1000 * 60 * 60)) * mult;
 
                             const colorClass = isModified
-                              ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                              : isVacance
-                              ? 'bg-gradient-to-r from-fuchsia-500/60 to-pink-500/60 border border-fuchsia-500 text-fuchsia-50'
-                              : isMieuxEtre
-                              ? 'bg-gradient-to-r from-cyan-500/60 to-blue-500/60 border border-cyan-500 text-cyan-50'
-                              : p.confirme
-                              ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
-                              : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
+                               ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                               : isVacance
+                               ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
+                               : isMieuxEtre
+                               ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
+                               : p.confirme
+                               ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                               : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
 
                             const titleColor = isModified ? 'text-orange-300'
-                              : isVacance ? 'text-fuchsia-300'
-                                                                            : isMieuxEtre ? 'text-cyan-300'
-                              : p.confirme ? 'text-green-300'
-                              : 'text-blue-300';
+                               : isVacance ? 'text-violet-300'
+                               : isMieuxEtre ? 'text-pink-300'
+                               : p.confirme ? 'text-green-300'
+                               : 'text-blue-300';
 
                             return (
                               <div
