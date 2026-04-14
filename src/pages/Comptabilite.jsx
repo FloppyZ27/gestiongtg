@@ -386,41 +386,97 @@ export default function Comptabilite() {
                                   const topPx = startTime.getHours() * 60 + startTime.getMinutes();
                                   const initialStart = new Date(p.heure_debut);
                                   const initialEnd = new Date(p.heure_fin);
-                                  const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
+                                  const mult = parseFloat(p.multiplicateur || 1);
+                                  const initialDuration = ((initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60)) * mult;
+                                  const modifiedDuration = isModified ? (p.duree_heures_modifiee || 0) * mult : null;
+
+                                  const isVacance = p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'));
+                                  const isMieuxEtre = p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'));
+                                  const isEnBanque = p.type === 'En banque';
+
+                                  const getTypeLabel = () => {
+                                    if (isVacance) return 'Vacances';
+                                    if (isMieuxEtre) return 'Mieux-Être';
+                                    if (isEnBanque) return 'Banque';
+                                    return 'Pointage';
+                                  };
+
+                                  const cardColor = isVacance
+                                    ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
+                                    : isMieuxEtre
+                                    ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
+                                    : isEnBanque
+                                    ? 'bg-gradient-to-r from-yellow-500/60 to-amber-400/60 border border-yellow-400 text-yellow-50'
+                                    : (p.confirme || isModified)
+                                    ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                    : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
+
+                                  const statusColor = isVacance ? 'text-violet-300'
+                                    : isMieuxEtre ? 'text-pink-300'
+                                    : isEnBanque ? 'text-yellow-300'
+                                    : (p.confirme || isModified) ? 'text-green-300'
+                                    : 'text-blue-300';
+
+                                  const typeColorTooltip = isVacance ? 'text-violet-400'
+                                    : isMieuxEtre ? 'text-pink-400'
+                                    : isEnBanque ? 'text-yellow-400'
+                                    : (p.confirme || isModified) ? 'text-green-400'
+                                    : 'text-blue-400';
 
                                   return (
                                     <Tooltip key={p.id}>
                                       <TooltipTrigger asChild>
                                         <div
-                                          className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-default overflow-hidden flex flex-col ${
-                                            isModified
-                                              ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                              : p.confirme
-                                              ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
-                                              : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
-                                          }`}
+                                          className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-default overflow-hidden flex flex-col ${cardColor}`}
                                           style={{ height: `${Math.max(totalMinutes, 20)}px`, top: `${topPx}px` }}
                                         >
-                                          {isModified && <div className="text-[10px] font-bold">MODIFIÉ</div>}
-                                          {p.confirme && !isModified && <div className="text-[10px] font-bold">CONFIRMÉ</div>}
-                                          <div className="text-[11px] leading-tight">
-                                            <div className="opacity-80">
-                                              {format(initialStart, "HH:mm")}–{format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
+                                          {mult !== 1 && (
+                                            <span className="absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-30">×{mult}</span>
+                                          )}
+                                          <div className="text-[12px] font-bold uppercase opacity-80 tracking-wide">{getTypeLabel()}</div>
+                                          {p.description && (
+                                            <div className="text-[12px] font-bold truncate leading-tight pr-5">{p.description}</div>
+                                          )}
+                                          {totalMinutes >= 30 && (
+                                            <div className={`text-[11px] font-semibold ${statusColor}`}>
+                                              {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En attente'}
                                             </div>
-                                            {isModified && (
-                                              <div className="text-orange-300 mt-0.5">
-                                                → {format(startTime, "HH:mm")}–{format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
+                                          )}
+                                          {totalMinutes >= 60 && (
+                                            <div className="text-[11px] leading-tight">
+                                              <div className={`${isModified ? 'opacity-50' : 'opacity-90'} ${statusColor}`}>
+                                                Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
                                               </div>
-                                            )}
-                                          </div>
+                                              {isModified && (
+                                                <div className="opacity-90 text-green-300 mt-1">
+                                                  Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({modifiedDuration?.toFixed(1)}h)
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-3">
-                                        <div className="space-y-1 text-xs">
-                                          <div className="font-semibold text-emerald-400">Pointage du {format(new Date(p.date), "d MMMM yyyy", { locale: fr })}</div>
-                                          <div className="text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(2)}h)</div>
-                                          {isModified && <div className="text-orange-400">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(2)}h)</div>}
-                                          {p.description && <div className="text-slate-400 border-t border-slate-600 pt-1 mt-1">{p.description}</div>}
+                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-sm p-4">
+                                        <div className="space-y-2">
+                                          <div className="flex items-center justify-between gap-2">
+                                            <div className={`text-xs font-bold uppercase ${typeColorTooltip}`}>{getTypeLabel()}</div>
+                                            {mult !== 1 && (
+                                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 border border-white/30 text-white leading-none">×{mult}</span>
+                                            )}
+                                          </div>
+                                          <div className="text-sm text-slate-300">
+                                            <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
+                                            {isModified && (
+                                              <div className="mt-1">Modifié: <span className="text-green-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
+                                            )}
+                                          </div>
+                                          {p.description && (
+                                            <div className="text-sm opacity-75 whitespace-pre-wrap border-t border-white/10 pt-2">{p.description}</div>
+                                          )}
+                                          <div className="pt-2 border-t border-white/20 text-xs opacity-60">
+                                            {p.confirme && <div>Confirmé: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                            {isModified && <div>Modifié: {format(new Date(p.updated_date), "dd/MM/yy à HH:mm")}</div>}
+                                          </div>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
