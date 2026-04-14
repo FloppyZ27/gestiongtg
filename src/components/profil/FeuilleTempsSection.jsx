@@ -97,6 +97,38 @@ export default function FeuilleTempsSection({
     queryFn: () => base44.auth.me(),
   });
 
+  const handleFactureUploadDragDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length === 0) return;
+    
+    setUploadingFactures(true);
+    try {
+      const path = getSharePointFacturesPath();
+      if (!path) {
+        alert('Impossible de déterminer le chemin SharePoint');
+        setUploadingFactures(false);
+        return;
+      }
+
+      for (const file of files) {
+        const fileData = await file.arrayBuffer();
+        await base44.functions.invoke('uploadToSharePoint', {
+          filePath: path,
+          fileName: file.name,
+          fileData: Array.from(new Uint8Array(fileData))
+        });
+      }
+      alert('Factures uploadées avec succès');
+    } catch (error) {
+      console.error('Erreur upload:', error);
+      alert('Erreur lors de l\'upload des factures');
+    } finally {
+      setUploadingFactures(false);
+    }
+  };
+
   const { data: commentairesSemaine = [] } = useQuery({
     queryKey: ['commentairesSemaine', currentUser?.email],
     queryFn: () => base44.entities.CommentaireSemaine.filter({ utilisateur_email: currentUser?.email }),
@@ -242,7 +274,7 @@ export default function FeuilleTempsSection({
                     className={`h-8 ${commentaireActuel?.contenu ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
                   >
                     <MessageSquare className="w-4 h-4 mr-1" />
-                    Note
+                    Note/Factures
                     {commentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
                   </Button>
                 )}
@@ -683,7 +715,7 @@ export default function FeuilleTempsSection({
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-amber-400" />
-              Note pour la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM yyyy", { locale: fr }) : ""}
+              Note et factures pour la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM yyyy", { locale: fr }) : ""}
             </DialogTitle>
           </DialogHeader>
           
@@ -725,7 +757,14 @@ export default function FeuilleTempsSection({
             <TabsContent value="factures" className="space-y-4">
               <div className="space-y-4">
                 {/* Upload zone */}
-                <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5">
+                <div 
+                  className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={handleFactureUploadDragDrop}
+                >
                   <UploadIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
                   <p className="text-slate-500 text-xs mb-3">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
