@@ -355,13 +355,12 @@ export default function FeuilleTempsSection({
                                           top: `${topPx}px`
                                         }}
                                       >
-                                        {/* En-tête avec description et multiplicateur */}
-                                        <div className="flex items-start justify-between gap-1">
-                                          {p.description && (
-                                            <div className="text-[12px] font-bold truncate leading-tight flex-1">{p.description}</div>
-                                          )}
-                                          {(() => { const m = parseFloat(p.multiplicateur || 1); return m !== 1 ? <span className="flex-shrink-0 text-[9px] font-bold px-1 py-0.5 rounded bg-white/20 border border-white/30 leading-none">×{m}</span> : null; })()}
-                                        </div>
+                                        {/* Badge multiplicateur en haut à droite */}
+                                        {(() => { const m = parseFloat(p.multiplicateur || 1); return m !== 1 ? <span className="absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-30">×{m}</span> : null; })()}
+                                        {/* Description */}
+                                        {p.description && (
+                                          <div className="text-[12px] font-bold truncate leading-tight pr-5">{p.description}</div>
+                                        )}
                                         {/* Statut visible si >= 30px */}
                                         {totalMinutes >= 30 && (
                                           <div className={`text-[11px] font-semibold ${
@@ -532,13 +531,11 @@ export default function FeuilleTempsSection({
                                 className={`relative text-xs px-3 py-2 rounded cursor-pointer hover:opacity-80 transition-opacity flex flex-col gap-1 overflow-hidden ${colorClass}`}
                                 onClick={() => handleOpenEditPointage(p)}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="truncate text-[11px] font-bold opacity-90 uppercase">
-                                    {isModified ? 'Modifié' : isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : p.confirme ? 'Confirmé' : 'En attente'}
-                                  </div>
-                                  {mult !== 1 && (
-                                    <span className="ml-1 flex-shrink-0 text-[10px] font-bold px-1 py-0.5 rounded bg-white/20 border border-white/30">×{mult}</span>
-                                  )}
+                                {mult !== 1 && (
+                                  <span className="absolute top-1 right-1 text-[10px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-10">×{mult}</span>
+                                )}
+                                <div className="truncate text-[11px] font-bold opacity-90 uppercase pr-6">
+                                  {isModified ? 'Modifié' : isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : p.confirme ? 'Confirmé' : 'En attente'}
                                 </div>
                                 {p.description && (
                                   <div className={`truncate font-bold text-sm ${titleColor}`}>{p.description}</div>
