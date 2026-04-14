@@ -267,24 +267,21 @@ export default function Comptabilite() {
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     {/* En-tête : Utilisateur + dim à sam + total + note */}
                      <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr 0.5fr' }}>
-                      <div className="text-xs font-semibold text-slate-400">
+                      <div>
                         <button
                           onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
-                          className="flex items-center gap-1 hover:text-white transition-colors"
+                          className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
                         >
                           Utilisateur
                           {userSortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                         </button>
                       </div>
-                      {weekDays.map((day, idx) => {
-                        const isToday = day.toDateString() === new Date().toDateString();
-                        return (
-                          <div key={idx} className="text-xs font-semibold text-right" style={{ color: isToday ? 'rgb(52,211,153)' : 'rgb(148,163,184)' }}>
-                            <div>{format(day, "EEE", { locale: fr })}</div>
-                            <div>{format(day, "d")}</div>
-                          </div>
-                        );
-                      })}
+                      {weekDays.map((day, idx) => (
+                        <div key={idx} className="text-xs font-semibold text-right text-slate-400">
+                          <div>{format(day, "EEE", { locale: fr })}</div>
+                          <div>{format(day, "d")}</div>
+                        </div>
+                      ))}
                       <div className="text-xs font-semibold text-slate-400 text-right">Total</div>
                       <div className="text-xs font-semibold text-slate-400 text-center">Note</div>
                       </div>
@@ -308,7 +305,6 @@ export default function Comptabilite() {
                            </div>
                            {weekDays.map((day, idx) => {
                              const h = getUserDayTotalHours(day, u.email);
-                             const isToday = day.toDateString() === new Date().toDateString();
                              const dayPointages = getPointagesForDateUser(day, u.email);
                              let dayPointage = 0, dayVacances = 0, dayMieuxEtre = 0, dayBanque = 0;
                              dayPointages.forEach(p => {
@@ -321,7 +317,7 @@ export default function Comptabilite() {
                              });
                              return (
                                <div key={idx} className="text-right space-y-1 min-h-[5.5rem] flex flex-col justify-start">
-                                 <div className={`text-xs font-bold ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
+                                 <div className={`text-xs font-bold ${h > 0 ? 'text-slate-200' : 'text-slate-700'}`}>
                                    Total: {h > 0 ? `${h.toFixed(1)}h` : '-'}
                                  </div>
                                  <div className={`text-[10px] ${dayPointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>Pointage: {dayPointage > 0 ? dayPointage.toFixed(1)+'h' : '-'}</div>
@@ -424,12 +420,11 @@ export default function Comptabilite() {
                       <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50">
                         <div className="w-16 flex-shrink-0 border-r border-slate-700" />
                         {weekDays.map((day, idx) => {
-                          const isToday = day.toDateString() === new Date().toDateString();
-                          const dayTotal = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
-                          return (
-                            <div key={idx} className={`flex-1 text-center py-2 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}>
-                              <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>{format(day, "EEE", { locale: fr })}</div>
-                              <div className={`text-lg font-bold ${isToday ? 'text-emerald-400' : 'text-white'}`}>{format(day, "d")}</div>
+                            const dayTotal = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
+                            return (
+                              <div key={idx} className="flex-1 text-center py-2 border-r border-slate-700">
+                                <div className="text-xs uppercase text-slate-400">{format(day, "EEE", { locale: fr })}</div>
+                                <div className="text-lg font-bold text-white">{format(day, "d")}</div>
                               {dayTotal > 0
                                 ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] mt-0.5">{dayTotal.toFixed(1)}h</Badge>
                                 : <span className="text-[10px] text-slate-700">-</span>}
@@ -454,11 +449,10 @@ export default function Comptabilite() {
 
                           {/* Colonnes des jours */}
                           {weekDays.map((day, dayIdx) => {
-                            const isToday = day.toDateString() === new Date().toDateString();
                             const dayPointages = activeAgendaUser ? getPointagesForDateUser(day, activeAgendaUser.email) : [];
 
                             return (
-                              <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-emerald-500/5' : 'bg-slate-800/10'}`}>
+                              <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/10">
                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                   <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
                                 ))}
