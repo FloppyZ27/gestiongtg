@@ -690,7 +690,6 @@ export default function FeuilleTempsSection({
                 allowDelete={true}
                 minPathLength={1}
               />
-              </div>
             </TabsContent>
           </Tabs>
         </DialogContent>
