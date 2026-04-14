@@ -639,8 +639,11 @@ export default function FeuilleTempsSection({
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-amber-400" />
-              Note et factures pour la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM yyyy", { locale: fr }) : ""}
+              Notes et Factures
             </DialogTitle>
+            <p className="text-sm text-slate-400 mt-1">
+              de la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM", { locale: fr }) : ""} au {weekKey ? format(new Date(new Date(weekKey).getTime() + 6 * 24 * 60 * 60 * 1000), "d MMMM yyyy", { locale: fr }) : ""}
+            </p>
           </DialogHeader>
           
           <Tabs defaultValue="note" className="w-full">
