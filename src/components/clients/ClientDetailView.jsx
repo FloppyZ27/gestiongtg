@@ -574,7 +574,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                            className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
                            onClick={() => handleSort('numero_dossier')}
                          >
-                           <div className="flex items-center gap-1">
+                           <div className="flex items-center gap-2">
                              N° Dossier
                              {getSortIcon('numero_dossier')}
                            </div>
@@ -583,7 +583,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                            className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
                            onClick={() => handleSort('date_ouverture')}
                          >
-                           <div className="flex items-center gap-1">
+                           <div className="flex items-center gap-2">
                              Date d'ouverture
                              {getSortIcon('date_ouverture')}
                            </div>
@@ -593,7 +593,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                              className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
                              onClick={() => handleSort('clients')}
                            >
-                             <div className="flex items-center gap-1">
+                             <div className="flex items-center gap-2">
                                Clients
                                {getSortIcon('clients')}
                              </div>
@@ -603,7 +603,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                            className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
                            onClick={() => handleSort('type_mandat')}
                          >
-                           <div className="flex items-center gap-1">
+                           <div className="flex items-center gap-2">
                              Type de mandat
                              {getSortIcon('type_mandat')}
                            </div>
@@ -612,7 +612,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                            className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
                            onClick={() => handleSort('adresse_travaux')}
                          >
-                           <div className="flex items-center gap-1">
+                           <div className="flex items-center gap-2">
                              Adresse des travaux
                              {getSortIcon('adresse_travaux')}
                            </div>
