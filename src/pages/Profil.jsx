@@ -1537,48 +1537,81 @@ export default function Profil() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="time"
-                    value={editPointageForm.heure_debut}
-                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    step="60"
-                    style={{ colorScheme: 'dark' }}
-                    required
-                  />
-                  {editPointageForm.heure_debut && (
-                    <p className="text-xs text-slate-400">
-                      {(() => { const [h, m] = editPointageForm.heure_debut.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
-                    </p>
-                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      type="time"
+                      value={editPointageForm.heure_debut}
+                      onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white flex-1"
+                      step="60"
+                      style={{ colorScheme: 'dark' }}
+                      required
+                    />
+                    <Select
+                      value={editPointageForm.heure_debut ? (parseInt(editPointageForm.heure_debut.split(':')[0]) < 12 ? 'AM' : 'PM') : 'AM'}
+                      onValueChange={(ampm) => {
+                        if (!editPointageForm.heure_debut) return;
+                        const [h, m] = editPointageForm.heure_debut.split(':');
+                        let hNum = parseInt(h);
+                        if (ampm === 'AM' && hNum >= 12) hNum -= 12;
+                        if (ampm === 'PM' && hNum < 12) hNum += 12;
+                        setEditPointageForm({...editPointageForm, heure_debut: `${String(hNum).padStart(2,'0')}:${m}`});
+                      }}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="AM" className="text-white">AM</SelectItem>
+                        <SelectItem value="PM" className="text-white">PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="time"
-                    value={editPointageForm.heure_fin}
-                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
-                    step="60"
-                    style={{ colorScheme: 'dark' }}
-                    required
-                  />
-                  {editPointageForm.heure_fin && (
-                    <p className="text-xs text-slate-400">
-                      {(() => { const [h, m] = editPointageForm.heure_fin.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
-                    </p>
-                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      type="time"
+                      value={editPointageForm.heure_fin}
+                      onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white flex-1"
+                      step="60"
+                      style={{ colorScheme: 'dark' }}
+                      required
+                    />
+                    <Select
+                      value={editPointageForm.heure_fin ? (parseInt(editPointageForm.heure_fin.split(':')[0]) < 12 ? 'AM' : 'PM') : 'PM'}
+                      onValueChange={(ampm) => {
+                        if (!editPointageForm.heure_fin) return;
+                        const [h, m] = editPointageForm.heure_fin.split(':');
+                        let hNum = parseInt(h);
+                        if (ampm === 'AM' && hNum >= 12) hNum -= 12;
+                        if (ampm === 'PM' && hNum < 12) hNum += 12;
+                        setEditPointageForm({...editPointageForm, heure_fin: `${String(hNum).padStart(2,'0')}:${m}`});
+                      }}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="AM" className="text-white">AM</SelectItem>
+                        <SelectItem value="PM" className="text-white">PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Description</Label>
+                <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
                 <textarea
                   value={editPointageForm.description}
                   onChange={(e) => setEditPointageForm({...editPointageForm, description: e.target.value})}
-                  placeholder="Description de l'activité... (facultatif)"
+                  placeholder="Description de l'activité..."
                   className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
                   rows="3"
+                  required
                 />
               </div>
 
