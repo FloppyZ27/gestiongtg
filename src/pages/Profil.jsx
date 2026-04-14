@@ -1643,11 +1643,9 @@ export default function Profil() {
                 </div>
                 <div className="space-y-2">
                   <Label>Heure <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="time"
+                  <TimeInput12h
                     value={eventForm.heure_debut}
-                    onChange={(e) => setEventForm({...eventForm, heure_debut: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    onChange={(v) => setEventForm({...eventForm, heure_debut: v})}
                     required
                   />
                 </div>
@@ -1664,11 +1662,9 @@ export default function Profil() {
                 </div>
                 <div className="space-y-2">
                   <Label>Heure de fin</Label>
-                  <Input
-                    type="time"
+                  <TimeInput12h
                     value={eventForm.heure_fin}
-                    onChange={(e) => setEventForm({...eventForm, heure_fin: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    onChange={(v) => setEventForm({...eventForm, heure_fin: v})}
                   />
                 </div>
               </div>
