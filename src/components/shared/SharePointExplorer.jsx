@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Folder, ArrowLeft, ChevronRight, Home, LayoutGrid, List } from "lucide-react";
-
-const { useState } = React;
 
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || '';
@@ -53,7 +51,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   const files = allItems.filter(f => f.type === 'file');
 
   // Notifier du nombre de fichiers
-  React.useEffect(() => {
+  useEffect(() => {
     if (onFileCountChange) {
       onFileCountChange(files.length);
     }
