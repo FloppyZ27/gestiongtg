@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Search, ArrowUpDown, ArrowUp, ArrowDown, Package, Edit, MessageSquare, Clock, Filter, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Search, Package, Edit, MessageSquare, Clock, Filter, ChevronDown, ChevronUp, ChevronsUpDown, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -183,8 +183,8 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   };
 
   const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
-    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-500" />;
+    return sortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />;
   };
 
   const sortedMandats = [...filteredMandats].sort((a, b) => {
@@ -571,37 +571,52 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead 
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('numero_dossier')}
-                        >
-                          N° Dossier {getSortIcon('numero_dossier')}
-                        </TableHead>
-                        <TableHead 
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('date_ouverture')}
-                        >
-                          Date d'ouverture {getSortIcon('date_ouverture')}
-                        </TableHead>
-                        {isNotaireOrCourtier && (
-                          <TableHead 
-                            className="text-slate-300 cursor-pointer hover:text-white"
-                            onClick={() => handleSort('clients')}
-                          >
-                            Clients {getSortIcon('clients')}
-                          </TableHead>
-                        )}
-                        <TableHead 
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('type_mandat')}
-                        >
-                          Type de mandat {getSortIcon('type_mandat')}
-                        </TableHead>
-                        <TableHead 
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('adresse_travaux')}
-                        >
-                          Adresse des travaux {getSortIcon('adresse_travaux')}
-                        </TableHead>
+                           className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
+                           onClick={() => handleSort('numero_dossier')}
+                         >
+                           <div className="flex items-center gap-1">
+                             N° Dossier
+                             {getSortIcon('numero_dossier')}
+                           </div>
+                         </TableHead>
+                         <TableHead 
+                           className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
+                           onClick={() => handleSort('date_ouverture')}
+                         >
+                           <div className="flex items-center gap-1">
+                             Date d'ouverture
+                             {getSortIcon('date_ouverture')}
+                           </div>
+                         </TableHead>
+                         {isNotaireOrCourtier && (
+                           <TableHead 
+                             className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
+                             onClick={() => handleSort('clients')}
+                           >
+                             <div className="flex items-center gap-1">
+                               Clients
+                               {getSortIcon('clients')}
+                             </div>
+                           </TableHead>
+                         )}
+                         <TableHead 
+                           className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
+                           onClick={() => handleSort('type_mandat')}
+                         >
+                           <div className="flex items-center gap-1">
+                             Type de mandat
+                             {getSortIcon('type_mandat')}
+                           </div>
+                         </TableHead>
+                         <TableHead 
+                           className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none"
+                           onClick={() => handleSort('adresse_travaux')}
+                         >
+                           <div className="flex items-center gap-1">
+                             Adresse des travaux
+                             {getSortIcon('adresse_travaux')}
+                           </div>
+                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
