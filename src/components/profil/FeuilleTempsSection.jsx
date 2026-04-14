@@ -360,7 +360,7 @@ export default function FeuilleTempsSection({
                                         {/* Badge multiplicateur en haut à droite */}
                                         {(() => { const m = parseFloat(p.multiplicateur || 1); return m !== 1 ? <span className="absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-30">×{m}</span> : null; })()}
                                         {/* Type de pointage */}
-                                        <div className="text-[10px] font-bold uppercase opacity-80 tracking-wide">
+                                        <div className="text-[12px] font-bold uppercase opacity-80 tracking-wide">
                                           {isModified ? 'Modifié' : p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')) ? 'Vacances' : p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux')) ? 'Mieux-Être' : p.type === 'En banque' ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}
                                         </div>
                                         {/* Description */}
@@ -546,7 +546,7 @@ export default function FeuilleTempsSection({
                                 {mult !== 1 && (
                                   <span className="absolute top-1 right-1 text-[10px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-10">×{mult}</span>
                                 )}
-                                <div className="truncate text-[11px] font-bold opacity-90 uppercase pr-6">
+                                <div className="truncate text-sm font-bold opacity-90 uppercase pr-6">
                                   {isModified ? 'Modifié' : isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : p.type === 'En banque' ? 'En banque' : p.confirme ? 'Confirmé' : 'En attente'}
                                 </div>
                                 {p.description && (
