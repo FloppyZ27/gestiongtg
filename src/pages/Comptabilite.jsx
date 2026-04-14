@@ -324,10 +324,10 @@ export default function Comptabilite() {
                                  <div className={`text-xs font-bold ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
                                    Total: {h > 0 ? `${h.toFixed(1)}h` : '-'}
                                  </div>
-                                 {dayPointage > 0 && <div className="text-[10px] text-green-400">Pointage: {dayPointage.toFixed(1)}h</div>}
-                                 {dayVacances > 0 && <div className="text-[10px] text-violet-400">Vacances: {dayVacances.toFixed(1)}h</div>}
-                                 {dayMieuxEtre > 0 && <div className="text-[10px] text-pink-400">Mieux-être: {dayMieuxEtre.toFixed(1)}h</div>}
-                                 {dayBanque > 0 && <div className="text-[10px] text-yellow-400">Banque: {dayBanque.toFixed(1)}h</div>}
+                                 <div className={`text-[10px] ${dayPointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>Pointage: {dayPointage > 0 ? dayPointage.toFixed(1)+'h' : '-'}</div>
+                                 <div className={`text-[10px] ${dayVacances > 0 ? 'text-violet-400' : 'text-slate-700'}`}>Vacances: {dayVacances > 0 ? dayVacances.toFixed(1)+'h' : '-'}</div>
+                                 <div className={`text-[10px] ${dayMieuxEtre > 0 ? 'text-pink-400' : 'text-slate-700'}`}>Mieux-être: {dayMieuxEtre > 0 ? dayMieuxEtre.toFixed(1)+'h' : '-'}</div>
+                                 <div className={`text-[10px] ${dayBanque > 0 ? 'text-yellow-400' : 'text-slate-700'}`}>Banque: {dayBanque > 0 ? dayBanque.toFixed(1)+'h' : '-'}</div>
                                </div>
                              );
                            })}
