@@ -28,6 +28,14 @@ export default function FeuilleTempsSection({
   weekScrollRef
 }) {
   
+  const getTypeLabel = (p) => {
+    if (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) return 'Vacances';
+    if (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) return 'Mieux-Être';
+    if (p.type === 'En banque') return 'Banque';
+    if (p.type === 'Pointage' || !p.type) return 'Pointage';
+    return p.type;
+  };
+
   const getMonthDaysWithFullWeeks = () => {
     const year = pointageCurrentDate.getFullYear();
     const month = pointageCurrentDate.getMonth();
@@ -361,7 +369,7 @@ export default function FeuilleTempsSection({
                                         {(() => { const m = parseFloat(p.multiplicateur || 1); return m !== 1 ? <span className="absolute top-1 right-1 text-[9px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-30">×{m}</span> : null; })()}
                                         {/* Type de pointage */}
                                          <div className="text-[12px] font-bold uppercase opacity-80 tracking-wide flex items-center gap-1">
-                                           {p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')) ? 'Vacances' : p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux')) ? 'Mieux-Être' : p.type === 'En banque' ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}
+                                           {getTypeLabel(p)}
                                          </div>
                                         {/* Description */}
                                         {p.description && (
@@ -377,7 +385,7 @@ export default function FeuilleTempsSection({
                                             : p.confirme ? 'text-green-300'
                                             : 'text-blue-300'
                                           }`}>
-                                            {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En Attente'}
+                                            {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En attente'}
                                           </div>
                                         )}
                                         {/* Heures visibles si >= 60px */}
@@ -428,7 +436,7 @@ export default function FeuilleTempsSection({
                                              : p.confirme ? 'text-green-400'
                                              : 'text-blue-400'
                                            }`}>
-                                            <span>{(p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'Vacances' : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'Mieux-Être' : p.type === 'En banque' ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
+                                            <span>{getTypeLabel(p)}</span>
                                           </div>
                                           {parseFloat(p.multiplicateur || 1) !== 1 && (
                                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 border border-white/30 text-white leading-none">×{parseFloat(p.multiplicateur)}</span>
@@ -552,7 +560,7 @@ export default function FeuilleTempsSection({
                                   <span className="absolute top-1 right-1 text-[10px] font-bold px-1 py-0.5 rounded bg-white/25 border border-white/40 leading-none z-10">×{mult}</span>
                                 )}
                                 <div className="truncate text-sm font-bold opacity-90 uppercase pr-6 flex items-center gap-1">
-                                  <span>{isVacance ? 'Vacances' : isMieuxEtre ? 'Mieux-Être' : isEnBanque ? 'Banque' : p.confirme ? 'Confirmé' : 'En attente'}</span>
+                                  <span>{getTypeLabel(p)}</span>
                                 </div>
                                 {p.description && (
                                   <div className={`truncate font-bold text-sm ${titleColor}`}>{p.description}</div>
