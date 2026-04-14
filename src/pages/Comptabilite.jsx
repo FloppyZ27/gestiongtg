@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -80,6 +81,8 @@ export default function Comptabilite() {
 
   // Tri feuille de temps
   const [userSortOrder, setUserSortOrder] = useState('asc');
+  const [selectedNoteUser, setSelectedNoteUser] = useState(null);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
   const agendaScrollRef = useRef(null);
 
@@ -87,6 +90,7 @@ export default function Comptabilite() {
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
+  const { data: commentairesSemaine = [] } = useQuery({ queryKey: ['commentairesSemaine'], queryFn: () => base44.entities.CommentaireSemaine.list(), initialData: [], enabled: !!users.length });
 
   // Scroll à 7h lors du passage en vue agenda
   useEffect(() => {
@@ -122,9 +126,29 @@ export default function Comptabilite() {
 
   const weekDays = getWeekDays(currentWeekDate);
 
+  const getWeekKey = () => format(weekDays[0], "yyyy-MM-dd");
+
+  const getCommentaireForUser = (userEmail) => {
+    return commentairesSemaine.find(c => c.utilisateur_email === userEmail && c.semaine_debut === getWeekKey());
+  };
+
   const getPointagesForDateUser = (date, userEmail) => {
     const dateStr = date.toISOString().split('T')[0];
     return allPointages.filter(p => p.date === dateStr && p.utilisateur_email === userEmail);
+  };
+
+  const getPointagesByTypeForUser = (userEmail) => {
+    const weekPointages = weekDays.flatMap(day => getPointagesForDateUser(day, userEmail));
+    let pointage = 0, vacances = 0, mieuxEtre = 0, banque = 0;
+    weekPointages.forEach(p => {
+      const mult = parseFloat(p.multiplicateur || 1);
+      const h = getPointageDuration(p) * mult;
+      if (p.type?.includes('Vacance')) vacances += h;
+      else if (p.type?.includes('Mieux')) mieuxEtre += h;
+      else if (p.type === 'En banque') banque += h;
+      else pointage += h;
+    });
+    return { pointage, vacances, mieuxEtre, banque };
   };
 
   const getUserDayTotalHours = (date, userEmail) =>
@@ -190,7 +214,7 @@ export default function Comptabilite() {
           <div className="mb-8">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Comptabilité</h1>
-              <Landmark className="w-8 h-8 text-violet-400" />
+              <Landmark className="w-8 h-8 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent" />
             </div>
             <p className="text-slate-400">Feuilles de temps, heures et tarification des mandats</p>
           </div>
@@ -265,37 +289,63 @@ export default function Comptabilite() {
                     </div>
 
                     {/* Lignes par utilisateur */}
-                    {sortedUsers.map(u => {
-                      const weekH = getUserWeekHours(u.email);
-                      return (
-                        <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="w-7 h-7">
-                              <AvatarImage src={u.photo_url} />
-                              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-white font-medium text-sm">{u.full_name}</p>
-                              <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
-                            </div>
-                          </div>
-                          {weekDays.map((day, idx) => {
-                            const h = getUserDayTotalHours(day, u.email);
-                            const isToday = day.toDateString() === new Date().toDateString();
-                            return (
-                              <div key={idx} className="text-right">
-                                <span className={`text-xs font-medium ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
-                                  {h > 0 ? `${h.toFixed(1)}h` : '-'}
-                                </span>
-                              </div>
-                            );
-                          })}
-                          <div className="text-right">
-                            <span className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                     {sortedUsers.map(u => {
+                       const weekH = getUserWeekHours(u.email);
+                       const typeBreakdown = getPointagesByTypeForUser(u.email);
+                       const commentaire = getCommentaireForUser(u.email);
+                       return (
+                         <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
+                           <div className="flex items-center gap-2">
+                             <Avatar className="w-7 h-7">
+                               <AvatarImage src={u.photo_url} />
+                               <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
+                             </Avatar>
+                             <div className="flex-1">
+                               <p className="text-white font-medium text-sm">{u.full_name}</p>
+                               <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
+                             </div>
+                             {commentaire?.contenu && (
+                               <Tooltip>
+                                 <TooltipTrigger asChild>
+                                   <button
+                                     onClick={() => {
+                                       setSelectedNoteUser(u);
+                                       setIsNoteModalOpen(true);
+                                     }}
+                                     className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors flex items-center gap-1"
+                                   >
+                                     <MessageSquare className="w-3 h-3" />
+                                   </button>
+                                 </TooltipTrigger>
+                                 <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                   <p className="text-xs">Note semaine</p>
+                                 </TooltipContent>
+                               </Tooltip>
+                             )}
+                           </div>
+                           {weekDays.map((day, idx) => {
+                             const h = getUserDayTotalHours(day, u.email);
+                             const isToday = day.toDateString() === new Date().toDateString();
+                             return (
+                               <div key={idx} className="text-right">
+                                 <span className={`text-xs font-medium ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
+                                   {h > 0 ? `${h.toFixed(1)}h` : '-'}
+                                 </span>
+                               </div>
+                             );
+                           })}
+                           <div className="text-right space-y-0.5">
+                             <div className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</div>
+                             <div className="text-[10px] space-y-0.5 text-slate-400">
+                               {typeBreakdown.pointage > 0 && <div className="text-green-400">P: {typeBreakdown.pointage.toFixed(1)}h</div>}
+                               {typeBreakdown.vacances > 0 && <div className="text-violet-400">V: {typeBreakdown.vacances.toFixed(1)}h</div>}
+                               {typeBreakdown.mieuxEtre > 0 && <div className="text-pink-400">ME: {typeBreakdown.mieuxEtre.toFixed(1)}h</div>}
+                               {typeBreakdown.banque > 0 && <div className="text-yellow-400">B: {typeBreakdown.banque.toFixed(1)}h</div>}
+                             </div>
+                           </div>
+                         </div>
+                       );
+                     })}
 
 
                   </div>
@@ -493,6 +543,33 @@ export default function Comptabilite() {
               </CardContent>
             )}
           </Card>
+
+          {/* Modal commentaire semaine */}
+          <Dialog open={isNoteModalOpen} onOpenChange={setIsNoteModalOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-amber-400" />
+                  Note de {selectedNoteUser?.full_name} - Semaine du {format(weekDays[0], "d MMMM yyyy", { locale: fr })}
+                </DialogTitle>
+              </DialogHeader>
+              {selectedNoteUser && (() => {
+                const commentaire = getCommentaireForUser(selectedNoteUser.email);
+                return (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                      <p className="text-slate-300 whitespace-pre-wrap text-sm">{commentaire?.contenu || "Aucune note"}</p>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button onClick={() => setIsNoteModalOpen(false)} className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">
+                        Fermer
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </DialogContent>
+          </Dialog>
 
           {/* ===== SECTION 2 : Soldes de congés ===== */}
           <SoldesCongesSection />
