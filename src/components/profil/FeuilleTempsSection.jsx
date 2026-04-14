@@ -234,8 +234,10 @@ export default function FeuilleTempsSection({
                           };
                           const allPs = weekDays.flatMap(day => getPointageForDate(day));
                           const t = calcTotaux(allPs);
+                          const grandTotal = t.pointage + t.vacances + t.mieuxEtre + t.banque;
                           return (
                             <div className="text-center px-1 space-y-0.5">
+                              <div className="text-[10px] font-bold text-white border-b border-slate-600 pb-0.5 mb-0.5">{grandTotal > 0 ? grandTotal.toFixed(1)+'h' : '-'}</div>
                               <div className={`text-[10px] font-semibold ${t.pointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>{t.pointage > 0 ? t.pointage.toFixed(1)+'h' : '-'}</div>
                               <div className={`text-[10px] font-semibold ${t.vacances > 0 ? 'text-violet-400' : 'text-slate-700'}`}>{t.vacances > 0 ? t.vacances.toFixed(1)+'h' : '-'}</div>
                               <div className={`text-[10px] font-semibold ${t.mieuxEtre > 0 ? 'text-pink-400' : 'text-slate-700'}`}>{t.mieuxEtre > 0 ? t.mieuxEtre.toFixed(1)+'h' : '-'}</div>
@@ -261,6 +263,7 @@ export default function FeuilleTempsSection({
                         
                         return (
                           <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2 space-y-0.5">
+                            <div className="text-[11px] font-bold text-white border-b border-slate-600 pb-0.5 mb-0.5">Total: <span>{(pointage + vacances + mieuxEtre + banque) > 0 ? (pointage + vacances + mieuxEtre + banque).toFixed(1)+'h' : '-'}</span></div>
                             <div className={`text-[11px] ${pointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>Pointage: <span className="font-semibold">{pointage > 0 ? pointage.toFixed(1)+'h' : '-'}</span></div>
                             <div className={`text-[11px] ${vacances > 0 ? 'text-violet-400' : 'text-slate-700'}`}>Vacances: <span className="font-semibold">{vacances > 0 ? vacances.toFixed(1)+'h' : '-'}</span></div>
                             <div className={`text-[11px] ${mieuxEtre > 0 ? 'text-pink-400' : 'text-slate-700'}`}>Mieux-Être: <span className="font-semibold">{mieuxEtre > 0 ? mieuxEtre.toFixed(1)+'h' : '-'}</span></div>
