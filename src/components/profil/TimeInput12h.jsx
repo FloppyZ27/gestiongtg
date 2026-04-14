@@ -87,7 +87,7 @@ export default function TimeInput12h({ value, onChange, required, className = ""
       <button
         type="button"
         onClick={toggleAmpm}
-        className="ml-1 px-2 py-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:bg-slate-700/50 rounded transition-colors border-none shadow-none bg-transparent"
+        className="ml-1 px-2 py-1 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-700/50 rounded transition-colors border-none shadow-none bg-transparent"
       >
         {ampm}
       </button>
