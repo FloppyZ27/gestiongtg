@@ -236,10 +236,10 @@ export default function FeuilleTempsSection({
                           const t = calcTotaux(allPs);
                           return (
                             <div className="text-center px-1 space-y-0.5">
-                              {t.pointage > 0 && <div className="text-[10px] text-green-400 font-semibold">{t.pointage.toFixed(1)}h</div>}
-                              {t.vacances > 0 && <div className="text-[10px] text-violet-400 font-semibold">{t.vacances.toFixed(1)}h</div>}
-                              {t.mieuxEtre > 0 && <div className="text-[10px] text-pink-400 font-semibold">{t.mieuxEtre.toFixed(1)}h</div>}
-                              {t.banque > 0 && <div className="text-[10px] text-yellow-400 font-semibold">{t.banque.toFixed(1)}h</div>}
+                              <div className={`text-[10px] font-semibold ${t.pointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>{t.pointage > 0 ? t.pointage.toFixed(1)+'h' : '-'}</div>
+                              <div className={`text-[10px] font-semibold ${t.vacances > 0 ? 'text-violet-400' : 'text-slate-700'}`}>{t.vacances > 0 ? t.vacances.toFixed(1)+'h' : '-'}</div>
+                              <div className={`text-[10px] font-semibold ${t.mieuxEtre > 0 ? 'text-pink-400' : 'text-slate-700'}`}>{t.mieuxEtre > 0 ? t.mieuxEtre.toFixed(1)+'h' : '-'}</div>
+                              <div className={`text-[10px] font-semibold ${t.banque > 0 ? 'text-yellow-400' : 'text-slate-700'}`}>{t.banque > 0 ? t.banque.toFixed(1)+'h' : '-'}</div>
                             </div>
                           );
                         })()}
@@ -261,10 +261,10 @@ export default function FeuilleTempsSection({
                         
                         return (
                           <div key={`total-${idx}`} className="flex-1 border-r border-slate-700 bg-slate-800/50 px-2 py-2 space-y-0.5">
-                            {pointage > 0 && <div className="text-[11px] text-green-400">Pointage: <span className="font-semibold">{pointage.toFixed(1)}h</span></div>}
-                            {vacances > 0 && <div className="text-[11px] text-violet-400">Vacances: <span className="font-semibold">{vacances.toFixed(1)}h</span></div>}
-                            {mieuxEtre > 0 && <div className="text-[11px] text-pink-400">Mieux-Être: <span className="font-semibold">{mieuxEtre.toFixed(1)}h</span></div>}
-                            {banque > 0 && <div className="text-[11px] text-yellow-400">Banque: <span className="font-semibold">{banque.toFixed(1)}h</span></div>}
+                            <div className={`text-[11px] ${pointage > 0 ? 'text-green-400' : 'text-slate-700'}`}>Pointage: <span className="font-semibold">{pointage > 0 ? pointage.toFixed(1)+'h' : '-'}</span></div>
+                            <div className={`text-[11px] ${vacances > 0 ? 'text-violet-400' : 'text-slate-700'}`}>Vacances: <span className="font-semibold">{vacances > 0 ? vacances.toFixed(1)+'h' : '-'}</span></div>
+                            <div className={`text-[11px] ${mieuxEtre > 0 ? 'text-pink-400' : 'text-slate-700'}`}>Mieux-Être: <span className="font-semibold">{mieuxEtre > 0 ? mieuxEtre.toFixed(1)+'h' : '-'}</span></div>
+                            <div className={`text-[11px] ${banque > 0 ? 'text-yellow-400' : 'text-slate-700'}`}>Banque: <span className="font-semibold">{banque > 0 ? banque.toFixed(1)+'h' : '-'}</span></div>
                           </div>
                         );
                       })}
