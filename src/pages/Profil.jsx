@@ -486,22 +486,72 @@ export default function Profil() {
     const fin = new Date(editPointageForm.date);
     fin.setHours(parseInt(heureF), parseInt(minF), 0);
     
-    const dureeHeuresModifiee = (fin - debut) / (1000 * 60 * 60);
+    const dureeHeuresModifiee = parseFloat(((fin - debut) / (1000 * 60 * 60)).toFixed(2));
 
-    updatePointageMutation.mutate({
+    await updatePointageMutation.mutateAsync({
       id: editingPointage.id,
       data: {
         ...editingPointage,
         date: editPointageForm.date,
         heure_debut_modifiee: debut.toISOString(),
         heure_fin_modifiee: fin.toISOString(),
-        duree_heures_modifiee: parseFloat(dureeHeuresModifiee.toFixed(2)),
+        duree_heures_modifiee: dureeHeuresModifiee,
         description: editPointageForm.description,
         type: editPointageForm.type || "Pointage",
         multiplicateur: parseFloat(editPointageForm.multiplicateur || 1),
         confirme: true
       }
     });
+
+    // Si type de congé, mettre à jour l'EntreeTemps correspondante pour ajuster le solde
+    const typeToTache = {
+      'Vacance': 'Vacances',
+      'Mieux-Être': 'Mieux-Être',
+      'En banque': 'En banque',
+    };
+    const ancienType = editingPointage.type;
+    const nouveauType = editPointageForm.type;
+    const ancienneTache = typeToTache[ancienType];
+    const nouvelleTache = typeToTache[nouveauType];
+
+    // Chercher l'EntreeTemps existante liée à ce pointage (même date, tache de congé, même user)
+    const dateOriginal = editingPointage.date;
+    if (ancienneTache || nouvelleTache) {
+      const entreesLiees = await base44.entities.EntreeTemps.filter({
+        utilisateur_email: user?.email,
+        date: dateOriginal,
+      });
+
+      const entreeExistante = entreesLiees.find(e => e.tache === ancienneTache && !e.dossier_id);
+
+      if (entreeExistante) {
+        if (nouvelleTache) {
+          // Mettre à jour la durée et la tâche si le type a changé
+          await base44.entities.EntreeTemps.update(entreeExistante.id, {
+            ...entreeExistante,
+            heures: dureeHeuresModifiee,
+            tache: nouvelleTache,
+            date: editPointageForm.date,
+            description: editPointageForm.description,
+          });
+        } else {
+          // Le nouveau type n'est plus un congé → supprimer l'EntreeTemps de congé
+          await base44.entities.EntreeTemps.delete(entreeExistante.id);
+        }
+      } else if (nouvelleTache) {
+        // Pas d'EntreeTemps existante mais le nouveau type est un congé → en créer une
+        await base44.entities.EntreeTemps.create({
+          date: editPointageForm.date,
+          heures: dureeHeuresModifiee,
+          tache: nouvelleTache,
+          description: editPointageForm.description,
+          utilisateur_email: user?.email,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['entreeTemps', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['entreeTempsConges', user?.email] });
+    }
   };
 
   const handleSubmitAddPointage = async (e) => {
