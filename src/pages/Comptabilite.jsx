@@ -331,8 +331,32 @@ export default function Comptabilite() {
                                </div>
                              );
                            })}
-                           <div className="text-right space-y-0.5">
-                             <div className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</div>
+                           <div className="text-right space-y-1">
+                             <div className={`text-xs font-bold ${weekH > 0 ? 'text-slate-200' : 'text-slate-700'}`}>
+                               Total: {weekH > 0 ? `${weekH.toFixed(1)}h` : '-'}
+                             </div>
+                             {(() => {
+                               let weekPointage = 0, weekVacances = 0, weekMieuxEtre = 0, weekBanque = 0;
+                               weekDays.forEach(day => {
+                                 const dayPointages = getPointagesForDateUser(day, u.email);
+                                 dayPointages.forEach(p => {
+                                   const mult = parseFloat(p.multiplicateur || 1);
+                                   const ph = getPointageDuration(p) * mult;
+                                   if (p.type?.includes('Vacance')) weekVacances += ph;
+                                   else if (p.type?.includes('Mieux')) weekMieuxEtre += ph;
+                                   else if (p.type === 'En banque') weekBanque += ph;
+                                   else weekPointage += ph;
+                                 });
+                               });
+                               return (
+                                 <>
+                                   {weekPointage > 0 && <div className="text-[10px] text-green-400">Pointage: {weekPointage.toFixed(1)}h</div>}
+                                   {weekVacances > 0 && <div className="text-[10px] text-violet-400">Vacances: {weekVacances.toFixed(1)}h</div>}
+                                   {weekMieuxEtre > 0 && <div className="text-[10px] text-pink-400">Mieux-être: {weekMieuxEtre.toFixed(1)}h</div>}
+                                   {weekBanque > 0 && <div className="text-[10px] text-yellow-400">Banque: {weekBanque.toFixed(1)}h</div>}
+                                 </>
+                               );
+                             })()}
                            </div>
                            <div className="text-center">
                              {commentaire?.contenu && (
