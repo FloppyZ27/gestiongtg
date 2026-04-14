@@ -18,7 +18,7 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 export default function Calendrier() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week');
+  const [viewMode, setViewMode] = useState('month');
   const [selectedUser, setSelectedUser] = useState([]);
   const [selectedType, setSelectedType] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
