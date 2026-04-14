@@ -670,26 +670,46 @@ export default function FeuilleTempsSection({
                 rows={6}
                 autoFocus
               />
-              <div className="flex justify-end gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCommentOpen(false)}
-                  className="border-red-500 text-red-400 hover:bg-red-500/10"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onClick={() => saveCommentMutation.mutate(commentText)}
-                  disabled={saveCommentMutation.isPending}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-none"
-                >
-                  {saveCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
-                </Button>
-              </div>
             </TabsContent>
 
             <TabsContent value="factures" className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  capture="environment"
+                  id="photo-input"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file && currentUser?.full_name) {
+                      const reader = new FileReader();
+                      reader.onload = async () => {
+                        const base64 = reader.result.split(',')[1];
+                        try {
+                          await base44.functions.invoke('uploadToSharePoint', {
+                            folderPath: `COMPTABILITÉ/FACTURES/${currentUser.full_name}/${getWeekDateRange()}`,
+                            fileName: `photo_${Date.now()}.jpg`,
+                            fileContent: base64,
+                            contentType: 'image/jpeg'
+                          });
+                          setFileCount(prev => prev + 1);
+                          e.target.value = '';
+                        } catch (error) {
+                          console.error('Erreur lors du téléversement:', error);
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                <Button 
+                  onClick={() => document.getElementById('photo-input').click()}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                >
+                  📸 Prendre une photo
+                </Button>
+              </div>
               <SharePointExplorer 
                 rootPath="COMPTABILITÉ/FACTURES" 
                 initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
@@ -700,6 +720,23 @@ export default function FeuilleTempsSection({
                 onFileCountChange={setFileCount}
               />
             </TabsContent>
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCommentOpen(false)}
+                className="border-red-500 text-red-400 hover:bg-red-500/10"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={() => saveCommentMutation.mutate(commentText)}
+                disabled={saveCommentMutation.isPending}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-none"
+              >
+                {saveCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              </Button>
+            </div>
           </Tabs>
         </DialogContent>
       </Dialog>
