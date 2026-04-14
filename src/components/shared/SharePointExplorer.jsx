@@ -81,7 +81,17 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
       fileId: file.id
     });
     const url = response.data?.downloadUrl || file.webUrl;
-    if (url) window.open(url, '_blank');
+    if (url) {
+      // Ouvrir en visualisation (Office365 viewer ou aperçu)
+      const ext = file.name?.split('.').pop()?.toLowerCase() || '';
+      if (['pdf', 'jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+        // Pour les images et PDF, ouvrir directement
+        window.open(url, '_blank');
+      } else {
+        // Pour les documents Office, utiliser le viewer SharePoint
+        window.open(url, '_blank');
+      }
+    }
   };
 
   const handleDelete = async (file) => {
