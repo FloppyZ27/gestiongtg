@@ -1,0 +1,80 @@
+{
+  "name": "Pointage",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date du pointage"
+    },
+    "heure_debut": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Heure de d\u00e9but initiale (punch in)"
+    },
+    "heure_fin": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Heure de fin initiale (punch out)"
+    },
+    "heure_debut_modifiee": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Heure de d\u00e9but modifi\u00e9e"
+    },
+    "heure_fin_modifiee": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Heure de fin modifi\u00e9e"
+    },
+    "duree_heures": {
+      "type": "number",
+      "description": "Dur\u00e9e en heures (calcul\u00e9e sur les heures modifi\u00e9es si pr\u00e9sentes)"
+    },
+    "duree_heures_modifiee": {
+      "type": "number",
+      "description": "Dur\u00e9e en heures modifi\u00e9e"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description de l'activit\u00e9"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_cours",
+        "termine"
+      ],
+      "default": "en_cours",
+      "description": "Statut du pointage"
+    },
+    "confirme": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indique si le pointage a \u00e9t\u00e9 confirm\u00e9"
+    },
+    "multiplicateur": {
+      "type": "number",
+      "enum": [
+        1,
+        1.5,
+        2
+      ],
+      "default": 1,
+      "description": "Multiplicateur de taux (1, 1.5 ou 2)"
+    },
+    "type": {
+      "type": "string",
+      "description": "Type de pointage (ex: Vacances, Mieux-\u00catre, etc.)"
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "date",
+    "heure_debut"
+  ]
+}

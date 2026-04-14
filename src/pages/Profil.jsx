@@ -523,6 +523,8 @@ export default function Profil() {
       heure_fin: fin.toISOString(),
       duree_heures: dureeHeures,
       description: addPointageForm.description,
+      type: addPointageForm.type,
+      multiplicateur: parseFloat(addPointageForm.multiplicateur || 1),
       confirme: true
     });
 
