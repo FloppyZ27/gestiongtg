@@ -20,6 +20,7 @@ import AgendaSection from "@/components/profil/AgendaSection";
 import FeuilleTempsSection from "@/components/profil/FeuilleTempsSection";
 import EntreeTempsDialog from "@/components/shared/EntreeTempsDialog";
 import AddressSearchInput from "@/components/profil/AddressSearchInput";
+import TimeInput12h from "@/components/profil/TimeInput12h";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -1373,37 +1374,19 @@ export default function Profil() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="time"
+                      <TimeInput12h
                         value={addPointageForm.heure_debut}
-                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_debut: e.target.value})}
-                        className="bg-slate-800 border-slate-700 text-white"
-                        step="60"
-                        style={{ colorScheme: 'dark' }}
+                        onChange={(v) => setAddPointageForm({...addPointageForm, heure_debut: v})}
                         required
                       />
-                      {addPointageForm.heure_debut && (
-                        <p className="text-xs text-slate-400">
-                          {(() => { const [h, m] = addPointageForm.heure_debut.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
-                        </p>
-                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="time"
+                      <TimeInput12h
                         value={addPointageForm.heure_fin}
-                        onChange={(e) => setAddPointageForm({...addPointageForm, heure_fin: e.target.value})}
-                        className="bg-slate-800 border-slate-700 text-white"
-                        step="60"
-                        style={{ colorScheme: 'dark' }}
+                        onChange={(v) => setAddPointageForm({...addPointageForm, heure_fin: v})}
                         required
                       />
-                      {addPointageForm.heure_fin && (
-                        <p className="text-xs text-slate-400">
-                          {(() => { const [h, m] = addPointageForm.heure_fin.split(':'); const hNum = parseInt(h); return `${hNum % 12 || 12}:${m} ${hNum < 12 ? 'AM' : 'PM'}`; })()}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -1537,69 +1520,19 @@ export default function Profil() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Heure de départ <span className="text-red-400">*</span></Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="time"
-                      value={editPointageForm.heure_debut}
-                      onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
-                      className="bg-slate-800 border-slate-700 text-white flex-1"
-                      step="60"
-                      style={{ colorScheme: 'dark' }}
-                      required
-                    />
-                    <Select
-                      value={editPointageForm.heure_debut ? (parseInt(editPointageForm.heure_debut.split(':')[0]) < 12 ? 'AM' : 'PM') : 'AM'}
-                      onValueChange={(ampm) => {
-                        if (!editPointageForm.heure_debut) return;
-                        const [h, m] = editPointageForm.heure_debut.split(':');
-                        let hNum = parseInt(h);
-                        if (ampm === 'AM' && hNum >= 12) hNum -= 12;
-                        if (ampm === 'PM' && hNum < 12) hNum += 12;
-                        setEditPointageForm({...editPointageForm, heure_debut: `${String(hNum).padStart(2,'0')}:${m}`});
-                      }}
-                    >
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white w-20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="AM" className="text-white">AM</SelectItem>
-                        <SelectItem value="PM" className="text-white">PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <TimeInput12h
+                    value={editPointageForm.heure_debut}
+                    onChange={(v) => setEditPointageForm({...editPointageForm, heure_debut: v})}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Heure de fin <span className="text-red-400">*</span></Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="time"
-                      value={editPointageForm.heure_fin}
-                      onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
-                      className="bg-slate-800 border-slate-700 text-white flex-1"
-                      step="60"
-                      style={{ colorScheme: 'dark' }}
-                      required
-                    />
-                    <Select
-                      value={editPointageForm.heure_fin ? (parseInt(editPointageForm.heure_fin.split(':')[0]) < 12 ? 'AM' : 'PM') : 'PM'}
-                      onValueChange={(ampm) => {
-                        if (!editPointageForm.heure_fin) return;
-                        const [h, m] = editPointageForm.heure_fin.split(':');
-                        let hNum = parseInt(h);
-                        if (ampm === 'AM' && hNum >= 12) hNum -= 12;
-                        if (ampm === 'PM' && hNum < 12) hNum += 12;
-                        setEditPointageForm({...editPointageForm, heure_fin: `${String(hNum).padStart(2,'0')}:${m}`});
-                      }}
-                    >
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white w-20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="AM" className="text-white">AM</SelectItem>
-                        <SelectItem value="PM" className="text-white">PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <TimeInput12h
+                    value={editPointageForm.heure_fin}
+                    onChange={(v) => setEditPointageForm({...editPointageForm, heure_fin: v})}
+                    required
+                  />
                 </div>
               </div>
 
