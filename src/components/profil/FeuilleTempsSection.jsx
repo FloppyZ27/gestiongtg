@@ -345,6 +345,8 @@ export default function FeuilleTempsSection({
                                                          ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
                                                          : (p.type?.includes('Mieux') || (!p.type && (p.description?.toLowerCase().includes('mieux'))))
                                             ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
+                                            : p.type === 'En banque'
+                                            ? 'bg-gradient-to-r from-yellow-500/60 to-amber-400/60 border border-yellow-400 text-yellow-50'
                                             : p.confirme
                                             ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                             : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
@@ -513,12 +515,15 @@ export default function FeuilleTempsSection({
                             const mult = parseFloat(p.multiplicateur || 1);
                             const duree = ((fin - debut) / (1000 * 60 * 60)) * mult;
 
+                            const isEnBanque = p.type === 'En banque';
                             const colorClass = isModified
                                ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
                                : isVacance
                                ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
                                : isMieuxEtre
                                ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
+                               : isEnBanque
+                               ? 'bg-gradient-to-r from-yellow-500/60 to-amber-400/60 border border-yellow-400 text-yellow-50'
                                : p.confirme
                                ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
@@ -526,6 +531,7 @@ export default function FeuilleTempsSection({
                             const titleColor = isModified ? 'text-orange-300'
                                : isVacance ? 'text-violet-300'
                                : isMieuxEtre ? 'text-pink-300'
+                               : isEnBanque ? 'text-yellow-300'
                                : p.confirme ? 'text-green-300'
                                : 'text-blue-300';
 
