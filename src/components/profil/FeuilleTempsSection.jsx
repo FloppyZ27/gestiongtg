@@ -348,15 +348,13 @@ export default function FeuilleTempsSection({
                                     <TooltipTrigger asChild>
                                       <div
                                         className={`absolute left-1 right-1 rounded px-2 py-1 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
-                                          isModified
-                                            ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                                            : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')))
-                                                         ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
-                                                         : (p.type?.includes('Mieux') || (!p.type && (p.description?.toLowerCase().includes('mieux'))))
+                                          (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance')))
+                                            ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
+                                            : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux')))
                                             ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
                                             : p.type === 'En banque'
                                             ? 'bg-gradient-to-r from-yellow-500/60 to-amber-400/60 border border-yellow-400 text-yellow-50'
-                                            : p.confirme
+                                            : p.confirme || isModified
                                             ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                             : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
                                         }`}
@@ -379,11 +377,10 @@ export default function FeuilleTempsSection({
                                         {/* Statut visible si >= 30px */}
                                         {totalMinutes >= 30 && (
                                           <div className={`text-[11px] font-semibold ${
-                                            isModified ? 'text-orange-300'
-                                            : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-300'
+                                            (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-300'
                                             : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-300'
                                             : p.type === 'En banque' ? 'text-yellow-300'
-                                            : p.confirme ? 'text-green-300'
+                                            : (p.confirme || isModified) ? 'text-green-300'
                                             : 'text-blue-300'
                                           }`}>
                                             {isModified ? 'Modifié' : p.confirme ? 'Confirmé' : 'En attente'}
@@ -392,18 +389,18 @@ export default function FeuilleTempsSection({
                                         {/* Heures visibles si >= 60px */}
                                         {totalMinutes >= 60 && (
                                           <div className="text-[11px] leading-tight">
-                                            <div className={isModified ? "opacity-50 text-slate-300" : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? "opacity-90 text-violet-300" : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? "opacity-90 text-pink-300" : p.type === 'En banque' ? "opacity-90 text-yellow-300" : p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>
+                                            <div className={`opacity-${isModified ? '50' : '90'} ${(p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-300' : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-300' : p.type === 'En banque' ? 'text-yellow-300' : 'text-green-400'}`}>
                                               Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)
                                             </div>
                                             {isModified && (
-                                              <div className="opacity-90 text-orange-400 mt-1">
+                                              <div className="opacity-90 text-green-300 mt-1">
                                                 Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)
                                               </div>
                                             )}
                                           </div>
                                         )}
                                         {/* Bouton et dates visibles si >= 90px */}
-                                        {totalMinutes >= 90 && !p.confirme && (
+                                        {totalMinutes >= 90 && !p.confirme && !isModified && (
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -414,14 +411,9 @@ export default function FeuilleTempsSection({
                                             Confirmer
                                           </button>
                                         )}
-                                        {totalMinutes >= 90 && p.confirme && !isModified && (
-                                           <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type?.includes('Vacance') ? 'border-violet-400/30' : p.type?.includes('Mieux') ? 'border-pink-400/30' : p.type === 'En banque' ? 'border-yellow-400/30' : 'border-green-400/30'}`}>
-                                            Confirmé: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
-                                          </div>
-                                        )}
-                                        {totalMinutes >= 90 && isModified && (
-                                          <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-orange-400/30">
-                                            Dernière modification: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                                        {totalMinutes >= 90 && (p.confirme || isModified) && (
+                                          <div className={`text-[9px] opacity-60 mt-auto pt-1 border-t ${p.type?.includes('Vacance') ? 'border-violet-400/30' : p.type?.includes('Mieux') ? 'border-pink-400/30' : p.type === 'En banque' ? 'border-yellow-400/30' : 'border-green-400/30'}`}>
+                                            {isModified ? 'Modifié' : 'Confirmé'}: {format(new Date(p.updated_date), "dd/MM/yyyy HH:mm", { locale: fr })}
                                           </div>
                                         )}
                                       </div>
@@ -430,11 +422,10 @@ export default function FeuilleTempsSection({
                                       <div className="space-y-2">
                                         <div className="flex items-center justify-between gap-2">
                                           <div className={`text-xs font-bold uppercase ${
-                                             isModified ? 'text-orange-400'
-                                             : (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-400'
+                                             (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) ? 'text-violet-400'
                                              : (p.type?.includes('Mieux') || (!p.type && p.description?.toLowerCase().includes('mieux'))) ? 'text-pink-400'
                                              : p.type === 'En banque' ? 'text-yellow-400'
-                                             : p.confirme ? 'text-green-400'
+                                             : (p.confirme || isModified) ? 'text-green-400'
                                              : 'text-blue-400'
                                            }`}>
                                             <span>{getTypeLabel(p)}</span>
@@ -446,7 +437,7 @@ export default function FeuilleTempsSection({
                                         <div className="text-sm text-slate-300">
                                           <div>Initial: <span className="text-white font-semibold">{format(initialStart, "HH:mm")} – {format(initialEnd, "HH:mm")}</span> <span className="text-slate-400">({initialDuration.toFixed(1)}h)</span></div>
                                           {isModified && (
-                                            <div className="mt-1">Modifié: <span className="text-orange-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
+                                            <div className="mt-1">Modifié: <span className="text-green-300 font-semibold">{format(startTime, "HH:mm")} – {format(endTime, "HH:mm")}</span> <span className="text-slate-400">({modifiedDuration?.toFixed(1)}h)</span></div>
                                           )}
                                         </div>
                                         {p.description && (
@@ -532,23 +523,20 @@ export default function FeuilleTempsSection({
                             const duree = ((fin - debut) / (1000 * 60 * 60)) * mult;
 
                             const isEnBanque = p.type === 'En banque';
-                            const colorClass = isModified
-                               ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
-                               : isVacance
+                            const colorClass = isVacance
                                ? 'bg-gradient-to-r from-violet-500/60 to-purple-500/60 border border-violet-500 text-violet-50'
                                : isMieuxEtre
                                ? 'bg-gradient-to-r from-pink-500/60 to-rose-500/60 border border-pink-500 text-pink-50'
                                : isEnBanque
                                ? 'bg-gradient-to-r from-yellow-500/60 to-amber-400/60 border border-yellow-400 text-yellow-50'
-                               : p.confirme
+                               : (p.confirme || isModified)
                                ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50';
 
-                            const titleColor = isModified ? 'text-orange-300'
-                               : isVacance ? 'text-violet-300'
+                            const titleColor = isVacance ? 'text-violet-300'
                                : isMieuxEtre ? 'text-pink-300'
                                : isEnBanque ? 'text-yellow-300'
-                               : p.confirme ? 'text-green-300'
+                               : (p.confirme || isModified) ? 'text-green-300'
                                : 'text-blue-300';
 
                             return (
