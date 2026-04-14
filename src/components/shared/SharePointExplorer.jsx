@@ -20,7 +20,7 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
-export default function SharePointExplorer({ rootPath, initialPath = [], maxHeight = "400px", allowUpload = true, allowDelete = false }) {
+export default function SharePointExplorer({ rootPath, initialPath = [], maxHeight = "400px", allowUpload = true, allowDelete = false, minPathLength = 0 }) {
   const [pathStack, setPathStack] = useState(initialPath);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -54,7 +54,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   };
 
   const navigateBack = () => {
-    setPathStack(prev => prev.slice(0, -1));
+    setPathStack(prev => prev.length > minPathLength ? prev.slice(0, -1) : prev);
   };
 
   const navigateToIndex = (index) => {
@@ -140,11 +140,11 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
       {/* Barre de navigation explorateur */}
       <div className="flex items-center gap-1 bg-slate-800/60 border border-slate-700 rounded px-2 py-1.5 overflow-hidden">
         <button
-          onClick={navigateBack}
-          disabled={pathStack.length === 0}
-          className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-700/50 transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Retour"
-        >
+            onClick={navigateBack}
+            disabled={pathStack.length <= minPathLength}
+            className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-700/50 transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Retour"
+          >
           <ArrowLeft className="w-3.5 h-3.5" />
         </button>
         <span className="text-slate-500 text-xs font-mono" title={currentPath}>{currentPath}</span>

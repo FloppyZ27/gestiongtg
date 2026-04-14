@@ -682,15 +682,14 @@ export default function FeuilleTempsSection({
             </TabsContent>
 
             <TabsContent value="factures" className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-slate-400 text-sm">Explorateur SharePoint pour les factures de la semaine du {weekKey ? format(new Date(weekKey + 'T00:00:00'), "d MMMM", { locale: fr }) : ""}:</p>
-                <SharePointExplorer 
-                  rootPath="COMPTABILITÉ/FACTURES" 
-                  initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
-                  maxHeight="500px"
-                  allowUpload={true}
-                  allowDelete={true}
-                />
+              <SharePointExplorer 
+                rootPath="COMPTABILITÉ/FACTURES" 
+                initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
+                maxHeight="500px"
+                allowUpload={true}
+                allowDelete={true}
+                minPathLength={1}
+              />
               </div>
             </TabsContent>
           </Tabs>
