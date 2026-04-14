@@ -83,18 +83,20 @@ export default function FeuilleTempsSection({
                     return sum + dayPointages.reduce((daySum, p) => {
                       const debut = new Date(p.heure_debut);
                       const fin = new Date(p.heure_fin);
-                      return daySum + (fin - debut) / (1000 * 60 * 60);
+                      const mult = parseFloat(p.multiplicateur || 1);
+                      return daySum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                     }, 0);
                   }, 0);
                   const totalModifie = monthDays.reduce((sum, day) => {
                     const dayPointages = getPointageForDate(day);
                     return sum + dayPointages.reduce((daySum, p) => {
+                      const mult = parseFloat(p.multiplicateur || 1);
                       if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                        return daySum + (p.duree_heures_modifiee || 0);
+                        return daySum + (p.duree_heures_modifiee || 0) * mult;
                       } else {
                         const debut = new Date(p.heure_debut);
                         const fin = new Date(p.heure_fin);
-                        return daySum + (fin - debut) / (1000 * 60 * 60);
+                        return daySum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                       }
                     }, 0);
                   }, 0);
@@ -212,18 +214,20 @@ export default function FeuilleTempsSection({
                             return sum + dayPointages.reduce((daySum, p) => {
                               const debut = new Date(p.heure_debut);
                               const fin = new Date(p.heure_fin);
-                              return daySum + (fin - debut) / (1000 * 60 * 60);
+                              const mult = parseFloat(p.multiplicateur || 1);
+                              return daySum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                             }, 0);
                           }, 0);
                           const totalModifie = weekDays.reduce((sum, day) => {
                             const dayPointages = getPointageForDate(day);
                             return sum + dayPointages.reduce((daySum, p) => {
+                              const mult = parseFloat(p.multiplicateur || 1);
                               if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                                return daySum + (p.duree_heures_modifiee || 0);
+                                return daySum + (p.duree_heures_modifiee || 0) * mult;
                               } else {
                                 const debut = new Date(p.heure_debut);
                                 const fin = new Date(p.heure_fin);
-                                return daySum + (fin - debut) / (1000 * 60 * 60);
+                                return daySum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                               }
                             }, 0);
                           }, 0);
@@ -244,15 +248,17 @@ export default function FeuilleTempsSection({
                         const totalInitial = dayPointages.reduce((sum, p) => {
                           const debut = new Date(p.heure_debut);
                           const fin = new Date(p.heure_fin);
-                          return sum + (fin - debut) / (1000 * 60 * 60);
+                          const mult = parseFloat(p.multiplicateur || 1);
+                          return sum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                         }, 0);
                         const totalModifie = dayPointages.reduce((sum, p) => {
+                          const mult = parseFloat(p.multiplicateur || 1);
                           if (p.heure_debut_modifiee && p.heure_fin_modifiee) {
-                            return sum + (p.duree_heures_modifiee || 0);
+                            return sum + (p.duree_heures_modifiee || 0) * mult;
                           } else {
                             const debut = new Date(p.heure_debut);
                             const fin = new Date(p.heure_fin);
-                            return sum + (fin - debut) / (1000 * 60 * 60);
+                            return sum + ((fin - debut) / (1000 * 60 * 60)) * mult;
                           }
                         }, 0);
                         
@@ -498,7 +504,8 @@ export default function FeuilleTempsSection({
                             const isMieuxEtre = p.type?.includes('Mieux');
                             const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
                             const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
-                            const duree = (fin - debut) / (1000 * 60 * 60);
+                            const mult = parseFloat(p.multiplicateur || 1);
+                            const duree = ((fin - debut) / (1000 * 60 * 60)) * mult;
 
                             const colorClass = isModified
                               ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
@@ -529,7 +536,7 @@ export default function FeuilleTempsSection({
                                   <div className={`truncate font-bold text-sm ${titleColor}`}>{p.description}</div>
                                 )}
                                 <div className="truncate text-[11px] opacity-90">
-                                  {format(debut, "HH:mm")} - {format(fin, "HH:mm")} ({duree.toFixed(1)}h)
+                                  {format(debut, "HH:mm")} - {format(fin, "HH:mm")} ({duree.toFixed(1)}h{mult !== 1 ? ` ×${mult}` : ''})
                                 </div>
                                 <div className="text-[9px] opacity-60 mt-auto pt-1 border-t border-white/20">
                                   <div className="truncate">Modif: {format(new Date(p.updated_date), "dd/MM/yy")}</div>
