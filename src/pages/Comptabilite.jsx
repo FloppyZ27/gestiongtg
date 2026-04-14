@@ -265,8 +265,8 @@ export default function Comptabilite() {
                 {/* ---- VUE LISTE ---- */}
                 {feuilleTempsView === 'liste' && (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
-                    {/* En-tête : Utilisateur + dim à sam + total */}
-                    <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
+                    {/* En-tête : Utilisateur + dim à sam + total + note */}
+                     <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr 0.5fr' }}>
                       <div className="text-xs font-semibold text-slate-400">
                         <button
                           onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
@@ -286,7 +286,8 @@ export default function Comptabilite() {
                         );
                       })}
                       <div className="text-xs font-semibold text-slate-400 text-right">Total</div>
-                    </div>
+                      <div className="text-xs font-semibold text-slate-400 text-center">Note</div>
+                      </div>
 
                     {/* Lignes par utilisateur */}
                      {sortedUsers.map(u => {
@@ -294,16 +295,50 @@ export default function Comptabilite() {
                        const typeBreakdown = getPointagesByTypeForUser(u.email);
                        const commentaire = getCommentaireForUser(u.email);
                        return (
-                         <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr' }}>
+                         <div key={u.id} className="grid px-3 py-2.5 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr 0.5fr' }}>
                            <div className="flex items-center gap-2">
                              <Avatar className="w-7 h-7">
                                <AvatarImage src={u.photo_url} />
                                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                              </Avatar>
-                             <div className="flex-1">
+                             <div>
                                <p className="text-white font-medium text-sm">{u.full_name}</p>
                                <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                              </div>
+                           </div>
+                           {weekDays.map((day, idx) => {
+                             const h = getUserDayTotalHours(day, u.email);
+                             const isToday = day.toDateString() === new Date().toDateString();
+                             const dayPointages = getPointagesForDateUser(day, u.email);
+                             let dayPointage = 0, dayVacances = 0, dayMieuxEtre = 0, dayBanque = 0;
+                             dayPointages.forEach(p => {
+                               const mult = parseFloat(p.multiplicateur || 1);
+                               const ph = getPointageDuration(p) * mult;
+                               if (p.type?.includes('Vacance')) dayVacances += ph;
+                               else if (p.type?.includes('Mieux')) dayMieuxEtre += ph;
+                               else if (p.type === 'En banque') dayBanque += ph;
+                               else dayPointage += ph;
+                             });
+                             return (
+                               <div key={idx} className="text-right space-y-0.5">
+                                 <div className={`text-xs font-bold ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
+                                   {h > 0 ? `${h.toFixed(1)}h` : '-'}
+                                 </div>
+                                 {h > 0 && (
+                                   <div className="text-[9px] space-y-0.5 text-slate-500">
+                                     {dayPointage > 0 && <div className="text-green-400">P:{dayPointage.toFixed(1)}</div>}
+                                     {dayVacances > 0 && <div className="text-violet-400">V:{dayVacances.toFixed(1)}</div>}
+                                     {dayMieuxEtre > 0 && <div className="text-pink-400">ME:{dayMieuxEtre.toFixed(1)}</div>}
+                                     {dayBanque > 0 && <div className="text-yellow-400">B:{dayBanque.toFixed(1)}</div>}
+                                   </div>
+                                 )}
+                               </div>
+                             );
+                           })}
+                           <div className="text-right space-y-0.5">
+                             <div className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</div>
+                           </div>
+                           <div className="text-center">
                              {commentaire?.contenu && (
                                <Tooltip>
                                  <TooltipTrigger asChild>
@@ -312,36 +347,16 @@ export default function Comptabilite() {
                                        setSelectedNoteUser(u);
                                        setIsNoteModalOpen(true);
                                      }}
-                                     className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors flex items-center gap-1"
+                                     className="px-1.5 py-1 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors inline-flex items-center gap-1"
                                    >
                                      <MessageSquare className="w-3 h-3" />
                                    </button>
                                  </TooltipTrigger>
-                                 <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                 <TooltipContent side="left" className="bg-slate-800 border-slate-700 text-white max-w-xs">
                                    <p className="text-xs">Note semaine</p>
                                  </TooltipContent>
                                </Tooltip>
                              )}
-                           </div>
-                           {weekDays.map((day, idx) => {
-                             const h = getUserDayTotalHours(day, u.email);
-                             const isToday = day.toDateString() === new Date().toDateString();
-                             return (
-                               <div key={idx} className="text-right">
-                                 <span className={`text-xs font-medium ${h > 0 ? (isToday ? 'text-emerald-300' : 'text-slate-200') : 'text-slate-700'}`}>
-                                   {h > 0 ? `${h.toFixed(1)}h` : '-'}
-                                 </span>
-                               </div>
-                             );
-                           })}
-                           <div className="text-right space-y-0.5">
-                             <div className={`font-bold text-sm ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h</div>
-                             <div className="text-[10px] space-y-0.5 text-slate-400">
-                               {typeBreakdown.pointage > 0 && <div className="text-green-400">P: {typeBreakdown.pointage.toFixed(1)}h</div>}
-                               {typeBreakdown.vacances > 0 && <div className="text-violet-400">V: {typeBreakdown.vacances.toFixed(1)}h</div>}
-                               {typeBreakdown.mieuxEtre > 0 && <div className="text-pink-400">ME: {typeBreakdown.mieuxEtre.toFixed(1)}h</div>}
-                               {typeBreakdown.banque > 0 && <div className="text-yellow-400">B: {typeBreakdown.banque.toFixed(1)}h</div>}
-                             </div>
                            </div>
                          </div>
                        );
