@@ -1300,9 +1300,8 @@ export default function Profil() {
             </DialogHeader>
             
             <Tabs defaultValue="pointage" className="w-full">
-              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4">
+              <TabsList className="bg-slate-800/50 border-b border-slate-700 w-full rounded-none p-0 mb-4" style={{ display: 'none' }}>
                 <TabsTrigger value="pointage" className="flex-1 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Pointage</TabsTrigger>
-                <TabsTrigger value="facture" className="flex-1 px-4 py-2 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent rounded-none">Facture</TabsTrigger>
               </TabsList>
 
               <TabsContent value="pointage" className="space-y-4">
@@ -1420,31 +1419,7 @@ export default function Profil() {
                 </form>
               </TabsContent>
 
-              <TabsContent value="facture" className="space-y-3">
-                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
-                  <div className="mb-4">
-                    <Label className="text-slate-300 text-sm font-semibold mb-2 block">Dossier de facturation</Label>
-                    <p className="text-slate-400 text-xs">Uploadez vos factures ici</p>
-                  </div>
-                  <div className="border-2 border-dashed border-blue-500/30 rounded-lg p-6 text-center hover:border-blue-500/50 transition-colors cursor-pointer bg-blue-500/5">
-                    <Upload className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                    <p className="text-slate-300 text-sm mb-1">Glissez vos factures ici</p>
-                    <p className="text-slate-500 text-xs">ou cliquez pour sélectionner (PDF, PNG, JPG)</p>
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.png,.jpg,.jpeg"
-                      className="hidden"
-                      id="facture-input-profil"
-                    />
-                    <label htmlFor="facture-input-profil" className="cursor-pointer">
-                      <Button type="button" variant="outline" size="sm" className="mt-3 mx-auto border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
-                        Sélectionner des fichiers
-                      </Button>
-                    </label>
-                  </div>
-                </div>
-              </TabsContent>
+
             </Tabs>
           </DialogContent>
         </Dialog>
