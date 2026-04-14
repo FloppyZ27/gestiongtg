@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,7 +118,7 @@ export default function Profil() {
     type: "Pointage",
     multiplicateur: "1"
   });
-  const weekScrollRef = React.useRef(null);
+  const weekScrollRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -1416,7 +1416,7 @@ export default function Profil() {
           </DialogContent>
         </Dialog>
 
-        {/* Edit Pointage Dialog */}
+        {/* Edit Pointage Dialog - v2 avec Type + Multiplicateur */}
         <Dialog open={!!editingPointage} onOpenChange={(open) => !open && setEditingPointage(null)}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
