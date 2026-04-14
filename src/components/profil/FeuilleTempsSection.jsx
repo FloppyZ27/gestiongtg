@@ -339,8 +339,9 @@ export default function FeuilleTempsSection({
                                 const topPx = startHour * 60 + startMin;
                                 const initialStart = new Date(p.heure_debut);
                                 const initialEnd = new Date(p.heure_fin);
-                                const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
-                                const modifiedDuration = isModified ? (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60) : null;
+                                const mult = parseFloat(p.multiplicateur || 1);
+                                const initialDuration = ((initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60)) * mult;
+                                const modifiedDuration = isModified ? (p.duree_heures_modifiee || 0) * mult : null;
 
                                 return (
                                   <Tooltip key={`display-${p.id}`}>
