@@ -1235,11 +1235,11 @@ export default function EditDossierForm({
                                   <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
                                 )}
                               </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </Tabs>
+                              </div>
+                              </div></div>
+                              </TabsContent>
+                              ))}
+                              </Tabs>
                   ) : (
                     <div className="flex items-center justify-center py-6">
                       <Button type="button" size="sm" onClick={addMandat} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-7 text-xs">
