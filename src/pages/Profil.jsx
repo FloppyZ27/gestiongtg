@@ -1211,14 +1211,14 @@ export default function Profil() {
                     const total = calculateTotalHours(day.toISOString().split('T')[0]);
                     const isToday = day.toDateString() === new Date().toDateString();
                     return (
-                      <div key={day.toISOString()} className={`rounded-lg border ${isToday ? 'border-orange-500/50' : 'border-slate-700'}`}>
-                        {/* En-tête du jour */}
-                        <div className={`flex items-center justify-between px-4 py-2 rounded-t-lg ${isToday ? 'bg-orange-900/20' : 'bg-slate-800/50'}`}>
-                          <span className={`font-semibold text-sm ${isToday ? 'text-orange-300' : 'text-slate-300'}`}>
-                            {format(day, "EEEE d MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(day, "EEEE d MMMM yyyy", { locale: fr }).slice(1)}
-                          </span>
-                          <span className={`text-sm font-bold ${isToday ? 'text-orange-400' : 'text-slate-400'}`}>{total.toFixed(1)}h</span>
-                        </div>
+                      <div key={day.toISOString()} className="rounded-lg border border-slate-700">
+                         {/* En-tête du jour */}
+                         <div className="flex items-center justify-between px-4 py-2 rounded-t-lg bg-slate-800/50">
+                           <span className="font-semibold text-sm text-slate-300">
+                             {format(day, "EEEE d MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(day, "EEEE d MMMM yyyy", { locale: fr }).slice(1)}
+                           </span>
+                           <span className="text-sm font-bold text-slate-400">{total.toFixed(1)}h</span>
+                         </div>
                         {/* Lignes d'entrées */}
                         <div className="divide-y divide-slate-700/50">
                           {entries.map(entry => {
