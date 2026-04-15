@@ -562,20 +562,43 @@ export default function GestionDeMandat() {
             {/* Vue par Tâches */}
             <TabsContent value="taches" className="mt-0">
               {/* Filtre Place d'affaire */}
-              <div className="flex gap-2 mb-4">
-                {["Toutes", "Alma", "Saguenay"].map(place => (
-                  <button
-                    key={place}
-                    onClick={() => setFilterPlaceAffaire(place)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                      filterPlaceAffaire === place
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50"
-                        : "bg-slate-800/50 text-slate-400 border-slate-700 hover:text-slate-300 hover:border-slate-600"
-                    }`}
-                  >
-                    {place}
-                  </button>
-                ))}
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-slate-400 text-sm">Filtrer par place d'affaire</span>
+                {["Toutes", "Alma", "Saguenay"].map(place => {
+                  // Calculer le compte sans le filtre place d'affaire
+                  const baseFiltered = allCards.filter(c => {
+                    const s = searchTerm.toLowerCase();
+                    const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
+                    const cn = getClientsNames(c.dossier.clients_ids);
+                    return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
+                      (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
+                      (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
+                      (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
+                      (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
+                  });
+                  const count = place === "Toutes"
+                    ? baseFiltered.length
+                    : baseFiltered.filter(c => c.dossier.place_affaire === place).length;
+                  const isActive = filterPlaceAffaire === place;
+                  return (
+                    <button
+                      key={place}
+                      onClick={() => setFilterPlaceAffaire(place)}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all border-0 ${
+                        isActive
+                          ? "text-white bg-transparent"
+                          : "text-slate-400 bg-transparent hover:text-slate-300"
+                      }`}
+                    >
+                      <span>{place}</span>
+                      <span className={`inline-flex items-center justify-center rounded-full text-xs font-bold min-w-[20px] h-5 px-1.5 ${
+                        isActive ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-300"
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
