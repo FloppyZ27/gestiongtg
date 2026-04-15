@@ -703,12 +703,6 @@ export default function FeuilleTempsSection({
             </TabsContent>
 
             <TabsContent value="factures" className="space-y-4">
-              <Button 
-                onClick={() => setShowCamera(true)}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-              >
-                <Camera className="w-4 h-4 mr-1" /> Prendre une photo
-              </Button>
               <SharePointExplorer 
                 rootPath="COMPTABILITÉ/FACTURES" 
                 initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
@@ -719,7 +713,14 @@ export default function FeuilleTempsSection({
                 onFileCountChange={setFileCount}
               />
             </TabsContent>
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+            <div className="flex justify-between gap-3 pt-4 border-t border-slate-700">
+              <Button 
+                onClick={() => setShowCamera(true)}
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+              >
+                <Camera className="w-4 h-4 mr-1" /> Prendre une photo
+              </Button>
+              <div className="flex gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -735,6 +736,7 @@ export default function FeuilleTempsSection({
               >
                 {saveCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
+              </div>
             </div>
           </Tabs>
         </DialogContent>
