@@ -95,13 +95,12 @@ function UserEntriesPanel({ userEmail, showDescription = false }) {
         const info = TYPE_INFO[e.tache] || { color: 'text-slate-400', bg: 'bg-slate-500/20 border-slate-500/30' };
         const label = e.tache === 'Mieux-etre' ? 'Mieux-être' : e.tache;
         return (
-          <div key={idx} className="flex items-center gap-4 py-1.5 px-3 text-xs">
-            <span className="text-slate-400 w-28 flex-shrink-0">
+          <div key={idx} className="grid px-3 py-2 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors items-center" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
+            <span className="text-slate-400 text-xs">
               {e.date ? format(new Date(e.date + 'T12:00:00'), 'd MMM yyyy', { locale: fr }) : '-'}
             </span>
-            <span className={`px-2 py-0.5 rounded-full border text-xs font-medium flex-shrink-0 ${info.bg} ${info.color}`}>{label}</span>
-            <span className={`font-bold flex-shrink-0 ${info.color}`}>{e.heures}h</span>
-            {showDescription && e.description && <span className="text-slate-500 truncate">{e.description}</span>}
+            <span className={`px-2 py-0.5 rounded-full border text-xs font-medium w-fit ${info.bg} ${info.color}`}>{label}</span>
+            <span className={`font-bold text-xs text-right ${info.color}`}>{e.heures}h</span>
           </div>
         );
       })}
@@ -265,15 +264,15 @@ export default function SoldesCongesSection() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <FileText className="w-5 h-5 text-emerald-400" />
-              Entrées de congé {new Date().getFullYear()} — {selectedUser?.full_name}
+              Entrées des Vacances, Mieux-Être et En Banque {new Date().getFullYear()} — {selectedUser?.full_name}
             </DialogTitle>
           </DialogHeader>
           {selectedUser && (
-            <div className="mt-2">
-              <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-2 mb-1">
-                <span>Date</span>
-                <span>Type</span>
-                <span>Heures</span>
+            <div className="mt-2 border border-slate-700 rounded-lg overflow-hidden">
+              <div className="grid bg-slate-800/60 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Nombre d'heures</span>
               </div>
               <UserEntriesPanel userEmail={selectedUser.email} showDescription />
             </div>
