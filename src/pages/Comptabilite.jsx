@@ -158,18 +158,19 @@ export default function Comptabilite() {
 
   const saveNotesCommentMutation = useMutation({
     mutationFn: async (contenu) => {
-      if (notesCommentaireActuel) {
-        return base44.entities.CommentaireSemaine.update(notesCommentaireActuel.id, { ...notesCommentaireActuel, contenu });
+      const targetEmail = selectedNoteUser?.email;
+      const existing = commentairesSemaine.find(c => c.utilisateur_email === targetEmail && c.semaine_debut === notesWeekKey);
+      if (existing) {
+        return base44.entities.CommentaireSemaine.update(existing.id, { ...existing, contenu });
       } else {
         return base44.entities.CommentaireSemaine.create({
-          utilisateur_email: currentUser?.email,
+          utilisateur_email: targetEmail,
           semaine_debut: notesWeekKey,
           contenu
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['commentairesSemaineUser', currentUser?.email] });
       queryClient.invalidateQueries({ queryKey: ['commentairesSemaine'] });
       setIsNotesFacturesOpen(false);
     },
@@ -317,15 +318,6 @@ export default function Comptabilite() {
                     <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
                     <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
                     <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
-                    <Button
-                      size="sm"
-                      onClick={handleOpenNotesFactures}
-                      className={`h-7 text-xs ${notesCommentaireActuel?.contenu ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 mr-1" />
-                      Notes/Factures
-                      {notesCommentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
-                    </Button>
                   </div>
                 </div>
 
@@ -422,24 +414,24 @@ export default function Comptabilite() {
                              })()}
                            </div>
                            <div className="text-center">
-                             {commentaire?.contenu && (
-                               <Tooltip>
-                                 <TooltipTrigger asChild>
-                                   <button
-                                     onClick={() => {
-                                       setSelectedNoteUser(u);
-                                       setIsNoteModalOpen(true);
-                                     }}
-                                     className="px-2 py-1.5 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-500/30 transition-colors inline-flex items-center gap-1"
-                                     >
-                                     <MessageSquare className="w-5 h-5" />
-                                   </button>
-                                 </TooltipTrigger>
-                                 <TooltipContent side="left" className="bg-slate-800 border-slate-700 text-white max-w-xs">
-                                   <p className="text-xs">Note semaine</p>
-                                 </TooltipContent>
-                               </Tooltip>
-                             )}
+                             <Tooltip>
+                               <TooltipTrigger asChild>
+                                 <button
+                                   onClick={() => {
+                                     setSelectedNoteUser(u);
+                                     setNotesFacturesText(commentaire?.contenu || "");
+                                     setNotesFacturesTab("note");
+                                     setIsNotesFacturesOpen(true);
+                                   }}
+                                   className={`px-2 py-1.5 text-xs border rounded hover:bg-amber-500/30 transition-colors inline-flex items-center gap-1 ${commentaire?.contenu ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-slate-800/50 text-slate-500 border-slate-700 hover:text-amber-400'}`}
+                                 >
+                                   <MessageSquare className="w-4 h-4" />
+                                 </button>
+                               </TooltipTrigger>
+                               <TooltipContent side="left" className="bg-slate-800 border-slate-700 text-white max-w-xs">
+                                 <p className="text-xs">Notes/Factures</p>
+                               </TooltipContent>
+                             </Tooltip>
                            </div>
                          </div>
                        );
@@ -673,10 +665,10 @@ export default function Comptabilite() {
               <DialogHeader>
                 <DialogTitle className="text-xl flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-amber-400" />
-                  Notes et Factures
+                  Notes et Factures — {selectedNoteUser?.full_name}
                 </DialogTitle>
                 <p className="text-sm text-slate-400 mt-1">
-                  de la semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
+                  Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
                 </p>
               </DialogHeader>
 
@@ -708,7 +700,7 @@ export default function Comptabilite() {
                 <TabsContent value="factures" className="space-y-4">
                   <SharePointExplorer
                     rootPath="COMPTABILITÉ/FACTURES"
-                    initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
+                    initialPath={selectedNoteUser?.full_name ? [selectedNoteUser.full_name, getWeekDateRange()] : []}
                     maxHeight="500px"
                     allowUpload={true}
                     allowDelete={true}
@@ -758,7 +750,7 @@ export default function Comptabilite() {
                 }
                 setShowNotesCamera(false);
               }}
-              folderPath={`COMPTABILITÉ/FACTURES/${currentUser?.full_name}/${getWeekDateRange()}`}
+              folderPath={`COMPTABILITÉ/FACTURES/${selectedNoteUser?.full_name}/${getWeekDateRange()}`}
               onPhotoUploaded={() => setNotesFacturesFileCount(prev => prev + 1)}
               streamRef={notesCameraStreamRef}
             />
