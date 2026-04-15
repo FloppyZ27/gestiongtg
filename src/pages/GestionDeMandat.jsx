@@ -592,10 +592,7 @@ export default function GestionDeMandat() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <style>{`
-        /* Empêcher le scroll horizontal global */
-        body, html {
-          overflow-x: hidden !important;
-        }
+        /* Pas de overflow-x hidden sur body - ça bloque le clone drag */
 
         /* Conteneur Kanban avec scroll horizontal */
         .kanban-scroll-container {
@@ -703,35 +700,9 @@ export default function GestionDeMandat() {
           overflow: visible !important;
         }
 
-        /* Contenu des colonnes avec hauteur fixe */
+        /* Contenu des colonnes - pas de scroll interne (évite nested scroll containers) */
         .kanban-column .kanban-content {
-          max-height: 700px;
-          overflow-y: auto;
-        }
-        
-        /* Placeholder lors du drag - ne pas interférer */
-        .kanban-column .kanban-content [data-rbd-placeholder-context-id] {
-          pointer-events: none !important;
-        }
-
-        /* Scrollbar pour le contenu des colonnes */
-        .kanban-column .kanban-content::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        .kanban-column .kanban-content::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
-          border-radius: 10px;
-        }
-
-        .kanban-column .kanban-content::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
-        }
-
-        .kanban-column .kanban-content::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+          overflow: visible;
         }
 
         /* Supprimer les bordures des Card Kanban */
