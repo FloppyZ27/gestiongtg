@@ -357,37 +357,31 @@ export default function Lots() {
       
       return updatedLot;
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      setIsFormDialogOpen(false);
-      setIsViewDialogOpen(false);
-      resetForm();
+      if (!vars?.fromAutoSave) { setIsFormDialogOpen(false); setIsViewDialogOpen(false); resetForm(); }
     },
-    onError: (error) => {
-      alert(error.message);
-    }
+    onError: (error) => { alert(error.message); }
   });
+
+  const autoSaveRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!editingLot) return;
+    clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(() => {
+      updateLotMutation.mutate({ id: editingLot.id, lotData: formData, fromAutoSave: true });
+    }, 800);
+    return () => clearTimeout(autoSaveRef.current);
+  }, [formData, editingLot?.id]);
 
   const deleteLotMutation = useMutation({
     mutationFn: async (id) => {
       const lot = lots.find(l => l.id === id);
       await base44.entities.Lot.delete(id);
-      
-      // Créer une entrée dans l'historique
-      await base44.entities.ActionLog.create({
-        utilisateur_email: user?.email || '',
-        utilisateur_nom: user?.full_name || '',
-        action: 'Suppression',
-        entite: 'Lot',
-        entite_id: id,
-        details: `Lot ${lot?.numero_lot || 'inconnu'} supprimé`
-      });
+      await base44.entities.ActionLog.create({ utilisateur_email: user?.email || '', utilisateur_nom: user?.full_name || '', action: 'Suppression', entite: 'Lot', entite_id: id, details: `Lot ${lot?.numero_lot || 'inconnu'} supprimé` });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
-      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['lots'] }); queryClient.invalidateQueries({ queryKey: ['actionLogs'] }); },
   });
 
   const getClientById = (id) => clients.find(c => c.id === id);
@@ -1629,138 +1623,50 @@ export default function Lots() {
                 </div>
               </div>
 
-              {/* Boutons Annuler/Créer tout en bas */}
-              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => {
-                  if (hasFormChanges) {
-                    setShowCancelConfirm(true);
-                  } else {
-                    setIsFormDialogOpen(false);
-                    resetForm();
-                  }
-                }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                  Annuler
-                </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  {editingLot ? "Modifier" : "Créer"}
-                </Button>
-              </div>
+              {!editingLot && (
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                  <Button type="button" variant="outline" onClick={() => { if (hasFormChanges) { setShowCancelConfirm(true); } else { setIsFormDialogOpen(false); resetForm(); } }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                  <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
+                </div>
+              )}
             </motion.div>
             </DialogContent>
           </Dialog>
           </div>
         </div>
 
-        {/* View Lot Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={(open) => {
-          setIsViewDialogOpen(open);
-          if (!open) {
-            // Reset filters when closing
-            setViewDossierSearchTerm("");
-            setViewFilterArpenteur("all");
-            setViewFilterTypeMandat("all");
-            setViewFilterVille("all");
-            setViewSortField(null);
-            setViewSortDirection("asc");
-          }
-        }}>
+        {/* View Lot Dialog - Note: View dialog kept for reference, editing is done inline */}
+        <Dialog open={isViewDialogOpen} onOpenChange={(open) => { setIsViewDialogOpen(open); if (!open) { setViewDossierSearchTerm(""); setViewFilterArpenteur("all"); setViewFilterTypeMandat("all"); setViewFilterVille("all"); setViewSortField(null); setViewSortDirection("asc"); } }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
-            <DialogHeader className="sr-only">
-              <DialogTitle className="text-2xl">Détails du lot</DialogTitle>
-            </DialogHeader>
+            <DialogHeader className="sr-only"><DialogTitle className="text-2xl">Détails du lot</DialogTitle></DialogHeader>
             {viewingLot && (
-              <motion.div 
-                className="flex flex-col h-[90vh]"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                {/* Header pleine largeur */}
+              <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
                 <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-white">
-                      Détails - Lot {viewingLot.numero_lot}
-                    </h2>
-                    <div className="text-right">
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        {viewingLot.circonscription_fonciere}
-                      </Badge>
-                    </div>
+                    <h2 className="text-2xl font-bold text-white">Détails - Lot {viewingLot.numero_lot}</h2>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">{viewingLot.circonscription_fonciere}</Badge>
                   </div>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                  {/* Main content - 70% */}
                   <div className="flex-[0_0_70%] overflow-y-auto p-6 pt-3 border-r border-slate-800">
-
                   <div className="space-y-6">
-                    {/* Informations principales */}
                     <div className="grid grid-cols-2 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
-                      <div>
-                        <Label className="text-slate-400 text-sm">Numéro de lot</Label>
-                        <p className="text-white font-medium mt-1">{viewingLot.numero_lot}</p>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Circonscription foncière</Label>
-                        <div className="mt-1">
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                            {viewingLot.circonscription_fonciere}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Cadastre</Label>
-                        <p className="text-white font-medium mt-1">{viewingLot.cadastre || "-"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Rang</Label>
-                        <p className="text-white font-medium mt-1">{viewingLot.rang || "-"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Date BPD</Label>
-                        <p className="text-white font-medium mt-1">
-                          {viewingLot.date_bpd && !isNaN(new Date(viewingLot.date_bpd + 'T00:00:00').getTime()) ? format(new Date(viewingLot.date_bpd + 'T00:00:00'), "dd MMMM yyyy", { locale: fr }) : "-"}
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Type d'opération</Label>
-                        <div className="mt-1">
-                          {viewingLot.type_operation ? (
-                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                              {viewingLot.type_operation}
-                            </Badge>
-                          ) : (
-                            <p className="text-slate-500 text-sm">-</p>
-                          )}
-                        </div>
-                      </div>
+                      <div><Label className="text-slate-400 text-sm">Numéro de lot</Label><p className="text-white font-medium mt-1">{viewingLot.numero_lot}</p></div>
+                      <div><Label className="text-slate-400 text-sm">Circonscription foncière</Label><div className="mt-1"><Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">{viewingLot.circonscription_fonciere}</Badge></div></div>
+                      <div><Label className="text-slate-400 text-sm">Cadastre</Label><p className="text-white font-medium mt-1">{viewingLot.cadastre || "-"}</p></div>
+                      <div><Label className="text-slate-400 text-sm">Rang</Label><p className="text-white font-medium mt-1">{viewingLot.rang || "-"}</p></div>
+                      <div><Label className="text-slate-400 text-sm">Date BPD</Label><p className="text-white font-medium mt-1">{viewingLot.date_bpd && !isNaN(new Date(viewingLot.date_bpd + 'T00:00:00').getTime()) ? format(new Date(viewingLot.date_bpd + 'T00:00:00'), "dd MMMM yyyy", { locale: fr }) : "-"}</p></div>
+                      <div><Label className="text-slate-400 text-sm">Type d'opération</Label><div className="mt-1">{viewingLot.type_operation ? <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">{viewingLot.type_operation}</Badge> : <p className="text-slate-500 text-sm">-</p>}</div></div>
                     </div>
 
-                    {/* Concordances antérieures */}
                     {viewingLot.concordances_anterieures && viewingLot.concordances_anterieures.length > 0 && (
                       <div>
                         <Label className="text-slate-400 mb-3 block">Concordances antérieures</Label>
                         <div className="border border-slate-700 rounded-lg overflow-hidden">
                           <Table>
-                            <TableHeader>
-                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                                <TableHead className="text-slate-300">Circonscription</TableHead>
-                                <TableHead className="text-slate-300">Cadastre</TableHead>
-                                <TableHead className="text-slate-300">Rang</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {viewingLot.concordances_anterieures.map((concordance, index) => (
-                                <TableRow key={index} className="border-slate-800">
-                                  <TableCell className="text-white font-medium">{concordance.numero_lot}</TableCell>
-                                  <TableCell className="text-white">{concordance.circonscription_fonciere}</TableCell>
-                                  <TableCell className="text-white">{concordance.cadastre || "-"}</TableCell>
-                                  <TableCell className="text-white">{concordance.rang || "-"}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
+                            <TableHeader><TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700"><TableHead className="text-slate-300">Numéro de lot</TableHead><TableHead className="text-slate-300">Circonscription</TableHead><TableHead className="text-slate-300">Cadastre</TableHead><TableHead className="text-slate-300">Rang</TableHead></TableRow></TableHeader>
+                            <TableBody>{viewingLot.concordances_anterieures.map((concordance, index) => (<TableRow key={index} className="border-slate-800"><TableCell className="text-white font-medium">{concordance.numero_lot}</TableCell><TableCell className="text-white">{concordance.circonscription_fonciere}</TableCell><TableCell className="text-white">{concordance.cadastre || "-"}</TableCell><TableCell className="text-white">{concordance.rang || "-"}</TableCell></TableRow>))}</TableBody>
                           </Table>
                         </div>
                       </div>
@@ -1957,406 +1863,58 @@ export default function Lots() {
         </Dialog>
 
         {/* Bulk Import Preview/Results Dialog */}
-        <Dialog open={isBulkImportDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            setBulkImportPreview(null);
-            setBulkImportResults(null);
-          }
-          setIsBulkImportDialogOpen(open);
-        }}>
+        <Dialog open={isBulkImportDialogOpen} onOpenChange={(open) => { if (!open) { setBulkImportPreview(null); setBulkImportResults(null); } setIsBulkImportDialogOpen(open); }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                {bulkImportPreview ? "Aperçu de l'importation" : "Résultats de l'importation"}
-              </DialogTitle>
-            </DialogHeader>
-            
+            <DialogHeader><DialogTitle className="text-2xl">{bulkImportPreview ? "Aperçu de l'importation" : "Résultats de l'importation"}</DialogTitle></DialogHeader>
             <div className="overflow-y-auto max-h-[70vh] p-4">
-              {/* Preview Mode */}
               {bulkImportPreview && (
-                <>
-                  <div className="border border-slate-700 rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                          <TableHead className="text-slate-300">Statut</TableHead>
-                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                          <TableHead className="text-slate-300">Cadastre</TableHead>
-                          <TableHead className="text-slate-300">Circonscription</TableHead>
-                          <TableHead className="text-slate-300">Concordances</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {bulkImportPreview.map((lot, index) => {
-                          const concordances = lot.types_operation?.[0]?.concordances_anterieures || [];
-                          return (
-                            <TableRow key={index} className="border-slate-800">
-                              <TableCell>
-                                {lot.alreadyExists ? (
-                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                                    Existe déjà
-                                  </Badge>
-                                ) : (
-                                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                    À créer
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-white font-medium">
-                                {lot.numero_lot}
-                              </TableCell>
-                              <TableCell className="text-slate-300">
-                                {lot.cadastre || "-"}
-                              </TableCell>
-                              <TableCell className="text-slate-300">
-                                {lot.circonscription_fonciere}
-                              </TableCell>
-                              <TableCell className="text-slate-300">
-                                {concordances.length > 0 ? (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="flex items-center gap-1 cursor-help">
-                                          <span>{concordances.length}</span>
-                                          <Info className="w-3 h-3 text-slate-500" />
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
-                                        <div className="space-y-1">
-                                          {concordances.map((conc, idx) => (
-                                            <div key={idx} className="text-xs">
-                                              <span className="text-white font-medium">{conc.numero_lot}</span>
-                                              {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
-                                              <span className="text-slate-400">
-                                                {conc.rang ? ` • ${conc.rang}` : ''}
-                                                {conc.cadastre ? ` • ${conc.cadastre}` : ''}
-                                              </span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                ) : (
-                                  "0"
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </>
+                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader><TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700"><TableHead className="text-slate-300">Statut</TableHead><TableHead className="text-slate-300">Numéro de lot</TableHead><TableHead className="text-slate-300">Cadastre</TableHead><TableHead className="text-slate-300">Circonscription</TableHead><TableHead className="text-slate-300">Concordances</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {bulkImportPreview.map((lot, index) => {
+                        const concordances = lot.types_operation?.[0]?.concordances_anterieures || [];
+                        return (<TableRow key={index} className="border-slate-800">
+                          <TableCell>{lot.alreadyExists ? <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Existe déjà</Badge> : <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">À créer</Badge>}</TableCell>
+                          <TableCell className="text-white font-medium">{lot.numero_lot}</TableCell>
+                          <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
+                          <TableCell className="text-slate-300">{lot.circonscription_fonciere}</TableCell>
+                          <TableCell className="text-slate-300">{concordances.length > 0 ? (<TooltipProvider><Tooltip><TooltipTrigger asChild><div className="flex items-center gap-1 cursor-help"><span>{concordances.length}</span><Info className="w-3 h-3 text-slate-500" /></div></TooltipTrigger><TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm"><div className="space-y-1">{concordances.map((conc, idx) => (<div key={idx} className="text-xs"><span className="text-white font-medium">{conc.numero_lot}</span>{conc.est_partie && <span className="text-slate-400"> Ptie</span>}<span className="text-slate-400">{conc.rang ? ` • ${conc.rang}` : ''}{conc.cadastre ? ` • ${conc.cadastre}` : ''}</span></div>))}</div></TooltipContent></Tooltip></TooltipProvider>) : "0"}</TableCell>
+                        </TableRow>);
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
-
-              {/* Results Mode */}
               {bulkImportResults && (
                 <>
                   <div className="mb-4 flex gap-4">
-                    <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex-1">
-                      <p className="text-emerald-400 font-semibold">
-                        {bulkImportResults.filter(r => r.success).length} lots créés
-                      </p>
-                    </div>
-                    {bulkImportResults.filter(r => !r.success).length > 0 && (
-                      <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex-1">
-                        <p className="text-red-400 font-semibold">
-                          {bulkImportResults.filter(r => !r.success).length} erreurs
-                        </p>
-                      </div>
-                    )}
+                    <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex-1"><p className="text-emerald-400 font-semibold">{bulkImportResults.filter(r => r.success).length} lots créés</p></div>
+                    {bulkImportResults.filter(r => !r.success).length > 0 && <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex-1"><p className="text-red-400 font-semibold">{bulkImportResults.filter(r => !r.success).length} erreurs</p></div>}
                   </div>
-
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <Table>
-                      <TableHeader>
-                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                          <TableHead className="text-slate-300">Statut</TableHead>
-                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                          <TableHead className="text-slate-300">Cadastre</TableHead>
-                          <TableHead className="text-slate-300">Circonscription</TableHead>
-                          <TableHead className="text-slate-300">Concordances</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {bulkImportResults.map((result, index) => (
-                          <TableRow key={index} className="border-slate-800">
-                            <TableCell>
-                              {result.success ? (
-                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                                  Créé
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                                  Erreur
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-white font-medium">
-                              {result.numero_lot}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {result.cadastre || "-"}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {result.circonscription_fonciere}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {result.concordances && result.concordances.length > 0 ? (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="flex items-center gap-1 cursor-help">
-                                        <span>{result.concordances_count}</span>
-                                        <Info className="w-3 h-3 text-slate-500" />
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
-                                      <div className="space-y-1">
-                                        {result.concordances.map((conc, idx) => (
-                                          <div key={idx} className="text-xs">
-                                            <span className="text-white font-medium">{conc.numero_lot}</span>
-                                            {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
-                                            <span className="text-slate-400">
-                                              {conc.rang ? ` • ${conc.rang}` : ''}
-                                              {conc.cadastre ? ` • ${conc.cadastre}` : ''}
-                                            </span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              ) : (
-                                result.concordances_count || 0
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
+                      <TableHeader><TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700"><TableHead className="text-slate-300">Statut</TableHead><TableHead className="text-slate-300">Numéro de lot</TableHead><TableHead className="text-slate-300">Cadastre</TableHead><TableHead className="text-slate-300">Circonscription</TableHead><TableHead className="text-slate-300">Concordances</TableHead></TableRow></TableHeader>
+                      <TableBody>{bulkImportResults.map((result, index) => (<TableRow key={index} className="border-slate-800"><TableCell>{result.success ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Créé</Badge> : <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Erreur</Badge>}</TableCell><TableCell className="text-white font-medium">{result.numero_lot}</TableCell><TableCell className="text-slate-300">{result.cadastre || "-"}</TableCell><TableCell className="text-slate-300">{result.circonscription_fonciere}</TableCell><TableCell className="text-slate-300">{result.concordances_count || 0}</TableCell></TableRow>))}</TableBody>
                     </Table>
                   </div>
-
-                  {bulkImportResults.filter(r => !r.success).length > 0 && (
-                    <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
-                      <p className="text-slate-400 text-sm mb-2 font-semibold">Détails des erreurs:</p>
-                      {bulkImportResults.filter(r => !r.success).map((result, index) => (
-                        <p key={index} className="text-red-400 text-sm">
-                          • {result.numero_lot}: {result.error}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+                  {bulkImportResults.filter(r => !r.success).length > 0 && (<div className="mt-4 p-3 bg-slate-800/30 border border-slate-700 rounded-lg"><p className="text-slate-400 text-sm mb-2 font-semibold">Détails des erreurs:</p>{bulkImportResults.filter(r => !r.success).map((result, index) => (<p key={index} className="text-red-400 text-sm">• {result.numero_lot}: {result.error}</p>))}</div>)}
                 </>
               )}
             </div>
-
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-              {bulkImportPreview ? (
-                <>
-                  <Button 
-                    onClick={() => {
-                      setIsBulkImportDialogOpen(false);
-                      setBulkImportPreview(null);
-                    }}
-                    variant="outline"
-                    className="border-red-500 text-red-400 hover:bg-red-500/10"
-                    disabled={isCreatingBulkLots}
-                  >
-                    Annuler
-                  </Button>
-                  <Button 
-                    onClick={handleConfirmBulkImport}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                    disabled={isCreatingBulkLots || bulkImportPreview.filter(l => !l.alreadyExists).length === 0}
-                  >
-                    {isCreatingBulkLots ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Création...
-                      </>
-                    ) : (
-                      `Créer ${bulkImportPreview.filter(l => !l.alreadyExists).length} lot(s)`
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  onClick={() => {
-                    setIsBulkImportDialogOpen(false);
-                    setBulkImportResults(null);
-                  }}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
-                  Fermer
-                </Button>
-              )}
+              {bulkImportPreview ? (<><Button onClick={() => { setIsBulkImportDialogOpen(false); setBulkImportPreview(null); }} variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" disabled={isCreatingBulkLots}>Annuler</Button><Button onClick={handleConfirmBulkImport} className="bg-gradient-to-r from-emerald-500 to-teal-600" disabled={isCreatingBulkLots || bulkImportPreview.filter(l => !l.alreadyExists).length === 0}>{isCreatingBulkLots ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Création...</> : `Créer ${bulkImportPreview.filter(l => !l.alreadyExists).length} lot(s)`}</Button></>) : (<Button onClick={() => { setIsBulkImportDialogOpen(false); setBulkImportResults(null); }} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>)}
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de succès d'import .d01 */}
-        <Dialog open={showImportSuccess} onOpenChange={setShowImportSuccess}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">✅</span>
-                Succès
-                <span className="text-2xl">✅</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Données importées avec succès depuis le fichier .d01
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowImportSuccess(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  OK
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog d'avertissement lot existant */}
-        <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Attention
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowLotExistsWarning(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Compris
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog d'avertissement champs obligatoires manquants */}
-        <Dialog open={showLotMissingFieldsWarning} onOpenChange={setShowLotMissingFieldsWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Attention
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowLotMissingFieldsWarning(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Compris
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog de confirmation d'annulation */}
-        <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Attention
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setShowCancelConfirm(false);
-                    setIsFormDialogOpen(false);
-                    resetForm();
-                  }}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                >
-                  Abandonner
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setShowCancelConfirm(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Continuer l'édition
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog de confirmation de suppression */}
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Confirmer la suppression
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir supprimer ce lot ? Cette action est irréversible.
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setLotToDelete(null);
-                  }}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (lotToDelete) {
-                      deleteLotMutation.mutate(lotToDelete);
-                    }
-                    setShowDeleteConfirm(false);
-                    setLotToDelete(null);
-                  }}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                >
-                  Supprimer
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <LotConfirmDialogs
+          showImportSuccess={showImportSuccess} setShowImportSuccess={setShowImportSuccess}
+          showLotExistsWarning={showLotExistsWarning} setShowLotExistsWarning={setShowLotExistsWarning} formData={formData}
+          showLotMissingFieldsWarning={showLotMissingFieldsWarning} setShowLotMissingFieldsWarning={setShowLotMissingFieldsWarning}
+          showCancelConfirm={showCancelConfirm} setShowCancelConfirm={setShowCancelConfirm} setIsFormDialogOpen={setIsFormDialogOpen} resetForm={resetForm}
+          showDeleteConfirm={showDeleteConfirm} setShowDeleteConfirm={setShowDeleteConfirm} lotToDelete={lotToDelete} setLotToDelete={setLotToDelete} deleteLotMutation={deleteLotMutation}
+        />
 
         {/* Stats Cards */}
         <div className="hidden grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -2384,169 +1942,31 @@ export default function Lots() {
           <CardHeader className="pb-2">
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
-                </div>
-
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Filtres</span>
-                  {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (
-                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {filterCirconscription.length + filterCadastre.length + filterTypeOperation.length + filterRang.length}
-                    </Badge>
-                  )}
+                <div className="relative flex-1"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" /><Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" /></div>
+                <Button variant="ghost" size="sm" onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
+                  <Filter className="w-4 h-4 mr-2" /><span className="text-sm">Filtres</span>
+                  {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (<Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">{filterCirconscription.length + filterCadastre.length + filterTypeOperation.length + filterRang.length}</Badge>)}
                   {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
                 </Button>
               </div>
-
               <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <CollapsibleContent>
-                  <div className="p-2 border border-emerald-500/30 rounded-lg">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-3 h-3 text-emerald-500" />
-                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
-                        </div>
-                        {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setFilterCirconscription([]);
-                              setFilterCadastre([]);
-                              setFilterTypeOperation([]);
-                              setFilterRang([]);
-                            }}
-                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                          >
-                            <X className="w-2.5 h-2.5 mr-1" />
-                            Réinitialiser
-                          </Button>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-4 gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Circonscription ({filterCirconscription.length > 0 ? `${filterCirconscription.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                              <DropdownMenuCheckboxItem
-                                key={circ}
-                                checked={filterCirconscription.includes(circ)}
-                                onCheckedChange={(checked) => {
-                                  setFilterCirconscription(
-                                    checked
-                                      ? [...filterCirconscription, circ]
-                                      : filterCirconscription.filter((c) => c !== circ)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {circ}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
+                  <div className="p-2 border border-emerald-500/30 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                      <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-emerald-500" /><h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4></div>
+                      {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (<Button variant="ghost" size="sm" onClick={() => { setFilterCirconscription([]); setFilterCadastre([]); setFilterTypeOperation([]); setFilterRang([]); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"><X className="w-2.5 h-2.5 mr-1" />Réinitialiser</Button>)}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[{label: `Circonscription (${filterCirconscription.length||'Toutes'})`, items: Object.keys(CADASTRES_PAR_CIRCONSCRIPTION), state: filterCirconscription, setState: setFilterCirconscription},
+                        {label: `Cadastre (${filterCadastre.length||'Tous'})`, items: [...new Set(lots.map(l=>l.cadastre).filter(c=>c))].sort(), state: filterCadastre, setState: setFilterCadastre},
+                        {label: `Type (${filterTypeOperation.length||'Tous'})`, items: TYPES_OPERATIONS, state: filterTypeOperation, setState: setFilterTypeOperation},
+                        {label: `Rang (${filterRang.length||'Tous'})`, items: [...new Set(lots.map(l=>l.rang).filter(r=>r))].sort(), state: filterRang, setState: setFilterRang}
+                      ].map(({label, items, state, setState}) => (
+                        <DropdownMenu key={label}>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10"><span className="truncate">{label}</span><ChevronDown className="w-3 h-3 flex-shrink-0" /></Button></DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">{items.map((item) => (<DropdownMenuCheckboxItem key={item} checked={state.includes(item)} onCheckedChange={(checked) => setState(checked ? [...state, item] : state.filter(i => i !== item))} className="text-white">{item}</DropdownMenuCheckboxItem>))}</DropdownMenuContent>
                         </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Cadastre ({filterCadastre.length > 0 ? `${filterCadastre.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {[...new Set(lots.map(l => l.cadastre).filter(c => c))].sort().map((cadastre) => (
-                              <DropdownMenuCheckboxItem
-                                key={cadastre}
-                                checked={filterCadastre.includes(cadastre)}
-                                onCheckedChange={(checked) => {
-                                  setFilterCadastre(
-                                    checked
-                                      ? [...filterCadastre, cadastre]
-                                      : filterCadastre.filter((c) => c !== cadastre)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {cadastre}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Type ({filterTypeOperation.length > 0 ? `${filterTypeOperation.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {TYPES_OPERATIONS.map((type) => (
-                              <DropdownMenuCheckboxItem
-                                key={type}
-                                checked={filterTypeOperation.includes(type)}
-                                onCheckedChange={(checked) => {
-                                  setFilterTypeOperation(
-                                    checked
-                                      ? [...filterTypeOperation, type]
-                                      : filterTypeOperation.filter((t) => t !== type)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {type}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Rang ({filterRang.length > 0 ? `${filterRang.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {[...new Set(lots.map(l => l.rang).filter(r => r))].sort().map((rang) => (
-                              <DropdownMenuCheckboxItem
-                                key={rang}
-                                checked={filterRang.includes(rang)}
-                                onCheckedChange={(checked) => {
-                                  setFilterRang(
-                                    checked
-                                      ? [...filterRang, rang]
-                                      : filterRang.filter((r) => r !== rang)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {rang}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -2562,83 +1982,23 @@ export default function Lots() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('numero_lot')}
-                    >
-                      Numéro de lot {sortField === 'numero_lot' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('circonscription')}
-                    >
-                      Circonscription {sortField === 'circonscription' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('cadastre')}
-                    >
-                      Cadastre {sortField === 'cadastre' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('rang')}
-                    >
-                      Rang {sortField === 'rang' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('date_bpd')}
-                    >
-                      Date BPD {sortField === 'date_bpd' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead 
-                      className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('type_operation')}
-                    >
-                      Type d'opération {sortField === 'type_operation' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
+                    {[['numero_lot','Numéro de lot'],['circonscription','Circonscription'],['cadastre','Cadastre'],['rang','Rang'],['date_bpd','Date BPD'],['type_operation',"Type d'opération"]].map(([field, label]) => (
+                      <TableHead key={field} className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort(field)}>{label} {sortField === field && (sortDirection === 'asc' ? '↑' : '↓')}</TableHead>
+                    ))}
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sortedLots.map((lot, index) => (
-                    <TableRow 
-                      key={`${lot.id}-${lot.typeOperationIndex ?? 'no-op'}-${index}`}
-                      className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                      onClick={() => handleEdit(lot)}
-                    >
-                      <TableCell className="font-medium text-white">
-                        {lot.numero_lot}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {lot.circonscription_fonciere}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {lot.cadastre || "-"}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {lot.rang || "-"}
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-sm">
-                        {lot.currentTypeOperation?.date_bpd && !isNaN(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00').getTime()) 
-                          ? format(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) 
-                          : "-"}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {lot.currentTypeOperation?.type_operation || "-"}
-                      </TableCell>
+                    <TableRow key={`${lot.id}-${lot.typeOperationIndex ?? 'no-op'}-${index}`} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => handleEdit(lot)}>
+                      <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
+                      <TableCell className="text-slate-300">{lot.circonscription_fonciere}</TableCell>
+                      <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
+                      <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">{lot.currentTypeOperation?.date_bpd && !isNaN(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00').getTime()) ? format(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                      <TableCell className="text-slate-300">{lot.currentTypeOperation?.type_operation || "-"}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(lot.id)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <div className="flex justify-end gap-2"><Button variant="ghost" size="sm" onClick={() => handleDelete(lot.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10"><Trash2 className="w-4 h-4" /></Button></div>
                       </TableCell>
                     </TableRow>
                   ))}
