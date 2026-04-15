@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -204,12 +204,22 @@ export default function OuvrirDossierDialog({
     }));
   };
 
+  const [showMissingUserError, setShowMissingUserError] = useState(false);
+
   const handleCreate = async (e) => {
     e?.preventDefault();
     if (!currentUser) {
       console.error('currentUser is undefined!');
       return;
     }
+
+    // Validation: tous les mandats doivent avoir un utilisateur assigné
+    const mandatsSansUtilisateur = (formData.mandats || []).filter(m => !m.utilisateur_assigne);
+    if (mandatsSansUtilisateur.length > 0) {
+      setShowMissingUserError(true);
+      return;
+    }
+
     setIsCreating(true);
     try {
       // Vérifier si le dossier existe déjà (éviter doublon)
@@ -360,6 +370,23 @@ export default function OuvrirDossierDialog({
           setIsClientFormOpen(false);
         }} 
       />
+
+      {/* Dialog utilisateur manquant */}
+      <Dialog open={showMissingUserError} onOpenChange={setShowMissingUserError}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Tous les mandats doivent avoir un utilisateur assigné avant d'ouvrir le dossier.</p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button type="button" onClick={() => setShowMissingUserError(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <NewLotDialog
         open={isNewLotDialogOpen}
