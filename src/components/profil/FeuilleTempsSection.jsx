@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SharePointExplorer from "@/components/shared/SharePointExplorer";
+import CameraModal from "@/components/profil/CameraModal";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -35,10 +36,7 @@ export default function FeuilleTempsSection({
   const [commentText, setCommentText] = useState("");
   const [fileCount, setFileCount] = useState(0);
   const [showCamera, setShowCamera] = useState(false);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const deviceOrientationRef = useRef(null);
   const queryClient = useQueryClient();
 
   const getWeekDateRange = () => {
@@ -92,30 +90,6 @@ export default function FeuilleTempsSection({
     setIsCommentOpen(true);
   };
 
-  // Initialiser la caméra au montage du modal
-  React.useEffect(() => {
-    if (showCamera && videoRef.current && !streamRef.current) {
-      navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' }, 
-        audio: false 
-      }).then(stream => {
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      }).catch(() => {
-        navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: false 
-        }).then(stream => {
-          streamRef.current = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        });
-      });
-    }
-  }, [showCamera]);
   
   const getTypeLabel = (p) => {
     if (p.type?.includes('Vacance') || (!p.type && p.description?.toLowerCase().includes('vacance'))) return 'Vacances';
@@ -744,71 +718,18 @@ export default function FeuilleTempsSection({
 
       {/* Modal caméra */}
       {showCamera && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full max-w-2xl rounded-lg"
-            style={{ maxHeight: '70vh', objectFit: 'cover' }}
-          />
-          <canvas ref={canvasRef} className="hidden" />
-          <div className="flex gap-4 mt-6">
-            <Button
-              onClick={() => {
-                if (streamRef.current) {
-                  streamRef.current.getTracks().forEach(t => t.stop());
-                  streamRef.current = null;
-                }
-                setShowCamera(false);
-              }}
-              size="lg"
-              className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={async () => {
-                if (!videoRef.current || !canvasRef.current || !currentUser?.full_name) return;
-                const canvas = canvasRef.current;
-                const video = videoRef.current;
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                canvas.toBlob(async (blob) => {
-                  if (!blob) return;
-                  const fileName = `photo_${Date.now()}.jpg`;
-                  const file = new File([blob], fileName, { type: 'image/jpeg' });
-                  try {
-                    const base64 = await new Promise((resolve) => {
-                      const reader = new FileReader();
-                      reader.onload = () => resolve(reader.result.split(',')[1]);
-                      reader.readAsDataURL(file);
-                    });
-                    await base44.functions.invoke('uploadToSharePoint', {
-                      folderPath: `COMPTABILITÉ/FACTURES/${currentUser.full_name}/${getWeekDateRange()}`,
-                      fileName: fileName,
-                      fileContent: base64,
-                      contentType: 'image/jpeg'
-                    });
-                    setFileCount(prev => prev + 1);
-                    if (streamRef.current) {
-                      streamRef.current.getTracks().forEach(t => t.stop());
-                      streamRef.current = null;
-                    }
-                    setShowCamera(false);
-                  } catch (error) {
-                    console.error('Erreur lors du téléversement:', error);
-                  }
-                }, 'image/jpeg', 0.92);
-              }}
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
-            >
-              <Camera className="w-5 h-5 mr-2" /> Capturer
-            </Button>
-          </div>
-        </div>
+        <CameraModal
+          onClose={() => {
+            if (streamRef.current) {
+              streamRef.current.getTracks().forEach(t => t.stop());
+              streamRef.current = null;
+            }
+            setShowCamera(false);
+          }}
+          folderPath={`COMPTABILITÉ/FACTURES/${currentUser?.full_name}/${getWeekDateRange()}`}
+          onPhotoUploaded={() => setFileCount(prev => prev + 1)}
+          streamRef={streamRef}
+        />
       )}
     </Card>
   );
