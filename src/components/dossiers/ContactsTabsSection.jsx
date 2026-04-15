@@ -68,7 +68,26 @@ export default function ContactsTabsSection({
         />
       );
     }
-    return null;
+    
+    // Rendu par défaut si ClientSelectionCard n'est pas fourni
+    return (
+      <div key={clientId} className={`${colors.backgroundColor} border ${colors.borderColor} ${colors.textColor} rounded p-2 text-xs relative cursor-pointer hover:${colors.hoverColor} transition-colors flex items-center justify-between gap-2`}>
+        <div className="truncate">
+          <p className="font-semibold">{client.prenom} {client.nom}</p>
+          {client.type_client && <p className="text-xs opacity-75">{client.type_client}</p>}
+        </div>
+        <button 
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            removeClient(clientId, type);
+          }}
+          className="flex-shrink-0 hover:opacity-80"
+        >
+          ×
+        </button>
+      </div>
+    );
   };
 
   return (
