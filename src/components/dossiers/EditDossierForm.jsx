@@ -873,7 +873,7 @@ export default function EditDossierForm({
 
                               {/* Suggestions d'adresses */}
                               {addressSuggestions.length > 0 && (
-                                <div className="absolute z-50 w-full top-full left-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                <div className="absolute z-[100] w-full top-7 left-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                                   {addressSuggestions.map((suggestion, idx) => (
                                     <div
                                       key={idx}
