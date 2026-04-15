@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,44 +12,19 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer, Clock } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
+import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer } from "lucide-react";
+import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Textarea } from "@/components/ui/textarea";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
-import CommentairesSection from "../components/dossiers/CommentairesSection";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 
-const MONTHS = [
-  { value: 0, label: "Janvier" },
-  { value: 1, label: "Février" },
-  { value: 2, label: "Mars" },
-  { value: 3, label: "Avril" },
-  { value: 4, label: "Mai" },
-  { value: 5, label: "Juin" },
-  { value: 6, label: "Juillet" },
-  { value: 7, label: "Août" },
-  { value: 8, label: "Septembre" },
-  { value: 9, label: "Octobre" },
-  { value: 10, label: "Novembre" },
-  { value: 11, label: "Décembre" }
-];
-
 const getArpenteurInitials = (arpenteur) => {
-  if (!arpenteur) return "";
-  const mapping = {
-    "Samuel Guay": "SG-",
-    "Dany Gaboury": "DG-",
-    "Pierre-Luc Pilote": "PLP-",
-    "Benjamin Larouche": "BL-",
-    "Frédéric Gilbert": "FG-"
-  };
+  const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
   return mapping[arpenteur] || "";
 };
 
@@ -64,9 +39,158 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
 };
 
-const getUserInitials = (name) => {
-  return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
+
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = { "Certificat de localisation": "CL", "Description Technique": "DT", "Implantation": "Imp", "Levé topographique": "Levé Topo", "Piquetage": "Piq" };
+  return abbreviations[type] || type;
+};
+
+const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+const getUserColor = (index) => {
+  const colors = ["from-blue-500 to-blue-600", "from-purple-500 to-purple-600", "from-green-500 to-green-600", "from-orange-500 to-orange-600", "from-pink-500 to-pink-600", "from-cyan-500 to-cyan-600", "from-yellow-500 to-yellow-600", "from-red-500 to-red-600"];
+  return colors[index % colors.length];
+};
+
+const formatAdresse = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques?.length > 0 && addr.numeros_civiques[0] !== "") parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  return parts.filter(p => p).join(', ');
+};
+
+// Hook custom pour le drag & drop natif
+function useKanbanDrag({ onDrop }) {
+  const [dragging, setDragging] = useState(null); // { card, startX, startY }
+  const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 });
+  const [overColumn, setOverColumn] = useState(null);
+  const ghostRef = useRef(null);
+
+  const handleDragStart = useCallback((e, card) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragging({ card, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
+    setGhostPos({ x: e.clientX, y: e.clientY });
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+  }, []);
+
+  useEffect(() => {
+    if (!dragging) return;
+
+    const onMove = (e) => {
+      setGhostPos({ x: e.clientX, y: e.clientY });
+
+      // Trouver la colonne sous le curseur
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const colEl = el?.closest('[data-kanban-column]');
+      if (colEl) {
+        setOverColumn(colEl.getAttribute('data-kanban-column'));
+      } else {
+        setOverColumn(null);
+      }
+    };
+
+    const onUp = (e) => {
+      if (overColumn && dragging.card) {
+        onDrop(dragging.card, overColumn);
+      }
+      setDragging(null);
+      setOverColumn(null);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [dragging, overColumn, onDrop]);
+
+  return { dragging, ghostPos, overColumn, handleDragStart };
+}
+
+// Ghost card rendu dans un portal
+function GhostCard({ card, pos, clients, users }) {
+  if (!card) return null;
+  const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+  const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
+  const clientsNames = clients.filter(c => card.dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
+
+  return ReactDOM.createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        left: pos.x - 135,
+        top: pos.y - 30,
+        width: 270,
+        zIndex: 99999,
+        pointerEvents: 'none',
+        opacity: 0.92,
+        transform: 'rotate(2deg) scale(1.04)',
+        filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))',
+        transition: 'none',
+      }}
+    >
+      <div className={`${arpColor.split(' ')[0]} rounded-lg p-2 border ${arpColor.split(' ')[2]}`}>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <Badge variant="outline" className={`${arpColor} border text-xs`}>
+            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+          </Badge>
+          <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
+            {getAbbreviatedMandatType(card.mandat.type_mandat)}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1 mb-1">
+          <User className="w-3 h-3 text-white flex-shrink-0" />
+          <span className="text-xs text-white font-medium truncate">{clientsNames}</span>
+        </div>
+        {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+          <div className="flex items-center gap-1 mb-1">
+            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+            <span className="text-xs text-slate-400 truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+          {card.mandat.date_livraison ? (
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-yellow-400" />
+              <span className="text-xs text-yellow-300">{format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM yy", { locale: fr })}</span>
+            </div>
+          ) : <div />}
+          {assignedUser && (
+            <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+              <AvatarImage src={assignedUser.photo_url} />
+              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+            </Avatar>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 export default function GestionDeMandat() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,1331 +198,416 @@ export default function GestionDeMandat() {
   const [filterTypeMandat, setFilterTypeMandat] = useState([]);
   const [filterUtilisateur, setFilterUtilisateur] = useState([]);
   const [filterVille, setFilterVille] = useState([]);
-  const [viewingDossier, setViewingDossier] = useState(null);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [activeView, setActiveView] = useState("taches");
   const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
-  const [calendarMode, setCalendarMode] = useState("week"); // "week" or "month"
-  const [sortTaches, setSortTaches] = useState({}); // { tache: "asc" | "desc" | null }
-  const [sortUtilisateurs, setSortUtilisateurs] = useState({}); // { email: "asc" | "desc" | null }
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [calendarMode, setCalendarMode] = useState("week");
+  const [sortTaches, setSortTaches] = useState({});
+  const [sortUtilisateurs, setSortUtilisateurs] = useState({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
   const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
   const [entreeTempsForm, setEntreeTempsForm] = useState({
     date: new Date().toISOString().split('T')[0],
-    heures: "",
-    tache: "",
-    tache_suivante: "",
-    utilisateur_assigne: ""
+    heures: "", tache: "", tache_suivante: "", utilisateur_assigne: ""
   });
 
   const queryClient = useQueryClient();
 
-  const { data: dossiers = [] } = useQuery({
-    queryKey: ['dossiers'],
-    queryFn: () => base44.entities.Dossier.list('-created_date'),
-    initialData: [],
-  });
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
-    initialData: [],
-  });
-
-  const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
-    initialData: [],
-  });
-
-  const { data: lots = [] } = useQuery({
-    queryKey: ['lots'],
-    queryFn: () => base44.entities.Lot.list(),
-    initialData: [],
-  });
-
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  });
+  const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
+  const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
+  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
+  const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
+  const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dossiers'] }),
   });
 
-  const getClientById = (id) => clients.find(c => c.id === id);
-  const getLotById = (numeroLot) => lots.find(l => l.id === numeroLot);
-
   const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
-      const client = getClientById(id);
-      return client ? `${client.prenom} ${client.nom}` : "";
-    }).filter(name => name).join(", ");
+    if (!clientIds?.length) return "-";
+    return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
   };
 
-  const formatAdresse = (addr) => {
-    if (!addr) return "";
-    const parts = [];
-    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-    }
-    if (addr.rue) parts.push(addr.rue);
-    if (addr.ville) parts.push(addr.ville);
-    return parts.filter(p => p).join(', ');
-  };
-
-  // Préparer les cartes de mandats
   const getMandatsCards = () => {
     const cards = [];
-    
-    dossiers
-      .filter(d => d.statut === "Ouvert" || d.statut === "Fermé")
-      .forEach(dossier => {
-        if (dossier.mandats && dossier.mandats.length > 0) {
-          dossier.mandats.forEach((mandat, mandatIndex) => {
-            cards.push({
-              id: `${dossier.id}-${mandatIndex}`,
-              dossierId: dossier.id,
-              mandatIndex: mandatIndex,
-              dossier: dossier,
-              mandat: mandat,
-              tache: mandat.tache_actuelle || "Ouverture",
-              utilisateur: mandat.utilisateur_assigne || "non-assigne"
-            });
-          });
-        }
+    dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé").forEach(dossier => {
+      dossier.mandats?.forEach((mandat, mandatIndex) => {
+        cards.push({
+          id: `${dossier.id}-${mandatIndex}`,
+          dossierId: dossier.id,
+          mandatIndex,
+          dossier,
+          mandat,
+          tache: mandat.tache_actuelle || "Ouverture",
+          utilisateur: mandat.utilisateur_assigne || "non-assigne"
+        });
       });
-
+    });
     return cards;
   };
 
   const allCards = getMandatsCards();
 
-  // Extraire les villes uniques
-  const uniqueVilles = [...new Set(
-    allCards
-      .filter(card => card.mandat.adresse_travaux?.ville)
-      .map(card => card.mandat.adresse_travaux.ville)
-  )].sort();
+  const uniqueVilles = [...new Set(allCards.filter(c => c.mandat.adresse_travaux?.ville).map(c => c.mandat.adresse_travaux.ville))].sort();
 
-  // Filtrer les cartes
   const filteredCards = allCards.filter(card => {
     const searchLower = searchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(card.dossier.arpenteur_geometre) + card.dossier.numero_dossier;
     const clientsNames = getClientsNames(card.dossier.clients_ids);
-
-    const matchesSearch = (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      card.dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      card.mandat.type_mandat?.toLowerCase().includes(searchLower)
+    return (
+      (fullNumber.toLowerCase().includes(searchLower) || card.dossier.numero_dossier?.toLowerCase().includes(searchLower) || clientsNames.toLowerCase().includes(searchLower) || card.mandat.type_mandat?.toLowerCase().includes(searchLower)) &&
+      (filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre)) &&
+      (filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat)) &&
+      (filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne)) &&
+      (filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville))
     );
-
-    const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre);
-    const matchesType = filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat);
-    const matchesUtilisateur = filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne);
-    const matchesVille = filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville);
-
-    return matchesSearch && matchesArpenteur && matchesType && matchesUtilisateur && matchesVille;
   });
 
-  // Organiser les cartes par tâche avec tri
+  const sortCards = (cards, sortKey, sortMap) => {
+    if (!sortMap[sortKey]) return cards;
+    return [...cards].sort((a, b) => {
+      const dA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
+      const dB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
+      return sortMap[sortKey] === "asc" ? dA - dB : dB - dA;
+    });
+  };
+
   const cardsByTache = TACHES.reduce((acc, tache) => {
-    let cards = filteredCards.filter(card => card.tache === tache);
-    
-    // Appliquer le tri si défini
-    if (sortTaches[tache]) {
-      cards = [...cards].sort((a, b) => {
-        const dateA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
-        const dateB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
-        return sortTaches[tache] === "asc" ? dateA - dateB : dateB - dateA;
-      });
-    }
-    
-    acc[tache] = cards;
+    acc[tache] = sortCards(filteredCards.filter(c => c.tache === tache), tache, sortTaches);
     return acc;
   }, {});
 
-  // Organiser les cartes par utilisateur avec tri
   const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
   const cardsByUtilisateur = usersList.reduce((acc, user) => {
-    let cards = filteredCards.filter(card => 
-      card.utilisateur === user.email || (card.utilisateur === "non-assigne" && user.email === "non-assigne")
-    );
-    
-    // Appliquer le tri si défini
-    if (sortUtilisateurs[user.email]) {
-      cards = [...cards].sort((a, b) => {
-        const dateA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
-        const dateB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
-        return sortUtilisateurs[user.email] === "asc" ? dateA - dateB : dateB - dateA;
-      });
-    }
-    
-    acc[user.email] = cards;
+    acc[user.email] = sortCards(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), user.email, sortUtilisateurs);
     return acc;
   }, {});
 
-  // Organiser les cartes par date de livraison pour le calendrier
-  const getWeeksToDisplay = () => {
-    const monthStart = startOfMonth(currentMonthStart);
-    const monthEnd = endOfMonth(currentMonthStart);
-    
-    // Obtenir toutes les semaines qui touchent ce mois
-    const weeks = eachWeekOfInterval(
-      { start: monthStart, end: monthEnd },
-      { locale: fr }
-    );
-    
-    return weeks;
-  };
-
-  const handleDragStart = (start) => {
-    // Désactiver le backdrop-filter du header qui crée un stacking context
-    // et emprisonne les éléments position:fixed (dont le clone drag)
-    document.querySelectorAll('header').forEach(el => {
-      el.style.backdropFilter = 'none';
-      el.style.webkitBackdropFilter = 'none';
-    });
-    document.body.classList.add('dragging-card');
-  };
-
-  const handleDragUpdate = (update) => {
-    // @hello-pangea/dnd suit automatiquement le curseur
-  };
-
-  const handleDragEnd = (result) => {
-    // Restaurer le backdrop-filter du header
-    document.querySelectorAll('header').forEach(el => {
-      el.style.backdropFilter = '';
-      el.style.webkitBackdropFilter = '';
-    });
-    document.body.classList.remove('dragging-card');
-
-    if (!result.destination) return;
-
-    const { source, destination, draggableId } = result;
-
-    if (source.droppableId === destination.droppableId) return;
-
-    const card = filteredCards.find(c => c.id === draggableId);
+  const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
-
     const dossier = card.dossier;
 
-    let updatedMandats = [...dossier.mandats];
-
     if (activeView === "taches") {
-      const nouvelleTache = destination.droppableId;
-      updatedMandats = dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          return { ...m, tache_actuelle: nouvelleTache };
-        }
-        return m;
-      });
-
-      // Ouvrir le dialog d'entrée de temps après le déplacement
-      updateDossierMutation.mutate({
-        id: dossier.id,
-        dossierData: { ...dossier, mandats: updatedMandats }
-      }, {
+      if (card.tache === targetColumn) return;
+      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, tache_actuelle: targetColumn } : m);
+      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } }, {
         onSuccess: () => {
-          // Ouvrir le dialog d'entrée de temps
-          setEntreeTempsCardInfo({
-            dossierId: dossier.id,
-            mandatType: card.mandat.type_mandat,
-            nouvelleTache: nouvelleTache,
-            ancienneTache: source.droppableId
-          });
-          setEntreeTempsForm({
-            date: new Date().toISOString().split('T')[0],
-            heures: "",
-            tache: source.droppableId,
-            tache_suivante: nouvelleTache,
-            utilisateur_assigne: card.mandat.utilisateur_assigne || ""
-          });
+          setEntreeTempsCardInfo({ dossierId: dossier.id, mandatType: card.mandat.type_mandat, nouvelleTache: targetColumn, ancienneTache: card.tache });
+          setEntreeTempsForm({ date: new Date().toISOString().split('T')[0], heures: "", tache: card.tache, tache_suivante: targetColumn, utilisateur_assigne: card.mandat.utilisateur_assigne || "" });
           setIsEntreeTempsDialogOpen(true);
         }
       });
-      return;
     } else if (activeView === "utilisateurs") {
-      const nouvelUtilisateur = destination.droppableId === "non-assigne" ? "" : destination.droppableId;
-      updatedMandats = dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          return { ...m, utilisateur_assigne: nouvelUtilisateur };
-        }
-        return m;
-      });
+      if (card.utilisateur === targetColumn) return;
+      const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
+      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m);
+      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
     } else if (activeView === "calendrier") {
-      // Format: "day-YYYY-MM-DD"
-      const newDateStr = destination.droppableId.replace("day-", "");
-      updatedMandats = dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          return { ...m, date_livraison: newDateStr };
-        }
-        return m;
-      });
+      const newDateStr = targetColumn.replace("day-", "");
+      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, date_livraison: newDateStr } : m);
+      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
     }
+  }, [activeView, updateDossierMutation]);
 
-    updateDossierMutation.mutate({
-      id: dossier.id,
-      dossierData: { ...dossier, mandats: updatedMandats }
-    });
-  };
-
-
-
-  const getTacheColor = (tache) => {
-       const colors = {
-         "Ouverture": "bg-blue-500/10 border-blue-500/15",
-         "Cédule": "bg-cyan-500/10 border-cyan-500/15",
-         "Montage": "bg-purple-500/10 border-purple-500/15",
-         "Terrain": "bg-green-500/10 border-green-500/15",
-         "Compilation": "bg-yellow-500/10 border-yellow-500/15",
-         "Reliage": "bg-orange-500/10 border-orange-500/15",
-         "Décision/Calcul": "bg-pink-500/10 border-pink-500/15",
-         "Mise en plan": "bg-indigo-500/10 border-indigo-500/15",
-         "Analyse": "bg-teal-500/10 border-teal-500/15",
-         "Rapport": "bg-red-500/10 border-red-500/15",
-         "Vérification": "bg-amber-500/10 border-amber-500/15",
-         "Facturer": "bg-emerald-500/10 border-emerald-500/15"
-       };
-       return colors[tache] || "bg-slate-500/10 border-slate-500/15";
-     };
-
-     const getMandatColor = (typeMandat) => {
-       const colors = {
-         "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
-         "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-         "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-         "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-         "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
-         "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-         "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
-         "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-         "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-         "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-         "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
-         "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
-       };
-       return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
-     };
-
-     const getAbbreviatedMandatType = (type) => {
-       const abbreviations = {
-         "Certificat de localisation": "CL",
-         "Description Technique": "DT",
-         "Implantation": "Imp",
-         "Levé topographique": "Levé Topo",
-         "Piquetage": "Piq"
-       };
-       return abbreviations[type] || type;
-     };
-
-  const getTacheHeaderColor = (tache) => {
-    const colors = {
-      "Ouverture": "from-blue-500 to-blue-600",
-      "Cédule": "from-cyan-500 to-cyan-600",
-      "Montage": "from-purple-500 to-purple-600",
-      "Terrain": "from-green-500 to-green-600",
-      "Compilation": "from-yellow-500 to-yellow-600",
-      "Reliage": "from-orange-500 to-orange-600",
-      "Décision/Calcul": "from-pink-500 to-pink-600",
-      "Mise en plan": "from-indigo-500 to-indigo-600",
-      "Analyse": "from-teal-500 to-teal-600",
-      "Rapport": "from-red-500 to-red-600",
-      "Vérification": "from-amber-500 to-amber-600",
-      "Facturer": "from-emerald-500 to-emerald-600"
-    };
-    return colors[tache] || "from-slate-500 to-slate-600";
-  };
-
-  const getUserColor = (index) => {
-    const colors = [
-      "bg-blue-500/20 border-blue-500/30 from-blue-500 to-blue-600",
-      "bg-purple-500/20 border-purple-500/30 from-purple-500 to-purple-600",
-      "bg-green-500/20 border-green-500/30 from-green-500 to-green-600",
-      "bg-orange-500/20 border-orange-500/30 from-orange-500 to-orange-600",
-      "bg-pink-500/20 border-pink-500/30 from-pink-500 to-pink-600",
-      "bg-cyan-500/20 border-cyan-500/30 from-cyan-500 to-cyan-600",
-      "bg-yellow-500/20 border-yellow-500/30 from-yellow-500 to-yellow-600",
-      "bg-red-500/20 border-red-500/30 from-red-500 to-red-600"
-    ];
-    return colors[index % colors.length];
-  };
+  const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
   const handleCardClick = (card) => {
+    if (dragging) return;
     setEditingDossier({ ...card.dossier, initialMandatIndex: card.mandatIndex });
     setIsEditingDialogOpen(true);
   };
 
-  const handleMouseDown = (e, containerRef) => {
-    if (!containerRef.current) return;
-    if (e.target.closest('[data-rbd-draggable-id]')) return; // Ne pas interférer avec le drag des cartes
-    
-    setIsDragging(true);
-    setStartX(e.pageX - containerRef.current.offsetLeft);
-    setScrollLeft(containerRef.current.scrollLeft);
-    containerRef.current.style.cursor = 'grabbing';
-    containerRef.current.style.userSelect = 'none';
+  const getWeeksToDisplay = () => {
+    return eachWeekOfInterval({ start: startOfMonth(currentMonthStart), end: endOfMonth(currentMonthStart) }, { locale: fr });
   };
 
-  const handleMouseLeave = (containerRef) => {
-    if (!containerRef.current) return;
-    setIsDragging(false);
-    containerRef.current.style.cursor = 'grab';
-  };
+  const renderCard = (card) => {
+    const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+    const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
+    const [bg, text, border] = arpColor.split(' ');
+    const isDraggingThis = dragging?.card?.id === card.id;
+    const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
+    const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
 
-  const handleMouseUp = (containerRef) => {
-    if (!containerRef.current) return;
-    setIsDragging(false);
-    containerRef.current.style.cursor = 'grab';
-  };
-
-  const handleMouseMove = (e, containerRef) => {
-    if (!isDragging || !containerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - containerRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Vitesse de défilement
-    containerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMonthChange = (monthValue) => {
-    const newDate = new Date(currentMonthStart);
-    newDate.setMonth(parseInt(monthValue));
-    setCurrentMonthStart(startOfMonth(newDate));
-  };
-
-  const handleYearChange = (yearValue) => {
-    const newDate = new Date(currentMonthStart);
-    newDate.setFullYear(parseInt(yearValue));
-    setCurrentMonthStart(startOfMonth(newDate));
-  };
-
-  // Générer une liste d'années (10 ans avant et après l'année actuelle)
-  const currentYear = new Date().getFullYear();
-  const YEARS = [];
-  for (let i = currentYear - 10; i <= currentYear + 10; i++) {
-    YEARS.push(i);
-  }
-
-  // Composant wrapper qui utilise un portal pendant le drag
-  // pour sortir la carte du stacking context du layout
-  const PortalAwareItem = ({ provided, snapshot, children }) => {
-    const child = (
+    return (
       <div
-        ref={provided.innerRef}
-        {...provided.draggableProps}
-        {...provided.dragHandleProps}
-        style={provided.draggableProps.style}
+        key={card.id}
+        onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e, card); }}
+        onClick={() => handleCardClick(card)}
+        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-grab select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'grab' }}
       >
-        {children}
-      </div>
-    );
-
-    if (!snapshot.isDragging) return child;
-
-    // Pendant le drag, rendre dans le body directement
-    return ReactDOM.createPortal(child, document.body);
-  };
-
-  const renderMandatCard = (card, provided, snapshot) => {
-     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
-
-     const arpenteurColor = getArpenteurColor(card.dossier.arpenteur_geometre);
-     const bgColorClass = arpenteurColor.split(' ')[0];
-     const textColorClass = arpenteurColor.split(' ')[1];
-     const borderColorClass = arpenteurColor.split(' ')[2];
-
-     const shadowColor = bgColorClass.includes('red') ? 'shadow-red-500/50' 
-       : bgColorClass.includes('slate') ? 'shadow-slate-500/50'
-       : bgColorClass.includes('orange') ? 'shadow-orange-500/50'
-       : bgColorClass.includes('yellow') ? 'shadow-yellow-500/50'
-       : 'shadow-cyan-500/50';
-
-     return (
-       <div 
-         onClick={() => !snapshot?.isDragging && handleCardClick(card)}
-         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
-           snapshot?.isDragging ? `shadow-2xl ${shadowColor}` : ''
-         }`}
-       >
-         {/* Entête : N° Dossier (gauche) et Type de mandat (droite) */}
-         <div className="flex items-start justify-between gap-2 mb-2">
-           <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
-             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-           </Badge>
-           <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
-             {getAbbreviatedMandatType(card.mandat.type_mandat)}
-           </Badge>
-         </div>
-
-        {/* Clients */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
+            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+          </Badge>
+          <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+            {getAbbreviatedMandatType(card.mandat.type_mandat)}
+          </Badge>
+        </div>
         <div className="flex items-center gap-1 mb-1">
           <User className="w-3 h-3 text-white flex-shrink-0" />
-          <span className="text-xs text-white font-medium">{getClientsNames(card.dossier.clients_ids)}</span>
+          <span className="text-xs text-white font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</span>
         </div>
-
-        {/* Adresse complète */}
         {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-          <div className="flex items-start gap-1 mb-1">
-            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-            <span className="text-xs text-slate-400 break-words">{formatAdresse(card.mandat.adresse_travaux)}</span>
+          <div className="flex items-center gap-1 mb-1">
+            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+            <span className="text-xs text-slate-400 truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
           </div>
         )}
-
-        {/* Tâche actuelle */}
         {card.mandat.tache_actuelle && (
           <div className="mb-1">
-            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
-              {card.mandat.tache_actuelle}
-            </Badge>
+            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{card.mandat.tache_actuelle}</Badge>
           </div>
         )}
-
-        {/* Date de livraison et utilisateur assigné en bas */}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
           {card.mandat.date_livraison ? (
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-              <span className="text-xs text-yellow-300">
-                {format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM yyyy", { locale: fr })}
-              </span>
+              <span className="text-xs text-yellow-300">{format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM yy", { locale: fr })}</span>
             </div>
-          ) : (
-            <div />
-          )}
+          ) : <div />}
           {assignedUser ? (
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
-              <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-                <AvatarImage src={assignedUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                  {getUserInitials(assignedUser.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
+            <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+              <AvatarImage src={assignedUser.photo_url} />
+              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+            </Avatar>
           ) : (
             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
               <User className="w-3 h-3 text-emerald-500" />
             </div>
+          )}
+        </div>
+        <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden border border-slate-700/50 relative">
+          <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{progress}%</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderColumn = (columnId, title, cards, headerContent) => {
+    const isOver = overColumn === columnId && dragging;
+    return (
+      <div
+        key={columnId}
+        data-kanban-column={columnId}
+        style={{ flex: '0 0 270px', minWidth: 270, maxWidth: 270 }}
+      >
+        <div className={`rounded-xl border transition-all duration-150 flex flex-col ${isOver ? 'border-emerald-400/80 bg-emerald-500/10 shadow-lg shadow-emerald-500/20' : 'border-slate-700/50 bg-slate-800/40'}`}>
+          <div className="px-3 py-2.5 border-b border-slate-700/50 bg-slate-700/30 rounded-t-xl">
+            {headerContent}
+          </div>
+          <div className="p-3 min-h-[120px]">
+            {cards.map(card => renderCard(card))}
+            {cards.length === 0 && (
+              <div className="text-center py-8 text-slate-600 text-sm">Aucun mandat</div>
             )}
-            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
-            {/* Barre de progression */}
-            {(() => {
-              const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
-              // Progression linéaire : Ouverture = 0%, Facturer = 95%
-              let rawProgress = 0;
-              if (tacheIndex >= 0 && TACHES.length > 1) {
-                rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
-              }
-              const progress = Math.round(rawProgress / 5) * 5;
-
-              return (
-                <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden border border-slate-700/50 relative">
-                  <div 
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
-                    style={{ width: `${progress}%` }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">
-                      {progress}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
-            </div>
-            );
-            };
+  const renderSortButton = (key, sortMap, setSortMap) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); setSortMap(prev => ({ ...prev, [key]: prev[key] === "asc" ? "desc" : prev[key] === "desc" ? null : "asc" })); }}
+            className={`h-7 px-2 text-xs font-medium ${sortMap[key] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
+          >
+            {sortMap[key] === "asc" ? <><ArrowUp className="w-3 h-3 mr-1" />Anciens</> : sortMap[key] === "desc" ? <><ArrowDown className="w-3 h-3 mr-1" />Récents</> : <><Calendar className="w-3 h-3 mr-1" />Trier</>}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Trier par date de livraison</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <style>{`
-        /* Pas de overflow-x hidden sur body - ça bloque le clone drag */
+      {/* Ghost card pendant le drag */}
+      {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} />}
 
-        /* Forcer le clone drag au-dessus de tout */
-        body.dragging-card [data-rbd-drag-handle-draggable-id] {
-          z-index: 99999 !important;
-        }
-
-        /* Le clone draggé doit être au-dessus de la sidebar et du header */
-        [data-rbd-draggable-context-id][style*="position: fixed"] {
-          z-index: 99999 !important;
-        }
-
-        /* Conteneur Kanban avec scroll horizontal */
-        .kanban-scroll-container {
-          overflow-x: auto;
-          overflow-y: visible;
-          width: 100%;
-          -webkit-overflow-scrolling: touch;
-          cursor: grab;
-          scrollbar-gutter: stable;
-        }
-
-        /* Masquer la scrollbar du bas */
-        .kanban-scroll-container::-webkit-scrollbar {
-          display: none;
-        }
-
-        /* Scrollbar en haut */
-        .kanban-scrollbar-top {
-          width: 100%;
-          height: 16px;
-          background: rgba(15, 23, 42, 0.8);
-          border-radius: 6px;
-          overflow-x: auto;
-          overflow-y: hidden;
-          margin-bottom: 12px;
-        }
-
-        .kanban-scrollbar-top::-webkit-scrollbar {
-          height: 12px;
-        }
-
-        .kanban-scrollbar-top::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.8);
-          border-radius: 6px;
-        }
-
-        .kanban-scrollbar-top::-webkit-scrollbar-thumb {
-          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 6px;
-          border: 2px solid rgba(15, 23, 42, 0.8);
-        }
-
-        .kanban-scrollbar-top::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
-        }
-
-
-
-        .kanban-scroll-container:active {
-          cursor: grabbing;
-        }
-
-        /* Bloquer le scroll horizontal pendant le drag */
-        body.dragging-card .kanban-scroll-container {
-          overflow-x: hidden !important;
-          cursor: grabbing !important;
-        }
-
-        /* Cursors pour drag */
-        [data-rbd-draggable-context-id] {
-          cursor: grab !important;
-        }
-
-        [data-rbd-draggable-context-id]:active {
-          cursor: grabbing !important;
-        }
-
-
-
-        /* Drag over column styling */
-        .kanban-column.drag-over {
-          background: rgba(0, 121, 191, 0.15);
-          border: 2px dashed #0079bf;
-        }
-
-        /* Personnaliser la scrollbar pour le Kanban */
-        .kanban-scroll-container::-webkit-scrollbar {
-          height: 12px;
-        }
-
-        .kanban-scroll-container::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.8);
-          border-radius: 10px;
-        }
-
-        .kanban-scroll-container::-webkit-scrollbar-thumb {
-          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.8);
-        }
-
-        .kanban-scroll-container::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
-        }
-
-        /* Colonnes avec largeur fixe */
-        .kanban-column {
-          flex: 0 0 270px;
-          min-width: 270px;
-          max-width: 270px;
-        }
-
-        /* Card dans colonne - overflow visible pour ne pas clip le drag */
-        .kanban-column > * {
-          overflow: visible !important;
-        }
-
-        /* Contenu des colonnes - pas de scroll interne (évite nested scroll containers) */
-        .kanban-column .kanban-content {
-          overflow: visible;
-        }
-
-        /* Supprimer les bordures des Card Kanban */
-        .kanban-column > .border {
-          border: none !important;
-        }
-      `}</style>
-      
-      <div className="w-full px-0">
-        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4 pt-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                  Gestion de Mandat
-                </h1>
-                <Kanban className="w-6 h-6 text-emerald-400" />
-              </div>
-              <p className="text-slate-400">Vue Kanban de vos mandats</p>
-            </div>
+      <div className="w-full">
+        <div className="pb-4 pt-4">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Gestion de Mandat
+            </h1>
+            <Kanban className="w-6 h-6 text-emerald-400" />
           </div>
+          <p className="text-slate-400 mb-6">Vue Kanban de vos mandats</p>
 
-        {/* Filtres et recherche */}
-        <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl mb-6">
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
+          {/* Filtres */}
+          <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl mb-6">
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Filtres</span>
+                    {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
+                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                        {filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length}
+                      </Badge>
+                    )}
+                    {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                  </Button>
                 </div>
-
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Filtres</span>
-                  {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterUtilisateur.length > 0 || filterVille.length > 0) && (
-                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length}
-                    </Badge>
-                  )}
-                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                </Button>
-              </div>
-
-              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                <CollapsibleContent>
-                  <div className="p-2 border border-emerald-500/30 rounded-lg">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-3 h-3 text-emerald-500" />
-                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
-                        </div>
-                        {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterUtilisateur.length > 0 || filterVille.length > 0) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setFilterArpenteur([]);
-                              setFilterTypeMandat([]);
-                              setFilterUtilisateur([]);
-                              setFilterVille([]);
-                            }}
-                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                          >
-                            <X className="w-2.5 h-2.5 mr-1" />
-                            Réinitialiser
+                <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                  <CollapsibleContent>
+                    <div className="p-2 border border-emerald-500/30 rounded-lg">
+                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30 mb-2">
+                        <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-emerald-500" /><h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4></div>
+                        {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
+                          <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterTypeMandat([]); setFilterUtilisateur([]); setFilterVille([]); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                            <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
                           </Button>
                         )}
                       </div>
-                      
                       <div className="grid grid-cols-4 gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {ARPENTEURS.map((arp) => (
-                              <DropdownMenuCheckboxItem
-                                key={arp}
-                                checked={filterArpenteur.includes(arp)}
-                                onCheckedChange={(checked) => {
-                                  setFilterArpenteur(
-                                    checked
-                                      ? [...filterArpenteur, arp]
-                                      : filterArpenteur.filter((a) => a !== arp)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {arp}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {[
+                          { label: "Arpenteurs", items: ARPENTEURS, filter: filterArpenteur, setFilter: setFilterArpenteur },
+                          { label: "Mandats", items: TYPES_MANDATS, filter: filterTypeMandat, setFilter: setFilterTypeMandat },
+                          { label: "Utilisateurs", items: users.map(u => u.email), filter: filterUtilisateur, setFilter: setFilterUtilisateur, labels: users.reduce((a, u) => ({ ...a, [u.email]: u.full_name }), {}) },
+                          { label: "Villes", items: uniqueVilles, filter: filterVille, setFilter: setFilterVille }
+                        ].map(({ label, items, filter, setFilter, labels }) => (
+                          <DropdownMenu key={label}>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                <span className="truncate">{label} ({filter.length > 0 ? filter.length : 'Tous'})</span>
+                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                              {items.map(item => (
+                                <DropdownMenuCheckboxItem key={item} checked={filter.includes(item)} onCheckedChange={(checked) => setFilter(checked ? [...filter, item] : filter.filter(i => i !== item))} className="text-white">
+                                  {labels ? labels[item] : item}
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ))}
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            </CardContent>
+          </Card>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Mandats ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            {TYPES_MANDATS.map((type) => (
-                              <DropdownMenuCheckboxItem
-                                key={type}
-                                checked={filterTypeMandat.includes(type)}
-                                onCheckedChange={(checked) => {
-                                  setFilterTypeMandat(
-                                    checked
-                                      ? [...filterTypeMandat, type]
-                                      : filterTypeMandat.filter((t) => t !== type)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {type}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+          {/* Vues */}
+          <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+            <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
+              <TabsTrigger value="taches" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-2 text-sm">
+                <Kanban className="w-4 h-4 mr-1" />Par Tâches
+              </TabsTrigger>
+              <TabsTrigger value="utilisateurs" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-2 text-sm">
+                <User className="w-4 h-4 mr-1" />Par Utilisateur
+              </TabsTrigger>
+              <TabsTrigger value="calendrier" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-2 text-sm">
+                <Calendar className="w-4 h-4 mr-1" />Calendrier
+              </TabsTrigger>
+            </TabsList>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Utilisateurs ({filterUtilisateur.length > 0 ? `${filterUtilisateur.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {users.map((usr) => (
-                              <DropdownMenuCheckboxItem
-                                key={usr.email}
-                                checked={filterUtilisateur.includes(usr.email)}
-                                onCheckedChange={(checked) => {
-                                  setFilterUtilisateur(
-                                    checked
-                                      ? [...filterUtilisateur, usr.email]
-                                      : filterUtilisateur.filter((u) => u !== usr.email)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {usr.full_name}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+            {/* Vue par Tâches */}
+            <TabsContent value="taches" className="mt-0">
+              <div className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+                <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
+                  {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
+                    <div className="flex items-center justify-between w-full">
+                      <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByTache[tache] || []).length}</Badge>
+                      <span className="text-sm font-bold text-white">{tache}</span>
+                      {renderSortButton(tache, sortTaches, setSortTaches)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            {uniqueVilles.map((ville) => (
-                              <DropdownMenuCheckboxItem
-                                key={ville}
-                                checked={filterVille.includes(ville)}
-                                onCheckedChange={(checked) => {
-                                  setFilterVille(
-                                    checked
-                                      ? [...filterVille, ville]
-                                      : filterVille.filter((v) => v !== ville)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {ville}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+            {/* Vue par Utilisateur */}
+            <TabsContent value="utilisateurs" className="mt-0">
+              <div className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+                <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
+                  {usersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
+                    <div className="flex items-center justify-between w-full">
+                      <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByUtilisateur[user.email] || []).length}</Badge>
+                      <div className="flex items-center gap-2">
+                        {user.email !== "non-assigne" ? (
+                          <Avatar className="w-5 h-5 border border-white/20">
+                            <AvatarImage src={user.photo_url} />
+                            <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user.full_name)}</AvatarFallback>
+                          </Avatar>
+                        ) : <User className="w-4 h-4 text-white" />}
+                        <span className="text-sm font-bold text-white truncate max-w-[110px]">{user.full_name}</span>
+                      </div>
+                      {renderSortButton(user.email, sortUtilisateurs, setSortUtilisateurs)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Vue Calendrier */}
+            <TabsContent value="calendrier" className="mt-0">
+              <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
+                <CardHeader className="border-b border-slate-800">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
+                    <CardTitle className="text-white text-sm">
+                      {calendarMode === "week"
+                        ? `Semaine du ${format(currentMonthStart, "d MMMM", { locale: fr })} au ${format(addDays(currentMonthStart, 4), "d MMMM yyyy", { locale: fr })}`
+                        : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
+                      }
+                    </CardTitle>
+                    <div className="flex gap-2 items-center flex-wrap">
+                      <Button size="sm" variant="outline" onClick={() => setCurrentMonthStart(calendarMode === "week" ? addDays(currentMonthStart, -7) : subMonths(currentMonthStart, 1))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">← Précédent</Button>
+                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Aujourd'hui</Button>
+                      <Button size="sm" variant="outline" onClick={() => setCurrentMonthStart(calendarMode === "week" ? addDays(currentMonthStart, 7) : addMonths(currentMonthStart, 1))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">Suivant →</Button>
+                      <div className="flex gap-1">
+                        <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white"}>Semaine</Button>
+                        <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white"}>Mois</Button>
                       </div>
                     </div>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </CardContent>
-        </Card>
-
-          {/* Tabs pour les différentes vues */}
-          <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-            <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
-            <TabsTrigger
-              value="taches"
-              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-2 text-sm"
-            >
-              <Kanban className="w-4 h-4 mr-1" />
-              Par Tâches
-            </TabsTrigger>
-            <TabsTrigger
-              value="utilisateurs"
-              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-2 text-sm"
-            >
-              <User className="w-4 h-4 mr-1" />
-              Par Utilisateur
-            </TabsTrigger>
-            <TabsTrigger
-              value="calendrier"
-              className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-2 text-sm"
-            >
-              <Calendar className="w-4 h-4 mr-1" />
-              Calendrier
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Vue par Tâches */}
-           <TabsContent value="taches" className="mt-0">
-             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
-               <div className="kanban-scrollbar-top" id="kanban-scrollbar-taches">
-                 <div style={{ height: '1px', minWidth: 'max-content' }}></div>
-               </div>
-               <div 
-                 className="kanban-scroll-container"
-                 id="kanban-container-taches"
-                 ref={(el) => {
-                   if (el) {
-                     const handleDown = (e) => handleMouseDown(e, { current: el });
-                     const handleMove = (e) => handleMouseMove(e, { current: el });
-                     const handleUp = () => handleMouseUp({ current: el });
-                     const handleLeave = () => handleMouseLeave({ current: el });
-
-                     el.onmousedown = handleDown;
-                     el.onmousemove = handleMove;
-                     el.onmouseup = handleUp;
-                     el.onmouseleave = handleLeave;
-
-                     // Synchroniser la scrollbar du haut
-                     const topScrollbar = document.getElementById('kanban-scrollbar-taches');
-                     if (topScrollbar) {
-                       const updateScrollbarWidth = () => {
-                         const content = topScrollbar.querySelector('div');
-                         if (content) {
-                           content.style.width = el.scrollWidth + 'px';
-                         }
-                       };
-                       updateScrollbarWidth();
-                       el.addEventListener('scroll', () => {
-                         topScrollbar.scrollLeft = el.scrollLeft;
-                       });
-                       topScrollbar.addEventListener('scroll', () => {
-                         el.scrollLeft = topScrollbar.scrollLeft;
-                       });
-                     }
-                   }
-                 }}
-               >
-                 <div className="flex gap-8 p-4" style={{ minWidth: 'max-content' }}>
-
-                      {TACHES.map(tache => {
-                    const cardsInColumn = cardsByTache[tache] || [];
-
-                    return (
-                      <div 
-                         key={tache} 
-                         className="kanban-column"
-                      >
-                        <Card 
-                           className="!border-0 bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
-                        >
-                          <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
-                            <div className="flex items-center justify-between w-full">
-                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5 mr-4">
-                                {cardsInColumn.length}
-                              </Badge>
-                              <div className="flex items-center gap-1">
-                                <CardTitle className="text-base font-bold text-white tracking-wide">
-                                  {tache}
-                                </CardTitle>
-                              </div>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setSortTaches(prev => ({
-                                        ...prev,
-                                        [tache]: prev[tache] === "asc" ? "desc" : prev[tache] === "desc" ? null : "asc"
-                                      }))}
-                                      className={`h-8 px-2 text-xs font-medium ${sortTaches[tache] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
-                                    >
-                                      {sortTaches[tache] === "asc" ? (
-                                        <>
-                                          <ArrowUp className="w-3 h-3 mr-1" />
-                                          Plus anciens
-                                        </>
-                                      ) : sortTaches[tache] === "desc" ? (
-                                        <>
-                                          <ArrowDown className="w-3 h-3 mr-1" />
-                                          Plus récents
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Calendar className="w-3 h-3 mr-1" />
-                                          Trier date
-                                        </>
-                                      )}
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    Trier par date de livraison
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </CardHeader>
-                          <Droppable droppableId={tache}>
-                            {(provided, snapshot) => (
-                              <CardContent
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                className="p-3 space-y-3 kanban-content"
-                              >
-                                {cardsInColumn.map((card, index) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={index}>
-                                    {(provided, snapshot) => (
-                                      <PortalAwareItem provided={provided} snapshot={snapshot}>
-                                        {renderMandatCard(card, provided, snapshot)}
-                                      </PortalAwareItem>
-                                    )}
-                                  </Draggable>
-                                  ))}
-                                  {provided.placeholder}
-                                  {cardsInColumn.length === 0 && (
-                                  <div className="text-center py-8 text-slate-600 text-sm">
-                                    Aucun mandat
-                                  </div>
-                                  )}
-                                  </CardContent>
-                                  )}
-                                  </Droppable>
-                                  </Card>
-                                  </div>
-                                  );
-                                  })}
-                                  </div>
-                                  </div>
-                                  </DragDropContext>
-                                  </TabsContent>
-
-                                {/* Vue par Utilisateur */}
-          <TabsContent value="utilisateurs" className="mt-0">
-            <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
-              <div className="kanban-scrollbar-top" id="kanban-scrollbar-users">
-                 <div style={{ height: '1px', minWidth: 'max-content' }}></div>
-               </div>
-               <div 
-                 className="kanban-scroll-container"
-                 id="kanban-container-users"
-                 ref={(el) => {
-                   if (el) {
-                     const handleDown = (e) => handleMouseDown(e, { current: el });
-                     const handleMove = (e) => handleMouseMove(e, { current: el });
-                     const handleUp = () => handleMouseUp({ current: el });
-                     const handleLeave = () => handleMouseLeave({ current: el });
-
-                     el.onmousedown = handleDown;
-                     el.onmousemove = handleMove;
-                     el.onmouseup = handleUp;
-                     el.onmouseleave = handleLeave;
-
-                     // Synchroniser la scrollbar du haut
-                     const topScrollbar = document.getElementById('kanban-scrollbar-users');
-                     if (topScrollbar) {
-                       const updateScrollbarWidth = () => {
-                         const content = topScrollbar.querySelector('div');
-                         if (content) {
-                           content.style.width = el.scrollWidth + 'px';
-                         }
-                       };
-                       updateScrollbarWidth();
-                       el.addEventListener('scroll', () => {
-                         topScrollbar.scrollLeft = el.scrollLeft;
-                       });
-                       topScrollbar.addEventListener('scroll', () => {
-                         el.scrollLeft = topScrollbar.scrollLeft;
-                       });
-                     }
-                   }
-                 }}
-               >
-                <div className="flex gap-8 p-4" style={{ minWidth: 'max-content' }}>
-              
-                  {usersList.map((user, userIndex) => {
-                    const cardsInColumn = cardsByUtilisateur[user.email] || [];
-                    const colorClass = getUserColor(userIndex);
-                    const [bgColor, borderColor, gradientColor] = colorClass.split(' ');
-                    
-                    return (
-                      <div 
-                         key={user.email} 
-                         className="kanban-column"
-                      >
-                        <Card 
-                           className="!border-0 bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
-                        >
-                          <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
-                            <div className="flex items-center justify-between w-full">
-                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5 mr-4">
-                                {cardsInColumn.length}
-                              </Badge>
-                              <div className="flex items-center gap-2 min-w-0">
-                                {user.email !== "non-assigne" ? (
-                                  <Avatar className="w-6 h-6 border-2 border-white/20 flex-shrink-0">
-                                    <AvatarImage src={user.photo_url} />
-                                    <AvatarFallback className="text-xs bg-slate-900 text-white">
-                                      {getUserInitials(user.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                ) : (
-                                  <User className="w-5 h-5 text-white flex-shrink-0" />
-                                )}
-                                <CardTitle className="text-base font-bold text-white tracking-wide whitespace-nowrap">
-                                  {user.full_name}
-                                </CardTitle>
-                              </div>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setSortUtilisateurs(prev => ({
-                                        ...prev,
-                                        [user.email]: prev[user.email] === "asc" ? "desc" : prev[user.email] === "desc" ? null : "asc"
-                                      }))}
-                                      className={`h-8 px-2 text-xs font-medium ${sortUtilisateurs[user.email] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
-                                    >
-                                      {sortUtilisateurs[user.email] === "asc" ? (
-                                        <>
-                                          <ArrowUp className="w-3 h-3 mr-1" />
-                                          Plus anciens
-                                        </>
-                                      ) : sortUtilisateurs[user.email] === "desc" ? (
-                                        <>
-                                          <ArrowDown className="w-3 h-3 mr-1" />
-                                          Plus récents
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Calendar className="w-3 h-3 mr-1" />
-                                          Trier date
-                                        </>
-                                      )}
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    Trier par date de livraison
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </CardHeader>
-                          <Droppable droppableId={user.email}>
-                            {(provided, snapshot) => (
-                              <CardContent
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                className="p-3 space-y-3 kanban-content"
-                              >
-                                {cardsInColumn.map((card, index) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={index}>
-                                    {(provided, snapshot) => (
-                                      <PortalAwareItem provided={provided} snapshot={snapshot}>
-                                        {renderMandatCard(card, provided, snapshot)}
-                                      </PortalAwareItem>
-                                    )}
-                                  </Draggable>
-                                  ))}
-                                  {provided.placeholder}
-                                  {cardsInColumn.length === 0 && (
-                                  <div className="text-center py-8 text-slate-600 text-sm">
-                                    Aucun mandat
-                                  </div>
-                                  )}
-                                  </CardContent>
-                                  )}
-                                  </Droppable>
-                                  </Card>
-                                  </div>
-                                  );
-                                  })}
-                                  </div>
-                                  </div>
-                                  </DragDropContext>
-                                  </TabsContent>
-
-                                {/* Vue Calendrier */}
-          <TabsContent value="calendrier" className="mt-0">
-            <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
-              <CardHeader className="border-b border-slate-800">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-white">
-                    {calendarMode === "week" 
-                      ? `Semaine du ${format(currentMonthStart, "d MMMM", { locale: fr })} au ${format(addDays(currentMonthStart, 4), "d MMMM yyyy", { locale: fr })}`
-                      : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
-                    }
-                  </CardTitle>
-                  <div className="flex gap-2 items-center">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (calendarMode === "week") {
-                          setCurrentMonthStart(addDays(currentMonthStart, -7));
-                        } else {
-                          setCurrentMonthStart(subMonths(currentMonthStart, 1));
-                        }
-                      }}
-                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                    >
-                      ← Précédent
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))}
-                      className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                    >
-                      Aujourd'hui
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (calendarMode === "week") {
-                          setCurrentMonthStart(addDays(currentMonthStart, 7));
-                        } else {
-                          setCurrentMonthStart(addMonths(currentMonthStart, 1));
-                        }
-                      }}
-                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
-                    >
-                      Suivant →
-                    </Button>
-                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setCalendarMode("week");
-                          setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
-                        }}
-                        className={calendarMode === "week" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
-                      >
-                        Semaine
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setCalendarMode("month");
-                          setCurrentMonthStart(startOfMonth(new Date()));
-                        }}
-                        className={calendarMode === "month" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
-                      >
-                        Mois
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4">
-                <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
+                </CardHeader>
+                <CardContent className="p-4">
                   {calendarMode === "week" ? (
                     <div className="grid grid-cols-5 gap-3">
-                      {[0, 1, 2, 3, 4].map((dayOffset) => {
+                      {[0,1,2,3,4].map(dayOffset => {
                         const day = addDays(currentMonthStart, dayOffset);
                         const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                        const cardsForDay = filteredCards.filter(card => 
-                          card.mandat.date_livraison && 
-                          isSameDay(new Date(card.mandat.date_livraison + "T00:00:00"), day)
-                        );
-
+                        const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day));
+                        const isOver = overColumn === dayId && dragging;
                         return (
-                          <div 
-                            key={dayOffset} 
-                            className="space-y-2"
-                            style={{ zIndex: 1 }}
-                          >
-                            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
-                              <div className="text-center">
-                                <h3 className="font-semibold text-white text-sm">
-                                  {format(day, "EEEE", { locale: fr })}
-                                </h3>
-                                <p className="text-xs text-slate-400">
-                                  {format(day, "d MMM", { locale: fr })}
-                                </p>
-                              </div>
+                          <div key={dayOffset} data-kanban-column={dayId} className={`rounded-lg border min-h-[400px] p-2 transition-all ${isOver ? 'border-emerald-400/80 bg-emerald-500/10' : 'border-slate-700/50'}`}>
+                            <div className="text-center mb-3 bg-slate-800/50 rounded-lg p-2">
+                              <h3 className="font-semibold text-white text-sm capitalize">{format(day, "EEEE", { locale: fr })}</h3>
+                              <p className="text-xs text-slate-400">{format(day, "d MMM", { locale: fr })}</p>
                             </div>
-
-                            <Droppable droppableId={dayId}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`space-y-2 min-h-[400px] p-2 rounded-lg transition-colors ${
-                                    snapshot.isDraggingOver ? 'bg-emerald-500/10 border-2 border-emerald-500/50' : ''
-                                  }`}
-                                >
-                                  {cardsForDay.map((card, index) => (
-                                    <Draggable key={card.id} draggableId={card.id} index={index}>
-                                      {(provided, snapshot) => (
-                                        <div
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          {...provided.dragHandleProps}
-                                          data-is-dragging={snapshot.isDragging}
-                                          style={provided.draggableProps.style}
-                                        >
-                                          {renderMandatCard(card, provided, snapshot)}
-                                        </div>
-                                      )}
-                                    </Draggable>
-                                  ))}
-                                  {provided.placeholder}
-                                  {cardsForDay.length === 0 && !snapshot.isDraggingOver && (
-                                    <div className="text-center py-8 text-slate-600 text-xs">
-                                      Aucun mandat
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </Droppable>
+                            {cardsForDay.map(card => renderCard(card))}
+                            {cardsForDay.length === 0 && <div className="text-center py-8 text-slate-600 text-xs">Aucun mandat</div>}
                           </div>
                         );
                       })}
                     </div>
                   ) : (
-                    <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                    <div className="space-y-4">
                       {getWeeksToDisplay().map((weekStart, weekIndex) => {
-                        const weekEnd = endOfWeek(weekStart, { locale: fr });
-                        const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                          .filter(day => day.getDay() !== 0 && day.getDay() !== 6);
-
+                        const daysOfWeek = eachDayOfInterval({ start: weekStart, end: endOfWeek(weekStart, { locale: fr }) }).filter(d => d.getDay() !== 0 && d.getDay() !== 6);
                         return (
                           <Card key={weekIndex} className="!border-0 !shadow-none bg-slate-800/30">
                             <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
@@ -1410,58 +619,16 @@ export default function GestionDeMandat() {
                               <div className="grid grid-cols-5 divide-x divide-slate-700">
                                 {daysOfWeek.map((day, dayIndex) => {
                                   const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                                  const cardsForDay = filteredCards.filter(card => 
-                                    card.mandat.date_livraison && 
-                                    isSameDay(new Date(card.mandat.date_livraison + "T00:00:00"), day)
-                                  );
-
+                                  const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day));
+                                  const isOver = overColumn === dayId && dragging;
                                   return (
-                                    <div 
-                                      key={dayIndex} 
-                                      className="p-3 min-h-[200px]"
-                                      style={{ zIndex: 1 }}
-                                    >
+                                    <div key={dayIndex} data-kanban-column={dayId} className={`p-3 min-h-[200px] transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
                                       <div className="text-center mb-3">
-                                        <p className="text-xs text-slate-500 uppercase">
-                                          {format(day, "EEE", { locale: fr })}
-                                        </p>
-                                        <p className="text-lg font-bold text-white">
-                                          {format(day, "d", { locale: fr })}
-                                        </p>
+                                        <p className="text-xs text-slate-500 uppercase">{format(day, "EEE", { locale: fr })}</p>
+                                        <p className="text-lg font-bold text-white">{format(day, "d", { locale: fr })}</p>
                                       </div>
-                                      <Droppable droppableId={dayId}>
-                                        {(provided, snapshot) => (
-                                          <div
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                            className={`space-y-2 rounded-lg transition-colors ${
-                                              snapshot.isDraggingOver ? 'bg-emerald-500/10 border-2 border-emerald-500/50' : ''
-                                            }`}
-                                          >
-                                            {cardsForDay.map((card, index) => (
-                                              <Draggable key={card.id} draggableId={card.id} index={index}>
-                                                {(provided, snapshot) => (
-                                                  <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    data-is-dragging={snapshot.isDragging}
-                                                    style={provided.draggableProps.style}
-                                                  >
-                                                    {renderMandatCard(card, provided, snapshot)}
-                                                  </div>
-                                                )}
-                                              </Draggable>
-                                            ))}
-                                            {provided.placeholder}
-                                            {cardsForDay.length === 0 && !snapshot.isDraggingOver && (
-                                              <div className="text-center py-4 text-slate-600 text-xs">
-                                                Aucun mandat
-                                              </div>
-                                            )}
-                                          </div>
-                                        )}
-                                      </Droppable>
+                                      {cardsForDay.map(card => renderCard(card))}
+                                      {cardsForDay.length === 0 && <div className="text-center py-4 text-slate-600 text-xs">Aucun</div>}
                                     </div>
                                   );
                                 })}
@@ -1472,252 +639,99 @@ export default function GestionDeMandat() {
                       })}
                     </div>
                   )}
-                </DragDropContext>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
-        {/* Dialog d'édition du dossier */}
         <EditDossierDialog
           isOpen={isEditingDialogOpen}
-          onClose={() => {
-            setIsEditingDialogOpen(false);
-            setEditingDossier(null);
-          }}
+          onClose={() => { setIsEditingDialogOpen(false); setEditingDossier(null); }}
           dossier={editingDossier}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-          }}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['dossiers'] })}
           clients={clients}
           users={users}
         />
 
-        {/* Dialog d'entrée de temps après drag & drop */}
+        {/* Dialog entrée de temps */}
         <Dialog open={isEntreeTempsDialogOpen} onOpenChange={setIsEntreeTempsDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">Nouvelle entrée de temps</DialogTitle>
               {entreeTempsCardInfo && (() => {
                 const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                const arpColor = getArpenteurColor(dossier?.arpenteur_geometre);
                 return (
-                  <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
-                    dossier?.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
-                    dossier?.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
-                    dossier?.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
-                    dossier?.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
-                    dossier?.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
-                    "text-emerald-400"
-                  }`}>
-                    <span>
-                      {dossier && getArpenteurInitials(dossier.arpenteur_geometre)}{dossier?.numero_dossier}
-                      {dossier?.clients_ids?.length > 0 && getClientsNames(dossier.clients_ids) !== "-" && (
-                        <span> - {getClientsNames(dossier.clients_ids)}</span>
-                      )}
-                    </span>
-                    <span className="flex gap-1">
-                      <Badge className={`${getMandatColor(entreeTempsCardInfo.mandatType)} border text-xs`}>
-                        {getAbbreviatedMandatType(entreeTempsCardInfo.mandatType)}
-                      </Badge>
-                    </span>
+                  <div className={`text-base font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${arpColor.split(' ')[1]}`}>
+                    <span>{getArpenteurInitials(dossier?.arpenteur_geometre)}{dossier?.numero_dossier}{dossier?.clients_ids?.length > 0 && ` - ${getClientsNames(dossier.clients_ids)}`}</span>
+                    <Badge className={`${getMandatColor(entreeTempsCardInfo.mandatType)} border text-xs`}>{getAbbreviatedMandatType(entreeTempsCardInfo.mandatType)}</Badge>
                   </div>
                 );
               })()}
             </DialogHeader>
-
-            <div className="space-y-4">
-              {/* Section Détails de l'entrée */}
-              <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
-                <div className="py-2 px-3 bg-lime-900/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-lime-500/30 flex items-center justify-center">
-                      <Timer className="w-3 h-3 text-lime-400" />
-                    </div>
-                    <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
-                  </div>
+            <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+              <div className="py-2 px-3 bg-lime-900/20 flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-lime-500/30 flex items-center justify-center"><Timer className="w-3 h-3 text-lime-400" /></div>
+                <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
+              </div>
+              <div className="p-3 grid grid-cols-5 gap-2">
+                <div className="space-y-0.5">
+                  <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                  <Input type="date" value={entreeTempsForm.date} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, date: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
                 </div>
-
-                <div className="pt-2 pb-2 px-3">
-                  <div className="rounded-lg p-3">
-                    <div className="grid grid-cols-5 gap-2">
-                      <div className="space-y-0.5">
-                        <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
-                        <Input
-                          type="date"
-                          value={entreeTempsForm.date}
-                          onChange={(e) => setEntreeTempsForm({...entreeTempsForm, date: e.target.value})}
-                          required
-                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
-                        <Input
-                          type="number"
-                          step="0.25"
-                          min="0"
-                          value={entreeTempsForm.heures}
-                          onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})}
-                          required
-                          placeholder="Ex: 2.5"
-                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
-                        <Select value={entreeTempsForm.tache} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, tache: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {TACHES.map((tache) => (
-                              <SelectItem key={tache} value={tache} className="text-white text-xs">
-                                {tache}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Tâche suivante</Label>
-                        <Select value={entreeTempsForm.tache_suivante} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {TACHES.map((tache) => (
-                              <SelectItem key={tache} value={tache} className="text-white text-xs">
-                                {tache}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                        <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {users.map((usr) => (
-                              <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">
-                                {usr.full_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
+                  <Input type="number" step="0.25" min="0" value={entreeTempsForm.heures} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})} placeholder="Ex: 2.5" className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
+                  <Select value={entreeTempsForm.tache} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache: v})}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white text-xs">{t}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Tâche suivante</Label>
+                  <Select value={entreeTempsForm.tache_suivante} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: v})}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white text-xs">{t}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                  <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: v})}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">{users.map(u => <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
-
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="border-red-500 text-red-400 hover:bg-red-500/10"
-                onClick={() => {
-                  setIsEntreeTempsDialogOpen(false);
-                  setEntreeTempsCardInfo(null);
-                  setEntreeTempsForm({
-                    date: new Date().toISOString().split('T')[0],
-                    heures: "",
-                    tache: "",
-                    tache_suivante: "",
-                    utilisateur_assigne: ""
-                  });
-                }}
-              >
-                Annuler
-              </Button>
-              <Button 
-                type="button" 
-                className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                onClick={async () => {
-                  if (!entreeTempsForm.heures || !entreeTempsForm.tache) {
-                    alert("Veuillez remplir tous les champs obligatoires");
-                    return;
+              <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => { setIsEntreeTempsDialogOpen(false); setEntreeTempsCardInfo(null); }}>Annuler</Button>
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={async () => {
+                if (!entreeTempsForm.heures || !entreeTempsForm.tache) { alert("Veuillez remplir tous les champs obligatoires"); return; }
+                const heures = parseFloat(entreeTempsForm.heures);
+                if (isNaN(heures) || heures <= 0) { alert("Veuillez entrer un nombre d'heures valide"); return; }
+                await base44.entities.EntreeTemps.create({ date: entreeTempsForm.date, heures, dossier_id: entreeTempsCardInfo.dossierId, mandat: entreeTempsCardInfo.mandatType, tache: entreeTempsForm.tache, utilisateur_email: currentUser?.email });
+                if (entreeTempsForm.tache_suivante || entreeTempsForm.utilisateur_assigne) {
+                  const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                  if (dossier?.mandats) {
+                    const updatedMandats = dossier.mandats.map(m => m.type_mandat === entreeTempsCardInfo.mandatType ? { ...m, tache_actuelle: entreeTempsForm.tache_suivante || m.tache_actuelle, utilisateur_assigne: entreeTempsForm.utilisateur_assigne || m.utilisateur_assigne } : m);
+                    await base44.entities.Dossier.update(dossier.id, { ...dossier, mandats: updatedMandats });
                   }
-
-                  const heures = parseFloat(entreeTempsForm.heures);
-                  if (isNaN(heures) || heures <= 0) {
-                    alert("Veuillez entrer un nombre d'heures valide");
-                    return;
-                  }
-
-                  // Créer l'entrée de temps
-                  await base44.entities.EntreeTemps.create({
-                    date: entreeTempsForm.date,
-                    heures: heures,
-                    dossier_id: entreeTempsCardInfo.dossierId,
-                    mandat: entreeTempsCardInfo.mandatType,
-                    tache: entreeTempsForm.tache,
-                    utilisateur_email: currentUser?.email
-                  });
-
-                  // Mettre à jour le dossier si tâche suivante ou utilisateur assigné sont renseignés
-                  if (entreeTempsForm.tache_suivante || entreeTempsForm.utilisateur_assigne) {
-                    const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
-                    if (dossier && dossier.mandats) {
-                      const updatedMandats = dossier.mandats.map(mandat => {
-                        if (mandat.type_mandat === entreeTempsCardInfo.mandatType) {
-                          return {
-                            ...mandat,
-                            tache_actuelle: entreeTempsForm.tache_suivante || mandat.tache_actuelle,
-                            utilisateur_assigne: entreeTempsForm.utilisateur_assigne || mandat.utilisateur_assigne
-                          };
-                        }
-                        return mandat;
-                      });
-
-                      await base44.entities.Dossier.update(dossier.id, {
-                        ...dossier,
-                        mandats: updatedMandats
-                      });
-                    }
-                  }
-
-                  // Créer une notification si un utilisateur est assigné
-                  if (entreeTempsForm.utilisateur_assigne && entreeTempsForm.tache_suivante) {
-                    const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
-                    const clientsNames = getClientsNames(dossier?.clients_ids);
-                    const numeroDossier = dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
-                    
-                    await base44.entities.Notification.create({
-                      utilisateur_email: entreeTempsForm.utilisateur_assigne,
-                      titre: "Nouvelle tâche assignée",
-                      message: `${currentUser?.full_name} vous a assigné la tâche "${entreeTempsForm.tache_suivante}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
-                      type: "dossier",
-                      dossier_id: entreeTempsCardInfo.dossierId,
-                      lue: false
-                    });
-                  }
-
-                  queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-                  queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
-                  queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-                  setIsEntreeTempsDialogOpen(false);
-                  setEntreeTempsCardInfo(null);
-                  setEntreeTempsForm({
-                    date: new Date().toISOString().split('T')[0],
-                    heures: "",
-                    tache: "",
-                    tache_suivante: "",
-                    utilisateur_assigne: ""
-                  });
-                }}
-              >
-                Enregistrer
-              </Button>
+                }
+                if (entreeTempsForm.utilisateur_assigne && entreeTempsForm.tache_suivante) {
+                  const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                  await base44.entities.Notification.create({ utilisateur_email: entreeTempsForm.utilisateur_assigne, titre: "Nouvelle tâche assignée", message: `${currentUser?.full_name} vous a assigné la tâche "${entreeTempsForm.tache_suivante}" pour le dossier ${getArpenteurInitials(dossier?.arpenteur_geometre)}${dossier?.numero_dossier}.`, type: "dossier", dossier_id: entreeTempsCardInfo.dossierId, lue: false });
+                }
+                queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+                queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
+                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                setIsEntreeTempsDialogOpen(false);
+                setEntreeTempsCardInfo(null);
+                setEntreeTempsForm({ date: new Date().toISOString().split('T')[0], heures: "", tache: "", tache_suivante: "", utilisateur_assigne: "" });
+              }}>Enregistrer</Button>
             </div>
           </DialogContent>
         </Dialog>
