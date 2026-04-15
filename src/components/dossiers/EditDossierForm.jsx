@@ -729,7 +729,7 @@ export default function EditDossierForm({
                               </Select>
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                              <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
                               <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
                                   <SelectValue placeholder="Sélectionner" />
