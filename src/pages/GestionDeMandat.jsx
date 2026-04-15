@@ -351,9 +351,27 @@ export default function GestionDeMandat() {
       const updatedMandats = dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
           const updated = { ...m, tache_actuelle: targetColumn };
-          // Si la tâche devient "Cédule" et n'a pas de statut_terrain, ajouter "en_verification"
+          // Si la tâche devient "Cédule" et n'a pas de statut_terrain, ajouter "en_verification" et créer une nouvelle entrée terrain
           if (targetColumn === "Cédule" && !updated.statut_terrain) {
             updated.statut_terrain = "en_verification";
+            // Ajouter une nouvelle entrée terrain
+            if (!updated.terrains_list) {
+              updated.terrains_list = [];
+            }
+            updated.terrains_list.push({
+              date_limite_leve: null,
+              instruments_requis: "",
+              a_rendez_vous: false,
+              date_rendez_vous: null,
+              heure_rendez_vous: "",
+              donneur: "",
+              technicien: "",
+              dossier_simultane: "",
+              temps_prevu: "",
+              notes: "",
+              date_cedulee: new Date().toISOString().split('T')[0],
+              equipe_assignee: ""
+            });
           }
           return updated;
         }
