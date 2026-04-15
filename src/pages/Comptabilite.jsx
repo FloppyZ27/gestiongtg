@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
+import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
+import SharePointExplorer from "@/components/shared/SharePointExplorer";
+import CameraModal from "@/components/profil/CameraModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -84,13 +87,29 @@ export default function Comptabilite() {
   const [selectedNoteUser, setSelectedNoteUser] = useState(null);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
+  // Notes/Factures dialog (feuille de temps comptabilité)
+  const [isNotesFacturesOpen, setIsNotesFacturesOpen] = useState(false);
+  const [notesFacturesTab, setNotesFacturesTab] = useState("note");
+  const [notesFacturesText, setNotesFacturesText] = useState("");
+  const [notesFacturesFileCount, setNotesFacturesFileCount] = useState(0);
+  const [showNotesCamera, setShowNotesCamera] = useState(false);
+  const notesCameraStreamRef = useRef(null);
+  const queryClient = useQueryClient();
+
   const agendaScrollRef = useRef(null);
 
+  const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
   const { data: commentairesSemaine = [] } = useQuery({ queryKey: ['commentairesSemaine'], queryFn: () => base44.entities.CommentaireSemaine.list(), initialData: [], enabled: !!users.length });
+  const { data: commentairesSemaineUser = [] } = useQuery({
+    queryKey: ['commentairesSemaineUser', currentUser?.email],
+    queryFn: () => base44.entities.CommentaireSemaine.filter({ utilisateur_email: currentUser?.email }),
+    initialData: [],
+    enabled: !!currentUser,
+  });
 
   // Scroll à 7h lors du passage en vue agenda
   useEffect(() => {
@@ -127,6 +146,40 @@ export default function Comptabilite() {
   const weekDays = getWeekDays(currentWeekDate);
 
   const getWeekKey = () => format(weekDays[0], "yyyy-MM-dd");
+
+  const getWeekDateRange = () => {
+    const dimanche = format(weekDays[0], "yyyy-MM-dd");
+    const samedi = format(weekDays[6], "yyyy-MM-dd");
+    return `${dimanche}_${samedi}`;
+  };
+
+  const notesWeekKey = getWeekKey();
+  const notesCommentaireActuel = commentairesSemaineUser.find(c => c.semaine_debut === notesWeekKey);
+
+  const saveNotesCommentMutation = useMutation({
+    mutationFn: async (contenu) => {
+      if (notesCommentaireActuel) {
+        return base44.entities.CommentaireSemaine.update(notesCommentaireActuel.id, { ...notesCommentaireActuel, contenu });
+      } else {
+        return base44.entities.CommentaireSemaine.create({
+          utilisateur_email: currentUser?.email,
+          semaine_debut: notesWeekKey,
+          contenu
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commentairesSemaineUser', currentUser?.email] });
+      queryClient.invalidateQueries({ queryKey: ['commentairesSemaine'] });
+      setIsNotesFacturesOpen(false);
+    },
+  });
+
+  const handleOpenNotesFactures = () => {
+    setNotesFacturesText(notesCommentaireActuel?.contenu || "");
+    setNotesFacturesTab("note");
+    setIsNotesFacturesOpen(true);
+  };
 
   const getCommentaireForUser = (userEmail) => {
     return commentairesSemaine.find(c => c.utilisateur_email === userEmail && c.semaine_debut === getWeekKey());
@@ -214,7 +267,12 @@ export default function Comptabilite() {
           <div className="mb-8">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Comptabilité</h1>
-              <Landmark className="w-8 h-8 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent" />
+              <Landmark className="w-8 h-8 text-emerald-400" />
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
+                alt="GTG Logo"
+                className="w-12 h-auto ml-2"
+              />
             </div>
             <p className="text-slate-400">Feuilles de temps, heures et tarification des mandats</p>
           </div>
@@ -259,6 +317,15 @@ export default function Comptabilite() {
                     <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
                     <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
                     <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
+                    <Button
+                      size="sm"
+                      onClick={handleOpenNotesFactures}
+                      className={`h-7 text-xs ${notesCommentaireActuel?.contenu ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 mr-1" />
+                      Notes/Factures
+                      {notesCommentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
+                    </Button>
                   </div>
                 </div>
 
@@ -599,6 +666,103 @@ export default function Comptabilite() {
               })()}
             </DialogContent>
           </Dialog>
+
+          {/* Dialog Notes/Factures feuille de temps */}
+          <Dialog open={isNotesFacturesOpen} onOpenChange={setIsNotesFacturesOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-amber-400" />
+                  Notes et Factures
+                </DialogTitle>
+                <p className="text-sm text-slate-400 mt-1">
+                  de la semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
+                </p>
+              </DialogHeader>
+
+              <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setNotesFacturesTab(v)}>
+                <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+                  <TabsTrigger value="note">Note</TabsTrigger>
+                  <TabsTrigger value="factures" className="flex items-center gap-2">
+                    Factures
+                    {notesFacturesFileCount > 0 && (
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-xs font-bold">
+                        {notesFacturesFileCount}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="note" className="space-y-4">
+                  <p className="text-slate-400 text-sm">Ajoutez une note à l'intention de la comptable pour cette semaine.</p>
+                  <textarea
+                    value={notesFacturesText}
+                    onChange={(e) => setNotesFacturesText(e.target.value)}
+                    placeholder="Ex: J'ai travaillé en dehors des heures normales le mercredi soir pour une urgence client..."
+                    className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm resize-none"
+                    rows={6}
+                    autoFocus
+                  />
+                </TabsContent>
+
+                <TabsContent value="factures" className="space-y-4">
+                  <SharePointExplorer
+                    rootPath="COMPTABILITÉ/FACTURES"
+                    initialPath={currentUser?.full_name ? [currentUser.full_name, getWeekDateRange()] : []}
+                    maxHeight="500px"
+                    allowUpload={true}
+                    allowDelete={true}
+                    minPathLength={1}
+                    onFileCountChange={setNotesFacturesFileCount}
+                  />
+                </TabsContent>
+
+                <div className="flex justify-between gap-3 pt-4 border-t border-slate-700">
+                  {notesFacturesTab === 'factures' ? (
+                    <Button
+                      onClick={() => setShowNotesCamera(true)}
+                      className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+                    >
+                      <Camera className="w-4 h-4 mr-1" /> Prendre une photo
+                    </Button>
+                  ) : <div />}
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsNotesFacturesOpen(false)}
+                      className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      onClick={() => saveNotesCommentMutation.mutate(notesFacturesText)}
+                      disabled={saveNotesCommentMutation.isPending}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none border-emerald-500"
+                    >
+                      {saveNotesCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                    </Button>
+                  </div>
+                </div>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modal caméra Notes/Factures */}
+          {showNotesCamera && (
+            <CameraModal
+              onClose={() => {
+                if (notesCameraStreamRef.current) {
+                  notesCameraStreamRef.current.getTracks().forEach(t => t.stop());
+                  notesCameraStreamRef.current = null;
+                }
+                setShowNotesCamera(false);
+              }}
+              folderPath={`COMPTABILITÉ/FACTURES/${currentUser?.full_name}/${getWeekDateRange()}`}
+              onPhotoUploaded={() => setNotesFacturesFileCount(prev => prev + 1)}
+              streamRef={notesCameraStreamRef}
+            />
+          )}
 
           {/* ===== SECTION 2 : Soldes de congés ===== */}
           <SoldesCongesSection />
