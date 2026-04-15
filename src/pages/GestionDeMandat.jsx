@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReactDOM from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -490,6 +491,26 @@ export default function GestionDeMandat() {
   for (let i = currentYear - 10; i <= currentYear + 10; i++) {
     YEARS.push(i);
   }
+
+  // Composant wrapper qui utilise un portal pendant le drag
+  // pour sortir la carte du stacking context du layout
+  const PortalAwareItem = ({ provided, snapshot, children }) => {
+    const child = (
+      <div
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={provided.draggableProps.style}
+      >
+        {children}
+      </div>
+    );
+
+    if (!snapshot.isDragging) return child;
+
+    // Pendant le drag, rendre dans le body directement
+    return ReactDOM.createPortal(child, document.body);
+  };
 
   const renderMandatCard = (card, provided, snapshot) => {
      const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
@@ -1061,17 +1082,9 @@ export default function GestionDeMandat() {
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
                                     {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={{
-                                          ...provided.draggableProps.style,
-                                          zIndex: snapshot.isDragging ? 9999 : undefined,
-                                        }}
-                                      >
+                                      <PortalAwareItem provided={provided} snapshot={snapshot}>
                                         {renderMandatCard(card, provided, snapshot)}
-                                      </div>
+                                      </PortalAwareItem>
                                     )}
                                   </Draggable>
                                   ))}
@@ -1093,7 +1106,7 @@ export default function GestionDeMandat() {
                                   </DragDropContext>
                                   </TabsContent>
 
-          {/* Vue par Utilisateur */}
+                                {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
               <div className="kanban-scrollbar-top" id="kanban-scrollbar-users">
@@ -1216,17 +1229,9 @@ export default function GestionDeMandat() {
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
                                     {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={{
-                                          ...provided.draggableProps.style,
-                                          zIndex: snapshot.isDragging ? 9999 : undefined,
-                                        }}
-                                      >
+                                      <PortalAwareItem provided={provided} snapshot={snapshot}>
                                         {renderMandatCard(card, provided, snapshot)}
-                                      </div>
+                                      </PortalAwareItem>
                                     )}
                                   </Draggable>
                                   ))}
@@ -1248,7 +1253,7 @@ export default function GestionDeMandat() {
                                   </DragDropContext>
                                   </TabsContent>
 
-          {/* Vue Calendrier */}
+                                {/* Vue Calendrier */}
           <TabsContent value="calendrier" className="mt-0">
             <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
               <CardHeader className="border-b border-slate-800">
