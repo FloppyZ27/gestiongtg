@@ -87,7 +87,8 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
     }
   };
 
-  const handleOpen = (file) => {
+  const handleOpen = (e, file) => {
+    if (e) e.stopPropagation();
     if (isViewable(file.name)) {
       setViewingFile(file);
     } else {
@@ -222,7 +223,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
               <div
                 key={file.id}
                 className="flex flex-col items-center gap-1.5 p-3 bg-slate-700/40 rounded hover:bg-slate-700/70 transition-colors group cursor-pointer"
-                onClick={() => handleOpen(file)}
+                onClick={(e) => handleOpen(e, file)}
               >
                 <div className="relative w-full flex justify-center py-2">
                   <span className="scale-[2.2] block">{getFileIcon(file.name)}</span>
@@ -257,7 +258,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
               <div
                 key={file.id}
                 className="flex items-center justify-between px-2 py-1.5 bg-slate-700/40 rounded hover:bg-slate-700/70 transition-colors group cursor-pointer"
-                onClick={() => handleOpen(file)}
+                onClick={(e) => handleOpen(e, file)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {getFileIcon(file.name)}
@@ -265,7 +266,7 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
                   {file.size > 0 && <span className="text-slate-500 text-xs flex-shrink-0">{formatFileSize(file.size)}</span>}
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleOpen(file); }} className="h-6 w-6 p-0 text-slate-400 hover:text-white" title="Ouvrir">
+                  <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleOpen(e, file); }} className="h-6 w-6 p-0 text-slate-400 hover:text-white" title="Ouvrir">
                     <Eye className="w-3 h-3" />
                   </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleDownload(file); }} className="h-6 w-6 p-0 text-slate-400 hover:text-white" title="Télécharger">
