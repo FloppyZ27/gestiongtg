@@ -300,8 +300,10 @@ export default function GestionDeMandat() {
     const searchLower = searchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(card.dossier.arpenteur_geometre) + card.dossier.numero_dossier;
     const clientsNames = getClientsNames(card.dossier.clients_ids);
+    const addressFormatted = formatAdresse(card.mandat.adresse_travaux);
+    const ville = card.mandat.adresse_travaux?.ville || "";
     return (
-      (fullNumber.toLowerCase().includes(searchLower) || card.dossier.numero_dossier?.toLowerCase().includes(searchLower) || clientsNames.toLowerCase().includes(searchLower) || card.mandat.type_mandat?.toLowerCase().includes(searchLower)) &&
+      (fullNumber.toLowerCase().includes(searchLower) || card.dossier.numero_dossier?.toLowerCase().includes(searchLower) || clientsNames.toLowerCase().includes(searchLower) || card.mandat.type_mandat?.toLowerCase().includes(searchLower) || addressFormatted.toLowerCase().includes(searchLower) || ville.toLowerCase().includes(searchLower)) &&
       (filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre)) &&
       (filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat)) &&
       (filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne)) &&
