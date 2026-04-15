@@ -25,7 +25,7 @@ import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
-
+import MandatLotsSection from "./MandatLotsSection";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -1062,183 +1062,29 @@ export default function EditDossierForm({
 
                           <div className="border-t border-slate-600 my-2"></div>
 
-                          <div className={`grid ${lotTabExpanded && currentMandatIndexForLot === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
-                            <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexForLot === index ? 'border-r border-slate-700 pr-4' : ''}`}>
-                              <div className="flex items-center justify-between">
-                                <Label className="text-slate-400 text-xs">Lots</Label>
-                                <div className="flex items-center gap-1.5">
-                                  <Checkbox
-                                    id={`sameLotsForAllMandats-${index}`}
-                                    checked={sameLotsForAllMandats}
-                                    onCheckedChange={(checked) => {
-                                      setSameLotsForAllMandats(checked);
-                                      if (checked) {
-                                        const currentLots = mandat.lots || [];
-                                        setFormData(prev => ({
-                                          ...prev,
-                                          mandats: prev.mandats.map(m => ({ ...m, lots: [...currentLots] }))
-                                        }));
-                                      }
-                                    }}
-                                  />
-                                  <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                  {mandat.lots && mandat.lots.length > 0 ? (
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {mandat.lots.map((lotId) => {
-                                        const lot = getLotById(lotId);
-                                        return (
-                                          <div 
-                                           key={lotId} 
-                                           className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
-                                           onClick={async () => {
-                                             if (onOpenNewLotDialog && lot) {
-                                               const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: lot.id }, '-created_date');
-                                               if (setEditingLot) setEditingLot(lot);
-                                               if (setNewLotForm) {
-                                                 setNewLotForm({
-                                                   numero_lot: lot.numero_lot || "",
-                                                   circonscription_fonciere: lot.circonscription_fonciere || "",
-                                                   cadastre: lot.cadastre || "Québec",
-                                                   rang: lot.rang || "",
-                                                   types_operation: lot.types_operation || []
-                                                 });
-                                               }
-                                               if (setLotActionLogs) setLotActionLogs(logs);
-                                               onOpenNewLotDialog(index);
-                                             }
-                                           }}
-                                          >
-                                           <button 
-                                             type="button" 
-                                             onClick={(e) => {
-                                               e.stopPropagation();
-                                               removeLotFromMandat(index, lotId);
-                                             }}
-                                             className="absolute right-1 top-1 hover:text-red-400"
-                                           >
-                                             <X className="w-3 h-3" />
-                                           </button>
-                                           <div className="pr-5 space-y-0.5">
-                                             <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
-                                             <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
-                                             <p className="text-slate-500">
-                                               {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
-                                             </p>
-                                           </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                      Aucun lot sélectionné
-                                    </div>
-                                  )}
-                                </div>
-                                {!(lotTabExpanded && currentMandatIndexForLot === index) && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      setCurrentMandatIndexForLot(index);
-                                      setLotTabExpanded(true);
-                                    }}
-                                    className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                  >
-                                    <ChevronDown className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                                {lotTabExpanded && currentMandatIndexForLot === index && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setLotTabExpanded(false)}
-                                    className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                  >
-                                    <ChevronUp className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className={`border-l border-slate-700 pl-3 pr-2 ${!(lotTabExpanded && currentMandatIndexForLot === index) ? 'hidden' : ''}`}>
-                              <div className="mb-2 flex gap-2">
-                                <div className="relative flex-1">
-                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input
-                                    placeholder="Rechercher lot..."
-                                    value={lotSearchTerm}
-                                    onChange={(e) => setLotSearchTerm(e.target.value)}
-                                    className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                  />
-                                </div>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => {
-                                    setCurrentMandatIndexForLot(index);
-                                    if (onOpenNewLotDialog) {
-                                      onOpenNewLotDialog(index);
-                                    }
-                                  }}
-                                  className="text-orange-400 hover:text-orange-300 h-6 w-6 p-0"
-                                >
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-
-                              <p className="text-slate-400 text-xs mb-2">Lots existants ({(lots || []).filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length})</p>
-                              <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                {(lots || []).filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length > 0 ? (
-                                  (lots || []).filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).slice(0, 20).map((lot) => {
-                                    const isSelected = mandat.lots?.includes(lot.id);
-                                    return (
-                                      <div
-                                        key={lot.id}
-                                        onClick={() => {
-                                          const currentLots = formData.mandats[index].lots || [];
-                                          const lotIsSelected = currentLots.includes(lot.id);
-                                          const newLots = lotIsSelected
-                                            ? currentLots.filter(id => id !== lot.id)
-                                            : [...currentLots, lot.id];
-
-                                          if (sameLotsForAllMandats) {
-                                            setFormData(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map(m => ({ ...m, lots: newLots }))
-                                            }));
-                                          } else {
-                                            updateMandat(index, 'lots', newLots);
-                                          }
-                                        }}
-                                        className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
-                                          isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
-                                        }`}
-                                      >
-                                        <p className="text-white font-semibold text-xs truncate">
-                                          {lot.numero_lot}
-                                          {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
-                                          {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
-                                          <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>
-                                          {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
-                                        </p>
-                                      </div>
-                                    );
-                                  })
-                                ) : (
-                                  <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
-                                )}
-                              </div>
-                              </div>
-                              </TabsContent>
-                              ))}
-                              </Tabs>
+                          <MandatLotsSection
+                            mandat={mandat}
+                            index={index}
+                            lots={lots}
+                            formData={formData}
+                            setFormData={setFormData}
+                            sameLotsForAllMandats={sameLotsForAllMandats}
+                            setSameLotsForAllMandats={setSameLotsForAllMandats}
+                            lotTabExpanded={lotTabExpanded}
+                            setLotTabExpanded={setLotTabExpanded}
+                            currentMandatIndexForLot={currentMandatIndexForLot}
+                            setCurrentMandatIndexForLot={setCurrentMandatIndexForLot}
+                            lotSearchTerm={lotSearchTerm}
+                            setLotSearchTerm={setLotSearchTerm}
+                            onOpenNewLotDialog={onOpenNewLotDialog}
+                            setEditingLot={setEditingLot}
+                            setNewLotForm={setNewLotForm}
+                            setLotActionLogs={setLotActionLogs}
+                            updateMandat={updateMandat}
+                          />
+                          </TabsContent>
+                          ))}
+                          </Tabs>
                   ) : (
                     <div className="flex items-center justify-center py-6">
                       <Button type="button" size="sm" onClick={addMandat} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-7 text-xs">
