@@ -969,11 +969,11 @@ export default function EditDossierForm({
                                   </Select>
                                 </div>
                               </div>
-                            </div>
+                              </div>
+                              </div>
+                              <div className="bg-slate-600"></div>
 
-                            <div className="bg-slate-600"></div>
-
-                            <div className="space-y-2 pr-2">
+                              <div className="space-y-2 pr-2">
                               <div className="flex items-center justify-between mb-1">
                                 <Label className="text-slate-400 text-xs">Dates</Label>
                                 <div className="flex items-center gap-1.5">
@@ -1081,8 +1081,8 @@ export default function EditDossierForm({
                             setNewLotForm={setNewLotForm}
                             setLotActionLogs={setLotActionLogs}
                             updateMandat={updateMandat}
-                          />
-                          </TabsContent>
+                            />
+                            </TabsContent>
                           ))}
                           </Tabs>
                   ) : (
