@@ -34,6 +34,7 @@ export default function FeuilleTempsSection({
 }) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [activeTab, setActiveTab] = useState("note");
   const [fileCount, setFileCount] = useState(0);
   const [showCamera, setShowCamera] = useState(false);
   const streamRef = useRef(null);
@@ -651,7 +652,7 @@ export default function FeuilleTempsSection({
             </p>
           </DialogHeader>
           
-          <Tabs defaultValue="note" className="w-full">
+          <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setActiveTab(v)}>
             <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
               <TabsTrigger value="note">Note</TabsTrigger>
               <TabsTrigger value="factures" className="flex items-center gap-2">
@@ -688,12 +689,14 @@ export default function FeuilleTempsSection({
               />
             </TabsContent>
             <div className="flex justify-between gap-3 pt-4 border-t border-slate-700">
-              <Button 
-                onClick={() => setShowCamera(true)}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-              >
-                <Camera className="w-4 h-4 mr-1" /> Prendre une photo
-              </Button>
+              {activeTab === 'factures' ? (
+                <Button 
+                  onClick={() => setShowCamera(true)}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+                >
+                  <Camera className="w-4 h-4 mr-1" /> Prendre une photo
+                </Button>
+              ) : <div />}
               <div className="flex gap-3">
               <Button
                 type="button"
