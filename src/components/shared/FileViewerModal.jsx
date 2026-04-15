@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { X, Download, Loader2 } from "lucide-react";
+import { X, Download, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
@@ -52,29 +52,26 @@ export default function FileViewerModal({ file, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 flex flex-col bg-black/90 backdrop-blur-sm"
-      style={{ zIndex: 999999 }}
-      onClick={(e) => { e.stopPropagation(); onClose(); }}
+      className="fixed bottom-4 right-4 flex flex-col bg-slate-900 border border-slate-700 rounded-xl shadow-2xl"
+      style={{ zIndex: 999999, width: '520px', height: '600px', maxWidth: 'calc(100vw - 2rem)', maxHeight: 'calc(100vh - 2rem)' }}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700 flex-shrink-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className="text-white font-medium text-sm truncate max-w-[70%]">{file.name}</span>
+      <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700 flex-shrink-0 rounded-t-xl">
+        <span className="text-white font-medium text-sm truncate max-w-[60%]">{file.name}</span>
         <div className="flex items-center gap-2">
           {url && (
             <button
               onClick={handleDownload}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded transition-colors"
             >
-              <Download className="w-3.5 h-3.5" />
-              Télécharger
+              <ExternalLink className="w-3.5 h-3.5" />
+              Ouvrir
             </button>
           )}
           <button
-            onClick={onClose}
-            className="p-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="p-1.5 bg-slate-700 hover:bg-red-600 text-white rounded transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -82,10 +79,7 @@ export default function FileViewerModal({ file, onClose }) {
       </div>
 
       {/* Content */}
-      <div
-        className="flex-1 overflow-auto flex items-center justify-center p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="flex-1 overflow-auto flex items-center justify-center p-3 rounded-b-xl">
         {loading ? (
           <Loader2 className="w-10 h-10 text-slate-400 animate-spin" />
         ) : error ? (
@@ -94,17 +88,17 @@ export default function FileViewerModal({ file, onClose }) {
           <img
             src={url}
             alt={file.name}
-            className="max-w-full max-h-full object-contain rounded shadow-2xl"
+            className="max-w-full max-h-full object-contain rounded shadow-lg"
           />
         ) : isPdf && url ? (
           <iframe
             src={url}
             className="w-full h-full rounded"
-            style={{ minHeight: '80vh', border: 'none' }}
+            style={{ border: 'none' }}
             title={file.name}
           />
         ) : isText && textContent !== null ? (
-          <pre className="bg-slate-900 text-slate-200 text-xs p-4 rounded w-full max-w-4xl overflow-auto whitespace-pre-wrap border border-slate-700" style={{ maxHeight: '80vh' }}>
+          <pre className="bg-slate-800 text-slate-200 text-xs p-4 rounded w-full h-full overflow-auto whitespace-pre-wrap border border-slate-700">
             {textContent}
           </pre>
         ) : (
