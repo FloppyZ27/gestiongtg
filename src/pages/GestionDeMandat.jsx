@@ -672,7 +672,7 @@ export default function GestionDeMandat() {
                             <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user.full_name)}</AvatarFallback>
                           </Avatar>
                         ) : <User className="w-4 h-4 text-white" />}
-                        <span className="text-sm font-bold text-white truncate max-w-[110px]">{user.full_name}</span>
+                        <span className="text-sm font-bold text-white truncate max-w-[110px]">{user.prenom} {user.nom}</span>
                       </div>
                       {renderSortButton(user.email, sortUtilisateurs, setSortUtilisateurs)}
                     </div>
