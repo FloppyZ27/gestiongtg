@@ -306,7 +306,7 @@ export default function EditDossierForm({
         prevFormDataRef.current = JSON.parse(JSON.stringify(formData));
         await detectAndLogChanges(oldData, formData);
         autoSaveMutation.mutate(formData);
-      }, 1500);
+      }, 500);
     }
 
     return () => {
