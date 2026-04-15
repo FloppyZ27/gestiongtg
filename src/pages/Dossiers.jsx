@@ -182,7 +182,7 @@ export default function Dossiers() {
   const [dossierIdToDelete, setDossierIdToDelete] = useState(null);
   const [dossierNameToDelete, setDossierNameToDelete] = useState("");
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("tous");
-
+  const [filterEquipe, setFilterEquipe] = useState("Toutes");
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
@@ -1690,10 +1690,10 @@ export default function Dossiers() {
       })();
       
       const matchesPlaceAffaire = filterPlaceAffaire === "tous" || item.place_affaire === filterPlaceAffaire;
-      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache && matchesDateRange && matchesPlaceAffaire;
+      const matchesEquipe = filterEquipe === "Toutes" || item.mandatInfo?.equipe_assignee === filterEquipe || (item.mandatInfo?.utilisateur_assigne?.includes(filterEquipe));
+      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache && matchesDateRange && matchesPlaceAffaire && matchesEquipe;
     });
-  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, filterDateDebut, filterDateFin, filterPlaceAffaire, getClientsNames]);
-
+  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, filterDateDebut, filterDateFin, filterPlaceAffaire, filterEquipe, getClientsNames]);
   const handleSort = (field) => {
     setSortField(prevField => {
       if (prevField === field) {
@@ -3425,8 +3425,8 @@ export default function Dossiers() {
           filterDateDebut={filterDateDebut} setFilterDateDebut={setFilterDateDebut}
           filterDateFin={filterDateFin} setFilterDateFin={setFilterDateFin}
           filterPlaceAffaire={filterPlaceAffaire} setFilterPlaceAffaire={setFilterPlaceAffaire}
-          uniqueVilles={uniqueVilles}
-          dossiersWithMandats={dossiersWithMandats}
+          filterEquipe={filterEquipe} setFilterEquipe={setFilterEquipe}
+          uniqueVilles={uniqueVilles} dossiersWithMandats={dossiersWithMandats}
         />
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">

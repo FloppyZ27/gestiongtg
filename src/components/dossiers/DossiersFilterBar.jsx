@@ -10,6 +10,7 @@ import PlaceAffaireTabs from "./PlaceAffaireTabs";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+const EQUIPES = ["Samuel", "Pierre-Luc", "Dany"];
 
 export default function DossiersFilterBar({
   searchTerm, setSearchTerm,
@@ -22,6 +23,7 @@ export default function DossiersFilterBar({
   filterDateDebut, setFilterDateDebut,
   filterDateFin, setFilterDateFin,
   filterPlaceAffaire, setFilterPlaceAffaire,
+  filterEquipe, setFilterEquipe,
   uniqueVilles,
   dossiersWithMandats,
 }) {
@@ -55,7 +57,7 @@ export default function DossiersFilterBar({
 
   return (
     <>
-      <div className="mb-2">
+      <div className="mb-2 flex items-center gap-4 flex-wrap">
         <PlaceAffaireTabs
           value={filterPlaceAffaire}
           onChange={setFilterPlaceAffaire}
@@ -65,6 +67,23 @@ export default function DossiersFilterBar({
             saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
           }}
         />
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400 text-sm">Équipe :</span>
+          {["Toutes", ...EQUIPES].map(equipe => (
+            <button
+              key={equipe}
+              onClick={() => setFilterEquipe(equipe)}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "text-white" : "text-slate-400 hover:text-slate-300"}`}
+            >
+              <span>{equipe}</span>
+              <span className={`inline-flex items-center justify-center rounded-full text-xs font-bold min-w-[20px] h-5 px-1.5 ${filterEquipe === equipe ? "bg-blue-500 text-white" : "bg-slate-700 text-slate-300"}`}>
+                {equipe === "Toutes"
+                  ? dossiersWithMandats.length
+                  : dossiersWithMandats.filter(d => d.mandatInfo?.equipe_assignee === equipe || d.mandatInfo?.utilisateur_assigne?.includes(equipe)).length}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg mb-2 p-3">
@@ -96,7 +115,7 @@ export default function DossiersFilterBar({
                       <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
                     </div>
                     {hasFilters && (
-                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterStatut([]); setFilterMandat([]); setFilterTache([]); setFilterVille([]); setFilterDateDebut(""); setFilterDateFin(""); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterStatut([]); setFilterMandat([]); setFilterTache([]); setFilterVille([]); setFilterDateDebut(""); setFilterDateFin(""); setFilterEquipe("Toutes"); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
                         <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
                       </Button>
                     )}
