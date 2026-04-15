@@ -54,7 +54,7 @@ export default function FileViewerModal({ file, onClose }) {
     <div
       className="fixed inset-0 flex flex-col bg-black/90 backdrop-blur-sm"
       style={{ zIndex: 999999 }}
-      onClick={onClose}
+      onClick={(e) => { e.stopPropagation(); onClose(); }}
     >
       {/* Header */}
       <div
