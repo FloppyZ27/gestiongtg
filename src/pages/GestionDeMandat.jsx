@@ -338,7 +338,7 @@ export default function GestionDeMandat() {
 
   const filteredUsersList = filterEquipe === "Toutes" 
     ? usersList 
-    : usersList.filter(u => u.email === "non-assigne" || getUserTeam(u) === filterEquipe);
+    : usersList.filter(u => u.email !== "non-assigne" && getUserTeam(u) === filterEquipe);
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
