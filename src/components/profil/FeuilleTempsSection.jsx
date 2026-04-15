@@ -732,7 +732,7 @@ export default function FeuilleTempsSection({
               <Button
                 onClick={() => saveCommentMutation.mutate(commentText)}
                 disabled={saveCommentMutation.isPending}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-none"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none border-emerald-500"
               >
                 {saveCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
