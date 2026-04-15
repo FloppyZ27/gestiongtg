@@ -78,12 +78,16 @@ const formatAdresse = (addr) => {
   return parts.filter(p => p).join(', ');
 };
 
-// Hook custom pour le drag & drop natif
+// Hook custom pour le drag & drop natif avec auto-scroll horizontal
 function useKanbanDrag({ onDrop }) {
-  const [dragging, setDragging] = useState(null); // { card, startX, startY }
+  const [dragging, setDragging] = useState(null);
   const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 });
   const [overColumn, setOverColumn] = useState(null);
-  const ghostRef = useRef(null);
+  const scrollAnimRef = useRef(null);
+  const overColumnRef = useRef(null);
+
+  // Keep ref in sync with state so the mouseup handler always sees latest value
+  useEffect(() => { overColumnRef.current = overColumn; }, [overColumn]);
 
   const handleDragStart = useCallback((e, card) => {
     e.preventDefault();
@@ -97,22 +101,50 @@ function useKanbanDrag({ onDrop }) {
   useEffect(() => {
     if (!dragging) return;
 
+    const SCROLL_ZONE = 80;  // px from edge to start scrolling
+    const MAX_SPEED = 18;    // px per frame
+
+    const getScrollSpeed = (pos, containerRect) => {
+      const distFromLeft = pos - containerRect.left;
+      const distFromRight = containerRect.right - pos;
+      if (distFromLeft < SCROLL_ZONE) return -Math.round((1 - distFromLeft / SCROLL_ZONE) * MAX_SPEED);
+      if (distFromRight < SCROLL_ZONE) return Math.round((1 - distFromRight / SCROLL_ZONE) * MAX_SPEED);
+      return 0;
+    };
+
+    let currentX = 0;
+
+    const startScrollLoop = (scrollEl, x) => {
+      if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
+      const rect = scrollEl.getBoundingClientRect();
+      const speed = getScrollSpeed(x, rect);
+      if (speed === 0) { scrollAnimRef.current = null; return; }
+      scrollEl.scrollLeft += speed;
+      scrollAnimRef.current = requestAnimationFrame(() => startScrollLoop(scrollEl, currentX));
+    };
+
     const onMove = (e) => {
+      currentX = e.clientX;
       setGhostPos({ x: e.clientX, y: e.clientY });
 
       // Trouver la colonne sous le curseur
       const el = document.elementFromPoint(e.clientX, e.clientY);
       const colEl = el?.closest('[data-kanban-column]');
-      if (colEl) {
-        setOverColumn(colEl.getAttribute('data-kanban-column'));
+      setOverColumn(colEl ? colEl.getAttribute('data-kanban-column') : null);
+
+      // Auto-scroll: chercher le conteneur kanban scrollable
+      const scrollEl = el?.closest('[data-kanban-scroll]');
+      if (scrollEl) {
+        startScrollLoop(scrollEl, e.clientX);
       } else {
-        setOverColumn(null);
+        if (scrollAnimRef.current) { cancelAnimationFrame(scrollAnimRef.current); scrollAnimRef.current = null; }
       }
     };
 
-    const onUp = (e) => {
-      if (overColumn && dragging.card) {
-        onDrop(dragging.card, overColumn);
+    const onUp = () => {
+      if (scrollAnimRef.current) { cancelAnimationFrame(scrollAnimRef.current); scrollAnimRef.current = null; }
+      if (overColumnRef.current && dragging.card) {
+        onDrop(dragging.card, overColumnRef.current);
       }
       setDragging(null);
       setOverColumn(null);
@@ -125,8 +157,9 @@ function useKanbanDrag({ onDrop }) {
     return () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
+      if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
     };
-  }, [dragging, overColumn, onDrop]);
+  }, [dragging, onDrop]);
 
   return { dragging, ghostPos, overColumn, handleDragStart };
 }
@@ -526,7 +559,7 @@ export default function GestionDeMandat() {
 
             {/* Vue par Tâches */}
             <TabsContent value="taches" className="mt-0">
-              <div className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+              <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
                     <div className="flex items-center justify-between w-full">
@@ -541,7 +574,7 @@ export default function GestionDeMandat() {
 
             {/* Vue par Utilisateur */}
             <TabsContent value="utilisateurs" className="mt-0">
-              <div className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+              <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {usersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
                     <div className="flex items-center justify-between w-full">
