@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Folder, ArrowLeft, ChevronRight, Home, LayoutGrid, List } from "lucide-react";
+import FileViewerModal from "@/components/shared/FileViewerModal";
 
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || '';
@@ -26,6 +27,10 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
   const [uploadProgress, setUploadProgress] = useState("");
   const [fileToDelete, setFileToDelete] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
+  const [viewingFile, setViewingFile] = useState(null);
+
+  const VIEWABLE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'pdf', 'txt', 'csv', 'json', 'xml', 'md', 'log'];
+  const isViewable = (fileName) => VIEWABLE_EXTS.includes(fileName?.split('.').pop()?.toLowerCase() || '');
 
   const currentPath = pathStack.length > 0
     ? `${rootPath}/${pathStack.join('/')}`
@@ -82,22 +87,11 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
     }
   };
 
-  const handleOpen = async (file) => {
-    const response = await base44.functions.invoke('sharepoint', {
-      action: 'getDownloadUrl',
-      fileId: file.id
-    });
-    const url = response.data?.downloadUrl || file.webUrl;
-    if (url) {
-      // Ouvrir en visualisation (Office365 viewer ou aperçu)
-      const ext = file.name?.split('.').pop()?.toLowerCase() || '';
-      if (['pdf', 'jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-        // Pour les images et PDF, ouvrir directement
-        window.open(url, '_blank');
-      } else {
-        // Pour les documents Office, utiliser le viewer SharePoint
-        window.open(url, '_blank');
-      }
+  const handleOpen = (file) => {
+    if (isViewable(file.name)) {
+      setViewingFile(file);
+    } else {
+      handleDownload(file);
     }
   };
 
@@ -288,6 +282,11 @@ export default function SharePointExplorer({ rootPath, initialPath = [], maxHeig
           </>
         )}
       </div>
+
+      {/* Viewer de fichier */}
+      {viewingFile && (
+        <FileViewerModal file={viewingFile} onClose={() => setViewingFile(null)} />
+      )}
 
       {/* Dialog suppression */}
       {fileToDelete && (
