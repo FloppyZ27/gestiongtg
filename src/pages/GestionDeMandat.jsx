@@ -351,10 +351,10 @@ export default function GestionDeMandat() {
       const updatedMandats = dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
           const updated = { ...m, tache_actuelle: targetColumn };
-          // Si la tâche devient "Cédule" et n'a pas de statut_terrain, ajouter "en_verification" et créer une nouvelle entrée terrain
-          if (targetColumn === "Cédule" && !updated.statut_terrain) {
+          // Si la tâche devient "Cédule", ajouter une nouvelle entrée terrain
+          if (targetColumn === "Cédule") {
             updated.statut_terrain = "en_verification";
-            // Ajouter une nouvelle entrée terrain
+            // Ajouter une nouvelle entrée terrain (toujours, même s'il en existe déjà)
             if (!updated.terrains_list) {
               updated.terrains_list = [];
             }
