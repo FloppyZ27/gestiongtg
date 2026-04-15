@@ -596,77 +596,24 @@ export default function EditDossierForm({
                 </Card>
             </form>
 
-            {/* Section Mandats */}
-            <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="mandats">
-              <CardHeader 
-                className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
-                onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
-                      <FileText className="w-3.5 h-3.5 text-orange-400" />
-                    </div>
-                    <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
-                    {formData.mandats.length > 0 && (
-                      <div className="flex gap-1 flex-wrap">
-                        {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
-                          <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                            {getAbbreviatedMandatType(m.type_mandat)}
-                          </Badge>
-                        ))}
-                        {formData.mandats.length > 3 && (
-                          <Badge className="bg-slate-700 text-slate-300 text-xs">
-                            +{formData.mandats.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Barre de progression du mandat sélectionné */}
-                    {editingDossier && formData.mandats.length > 0 && activeTabMandat !== undefined && formData.mandats[parseInt(activeTabMandat)] && (
-                      <div className="flex-1 max-w-[200px] space-y-1 ml-auto mr-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-medium text-slate-400">Progression</span>
-                          <span className="text-xs font-bold text-emerald-400">
-                            {(() => {
-                              const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                              const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
-                              let rawProgress = 0;
-                              if (tacheIndex >= 0 && TACHES_LIST.length > 1) {
-                                rawProgress = (tacheIndex / (TACHES_LIST.length - 1)) * 95;
-                              }
-                              return Math.round(rawProgress / 5) * 5;
-                            })()}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-900/50 h-1.5 rounded-full overflow-hidden border border-slate-700/50">
-                          <div 
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
-                            style={{ 
-                              width: `${(() => {
-                                const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                                const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
-                                let rawProgress = 0;
-                                if (tacheIndex >= 0 && TACHES_LIST.length > 1) {
-                                  rawProgress = (tacheIndex / (TACHES_LIST.length - 1)) * 95;
-                                }
-                                return Math.round(rawProgress / 5) * 5;
-                              })()}%` 
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {mandatStepCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                </div>
-              </CardHeader>
-
-              {!mandatStepCollapsed && (
-                <CardContent className="pt-2 pb-3">
-                  {formData.mandats.length > 0 ? (
-                    <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
+            {/* Section Mandats - Imported Component */}
+            <MandatsSection
+              formData={formData}
+              setFormData={setFormData}
+              updateMandat={updateMandat}
+              addMandat={addMandat}
+              removeMandat={removeMandat}
+              openLotSelector={openLotSelector}
+              removeLotFromMandat={removeLotFromMandat}
+              getLotById={getLotById}
+              users={users}
+              activeTabMandat={activeTabMandat}
+              setActiveTabMandat={setActiveTabMandat}
+              mandatStepCollapsed={mandatStepCollapsed}
+              setMandatStepCollapsed={setMandatStepCollapsed}
+              setShowDeleteMandatConfirm={setShowDeleteMandatConfirm}
+              setMandatIndexToDelete={setMandatIndexToDelete}
+            />
                       <div className="flex justify-between items-center mb-2 gap-3">
                         <div className="flex-1">
                           <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
