@@ -44,30 +44,14 @@ export default function FileViewerModal({ file, onClose }) {
     fetchUrl();
   }, [file.id]);
 
-  const stop = (e) => {
-    e.stopPropagation();
-    e.nativeEvent?.stopImmediatePropagation?.();
-  };
-
-  const handleClose = (e) => {
-    stop(e);
-    onClose();
-  };
-
   return createPortal(
-    /* Backdrop — stoppe tous les événements pour ne pas fermer le dialog parent */
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onMouseDown={stop}
-      onClick={handleClose}
-      onPointerDown={stop}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
-      {/* Panneau — stoppe la propagation pour ne pas déclencher le handleClose du backdrop */}
       <div
         style={{ width: '80vw', height: '85vh', maxWidth: '1100px', display: 'flex', flexDirection: 'column', background: '#0f172a', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.8)' }}
-        onMouseDown={stop}
-        onClick={stop}
-        onPointerDown={stop}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700 flex-shrink-0">
@@ -75,8 +59,7 @@ export default function FileViewerModal({ file, onClose }) {
           <div className="flex items-center gap-2">
             {url && (
               <button
-                onMouseDown={stop}
-                onClick={(e) => { stop(e); window.open(url, '_blank'); }}
+                onClick={() => window.open(url, '_blank')}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded transition-colors"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -84,8 +67,7 @@ export default function FileViewerModal({ file, onClose }) {
               </button>
             )}
             <button
-              onMouseDown={stop}
-              onClick={handleClose}
+              onClick={onClose}
               className="p-1.5 bg-slate-700 hover:bg-red-600 text-white rounded transition-colors"
             >
               <X className="w-4 h-4" />
@@ -112,6 +94,7 @@ export default function FileViewerModal({ file, onClose }) {
           )}
         </div>
       </div>
+    </div>
     </div>,
     document.body
   );
