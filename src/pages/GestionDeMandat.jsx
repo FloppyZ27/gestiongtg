@@ -22,6 +22,7 @@ import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+const EQUIPES = ["Samuel", "Pierre-Luc", "Dany"];
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
@@ -318,7 +319,6 @@ export default function GestionDeMandat() {
   }, {});
 
   const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
-  const uniqueEquipes = [...new Set(usersList.filter(u => u.email !== "non-assigne").map(u => u.equipe_assignee).filter(Boolean))].sort();
   
   const cardsByUtilisateur = usersList.reduce((acc, user) => {
     acc[user.email] = sortCards(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), user.email, sortUtilisateurs);
@@ -327,7 +327,7 @@ export default function GestionDeMandat() {
 
   const filteredUsersList = filterEquipe === "Toutes" 
     ? usersList 
-    : usersList.filter(u => u.email === "non-assigne" || u.equipe_assignee === filterEquipe);
+    : usersList.filter(u => u.email === "non-assigne" || (u.full_name && EQUIPES.some(equipe => u.full_name.includes(equipe))));
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
@@ -626,10 +626,10 @@ export default function GestionDeMandat() {
               {/* Filtre Équipe */}
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-slate-400 text-sm">Filtrer par équipe</span>
-                {["Toutes", ...uniqueEquipes].map(equipe => {
+                {["Toutes", ...EQUIPES].map(equipe => {
                   const count = equipe === "Toutes"
                     ? usersList.length
-                    : usersList.filter(u => u.email === "non-assigne" || u.equipe_assignee === equipe).length;
+                    : usersList.filter(u => u.email === "non-assigne" || (u.full_name && u.full_name.includes(equipe))).length;
                   const isActive = filterEquipe === equipe;
                   return (
                     <button
