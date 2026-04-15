@@ -263,7 +263,13 @@ export default function GestionDeMandat() {
   };
 
   const handleDragStart = (start) => {
-    // Pas besoin de tracker la carte, @hello-pangea/dnd gère le suivi
+    // Désactiver le backdrop-filter du header qui crée un stacking context
+    // et emprisonne les éléments position:fixed (dont le clone drag)
+    document.querySelectorAll('header').forEach(el => {
+      el.style.backdropFilter = 'none';
+      el.style.webkitBackdropFilter = 'none';
+    });
+    document.body.classList.add('dragging-card');
   };
 
   const handleDragUpdate = (update) => {
@@ -271,6 +277,13 @@ export default function GestionDeMandat() {
   };
 
   const handleDragEnd = (result) => {
+    // Restaurer le backdrop-filter du header
+    document.querySelectorAll('header').forEach(el => {
+      el.style.backdropFilter = '';
+      el.style.webkitBackdropFilter = '';
+    });
+    document.body.classList.remove('dragging-card');
+
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
@@ -593,6 +606,16 @@ export default function GestionDeMandat() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <style>{`
         /* Pas de overflow-x hidden sur body - ça bloque le clone drag */
+
+        /* Forcer le clone drag au-dessus de tout */
+        body.dragging-card [data-rbd-drag-handle-draggable-id] {
+          z-index: 99999 !important;
+        }
+
+        /* Le clone draggé doit être au-dessus de la sidebar et du header */
+        [data-rbd-draggable-context-id][style*="position: fixed"] {
+          z-index: 99999 !important;
+        }
 
         /* Conteneur Kanban avec scroll horizontal */
         .kanban-scroll-container {
