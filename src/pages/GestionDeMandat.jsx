@@ -239,6 +239,7 @@ export default function GestionDeMandat() {
   const [sortTaches, setSortTaches] = useState({});
   const [sortUtilisateurs, setSortUtilisateurs] = useState({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("Toutes");
   const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
   const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
   const [entreeTempsForm, setEntreeTempsForm] = useState({
@@ -295,7 +296,8 @@ export default function GestionDeMandat() {
       (filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre)) &&
       (filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat)) &&
       (filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne)) &&
-      (filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville))
+      (filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville)) &&
+      (filterPlaceAffaire === "Toutes" || card.dossier.place_affaire === filterPlaceAffaire)
     );
   });
 
@@ -559,6 +561,22 @@ export default function GestionDeMandat() {
 
             {/* Vue par Tâches */}
             <TabsContent value="taches" className="mt-0">
+              {/* Filtre Place d'affaire */}
+              <div className="flex gap-2 mb-4">
+                {["Toutes", "Alma", "Saguenay"].map(place => (
+                  <button
+                    key={place}
+                    onClick={() => setFilterPlaceAffaire(place)}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                      filterPlaceAffaire === place
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50"
+                        : "bg-slate-800/50 text-slate-400 border-slate-700 hover:text-slate-300 hover:border-slate-600"
+                    }`}
+                  >
+                    {place}
+                  </button>
+                ))}
+              </div>
               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
