@@ -1236,7 +1236,6 @@ export default function EditDossierForm({
                                 )}
                               </div>
                               </div>
-                              </div>
                               </TabsContent>
                               ))}
                               </Tabs>
