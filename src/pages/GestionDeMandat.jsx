@@ -24,6 +24,12 @@ const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjami
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const EQUIPES = ["Samuel", "Pierre-Luc", "Dany"];
 
+// Mapping des utilisateurs à leurs équipes
+const USER_TEAM_MAP = {
+  "davevallee27@gmail.com": "Samuel"
+  // Ajouter d'autres mappings au besoin
+};
+
 const getArpenteurInitials = (arpenteur) => {
   const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
   return mapping[arpenteur] || "";
@@ -325,9 +331,14 @@ export default function GestionDeMandat() {
     return acc;
   }, {});
 
+  const getUserTeam = (user) => {
+    if (user.email === "non-assigne") return null;
+    return USER_TEAM_MAP[user.email] || (u.full_name && EQUIPES.find(equipe => u.full_name.includes(equipe)));
+  };
+
   const filteredUsersList = filterEquipe === "Toutes" 
     ? usersList 
-    : usersList.filter(u => u.email === "non-assigne" || (u.full_name && EQUIPES.some(equipe => u.full_name.includes(equipe))));
+    : usersList.filter(u => u.email === "non-assigne" || getUserTeam(u) === filterEquipe);
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
@@ -629,7 +640,7 @@ export default function GestionDeMandat() {
                 {["Toutes", ...EQUIPES].map(equipe => {
                   const count = equipe === "Toutes"
                     ? usersList.length
-                    : usersList.filter(u => u.email === "non-assigne" || (u.full_name && u.full_name.includes(equipe))).length;
+                    : usersList.filter(u => u.email === "non-assigne" || getUserTeam(u) === equipe).length;
                   const isActive = filterEquipe === equipe;
                   return (
                     <button
