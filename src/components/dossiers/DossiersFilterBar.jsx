@@ -57,7 +57,7 @@ export default function DossiersFilterBar({
 
   return (
     <>
-      <div className="mb-2 flex items-center gap-4 flex-wrap">
+      <div className="mb-2 flex flex-col gap-2">
         <PlaceAffaireTabs
           value={filterPlaceAffaire}
           onChange={setFilterPlaceAffaire}
@@ -68,7 +68,7 @@ export default function DossiersFilterBar({
           }}
         />
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 text-sm">Équipe :</span>
+          <span className="text-slate-400 text-sm">Équipe de travail :</span>
           {["Toutes", ...EQUIPES].map(equipe => (
             <button
               key={equipe}
