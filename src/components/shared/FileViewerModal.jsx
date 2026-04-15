@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { X, ExternalLink, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 
 const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
@@ -12,11 +12,30 @@ export default function FileViewerModal({ file, onClose }) {
   const [textContent, setTextContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const containerRef = useRef(null);
 
   const ext = file?.name?.split('.').pop()?.toLowerCase() || '';
   const isImage = IMAGE_EXTS.includes(ext);
   const isPdf = PDF_EXTS.includes(ext);
   const isText = TEXT_EXTS.includes(ext);
+
+  // Bloquer tous les events pointer/mouse au niveau du document
+  // pour empêcher Radix UI de fermer le Dialog parent
+  useEffect(() => {
+    const capture = (e) => {
+      if (containerRef.current && containerRef.current.contains(e.target)) {
+        e.stopImmediatePropagation();
+      }
+    };
+    document.addEventListener('pointerdown', capture, true);
+    document.addEventListener('mousedown', capture, true);
+    document.addEventListener('click', capture, true);
+    return () => {
+      document.removeEventListener('pointerdown', capture, true);
+      document.removeEventListener('mousedown', capture, true);
+      document.removeEventListener('click', capture, true);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchUrl = async () => {
@@ -46,14 +65,12 @@ export default function FileViewerModal({ file, onClose }) {
 
   return createPortal(
     <div
+      ref={containerRef}
       style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onMouseDown={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
-      onClick={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         style={{ width: '80vw', height: '85vh', maxWidth: '1100px', display: 'flex', flexDirection: 'column', background: '#0f172a', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.8)' }}
-        onClick={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
-        onMouseDown={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700 flex-shrink-0">
