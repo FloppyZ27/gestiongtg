@@ -25,57 +25,17 @@ import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
+import AssignedUserSection from "./AssignedUserSection";
+import RetourAppelSection from "./RetourAppelSection";
+import EntreeTempsSection from "./EntreeTempsSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-
-const getAbbreviatedMandatType = (type) => {
-  const abbreviations = {
-    "Certificat de localisation": "CL",
-    "Description Technique": "DT",
-    "Implantation": "Imp",
-    "Levé topographique": "Levé Topo",
-    "Piquetage": "Piq"
-  };
-  return abbreviations[type] || type;
-};
-
-const getMandatColor = (typeMandat) => {
-  const colors = {
-    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
-    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
-    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
-    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
-  };
-  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
-};
-
-const getArpenteurInitials = (arpenteur) => {
-  if (!arpenteur) return "";
-  const mapping = {
-    "Samuel Guay": "SG-",
-    "Dany Gaboury": "DG-",
-    "Pierre-Luc Pilote": "PLP-",
-    "Benjamin Larouche": "BL-",
-    "Frédéric Gilbert": "FG-"
-  };
-  return mapping[arpenteur] || "";
-};
-
-
-
-const getUserInitials = (name) => {
-  return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-};
+const getAbbreviatedMandatType = (type) => ({ "Certificat de localisation": "CL", "Description Technique": "DT", "Implantation": "Imp", "Levé topographique": "Levé Topo", "Piquetage": "Piq" }[type] || type);
+const getMandatColor = (typeMandat) => ({ "Bornage": "bg-red-500/20 text-red-400 border-red-500/30", "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30", "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30", "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30", "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30", "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30", "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30", "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30", "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30", "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30" }[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30");
+const getArpenteurInitials = (arpenteur) => ({ "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" }[arpenteur] || "");
+const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
 export default function EditDossierForm({
   formData,
@@ -499,10 +459,9 @@ export default function EditDossierForm({
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
               if (!editingDossier) {
+                if (!formData.utilisateur_assigne) { alert("Veuillez sélectionner un utilisateur assigné."); e.preventDefault(); return; }
                 onSubmit(e);
-              } else {
-                e.preventDefault();
-              }
+              } else { e.preventDefault(); }
             }}>
               <Card className="border-slate-700 bg-slate-800/30 mb-3" data-section="infos">
                   <CardHeader 
@@ -530,19 +489,13 @@ export default function EditDossierForm({
                       <div className="grid grid-cols-[33%_67%] gap-4">
                         {/* Colonne gauche - Informations de base */}
                         <div className="space-y-2 border-r border-slate-700 pr-4">
+                          <AssignedUserSection users={users} editingDossier={editingDossier} initialValue={formData.utilisateur_assigne} onChangeUser={(v) => setFormData({...formData, utilisateur_assigne: v})} />
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                            <Select value={formData.arpenteur_geometre} onValueChange={(value) => {
-                              const newNumeroDossier = !editingDossier && calculerProchainNumeroDossier ? calculerProchainNumeroDossier(value) : formData.numero_dossier;
-                              setFormData({...formData, arpenteur_geometre: value, numero_dossier: newNumeroDossier});
-                            }}>
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                <SelectValue placeholder="Sélectionner" />
-                              </SelectTrigger>
+                            <Select value={formData.arpenteur_geometre} onValueChange={(value) => { const newNumeroDossier = !editingDossier && calculerProchainNumeroDossier ? calculerProchainNumeroDossier(value) : formData.numero_dossier; setFormData({...formData, arpenteur_geometre: value, numero_dossier: newNumeroDossier}); }}>
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                               <SelectContent className="bg-slate-800 border-slate-700">
-                                {ARPENTEURS.map((arpenteur) => (
-                                  <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
-                                ))}
+                                {ARPENTEURS.map((arpenteur) => (<SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>))}
                               </SelectContent>
                             </Select>
                           </div>
@@ -1956,485 +1909,22 @@ export default function EditDossierForm({
             )}
 
             {/* Section Entrée de temps */}
-              {editingDossier && (
-                <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="entree-temps">
-                 <CardHeader 
-                   className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
-                   onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
-                 >
-                   <div className="flex items-center justify-between">
-                     <div className="flex items-center gap-3">
-                       <div className="w-6 h-6 rounded-full bg-lime-500/30 flex items-center justify-center">
-                         <Clock className="w-3.5 h-3.5 text-lime-400" />
-                       </div>
-                       <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
-                       {entreesTemps.length > 0 && (
-                         <>
-                           {formData.mandats.map((mandat, idx) => {
-                             const totalHeures = entreesTemps
-                               .filter(e => e.mandat === mandat.type_mandat)
-                               .reduce((sum, e) => sum + (e.heures || 0), 0);
-                             return totalHeures > 0 && (
-                               <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                 {getAbbreviatedMandatType(mandat.type_mandat)}: {totalHeures}h
-                               </Badge>
-                             );
-                           })}
-                           <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs font-semibold">
-                             Total: {entreesTemps.reduce((sum, e) => sum + (e.heures || 0), 0)}h
-                           </Badge>
-                         </>
-                       )}
-                     </div>
-                     {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                   </div>
-                 </CardHeader>
+              {editingDossier && <EntreeTempsSection editingDossier={editingDossier} formData={formData} user={user} users={users} entreesTemps={entreesTemps} setEntreesTemps={setEntreesTemps} addActionLog={addActionLog} isCollapsed={entreeTempsCollapsed} onToggleCollapse={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)} getMandatColor={getMandatColor} getAbbreviatedMandatType={getAbbreviatedMandatType} TACHES={TACHES} getUserInitials={getUserInitials} onDeleteRequest={(info) => { setMinuteToDeleteInfo(info); setShowDeleteMinuteConfirm(true); }} />}
 
-                 {!entreeTempsCollapsed && (
-                   <CardContent className="pt-2 pb-3 space-y-4">
-                     {/* Formulaire d'ajout des entrées de temps - en haut et collapsable */}
-                     <div className="border-2 border-lime-500/30 rounded-lg mb-4 bg-lime-900/10">
-                       <div 
-                         className="cursor-pointer hover:bg-lime-900/40 transition-colors px-4 py-2 flex items-center justify-between"
-                         onClick={() => setNewEntreeTempsFormCollapsed(!newEntreeTempsFormCollapsed)}
-                       >
-                         <div className="flex items-center gap-2">
-                           <Plus className="w-4 h-4 text-lime-400" />
-                           <span className="text-xs font-semibold text-lime-400">Ajouter une entrée de temps</span>
-                         </div>
-                         {newEntreeTempsFormCollapsed ? <ChevronDown className="w-4 h-4 text-lime-400" /> : <ChevronUp className="w-4 h-4 text-lime-400" />}
-                       </div>
-
-                       {!newEntreeTempsFormCollapsed && (
-                         <div className="p-4 border-t border-lime-500/30 space-y-3">
-                           <div className="grid grid-cols-4 gap-3">
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
-                               <Input 
-                                 type="date"
-                                 value={newEntreeTempsForm.date}
-                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, date: e.target.value})}
-                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                               />
-                             </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
-                               <Select value={newEntreeTempsForm.mandat} onValueChange={(value) => setNewEntreeTempsForm({...newEntreeTempsForm, mandat: value})}>
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                                   <SelectValue placeholder="Sélectionner" />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                   {(formData?.mandats || []).map((mandat, index) => (
-                                      <SelectItem key={index} value={mandat?.type_mandat} className="text-white text-xs">
-                                        {mandat?.type_mandat || `Mandat ${index + 1}`}
-                                      </SelectItem>
-                                    ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
-                               <Input 
-                                 type="number"
-                                 step="0.25"
-                                 min="0"
-                                 placeholder="Ex: 2.5"
-                                 value={newEntreeTempsForm.heures}
-                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, heures: e.target.value})}
-                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                               />
-                             </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
-                               <Select value={newEntreeTempsForm.tache} onValueChange={(value) => setNewEntreeTempsForm({...newEntreeTempsForm, tache: value})}>
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                                   <SelectValue placeholder="Sélectionner" />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                   {TACHES.map((tache) => (
-                                     <SelectItem key={tache} value={tache} className="text-white text-xs">
-                                       {tache}
-                                     </SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                           </div>
-                           <Button 
-                             type="button"
-                             size="sm"
-                             onClick={async () => {
-                               if (!newEntreeTempsForm.date) {
-                                 alert("Veuillez sélectionner une date");
-                                 return;
-                               }
-                               if (!newEntreeTempsForm.mandat) {
-                                 alert("Veuillez sélectionner un mandat");
-                                 return;
-                               }
-                               if (!newEntreeTempsForm.heures) {
-                                 alert("Veuillez entrer le temps");
-                                 return;
-                               }
-                               if (!newEntreeTempsForm.tache) {
-                                 alert("Veuillez sélectionner une tâche");
-                                 return;
-                               }
-
-                               const createdEntree = await base44.entities.EntreeTemps.create({
-                                 dossier_id: editingDossier.id,
-                                 date: newEntreeTempsForm.date,
-                                 mandat: newEntreeTempsForm.mandat,
-                                 heures: parseFloat(newEntreeTempsForm.heures),
-                                 tache: newEntreeTempsForm.tache,
-                                 utilisateur_email: user?.email || ""
-                               });
-
-                               addActionLog("Entrée de temps", `${parseFloat(newEntreeTempsForm.heures)}h - ${newEntreeTempsForm.tache} - ${newEntreeTempsForm.mandat}`);
-                               setEntreesTemps(prev => [createdEntree, ...prev]);
-                               setNewEntreeTempsForm({
-                                 date: new Date().toISOString().split('T')[0],
-                                 mandat: "",
-                                 heures: "",
-                                 tache: ""
-                               });
-                               setNewEntreeTempsFormCollapsed(true);
-                             }}
-                             className="bg-lime-500/20 hover:bg-lime-500/30 text-lime-400 h-8 text-xs w-full border border-lime-500/30"
-                           >
-                             <Plus className="w-3 h-3 mr-1" />
-                             Ajouter l'entrée
-                           </Button>
-                         </div>
-                       )}
-                     </div>
-                    {entreesTemps.length > 0 ? (
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300 text-xs">Date</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Heures</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {entreesTemps.map((entree) => (
-                              <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-slate-300 text-xs">
-                                  {entree.date ? format(new Date(entree.date), "dd MMM yyyy", { locale: fr }) : "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs font-medium">
-                                  {entree.heures}h
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs">
-                                  <Badge className={`${getMandatColor(entree.mandat)} border text-xs`}>
-                                    {getAbbreviatedMandatType(entree.mandat) || "-"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs">
-                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
-                                    {entree.tache || "-"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs">
-                                  <div className="flex items-center gap-1.5">
-                                    <span>
-                                      {getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name) || "-"}
-                                    </span>
-                                    <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
-                                      <AvatarImage src={(users || []).find(u => u?.email === entree.utilisateur_email)?.photo_url} />
-                                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                        {getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <button 
-                                    type="button" 
-                                    onClick={() => {
-                                      setMinuteToDeleteInfo({entreeTempsId: entree.id});
-                                      setShowDeleteMinuteConfirm(true);
-                                    }}
-                                    className="text-slate-400 hover:text-red-400 transition-colors"
-                                  >
-                                    <Trash className="w-4 h-4" />
-                                  </button>
-                                </TableCell>
-                                </TableRow>
-                                ))}
-                                </TableBody>
-                                </Table>
-                      </div>
-                    ) : (
-                      <div className="text-center py-6 text-slate-500">
-                        <Clock className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                        <p className="text-sm">Aucune entrée de temps</p>
-                      </div>
-                    )}
-                  </CardContent>
-                )}
-              </Card>
-            )}
-
-            {/* Section Retour d'appel */}
-             {editingDossier && (
-               <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="retour-appel">
-                <CardHeader 
-                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
-                  onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                        <Phone className="w-3.5 h-3.5 text-blue-400" />
-                      </div>
-                      <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
-                      {retoursAppel.length > 0 && (
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                          {retoursAppel.length} appel{retoursAppel.length > 1 ? 's' : ''}
-                        </Badge>
-                      )}
-                    </div>
-                    {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                  </div>
-                </CardHeader>
-
-                {!retourAppelCollapsed && (
-                   <CardContent className="pt-4 pb-3 space-y-4">
-                     {/* Formulaire d'ajout des retours d'appel - en haut et collapsable */}
-                     <div className="border-2 border-blue-500/30 rounded-lg mb-4 bg-blue-900/10">
-                       <div 
-                         className="cursor-pointer hover:bg-blue-900/40 transition-colors px-4 py-2 flex items-center justify-between"
-                         onClick={() => setNewRetourAppelFormCollapsed(!newRetourAppelFormCollapsed)}
-                       >
-                         <div className="flex items-center gap-2">
-                           <Plus className="w-4 h-4 text-blue-400" />
-                           <span className="text-xs font-semibold text-blue-400">Ajouter un retour d'appel</span>
-                         </div>
-                         {newRetourAppelFormCollapsed ? <ChevronDown className="w-4 h-4 text-blue-400" /> : <ChevronUp className="w-4 h-4 text-blue-400" />}
-                       </div>
-
-                       {!newRetourAppelFormCollapsed && (
-                         <div className="p-4 border-t border-blue-500/30 space-y-3">
-                           <div className="grid grid-cols-[1fr_1fr] gap-3">
-                             <div className="space-y-3">
-                               <div className="space-y-1">
-                                 <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
-                                 <Input 
-                                   type="date"
-                                   value={newRetourAppel.date_appel}
-                                   onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
-                                   className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                                 />
-                               </div>
-                               <div className="space-y-1">
-                                 <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                                 <Select 
-                                   value={newRetourAppel.utilisateur_assigne}
-                                   onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
-                                 >
-                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                                     <SelectValue placeholder="Sélectionner" />
-                                   </SelectTrigger>
-                                   <SelectContent className="bg-slate-800 border-slate-700">
-                                     {(users || []).map((u) => (
-                                       <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
-                                     ))}
-                                   </SelectContent>
-                                 </Select>
-                               </div>
-                             </div>
-                             <div className="flex flex-col">
-                               <Label className="text-slate-400 text-xs mb-1">Raison de l'appel <span className="text-red-400">*</span></Label>
-                               <textarea 
-                                 placeholder="Notes sur l'appel..."
-                                 value={newRetourAppel.raison}
-                                 onChange={(e) => setNewRetourAppel({...newRetourAppel, raison: e.target.value})}
-                                 className="bg-slate-700 border border-slate-600 text-white flex-1 text-xs p-2 rounded resize-none"
-                               />
-                             </div>
-                           </div>
-                           <Button 
-                             type="button"
-                             size="sm"
-                             onClick={async () => {
-                               if (!newRetourAppel.raison) {
-                                 alert("Veuillez entrer la raison de l'appel");
-                                 return;
-                               }
-
-                               const createdRetour = await base44.entities.RetourAppel.create({
-                                 dossier_id: editingDossier.id,
-                                 date_appel: newRetourAppel.date_appel,
-                                 utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
-                                 raison: newRetourAppel.raison,
-                                 statut: "Retour d'appel"
-                               });
-
-                               addActionLog("Retour d'appel", `Retour d'appel ajouté: ${newRetourAppel.raison}`);
-                               setRetoursAppel(prev => [createdRetour, ...prev]);
-                               setFormData({...formData, statut: "Retour d'appel"});
-
-                               if (newRetourAppel.utilisateur_assigne) {
-                                 const clientsNames = getClientsNames(formData.clients_ids);
-                                 await base44.entities.Notification.create({
-                                   utilisateur_email: newRetourAppel.utilisateur_assigne,
-                                   titre: "Nouveau retour d'appel assigné",
-                                   message: `Un retour d'appel vous a été assigné pour le dossier ${getArpenteurInitials(formData.arpenteur_geometre)}${formData.numero_dossier}${clientsNames !== "-" ? ` - ${clientsNames}` : ""}.`,
-                                   type: "retour_appel",
-                                   dossier_id: editingDossier.id,
-                                   lue: false
-                                 });
-                               }
-
-                               queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-                               setNewRetourAppel({
-                                 date_appel: new Date().toISOString().split('T')[0],
-                                 utilisateur_assigne: "",
-                                 raison: "",
-                                 statut: "Retour d'appel"
-                               });
-                               setNewRetourAppelFormCollapsed(true);
-                             }}
-                             className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-8 text-xs w-full border border-blue-500/30"
-                           >
-                             <Plus className="w-3 h-3 mr-1" />
-                             Ajouter le retour d'appel
-                           </Button>
-                         </div>
-                       )}
-                     </div>
-
-                     {/* Liste des retours d'appel */}
-                     {retoursAppel.length > 0 && (
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table className="table-fixed w-full">
-                          <TableHeader>
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300 text-xs w-[22.5%]">Date</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-[22.5%]">Notes</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-[22.5%]">Statut</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-[22.5%]">Utilisateur assigné</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-[10%]">Action</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {(() => {
-                              let sortedRetoursAppel = [...retoursAppel];
-                              
-                              if (retourAppelSortConfig.key) {
-                                sortedRetoursAppel.sort((a, b) => {
-                                  let aVal, bVal;
-                                  if (retourAppelSortConfig.key === 'date') {
-                                    aVal = a.date_appel || '';
-                                    bVal = b.date_appel || '';
-                                  } else if (retourAppelSortConfig.key === 'utilisateur') {
-                                    aVal = (users || []).find(u => u?.email === a.utilisateur_assigne)?.full_name || a.utilisateur_assigne || '';
-                                    bVal = (users || []).find(u => u?.email === b.utilisateur_assigne)?.full_name || b.utilisateur_assigne || '';
-                                  } else if (retourAppelSortConfig.key === 'statut') {
-                                    aVal = a.statut || '';
-                                    bVal = b.statut || '';
-                                  }
-
-                                  if (aVal < bVal) return retourAppelSortConfig.direction === 'asc' ? -1 : 1;
-                                  if (aVal > bVal) return retourAppelSortConfig.direction === 'asc' ? 1 : -1;
-                                  return 0;
-                                });
-                              }
-
-                              return sortedRetoursAppel.map((retour) => (
-                                <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
-                                    {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <div className="truncate cursor-help">
-                                            {retour.raison || "-"}
-                                          </div>
-                                        </TooltipTrigger>
-                                        {retour.raison && (
-                                          <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
-                                            {retour.raison}
-                                          </TooltipContent>
-                                        )}
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                  </TableCell>
-                                  <TableCell className="text-xs w-[22.5%]">
-                                    <Select 
-                                      value={retour.statut}
-                                      onValueChange={async (newStatut) => {
-                                        await base44.entities.RetourAppel.update(retour.id, {
-                                          ...retour,
-                                          statut: newStatut
-                                        });
-                                        setRetoursAppel(prev => 
-                                          prev.map(r => r.id === retour.id ? {...r, statut: newStatut} : r)
-                                        );
-                                        queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
-                                      }}
-                                    >
-                                      <SelectTrigger className={`border-slate-600 h-8 text-xs w-full ${
-                                        retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                                        retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                                        retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
-                                        "bg-slate-700 text-white"
-                                      }`}>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                        <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
-                                        <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
-                                        <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
-                                        <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
-                                    <div className="flex items-center gap-1.5">
-                                      <span>
-                                        {getUserInitials((users || []).find(u => u?.email === retour.utilisateur_assigne)?.full_name) || "-"}
-                                      </span>
-                                      <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
-                                        <AvatarImage src={(users || []).find(u => u?.email === retour.utilisateur_assigne)?.photo_url} />
-                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getUserInitials((users || []).find(u => u?.email === retour.utilisateur_assigne)?.full_name)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-right w-[10%]">
-                                    <button 
-                                      type="button" 
-                                      onClick={() => {
-                                        setMinuteToDeleteInfo({retourAppelId: retour.id});
-                                        setShowDeleteMinuteConfirm(true);
-                                      }}
-                                      className="text-slate-400 hover:text-red-400 transition-colors"
-                                    >
-                                      <Trash className="w-4 h-4" />
-                                    </button>
-                                  </TableCell>
-                                  </TableRow>
-                                  ));
-                                  })()}
-                                  </TableBody>
-                                  </Table>
-                      </div>
-                      )}
-                  </CardContent>
-                )}
-              </Card>
-            )}
+            <RetourAppelSection
+              editingDossier={editingDossier}
+              formData={formData}
+              setFormData={setFormData}
+              users={users}
+              user={user}
+              getClientsNames={getClientsNames}
+              addActionLog={addActionLog}
+              retoursAppel={retoursAppel}
+              setRetoursAppel={setRetoursAppel}
+              isCollapsed={retourAppelCollapsed}
+              onToggleCollapse={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
+              onDeleteRequest={(info) => { setMinuteToDeleteInfo(info); setShowDeleteMinuteConfirm(true); }}
+            />
 
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {formData.numero_dossier && formData.arpenteur_geometre && (
@@ -2531,77 +2021,41 @@ export default function EditDossierForm({
                   <div className="space-y-3">
                     {actionLogs.map((log) => {
                       const logUser = (users || []).find(u => u?.email === log.utilisateur_email);
-                      // Formater les détails pour mettre en gras les valeurs entre guillemets
                       const formatDetails = (details) => {
                         if (!details) return null;
-                        // Séparer par " • " pour avoir chaque changement
-                        const parts = details.split(' • ');
-                        return parts.map((part, i) => {
-                          // Remplacer "valeur" → "valeur" par version bold
-                          const formatted = part.replace(/"([^"]*)"\s*→\s*"([^"]*)"/g, (match, from, to) => {
-                            return `__BOLD__${from}__/BOLD__ → __BOLD__${to}__/BOLD__`;
-                          });
+                        return details.split(' • ').map((part, i) => {
+                          const formatted = part.replace(/"([^"]*)"\s*→\s*"([^"]*)"/g, (_, from, to) => `__BOLD__${from}__/BOLD__ → __BOLD__${to}__/BOLD__`);
                           const segments = formatted.split(/(__BOLD__|__\/BOLD__)/);
                           let isBold = false;
-                          const nodes = segments.map((seg, j) => {
-                            if (seg === '__BOLD__') { isBold = true; return null; }
-                            if (seg === '__/BOLD__') { isBold = false; return null; }
-                            if (!seg) return null;
-                            return isBold
-                              ? <strong key={j} className="text-white font-semibold">{seg}</strong>
-                              : <span key={j}>{seg}</span>;
-                          });
-                          return (
-                            <div key={i} className={`text-slate-300 text-xs leading-relaxed ${i > 0 ? 'mt-0.5 pt-0.5 border-t border-slate-700/50' : ''}`}>
-                              {nodes}
-                            </div>
-                          );
+                          const nodes = segments.map((seg, j) => { if (seg==='__BOLD__'){isBold=true;return null;} if (seg==='__/BOLD__'){isBold=false;return null;} if(!seg)return null; return isBold?<strong key={j} className="text-white font-semibold">{seg}</strong>:<span key={j}>{seg}</span>; });
+                          return <div key={i} className={`text-slate-300 text-xs leading-relaxed ${i>0?'mt-0.5 pt-0.5 border-t border-slate-700/50':''}`}>{nodes}</div>;
                         });
                       };
-
                       return (
                         <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
                           <div className="flex items-start gap-2 mb-2">
                             <Avatar className="w-7 h-7 border border-slate-600 flex-shrink-0 mt-0.5">
                               <AvatarImage src={logUser?.photo_url} />
-                              <AvatarFallback className="text-[10px] bg-gradient-to-r from-slate-600 to-slate-700 text-white">
-                                {getUserInitials(logUser?.full_name || log.utilisateur_nom)}
-                              </AvatarFallback>
+                              <AvatarFallback className="text-[10px] bg-gradient-to-r from-slate-600 to-slate-700 text-white">{getUserInitials(logUser?.full_name || log.utilisateur_nom)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="text-slate-300 text-xs font-medium">{logUser?.full_name || log.utilisateur_nom || log.utilisateur_email}</span>
-                                <Badge className={`text-[10px] px-1.5 py-0 ${
-                                  log.action === 'CREATION_DOSSIER' || log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                                  log.action === 'MODIFICATION_DOSSIER' || log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                  log.action === 'SUPPRESSION_DOSSIER' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                                  'bg-slate-500/20 text-slate-400 border-slate-500/30'
-                                }`}>
-                                  {log.action === 'CREATION_DOSSIER' ? 'Création' :
-                                   log.action === 'MODIFICATION_DOSSIER' ? 'Modification' :
-                                   log.action === 'SUPPRESSION_DOSSIER' ? 'Suppression' :
-                                   log.action}
+                                <Badge className={`text-[10px] px-1.5 py-0 ${log.action==='CREATION_DOSSIER'||log.action==='Création'?'bg-emerald-500/20 text-emerald-400 border-emerald-500/30':log.action==='MODIFICATION_DOSSIER'||log.action==='Modification'?'bg-blue-500/20 text-blue-400 border-blue-500/30':log.action==='SUPPRESSION_DOSSIER'?'bg-red-500/20 text-red-400 border-red-500/30':'bg-slate-500/20 text-slate-400 border-slate-500/30'}`}>
+                                  {log.action==='CREATION_DOSSIER'?'Création':log.action==='MODIFICATION_DOSSIER'?'Modification':log.action==='SUPPRESSION_DOSSIER'?'Suppression':log.action}
                                 </Badge>
                               </div>
-                              <span className="text-slate-500 text-[10px]">
-                                {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                              </span>
+                              <span className="text-slate-500 text-[10px]">{log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                             </div>
                           </div>
-                          <div className="ml-9">
-                            {formatDetails(log.details)}
-                          </div>
+                          <div className="ml-9">{formatDetails(log.details)}</div>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full text-center">
-                    <div>
-                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p className="text-slate-500">Aucune action enregistrée</p>
-                      <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                    </div>
+                    <div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action enregistrée</p><p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p></div>
                   </div>
                 )}
               </TabsContent>
