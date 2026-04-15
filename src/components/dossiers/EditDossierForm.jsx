@@ -758,7 +758,7 @@ export default function EditDossierForm({
                           
                           <div className="border-t border-slate-600 my-2"></div>
 
-                          <div className="grid grid-cols-[60%_1px_40%] gap-3">
+                          <div className="grid grid-cols-[65%_35%] gap-3">
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
@@ -971,9 +971,7 @@ export default function EditDossierForm({
                               </div>
                             </div>
 
-                            <div className="bg-slate-600"></div>
-
-                            <div className="space-y-2 pr-2">
+                            <div className="border-l-2 border-slate-600 pl-3 pr-2">
                               <div className="flex items-center justify-between mb-1">
                                 <Label className="text-slate-400 text-xs">Dates</Label>
                                 <div className="flex items-center gap-1.5">
