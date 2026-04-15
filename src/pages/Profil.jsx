@@ -704,7 +704,7 @@ export default function Profil() {
 
   const getEntreeTempsForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return entreeTemps.filter(e => e.date === dateStr);
+    return entreeTemps.filter(e => e.date === dateStr && e.dossier_id);
   };
 
   // Fonctions pour générer les jours de la semaine et du mois
