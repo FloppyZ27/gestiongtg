@@ -241,7 +241,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const unassignedCards = terrainCards.filter(card => {
     const isAssigned = Object.values(equipes).some(de => de.some(eq => eq.mandats.includes(card.id)));
-    return !isAssigned && !(card.terrain?.date_cedulee && card.terrain?.equipe_assignee);
+    return !isAssigned;
   });
 
   const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
