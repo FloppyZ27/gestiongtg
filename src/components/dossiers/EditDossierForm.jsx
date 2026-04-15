@@ -587,8 +587,7 @@ export default function EditDossierForm({
                             setCourtierSearchTerm={setCourtierSearchTerm}
                             setClientTypeForForm={setClientTypeForForm}
                             setIsClientFormDialogOpen={setIsClientFormDialogOpen}
-                            clientSelectionCardComponent={clientSelectionCardComponent}
-                            onClientCardClick={onClientCardClick}
+                            setEditingClient={setEditingClient}
                           />
                         </div>
                       </div>
