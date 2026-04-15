@@ -47,11 +47,13 @@ export default function FileViewerModal({ file, onClose }) {
   return createPortal(
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
+      onClick={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         style={{ width: '80vw', height: '85vh', maxWidth: '1100px', display: 'flex', flexDirection: 'column', background: '#0f172a', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.8)' }}
+        onClick={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
+        onMouseDown={(e) => { e.stopPropagation(); e.nativeEvent?.stopImmediatePropagation?.(); }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700 flex-shrink-0">
