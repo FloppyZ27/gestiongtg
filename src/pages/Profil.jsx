@@ -403,9 +403,11 @@ export default function Profil() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
+      const fullName = `${profileForm.prenom} ${profileForm.nom}`.trim();
       await updateProfileMutation.mutateAsync({
         prenom: profileForm.prenom,
         nom: profileForm.nom,
+        full_name: fullName,
         date_naissance: profileForm.date_naissance,
         telephone: profileForm.telephone,
         adresse: profileForm.adresse
