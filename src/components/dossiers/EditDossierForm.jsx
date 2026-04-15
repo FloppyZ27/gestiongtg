@@ -25,6 +25,7 @@ import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
+import MandatsSection from "./MandatsSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -613,6 +614,7 @@ export default function EditDossierForm({
               setMandatStepCollapsed={setMandatStepCollapsed}
               setShowDeleteMandatConfirm={setShowDeleteMandatConfirm}
               setMandatIndexToDelete={setMandatIndexToDelete}
+              editingDossier={editingDossier}
             />
 
             {/* Section Tarification */}
