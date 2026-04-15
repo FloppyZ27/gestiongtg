@@ -218,12 +218,9 @@ export default function CeduleTerrain() {
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
-    onSuccess: (updatedDossier, { id, data }) => {
-      // Mettre à jour le cache directement avec les nouvelles données
-      queryClient.setQueryData(['dossiers'], (oldDossiers) => {
-        if (!oldDossiers) return [updatedDossier];
-        return oldDossiers.map(d => d.id === id ? { ...d, ...data } : d);
-      });
+    onSuccess: () => {
+      // Invalider le cache pour forcer un refresh avec les données du serveur
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
     },
   });
 
