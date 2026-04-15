@@ -67,22 +67,24 @@ export default function DossiersFilterBar({
             saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
           }}
         />
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400 text-sm">Équipe de travail :</span>
-          {["Toutes", ...EQUIPES].map(equipe => (
-            <button
-              key={equipe}
-              onClick={() => setFilterEquipe(equipe)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "text-white" : "text-slate-400 hover:text-slate-300"}`}
-            >
-              <span>{equipe}</span>
-              <span className={`inline-flex items-center justify-center rounded-full text-xs font-bold min-w-[20px] h-5 px-1.5 ${filterEquipe === equipe ? "bg-blue-500 text-white" : "bg-slate-700 text-slate-300"}`}>
-                {equipe === "Toutes"
-                  ? dossiersWithMandats.length
-                  : dossiersWithMandats.filter(d => d.mandatInfo?.equipe_assignee === equipe || d.mandatInfo?.utilisateur_assigne?.includes(equipe)).length}
-              </span>
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
+          <div className="flex gap-1">
+            {["Toutes", ...EQUIPES].map(equipe => (
+              <button
+                key={equipe}
+                onClick={() => setFilterEquipe(equipe)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "bg-emerald-500/20 text-emerald-400 border-b-2 border-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}
+              >
+                {equipe}
+                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterEquipe === equipe ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>
+                  {equipe === "Toutes"
+                    ? dossiersWithMandats.length
+                    : dossiersWithMandats.filter(d => d.mandatInfo?.equipe_assignee === equipe || d.mandatInfo?.utilisateur_assigne?.includes(equipe)).length}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
