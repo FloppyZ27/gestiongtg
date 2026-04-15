@@ -782,7 +782,7 @@ export default function EditDossierForm({
                               </div>
                               
                               {/* Barre de recherche d'adresse */}
-                              <div className="relative">
+                              <div className="relative z-20">
                                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
                                 <Input
                                   placeholder="Rechercher une adresse..."
