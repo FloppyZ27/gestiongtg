@@ -850,7 +850,7 @@ export default function EditDossierForm({
                                     >
                                       <div className="flex items-center gap-2 flex-1 min-w-0">
                                         <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                        <span className="truncate">{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
+                                        <span className="truncate">{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}${suggestion.code_postal ? `, ${suggestion.code_postal}` : ''}`}</span>
                                       </div>
                                       {suggestion.distance && <span className="text-xs text-slate-500 flex-shrink-0">{suggestion.distance} km</span>}
                                     </div>
