@@ -553,13 +553,10 @@ export default function Dossiers() {
       
       return updatedLot;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
-      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      setIsNewLotDialogOpen(false);
-      resetNewLotForm();
-    },
+    onSuccess: (_, vars) => { queryClient.invalidateQueries({ queryKey: ['lots'] }); queryClient.invalidateQueries({ queryKey: ['actionLogs'] }); if (!vars?.fromAutoSave) { setIsNewLotDialogOpen(false); resetNewLotForm(); } },
   });
+  const autoSaveRefLot = React.useRef(null);
+  useEffect(() => { if (!editingLot) return; clearTimeout(autoSaveRefLot.current); autoSaveRefLot.current = setTimeout(() => { updateLotMutation.mutate({ id: editingLot.id, lotData: newLotForm, fromAutoSave: true }); }, 800); return () => clearTimeout(autoSaveRefLot.current); }, [newLotForm, editingLot?.id]);
 
   const clientsReguliers = clients.filter((c) => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter((c) => c.type_client === 'Notaire');
@@ -3202,34 +3199,10 @@ export default function Dossiers() {
 
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
           if (!open) {
-            let hasChanges = false;
-            if (editingLot) {
-              hasChanges = newLotForm.numero_lot !== editingLot.numero_lot || 
-                newLotForm.circonscription_fonciere !== editingLot.circonscription_fonciere ||
-                newLotForm.cadastre !== editingLot.cadastre ||
-                newLotForm.rang !== editingLot.rang ||
-                JSON.stringify(newLotForm.types_operation) !== JSON.stringify(editingLot.types_operation) ||
-                commentairesTemporairesLot.length > 0;
-            } else {
-              hasChanges = newLotForm.numero_lot || 
-                newLotForm.circonscription_fonciere || 
-                newLotForm.rang || 
-                newLotForm.types_operation.length > 0 ||
-                commentairesTemporairesLot.length > 0;
-            }
-            
-            if (hasChanges) {
-              if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
-                setIsNewLotDialogOpen(false);
-                resetNewLotForm();
-              }
-            } else {
-              setIsNewLotDialogOpen(false);
-              resetNewLotForm();
-            }
-          } else {
-            setIsNewLotDialogOpen(open);
-          }
+            if (editingLot) { setIsNewLotDialogOpen(false); resetNewLotForm(); return; }
+            const hasChanges = newLotForm.numero_lot || newLotForm.circonscription_fonciere || newLotForm.rang || newLotForm.types_operation.length > 0 || commentairesTemporairesLot.length > 0;
+            if (hasChanges) { if (confirm("Êtes-vous sûr de vouloir annuler ?")) { setIsNewLotDialogOpen(false); resetNewLotForm(); } } else { setIsNewLotDialogOpen(false); resetNewLotForm(); }
+          } else { setIsNewLotDialogOpen(open); }
         }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
@@ -3397,19 +3370,12 @@ export default function Dossiers() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => {
-                  if (confirm("Êtes-vous sûr de vouloir annuler ?")) {
-                    setIsNewLotDialogOpen(false);
-                    resetNewLotForm();
-                  }
-                }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                  Annuler
-                </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  {editingLot ? "Modifier" : "Créer"}
-                </Button>
-              </div>
+              {!editingLot && (
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                  <Button type="button" variant="outline" onClick={() => { if (confirm("Êtes-vous sûr de vouloir annuler ?")) { setIsNewLotDialogOpen(false); resetNewLotForm(); } }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                  <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
+                </div>
+              )}
             </motion.div>
           </DialogContent>
         </Dialog>
