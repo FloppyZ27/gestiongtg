@@ -782,7 +782,7 @@ export default function EditDossierForm({
                               </div>
                               
                               {/* Barre de recherche d'adresse */}
-                              <div className="relative z-20">
+                              <div className="relative">
                                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
                                 <Input
                                   placeholder="Rechercher une adresse..."
@@ -873,7 +873,7 @@ export default function EditDossierForm({
 
                               {/* Suggestions d'adresses */}
                               {addressSuggestions.length > 0 && (
-                                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                <div className="absolute z-50 w-full top-full left-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                                   {addressSuggestions.map((suggestion, idx) => (
                                     <div
                                       key={idx}
