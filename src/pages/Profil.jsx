@@ -251,6 +251,7 @@ export default function Profil() {
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsEditingProfile(false);
     },
     onError: (error) => {
