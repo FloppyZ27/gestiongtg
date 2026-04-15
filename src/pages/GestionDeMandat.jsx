@@ -241,6 +241,7 @@ export default function GestionDeMandat() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("Toutes");
   const [filterPlaceAffaireCalendrier, setFilterPlaceAffaireCalendrier] = useState("Toutes");
+  const [filterEquipe, setFilterEquipe] = useState("Toutes");
   const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
   const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
   const [entreeTempsForm, setEntreeTempsForm] = useState({
@@ -317,10 +318,16 @@ export default function GestionDeMandat() {
   }, {});
 
   const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
+  const uniqueEquipes = [...new Set(usersList.filter(u => u.email !== "non-assigne").map(u => u.equipe_assignee).filter(Boolean))].sort();
+  
   const cardsByUtilisateur = usersList.reduce((acc, user) => {
     acc[user.email] = sortCards(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), user.email, sortUtilisateurs);
     return acc;
   }, {});
+
+  const filteredUsersList = filterEquipe === "Toutes" 
+    ? usersList 
+    : usersList.filter(u => u.email === "non-assigne" || u.equipe_assignee === filterEquipe);
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
@@ -616,9 +623,35 @@ export default function GestionDeMandat() {
 
             {/* Vue par Utilisateur */}
             <TabsContent value="utilisateurs" className="mt-0">
+              {/* Filtre Équipe */}
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-slate-400 text-sm">Filtrer par équipe</span>
+                {["Toutes", ...uniqueEquipes].map(equipe => {
+                  const count = equipe === "Toutes"
+                    ? usersList.length
+                    : usersList.filter(u => u.email === "non-assigne" || u.equipe_assignee === equipe).length;
+                  const isActive = filterEquipe === equipe;
+                  return (
+                    <button
+                      key={equipe}
+                      onClick={() => setFilterEquipe(equipe)}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all border-0 ${
+                        isActive ? "text-white bg-transparent" : "text-slate-400 bg-transparent hover:text-slate-300"
+                      }`}
+                    >
+                      <span>{equipe}</span>
+                      <span className={`inline-flex items-center justify-center rounded-full text-xs font-bold min-w-[20px] h-5 px-1.5 ${
+                        isActive ? "bg-blue-500 text-white" : "bg-slate-700 text-slate-300"
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
-                  {usersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
+                  {filteredUsersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
                     <div className="flex items-center justify-between w-full">
                       <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByUtilisateur[user.email] || []).length}</Badge>
                       <div className="flex items-center gap-2">
