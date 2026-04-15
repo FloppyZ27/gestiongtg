@@ -734,39 +734,9 @@ export default function GestionDeMandat() {
           background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
         }
 
-        /* Supprimer les bordures des Card */
-        .kanban-column .kanban-content [role="presentation"] {
+        /* Supprimer les bordures des Card Kanban */
+        .kanban-column > .border {
           border: none !important;
-        }
-
-        /* Force border-0 sur les Card Kanban */
-        .kanban-column > * {
-          border: none !important;
-        }
-
-        /* Supprimer bordure calendar */
-        [role="tabpanel"] [class*="Card"] {
-          border: none !important;
-        }
-
-        /* Supprimer bordure des cartes mandats */
-        [data-rbd-draggable-id] > div {
-          border: none !important;
-        }
-
-        /* Supprimer TOUTES les bordures de la page */
-        * {
-          border: none !important;
-          outline: none !important;
-        }
-
-        /* Supprimer les box-shadows qui créent des bordures */
-        [class*="border"],
-        [class*="shadow"],
-        [class*="outline"] {
-          border: none !important;
-          box-shadow: none !important;
-          outline: none !important;
         }
       `}</style>
       
