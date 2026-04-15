@@ -240,6 +240,7 @@ export default function GestionDeMandat() {
   const [sortUtilisateurs, setSortUtilisateurs] = useState({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("Toutes");
+  const [filterPlaceAffaireCalendrier, setFilterPlaceAffaireCalendrier] = useState("Toutes");
   const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
   const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
   const [entreeTempsForm, setEntreeTempsForm] = useState({
@@ -638,6 +639,32 @@ export default function GestionDeMandat() {
 
             {/* Vue Calendrier */}
             <TabsContent value="calendrier" className="mt-0">
+              {/* Filtre Place d'affaire */}
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-slate-400 text-sm">Filtrer par place d'affaire</span>
+                {["Toutes", "Alma", "Saguenay"].map(place => {
+                  const count = place === "Toutes"
+                    ? filteredCards.length
+                    : filteredCards.filter(c => c.dossier.place_affaire === place).length;
+                  const isActive = filterPlaceAffaireCalendrier === place;
+                  return (
+                    <button
+                      key={place}
+                      onClick={() => setFilterPlaceAffaireCalendrier(place)}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all border-0 ${
+                        isActive ? "text-white bg-transparent" : "text-slate-400 bg-transparent hover:text-slate-300"
+                      }`}
+                    >
+                      <span>{place}</span>
+                      <span className={`inline-flex items-center justify-center rounded-full text-xs font-bold min-w-[20px] h-5 px-1.5 ${
+                        isActive ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-300"
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
               <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
                 <CardHeader className="border-b border-slate-800">
                   <div className="flex justify-between items-center flex-wrap gap-2">
@@ -664,7 +691,7 @@ export default function GestionDeMandat() {
                       {[0,1,2,3,4].map(dayOffset => {
                         const day = addDays(currentMonthStart, dayOffset);
                         const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                        const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day));
+                        const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier));
                         const isOver = overColumn === dayId && dragging;
                         return (
                           <div key={dayOffset} data-kanban-column={dayId} className={`rounded-lg border min-h-[400px] p-2 transition-all ${isOver ? 'border-emerald-400/80 bg-emerald-500/10' : 'border-slate-700/50'}`}>
@@ -693,7 +720,7 @@ export default function GestionDeMandat() {
                               <div className="grid grid-cols-5 divide-x divide-slate-700">
                                 {daysOfWeek.map((day, dayIndex) => {
                                   const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                                  const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day));
+                                  const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier));
                                   const isOver = overColumn === dayId && dragging;
                                   return (
                                     <div key={dayIndex} data-kanban-column={dayId} className={`p-3 min-h-[200px] transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
