@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Camera, X, CheckCircle, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -91,8 +92,8 @@ export default function CameraModal({ onClose, folderPath, onPhotoUploaded, stre
     }, 'image/jpeg', 0.92);
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-between py-6 px-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black flex flex-col items-center justify-between py-6 px-4" style={{ zIndex: 99999 }}>
       {/* Header */}
       <div className="w-full flex items-center justify-between max-w-2xl">
         <div className="text-white font-semibold text-lg flex items-center gap-2">
@@ -170,6 +171,7 @@ export default function CameraModal({ onClose, folderPath, onPhotoUploaded, stre
 
         <div className="w-24" />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
