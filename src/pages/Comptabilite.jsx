@@ -686,15 +686,15 @@ export default function Comptabilite() {
                 </TabsList>
 
                 <TabsContent value="note" className="space-y-4">
-                  <p className="text-slate-400 text-sm">Ajoutez une note à l'intention de la comptable pour cette semaine.</p>
-                  <textarea
-                    value={notesFacturesText}
-                    onChange={(e) => setNotesFacturesText(e.target.value)}
-                    placeholder="Ex: J'ai travaillé en dehors des heures normales le mercredi soir pour une urgence client..."
-                    className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm resize-none"
-                    rows={6}
-                    autoFocus
-                  />
+                  {notesFacturesText ? (
+                    <div className="bg-slate-800/50 border border-slate-700 text-slate-300 rounded px-3 py-3 w-full text-sm whitespace-pre-wrap min-h-[120px]">
+                      {notesFacturesText}
+                    </div>
+                  ) : (
+                    <div className="bg-slate-800/30 border border-slate-700/50 text-slate-500 rounded px-3 py-6 w-full text-sm text-center italic">
+                      Aucune note pour cette semaine.
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="factures" className="space-y-4">
@@ -702,39 +702,22 @@ export default function Comptabilite() {
                     rootPath="COMPTABILITÉ/FACTURES"
                     initialPath={selectedNoteUser?.full_name ? [selectedNoteUser.full_name, getWeekDateRange()] : []}
                     maxHeight="500px"
-                    allowUpload={true}
-                    allowDelete={true}
+                    allowUpload={false}
+                    allowDelete={false}
                     minPathLength={1}
                     onFileCountChange={setNotesFacturesFileCount}
                   />
                 </TabsContent>
 
-                <div className="flex justify-between gap-3 pt-4 border-t border-slate-700">
-                  {notesFacturesTab === 'factures' ? (
-                    <Button
-                      onClick={() => setShowNotesCamera(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-                    >
-                      <Camera className="w-4 h-4 mr-1" /> Prendre une photo
-                    </Button>
-                  ) : <div />}
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsNotesFacturesOpen(false)}
-                      className="border-red-500 text-red-400 hover:bg-red-500/10"
-                    >
-                      Annuler
-                    </Button>
-                    <Button
-                      onClick={() => saveNotesCommentMutation.mutate(notesFacturesText)}
-                      disabled={saveNotesCommentMutation.isPending}
-                      className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none border-emerald-500"
-                    >
-                      {saveNotesCommentMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
-                    </Button>
-                  </div>
+                <div className="flex justify-end pt-4 border-t border-slate-700">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsNotesFacturesOpen(false)}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                  >
+                    Fermer
+                  </Button>
                 </div>
               </Tabs>
             </DialogContent>
