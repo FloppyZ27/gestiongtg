@@ -348,7 +348,17 @@ export default function GestionDeMandat() {
 
     if (activeView === "taches") {
       if (card.tache === targetColumn) return;
-      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, tache_actuelle: targetColumn } : m);
+      const updatedMandats = dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) {
+          const updated = { ...m, tache_actuelle: targetColumn };
+          // Si la tâche devient "Cédule" et n'a pas de statut_terrain, ajouter "en_verification"
+          if (targetColumn === "Cédule" && !updated.statut_terrain) {
+            updated.statut_terrain = "en_verification";
+          }
+          return updated;
+        }
+        return m;
+      });
       updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } }, {
         onSuccess: () => {
           setEntreeTempsCardInfo({ dossierId: dossier.id, mandatType: card.mandat.type_mandat, nouvelleTache: targetColumn, ancienneTache: card.tache });
