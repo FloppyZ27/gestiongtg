@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp } from "lucide-react";
+import ClientSelectionCard from "@/components/mandat/ClientSelectionCard";
 
 export default function ContactsTabsSection({
   formData,
@@ -21,8 +22,8 @@ export default function ContactsTabsSection({
   setCourtierSearchTerm,
   setClientTypeForForm,
   setIsClientFormDialogOpen,
-  clientSelectionCardComponent: ClientSelectionCard,
-  onClientCardClick
+  onClientCardClick,
+  setEditingClient
 }) {
   const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
   const notaires = (clients || []).filter(c => c?.type_client === 'Notaire');
@@ -53,40 +54,30 @@ export default function ContactsTabsSection({
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
   );
 
-  const renderClientCard = (clientId, client, type, colors) => {
-    if (!client) return null;
-    
-    if (ClientSelectionCard && onClientCardClick) {
-      return (
-        <ClientSelectionCard 
-          key={clientId}
-          clientId={clientId}
-          clientData={client}
-          onRemove={() => removeClient(clientId, type)}
-          onClick={() => onClientCardClick(client)}
-          {...colors}
-        />
-      );
+  const handleClientCardClick = (client, type) => {
+    if (setEditingClient) {
+      setEditingClient(client);
     }
-    
-    // Rendu par défaut si ClientSelectionCard n'est pas fourni
+    setClientTypeForForm(type === 'notaires' ? 'Notaire' : type === 'courtiers' ? 'Courtier immobilier' : type === 'compagnies' ? 'Compagnie' : 'Client');
+    setIsClientFormDialogOpen(true);
+    if (onClientCardClick) {
+      onClientCardClick(client);
+    }
+  };
+
+  const renderClientCard = (clientId, client, type, colors) => {
     return (
-      <div key={clientId} className={`${colors.backgroundColor} border ${colors.borderColor} ${colors.textColor} rounded p-2 text-xs relative cursor-pointer hover:${colors.hoverColor} transition-colors flex items-center justify-between gap-2`}>
-        <div className="truncate">
-          <p className="font-semibold">{client.prenom} {client.nom}</p>
-          {client.type_client && <p className="text-xs opacity-75">{client.type_client}</p>}
-        </div>
-        <button 
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeClient(clientId, type);
-          }}
-          className="flex-shrink-0 hover:opacity-80"
-        >
-          ×
-        </button>
-      </div>
+      <ClientSelectionCard 
+        key={clientId}
+        clientId={clientId}
+        clientData={client}
+        onRemove={() => removeClient(clientId, type)}
+        onClick={() => handleClientCardClick(client, type)}
+        backgroundColor={colors.backgroundColor}
+        borderColor={colors.borderColor}
+        textColor={colors.textColor}
+        hoverColor={colors.hoverColor}
+      />
     );
   };
 
