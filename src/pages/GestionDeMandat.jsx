@@ -708,35 +708,41 @@ export default function GestionDeMandat() {
                 <div className="w-5 h-5 rounded-full bg-lime-500/30 flex items-center justify-center"><Timer className="w-3 h-3 text-lime-400" /></div>
                 <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
               </div>
-              <div className="p-3 grid grid-cols-5 gap-2">
-                <div className="space-y-0.5">
-                  <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
-                  <Input type="date" value={entreeTempsForm.date} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, date: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
+              <div className="p-3 space-y-3">
+                {/* Ligne 1 : Date + Temps + Tâche accomplie */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                    <Input type="date" value={entreeTempsForm.date} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, date: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Temps (heures) <span className="text-red-400">*</span></Label>
+                    <Input type="number" step="0.25" min="0" value={entreeTempsForm.heures} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})} placeholder="Ex: 2.5" className="bg-slate-700 border-slate-600 text-white h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
+                    <Select value={entreeTempsForm.tache} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache: v})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white">{t}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
-                  <Input type="number" step="0.25" min="0" value={entreeTempsForm.heures} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})} placeholder="Ex: 2.5" className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
-                  <Select value={entreeTempsForm.tache} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache: v})}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white text-xs">{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Tâche suivante</Label>
-                  <Select value={entreeTempsForm.tache_suivante} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: v})}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white text-xs">{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                  <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: v})}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">{users.map(u => <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>)}</SelectContent>
-                  </Select>
+                {/* Ligne 2 : Tâche suivante + Utilisateur assigné */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Tâche suivante</Label>
+                    <Select value={entreeTempsForm.tache_suivante} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: v})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white">{t}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                    <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: v})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">{users.map(u => <SelectItem key={u.email} value={u.email} className="text-white">{u.full_name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
