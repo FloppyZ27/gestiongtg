@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, FolderOpen } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const ARPENTEURS = [
   "Samuel Guay",
@@ -31,10 +33,17 @@ export default function DossierInfoStepForm({
   onDateOuvertureChange,
   placeAffaire,
   onPlaceAffaireChange,
+  utilisateurAssigne,
+  onUtilisateurAssigneChange,
   isCollapsed,
   onToggleCollapse,
   disabled = false
 }) {
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
@@ -55,6 +64,25 @@ export default function DossierInfoStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="space-y-[3px]">
+            {/* Ligne 0: Utilisateur assigné - obligatoire */}
+            {onUtilisateurAssigneChange && (
+              <div className="space-y-0.5">
+                <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
+                <Select value={utilisateurAssigne || ""} onValueChange={onUtilisateurAssigneChange} disabled={disabled}>
+                  <SelectTrigger className={`bg-slate-700 border-slate-600 text-white h-6 text-sm ${!utilisateurAssigne ? 'border-red-500/50' : ''}`}>
+                    <SelectValue placeholder="Sélectionner un utilisateur" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {users.map((u) => (
+                      <SelectItem key={u.email} value={u.email} className="text-white text-sm">
+                        {u.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Ligne 1: Arpenteur-géomètre, Place d'affaire et Statut */}
             <div className="grid grid-cols-3 gap-1">
               <div className="space-y-0.5">

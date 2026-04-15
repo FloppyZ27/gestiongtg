@@ -1398,10 +1398,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
     e.preventDefault();
 
     // Validation: arpenteur requis
-    if (!formData.arpenteur_geometre) {
-      setShowArpenteurRequiredDialog(true);
-      return;
-    }
+    if (!formData.arpenteur_geometre) { setShowArpenteurRequiredDialog(true); return; }
+    // Validation: utilisateur assigné requis (création seulement)
+    if (!editingPriseMandat && !formData.utilisateur_assigne) { alert("Veuillez sélectionner un utilisateur assigné."); return; }
 
     // Validation: vérifier que le numéro de dossier n'existe pas déjà (si statut "Mandats à ouvrir")
     if (formData.statut === "Mandats à ouvrir" && formData.numero_dossier) {
@@ -1440,18 +1439,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
       date_signature: mandatsInfo[0]?.date_signature || "",
       date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
       date_livraison: mandatsInfo[0]?.date_livraison || "",
-      urgence_percue: mandatsInfo[0]?.urgence_percue || "",
-      statut: formData.statut
+      urgence_percue: mandatsInfo[0]?.urgence_percue || "", statut: formData.statut, utilisateur_assigne: formData.utilisateur_assigne || ""
     };
 
     if (editingPriseMandat) {
-      // Détecter les changements et créer des entrées d'historique
-      const newHistoriqueEntries = [];
-      const now = new Date().toISOString();
-      const userName = user?.full_name || "Utilisateur";
-      const userEmail = user?.email || "";
-
-      // Vérifier changement de statut
+      const newHistoriqueEntries = [];const now = new Date().toISOString();const userName = user?.full_name || "Utilisateur";const userEmail = user?.email || "";
       if (editingPriseMandat.statut !== formData.statut) {
         newHistoriqueEntries.push({
           action: "Changement de statut",
@@ -2410,30 +2402,28 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                   <form id="dossier-form" onSubmit={handleSubmit} onBlur={handleAutoSave} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
                   <div id="section-dossier-info"><DossierInfoStepForm
-                    disabled={isLocked}
-                    arpenteurGeometre={formData.arpenteur_geometre}
-                    onArpenteurChange={(value) => {
-                      if (isLocked) return;
-                      setFormData({...formData, arpenteur_geometre: value});
-                      setHasFormChanges(true);
-                    }}
-                    statut={formData.statut}
-                    onStatutChange={async (value) => {
-                      if (isLocked) return;
-                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && value !== formData.statut) {
-                        setPendingStatutChange(value);
-                        setShowStatutChangeConfirm(true);
-                        return;
-                      }
-                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
-                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                        setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
-                      } else if (value !== "Mandats à ouvrir") {
-                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
-                      } else {
-                        setFormData({...formData, statut: value});
-                      }
-                    }}
+                   disabled={isLocked}
+                   arpenteurGeometre={formData.arpenteur_geometre}
+                   onArpenteurChange={(v)=>{if(isLocked)return;setFormData({...formData,arpenteur_geometre:v});setHasFormChanges(true);}}
+                   utilisateurAssigne={formData.utilisateur_assigne}
+                   onUtilisateurAssigneChange={(v)=>{if(isLocked)return;setFormData({...formData,utilisateur_assigne:v});setHasFormChanges(true);}}
+                   statut={formData.statut}
+                   onStatutChange={async (value) => {
+                     if (isLocked) return;
+                     if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && value !== formData.statut) {
+                       setPendingStatutChange(value);
+                       setShowStatutChangeConfirm(true);
+                       return;
+                     }
+                     if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
+                       const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                       setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
+                     } else if (value !== "Mandats à ouvrir") {
+                       setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                     } else {
+                       setFormData({...formData, statut: value});
+                     }
+                   }}
                     numeroDossier={formData.numero_dossier}
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
                     dateOuverture={formData.date_ouverture}
