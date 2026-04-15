@@ -16,7 +16,7 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { createPageUrl } from "@/utils";
+import LotConfirmDialogs from "../components/lots/LotConfirmDialogs";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
