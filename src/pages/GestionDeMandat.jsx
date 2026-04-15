@@ -709,7 +709,7 @@ export default function GestionDeMandat() {
                 <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
               </div>
               <div className="p-3 space-y-3">
-                {/* Ligne 1 : Date + Temps + Tâche accomplie */}
+                {/* Ligne 1 : Date + Temps + Utilisateur assigné */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
@@ -720,27 +720,27 @@ export default function GestionDeMandat() {
                     <Input type="number" step="0.25" min="0" value={entreeTempsForm.heures} onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})} placeholder="Ex: 2.5" className="bg-slate-700 border-slate-600 text-white h-9 text-sm" />
                   </div>
                   <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                    <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: v})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">{users.map(u => <SelectItem key={u.email} value={u.email} className="text-white">{u.full_name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {/* Ligne 2 : Tâche accomplie + Tâche suivante */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
                     <Select value={entreeTempsForm.tache} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache: v})}>
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white">{t}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
-                </div>
-                {/* Ligne 2 : Tâche suivante + Utilisateur assigné */}
-                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Tâche suivante</Label>
                     <Select value={entreeTempsForm.tache_suivante} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: v})}>
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">{TACHES.map(t => <SelectItem key={t} value={t} className="text-white">{t}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                    <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(v) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: v})}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">{users.map(u => <SelectItem key={u.email} value={u.email} className="text-white">{u.full_name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                 </div>
