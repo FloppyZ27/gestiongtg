@@ -1059,7 +1059,7 @@ export default function EditDossierForm({
                           </div>
 
                           <div className={`grid ${lotTabExpanded && currentMandatIndexForLot === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
-                            <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexForLot === index ? 'border-r border-slate-700 pr-4' : ''}`}>
+                            <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <Label className="text-slate-400 text-xs">Lots</Label>
                                 <div className="flex items-center gap-1.5">
