@@ -94,7 +94,6 @@ export default function FileViewerModal({ file, onClose }) {
           )}
         </div>
       </div>
-    </div>
     </div>,
     document.body
   );
