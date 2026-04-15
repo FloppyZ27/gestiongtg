@@ -590,17 +590,17 @@ export default function GestionDeMandat() {
             };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <style>{`
         /* Empêcher le scroll horizontal global */
-        body, html, #root {
+        body, html {
           overflow-x: hidden !important;
         }
 
         /* Conteneur Kanban avec scroll horizontal */
         .kanban-scroll-container {
           overflow-x: auto;
-          overflow-y: hidden;
+          overflow-y: visible;
           width: 100%;
           -webkit-overflow-scrolling: touch;
           cursor: grab;
@@ -740,8 +740,8 @@ export default function GestionDeMandat() {
         }
       `}</style>
       
-      <div className="w-full px-0 overflow-x-hidden">
-        <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4 pt-4">
+      <div className="w-full px-0">
+        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4 pt-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -1071,31 +1071,33 @@ export default function GestionDeMandat() {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
-                                        data-is-dragging={snapshot.isDragging}
-                                        style={provided.draggableProps.style}
+                                        style={{
+                                          ...provided.draggableProps.style,
+                                          zIndex: snapshot.isDragging ? 9999 : undefined,
+                                        }}
                                       >
                                         {renderMandatCard(card, provided, snapshot)}
                                       </div>
                                     )}
                                   </Draggable>
-                                ))}
-                                {provided.placeholder}
-                                {cardsInColumn.length === 0 && (
+                                  ))}
+                                  {provided.placeholder}
+                                  {cardsInColumn.length === 0 && (
                                   <div className="text-center py-8 text-slate-600 text-sm">
                                     Aucun mandat
                                   </div>
-                                )}
-                              </CardContent>
-                            )}
-                          </Droppable>
-                        </Card>
-                      </div>
-                    );
-                    })}
-                    </div>
-                    </div>
-                    </DragDropContext>
-                    </TabsContent>
+                                  )}
+                                  </CardContent>
+                                  )}
+                                  </Droppable>
+                                  </Card>
+                                  </div>
+                                  );
+                                  })}
+                                  </div>
+                                  </div>
+                                  </DragDropContext>
+                                  </TabsContent>
 
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
@@ -1224,31 +1226,33 @@ export default function GestionDeMandat() {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
-                                        data-is-dragging={snapshot.isDragging}
-                                        style={provided.draggableProps.style}
+                                        style={{
+                                          ...provided.draggableProps.style,
+                                          zIndex: snapshot.isDragging ? 9999 : undefined,
+                                        }}
                                       >
                                         {renderMandatCard(card, provided, snapshot)}
                                       </div>
                                     )}
                                   </Draggable>
-                                ))}
-                                {provided.placeholder}
-                                {cardsInColumn.length === 0 && (
+                                  ))}
+                                  {provided.placeholder}
+                                  {cardsInColumn.length === 0 && (
                                   <div className="text-center py-8 text-slate-600 text-sm">
                                     Aucun mandat
                                   </div>
-                                )}
-                              </CardContent>
-                            )}
-                          </Droppable>
-                        </Card>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </DragDropContext>
-          </TabsContent>
+                                  )}
+                                  </CardContent>
+                                  )}
+                                  </Droppable>
+                                  </Card>
+                                  </div>
+                                  );
+                                  })}
+                                  </div>
+                                  </div>
+                                  </DragDropContext>
+                                  </TabsContent>
 
           {/* Vue Calendrier */}
           <TabsContent value="calendrier" className="mt-0">
