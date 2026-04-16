@@ -447,19 +447,45 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   // Recalculer automatiquement les routes pour tous les jours visibles dès que les équipes ou dossiers changent
   useEffect(() => {
-    const allRoutes = [];
-    days.forEach(day => {
-      const dateStr = format(day, "yyyy-MM-dd");
-      const routes = buildRoutesForDate(dateStr);
-      allRoutes.push(...routes);
-    });
-    // Mettre à jour mapRoutes si une date est sélectionnée
+    // Mettre à jour mapRoutes si une date est sélectionnée (pour la fenêtre carte)
     if (selectedMapDate) {
       const routes = buildRoutesForDate(selectedMapDate);
       setMapRoutes(routes);
-      setSelectedRoutes(prev => routes.map((_, i) => i).filter(i => prev.includes(i) || prev.length === 0));
+      setSelectedRoutes(prev => {
+        const newIndices = routes.map((_, i) => i);
+        return prev.length === 0 ? newIndices : newIndices.filter(i => prev.includes(i));
+      });
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
+
+  // Calculer les durées de trajet via le backend pour tous les jours visibles (sans ouvrir la carte)
+  useEffect(() => {
+    if (!googleMapsApiKey) return;
+    let cancelled = false;
+    const computeAll = async () => {
+      const allRoutes = [];
+      days.forEach(day => {
+        const routes = buildRoutesForDate(format(day, "yyyy-MM-dd"));
+        allRoutes.push(...routes);
+      });
+      for (const route of allRoutes) {
+        if (cancelled) break;
+        if (!route.equipeId || !route.waypoints?.length) continue;
+        try {
+          const res = await base44.functions.invoke('calculateRouteDuration', {
+            origin: route.origin,
+            destination: route.destination,
+            waypoints: route.waypoints,
+          });
+          if (!cancelled && res.data?.durationSeconds != null) {
+            setEquipeTravelSeconds(prev => ({ ...prev, [route.equipeId]: res.data.durationSeconds }));
+          }
+        } catch (e) { /* ignorer les erreurs silencieusement */ }
+      }
+    };
+    computeAll();
+    return () => { cancelled = true; };
+  }, [googleMapsApiKey, buildRoutesForDate]);
 
   const openGoogleMapsForDay = (dateStr) => {
     const routes = buildRoutesForDate(dateStr);
