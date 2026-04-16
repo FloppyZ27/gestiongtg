@@ -59,12 +59,12 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations, selectedRoutes }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const googleMapRef = useRef(null);
-  const directionsRenderersRef = useRef([]);
+  const directionsRenderersRef = useRef([]); // [{renderer, markers}]
   const markersRef = useRef([]);
   const [hoveredDossier, setHoveredDossier] = useState(null);
 
@@ -146,7 +146,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
                 preserveViewport: true,
               });
 
-              directionsRenderersRef.current.push(directionsRenderer);
+              // Stocker renderer + ses marqueurs pour gérer la visibilité
+              directionsRenderersRef.current[index] = { renderer: directionsRenderer, markers: [] };
 
               // Créer des marqueurs personnalisés pour le départ et l'arrivée
               const route = result.routes[0];
@@ -213,6 +214,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
                     setHoveredDossier(null);
                   });
 
+                  if (!directionsRenderersRef.current[index]) directionsRenderersRef.current[index] = { renderer: directionsRenderer, markers: [] };
+                  directionsRenderersRef.current[index].markers.push(marker);
                   markersRef.current.push(marker);
                 }
               });
@@ -249,14 +252,24 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
     loadGoogleMapsScript();
 
     return () => {
-      // Cleanup
-      directionsRenderersRef.current.forEach(renderer => renderer.setMap(null));
+      directionsRenderersRef.current.forEach(item => item?.renderer?.setMap(null));
       directionsRenderersRef.current = [];
       markersRef.current.forEach(marker => marker.setMap(null));
       markersRef.current = [];
       setHoveredDossier(null);
     };
   }, [apiKey, routes]);
+
+  // Gérer la visibilité des trajets sans recharger la carte
+  useEffect(() => {
+    if (!googleMapRef.current || !selectedRoutes) return;
+    directionsRenderersRef.current.forEach((item, i) => {
+      if (!item?.renderer) return;
+      const visible = selectedRoutes.includes(i);
+      item.renderer.setMap(visible ? googleMapRef.current : null);
+      item.markers?.forEach(m => m.setMap(visible ? googleMapRef.current : null));
+    });
+  }, [selectedRoutes]);
 
   if (error) {
     return (
