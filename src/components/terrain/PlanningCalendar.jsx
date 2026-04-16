@@ -147,6 +147,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [copyErrorMessage, setCopyErrorMessage] = useState(null);
+  const [routeTravelDurations, setRouteTravelDurations] = useState([]);
 
   useEffect(() => {
     const loadEquipes = async () => {
@@ -419,7 +420,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       });
       if (waypoints.length > 0) routes.push({ origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
     });
-    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i));
+    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i)); setRouteTravelDurations([]);
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
@@ -803,6 +804,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 </Button>
                 {mapRoutes.map((route, i) => {
                   const isSelected = selectedRoutes.includes(i);
+                  const travelSecs = routeTravelDurations[i] || 0;
+                  const travelMin = Math.round(travelSecs / 60);
+                  const travelH = Math.floor(travelMin / 60);
+                  const travelM = travelMin % 60;
+                  const travelLabel = travelSecs > 0 ? (travelH > 0 ? `${travelH}h${travelM > 0 ? travelM + 'min' : ''}` : `${travelM}min`) : null;
+                  // Temps travaux
+                  const travailH = parseFloat(route.dossiers?.reduce((sum, d) => {
+                    const m = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/);
+                    return sum + (m ? parseFloat(m[0]) : 0);
+                  }, 0).toFixed(1));
+                  const totalH = travelSecs > 0 ? (travailH + travelSecs / 3600).toFixed(1) : null;
                   return (
                     <button
                       key={i}
@@ -818,6 +830,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                     >
                       <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
                       {route.label}
+                      {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalH ? ` · Total: ${totalH}h` : ''}</span>}
                     </button>
                   );
                 })}
@@ -827,7 +840,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} /></div>}
+              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = new Array(mapRoutes.length).fill(0); mapRoutes.filter((_, i) => selectedRoutes.includes(i)).forEach((_, fi) => { full[selectedRoutes[fi]] = durations[fi] || 0; }); setRouteTravelDurations(full); }} /></div>}
           </div>
         </DialogContent>
       </Dialog>

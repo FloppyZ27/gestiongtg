@@ -59,7 +59,7 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey }) {
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -116,6 +116,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
         const directionsService = new window.google.maps.DirectionsService();
 
         let completedRoutes = 0;
+        const routeDurationsSeconds = new Array(routes.length).fill(0);
 
         routes.forEach((route, index) => {
           const { origin, destination, waypoints, color, label, dossiers } = route;
@@ -129,6 +130,10 @@ export default function MultiRouteMap({ routes, apiKey }) {
 
           directionsService.route(request, (result, status) => {
             if (status === 'OK') {
+              // Calculer la durée totale du trajet (tous les legs)
+              const totalTravelSecs = result.routes[0].legs.reduce((sum, leg) => sum + (leg.duration?.value || 0), 0);
+              routeDurationsSeconds[index] = totalTravelSecs;
+
               const directionsRenderer = new window.google.maps.DirectionsRenderer({
                 map,
                 directions: result,
@@ -222,12 +227,15 @@ export default function MultiRouteMap({ routes, apiKey }) {
               if (completedRoutes === routes.length) {
                 map.fitBounds(bounds);
                 setLoading(false);
+                if (onRouteDurations) onRouteDurations(routeDurationsSeconds);
               }
             } else {
               console.error(`Erreur pour le trajet ${index}:`, status);
+              routeDurationsSeconds[index] = 0;
               completedRoutes++;
               if (completedRoutes === routes.length) {
                 setLoading(false);
+                if (onRouteDurations) onRouteDurations(routeDurationsSeconds);
               }
             }
           });
