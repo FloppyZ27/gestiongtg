@@ -171,14 +171,17 @@ export default function MultiRouteMap({ routes, apiKey }) {
               });
 
               // Marqueurs pour chaque waypoint avec informations des dossiers
+              // Les legs : leg[0] = bureau → wp[0], leg[1] = wp[0] → wp[1], ..., leg[n-1] = wp[n-2] → bureau
+              // Donc le dossier[i] correspond au leg[i] (end_location de ce leg = le waypoint i)
               route.legs.forEach((leg, legIndex) => {
-                if (legIndex > 0 && dossiers && dossiers[legIndex - 1]) {
-                  const dossier = dossiers[legIndex - 1];
+                const dossierIndex = legIndex; // leg[0] arrive au dossier[0], leg[1] au dossier[1], etc.
+                if (dossiers && dossiers[dossierIndex]) {
+                  const dossier = dossiers[dossierIndex];
                   const marker = new window.google.maps.Marker({
-                    position: leg.start_location,
+                    position: leg.end_location,
                     map: map,
                     label: {
-                      text: String.fromCharCode(65 + legIndex - 1), // A, B, C...
+                      text: String.fromCharCode(65 + dossierIndex), // A, B, C...
                       color: 'white',
                       fontSize: '12px',
                       fontWeight: 'bold'
@@ -198,10 +201,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    setHoveredDossier({
-                      ...dossier,
-                      color: teamColor
-                    });
+                    setHoveredDossier({ ...dossier, color: teamColor });
                   });
 
                   marker.addListener('mouseout', () => {
@@ -385,6 +385,16 @@ export default function MultiRouteMap({ routes, apiKey }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
               <span style={{ fontSize: '12px', color: '#d8b4fe', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Avec: {hoveredDossier.dossierSimultane}</span>
+            </div>
+          )}
+
+          {/* Notes */}
+          {hoveredDossier.notes && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', marginBottom: '4px' }}>
+              <svg style={{ width: '12px', height: '12px', color: '#94a3b8', flexShrink: 0, marginTop: '2px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span style={{ fontSize: '12px', color: '#94a3b8', wordBreak: 'break-word' }}>{hoveredDossier.notes}</span>
             </div>
           )}
 
