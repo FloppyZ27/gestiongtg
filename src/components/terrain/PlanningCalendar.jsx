@@ -146,6 +146,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
+  const [copyErrorMessage, setCopyErrorMessage] = useState(null);
 
   useEffect(() => {
     const loadEquipes = async () => {
@@ -349,7 +350,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const ne = { ...equipes }; const equipe = ne[dateStr]?.find(e => e.id === equipeId); if (!equipe) return;
     // Vérifier si une équipe avec le même nom existe déjà ce jour-là
     const alreadyExists = (ne[nextStr] || []).some(e => e.nom === equipe.nom);
-    if (alreadyExists) { alert(`L'équipe "${equipe.nom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
+    if (alreadyExists) { setCopyErrorMessage(`L'équipe "${equipe.nom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
     // Créer directement en BD pour avoir un vrai ID
     const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     const created = await base44.entities.EquipeTerrain.create(data);
@@ -773,6 +774,16 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               <Button onClick={() => confirmRemoveEquipe(deleteEquipeWarning.dateStr, deleteEquipeWarning.equipeId)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Supprimer</Button>
             </div>
           </div>}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!copyErrorMessage} onOpenChange={() => setCopyErrorMessage(null)}>
+        <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">⚠️ Équipe déjà existante</DialogTitle></DialogHeader>
+          <p className="text-slate-300 text-center py-2">{copyErrorMessage}</p>
+          <div className="flex justify-center pt-2">
+            <Button onClick={() => setCopyErrorMessage(null)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">OK</Button>
+          </div>
         </DialogContent>
       </Dialog>
 
