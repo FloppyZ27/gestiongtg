@@ -350,6 +350,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const copy = { id: `eq${Date.now()}`, nom: equipe.nom, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     if (!ne[nextStr]) ne[nextStr] = [];
     ne[nextStr].push(copy); setEquipes(ne); setEquipeActiveTabs({ ...equipeActiveTabs, [copy.id]: null });
+    // Naviguer vers la semaine/mois contenant le jour cible
+    setCurrentDate(next);
   };
   const removeEquipe = (dateStr, equipeId) => {
     const equipe = equipes[dateStr]?.find(e => e.id === equipeId);
