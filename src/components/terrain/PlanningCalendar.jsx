@@ -121,7 +121,26 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   );
 }
 
+// Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
+function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
+  const filteredRoutes = useMemo(
+    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(selectedRoutes), JSON.stringify(mapRoutes.map(r => r.equipeId))]
+  );
 
+  const handleDurations = useCallback((durations) => {
+    filteredRoutes.forEach((route, fi) => {
+      if (route.equipeId) onEquipeDurations(route.equipeId, durations[fi] || 0);
+    });
+  }, [filteredRoutes, onEquipeDurations]);
+
+  return (
+    <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
+      <MultiRouteMap routes={filteredRoutes} apiKey={apiKey} onRouteDurations={handleDurations} />
+    </div>
+  );
+}
 
 export default function PlanningCalendar({ dossiers, techniciens, vehicules, equipements, clients, onUpdateDossier, onAddTechnicien, onAddVehicule, onAddEquipement, onEditTechnicien, onDeleteTechnicien, onEditVehicule, onDeleteVehicule, onEditEquipement, onDeleteEquipement, users, lots, placeAffaire }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -939,18 +958,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0
                 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-                : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
-                    <MultiRouteMap
-                      routes={mapRoutes}
-                      selectedRoutes={selectedRoutes}
-                      apiKey={googleMapsApiKey}
-                      onRouteDurations={(durations) => {
-                        mapRoutes.forEach((route, i) => {
-                          if (route.equipeId) setEquipeTravelSeconds(prev => ({ ...prev, [route.equipeId]: durations[i] || 0 }));
-                        });
-                      }}
-                    />
-                  </div>
+                : <MapWithStableRoutes
+                    mapRoutes={mapRoutes}
+                    selectedRoutes={selectedRoutes}
+                    apiKey={googleMapsApiKey}
+                    onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                  />
             }
           </div>
         </DialogContent>
