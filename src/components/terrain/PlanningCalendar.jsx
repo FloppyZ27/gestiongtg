@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { base44 } from "@/api/base44Client";
@@ -118,6 +118,28 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
       </div>
     </div>,
     document.body
+  );
+}
+
+// Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
+function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
+  const filteredRoutes = useMemo(
+    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)),
+    // On stringify pour éviter les re-renders quand la référence change mais pas le contenu
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(mapRoutes.filter((_, i) => selectedRoutes.includes(i)).map(r => r.equipeId))]
+  );
+
+  const handleDurations = useCallback((durations) => {
+    filteredRoutes.forEach((route, fi) => {
+      if (route.equipeId) onEquipeDurations(route.equipeId, durations[fi] || 0);
+    });
+  }, [filteredRoutes, onEquipeDurations]);
+
+  return (
+    <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
+      <MultiRouteMap routes={filteredRoutes} apiKey={apiKey} onRouteDurations={handleDurations} />
+    </div>
   );
 }
 
@@ -611,7 +633,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 return (
                   <span className="text-emerald-300 text-xs">
                     {totalH ? `${totalH}h` : `${totalTime}h`}
-                    {travelLabel && <span className="text-slate-400 ml-1">(+{travelLabel} 🚗)</span>}
+                    {travelLabel && <span className="text-slate-400 ml-1">({travelLabel} 🚗)</span>}
                   </span>
                 );
               })()}
@@ -858,7 +880,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const filteredRoutes = mapRoutes.filter((_, i) => selectedRoutes.includes(i)); const newEquipeTimes = { ...equipeTravelSeconds }; filteredRoutes.forEach((route, fi) => { if (route.equipeId) newEquipeTimes[route.equipeId] = durations[fi] || 0; }); setEquipeTravelSeconds(newEquipeTimes); }} /></div>}
+              : <MapWithStableRoutes mapRoutes={mapRoutes} selectedRoutes={selectedRoutes} apiKey={googleMapsApiKey} onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))} />
           </div>
         </DialogContent>
       </Dialog>
