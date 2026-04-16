@@ -509,7 +509,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
-  const executeDrop = useCallback((card, columnId) => {
+  const executeDrop = useCallback((card, columnId, insertIndex) => {
     if (!card) return;
 
     if (columnId === 'unassigned') {
@@ -537,7 +537,11 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       if (!equipe) return;
       // Remove from previous equipe
       Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
-      if (!equipe.mandats.includes(card.id)) equipe.mandats.push(card.id);
+      // Insert at index or reorder within same equipe
+      const withoutCard = equipe.mandats.filter(id => id !== card.id);
+      const targetIndex = insertIndex != null ? Math.min(insertIndex, withoutCard.length) : withoutCard.length;
+      withoutCard.splice(targetIndex, 0, card.id);
+      equipe.mandats = withoutCard;
       setEquipes(ne);
       if (onUpdateDossier) {
         const eqNom = generateTeamDisplayName(equipe);
@@ -552,27 +556,30 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     // Check rendez-vous warning
     if (card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous && card.terrain.date_rendez_vous !== dest.dateStr) {
       setRendezVousWarning({ card, newDateStr: dest.dateStr });
-      setPendingDrop({ card, dateStr: dest.dateStr, equipeId: dest.equipeId });
+      setPendingDrop({ card, dateStr: dest.dateStr, equipeId: dest.equipeId, insertIndex });
       return;
     }
 
     doTheDrop(dest.dateStr, dest.equipeId);
   }, [equipes, onUpdateDossier]);
 
-  const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
+  const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
 
   const executePendingDrop = () => {
     if (!pendingDrop) return;
-    const { card, dateStr, equipeId } = pendingDrop;
+    const { card, dateStr, equipeId, insertIndex } = pendingDrop;
     const ne = { ...equipes };
     if (!ne[dateStr]) { setRendezVousWarning(null); setPendingDrop(null); return; }
     const equipe = ne[dateStr].find(e => e.id === equipeId);
     if (!equipe) { setRendezVousWarning(null); setPendingDrop(null); return; }
     Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
-    if (!equipe.mandats.includes(card.id)) equipe.mandats.push(card.id);
+    const withoutCard = equipe.mandats.filter(id => id !== card.id);
+    const targetIndex = insertIndex != null ? Math.min(insertIndex, withoutCard.length) : withoutCard.length;
+    withoutCard.splice(targetIndex, 0, card.id);
+    equipe.mandats = withoutCard;
     setEquipes(ne);
     if (onUpdateDossier) {
       const eqNom = generateTeamDisplayName(equipe);
@@ -712,7 +719,20 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           {globalViewMode === "equipements" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-orange-500/20' : 'border border-slate-700'}`}>{equipe.equipements.map(id => { const e = equipements.find(e => e.id === id); return e ? <span key={id} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Wrench className="w-3 h-3 text-orange-400" />{e.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
           {/* Zone de drop custom pour les DossierCards */}
           <div data-kanban-column={columnId} className={`min-h-[50px] -mx-2 px-2 rounded transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
-            {equipe.mandats.map((cId) => { const card = terrainCards.find(c => c.id === cId); if (!card) return null; return <DossierCard key={cId} card={card} />; })}
+            {equipe.mandats.map((cId, idx) => {
+              const card = terrainCards.find(c => c.id === cId);
+              if (!card) return null;
+              const showIndicator = isOver && dropIndex === idx;
+              return (
+                <div key={cId} data-card-id={cId}>
+                  {showIndicator && <div className="h-1 bg-emerald-400 rounded-full mx-1 mb-1 opacity-80" />}
+                  <DossierCard card={card} />
+                </div>
+              );
+            })}
+            {isOver && (dropIndex == null || dropIndex >= equipe.mandats.length) && (
+              <div className="h-1 bg-emerald-400 rounded-full mx-1 mt-1 opacity-80" />
+            )}
           </div>
         </div>
       </div>
