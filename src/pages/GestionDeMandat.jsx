@@ -173,6 +173,9 @@ export default function GestionDeMandat() {
     heures: "", tache: "", tache_suivante: "", utilisateur_assigne: ""
   });
 
+  const holdTimerRef = useRef(null);
+  const didDragRef = useRef(false);
+
   const queryClient = useQueryClient();
 
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
@@ -332,9 +335,6 @@ export default function GestionDeMandat() {
     const isDraggingThis = dragging?.card?.id === card.id;
     const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
-
-    const holdTimerRef = { current: null };
-    const didDragRef = { current: false };
 
     const onMouseDown = (e) => {
       e.stopPropagation();
