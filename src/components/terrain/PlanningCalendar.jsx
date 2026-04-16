@@ -594,35 +594,47 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     };
     const onUp = () => {
       const targetDate = overDayColumnRef.current;
-      if (targetDate && draggingEquipe && targetDate !== draggingEquipe.dateStr) {
+      if (targetDate && draggingEquipe) {
         const { dateStr: srcDate, equipeId } = draggingEquipe;
         const ne = { ...equipes };
         const srcEquipes = ne[srcDate] || [];
         const equipe = srcEquipes.find(e => e.id === equipeId);
         if (equipe) {
-          // Retirer de la source
-          ne[srcDate] = srcEquipes.filter(e => e.id !== equipeId);
-          if (!ne[srcDate].length) delete ne[srcDate];
-          // Ajouter à la destination
-          if (!ne[targetDate]) ne[targetDate] = [];
-          ne[targetDate] = [...ne[targetDate], { ...equipe }];
-          // Mettre à jour les dossiers assignés à cette équipe
-          const equipeNom = generateTeamDisplayName(equipe);
-          equipe.mandats.forEach(cardId => {
-            const card = terrainCards.find(c => c.id === cardId);
-            if (card && onUpdateDossier) {
-              const um = card.dossier.mandats.map((m, idx) => {
-                if (idx === card.mandatIndex) {
-                  let tl = [...(m.terrains_list || [])];
-                  if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
-                  return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
-                }
-                return m;
-              });
-              onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+          if (targetDate === srcDate) {
+            // Réordonner au sein du même jour
+            const equipeIndex = srcEquipes.findIndex(e => e.id === equipeId);
+            if (equipeIndex !== -1) {
+              const reordered = srcEquipes.filter((_, i) => i !== equipeIndex);
+              reordered.push(equipe);
+              ne[srcDate] = reordered;
+              setEquipes(ne);
             }
-          });
-          setEquipes(ne);
+          } else {
+            // Déplacer vers un autre jour
+            // Retirer de la source
+            ne[srcDate] = srcEquipes.filter(e => e.id !== equipeId);
+            if (!ne[srcDate].length) delete ne[srcDate];
+            // Ajouter à la destination
+            if (!ne[targetDate]) ne[targetDate] = [];
+            ne[targetDate] = [...ne[targetDate], { ...equipe }];
+            // Mettre à jour les dossiers assignés à cette équipe
+            const equipeNom = generateTeamDisplayName(equipe);
+            equipe.mandats.forEach(cardId => {
+              const card = terrainCards.find(c => c.id === cardId);
+              if (card && onUpdateDossier) {
+                const um = card.dossier.mandats.map((m, idx) => {
+                  if (idx === card.mandatIndex) {
+                    let tl = [...(m.terrains_list || [])];
+                    if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
+                    return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
+                  }
+                  return m;
+                });
+                onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+              }
+            });
+            setEquipes(ne);
+          }
         }
       }
       setDraggingEquipe(null);
