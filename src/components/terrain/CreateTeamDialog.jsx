@@ -140,19 +140,20 @@ export default function CreateTeamDialog({
           <DialogTitle className="text-xl">Créer une nouvelle équipe{selectedTechniciens.length > 0 && ` - ${generateTeamName(selectedTechniciens)}`}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Techniciens */}
           <Collapsible open={expandedSections.techniciens} onOpenChange={() => toggleSection('techniciens')}>
-            <div className="border border-slate-700 bg-slate-800/30 rounded-lg overflow-hidden">
-              <CollapsibleTrigger className="w-full cursor-pointer hover:bg-blue-900/40 transition-colors py-1.5 px-3 bg-blue-900/20 rounded-t-lg">
+            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(30,27,60,0.9), rgba(20,20,45,0.9))' }}>
+              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                      <Users className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-blue-400" />
                     </div>
-                    <span className="text-blue-300 font-semibold text-sm">
-                      Techniciens <span className="text-blue-400/70 font-normal text-xs">({availableTechs.length} disponibles)</span>
+                    <span className="text-blue-300 font-bold text-sm tracking-wide">
+                      Techniciens
                     </span>
+                    <span className="text-slate-500 text-xs">({availableTechs.length} disponibles)</span>
                   </div>
                   {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -188,16 +189,17 @@ export default function CreateTeamDialog({
 
           {/* Véhicules */}
           <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
-            <div className="border border-slate-700 bg-slate-800/30 rounded-lg overflow-hidden">
-              <CollapsibleTrigger className="w-full cursor-pointer hover:bg-purple-900/40 transition-colors py-1.5 px-3 bg-purple-900/20 rounded-t-lg">
+            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(40,20,60,0.9), rgba(20,20,45,0.9))' }}>
+              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-                      <Truck className="w-3.5 h-3.5 text-purple-400" />
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                      <Truck className="w-4 h-4 text-purple-400" />
                     </div>
-                    <span className="text-purple-300 font-semibold text-sm">
-                      Véhicules <span className="text-purple-400/70 font-normal text-xs">({availableVehs.length} disponibles)</span>
+                    <span className="text-purple-300 font-bold text-sm tracking-wide">
+                      Véhicules
                     </span>
+                    <span className="text-slate-500 text-xs">({availableVehs.length} disponibles)</span>
                   </div>
                   {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -233,16 +235,17 @@ export default function CreateTeamDialog({
 
           {/* Équipements */}
           <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
-            <div className="border border-slate-700 bg-slate-800/30 rounded-lg overflow-hidden">
-              <CollapsibleTrigger className="w-full cursor-pointer hover:bg-orange-900/40 transition-colors py-1.5 px-3 bg-orange-900/20 rounded-t-lg">
+            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(45,25,10,0.9), rgba(20,20,45,0.9))' }}>
+              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
-                      <Wrench className="w-3.5 h-3.5 text-orange-400" />
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                      <Wrench className="w-4 h-4 text-orange-400" />
                     </div>
-                    <span className="text-orange-300 font-semibold text-sm">
-                      Équipements <span className="text-orange-400/70 font-normal text-xs">({availableEqs.length} disponibles)</span>
+                    <span className="text-orange-300 font-bold text-sm tracking-wide">
+                      Équipements
                     </span>
+                    <span className="text-slate-500 text-xs">({availableEqs.length} disponibles)</span>
                   </div>
                   {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
