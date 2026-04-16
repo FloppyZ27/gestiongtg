@@ -17,7 +17,8 @@ Deno.serve(async (req) => {
       return Response.json({ success: true });
     }
 
-    // Vérifier si au moins un mandat a la tâche "Cédule" et n'a pas encore le statut_terrain
+    // Vérifier si au moins un mandat a la tâche "Cédule" et n'a PAS de statut_terrain
+    // (si statut_terrain est déjà défini, on ne touche pas)
     const needsUpdate = data.mandats.some(
       (mandat) => mandat.tache_actuelle === "Cédule" && !mandat.statut_terrain
     );
@@ -26,15 +27,9 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, modified: false });
     }
 
-    // Relire le dossier depuis la BD pour avoir les données les plus récentes
-    const freshDossier = await base44.asServiceRole.entities.Dossier.get(event.entity_id);
-    if (!freshDossier || !freshDossier.mandats) {
-      return Response.json({ success: true });
-    }
-
+    // Utiliser les données du payload directement (déjà sauvegardées) plutôt que de refaire un get
     let modified = false;
-    const updatedMandats = freshDossier.mandats.map((mandat) => {
-      // Vérifier si le mandat a la tâche "Cédule" et n'a pas encore le statut_terrain
+    const updatedMandats = data.mandats.map((mandat) => {
       if (mandat.tache_actuelle === "Cédule" && !mandat.statut_terrain) {
         modified = true;
         return {
@@ -45,10 +40,9 @@ Deno.serve(async (req) => {
       return mandat;
     });
 
-    // Si des mandats ont été modifiés, mettre à jour le dossier
     if (modified) {
       await base44.asServiceRole.entities.Dossier.update(event.entity_id, {
-        ...freshDossier,
+        ...data,
         mandats: updatedMandats
       });
     }
