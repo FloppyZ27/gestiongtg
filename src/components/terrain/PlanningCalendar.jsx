@@ -202,6 +202,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           mandat.terrains_list.forEach((terrain, terrainIndex) => {
             cards.push({ id: `${dossier.id}-${mandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain, mandatIndex, terrainIndex });
           });
+        } else {
+          // Mandat sans terrains_list mais avec statut_terrain en_verification → carte synthétique
+          const statutTerrain = mandat.statut_terrain;
+          if (!statutTerrain || statutTerrain === "en_verification") {
+            const syntheticTerrain = { ...(mandat.terrain || {}), statut_terrain: statutTerrain || "en_verification" };
+            cards.push({ id: `${dossier.id}-${mandatIndex}-0`, dossierId: dossier.id, dossier, mandat, terrain: syntheticTerrain, mandatIndex, terrainIndex: 0 });
+          }
         }
       });
     });

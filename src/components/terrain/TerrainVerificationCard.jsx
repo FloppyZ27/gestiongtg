@@ -6,13 +6,15 @@ export default function TerrainVerificationCard({ card, onUpdateDossier }) {
     const updatedMandats = card.dossier.mandats.map((m, idx) => {
       if (idx === card.mandatIndex) {
         let updatedTerrainsList = [...(m.terrains_list || [])];
-        if (updatedTerrainsList[card.terrainIndex]) {
+        if (updatedTerrainsList.length === 0) {
+          // Créer une entrée dans terrains_list à partir du terrain synthétique
+          updatedTerrainsList.push({ ...(m.terrain || {}), statut_terrain: "a_ceduler" });
+        } else {
           updatedTerrainsList[card.terrainIndex] = {
             ...updatedTerrainsList[card.terrainIndex],
             statut_terrain: "a_ceduler"
           };
         }
-        // Mettre à jour aussi le statut_terrain du mandat lui-même
         return { ...m, statut_terrain: "a_ceduler", terrains_list: updatedTerrainsList };
       }
       return m;
@@ -23,15 +25,16 @@ export default function TerrainVerificationCard({ card, onUpdateDossier }) {
   const handleAnnuler = () => {
     const updatedMandats = card.dossier.mandats.map((m, idx) => {
       if (idx === card.mandatIndex) {
-        // Mettre à jour seulement le terrain spécifique dans terrains_list
         let updatedTerrainsList = [...(m.terrains_list || [])];
-        if (updatedTerrainsList[card.terrainIndex]) {
+        if (updatedTerrainsList.length === 0) {
+          updatedTerrainsList.push({ ...(m.terrain || {}), statut_terrain: "pas_de_terrain" });
+        } else {
           updatedTerrainsList[card.terrainIndex] = {
             ...updatedTerrainsList[card.terrainIndex],
             statut_terrain: "pas_de_terrain"
           };
         }
-        return { ...m, terrains_list: updatedTerrainsList };
+        return { ...m, statut_terrain: "pas_de_terrain", terrains_list: updatedTerrainsList };
       }
       return m;
     });
