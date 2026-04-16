@@ -334,12 +334,15 @@ export default function GestionDeMandat() {
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
 
     const holdTimerRef = { current: null };
+    const didDragRef = { current: false };
 
     const onMouseDown = (e) => {
       e.stopPropagation();
+      didDragRef.current = false;
       const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
       holdTimerRef.current = setTimeout(() => {
         holdTimerRef.current = null;
+        didDragRef.current = true;
         handleDragStart({ ...savedEvent, preventDefault: () => {} }, card);
       }, 500);
     };
@@ -352,7 +355,7 @@ export default function GestionDeMandat() {
     };
 
     const onClick = () => {
-      if (!dragging) handleCardClick(card);
+      if (!didDragRef.current) handleCardClick(card);
     };
 
     return (
