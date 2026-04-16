@@ -463,24 +463,37 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (!googleMapsApiKey) return;
     let cancelled = false;
     const computeAll = async () => {
+      // Collecter toutes les routes de tous les jours visibles
       const allRoutes = [];
       days.forEach(day => {
         const routes = buildRoutesForDate(format(day, "yyyy-MM-dd"));
         allRoutes.push(...routes);
       });
-      for (const route of allRoutes) {
-        if (cancelled) break;
-        if (!route.equipeId || !route.waypoints?.length) continue;
-        try {
-          const res = await base44.functions.invoke('calculateRouteDuration', {
+      const routesWithWaypoints = allRoutes.filter(r => r.equipeId && r.waypoints?.length);
+      if (!routesWithWaypoints.length) return;
+
+      // Lancer tous les appels en parallèle
+      const results = await Promise.allSettled(
+        routesWithWaypoints.map(route =>
+          base44.functions.invoke('calculateRouteDuration', {
             origin: route.origin,
             destination: route.destination,
             waypoints: route.waypoints,
-          });
-          if (!cancelled && res.data?.durationSeconds != null) {
-            setEquipeTravelSeconds(prev => ({ ...prev, [route.equipeId]: res.data.durationSeconds }));
-          }
-        } catch (e) { /* ignorer les erreurs silencieusement */ }
+          }).then(res => ({ equipeId: route.equipeId, seconds: res.data?.durationSeconds ?? 0 }))
+        )
+      );
+
+      if (cancelled) return;
+
+      // Un seul setState avec tous les résultats
+      const newDurations = {};
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          newDurations[r.value.equipeId] = r.value.seconds;
+        }
+      });
+      if (Object.keys(newDurations).length > 0) {
+        setEquipeTravelSeconds(prev => ({ ...prev, ...newDurations }));
       }
     };
     computeAll();
