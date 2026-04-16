@@ -121,13 +121,13 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   );
 }
 
-// Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
+// Wrapper pour filtrer les routes selon la sélection
 function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
   const filteredRoutes = useMemo(
     () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)),
-    // On stringify pour éviter les re-renders quand la référence change mais pas le contenu
+    // Dépend à la fois des routes ET de la sélection
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(mapRoutes.filter((_, i) => selectedRoutes.includes(i)).map(r => r.equipeId))]
+    [JSON.stringify(selectedRoutes), JSON.stringify(mapRoutes.map(r => r.equipeId))]
   );
 
   const handleDurations = useCallback((durations) => {
