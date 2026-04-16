@@ -86,7 +86,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   };
   return ReactDOM.createPortal(
     <div style={{
-      position: 'fixed', left: pos.x - 110, top: pos.y - 40, width: 220, zIndex: 99999,
+      position: 'fixed', left: pos.x, top: pos.y, width: 220, zIndex: 99999,
       pointerEvents: 'none', opacity: 0.95, transform: 'rotate(2deg) scale(1.04)',
       filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
     }}>
