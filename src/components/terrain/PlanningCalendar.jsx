@@ -599,6 +599,31 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (!destination) return;
     const sourceId = source.droppableId; const destId = destination.droppableId;
     const isUsed = (dateStr, rId, rType, excl) => equipes[dateStr]?.some(eq => eq.id !== excl && eq[rType].includes(rId)) || false;
+
+    if (type === "EQUIPE") {
+      // draggableId = equipeId, sourceId = "equipes-{dateStr}", destId = "equipes-{dateStr}"
+      const srcDate = sourceId.replace("equipes-", "");
+      const dstDate = destId.replace("equipes-", "");
+      if (srcDate === dstDate && source.index === destination.index) return;
+      const ne = { ...equipes };
+      const srcList = [...(ne[srcDate] || [])];
+      const [moved] = srcList.splice(source.index, 1);
+      if (srcDate === dstDate) {
+        srcList.splice(destination.index, 0, moved);
+        ne[srcDate] = srcList;
+      } else {
+        ne[srcDate] = srcList;
+        if (!ne[srcDate].length) delete ne[srcDate];
+        const dstList = [...(ne[dstDate] || [])];
+        // Update the equipe's date
+        const updatedMoved = { ...moved, date_terrain: dstDate };
+        dstList.splice(destination.index, 0, updatedMoved);
+        ne[dstDate] = dstList;
+      }
+      setEquipes(ne);
+      return;
+    }
+
     if (type === "TECHNICIEN") {
       const d = parseEquipeDroppableId(destId); if (!d) return;
       if (isUsed(d.dateStr, draggableId, 'techniciens', d.equipeId)) { alert('Déjà assigné.'); return; }
@@ -759,7 +784,32 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             {holiday && <div className="text-xs text-red-400">{holiday.name}</div>}
           </div>
         </div>
-        <div className="space-y-2">{dayEquipes.map(eq => renderEquipeContent(eq, dateStr))}</div>
+        <Droppable droppableId={`equipes-${dateStr}`} type="EQUIPE">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={`space-y-2 min-h-[8px] rounded transition-all ${snapshot.isDraggingOver ? 'bg-emerald-500/10' : ''}`}
+            >
+              {dayEquipes.map((eq, idx) => (
+                <Draggable key={eq.id} draggableId={eq.id} index={idx}>
+                  {(drag, dragSnapshot) => (
+                    <div
+                      ref={drag.innerRef}
+                      {...drag.draggableProps}
+                      style={{ ...drag.draggableProps.style, opacity: dragSnapshot.isDragging ? 0.85 : 1 }}
+                    >
+                      <div {...drag.dragHandleProps} className="cursor-grab active:cursor-grabbing">
+                        {renderEquipeContent(eq, dateStr)}
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
         <Button size="sm" onClick={() => addEquipe(dateStr)} className={`w-full border-2 border-slate-600 bg-transparent hover:bg-slate-800 text-slate-300 mt-2 ${isMonthView ? 'h-5 text-xs' : 'h-6'}`}><Plus className="w-3 h-3 mr-1" />{isMonthView ? 'Ajouter' : 'Ajouter équipe'}</Button>
       </Card>
     );
