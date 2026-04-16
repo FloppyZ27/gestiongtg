@@ -453,7 +453,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       setMapRoutes(routes);
       setSelectedRoutes(prev => {
         const newIndices = routes.map((_, i) => i);
-        return prev.length === 0 ? newIndices : newIndices.filter(i => prev.includes(i));
+        return prev.length === 0 ? [0] : newIndices.filter(i => prev.includes(i));
       });
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
@@ -509,7 +509,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const routes = buildRoutesForDate(dateStr);
     setSelectedMapDate(dateStr);
     setMapRoutes(routes);
-    setSelectedRoutes(routes.map((_, i) => i));
+    setSelectedRoutes([0]);
     setShowMapDialog(true);
   };
 
@@ -921,14 +921,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             <DialogTitle className="text-xl font-bold text-white">Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</DialogTitle>
             {mapRoutes.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
-                <Button
-                  size="sm"
-                  onClick={() => setSelectedRoutes(selectedRoutes.length === mapRoutes.length ? [] : mapRoutes.map((_, i) => i))}
-                  className="text-xs h-7 px-3"
-                  style={{ background: selectedRoutes.length === mapRoutes.length ? 'rgba(255,255,255,0.15)' : 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
-                >
-                  {selectedRoutes.length === mapRoutes.length ? 'Tout masquer' : 'Tout afficher'}
-                </Button>
+
                 {mapRoutes.map((route, i) => {
                   const isSelected = selectedRoutes.includes(i);
                   const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
@@ -945,7 +938,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                   return (
                     <button
                       key={i}
-                      onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
+                      onClick={() => setSelectedRoutes(isSelected ? [] : [i])}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '6px',
                         padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
