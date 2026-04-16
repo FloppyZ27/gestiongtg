@@ -200,7 +200,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       mandatsCedule.forEach((mandat, mandatIndex) => {
         if (mandat.terrains_list?.length > 0) {
           mandat.terrains_list.forEach((terrain, terrainIndex) => {
-            cards.push({ id: `${dossier.id}-${mandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain, mandatIndex, terrainIndex });
+            cards.push({ id: `${dossier.id}-${mandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex, terrainIndex });
           });
         } else {
           // Mandat sans terrains_list mais avec statut_terrain en_verification → carte synthétique
