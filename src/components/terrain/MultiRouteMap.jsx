@@ -70,10 +70,13 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
 
   // Gérer la visibilité sans recréer la carte
   useEffect(() => {
+    if (!googleMapRef.current) return;
     directionsRenderersRef.current.forEach(({ equipeId, renderer, markers }) => {
-      const visible = !visibleEquipeIds || visibleEquipeIds.includes(equipeId);
-      renderer.setMap(visible ? googleMapRef.current : null);
-      markers.forEach(m => m.setMap(visible ? googleMapRef.current : null));
+      try {
+        const visible = !visibleEquipeIds || visibleEquipeIds.includes(equipeId);
+        renderer.setMap(visible ? googleMapRef.current : null);
+        markers.forEach(m => { try { m.setMap(visible ? googleMapRef.current : null); } catch (_) {} });
+      } catch (_) {}
     });
   }, [visibleEquipeIds]);
 
@@ -260,11 +263,15 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
     loadGoogleMapsScript();
 
     return () => {
-      // Cleanup
-      directionsRenderersRef.current.forEach(({ renderer, markers }) => { renderer.setMap(null); markers.forEach(m => m.setMap(null)); });
+      // Cleanup — guard against destroyed map instance
+      directionsRenderersRef.current.forEach(({ renderer, markers }) => {
+        try { renderer.setMap(null); } catch (_) {}
+        markers.forEach(m => { try { m.setMap(null); } catch (_) {} });
+      });
       directionsRenderersRef.current = [];
-      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current.forEach(marker => { try { marker.setMap(null); } catch (_) {} });
       markersRef.current = [];
+      googleMapRef.current = null;
       setHoveredDossier(null);
     };
   }, [apiKey, routes]);
