@@ -347,6 +347,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     do { next.setDate(next.getDate() + 1); } while (next.getDay() === 0 || next.getDay() === 6);
     const nextStr = format(next, "yyyy-MM-dd");
     const ne = { ...equipes }; const equipe = ne[dateStr]?.find(e => e.id === equipeId); if (!equipe) return;
+    // Vérifier si une équipe avec le même nom existe déjà ce jour-là
+    const alreadyExists = (ne[nextStr] || []).some(e => e.nom === equipe.nom);
+    if (alreadyExists) { alert(`L'équipe "${equipe.nom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
     // Créer directement en BD pour avoir un vrai ID
     const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     const created = await base44.entities.EquipeTerrain.create(data);
