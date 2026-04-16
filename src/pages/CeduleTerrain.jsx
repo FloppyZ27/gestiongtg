@@ -218,8 +218,15 @@ export default function CeduleTerrain() {
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
-    onSuccess: () => {
-      // Invalider le cache pour forcer un refresh avec les données du serveur
+    onMutate: async ({ id, data }) => {
+      // Mise à jour optimiste du cache pour réponse immédiate
+      await queryClient.cancelQueries({ queryKey: ['dossiers'] });
+      queryClient.setQueryData(['dossiers'], (old) => {
+        if (!old) return old;
+        return old.map(d => d.id === id ? { ...d, ...data } : d);
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
     },
   });
