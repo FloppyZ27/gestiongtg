@@ -5,7 +5,6 @@ export default function TerrainVerificationCard({ card, onUpdateDossier }) {
   const handleTerrainRequis = () => {
     const updatedMandats = card.dossier.mandats.map((m, idx) => {
       if (idx === card.mandatIndex) {
-        // Mettre à jour seulement le terrain spécifique dans terrains_list
         let updatedTerrainsList = [...(m.terrains_list || [])];
         if (updatedTerrainsList[card.terrainIndex]) {
           updatedTerrainsList[card.terrainIndex] = {
@@ -13,7 +12,8 @@ export default function TerrainVerificationCard({ card, onUpdateDossier }) {
             statut_terrain: "a_ceduler"
           };
         }
-        return { ...m, terrains_list: updatedTerrainsList };
+        // Mettre à jour aussi le statut_terrain du mandat lui-même
+        return { ...m, statut_terrain: "a_ceduler", terrains_list: updatedTerrainsList };
       }
       return m;
     });
