@@ -121,23 +121,24 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   );
 }
 
-// Wrapper stable — passe toutes les routes mais filtre la visibilité via visibleEquipeIds
+// Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
 function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
-  const visibleEquipeIds = useMemo(
-    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)).map(r => r.equipeId),
+  const filteredRoutes = useMemo(
+    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)),
+    // On stringify pour éviter les re-renders quand la référence change mais pas le contenu
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(selectedRoutes), JSON.stringify(mapRoutes.map(r => r.equipeId))]
+    [JSON.stringify(mapRoutes.filter((_, i) => selectedRoutes.includes(i)).map(r => r.equipeId))]
   );
 
   const handleDurations = useCallback((durations) => {
-    mapRoutes.forEach((route, i) => {
-      if (route.equipeId) onEquipeDurations(route.equipeId, durations[i] || 0);
+    filteredRoutes.forEach((route, fi) => {
+      if (route.equipeId) onEquipeDurations(route.equipeId, durations[fi] || 0);
     });
-  }, [mapRoutes, onEquipeDurations]);
+  }, [filteredRoutes, onEquipeDurations]);
 
   return (
     <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
-      <MultiRouteMap routes={mapRoutes} apiKey={apiKey} onRouteDurations={handleDurations} visibleEquipeIds={visibleEquipeIds} />
+      <MultiRouteMap routes={filteredRoutes} apiKey={apiKey} onRouteDurations={handleDurations} />
     </div>
   );
 }
