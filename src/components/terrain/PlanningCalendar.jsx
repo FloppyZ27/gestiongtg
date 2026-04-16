@@ -442,7 +442,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
           </div>
           <div className="flex gap-1">
-            <Button size="sm" onClick={(e) => { e.stopPropagation(); setSharePointItem(card); setIsSharePointDialogOpen(true); }} className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 h-6 w-6 p-0 flex-shrink-0"><Folder className="w-3 h-3" /></Button>
             <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
           </div>
         </div>
