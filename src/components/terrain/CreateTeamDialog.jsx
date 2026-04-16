@@ -143,7 +143,7 @@ export default function CreateTeamDialog({
         <div className="space-y-2">
           {/* Techniciens */}
           <Collapsible open={expandedSections.techniciens} onOpenChange={() => toggleSection('techniciens')}>
-            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+            <div className="rounded-lg overflow-hidden border border-blue-800/40">
               <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-950/60 hover:bg-blue-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -157,7 +157,7 @@ export default function CreateTeamDialog({
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
+                <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {techniciens.map(tech => {
                       const isUsedToday = usedTechIds.includes(tech.id);
@@ -181,7 +181,7 @@ export default function CreateTeamDialog({
 
           {/* Véhicules */}
           <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
-            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+            <div className="rounded-lg overflow-hidden border border-purple-800/40">
               <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-purple-950/60 hover:bg-purple-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function CreateTeamDialog({
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
+                <div className="bg-purple-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {vehicules.map(veh => {
                       const isUsedToday = usedVehIds.includes(veh.id);
@@ -219,7 +219,7 @@ export default function CreateTeamDialog({
 
           {/* Équipements */}
           <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
-            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+            <div className="rounded-lg overflow-hidden border border-orange-800/40">
               <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-950/60 hover:bg-orange-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export default function CreateTeamDialog({
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
+                <div className="bg-orange-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {equipements.map(eq => {
                       const isUsedToday = usedEqIds.includes(eq.id);
