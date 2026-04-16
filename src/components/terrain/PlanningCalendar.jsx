@@ -121,24 +121,23 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   );
 }
 
-// Wrapper pour filtrer les routes selon la sélection
+// Wrapper stable — passe toutes les routes mais filtre la visibilité via visibleEquipeIds
 function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
-  const filteredRoutes = useMemo(
-    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)),
-    // Dépend à la fois des routes ET de la sélection
+  const visibleEquipeIds = useMemo(
+    () => mapRoutes.filter((_, i) => selectedRoutes.includes(i)).map(r => r.equipeId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(selectedRoutes), JSON.stringify(mapRoutes.map(r => r.equipeId))]
   );
 
   const handleDurations = useCallback((durations) => {
-    filteredRoutes.forEach((route, fi) => {
-      if (route.equipeId) onEquipeDurations(route.equipeId, durations[fi] || 0);
+    mapRoutes.forEach((route, i) => {
+      if (route.equipeId) onEquipeDurations(route.equipeId, durations[i] || 0);
     });
-  }, [filteredRoutes, onEquipeDurations]);
+  }, [mapRoutes, onEquipeDurations]);
 
   return (
     <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
-      <MultiRouteMap routes={filteredRoutes} apiKey={apiKey} onRouteDurations={handleDurations} />
+      <MultiRouteMap routes={mapRoutes} apiKey={apiKey} onRouteDurations={handleDurations} visibleEquipeIds={visibleEquipeIds} />
     </div>
   );
 }
