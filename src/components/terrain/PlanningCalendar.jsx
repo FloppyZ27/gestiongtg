@@ -342,15 +342,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (ne[editTeamDateStr]) { const idx = ne[editTeamDateStr].findIndex(eq => eq.id === updatedTeam.id); if (idx !== -1) { ne[editTeamDateStr][idx] = updatedTeam; setEquipes(ne); } }
     setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null);
   };
-  const copyEquipe = (dateStr, equipeId) => {
+  const copyEquipe = async (dateStr, equipeId) => {
     const d = new Date(dateStr + 'T00:00:00'); let next = new Date(d);
     do { next.setDate(next.getDate() + 1); } while (next.getDay() === 0 || next.getDay() === 6);
     const nextStr = format(next, "yyyy-MM-dd");
     const ne = { ...equipes }; const equipe = ne[dateStr]?.find(e => e.id === equipeId); if (!equipe) return;
-    const copy = { id: `eq${Date.now()}`, nom: equipe.nom, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
+    // Créer directement en BD pour avoir un vrai ID
+    const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
+    const created = await base44.entities.EquipeTerrain.create(data);
+    const copy = { id: created.id, ...data };
     if (!ne[nextStr]) ne[nextStr] = [];
     ne[nextStr].push(copy); setEquipes(ne); setEquipeActiveTabs({ ...equipeActiveTabs, [copy.id]: null });
-    // Naviguer vers la semaine/mois contenant le jour cible
     setCurrentDate(next);
   };
   const removeEquipe = (dateStr, equipeId) => {
