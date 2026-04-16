@@ -148,6 +148,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [copyErrorMessage, setCopyErrorMessage] = useState(null);
   const [routeTravelDurations, setRouteTravelDurations] = useState([]);
+  // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
+  const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
+  const [currentRouteEquipeIds, setCurrentRouteEquipeIds] = useState([]);
 
   useEffect(() => {
     const loadEquipes = async () => {
@@ -421,6 +424,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       if (waypoints.length > 0) routes.push({ origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
     });
     setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i)); setRouteTravelDurations(new Array(routes.length).fill(0));
+    // Associer chaque route à son equipeId pour pouvoir mettre à jour le state plus tard
+    const routeEquipeIds = dayEquipes.map(eq => eq.id);
+    setCurrentRouteEquipeIds(routeEquipeIds);
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
@@ -597,7 +603,24 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       <div key={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''}`}>
         <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
           <div className="flex items-start justify-between gap-2">
-            <div><span className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 block" onClick={() => handleEditTeam(dateStr, equipe)}>{equipeNom}</span><span className="text-emerald-300 text-xs">{calculateEquipeTimings(equipe).totalTime}h</span></div>
+            <div>
+              <span className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 block" onClick={() => handleEditTeam(dateStr, equipe)}>{equipeNom}</span>
+              {(() => {
+                const { totalTime } = calculateEquipeTimings(equipe);
+                const travelSecs = equipeTravelSeconds[equipe.id] || 0;
+                const totalH = travelSecs > 0 ? (parseFloat(totalTime) + travelSecs / 3600).toFixed(1) : null;
+                const travelMin = Math.round(travelSecs / 60);
+                const travelH = Math.floor(travelMin / 60);
+                const travelM = travelMin % 60;
+                const travelLabel = travelSecs > 0 ? (travelH > 0 ? `${travelH}h${travelM > 0 ? travelM + 'min' : ''}` : `${travelM}min`) : null;
+                return (
+                  <span className="text-emerald-300 text-xs">
+                    {totalH ? `${totalH}h` : `${totalTime}h`}
+                    {travelLabel && <span className="text-slate-400 ml-1">(+{travelLabel} 🚗)</span>}
+                  </span>
+                );
+              })()}
+            </div>
             <div className="flex gap-1">
               <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300"><Copy className="w-3 h-3" /></button>
               <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
@@ -840,7 +863,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = [...routeTravelDurations]; const filteredIndices = mapRoutes.map((_, i) => i).filter(i => selectedRoutes.includes(i)); filteredIndices.forEach((origIdx, fi) => { full[origIdx] = durations[fi] || 0; }); setRouteTravelDurations(full); }} /></div>}
+              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = [...routeTravelDurations]; const filteredIndices = mapRoutes.map((_, i) => i).filter(i => selectedRoutes.includes(i)); filteredIndices.forEach((origIdx, fi) => { full[origIdx] = durations[fi] || 0; }); setRouteTravelDurations(full); const newEquipeTimes = { ...equipeTravelSeconds }; filteredIndices.forEach((origIdx, fi) => { const equipeId = currentRouteEquipeIds[origIdx]; if (equipeId) newEquipeTimes[equipeId] = durations[fi] || 0; }); setEquipeTravelSeconds(newEquipeTimes); }} /></div>}
           </div>
         </DialogContent>
       </Dialog>
