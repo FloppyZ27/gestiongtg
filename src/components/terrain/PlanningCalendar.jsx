@@ -90,7 +90,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
       pointerEvents: 'none', opacity: 0.95, transform: 'rotate(2deg) scale(1.04)',
       filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
     }}>
-      <div className={`${arpColor.split(' ')[0]} rounded-lg p-2 border ${arpColor.split(' ')[2]}`}>
+      <div className={`${arpColor.split(' ')[0]} rounded-xl p-2 border-2 ${arpColor.split(' ')[2]} shadow-md`} style={{ boxShadow: '0 2px 12px 0 rgba(0,0,0,0.35)' }}>
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-1 flex-wrap">
             <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
@@ -658,8 +658,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-lg p-2 mb-2 border ${arpColor.split(' ')[2]} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 border-2 ${arpColor.split(' ')[2]} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] shadow-md ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer', boxShadow: '0 2px 12px 0 rgba(0,0,0,0.35)' }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2">
