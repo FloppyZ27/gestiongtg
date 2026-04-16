@@ -151,9 +151,10 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
               const totalTravelSecs = result.routes[0].legs.reduce((sum, leg) => sum + (leg.duration?.value || 0), 0);
               routeDurationsSeconds[index] = totalTravelSecs;
 
+              if (cancelled) return;
+
               const isVisible = !visibleEquipeIds || visibleEquipeIds.includes(route.equipeId);
               const directionsRenderer = new window.google.maps.DirectionsRenderer({
-                map: isVisible ? map : null,
                 directions: result,
                 polylineOptions: {
                   strokeColor: color || COLORS[index % COLORS.length],
@@ -163,6 +164,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                 suppressMarkers: true,
                 preserveViewport: true,
               });
+              // Attacher à la carte seulement si non annulé
+              if (!cancelled) directionsRenderer.setMap(isVisible ? map : null);
 
               const routeMarkers = [];
 
@@ -173,7 +176,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
               // Marqueur de départ
               const startMarker = new window.google.maps.Marker({
                 position: startLocation,
-                map: isVisible ? map : null,
+                map: cancelled ? null : (isVisible ? map : null),
                 label: {
                   text: `${index + 1}`,
                   color: 'white',
@@ -200,7 +203,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                   const dossier = dossiers[dossierIndex];
                   const marker = new window.google.maps.Marker({
                     position: leg.end_location,
-                    map: isVisible ? map : null,
+                    map: cancelled ? null : (isVisible ? map : null),
                     label: {
                       text: String.fromCharCode(65 + dossierIndex), // A, B, C...
                       color: 'white',
