@@ -420,7 +420,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       });
       if (waypoints.length > 0) routes.push({ origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
     });
-    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i)); setRouteTravelDurations([]);
+    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i)); setRouteTravelDurations(new Array(routes.length).fill(0));
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
@@ -840,7 +840,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = new Array(mapRoutes.length).fill(0); mapRoutes.filter((_, i) => selectedRoutes.includes(i)).forEach((_, fi) => { full[selectedRoutes[fi]] = durations[fi] || 0; }); setRouteTravelDurations(full); }} /></div>}
+              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = [...routeTravelDurations]; const filteredIndices = mapRoutes.map((_, i) => i).filter(i => selectedRoutes.includes(i)); filteredIndices.forEach((origIdx, fi) => { full[origIdx] = durations[fi] || 0; }); setRouteTravelDurations(full); }} /></div>}
           </div>
         </DialogContent>
       </Dialog>
