@@ -878,9 +878,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             )}
           </DialogHeader>
           <div className="flex-1 w-full h-full">
-            {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
-              : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <MapWithStableRoutes mapRoutes={mapRoutes} selectedRoutes={selectedRoutes} apiKey={googleMapsApiKey} onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))} />
+            {!googleMapsApiKey
+              ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
+              : mapRoutes.length === 0
+                ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
+                : <MapWithStableRoutes mapRoutes={mapRoutes} selectedRoutes={selectedRoutes} apiKey={googleMapsApiKey} onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))} />
+            }
           </div>
         </DialogContent>
       </Dialog>
