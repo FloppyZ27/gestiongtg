@@ -429,21 +429,44 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     setIsTerrainDialogOpen(false); setEditingTerrainCard(null);
   };
 
-  const openGoogleMapsForDay = async (dateStr) => {
-    setSelectedMapDate(dateStr); setShowMapDialog(true);
+  const buildRoutesForDate = useCallback((dateStr) => {
     const bureauAddress = "11 rue melancon est, Alma";
-    const dayEquipes = equipes[dateStr] || [];
-    if (!dayEquipes.length) { setMapRoutes([]); return; }
+    const dayEquipes = (equipes[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+    if (!dayEquipes.length) return [];
     const routes = [];
     dayEquipes.forEach((equipe, index) => {
       const cardIds = equipe.mandats || []; const waypoints = []; const dossiersInfo = [];
       cardIds.forEach(cId => {
-      const card = terrainCards.find(c => c.id === cId);
-      if (card?.mandat?.adresse_travaux) { const address = formatAdresse(card.mandat.adresse_travaux); if (address) { waypoints.push(address); dossiersInfo.push({ numero: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`, clients: getClientsNames(card.dossier.clients_ids), mandat: getAbbreviatedMandatType(card.mandat.type_mandat), mandatType: card.mandat.type_mandat, adresse: address, arpenteur: card.dossier.arpenteur_geometre, dateLimite: card.terrain?.date_limite_leve ? format(new Date(card.terrain.date_limite_leve + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, dateLivraison: card.mandat?.date_livraison ? format(new Date(card.mandat.date_livraison + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, rendezVous: card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous ? `${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}${card.terrain.heure_rendez_vous ? ` à ${card.terrain.heure_rendez_vous}` : ''}` : null, instrumentsRequis: card.terrain?.instruments_requis || null, technicien: card.terrain?.technicien || null, dossierSimultane: card.terrain?.dossier_simultane || null, tempsPrevu: card.terrain?.temps_prevu || null, donneur: card.terrain?.donneur || null, notes: card.terrain?.notes || null }); } }
+        const card = terrainCards.find(c => c.id === cId);
+        if (card?.mandat?.adresse_travaux) { const address = formatAdresse(card.mandat.adresse_travaux); if (address) { waypoints.push(address); dossiersInfo.push({ numero: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`, clients: getClientsNames(card.dossier.clients_ids), mandat: getAbbreviatedMandatType(card.mandat.type_mandat), mandatType: card.mandat.type_mandat, adresse: address, arpenteur: card.dossier.arpenteur_geometre, dateLimite: card.terrain?.date_limite_leve ? format(new Date(card.terrain.date_limite_leve + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, dateLivraison: card.mandat?.date_livraison ? format(new Date(card.mandat.date_livraison + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, rendezVous: card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous ? `${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}${card.terrain.heure_rendez_vous ? ` à ${card.terrain.heure_rendez_vous}` : ''}` : null, instrumentsRequis: card.terrain?.instruments_requis || null, technicien: card.terrain?.technicien || null, dossierSimultane: card.terrain?.dossier_simultane || null, tempsPrevu: card.terrain?.temps_prevu || null, donneur: card.terrain?.donneur || null, notes: card.terrain?.notes || null }); } }
       });
       if (waypoints.length > 0) routes.push({ equipeId: equipe.id, origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
     });
-    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i));
+    return routes;
+  }, [equipes, terrainCards, placeAffaire]);
+
+  // Recalculer automatiquement les routes pour tous les jours visibles dès que les équipes ou dossiers changent
+  useEffect(() => {
+    const allRoutes = [];
+    days.forEach(day => {
+      const dateStr = format(day, "yyyy-MM-dd");
+      const routes = buildRoutesForDate(dateStr);
+      allRoutes.push(...routes);
+    });
+    // Mettre à jour mapRoutes si une date est sélectionnée
+    if (selectedMapDate) {
+      const routes = buildRoutesForDate(selectedMapDate);
+      setMapRoutes(routes);
+      setSelectedRoutes(prev => routes.map((_, i) => i).filter(i => prev.includes(i) || prev.length === 0));
+    }
+  }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
+
+  const openGoogleMapsForDay = (dateStr) => {
+    const routes = buildRoutesForDate(dateStr);
+    setSelectedMapDate(dateStr);
+    setMapRoutes(routes);
+    setSelectedRoutes(routes.map((_, i) => i));
+    setShowMapDialog(true);
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
