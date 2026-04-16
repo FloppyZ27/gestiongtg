@@ -105,8 +105,10 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
       document.head.appendChild(script);
     };
 
+    let cancelled = false;
+
     const initMap = () => {
-      if (!mapRef.current) return;
+      if (!mapRef.current || cancelled) return;
 
       try {
         const map = new window.google.maps.Map(mapRef.current, {
@@ -118,9 +120,9 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
         googleMapRef.current = map;
 
         // Nettoyer les anciens renderers et marqueurs
-        directionsRenderersRef.current.forEach(({ renderer, markers }) => { renderer.setMap(null); markers.forEach(m => m.setMap(null)); });
+        directionsRenderersRef.current.forEach(({ renderer, markers }) => { try { renderer.setMap(null); } catch (_) {} markers.forEach(m => { try { m.setMap(null); } catch (_) {} }); });
         directionsRenderersRef.current = [];
-        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current.forEach(marker => { try { marker.setMap(null); } catch (_) {} });
         markersRef.current = [];
         setHoveredDossier(null);
 
@@ -141,6 +143,9 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           };
 
           directionsService.route(request, (result, status) => {
+            // Si le composant a été démonté entre temps, on ignore
+            if (cancelled) return;
+
             if (status === 'OK') {
               // Calculer la durée totale du trajet (tous les legs)
               const totalTravelSecs = result.routes[0].legs.reduce((sum, leg) => sum + (leg.duration?.value || 0), 0);
@@ -263,6 +268,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
     loadGoogleMapsScript();
 
     return () => {
+      cancelled = true;
       // Cleanup — guard against destroyed map instance
       directionsRenderersRef.current.forEach(({ renderer, markers }) => {
         try { renderer.setMap(null); } catch (_) {}
