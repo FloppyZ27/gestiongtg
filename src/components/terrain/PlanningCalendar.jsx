@@ -841,7 +841,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
           {/* Calendrier */}
           <div data-kanban-scroll className="flex-1 overflow-x-auto" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
-            <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content' }}>
+            <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content', transform: 'scaleX(0.95)', transformOrigin: 'left top' }}>
               {days.map(day => renderDay(day, viewMode === "month"))}
             </div>
           </div>
