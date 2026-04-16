@@ -15,11 +15,9 @@ export function useKanbanDrag({ onDrop }) {
 
   const handleDragStart = useCallback((e, card) => {
     if (e.preventDefault) e.preventDefault();
-    const rect = e.currentTarget?.getBoundingClientRect?.() || { left: e.clientX, top: e.clientY, width: 220, height: 40 };
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    setDragging({ card, offsetX, offsetY });
-    setGhostPos({ x: e.clientX - offsetX, y: e.clientY - offsetY });
+    const rect = e.currentTarget?.getBoundingClientRect?.() || { left: e.clientX, top: e.clientY };
+    setDragging({ card, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
+    setGhostPos({ x: e.clientX, y: e.clientY });
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
   }, []);
@@ -63,7 +61,7 @@ export function useKanbanDrag({ onDrop }) {
 
     const onMove = (e) => {
       currentX = e.clientX;
-      setGhostPos({ x: e.clientX - dragging.offsetX, y: e.clientY - dragging.offsetY });
+      setGhostPos({ x: e.clientX, y: e.clientY });
       const el = document.elementFromPoint(e.clientX, e.clientY);
       const colEl = el?.closest('[data-kanban-column]');
       const colId = colEl ? colEl.getAttribute('data-kanban-column') : null;

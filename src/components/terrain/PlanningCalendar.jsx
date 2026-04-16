@@ -86,7 +86,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
   };
   return ReactDOM.createPortal(
     <div style={{
-      position: 'fixed', left: pos.x, top: pos.y, width: 220, zIndex: 99999,
+      position: 'fixed', left: pos.x - 110, top: pos.y - 40, width: 220, zIndex: 99999,
       pointerEvents: 'none', opacity: 0.95, transform: 'rotate(2deg) scale(1.04)',
       filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
     }}>
@@ -168,7 +168,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [copyErrorMessage, setCopyErrorMessage] = useState(null);
-  const [equipeConflictWarning, setEquipeConflictWarning] = useState(null); // { equipe, srcDate, dstDate, dstIndex, conflictingTechniciens }
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
@@ -600,59 +599,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (!destination) return;
     const sourceId = source.droppableId; const destId = destination.droppableId;
     const isUsed = (dateStr, rId, rType, excl) => equipes[dateStr]?.some(eq => eq.id !== excl && eq[rType].includes(rId)) || false;
-
-    if (type === "EQUIPE") {
-      const srcDate = sourceId.replace("equipes-", "");
-      const dstDate = destId.replace("equipes-", "");
-      if (srcDate === dstDate && source.index === destination.index) return;
-
-      const srcList = [...(equipes[srcDate] || [])];
-      const moved = srcList[source.index];
-      if (!moved) return;
-
-      // Détecter les conflits de techniciens uniquement si on change de jour
-      if (srcDate !== dstDate && moved.techniciens?.length > 0) {
-        const dstEquipes = (equipes[dstDate] || []).filter(eq => eq.id !== moved.id);
-        const usedTechIds = new Set(dstEquipes.flatMap(eq => eq.techniciens));
-        const conflicting = moved.techniciens
-          .filter(tId => usedTechIds.has(tId))
-          .map(tId => techniciens.find(t => t.id === tId))
-          .filter(Boolean);
-
-        if (conflicting.length > 0) {
-          setEquipeConflictWarning({
-            equipe: moved,
-            srcDate,
-            dstDate,
-            srcIndex: source.index,
-            dstIndex: destination.index,
-            conflictingTechniciens: conflicting,
-          });
-          return;
-        }
-      }
-
-      // Appliquer le déplacement sans conflit
-      const applyEquipeMove = (ne, eq, sDate, dDate, sIdx, dIdx) => {
-        const sl = [...(ne[sDate] || [])];
-        sl.splice(sIdx, 1);
-        if (sDate === dDate) {
-          sl.splice(dIdx, 0, eq);
-          ne[sDate] = sl;
-        } else {
-          ne[sDate] = sl;
-          if (!ne[sDate].length) delete ne[sDate];
-          const dl = [...(ne[dDate] || [])];
-          dl.splice(dIdx, 0, { ...eq, date_terrain: dDate });
-          ne[dDate] = dl;
-        }
-        return ne;
-      };
-
-      setEquipes(prev => applyEquipeMove({ ...prev }, moved, srcDate, dstDate, source.index, destination.index));
-      return;
-    }
-
     if (type === "TECHNICIEN") {
       const d = parseEquipeDroppableId(destId); if (!d) return;
       if (isUsed(d.dateStr, draggableId, 'techniciens', d.equipeId)) { alert('Déjà assigné.'); return; }
@@ -813,32 +759,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             {holiday && <div className="text-xs text-red-400">{holiday.name}</div>}
           </div>
         </div>
-        <Droppable droppableId={`equipes-${dateStr}`} type="EQUIPE">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={`space-y-2 min-h-[8px] rounded transition-all ${snapshot.isDraggingOver ? 'bg-emerald-500/10' : ''}`}
-            >
-              {dayEquipes.map((eq, idx) => (
-                <Draggable key={eq.id} draggableId={eq.id} index={idx}>
-                  {(drag, dragSnapshot) => (
-                    <div
-                      ref={drag.innerRef}
-                      {...drag.draggableProps}
-                      style={{ ...drag.draggableProps.style, opacity: dragSnapshot.isDragging ? 0.85 : 1 }}
-                    >
-                      <div {...drag.dragHandleProps} className="cursor-grab active:cursor-grabbing">
-                        {renderEquipeContent(eq, dateStr)}
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+        <div className="space-y-2">{dayEquipes.map(eq => renderEquipeContent(eq, dateStr))}</div>
         <Button size="sm" onClick={() => addEquipe(dateStr)} className={`w-full border-2 border-slate-600 bg-transparent hover:bg-slate-800 text-slate-300 mt-2 ${isMonthView ? 'h-5 text-xs' : 'h-6'}`}><Plus className="w-3 h-3 mr-1" />{isMonthView ? 'Ajouter' : 'Ajouter équipe'}</Button>
       </Card>
     );
@@ -975,42 +896,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             <div className="flex justify-center gap-3 pt-4">
               <Button onClick={() => setDeleteEquipeWarning(null)} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
               <Button onClick={() => confirmRemoveEquipe(deleteEquipeWarning.dateStr, deleteEquipeWarning.equipeId)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Supprimer</Button>
-            </div>
-          </div>}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!equipeConflictWarning} onOpenChange={() => setEquipeConflictWarning(null)}>
-        <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
-          <DialogHeader><DialogTitle className="text-xl text-yellow-400 text-center">⚠️ Conflit de technicien ⚠️</DialogTitle></DialogHeader>
-          {equipeConflictWarning && <div className="space-y-4">
-            <p className="text-slate-300 text-center">
-              Le(s) technicien(s) suivant(s) sont déjà assignés le{' '}
-              <span className="text-emerald-400 font-semibold">{format(new Date(equipeConflictWarning.dstDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span> :
-            </p>
-            <ul className="flex flex-col gap-1 items-center">
-              {equipeConflictWarning.conflictingTechniciens.map(t => (
-                <li key={t.id} className="text-yellow-300 font-semibold">{t.prenom} {t.nom}</li>
-              ))}
-            </ul>
-            <p className="text-slate-300 text-center text-sm">Voulez-vous quand même déplacer l'équipe ?</p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button onClick={() => setEquipeConflictWarning(null)} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
-              <Button onClick={() => {
-                const { equipe, srcDate, dstDate, srcIndex, dstIndex } = equipeConflictWarning;
-                setEquipes(prev => {
-                  const ne = { ...prev };
-                  const sl = [...(ne[srcDate] || [])];
-                  sl.splice(srcIndex, 1);
-                  ne[srcDate] = sl;
-                  if (!ne[srcDate].length) delete ne[srcDate];
-                  const dl = [...(ne[dstDate] || [])];
-                  dl.splice(dstIndex, 0, { ...equipe, date_terrain: dstDate });
-                  ne[dstDate] = dl;
-                  return ne;
-                });
-                setEquipeConflictWarning(null);
-              }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Déplacer quand même</Button>
             </div>
           </div>}
         </DialogContent>
