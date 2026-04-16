@@ -566,6 +566,78 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
+  // ---- Drag & drop pour les équipes entières ----
+  const [draggingEquipe, setDraggingEquipe] = useState(null);
+  const [equipeGhostPos, setEquipeGhostPos] = useState({ x: 0, y: 0 });
+  const [overDayColumn, setOverDayColumn] = useState(null);
+  const equipeHoldTimerRef = useRef(null);
+  const didEquipeDragRef = useRef(false);
+  const overDayColumnRef = useRef(null);
+
+  useEffect(() => { overDayColumnRef.current = overDayColumn; }, [overDayColumn]);
+
+  const handleEquipeDragStart = useCallback((e, dateStr, equipeId) => {
+    if (e.preventDefault) e.preventDefault();
+    setDraggingEquipe({ dateStr, equipeId });
+    setEquipeGhostPos({ x: e.clientX, y: e.clientY });
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+  }, []);
+
+  useEffect(() => {
+    if (!draggingEquipe) return;
+    const onMove = (e) => {
+      setEquipeGhostPos({ x: e.clientX, y: e.clientY });
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const colEl = el?.closest('[data-day-column]');
+      setOverDayColumn(colEl ? colEl.getAttribute('data-day-column') : null);
+    };
+    const onUp = () => {
+      const targetDate = overDayColumnRef.current;
+      if (targetDate && draggingEquipe && targetDate !== draggingEquipe.dateStr) {
+        const { dateStr: srcDate, equipeId } = draggingEquipe;
+        const ne = { ...equipes };
+        const srcEquipes = ne[srcDate] || [];
+        const equipe = srcEquipes.find(e => e.id === equipeId);
+        if (equipe) {
+          // Retirer de la source
+          ne[srcDate] = srcEquipes.filter(e => e.id !== equipeId);
+          if (!ne[srcDate].length) delete ne[srcDate];
+          // Ajouter à la destination
+          if (!ne[targetDate]) ne[targetDate] = [];
+          ne[targetDate] = [...ne[targetDate], { ...equipe }];
+          // Mettre à jour les dossiers assignés à cette équipe
+          const equipeNom = generateTeamDisplayName(equipe);
+          equipe.mandats.forEach(cardId => {
+            const card = terrainCards.find(c => c.id === cardId);
+            if (card && onUpdateDossier) {
+              const um = card.dossier.mandats.map((m, idx) => {
+                if (idx === card.mandatIndex) {
+                  let tl = [...(m.terrains_list || [])];
+                  if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
+                  return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
+                }
+                return m;
+              });
+              onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+            }
+          });
+          setEquipes(ne);
+        }
+      }
+      setDraggingEquipe(null);
+      setOverDayColumn(null);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [draggingEquipe, equipes, terrainCards, onUpdateDossier]);
+
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
 
@@ -686,12 +758,37 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const equipeNom = generateTeamDisplayName(equipe);
     const columnId = `terrain-${dateStr}-${equipe.id}`;
     const isOver = overColumn === columnId && dragging;
+    const isDraggingThisEquipe = draggingEquipe?.equipeId === equipe.id;
+
+    const onEquipeHeaderMouseDown = (e) => {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      didEquipeDragRef.current = false;
+      const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
+      equipeHoldTimerRef.current = setTimeout(() => {
+        equipeHoldTimerRef.current = null;
+        didEquipeDragRef.current = true;
+        handleEquipeDragStart({ ...savedEvent, preventDefault: () => {} }, dateStr, equipe.id);
+      }, 400);
+    };
+    const onEquipeHeaderMouseUp = () => {
+      if (equipeHoldTimerRef.current) { clearTimeout(equipeHoldTimerRef.current); equipeHoldTimerRef.current = null; }
+    };
+    const onEquipeHeaderClick = (e) => {
+      if (!didEquipeDragRef.current) handleEditTeam(dateStr, equipe);
+    };
+
     return (
-      <div key={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''}`}>
-        <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
+      <div key={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''} ${isDraggingThisEquipe ? 'opacity-30 scale-95' : ''}`}>
+        <div
+          className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50 cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={onEquipeHeaderMouseDown}
+          onMouseUp={onEquipeHeaderMouseUp}
+          title="Maintenir pour déplacer l'équipe"
+        >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <span className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 block" onClick={() => handleEditTeam(dateStr, equipe)}>{equipeNom}</span>
+              <span className="text-white text-sm font-bold block hover:text-emerald-400" onClick={onEquipeHeaderClick}>{equipeNom}</span>
               {(() => {
                 const { totalTime } = calculateEquipeTimings(equipe);
                 const travelSecs = equipeTravelSeconds[equipe.id] || 0;
@@ -708,7 +805,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 );
               })()}
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1" onMouseDown={e => e.stopPropagation()}>
               <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300"><Copy className="w-3 h-3" /></button>
               <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
             </div>
@@ -746,8 +843,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const allDayEquipes = equipes[dateStr] || [];
     const dayEquipes = allDayEquipes.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
     const holiday = isHoliday(day);
+    const isDayOver = overDayColumn === dateStr && draggingEquipe && draggingEquipe.dateStr !== dateStr;
     return (
-      <Card key={dateStr} className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''} w-full`}>
+      <Card key={dateStr} data-day-column={dateStr} className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''} w-full ${isDayOver ? 'ring-2 ring-blue-400/80 bg-blue-500/5' : ''}`}>
         <div className="mb-2">
           <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
             <div className="flex items-center justify-between mb-1">
@@ -771,6 +869,23 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       {/* Ghost card pendant le drag custom */}
       {dragging && <TerrainGhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} techniciens={techniciens} />}
+
+      {/* Ghost équipe pendant le drag d'équipe */}
+      {draggingEquipe && ReactDOM.createPortal(
+        <div style={{
+          position: 'fixed', left: equipeGhostPos.x - 80, top: equipeGhostPos.y - 16,
+          width: 180, zIndex: 99999, pointerEvents: 'none', opacity: 0.9,
+          transform: 'rotate(2deg) scale(1.05)', filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.6))',
+        }}>
+          <div className="bg-blue-600/80 rounded-lg px-3 py-2 border-2 border-blue-400/60">
+            <span className="text-white text-sm font-bold">
+              {(() => { const eq = (equipes[draggingEquipe.dateStr] || []).find(e => e.id === draggingEquipe.equipeId); return eq ? generateTeamDisplayName(eq) : ''; })()}
+            </span>
+            <div className="text-blue-200 text-xs mt-0.5">Déplacer vers un autre jour</div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4">
         <CardContent className="p-4">
