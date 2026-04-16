@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import React, { useState, useCallback, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useKanbanDrag } from "@/hooks/useKanbanDrag";
 import { base44 } from "@/api/base44Client";
