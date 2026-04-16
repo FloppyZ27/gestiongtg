@@ -333,13 +333,36 @@ export default function GestionDeMandat() {
     const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
 
+    const holdTimerRef = { current: null };
+
+    const onMouseDown = (e) => {
+      e.stopPropagation();
+      const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
+      holdTimerRef.current = setTimeout(() => {
+        holdTimerRef.current = null;
+        handleDragStart({ ...savedEvent, preventDefault: () => {} }, card);
+      }, 500);
+    };
+
+    const onMouseUp = () => {
+      if (holdTimerRef.current) {
+        clearTimeout(holdTimerRef.current);
+        holdTimerRef.current = null;
+      }
+    };
+
+    const onClick = () => {
+      if (!dragging) handleCardClick(card);
+    };
+
     return (
       <div
         key={card.id}
-        onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e, card); }}
-        onClick={() => handleCardClick(card)}
-        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-grab select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'grab' }}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onClick={onClick}
+        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>

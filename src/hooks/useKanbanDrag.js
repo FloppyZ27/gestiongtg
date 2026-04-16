@@ -11,8 +11,8 @@ export function useKanbanDrag({ onDrop }) {
   useEffect(() => { overColumnRef.current = overColumn; }, [overColumn]);
 
   const handleDragStart = useCallback((e, card) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
+    if (e.preventDefault) e.preventDefault();
+    const rect = e.currentTarget?.getBoundingClientRect?.() || { left: e.clientX, top: e.clientY };
     setDragging({ card, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
     setGhostPos({ x: e.clientX, y: e.clientY });
     document.body.style.userSelect = 'none';
