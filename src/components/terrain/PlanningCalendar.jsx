@@ -658,8 +658,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 border-2 ${arpColor.split(' ')[2]} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] shadow-md ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer', boxShadow: '0 2px 12px 0 rgba(0,0,0,0.35)' }}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 cursor-pointer select-none transition-all duration-150 hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer', boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return `inset 0 0 0 2px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2">
