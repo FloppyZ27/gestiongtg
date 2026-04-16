@@ -246,7 +246,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     }
   };
 
-  const days = getDays();
+  const days = useMemo(() => getDays(), [currentDate, viewMode]);
   const goToPrevious = () => viewMode === "week" ? setCurrentDate(subWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const goToNext = () => viewMode === "week" ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
@@ -458,21 +458,31 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
 
-  // Calculer les durées de trajet via le backend pour tous les jours visibles (sans ouvrir la carte)
+  // Calculer les durées de trajet via le backend — debounce 2s pour éviter les appels excessifs
+  const travelCalcTimerRef = useRef(null);
+  const lastRouteKeyRef = useRef(null);
+
   useEffect(() => {
     if (!googleMapsApiKey) return;
-    let cancelled = false;
-    const computeAll = async () => {
-      // Collecter toutes les routes de tous les jours visibles
-      const allRoutes = [];
-      days.forEach(day => {
-        const routes = buildRoutesForDate(format(day, "yyyy-MM-dd"));
-        allRoutes.push(...routes);
-      });
-      const routesWithWaypoints = allRoutes.filter(r => r.equipeId && r.waypoints?.length);
-      if (!routesWithWaypoints.length) return;
 
-      // Lancer tous les appels en parallèle
+    // Construire la clé des routes pour éviter les recalculs inutiles
+    const allRoutes = [];
+    days.forEach(day => {
+      const routes = buildRoutesForDate(format(day, "yyyy-MM-dd"));
+      allRoutes.push(...routes);
+    });
+    const routesWithWaypoints = allRoutes.filter(r => r.equipeId && r.waypoints?.length);
+    const routeKey = routesWithWaypoints.map(r => `${r.equipeId}:${r.waypoints.join(',')}`).join('|');
+
+    // Ne pas recalculer si les routes n'ont pas changé
+    if (routeKey === lastRouteKeyRef.current) return;
+
+    if (travelCalcTimerRef.current) clearTimeout(travelCalcTimerRef.current);
+
+    travelCalcTimerRef.current = setTimeout(async () => {
+      if (!routesWithWaypoints.length) return;
+      lastRouteKeyRef.current = routeKey;
+
       const results = await Promise.allSettled(
         routesWithWaypoints.map(route =>
           base44.functions.invoke('calculateRouteDuration', {
@@ -483,22 +493,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         )
       );
 
-      if (cancelled) return;
-
-      // Un seul setState avec tous les résultats
       const newDurations = {};
-      results.forEach((r, i) => {
-        if (r.status === 'fulfilled') {
-          newDurations[r.value.equipeId] = r.value.seconds;
-        }
+      results.forEach(r => {
+        if (r.status === 'fulfilled') newDurations[r.value.equipeId] = r.value.seconds;
       });
       if (Object.keys(newDurations).length > 0) {
         setEquipeTravelSeconds(prev => ({ ...prev, ...newDurations }));
       }
-    };
-    computeAll();
-    return () => { cancelled = true; };
-  }, [googleMapsApiKey, buildRoutesForDate]);
+    }, 2000);
+
+    return () => { if (travelCalcTimerRef.current) clearTimeout(travelCalcTimerRef.current); };
+  }, [googleMapsApiKey, equipes, days]);
 
   const openGoogleMapsForDay = (dateStr) => {
     const routes = buildRoutesForDate(dateStr);
@@ -964,7 +969,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0
                 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-                : <MapWithStableRoutes mapRoutes={mapRoutes} selectedRoutes={selectedRoutes} apiKey={googleMapsApiKey} onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))} />
+                : <MapWithStableRoutes
+                    mapRoutes={mapRoutes}
+                    selectedRoutes={selectedRoutes}
+                    apiKey={googleMapsApiKey}
+                    onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                  />
             }
           </div>
         </DialogContent>
