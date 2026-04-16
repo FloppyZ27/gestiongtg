@@ -147,10 +147,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [copyErrorMessage, setCopyErrorMessage] = useState(null);
-  const [routeTravelDurations, setRouteTravelDurations] = useState([]);
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
-  const [currentRouteEquipeIds, setCurrentRouteEquipeIds] = useState([]);
 
   useEffect(() => {
     const loadEquipes = async () => {
@@ -421,12 +419,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const card = terrainCards.find(c => c.id === cId);
       if (card?.mandat?.adresse_travaux) { const address = formatAdresse(card.mandat.adresse_travaux); if (address) { waypoints.push(address); dossiersInfo.push({ numero: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`, clients: getClientsNames(card.dossier.clients_ids), mandat: getAbbreviatedMandatType(card.mandat.type_mandat), mandatType: card.mandat.type_mandat, adresse: address, arpenteur: card.dossier.arpenteur_geometre, dateLimite: card.terrain?.date_limite_leve ? format(new Date(card.terrain.date_limite_leve + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, dateLivraison: card.mandat?.date_livraison ? format(new Date(card.mandat.date_livraison + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null, rendezVous: card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous ? `${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}${card.terrain.heure_rendez_vous ? ` à ${card.terrain.heure_rendez_vous}` : ''}` : null, instrumentsRequis: card.terrain?.instruments_requis || null, technicien: card.terrain?.technicien || null, dossierSimultane: card.terrain?.dossier_simultane || null, tempsPrevu: card.terrain?.temps_prevu || null, donneur: card.terrain?.donneur || null, notes: card.terrain?.notes || null }); } }
       });
-      if (waypoints.length > 0) routes.push({ origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
+      if (waypoints.length > 0) routes.push({ equipeId: equipe.id, origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
     });
-    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i)); setRouteTravelDurations(new Array(routes.length).fill(0));
-    // Associer chaque route à son equipeId pour pouvoir mettre à jour le state plus tard
-    const routeEquipeIds = dayEquipes.map(eq => eq.id);
-    setCurrentRouteEquipeIds(routeEquipeIds);
+    setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i));
   };
 
   // ---- Custom drag & drop pour les DossierCards ----
@@ -827,7 +822,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 </Button>
                 {mapRoutes.map((route, i) => {
                   const isSelected = selectedRoutes.includes(i);
-                  const travelSecs = routeTravelDurations[i] || 0;
+                  const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
                   const travelMin = Math.round(travelSecs / 60);
                   const travelH = Math.floor(travelMin / 60);
                   const travelM = travelMin % 60;
@@ -863,7 +858,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const full = [...routeTravelDurations]; const filteredIndices = mapRoutes.map((_, i) => i).filter(i => selectedRoutes.includes(i)); filteredIndices.forEach((origIdx, fi) => { full[origIdx] = durations[fi] || 0; }); setRouteTravelDurations(full); const newEquipeTimes = { ...equipeTravelSeconds }; filteredIndices.forEach((origIdx, fi) => { const equipeId = currentRouteEquipeIds[origIdx]; if (equipeId) newEquipeTimes[equipeId] = durations[fi] || 0; }); setEquipeTravelSeconds(newEquipeTimes); }} /></div>}
+              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} onRouteDurations={(durations) => { const filteredRoutes = mapRoutes.filter((_, i) => selectedRoutes.includes(i)); const newEquipeTimes = { ...equipeTravelSeconds }; filteredRoutes.forEach((route, fi) => { if (route.equipeId) newEquipeTimes[route.equipeId] = durations[fi] || 0; }); setEquipeTravelSeconds(newEquipeTimes); }} /></div>}
           </div>
         </DialogContent>
       </Dialog>
