@@ -144,16 +144,16 @@ export default function CreateTeamDialog({
           {/* Techniciens */}
           <Collapsible open={expandedSections.techniciens} onOpenChange={() => toggleSection('techniciens')}>
             <div className="rounded-lg overflow-hidden border border-blue-800/40">
-              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-950/60 hover:bg-blue-950/80">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-600 hover:bg-blue-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <Users className="w-4 h-4 text-blue-400" />
+                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-blue-300 font-bold text-sm">Techniciens</span>
-                    <span className="text-slate-500 text-xs">({availableTechs.length} disponibles)</span>
+                    <span className="text-white font-bold text-sm">Techniciens</span>
+                    <span className="text-blue-100 text-xs">({availableTechs.length} disponibles)</span>
                   </div>
-                  {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -182,16 +182,16 @@ export default function CreateTeamDialog({
           {/* Véhicules */}
           <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
             <div className="rounded-lg overflow-hidden border border-purple-800/40">
-              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-purple-950/60 hover:bg-purple-950/80">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-purple-600 hover:bg-purple-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <Truck className="w-4 h-4 text-purple-400" />
+                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Truck className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-purple-300 font-bold text-sm">Véhicules</span>
-                    <span className="text-slate-500 text-xs">({availableVehs.length} disponibles)</span>
+                    <span className="text-white font-bold text-sm">Véhicules</span>
+                    <span className="text-purple-100 text-xs">({availableVehs.length} disponibles)</span>
                   </div>
-                  {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -220,16 +220,16 @@ export default function CreateTeamDialog({
           {/* Équipements */}
           <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
             <div className="rounded-lg overflow-hidden border border-orange-800/40">
-              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-950/60 hover:bg-orange-950/80">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-500 hover:bg-orange-600">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                      <Wrench className="w-4 h-4 text-orange-400" />
+                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Wrench className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-orange-300 font-bold text-sm">Équipements</span>
-                    <span className="text-slate-500 text-xs">({availableEqs.length} disponibles)</span>
+                    <span className="text-white font-bold text-sm">Équipements</span>
+                    <span className="text-orange-100 text-xs">({availableEqs.length} disponibles)</span>
                   </div>
-                  {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
