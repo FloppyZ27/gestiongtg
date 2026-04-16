@@ -73,9 +73,12 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
     if (!googleMapRef.current) return;
     directionsRenderersRef.current.forEach(({ equipeId, renderer, markers }) => {
       try {
+        const map = googleMapRef.current;
+        if (!map) return;
         const visible = !visibleEquipeIds || visibleEquipeIds.includes(equipeId);
-        renderer.setMap(visible ? googleMapRef.current : null);
-        markers.forEach(m => { try { m.setMap(visible ? googleMapRef.current : null); } catch (_) {} });
+        // Vérifier que le renderer est encore attaché à une carte valide avant setMap
+        renderer.setMap(visible ? map : null);
+        markers.forEach(m => { try { m.setMap(visible ? map : null); } catch (_) {} });
       } catch (_) {}
     });
   }, [visibleEquipeIds]);
@@ -272,7 +275,9 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
 
     return () => {
       cancelled = true;
-      // Cleanup — guard against destroyed map instance
+      // Nullifier la ref en premier pour bloquer l'effet de visibilité
+      googleMapRef.current = null;
+      // Détacher renderers et marqueurs — la carte est peut-être déjà GC'd, on ignore les erreurs
       directionsRenderersRef.current.forEach(({ renderer, markers }) => {
         try { renderer.setMap(null); } catch (_) {}
         markers.forEach(m => { try { m.setMap(null); } catch (_) {} });
@@ -280,7 +285,6 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
       directionsRenderersRef.current = [];
       markersRef.current.forEach(marker => { try { marker.setMap(null); } catch (_) {} });
       markersRef.current = [];
-      googleMapRef.current = null;
       setHoveredDossier(null);
     };
   }, [apiKey, routes]);
