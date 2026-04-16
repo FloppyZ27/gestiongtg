@@ -143,23 +143,21 @@ export default function CreateTeamDialog({
         <div className="space-y-2">
           {/* Techniciens */}
           <Collapsible open={expandedSections.techniciens} onOpenChange={() => toggleSection('techniciens')}>
-            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(30,27,60,0.9), rgba(20,20,45,0.9))' }}>
-              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
+            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-950/60 hover:bg-blue-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <Users className="w-4 h-4 text-blue-400" />
                     </div>
-                    <span className="text-blue-300 font-bold text-sm tracking-wide">
-                      Techniciens
-                    </span>
+                    <span className="text-blue-300 font-bold text-sm">Techniciens</span>
                     <span className="text-slate-500 text-xs">({availableTechs.length} disponibles)</span>
                   </div>
                   {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="pt-2 pb-3 px-3">
+                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {techniciens.map(tech => {
                       const isUsedToday = usedTechIds.includes(tech.id);
@@ -168,13 +166,7 @@ export default function CreateTeamDialog({
                       const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
                       return (
                         <div key={tech.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox
-                            id={`tech-${tech.id}`}
-                            checked={selectedTechniciens.includes(tech.id)}
-                            onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)}
-                            disabled={!isAvailable}
-                            className="border-slate-500"
-                          />
+                          <Checkbox id={`tech-${tech.id}`} checked={selectedTechniciens.includes(tech.id)} onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)} disabled={!isAvailable} className="border-slate-500" />
                           <Label htmlFor={`tech-${tech.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
                             {tech.prenom} {tech.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                           </Label>
@@ -189,23 +181,21 @@ export default function CreateTeamDialog({
 
           {/* Véhicules */}
           <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
-            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(40,20,60,0.9), rgba(20,20,45,0.9))' }}>
-              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
+            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-purple-950/60 hover:bg-purple-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <Truck className="w-4 h-4 text-purple-400" />
                     </div>
-                    <span className="text-purple-300 font-bold text-sm tracking-wide">
-                      Véhicules
-                    </span>
+                    <span className="text-purple-300 font-bold text-sm">Véhicules</span>
                     <span className="text-slate-500 text-xs">({availableVehs.length} disponibles)</span>
                   </div>
                   {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="pt-2 pb-3 px-3">
+                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {vehicules.map(veh => {
                       const isUsedToday = usedVehIds.includes(veh.id);
@@ -214,13 +204,7 @@ export default function CreateTeamDialog({
                       const assignedTeam = isUsedToday ? getTeamForResource(veh.id, 'vehicules') : null;
                       return (
                         <div key={veh.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox
-                            id={`veh-${veh.id}`}
-                            checked={selectedVehicules.includes(veh.id)}
-                            onCheckedChange={() => isAvailable && toggleVehicule(veh.id)}
-                            disabled={!isAvailable}
-                            className="border-slate-500"
-                          />
+                          <Checkbox id={`veh-${veh.id}`} checked={selectedVehicules.includes(veh.id)} onCheckedChange={() => isAvailable && toggleVehicule(veh.id)} disabled={!isAvailable} className="border-slate-500" />
                           <Label htmlFor={`veh-${veh.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
                             {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                           </Label>
@@ -235,23 +219,21 @@ export default function CreateTeamDialog({
 
           {/* Équipements */}
           <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
-            <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(to right, rgba(45,25,10,0.9), rgba(20,20,45,0.9))' }}>
-              <CollapsibleTrigger className="w-full cursor-pointer hover:brightness-110 transition-all py-2.5 px-3">
+            <div className="rounded-lg overflow-hidden border border-slate-700/50">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-950/60 hover:bg-orange-950/80">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
                       <Wrench className="w-4 h-4 text-orange-400" />
                     </div>
-                    <span className="text-orange-300 font-bold text-sm tracking-wide">
-                      Équipements
-                    </span>
+                    <span className="text-orange-300 font-bold text-sm">Équipements</span>
                     <span className="text-slate-500 text-xs">({availableEqs.length} disponibles)</span>
                   </div>
                   {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="pt-2 pb-3 px-3">
+                <div className="bg-slate-800/40 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {equipements.map(eq => {
                       const isUsedToday = usedEqIds.includes(eq.id);
@@ -260,13 +242,7 @@ export default function CreateTeamDialog({
                       const assignedTeam = isUsedToday ? getTeamForResource(eq.id, 'equipements') : null;
                       return (
                         <div key={eq.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox
-                            id={`eq-${eq.id}`}
-                            checked={selectedEquipements.includes(eq.id)}
-                            onCheckedChange={() => isAvailable && toggleEquipement(eq.id)}
-                            disabled={!isAvailable}
-                            className="border-slate-500"
-                          />
+                          <Checkbox id={`eq-${eq.id}`} checked={selectedEquipements.includes(eq.id)} onCheckedChange={() => isAvailable && toggleEquipement(eq.id)} disabled={!isAvailable} className="border-slate-500" />
                           <Label htmlFor={`eq-${eq.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
                             {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                           </Label>
