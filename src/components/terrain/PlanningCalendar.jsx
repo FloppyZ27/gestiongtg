@@ -451,10 +451,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (selectedMapDate) {
       const routes = buildRoutesForDate(selectedMapDate);
       setMapRoutes(routes);
-      setSelectedRoutes(prev => {
-        const newIndices = routes.map((_, i) => i);
-        return prev.length === 0 ? [0] : newIndices.filter(i => prev.includes(i));
-      });
+      setSelectedRoutes(routes.map((_, i) => i));
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
 
@@ -509,7 +506,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const routes = buildRoutesForDate(dateStr);
     setSelectedMapDate(dateStr);
     setMapRoutes(routes);
-    setSelectedRoutes([0]);
+    setSelectedRoutes(routes.map((_, i) => i));
     setShowMapDialog(true);
   };
 
@@ -938,7 +935,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                   return (
                     <button
                       key={i}
-                      onClick={() => setSelectedRoutes(isSelected ? [] : [i])}
+                      onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '6px',
                         padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
