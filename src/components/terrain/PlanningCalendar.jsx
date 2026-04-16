@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
@@ -11,16 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Folder } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
-import CommentairesSection from "../dossiers/CommentairesSection";
 import TerrainVerificationCard from "./TerrainVerificationCard";
 import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
 import MultiRouteMap from "./MultiRouteMap";
-import SharePointTerrainViewer from "./SharePointTerrainViewer";
+import { useKanbanDrag } from "@/hooks/useKanbanDrag";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -68,6 +68,36 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
+// Ghost card pour le drag custom
+function TerrainGhostCard({ card, pos, clients }) {
+  if (!card) return null;
+  const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
+  const clientsNames = clients.filter(c => card.dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
+  return ReactDOM.createPortal(
+    <div style={{
+      position: 'fixed', left: pos.x - 100, top: pos.y - 30, width: 200, zIndex: 99999,
+      pointerEvents: 'none', opacity: 0.92, transform: 'rotate(2deg) scale(1.04)',
+      filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
+    }}>
+      <div className={`${arpColor.split(' ')[0]} rounded-lg p-2 border ${arpColor.split(' ')[2]}`}>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <Badge variant="outline" className={`${arpColor} border text-xs`}>
+            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+          </Badge>
+          <Badge className={`${getMandatColor(card.mandat?.type_mandat)} border text-xs font-semibold`}>
+            {getAbbreviatedMandatType(card.mandat?.type_mandat) || 'Mandat'}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1">
+          <User className="w-3 h-3 text-white flex-shrink-0" />
+          <span className="text-xs text-white font-medium truncate">{clientsNames}</span>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export default function PlanningCalendar({ dossiers, techniciens, vehicules, equipements, clients, onUpdateDossier, onAddTechnicien, onAddVehicule, onAddEquipement, onEditTechnicien, onDeleteTechnicien, onEditVehicule, onDeleteVehicule, onEditEquipement, onDeleteEquipement, users, lots, placeAffaire }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week");
@@ -86,19 +116,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [editingTerrainCard, setEditingTerrainCard] = useState(null);
   const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
   const [rendezVousWarning, setRendezVousWarning] = useState(null);
-  const [pendingDragDrop, setPendingDragDrop] = useState(null);
+  const [pendingDrop, setPendingDrop] = useState(null);
   const [deleteEquipeWarning, setDeleteEquipeWarning] = useState(null);
   const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
-  const [travelTimes, setTravelTimes] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-  const [mapUrl, setMapUrl] = useState(null);
-  const [loadingMapUrl, setLoadingMapUrl] = useState(false);
-  const [selectedEquipe, setSelectedEquipe] = useState(null);
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
-  const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
-  const [sharePointItem, setSharePointItem] = useState(null);
 
   useEffect(() => {
     const loadEquipes = async () => {
@@ -192,6 +216,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     return { dateStr: `${parts[1]}-${parts[2]}-${parts[3]}`, equipeId: parts[4], type: parts[5] };
   };
 
+  // Parse a custom drag column id: "terrain-{dateStr}-{equipeId}" or "unassigned"
+  const parseTerrainColumnId = (colId) => {
+    if (!colId || colId === 'unassigned') return null;
+    const prefix = 'terrain-';
+    if (!colId.startsWith(prefix)) return null;
+    const rest = colId.slice(prefix.length); // "{dateStr}-{equipeId}"
+    // dateStr is "yyyy-MM-dd" (10 chars)
+    const dateStr = rest.slice(0, 10);
+    const equipeId = rest.slice(11); // skip the dash
+    return { dateStr, equipeId };
+  };
+
   const generateTerrainCards = () => {
     const cards = [];
     const filtered = placeAffaire ? dossiers.filter(d => d.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()) : dossiers;
@@ -203,7 +239,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             cards.push({ id: `${dossier.id}-${mandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex, terrainIndex });
           });
         } else {
-          // Mandat sans terrains_list mais avec statut_terrain en_verification → carte synthétique
           const statutTerrain = mandat.statut_terrain;
           if (!statutTerrain || statutTerrain === "en_verification") {
             const syntheticTerrain = { ...(mandat.terrain || {}), statut_terrain: statutTerrain || "en_verification" };
@@ -255,9 +290,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
 
   const calculateEquipeTimings = (equipe) => {
-    let total = 0; let travel = 0;
+    let total = 0;
     equipe.mandats.forEach(id => { const c = terrainCards.find(c => c.id === id); if (c?.terrain?.temps_prevu) total += parseTimeString(c.terrain.temps_prevu); });
-    return { totalTime: (total + travel).toFixed(1), cardCount: equipe.mandats.length };
+    return { totalTime: total.toFixed(1), cardCount: equipe.mandats.length };
   };
 
   const getUsedResourcesForDate = (dateStr) => {
@@ -268,7 +303,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   const getEquipeActiveTab = (id) => equipeActiveTabs[id] !== undefined ? equipeActiveTabs[id] : null;
-  const setEquipeActiveTab = (id, tab) => { const cur = getEquipeActiveTab(id); setEquipeActiveTabs({ ...equipeActiveTabs, [id]: cur === tab ? null : tab }); };
 
   const addEquipe = (dateStr) => { setCreateTeamDateStr(dateStr); setIsCreateTeamDialogOpen(true); };
   const handleCreateTeam = (newEquipe) => {
@@ -318,7 +352,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   const handleEdit = (dossier, mandatIndex = 0) => { setEditingDossier({ ...dossier, initialMandatIndex: mandatIndex }); setIsEditingDialogOpen(true); };
-  const handleCardClick = (card) => handleEdit(card.dossier, card.mandatIndex);
+  const handleCardClick = (card) => { if (dragging) return; handleEdit(card.dossier, card.mandatIndex); };
 
   const handleEditTerrain = (card) => {
     setEditingTerrainCard(card);
@@ -341,7 +375,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   const openGoogleMapsForDay = async (dateStr) => {
-    setSelectedMapDate(dateStr); setSelectedEquipe(null); setShowMapDialog(true);
+    setSelectedMapDate(dateStr); setShowMapDialog(true);
     const bureauAddress = "11 rue melancon est, Alma";
     const dayEquipes = equipes[dateStr] || [];
     if (!dayEquipes.length) { setMapRoutes([]); return; }
@@ -357,28 +391,86 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     setMapRoutes(routes); setSelectedRoutes(routes.map((_, i) => i));
   };
 
+  // ---- Custom drag & drop pour les DossierCards ----
+  const executeDrop = useCallback((card, columnId) => {
+    if (!card) return;
+
+    if (columnId === 'unassigned') {
+      // Retirer de toutes les équipes
+      const ne = { ...equipes };
+      Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== card.id); }));
+      setEquipes(ne);
+      if (onUpdateDossier) {
+        const um = card.dossier.mandats.map((m, idx) => {
+          if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: null, equipe_assignee: null }; return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl }; }
+          return m;
+        });
+        onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+      }
+      return;
+    }
+
+    const dest = parseTerrainColumnId(columnId);
+    if (!dest) return;
+
+    const doTheDrop = (dateStr, equipeId) => {
+      const ne = { ...equipes };
+      if (!ne[dateStr]) return;
+      const equipe = ne[dateStr].find(e => e.id === equipeId);
+      if (!equipe) return;
+      // Remove from previous equipe
+      Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
+      if (!equipe.mandats.includes(card.id)) equipe.mandats.push(card.id);
+      setEquipes(ne);
+      if (onUpdateDossier) {
+        const eqNom = generateTeamDisplayName(equipe);
+        const um = card.dossier.mandats.map((m, idx) => {
+          if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
+          return m;
+        });
+        onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+      }
+    };
+
+    // Check rendez-vous warning
+    if (card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous && card.terrain.date_rendez_vous !== dest.dateStr) {
+      setRendezVousWarning({ card, newDateStr: dest.dateStr });
+      setPendingDrop({ card, dateStr: dest.dateStr, equipeId: dest.equipeId });
+      return;
+    }
+
+    doTheDrop(dest.dateStr, dest.equipeId);
+  }, [equipes, onUpdateDossier]);
+
+  const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
+
+  const executePendingDrop = () => {
+    if (!pendingDrop) return;
+    const { card, dateStr, equipeId } = pendingDrop;
+    const ne = { ...equipes };
+    if (!ne[dateStr]) { setRendezVousWarning(null); setPendingDrop(null); return; }
+    const equipe = ne[dateStr].find(e => e.id === equipeId);
+    if (!equipe) { setRendezVousWarning(null); setPendingDrop(null); return; }
+    Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
+    if (!equipe.mandats.includes(card.id)) equipe.mandats.push(card.id);
+    setEquipes(ne);
+    if (onUpdateDossier) {
+      const eqNom = generateTeamDisplayName(equipe);
+      const um = card.dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
+        return m;
+      });
+      onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+    }
+    setRendezVousWarning(null); setPendingDrop(null);
+  };
+
+  // ---- @hello-pangea/dnd pour ressources (techniciens/véhicules/équipements) ----
   const onDragEnd = (result) => {
     const { source, destination, draggableId, type } = result;
     if (!destination) return;
     const sourceId = source.droppableId; const destId = destination.droppableId;
     const isUsed = (dateStr, rId, rType, excl) => equipes[dateStr]?.some(eq => eq.id !== excl && eq[rType].includes(rId)) || false;
-    const destParsed = parseEquipeDroppableId(destId);
-    if (destParsed) {
-      const card = terrainCards.find(c => c.id === draggableId);
-      if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous) {
-        const srcP = parseEquipeDroppableId(sourceId);
-        if (card.terrain.date_rendez_vous !== destParsed.dateStr && (sourceId === "unassigned" || (srcP && srcP.dateStr !== destParsed.dateStr))) {
-          setRendezVousWarning({ card, currentDateStr: srcP?.dateStr || "non cédulé", newDateStr: destParsed.dateStr });
-          setPendingDragDrop({ source, destination, draggableId, type }); return;
-        }
-      }
-    }
-    if (destId === "unassigned") {
-      const ne = { ...equipes }; Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== draggableId); })); setEquipes(ne);
-      const card = terrainCards.find(c => c.id === draggableId);
-      if (card && onUpdateDossier) { const um = card.dossier.mandats.map((m, idx) => { if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: null, equipe_assignee: null }; return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl }; } return m; }); onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um }); }
-      return;
-    }
     if (type === "TECHNICIEN") {
       const d = parseEquipeDroppableId(destId); if (!d) return;
       if (isUsed(d.dateStr, draggableId, 'techniciens', d.equipeId)) { alert('Déjà assigné.'); return; }
@@ -400,42 +492,21 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const sp = parseEquipeDroppableId(sourceId); if (sp) { const se = ne[sp.dateStr]?.find(e => e.id === sp.equipeId); if (se) se.equipements = se.equipements.filter(id => id !== draggableId); }
       if (!eq.equipements.includes(draggableId)) eq.equipements.push(draggableId); setEquipes(ne); return;
     }
-    const dest = parseEquipeDroppableId(destId); if (!dest) return;
-    const srcP = parseEquipeDroppableId(sourceId);
-    if (srcP && srcP.dateStr !== dest.dateStr) {
-      const card = terrainCards.find(c => c.id === draggableId);
-      if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous && card.terrain.date_rendez_vous !== dest.dateStr) {
-        setRendezVousWarning({ card, currentDateStr: srcP.dateStr, newDateStr: dest.dateStr }); setPendingDragDrop({ source, destination, draggableId, type }); return;
-      }
-    }
-    const ne = { ...equipes }; if (!ne[dest.dateStr]) return;
-    const equipe = ne[dest.dateStr].find(e => e.id === dest.equipeId); if (!equipe) return;
-    const sm = parseEquipeDroppableId(sourceId);
-    if (sm && sourceId !== "unassigned") { const se = ne[sm.dateStr]?.find(e => e.id === sm.equipeId); if (se) se.mandats = se.mandats.filter(id => id !== draggableId); }
-    if (!equipe.mandats.includes(draggableId)) equipe.mandats.splice(destination.index, 0, draggableId);
-    setEquipes(ne);
-    const card = terrainCards.find(c => c.id === draggableId);
-    if (card && onUpdateDossier) {
-      const eqNom = generateTeamDisplayName(equipe);
-      const um = card.dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          let tl = [...(m.terrains_list || [])];
-          if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) };
-          tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dest.dateStr, equipe_assignee: eqNom };
-          return { ...m, date_terrain: dest.dateStr, equipe_assignee: eqNom, terrains_list: tl };
-        }
-        return m;
-      });
-      onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
-    }
   };
 
+  // ---- Render DossierCard (custom drag) ----
   const DossierCard = ({ card }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+    const isDraggingThis = dragging?.card?.id === card.id;
     return (
-      <div onClick={(e) => { e.stopPropagation(); handleCardClick(card); }} className={`${arpColor.split(' ')[0]} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer border-none`}>
+      <div
+        onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e, card); }}
+        onClick={(e) => { e.stopPropagation(); handleCardClick(card); }}
+        className={`${arpColor.split(' ')[0]} rounded-lg p-2 mb-2 border ${arpColor.split(' ')[2]} cursor-grab select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'grab' }}
+      >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2">
             <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
@@ -462,10 +533,11 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   const renderEquipeContent = (equipe, dateStr) => {
-    const activeTab = getEquipeActiveTab(equipe.id);
     const equipeNom = generateTeamDisplayName(equipe);
+    const columnId = `terrain-${dateStr}-${equipe.id}`;
+    const isOver = overColumn === columnId && dragging;
     return (
-      <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
+      <div key={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''}`}>
         <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
           <div className="flex items-start justify-between gap-2">
             <div><span className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 block" onClick={() => handleEditTeam(dateStr, equipe)}>{equipeNom}</span><span className="text-emerald-300 text-xs">{calculateEquipeTimings(equipe).totalTime}h</span></div>
@@ -479,12 +551,10 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           {globalViewMode === "techniciens" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-blue-500/20' : 'border border-slate-700'}`}>{equipe.techniciens.map(id => { const t = techniciens.find(t => t.id === id); return t ? <span key={id} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Users className="w-3 h-3 text-blue-400" />{t.prenom} {t.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
           {globalViewMode === "vehicules" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-purple-500/20' : 'border border-slate-700'}`}>{equipe.vehicules.map(id => { const v = vehicules.find(v => v.id === id); return v ? <span key={id} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Truck className="w-3 h-3 text-purple-400" />{v.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
           {globalViewMode === "equipements" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-orange-500/20' : 'border border-slate-700'}`}>{equipe.equipements.map(id => { const e = equipements.find(e => e.id === id); return e ? <span key={id} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Wrench className="w-3 h-3 text-orange-400" />{e.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
-          <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
-            {(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[50px] -mx-2 ${s.isDraggingOver ? 'bg-cyan-500/10' : ''}`}>
-              {equipe.mandats.map((cId, i) => { const card = terrainCards.find(c => c.id === cId); if (!card) return null; return <Draggable key={cId} draggableId={cId} index={i}>{(p, s) => <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className={s.isDragging ? 'opacity-50' : ''}><DossierCard card={card} /></div>}</Draggable>; })}
-              {p.placeholder}
-            </div>}
-          </Droppable>
+          {/* Zone de drop custom pour les DossierCards */}
+          <div data-kanban-column={columnId} className={`min-h-[50px] -mx-2 px-2 rounded transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
+            {equipe.mandats.map((cId) => { const card = terrainCards.find(c => c.id === cId); if (!card) return null; return <DossierCard key={cId} card={card} />; })}
+          </div>
         </div>
       </div>
     );
@@ -515,32 +585,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     );
   };
 
-  const executePendingDrop = () => {
-    if (!pendingDragDrop) return;
-    const { source, destination, draggableId } = pendingDragDrop;
-    const dest = parseEquipeDroppableId(destination.droppableId);
-    if (!dest) return;
-    const ne = { ...equipes }; if (!ne[dest.dateStr]) return;
-    const equipe = ne[dest.dateStr].find(e => e.id === dest.equipeId); if (!equipe) return;
-    const sm = parseEquipeDroppableId(source.droppableId);
-    if (sm && source.droppableId !== "unassigned") { const se = ne[sm.dateStr]?.find(e => e.id === sm.equipeId); if (se) se.mandats = se.mandats.filter(id => id !== draggableId); }
-    if (!equipe.mandats.includes(draggableId)) equipe.mandats.splice(destination.index, 0, draggableId);
-    setEquipes(ne);
-    const card = terrainCards.find(c => c.id === draggableId);
-    if (card && onUpdateDossier) {
-      const eqNom = generateTeamDisplayName(equipe);
-      const um = card.dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dest.dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dest.dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
-        return m;
-      });
-      onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
-    }
-    setRendezVousWarning(null); setPendingDragDrop(null);
-  };
-
   return (
     <div className="space-y-4">
       <style>{`* { border: none !important; outline: none !important; } [class*="border"],[class*="shadow"],[class*="outline"] { border: none !important; box-shadow: none !important; outline: none !important; }`}</style>
+
+      {/* Ghost card pendant le drag custom */}
+      {dragging && <TerrainGhostCard card={dragging.card} pos={ghostPos} clients={clients} />}
 
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4">
         <CardContent className="p-4">
@@ -569,6 +619,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4">
+          {/* Panneau gauche - cartes non assignées */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs defaultValue="verification" className="w-full">
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3">
@@ -576,7 +627,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700">À planifier</TabsTrigger>
               </TabsList>
               <TabsContent value="verification" className="mt-0">
-                <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.mandat?.statut_terrain || c.mandat?.statut_terrain === "en_verification" || (c.terrain?.statut_terrain !== "a_ceduler" && c.terrain?.statut_terrain !== "pas_de_terrain")).length})</h3>
+                <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
                 <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                   {unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").map(card => (
                     <div key={card.id} className="mb-2">
@@ -588,22 +639,25 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               </TabsContent>
               <TabsContent value="planifier" className="mt-0">
                 <h3 className="text-white font-semibold mb-3 text-sm">À planifier ({unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").length})</h3>
-                <Droppable droppableId="unassigned">
-                  {(p) => <div ref={p.innerRef} {...p.droppableProps} className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-                    {unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").map((card, i) => (
-                      <Draggable key={card.id} draggableId={card.id} index={i}>
-                        {(p, s) => <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps} className={s.isDragging ? 'opacity-50' : ''}><div className="mb-2"><DossierCard card={card} /></div></div>}
-                      </Draggable>
-                    ))}
-                    {p.placeholder}
-                  </div>}
-                </Droppable>
+                {/* Zone de drop "retour" pour désassigner */}
+                <div
+                  data-kanban-column="unassigned"
+                  data-kanban-scroll
+                  className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2 rounded-lg transition-all ${overColumn === 'unassigned' && dragging ? 'bg-emerald-500/10 ring-2 ring-emerald-400/50' : ''}`}
+                >
+                  {unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").map((card) => (
+                    <div key={card.id} className="mb-2">
+                      <DossierCard card={card} />
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
             </Tabs>
           </Card>
 
-          <div className="flex-1 space-y-4 w-full">
-            <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
+          {/* Calendrier */}
+          <div data-kanban-scroll className="flex-1 overflow-x-auto" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+            <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content' }}>
               {days.map(day => renderDay(day, viewMode === "month"))}
             </div>
           </div>
@@ -639,24 +693,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!rendezVousWarning} onOpenChange={() => setRendezVousWarning(null)}>
+      <Dialog open={!!rendezVousWarning} onOpenChange={() => { setRendezVousWarning(null); setPendingDrop(null); }}>
         <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
           <DialogHeader><DialogTitle className="text-xl text-yellow-400 text-center">⚠️ Attention ⚠️</DialogTitle></DialogHeader>
           {rendezVousWarning && <div className="space-y-4">
             <p className="text-slate-300 text-center">Ce terrain a un rendez-vous le <span className="text-emerald-400 font-semibold">{format(new Date(rendezVousWarning.card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.</p>
             <p className="text-slate-300 text-center">Voulez-vous le déplacer vers le <span className="text-emerald-400 font-semibold">{format(new Date(rendezVousWarning.newDateStr + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span> ?</p>
             <div className="flex justify-center gap-3 pt-4">
-              <Button onClick={() => { setRendezVousWarning(null); setPendingDragDrop(null); }} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
+              <Button onClick={() => { setRendezVousWarning(null); setPendingDrop(null); }} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
               <Button onClick={executePendingDrop} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Continuer</Button>
             </div>
           </div>}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
-          <DialogHeader><DialogTitle className="text-xl">Documents Terrain</DialogTitle></DialogHeader>
-          {sharePointItem && <SharePointTerrainViewer arpenteurGeometre={sharePointItem.dossier.arpenteur_geometre} numeroDossier={sharePointItem.dossier.numero_dossier} />}
         </DialogContent>
       </Dialog>
 
