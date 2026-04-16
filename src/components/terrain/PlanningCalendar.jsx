@@ -467,6 +467,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
+  const holdTimerRef = useRef(null);
+  const didDragRef = useRef(false);
+
   const executePendingDrop = () => {
     if (!pendingDrop) return;
     const { card, dateStr, equipeId } = pendingDrop;
@@ -523,12 +526,34 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
     const isDraggingThis = dragging?.card?.id === card.id;
+
+    const onMouseDown = (e) => {
+      e.stopPropagation();
+      didDragRef.current = false;
+      const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
+      holdTimerRef.current = setTimeout(() => {
+        holdTimerRef.current = null;
+        didDragRef.current = true;
+        handleDragStart({ ...savedEvent, preventDefault: () => {} }, card);
+      }, 500);
+    };
+
+    const onMouseUp = () => {
+      if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null; }
+    };
+
+    const onClick = (e) => {
+      e.stopPropagation();
+      if (!didDragRef.current) handleCardClick(card);
+    };
+
     return (
       <div
-        onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e, card); }}
-        onClick={(e) => { e.stopPropagation(); handleCardClick(card); }}
-        className={`${arpColor.split(' ')[0]} rounded-lg p-2 mb-2 border ${arpColor.split(' ')[2]} cursor-grab select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'grab' }}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onClick={onClick}
+        className={`${arpColor.split(' ')[0]} rounded-lg p-2 mb-2 border ${arpColor.split(' ')[2]} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2">
