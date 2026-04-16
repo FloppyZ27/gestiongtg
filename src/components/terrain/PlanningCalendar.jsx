@@ -791,11 +791,43 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
           <DialogHeader className="p-4 border-b border-slate-800">
             <DialogTitle className="text-xl font-bold text-white">Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</DialogTitle>
+            {mapRoutes.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedRoutes(selectedRoutes.length === mapRoutes.length ? [] : mapRoutes.map((_, i) => i))}
+                  className="text-xs h-7 px-3"
+                  style={{ background: selectedRoutes.length === mapRoutes.length ? 'rgba(255,255,255,0.15)' : 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: 'white' }}
+                >
+                  {selectedRoutes.length === mapRoutes.length ? 'Tout masquer' : 'Tout afficher'}
+                </Button>
+                {mapRoutes.map((route, i) => {
+                  const isSelected = selectedRoutes.includes(i);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
+                        border: `2px solid ${route.color}`,
+                        background: isSelected ? `${route.color}33` : 'transparent',
+                        color: isSelected ? 'white' : 'rgba(255,255,255,0.5)',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
+                      {route.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </DialogHeader>
           <div className="flex-1 w-full h-full">
             {!googleMapsApiKey ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
               : mapRoutes.length === 0 ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-              : <div style={{ height: 'calc(90vh - 80px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} /></div>}
+              : <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}><MultiRouteMap routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} apiKey={googleMapsApiKey} /></div>}
           </div>
         </DialogContent>
       </Dialog>
