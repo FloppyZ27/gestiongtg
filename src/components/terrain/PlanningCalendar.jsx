@@ -583,11 +583,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== card.id); }));
       setEquipes(ne);
       if (onUpdateDossier) {
-        const um = card.dossier.mandats.map((m, idx) => {
-          if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: null, equipe_assignee: null }; return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl }; }
-          return m;
+        const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+        const targetMandat = card.mandat;
+        const um = freshDossier.mandats.map((m) => {
+          if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+          let tl = m.terrains_list && m.terrains_list.length > 0
+            ? [...m.terrains_list]
+            : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+          const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+          tl[tIdx] = { ...tl[tIdx], date_cedulee: null, equipe_assignee: null };
+          return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl };
         });
-        onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+        onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
       return;
     }
@@ -614,18 +621,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
         // Utiliser le dossier frais depuis la prop dossiers pour éviter les données périmées
         const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-        const um = freshDossier.mandats.map((m, idx) => {
-          if (idx === card.mandatIndex) {
-            // S'assurer que terrains_list existe et contient au moins un élément à l'index voulu
-            let tl = [...(m.terrains_list || [])];
-            if (!tl[card.terrainIndex]) {
-              // Initialiser depuis terrain principal si terrains_list vide
-              tl[card.terrainIndex] = { ...(m.terrain || {}), statut_terrain: m.statut_terrain };
-            }
-            tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom };
-            return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
-          }
-          return m;
+        // Identifier le mandat cible par type_mandat ET date_ouverture pour éviter les erreurs d'index
+        const targetMandat = card.mandat;
+        const um = freshDossier.mandats.map((m) => {
+          // Matcher par type_mandat et date_ouverture (identifiants stables)
+          if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+          // Construire terrains_list à partir de terrain principal si absente
+          let tl = m.terrains_list && m.terrains_list.length > 0
+            ? [...m.terrains_list]
+            : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+          const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+          tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
+          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
         });
         onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
@@ -763,16 +770,15 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const posIdx = dayEqs.findIndex(e => e.id === equipeId);
       const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
       const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-      const um = freshDossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          let tl = [...(m.terrains_list || [])];
-          if (!tl[card.terrainIndex]) {
-            tl[card.terrainIndex] = { ...(m.terrain || {}), statut_terrain: m.statut_terrain };
-          }
-          tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom };
-          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
-        }
-        return m;
+      const targetMandat = card.mandat;
+      const um = freshDossier.mandats.map((m) => {
+        if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+        let tl = m.terrains_list && m.terrains_list.length > 0
+          ? [...m.terrains_list]
+          : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+        const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+        tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
+        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
       });
       onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
     }
