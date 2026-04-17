@@ -288,11 +288,16 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const goToNext = () => viewMode === "week" ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
 
-  const generateTeamDisplayName = (equipe) => {
-    if (equipe.techniciens.length === 0) return equipe.nom;
+  const generateTeamDisplayName = (equipe, positionIndex) => {
+    // Si positionIndex fourni, utiliser ce numéro (1-based), sinon extraire du nom
+    const numStr = positionIndex != null
+      ? String(positionIndex + 1)
+      : (equipe.nom.match(/Équipe (\d+)/)?.[1] ?? null);
+    if (equipe.techniciens.length === 0) {
+      return numStr ? `Équipe ${numStr}` : equipe.nom;
+    }
     const initials = equipe.techniciens.map(id => { const t = techniciens.find(t => t.id === id); return t ? t.prenom.charAt(0) + t.nom.charAt(0) : ''; }).filter(n => n).join('-');
-    const match = equipe.nom.match(/Équipe (\d+)/);
-    return match ? `Équipe ${match[1]} - ${initials}` : equipe.nom;
+    return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
   };
 
   const parseEquipeDroppableId = (id) => {
@@ -832,8 +837,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     );
   };
 
-  const renderEquipeContent = (equipe, dateStr) => {
-    const equipeNom = generateTeamDisplayName(equipe);
+  const renderEquipeContent = (equipe, dateStr, positionIndex) => {
+    const equipeNom = generateTeamDisplayName(equipe, positionIndex);
     const columnId = `terrain-${dateStr}-${equipe.id}`;
     const isOver = overColumn === columnId && dragging;
     const isDraggingThisEquipe = draggingEquipe?.equipeId === equipe.id;
@@ -935,7 +940,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             {holiday && <div className="text-xs text-red-400">{holiday.name}</div>}
           </div>
         </div>
-        <div className="space-y-2">{dayEquipes.map(eq => renderEquipeContent(eq, dateStr))}</div>
+        <div className="space-y-2">{dayEquipes.map((eq, idx) => renderEquipeContent(eq, dateStr, idx))}</div>
         <Button size="sm" onClick={() => addEquipe(dateStr)} className={`w-full border-2 border-slate-600 bg-transparent hover:bg-slate-800 text-slate-300 mt-2 ${isMonthView ? 'h-5 text-xs' : 'h-6'}`}><Plus className="w-3 h-3 mr-1" />{isMonthView ? 'Ajouter' : 'Ajouter équipe'}</Button>
       </Card>
     );
@@ -957,7 +962,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         }}>
           <div className="bg-blue-600/80 rounded-lg px-3 py-2 border-2 border-blue-400/60">
             <span className="text-white text-sm font-bold">
-              {(() => { const eq = (equipes[draggingEquipe.dateStr] || []).find(e => e.id === draggingEquipe.equipeId); return eq ? generateTeamDisplayName(eq) : ''; })()}
+              {(() => { const dayEqs = (equipes[draggingEquipe.dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()); const idx = dayEqs.findIndex(e => e.id === draggingEquipe.equipeId); const eq = dayEqs[idx]; return eq ? generateTeamDisplayName(eq, idx >= 0 ? idx : undefined) : ''; })()}
             </span>
             <div className="text-blue-200 text-xs mt-0.5">Déplacer vers un autre jour</div>
           </div>
