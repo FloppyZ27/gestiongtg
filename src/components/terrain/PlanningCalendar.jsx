@@ -306,41 +306,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     return { dateStr: `${parts[1]}-${parts[2]}-${parts[3]}`, equipeId: parts[4], type: parts[5] };
   };
 
-  // Parse a custom drag column id: "terrain-{dateStr}-{equipeId}" or "unassigned"
-  // Met à jour equipe_assignee et date_cedulee dans tous les dossiers affectés par un nouvel état d'équipes
-  const syncDossiersAfterEquipeChange = useCallback((newEquipes) => {
-    if (!onUpdateDossier) return;
-    // Pour chaque carte assignée, recalculer son nom d'équipe et date selon la position dans newEquipes
-    Object.entries(newEquipes).forEach(([dateStr, dayEqs]) => {
-      const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
-      filtered.forEach((equipe, posIdx) => {
-        const equipeNom = generateTeamDisplayName(equipe, posIdx);
-        equipe.mandats.forEach(cardId => {
-          const card = terrainCards.find(c => c.id === cardId);
-          if (!card) return;
-          // Vérifier si la date ou le nom a changé
-          const currentTerrain = card.terrain;
-          if (currentTerrain?.date_cedulee === dateStr && currentTerrain?.equipe_assignee === equipeNom) return;
-          const um = card.dossier.mandats.map((m, idx) => {
-            if (idx !== card.mandatIndex) return m;
-            let tl = [...(m.terrains_list || [])];
-            if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: equipeNom };
-            return { ...m, date_terrain: dateStr, equipe_assignee: equipeNom, terrains_list: tl };
-          });
-          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
-        });
-      });
-    });
-  }, [terrainCards, onUpdateDossier, placeAffaire, generateTeamDisplayName]);
-
   const parseTerrainColumnId = (colId) => {
     if (!colId || colId === 'unassigned') return null;
     const prefix = 'terrain-';
     if (!colId.startsWith(prefix)) return null;
-    const rest = colId.slice(prefix.length); // "{dateStr}-{equipeId}"
-    // dateStr is "yyyy-MM-dd" (10 chars)
+    const rest = colId.slice(prefix.length);
     const dateStr = rest.slice(0, 10);
-    const equipeId = rest.slice(11); // skip the dash
+    const equipeId = rest.slice(11);
     return { dateStr, equipeId };
   };
 
@@ -367,6 +339,32 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   const terrainCards = generateTerrainCards();
+
+  // Met à jour equipe_assignee et date_cedulee dans tous les dossiers affectés par un nouvel état d'équipes
+  const syncDossiersAfterEquipeChange = useCallback((newEquipes) => {
+    if (!onUpdateDossier) return;
+    // Pour chaque carte assignée, recalculer son nom d'équipe et date selon la position dans newEquipes
+    Object.entries(newEquipes).forEach(([dateStr, dayEqs]) => {
+      const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+      filtered.forEach((equipe, posIdx) => {
+        const equipeNom = generateTeamDisplayName(equipe, posIdx);
+        equipe.mandats.forEach(cardId => {
+          const card = terrainCards.find(c => c.id === cardId);
+          if (!card) return;
+          // Vérifier si la date ou le nom a changé
+          const currentTerrain = card.terrain;
+          if (currentTerrain?.date_cedulee === dateStr && currentTerrain?.equipe_assignee === equipeNom) return;
+          const um = card.dossier.mandats.map((m, idx) => {
+            if (idx !== card.mandatIndex) return m;
+            let tl = [...(m.terrains_list || [])];
+            if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: equipeNom };
+            return { ...m, date_terrain: dateStr, equipe_assignee: equipeNom, terrains_list: tl };
+          });
+          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+        });
+      });
+    });
+  }, [terrainCards, onUpdateDossier, placeAffaire, generateTeamDisplayName]);
 
   useEffect(() => {
     const validIds = new Set(terrainCards.map(c => c.id));
