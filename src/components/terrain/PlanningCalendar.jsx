@@ -436,8 +436,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const nextStr = format(next, "yyyy-MM-dd");
     const ne = { ...equipes }; const equipe = ne[dateStr]?.find(e => e.id === equipeId); if (!equipe) return;
     // Vérifier si une équipe avec le même nom existe déjà ce jour-là
-    const alreadyExists = (ne[nextStr] || []).some(e => e.nom === equipe.nom);
-    if (alreadyExists) { setCopyErrorMessage(`L'équipe "${equipe.nom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
+    const equipeNom = generateTeamDisplayName(equipe);
+    const alreadyExists = (ne[nextStr] || []).some(e => generateTeamDisplayName(e) === equipeNom);
+    if (alreadyExists) { setCopyErrorMessage(`L'équipe "${equipeNom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
     // Créer directement en BD pour avoir un vrai ID
     const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     const created = await base44.entities.EquipeTerrain.create(data);
@@ -727,7 +728,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               });
             };
 
-            if (conflits.length > 0) {
+            // Vérifier si une équipe avec le même nom existe déjà à la date cible
+            const equipeNomSrc = generateTeamDisplayName(equipe);
+            const alreadyExistsAtTarget = destEquipes.some(eq => generateTeamDisplayName(eq) === equipeNomSrc);
+            if (alreadyExistsAtTarget) {
+              setCopyErrorMessage(`L'équipe "${equipeNomSrc}" existe déjà le ${format(new Date(targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}.`);
+            } else if (conflits.length > 0) {
               pendingEquipeMoveRef.current = { srcDate, targetDate, equipeId, equipe, doMove };
               setConflitTechnicienWarning({ equipe, srcDate, targetDate, conflits });
             } else {
