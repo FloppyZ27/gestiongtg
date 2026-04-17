@@ -436,9 +436,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const nextStr = format(next, "yyyy-MM-dd");
     const ne = { ...equipes }; const equipe = ne[dateStr]?.find(e => e.id === equipeId); if (!equipe) return;
     // Vérifier si une équipe avec le même nom existe déjà ce jour-là
-    const equipeNom = generateTeamDisplayName(equipe);
-    const alreadyExists = (ne[nextStr] || []).some(e => generateTeamDisplayName(e) === equipeNom);
-    if (alreadyExists) { setCopyErrorMessage(`L'équipe "${equipeNom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
+    const alreadyExists = (ne[nextStr] || []).some(e => e.nom === equipe.nom);
+    if (alreadyExists) { setCopyErrorMessage(`L'équipe "${equipe.nom}" existe déjà le ${format(next, "dd MMMM yyyy", { locale: fr })}.`); return; }
     // Créer directement en BD pour avoir un vrai ID
     const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     const created = await base44.entities.EquipeTerrain.create(data);
@@ -728,13 +727,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               });
             };
 
-            // Vérifier si une équipe avec le même nom existe déjà à la date cible
-            const equipeNomSrc = generateTeamDisplayName(equipe);
-            const alreadyExistsAtTarget = destEquipes.some(eq => generateTeamDisplayName(eq) === equipeNomSrc);
-            if (alreadyExistsAtTarget) {
-              pendingEquipeMoveRef.current = { srcDate, targetDate, equipeId, equipe, doMove };
-              setConflitTechnicienWarning({ equipe, srcDate, targetDate, conflits: [], alreadyExists: true, equipeNom: equipeNomSrc });
-            } else if (conflits.length > 0) {
+            if (conflits.length > 0) {
               pendingEquipeMoveRef.current = { srcDate, targetDate, equipeId, equipe, doMove };
               setConflitTechnicienWarning({ equipe, srcDate, targetDate, conflits });
             } else {
@@ -1145,41 +1138,25 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       <Dialog open={!!conflitTechnicienWarning} onOpenChange={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }}>
         <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
-          {conflitTechnicienWarning?.alreadyExists ? (
-            <>
-              <DialogHeader><DialogTitle className="text-xl text-yellow-400 text-center">⚠️ Équipe déjà existante</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <p className="text-slate-300 text-center">
-                  L'équipe <span className="text-emerald-400 font-semibold">"{conflitTechnicienWarning.equipeNom}"</span> existe déjà le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.
-                </p>
-                <div className="flex justify-center pt-2">
-                  <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">🚫 Techniciens déjà attribués</DialogTitle></DialogHeader>
-              {conflitTechnicienWarning && <div className="space-y-4">
-                <p className="text-slate-300 text-center">
-                  Impossible de déplacer cette équipe vers le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.
-                </p>
-                <p className="text-slate-400 text-center text-sm">Les techniciens suivants sont déjà assignés à une autre équipe ce jour-là :</p>
-                <ul className="space-y-1 bg-slate-800/50 rounded-lg p-3">
-                  {conflitTechnicienWarning.conflits.map((c, i) => (
-                    <li key={i} className="text-center text-sm">
-                      <span className="text-yellow-300 font-semibold">{c.technicien}</span>
-                      <span className="text-slate-400"> → </span>
-                      <span className="text-blue-300 font-semibold">{c.equipeNom}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-center pt-2">
-                  <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
-                </div>
-              </div>}
-            </>
-          )}
+          <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">🚫 Techniciens déjà attribués</DialogTitle></DialogHeader>
+          {conflitTechnicienWarning && <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Impossible de déplacer cette équipe vers le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.
+            </p>
+            <p className="text-slate-400 text-center text-sm">Les techniciens suivants sont déjà assignés à une autre équipe ce jour-là :</p>
+            <ul className="space-y-1 bg-slate-800/50 rounded-lg p-3">
+              {conflitTechnicienWarning.conflits.map((c, i) => (
+                <li key={i} className="text-center text-sm">
+                  <span className="text-yellow-300 font-semibold">{c.technicien}</span>
+                  <span className="text-slate-400"> → </span>
+                  <span className="text-blue-300 font-semibold">{c.equipeNom}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-center pt-2">
+              <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
+            </div>
+          </div>}
         </DialogContent>
       </Dialog>
 
