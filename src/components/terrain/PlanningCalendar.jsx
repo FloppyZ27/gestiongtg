@@ -162,6 +162,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [rendezVousWarning, setRendezVousWarning] = useState(null);
   const [pendingDrop, setPendingDrop] = useState(null);
   const [deleteEquipeWarning, setDeleteEquipeWarning] = useState(null);
+  const [conflitTechnicienWarning, setConflitTechnicienWarning] = useState(null); // { equipe, srcDate, targetDate, conflits: [{technicien, equipeNom}] }
+  const pendingEquipeMoveRef = useRef(null);
   const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
   const [isSaving, setIsSaving] = useState(false);
   const [mapRoutes, setMapRoutes] = useState([]);
@@ -654,30 +656,48 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             ne[srcDate] = without;
             setEquipes(ne);
           } else {
-            // Déplacer vers un autre jour
-            // Retirer de la source
-            ne[srcDate] = srcEquipes.filter(e => e.id !== equipeId);
-            if (!ne[srcDate].length) delete ne[srcDate];
-            // Ajouter à la destination
-            if (!ne[targetDate]) ne[targetDate] = [];
-            ne[targetDate] = [...ne[targetDate], { ...equipe }];
-            // Mettre à jour les dossiers assignés à cette équipe
-            const equipeNom = generateTeamDisplayName(equipe);
-            equipe.mandats.forEach(cardId => {
-              const card = terrainCards.find(c => c.id === cardId);
-              if (card && onUpdateDossier) {
-                const um = card.dossier.mandats.map((m, idx) => {
-                  if (idx === card.mandatIndex) {
-                    let tl = [...(m.terrains_list || [])];
-                    if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
-                    return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
-                  }
-                  return m;
-                });
-                onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+            // Déplacer vers un autre jour — vérifier les conflits de techniciens
+            const destEquipes = ne[targetDate] || [];
+            const conflits = [];
+            equipe.techniciens.forEach(techId => {
+              const equipeConflictuante = destEquipes.find(eq => eq.id !== equipeId && eq.techniciens.includes(techId));
+              if (equipeConflictuante) {
+                const tech = techniciens.find(t => t.id === techId);
+                conflits.push({ technicien: tech ? `${tech.prenom} ${tech.nom}` : techId, equipeNom: generateTeamDisplayName(equipeConflictuante) });
               }
             });
-            setEquipes(ne);
+
+            const doMove = (srcDate, targetDate, equipeId, equipe) => {
+              const ne2 = { ...equipes };
+              const src2 = ne2[srcDate] || [];
+              ne2[srcDate] = src2.filter(e => e.id !== equipeId);
+              if (!ne2[srcDate].length) delete ne2[srcDate];
+              if (!ne2[targetDate]) ne2[targetDate] = [];
+              ne2[targetDate] = [...ne2[targetDate], { ...equipe }];
+              const equipeNom = generateTeamDisplayName(equipe);
+              equipe.mandats.forEach(cardId => {
+                const card = terrainCards.find(c => c.id === cardId);
+                if (card && onUpdateDossier) {
+                  const um = card.dossier.mandats.map((m, idx) => {
+                    if (idx === card.mandatIndex) {
+                      let tl = [...(m.terrains_list || [])];
+                      if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
+                      return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
+                    }
+                    return m;
+                  });
+                  onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+                }
+              });
+              setEquipes(ne2);
+            };
+
+            if (conflits.length > 0) {
+              pendingEquipeMoveRef.current = { srcDate, targetDate, equipeId, equipe, doMove };
+              setConflitTechnicienWarning({ equipe, srcDate, targetDate, conflits });
+            } else {
+              doMove(srcDate, targetDate, equipeId, equipe);
+            }
           }
         }
       }
@@ -1067,6 +1087,36 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             <div className="flex justify-center gap-3 pt-4">
               <Button onClick={() => setDeleteEquipeWarning(null)} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
               <Button onClick={() => confirmRemoveEquipe(deleteEquipeWarning.dateStr, deleteEquipeWarning.equipeId)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Supprimer</Button>
+            </div>
+          </div>}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!conflitTechnicienWarning} onOpenChange={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }}>
+        <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-yellow-400 text-center">⚠️ Conflit de techniciens</DialogTitle></DialogHeader>
+          {conflitTechnicienWarning && <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Les techniciens suivants sont déjà assignés le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span> :
+            </p>
+            <ul className="space-y-1">
+              {conflitTechnicienWarning.conflits.map((c, i) => (
+                <li key={i} className="text-center text-sm">
+                  <span className="text-yellow-300 font-semibold">{c.technicien}</span>
+                  <span className="text-slate-400"> → déjà dans </span>
+                  <span className="text-blue-300 font-semibold">{c.equipeNom}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-slate-400 text-center text-sm">Voulez-vous quand même déplacer l'équipe ?</p>
+            <div className="flex justify-center gap-3 pt-2">
+              <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
+              <Button onClick={() => {
+                const p = pendingEquipeMoveRef.current;
+                if (p) p.doMove(p.srcDate, p.targetDate, p.equipeId, p.equipe);
+                setConflitTechnicienWarning(null);
+                pendingEquipeMoveRef.current = null;
+              }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Déplacer quand même</Button>
             </div>
           </div>}
         </DialogContent>
