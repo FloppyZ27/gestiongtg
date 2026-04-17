@@ -221,12 +221,19 @@ export default function CeduleTerrain() {
     onMutate: async ({ id, data }) => {
       // Mise à jour optimiste du cache pour réponse immédiate
       await queryClient.cancelQueries({ queryKey: ['dossiers'] });
+      const previous = queryClient.getQueryData(['dossiers']);
       queryClient.setQueryData(['dossiers'], (old) => {
         if (!old) return old;
         return old.map(d => d.id === id ? { ...d, ...data } : d);
       });
+      return { previous };
     },
-    onSettled: () => {
+    onError: (_err, _vars, context) => {
+      // Restaurer les données précédentes en cas d'erreur
+      if (context?.previous) queryClient.setQueryData(['dossiers'], context.previous);
+    },
+    onSuccess: () => {
+      // N'invalider qu'après succès pour éviter un re-fetch prématuré
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
     },
   });
