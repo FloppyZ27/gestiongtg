@@ -578,7 +578,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
           const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: null, equipe_assignee: null };
-          return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl };
+          const terrainPrincipal = { ...(m.terrain || {}), ...tl[0], date_cedulee: null, equipe_assignee: null };
+          return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl, terrain: terrainPrincipal };
         });
         onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
@@ -605,20 +606,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
         const posIdx = dayEqs.findIndex(e => e.id === equipeId);
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-        // Utiliser le dossier frais depuis la prop dossiers pour éviter les données périmées
         const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-        // Identifier le mandat cible par type_mandat ET date_ouverture pour éviter les erreurs d'index
         const targetMandat = card.mandat;
         const um = freshDossier.mandats.map((m) => {
-          // Matcher par type_mandat et date_ouverture (identifiants stables)
           if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
-          // Construire terrains_list à partir de terrain principal si absente
           let tl = m.terrains_list && m.terrains_list.length > 0
             ? [...m.terrains_list]
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
           const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
+          // Sync terrain principal (lu par MandatTabs) avec les données du premier terrain
+          const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
+          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
         });
         onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
@@ -770,7 +769,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
         const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
         tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
+        const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
+        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
       });
       onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
     }
