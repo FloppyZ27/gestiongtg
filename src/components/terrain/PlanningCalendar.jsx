@@ -622,11 +622,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
         const posIdx = dayEqs.findIndex(e => e.id === equipeId);
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-        const um = card.dossier.mandats.map((m, idx) => {
+        // Utiliser le dossier frais depuis la prop dossiers pour éviter les données périmées
+        const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+        const um = freshDossier.mandats.map((m, idx) => {
           if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
           return m;
         });
-        onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+        onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
     };
 
@@ -638,7 +640,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     }
 
     doTheDrop(dest.dateStr, dest.equipeId);
-  }, [equipes, onUpdateDossier]);
+  }, [equipes, onUpdateDossier, dossiers, placeAffaire, generateTeamDisplayName]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
@@ -761,11 +763,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
       const posIdx = dayEqs.findIndex(e => e.id === equipeId);
       const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-      const um = card.dossier.mandats.map((m, idx) => {
+      const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+      const um = freshDossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
         return m;
       });
-      onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+      onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
     }
     setRendezVousWarning(null); setPendingDrop(null);
   };
