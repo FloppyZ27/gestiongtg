@@ -618,7 +618,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
           const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
+          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, statut_terrain: m.statut_terrain === "en_verification" ? "a_ceduler" : (m.statut_terrain || "a_ceduler") };
         });
         onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
       }
@@ -770,7 +770,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
         const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
         tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl };
+        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, statut_terrain: m.statut_terrain === "en_verification" ? "a_ceduler" : (m.statut_terrain || "a_ceduler") };
       });
       onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
     }
