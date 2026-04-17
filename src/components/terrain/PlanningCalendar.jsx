@@ -184,15 +184,20 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           grouped[d].push({ id: eq.id, nom: eq.nom, place_affaire: eq.place_affaire, techniciens: eq.techniciens || [], vehicules: eq.vehicules || [], equipements: eq.equipements || [], mandats: eq.mandats || [] });
         });
         setEquipes(grouped);
+        // Marquer le chargement initial comme terminé après un court délai
+        setTimeout(() => { isInitialLoadRef.current = false; }, 500);
       } catch (e) { console.error('Erreur chargement équipes:', e); }
     };
     loadEquipes();
   }, []);
 
   const prevEquipesRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     const save = async () => {
+      // Ne pas sauvegarder lors du chargement initial
+      if (isInitialLoadRef.current) return;
       if (Object.keys(equipes).length === 0) return;
 
       // Trouver seulement les équipes qui ont changé
@@ -348,37 +353,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   useEffect(() => {
     const validIds = new Set(terrainCards.map(c => c.id));
-    let needsUpdate = false;
 
     setEquipes(prev => {
+      let needsUpdate = false;
       const updated = JSON.parse(JSON.stringify(prev)); // deep clone
 
-      // 1. Retirer les cartes qui n'existent plus (dossier supprimé, tâche changée, etc.)
+      // Retirer uniquement les cartes qui n'existent plus (dossier supprimé, tâche changée, etc.)
       Object.keys(updated).forEach(dateStr => {
         updated[dateStr].forEach(equipe => {
           const orig = equipe.mandats.length;
           equipe.mandats = equipe.mandats.filter(id => validIds.has(id));
           if (equipe.mandats.length !== orig) needsUpdate = true;
         });
-      });
-
-      // 2. Ajouter les cartes déjà assignées dans les données dossier mais absentes du state local
-      // (ex: rechargement de page, première visite)
-      const alreadyAssigned = new Set(Object.values(updated).flatMap(de => de.flatMap(eq => eq.mandats)));
-      terrainCards.forEach(card => {
-        if (alreadyAssigned.has(card.id)) return; // déjà dans une équipe locale → ne pas toucher
-        if (card.terrain?.date_cedulee && card.terrain?.equipe_assignee) {
-          const dateStr = card.terrain.date_cedulee;
-          const equipeNom = card.terrain.equipe_assignee;
-          if (!updated[dateStr]) updated[dateStr] = [];
-          let equipe = updated[dateStr].find(eq => generateTeamDisplayName(eq) === equipeNom);
-          if (!equipe) {
-            equipe = { id: `eq${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, nom: equipeNom, place_affaire: placeAffaire, techniciens: [], vehicules: [], equipements: [], mandats: [] };
-            updated[dateStr].push(equipe);
-          }
-          equipe.mandats.push(card.id);
-          needsUpdate = true;
-        }
       });
 
       return needsUpdate ? updated : prev;
