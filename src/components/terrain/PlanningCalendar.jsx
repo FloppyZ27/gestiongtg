@@ -325,17 +325,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const cards = [];
     const filtered = placeAffaire ? dossiers.filter(d => d.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()) : dossiers;
     filtered.forEach(dossier => {
-      const mandatsCedule = dossier.mandats?.filter(m => m.tache_actuelle === "Cédule") || [];
-      mandatsCedule.forEach((mandat, mandatIndex) => {
+      (dossier.mandats || []).forEach((mandat, realMandatIndex) => {
+        if (mandat.tache_actuelle !== "Cédule") return;
         if (mandat.terrains_list?.length > 0) {
           mandat.terrains_list.forEach((terrain, terrainIndex) => {
-            cards.push({ id: `${dossier.id}-${mandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex, terrainIndex });
+            cards.push({ id: `${dossier.id}-${realMandatIndex}-${terrainIndex}`, dossierId: dossier.id, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex: realMandatIndex, terrainIndex });
           });
         } else {
           const statutTerrain = mandat.statut_terrain;
           if (!statutTerrain || statutTerrain === "en_verification") {
             const syntheticTerrain = { ...(mandat.terrain || {}), statut_terrain: statutTerrain || "en_verification" };
-            cards.push({ id: `${dossier.id}-${mandatIndex}-0`, dossierId: dossier.id, dossier, mandat, terrain: syntheticTerrain, mandatIndex, terrainIndex: 0 });
+            cards.push({ id: `${dossier.id}-${realMandatIndex}-0`, dossierId: dossier.id, dossier, mandat, terrain: syntheticTerrain, mandatIndex: realMandatIndex, terrainIndex: 0 });
           }
         }
       });
@@ -570,9 +570,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       setEquipes(ne);
       if (onUpdateDossier) {
         const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-        const targetMandat = card.mandat;
-        const um = freshDossier.mandats.map((m) => {
-          if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+        const um = freshDossier.mandats.map((m, idx) => {
+          if (idx !== card.mandatIndex) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
             ? [...m.terrains_list]
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
@@ -607,15 +606,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const posIdx = dayEqs.findIndex(e => e.id === equipeId);
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
         const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-        const targetMandat = card.mandat;
-        const um = freshDossier.mandats.map((m) => {
-          if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+        const um = freshDossier.mandats.map((m, idx) => {
+          if (idx !== card.mandatIndex) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
             ? [...m.terrains_list]
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
           const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-          // Sync terrain principal (lu par MandatTabs) avec les données du premier terrain
           const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
           return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
         });
@@ -761,9 +758,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const posIdx = dayEqs.findIndex(e => e.id === equipeId);
       const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
       const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
-      const targetMandat = card.mandat;
-      const um = freshDossier.mandats.map((m) => {
-        if (m.type_mandat !== targetMandat.type_mandat || m.date_ouverture !== targetMandat.date_ouverture) return m;
+      const um = freshDossier.mandats.map((m, idx) => {
+        if (idx !== card.mandatIndex) return m;
         let tl = m.terrains_list && m.terrains_list.length > 0
           ? [...m.terrains_list]
           : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
