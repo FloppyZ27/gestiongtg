@@ -244,7 +244,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         }
       } catch (e) { console.error('Erreur sauvegarde:', e); } finally { setIsSaving(false); }
     };
-    const id = setTimeout(save, 1500);
+    const id = setTimeout(save, 3000);
     return () => clearTimeout(id);
   }, [equipes]);
 
@@ -340,59 +340,49 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const terrainCards = generateTerrainCards();
 
-  // Met à jour equipe_assignee et date_cedulee dans tous les dossiers affectés par un nouvel état d'équipes
-  const syncDossiersAfterEquipeChange = useCallback((newEquipes) => {
-    if (!onUpdateDossier) return;
-    // Pour chaque carte assignée, recalculer son nom d'équipe et date selon la position dans newEquipes
-    Object.entries(newEquipes).forEach(([dateStr, dayEqs]) => {
-      const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
-      filtered.forEach((equipe, posIdx) => {
-        const equipeNom = generateTeamDisplayName(equipe, posIdx);
-        equipe.mandats.forEach(cardId => {
-          const card = terrainCards.find(c => c.id === cardId);
-          if (!card) return;
-          // Vérifier si la date ou le nom a changé
-          const currentTerrain = card.terrain;
-          if (currentTerrain?.date_cedulee === dateStr && currentTerrain?.equipe_assignee === equipeNom) return;
-          const um = card.dossier.mandats.map((m, idx) => {
-            if (idx !== card.mandatIndex) return m;
-            let tl = [...(m.terrains_list || [])];
-            if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: equipeNom };
-            return { ...m, date_terrain: dateStr, equipe_assignee: equipeNom, terrains_list: tl };
-          });
-          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
-        });
-      });
-    });
-  }, [terrainCards, onUpdateDossier, placeAffaire, generateTeamDisplayName]);
+  // Supprimé: syncDossiersAfterEquipeChange causait des appels API excessifs (rate limit 429)
+  // Les mises à jour de dossier sont faites directement dans executeDrop/executePendingDrop
+  const syncDossiersAfterEquipeChange = useCallback((_newEquipes) => {
+    // No-op: intentionnellement vide pour éviter le rate limiting
+  }, []);
 
   useEffect(() => {
     const validIds = new Set(terrainCards.map(c => c.id));
     let needsUpdate = false;
-    const updated = { ...equipes };
-    Object.keys(updated).forEach(dateStr => {
-      updated[dateStr].forEach(equipe => {
-        const orig = equipe.mandats.length;
-        equipe.mandats = equipe.mandats.filter(id => validIds.has(id));
-        if (equipe.mandats.length !== orig) needsUpdate = true;
+
+    setEquipes(prev => {
+      const updated = JSON.parse(JSON.stringify(prev)); // deep clone
+
+      // 1. Retirer les cartes qui n'existent plus (dossier supprimé, tâche changée, etc.)
+      Object.keys(updated).forEach(dateStr => {
+        updated[dateStr].forEach(equipe => {
+          const orig = equipe.mandats.length;
+          equipe.mandats = equipe.mandats.filter(id => validIds.has(id));
+          if (equipe.mandats.length !== orig) needsUpdate = true;
+        });
       });
-    });
-    terrainCards.forEach(card => {
-      if (card.terrain?.date_cedulee && card.terrain?.equipe_assignee) {
-        const dateStr = card.terrain.date_cedulee; const equipeNom = card.terrain.equipe_assignee;
-        const isAssigned = Object.values(updated).some(de => de.some(eq => eq.mandats.includes(card.id)));
-        if (!isAssigned) {
+
+      // 2. Ajouter les cartes déjà assignées dans les données dossier mais absentes du state local
+      // (ex: rechargement de page, première visite)
+      const alreadyAssigned = new Set(Object.values(updated).flatMap(de => de.flatMap(eq => eq.mandats)));
+      terrainCards.forEach(card => {
+        if (alreadyAssigned.has(card.id)) return; // déjà dans une équipe locale → ne pas toucher
+        if (card.terrain?.date_cedulee && card.terrain?.equipe_assignee) {
+          const dateStr = card.terrain.date_cedulee;
+          const equipeNom = card.terrain.equipe_assignee;
           if (!updated[dateStr]) updated[dateStr] = [];
           let equipe = updated[dateStr].find(eq => generateTeamDisplayName(eq) === equipeNom);
           if (!equipe) {
             equipe = { id: `eq${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, nom: equipeNom, place_affaire: placeAffaire, techniciens: [], vehicules: [], equipements: [], mandats: [] };
             updated[dateStr].push(equipe);
           }
-          if (!equipe.mandats.includes(card.id)) { equipe.mandats.push(card.id); needsUpdate = true; }
+          equipe.mandats.push(card.id);
+          needsUpdate = true;
         }
-      }
+      });
+
+      return needsUpdate ? updated : prev;
     });
-    if (needsUpdate) setEquipes(updated);
   }, [dossiers]);
 
   const unassignedCards = terrainCards.filter(card => {
