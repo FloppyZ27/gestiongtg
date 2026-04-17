@@ -187,26 +187,62 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     loadEquipes();
   }, []);
 
+  const prevEquipesRef = useRef(null);
+
   useEffect(() => {
     const save = async () => {
       if (Object.keys(equipes).length === 0) return;
+
+      // Trouver seulement les équipes qui ont changé
+      const prev = prevEquipesRef.current;
+      const changed = [];
+      const currentIds = new Set();
+
+      for (const [dateStr, dayEquipes] of Object.entries(equipes)) {
+        for (const equipe of dayEquipes) {
+          currentIds.add(equipe.id);
+          const prevEquipe = prev ? Object.values(prev).flat().find(e => e.id === equipe.id) : null;
+          const prevDateStr = prev ? Object.keys(prev).find(d => prev[d].some(e => e.id === equipe.id)) : null;
+          const hasChanged = !prevEquipe ||
+            JSON.stringify(equipe.mandats) !== JSON.stringify(prevEquipe.mandats) ||
+            JSON.stringify(equipe.techniciens) !== JSON.stringify(prevEquipe.techniciens) ||
+            JSON.stringify(equipe.vehicules) !== JSON.stringify(prevEquipe.vehicules) ||
+            JSON.stringify(equipe.equipements) !== JSON.stringify(prevEquipe.equipements) ||
+            prevDateStr !== dateStr ||
+            equipe.nom !== prevEquipe.nom;
+          if (hasChanged) changed.push({ dateStr, equipe });
+        }
+      }
+
+      // Trouver les équipes supprimées
+      const deleted = [];
+      if (prev) {
+        for (const dayEquipes of Object.values(prev)) {
+          for (const eq of dayEquipes) {
+            if (!currentIds.has(eq.id)) deleted.push(eq.id);
+          }
+        }
+      }
+
+      if (changed.length === 0 && deleted.length === 0) return;
+
+      prevEquipesRef.current = JSON.parse(JSON.stringify(equipes));
       setIsSaving(true);
       try {
         const existing = await base44.entities.EquipeTerrain.list();
         const existingIds = new Set(existing.map(eq => eq.id));
-        const currentIds = new Set();
-        for (const [dateStr, dayEquipes] of Object.entries(equipes)) {
-          for (const equipe of dayEquipes) {
-            currentIds.add(equipe.id);
-            const data = { date_terrain: dateStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: equipe.techniciens || [], vehicules: equipe.vehicules || [], equipements: equipe.equipements || [], mandats: equipe.mandats || [] };
-            if (existingIds.has(equipe.id)) await base44.entities.EquipeTerrain.update(equipe.id, data);
-            else await base44.entities.EquipeTerrain.create(data);
-          }
+
+        for (const { dateStr, equipe } of changed) {
+          const data = { date_terrain: dateStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: equipe.techniciens || [], vehicules: equipe.vehicules || [], equipements: equipe.equipements || [], mandats: equipe.mandats || [] };
+          if (existingIds.has(equipe.id)) await base44.entities.EquipeTerrain.update(equipe.id, data);
+          else await base44.entities.EquipeTerrain.create(data);
         }
-        for (const eq of existing) { if (!currentIds.has(eq.id)) await base44.entities.EquipeTerrain.delete(eq.id); }
+        for (const id of deleted) {
+          if (existingIds.has(id)) await base44.entities.EquipeTerrain.delete(id);
+        }
       } catch (e) { console.error('Erreur sauvegarde:', e); } finally { setIsSaving(false); }
     };
-    const id = setTimeout(save, 1000);
+    const id = setTimeout(save, 1500);
     return () => clearTimeout(id);
   }, [equipes]);
 
@@ -573,6 +609,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const equipeHoldTimerRef = useRef(null);
   const didEquipeDragRef = useRef(false);
   const overDayColumnRef = useRef(null);
+  const ghostPosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => { overDayColumnRef.current = overDayColumn; }, [overDayColumn]);
 
@@ -588,6 +625,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (!draggingEquipe) return;
     const onMove = (e) => {
       setEquipeGhostPos({ x: e.clientX, y: e.clientY });
+      ghostPosRef.current = { x: e.clientX, y: e.clientY };
       const el = document.elementFromPoint(e.clientX, e.clientY);
       const colEl = el?.closest('[data-day-column]');
       setOverDayColumn(colEl ? colEl.getAttribute('data-day-column') : null);
@@ -601,14 +639,20 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const equipe = srcEquipes.find(e => e.id === equipeId);
         if (equipe) {
           if (targetDate === srcDate) {
-            // Réordonner au sein du même jour
-            const equipeIndex = srcEquipes.findIndex(e => e.id === equipeId);
-            if (equipeIndex !== -1) {
-              const reordered = srcEquipes.filter((_, i) => i !== equipeIndex);
-              reordered.push(equipe);
-              ne[srcDate] = reordered;
-              setEquipes(ne);
-            }
+            // Réordonner au sein du même jour — trouver l'index cible par position souris
+            const { y } = ghostPosRef.current;
+            const equipeEls = document.querySelectorAll(`[data-day-column="${srcDate}"] [data-equipe-id]`);
+            let insertIndex = srcEquipes.length - 1;
+            equipeEls.forEach((el, i) => {
+              const rect = el.getBoundingClientRect();
+              if (y < rect.top + rect.height / 2) {
+                insertIndex = Math.min(insertIndex, i);
+              }
+            });
+            const without = srcEquipes.filter(e => e.id !== equipeId);
+            without.splice(Math.min(insertIndex, without.length), 0, equipe);
+            ne[srcDate] = without;
+            setEquipes(ne);
           } else {
             // Déplacer vers un autre jour
             // Retirer de la source
@@ -791,7 +835,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     };
 
     return (
-      <div key={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''} ${isDraggingThisEquipe ? 'opacity-30 scale-95' : ''}`}>
+      <div key={equipe.id} data-equipe-id={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''} ${isDraggingThisEquipe ? 'opacity-30 scale-95' : ''}`}>
         <div
           className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50 cursor-grab active:cursor-grabbing select-none"
           onMouseDown={onEquipeHeaderMouseDown}
