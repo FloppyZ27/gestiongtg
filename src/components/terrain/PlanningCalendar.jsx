@@ -173,6 +173,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
+  const prevEquipesRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
+
   useEffect(() => {
     const loadEquipes = async () => {
       try {
@@ -190,9 +193,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     };
     loadEquipes();
   }, []);
-
-  const prevEquipesRef = useRef(null);
-  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     const save = async () => {
