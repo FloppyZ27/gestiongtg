@@ -349,7 +349,7 @@ export default function MandatTabs({
                   <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
                     <TableCell className="text-white">{minute.minute}</TableCell>
                     <TableCell className="text-white">
-                      {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
+                      {minute.date_minute ? format(new Date(minute.date_minute + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : '-'}
                     </TableCell>
                     <TableCell className="text-white">
                       <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
@@ -401,7 +401,7 @@ export default function MandatTabs({
                 {mandat.factures.map((facture, factureIdx) => (
                   <TableRow key={factureIdx} className="border-slate-800">
                     <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
-                    <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                    <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
                     <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
                     <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
                   </TableRow>
