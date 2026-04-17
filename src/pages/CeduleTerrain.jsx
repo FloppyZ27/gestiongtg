@@ -232,9 +232,12 @@ export default function CeduleTerrain() {
       // Restaurer les données précédentes en cas d'erreur
       if (context?.previous) queryClient.setQueryData(['dossiers'], context.previous);
     },
-    onSuccess: () => {
-      // N'invalider qu'après succès pour éviter un re-fetch prématuré
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    onSuccess: (_data, { id, data }) => {
+      // Mettre à jour le cache avec les données exactes retournées, sans invalider (évite le flash)
+      queryClient.setQueryData(['dossiers'], (old) => {
+        if (!old) return old;
+        return old.map(d => d.id === id ? { ...d, ...data } : d);
+      });
     },
   });
 
