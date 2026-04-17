@@ -230,11 +230,11 @@ export default function CeduleTerrain() {
     onError: (_err, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(['dossiers'], context.previous);
     },
-    onSuccess: (apiData, { id, data }) => {
-      // Utiliser les données retournées par l'API (source de vérité)
+    onSuccess: (_apiData, { id, data }) => {
+      // Garder les données qu'on a envoyées (data) comme source de vérité dans le cache
       queryClient.setQueryData(['dossiers'], (old) => {
         if (!old) return old;
-        return old.map(d => d.id === id ? { ...d, ...data, ...(apiData || {}) } : d);
+        return old.map(d => d.id === id ? { ...d, ...data } : d);
       });
     },
   });
