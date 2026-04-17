@@ -288,7 +288,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const goToNext = () => viewMode === "week" ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
 
-  const generateTeamDisplayName = (equipe, positionIndex) => {
+  const generateTeamDisplayName = useCallback((equipe, positionIndex) => {
     // Si positionIndex fourni, utiliser ce numéro (1-based), sinon extraire du nom
     const numStr = positionIndex != null
       ? String(positionIndex + 1)
@@ -298,7 +298,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     }
     const initials = equipe.techniciens.map(id => { const t = techniciens.find(t => t.id === id); return t ? t.prenom.charAt(0) + t.nom.charAt(0) : ''; }).filter(n => n).join('-');
     return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
-  };
+  }, [techniciens]);
 
   const parseEquipeDroppableId = (id) => {
     if (!id.startsWith('equipe-')) return null;
@@ -307,6 +307,32 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   // Parse a custom drag column id: "terrain-{dateStr}-{equipeId}" or "unassigned"
+  // Met à jour equipe_assignee et date_cedulee dans tous les dossiers affectés par un nouvel état d'équipes
+  const syncDossiersAfterEquipeChange = useCallback((newEquipes) => {
+    if (!onUpdateDossier) return;
+    // Pour chaque carte assignée, recalculer son nom d'équipe et date selon la position dans newEquipes
+    Object.entries(newEquipes).forEach(([dateStr, dayEqs]) => {
+      const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+      filtered.forEach((equipe, posIdx) => {
+        const equipeNom = generateTeamDisplayName(equipe, posIdx);
+        equipe.mandats.forEach(cardId => {
+          const card = terrainCards.find(c => c.id === cardId);
+          if (!card) return;
+          // Vérifier si la date ou le nom a changé
+          const currentTerrain = card.terrain;
+          if (currentTerrain?.date_cedulee === dateStr && currentTerrain?.equipe_assignee === equipeNom) return;
+          const um = card.dossier.mandats.map((m, idx) => {
+            if (idx !== card.mandatIndex) return m;
+            let tl = [...(m.terrains_list || [])];
+            if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: equipeNom };
+            return { ...m, date_terrain: dateStr, equipe_assignee: equipeNom, terrains_list: tl };
+          });
+          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
+        });
+      });
+    });
+  }, [terrainCards, onUpdateDossier, placeAffaire, generateTeamDisplayName]);
+
   const parseTerrainColumnId = (colId) => {
     if (!colId || colId === 'unassigned') return null;
     const prefix = 'terrain-';
@@ -406,7 +432,14 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const handleEditTeam = (dateStr, equipe) => { setEditingTeam(equipe); setEditTeamDateStr(dateStr); setIsEditTeamDialogOpen(true); };
   const handleUpdateTeam = (updatedTeam) => {
     const ne = { ...equipes };
-    if (ne[editTeamDateStr]) { const idx = ne[editTeamDateStr].findIndex(eq => eq.id === updatedTeam.id); if (idx !== -1) { ne[editTeamDateStr][idx] = updatedTeam; setEquipes(ne); } }
+    if (ne[editTeamDateStr]) {
+      const idx = ne[editTeamDateStr].findIndex(eq => eq.id === updatedTeam.id);
+      if (idx !== -1) {
+        ne[editTeamDateStr][idx] = updatedTeam;
+        setEquipes(ne);
+        syncDossiersAfterEquipeChange(ne);
+      }
+    }
     setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null);
   };
   const copyEquipe = async (dateStr, equipeId) => {
@@ -588,7 +621,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       equipe.mandats = withoutCard;
       setEquipes(ne);
       if (onUpdateDossier) {
-        const eqNom = generateTeamDisplayName(equipe);
+        const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+        const posIdx = dayEqs.findIndex(e => e.id === equipeId);
+        const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
         const um = card.dossier.mandats.map((m, idx) => {
           if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
           return m;
@@ -660,6 +695,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             without.splice(Math.min(insertIndex, without.length), 0, equipe);
             ne[srcDate] = without;
             setEquipes(ne);
+            syncDossiersAfterEquipeChange(ne);
           } else {
             // Déplacer vers un autre jour — vérifier les conflits de techniciens
             const destEquipes = ne[targetDate] || [];
@@ -680,22 +716,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 if (!ne2[srcDate].length) delete ne2[srcDate];
                 if (!ne2[targetDate]) ne2[targetDate] = [];
                 ne2[targetDate] = [...(ne2[targetDate] || []), { ...equipe }];
+                syncDossiersAfterEquipeChange(ne2);
                 return ne2;
-              });
-              const equipeNom = generateTeamDisplayName(equipe);
-              equipe.mandats.forEach(cardId => {
-                const card = terrainCards.find(c => c.id === cardId);
-                if (card && onUpdateDossier) {
-                  const um = card.dossier.mandats.map((m, idx) => {
-                    if (idx === card.mandatIndex) {
-                      let tl = [...(m.terrains_list || [])];
-                      if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: targetDate, equipe_assignee: equipeNom };
-                      return { ...m, date_terrain: targetDate, equipe_assignee: equipeNom, terrains_list: tl };
-                    }
-                    return m;
-                  });
-                  onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
-                }
               });
             };
 
@@ -719,7 +741,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  }, [draggingEquipe, equipes, terrainCards, onUpdateDossier]);
+  }, [draggingEquipe, equipes, terrainCards, onUpdateDossier, syncDossiersAfterEquipeChange]);
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
@@ -738,7 +760,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     equipe.mandats = withoutCard;
     setEquipes(ne);
     if (onUpdateDossier) {
-      const eqNom = generateTeamDisplayName(equipe);
+      const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+      const posIdx = dayEqs.findIndex(e => e.id === equipeId);
+      const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
       const um = card.dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (!tl[card.terrainIndex]) tl[card.terrainIndex] = { ...(card.terrain || {}) }; tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: dateStr, equipe_assignee: eqNom }; return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl }; }
         return m;
