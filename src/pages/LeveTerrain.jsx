@@ -79,7 +79,7 @@ const getAdresseString = (addr) => {
 };
 
 export default function LeveTerrain() {
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = new Date().toISOString().split('T')[0];
   const [selectedItem, setSelectedItem] = useState(null); // { dossier, mandat }
   const [terrainStartTime, setTerrainStartTime] = useState(null); // Date object quand punch in terrain
   const [elapsedTime, setElapsedTime] = useState(0);
