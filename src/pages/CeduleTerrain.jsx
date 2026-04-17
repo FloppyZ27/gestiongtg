@@ -219,7 +219,6 @@ export default function CeduleTerrain() {
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
     onMutate: async ({ id, data }) => {
-      // Mise à jour optimiste du cache pour réponse immédiate
       await queryClient.cancelQueries({ queryKey: ['dossiers'] });
       const previous = queryClient.getQueryData(['dossiers']);
       queryClient.setQueryData(['dossiers'], (old) => {
@@ -229,14 +228,13 @@ export default function CeduleTerrain() {
       return { previous };
     },
     onError: (_err, _vars, context) => {
-      // Restaurer les données précédentes en cas d'erreur
       if (context?.previous) queryClient.setQueryData(['dossiers'], context.previous);
     },
-    onSuccess: (_data, { id, data }) => {
-      // Mettre à jour le cache avec les données exactes retournées, sans invalider (évite le flash)
+    onSuccess: (apiData, { id, data }) => {
+      // Utiliser les données retournées par l'API (source de vérité)
       queryClient.setQueryData(['dossiers'], (old) => {
         if (!old) return old;
-        return old.map(d => d.id === id ? { ...d, ...data } : d);
+        return old.map(d => d.id === id ? { ...d, ...data, ...(apiData || {}) } : d);
       });
     },
   });
