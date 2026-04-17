@@ -668,12 +668,15 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             });
 
             const doMove = (srcDate, targetDate, equipeId, equipe) => {
-              const ne2 = { ...equipes };
-              const src2 = ne2[srcDate] || [];
-              ne2[srcDate] = src2.filter(e => e.id !== equipeId);
-              if (!ne2[srcDate].length) delete ne2[srcDate];
-              if (!ne2[targetDate]) ne2[targetDate] = [];
-              ne2[targetDate] = [...ne2[targetDate], { ...equipe }];
+              setEquipes(prev => {
+                const ne2 = { ...prev };
+                const src2 = ne2[srcDate] || [];
+                ne2[srcDate] = src2.filter(e => e.id !== equipeId);
+                if (!ne2[srcDate].length) delete ne2[srcDate];
+                if (!ne2[targetDate]) ne2[targetDate] = [];
+                ne2[targetDate] = [...(ne2[targetDate] || []), { ...equipe }];
+                return ne2;
+              });
               const equipeNom = generateTeamDisplayName(equipe);
               equipe.mandats.forEach(cardId => {
                 const card = terrainCards.find(c => c.id === cardId);
@@ -689,7 +692,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                   onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: um });
                 }
               });
-              setEquipes(ne2);
             };
 
             if (conflits.length > 0) {
@@ -1094,29 +1096,23 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       <Dialog open={!!conflitTechnicienWarning} onOpenChange={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }}>
         <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
-          <DialogHeader><DialogTitle className="text-xl text-yellow-400 text-center">⚠️ Conflit de techniciens</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">🚫 Techniciens déjà attribués</DialogTitle></DialogHeader>
           {conflitTechnicienWarning && <div className="space-y-4">
             <p className="text-slate-300 text-center">
-              Les techniciens suivants sont déjà assignés le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span> :
+              Impossible de déplacer cette équipe vers le <span className="text-emerald-400 font-semibold">{format(new Date(conflitTechnicienWarning.targetDate + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.
             </p>
-            <ul className="space-y-1">
+            <p className="text-slate-400 text-center text-sm">Les techniciens suivants sont déjà assignés à une autre équipe ce jour-là :</p>
+            <ul className="space-y-1 bg-slate-800/50 rounded-lg p-3">
               {conflitTechnicienWarning.conflits.map((c, i) => (
                 <li key={i} className="text-center text-sm">
                   <span className="text-yellow-300 font-semibold">{c.technicien}</span>
-                  <span className="text-slate-400"> → déjà dans </span>
+                  <span className="text-slate-400"> → </span>
                   <span className="text-blue-300 font-semibold">{c.equipeNom}</span>
                 </li>
               ))}
             </ul>
-            <p className="text-slate-400 text-center text-sm">Voulez-vous quand même déplacer l'équipe ?</p>
-            <div className="flex justify-center gap-3 pt-2">
-              <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="border border-red-500 text-red-400 bg-transparent">Annuler</Button>
-              <Button onClick={() => {
-                const p = pendingEquipeMoveRef.current;
-                if (p) p.doMove(p.srcDate, p.targetDate, p.equipeId, p.equipe);
-                setConflitTechnicienWarning(null);
-                pendingEquipeMoveRef.current = null;
-              }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Déplacer quand même</Button>
+            <div className="flex justify-center pt-2">
+              <Button onClick={() => { setConflitTechnicienWarning(null); pendingEquipeMoveRef.current = null; }} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
             </div>
           </div>}
         </DialogContent>
