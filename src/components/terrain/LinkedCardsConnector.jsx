@@ -154,12 +154,12 @@ function CardSymbol({ cardId }) {
 
   return (
     <div
-      className="absolute flex items-center justify-center pointer-events-none"
+      className="fixed flex items-center justify-center pointer-events-none"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: `translate(-50%, -50%)`,
-        zIndex: 60,
+        zIndex: 70,
       }}
     >
       <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-full p-2 border-2 border-red-400 shadow-lg shadow-red-500/50">
