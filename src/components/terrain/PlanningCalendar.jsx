@@ -592,31 +592,25 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       // Cartes déjà assignées
       const assignedIds = new Set(Object.values(equipes).flatMap(de => de.flatMap(eq => eq.mandats)));
 
-      // Données de toutes les cartes
-      const allCardsData = terrainCards.map(card => ({
+      const toCardData = (card) => ({
         id: card.id,
         address: formatAdresse(card.mandat?.adresse_travaux),
         date_limite_leve: card.terrain?.date_limite_leve || null,
+        date_livraison: card.mandat?.date_livraison || null,
         a_rendez_vous: card.terrain?.a_rendez_vous || false,
         date_rendez_vous: card.terrain?.date_rendez_vous || null,
         heure_rendez_vous: card.terrain?.heure_rendez_vous || null,
         technicien: card.terrain?.technicien || null,
         temps_prevu: card.terrain?.temps_prevu || null,
-      }));
+      });
+
+      // Données de toutes les cartes
+      const allCardsData = terrainCards.map(toCardData);
 
       // Cartes non assignées à planifier (statut a_ceduler)
       const unassignedCardsData = terrainCards
         .filter(c => !assignedIds.has(c.id) && c.terrain?.statut_terrain === 'a_ceduler')
-        .map(card => ({
-          id: card.id,
-          address: formatAdresse(card.mandat?.adresse_travaux),
-          date_limite_leve: card.terrain?.date_limite_leve || null,
-          a_rendez_vous: card.terrain?.a_rendez_vous || false,
-          date_rendez_vous: card.terrain?.date_rendez_vous || null,
-          heure_rendez_vous: card.terrain?.heure_rendez_vous || null,
-          technicien: card.terrain?.technicien || null,
-          temps_prevu: card.terrain?.temps_prevu || null,
-        }));
+        .map(toCardData);
 
       const res = await base44.functions.invoke('optimizeTeamRoutes', {
         equipes: futureEquipes,

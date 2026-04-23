@@ -42,25 +42,37 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr)
   const maxH = getMaxHours(dateStr);
   if (candidateCards.length === 0) return [];
 
-  const withAddr = candidateCards.filter(c => c.address);
-  let orderedCards = [...candidateCards];
+  // Séparer urgents (délai dépassé/proche) et non-urgents
+  // Les urgents gardent leur ordre de priorité; les non-urgents sont optimisés géographiquement
+  const urgentCards = candidateCards.filter(c => lockedCardIds.includes(c.id) || c.a_rendez_vous || isUrgent(c, dateStr));
+  const relaxedCards = candidateCards.filter(c => !lockedCardIds.includes(c.id) && !c.a_rendez_vous && !isUrgent(c, dateStr));
 
-  // Optimiser l'ordre géographique si >= 2 adresses
+  // Optimiser géographiquement les cartes non-urgentes qui ont une adresse
+  let orderedRelaxed = [...relaxedCards];
+  if (relaxedCards.filter(c => c.address).length >= 2) {
+    try {
+      const relaxedWithAddr = relaxedCards.filter(c => c.address);
+      const { order } = await getOptimizedRoute(apiKey, relaxedWithAddr.map(c => c.address));
+      const relaxedWithAddrSorted = order.map(i => relaxedWithAddr[i]);
+      const relaxedWithoutAddr = relaxedCards.filter(c => !c.address);
+      orderedRelaxed = [...relaxedWithAddrSorted, ...relaxedWithoutAddr];
+    } catch { /* garder l'ordre original */ }
+  }
+
+  // Ordre final: urgents en premier (ordre priorité), puis non-urgents (ordre géo)
+  let orderedCards = [...urgentCards, ...orderedRelaxed];
+
+  // Maintenant calculer le trajet total pour la liste complète et élaguer si nécessaire
+  const withAddr = orderedCards.filter(c => c.address);
   if (withAddr.length >= 2) {
     try {
-      const { order, durationSeconds } = await getOptimizedRoute(apiKey, withAddr.map(c => c.address));
-      const withAddrSorted = order.map(i => withAddr[i]);
-      const withoutAddr = candidateCards.filter(c => !c.address);
-      orderedCards = [...withAddrSorted, ...withoutAddr];
-
-      const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
+      const { durationSeconds } = await getOptimizedRoute(apiKey, withAddr.map(c => c.address));
       const travelH = durationSeconds / 3600;
+      const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
 
-      if (totalTravail + travelH <= maxH) {
-        return orderedCards; // tout rentre
-      }
+      if (totalTravail + travelH <= maxH) return orderedCards;
 
-      // Trop plein: retirer depuis la fin (sauf lockées) en utilisant trajet proportionnel
+      // Trop plein: retirer depuis la fin (non-urgents d'abord, sauf lockées)
       const travelPerAddr = travelH / withAddr.length;
       let cumH = 0;
       const kept = [];
@@ -94,13 +106,33 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr)
   return kept;
 }
 
-const sortByPriority = (arr) => arr.sort((a, b) => {
+// Une carte est "en retard" si sa date_limite_leve ou date_livraison est dépassée (ou dans les 3 prochains jours)
+function isUrgent(card, todayStr) {
+  const soonThreshold = new Date(todayStr);
+  soonThreshold.setDate(soonThreshold.getDate() + 3);
+  const soonStr = soonThreshold.toISOString().split('T')[0];
+  const lim = card.date_limite_leve || card.date_livraison;
+  if (!lim) return false;
+  return lim <= soonStr;
+}
+
+const sortByPriority = (arr, todayStr) => arr.sort((a, b) => {
+  // 1. RDV en premier
   if (a.a_rendez_vous && !b.a_rendez_vous) return -1;
   if (!a.a_rendez_vous && b.a_rendez_vous) return 1;
-  if (!a.date_limite_leve && !b.date_limite_leve) return 0;
-  if (!a.date_limite_leve) return 1;
-  if (!b.date_limite_leve) return -1;
-  return a.date_limite_leve.localeCompare(b.date_limite_leve);
+  // 2. Urgent avant non-urgent
+  const aUrgent = isUrgent(a, todayStr);
+  const bUrgent = isUrgent(b, todayStr);
+  if (aUrgent && !bUrgent) return -1;
+  if (!aUrgent && bUrgent) return 1;
+  // 3. Parmi les urgents: trier par date la plus proche
+  if (aUrgent && bUrgent) {
+    const aDate = a.date_limite_leve || a.date_livraison || '';
+    const bDate = b.date_limite_leve || b.date_livraison || '';
+    return aDate.localeCompare(bDate);
+  }
+  // 4. Parmi les non-urgents: pas de tri forcé → Google Maps optimisera géographiquement
+  return 0;
 });
 
 Deno.serve(async (req) => {
@@ -145,7 +177,7 @@ Deno.serve(async (req) => {
       if (data) poolCards.set(id, data);
     });
     let pool = [...poolCards.values()];
-    sortByPriority(pool);
+    sortByPriority(pool, today);
 
     // Vider les mandats non-lockés de toutes les équipes futures (on va les réassigner)
     const equipesCopy = {};
@@ -185,7 +217,7 @@ Deno.serve(async (req) => {
         const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
         const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
         rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-        sortByPriority(othersForDay);
+        sortByPriority(othersForDay, dateStr);
 
         const candidates = [...lockedCards_data, ...rdvForDay, ...othersForDay];
         const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr);
@@ -212,7 +244,7 @@ Deno.serve(async (req) => {
         const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
         const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
         rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-        sortByPriority(othersForDay);
+        sortByPriority(othersForDay, dateStr);
 
         const candidates = [...rdvForDay, ...othersForDay];
         if (candidates.length === 0) break;
