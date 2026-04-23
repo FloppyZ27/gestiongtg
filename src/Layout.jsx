@@ -565,6 +565,11 @@ function LayoutContent({ children, currentPageName }) {
             font-family: 'JetBrains Mono', monospace !important;
           }
 
+          /* Page titles - couleur bleu professionnel */
+          h1 {
+            color: hsl(207, 85%, 55%) !important;
+          }
+
         /* Overlay avec flou doux */
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
@@ -671,44 +676,7 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
-        /* Tabs avec couleur blue - inactifs en gris */
-        button[role="tab"][class*="blue"]:not([data-state="active"]),
-        [role="tab"][class*="blue"]:not([data-state="active"]) {
-          color: rgb(148, 163, 184) !important;
-        }
 
-        button[role="tab"][class*="blue"]:not([data-state="active"]):hover,
-        [role="tab"][class*="blue"]:not([data-state="active"]):hover {
-          background: rgba(148, 163, 184, 0.1) !important;
-          background-color: rgba(148, 163, 184, 0.1) !important;
-          background-image: none !important;
-          color: rgb(148, 163, 184) !important;
-        }
-
-        button[role="tab"][class*="blue"][data-state="active"],
-        [role="tab"][class*="blue"][data-state="active"] {
-          background: rgba(59, 130, 246, 0.2) !important;
-          background-color: rgba(59, 130, 246, 0.2) !important;
-          background-image: none !important;
-          color: rgb(59, 130, 246) !important;
-          border-bottom-color: rgb(59, 130, 246) !important;
-        }
-
-        /* Tabs avec couleur cyan */
-        button[role="tab"][class*="cyan"]:hover,
-        [role="tab"][class*="cyan"]:hover {
-          background: rgba(34, 211, 238, 0.15) !important;
-          background-color: rgba(34, 211, 238, 0.15) !important;
-          background-image: none !important;
-          color: rgb(34, 211, 238) !important;
-        }
-
-        button[role="tab"][class*="cyan"][class*="border-cyan"],
-        [role="tab"][class*="cyan"][class*="border-cyan"] {
-          background: rgba(34, 211, 238, 0.1) !important;
-          color: rgb(34, 211, 238) !important;
-          border-bottom-color: rgb(34, 211, 238) !important;
-        }
 
         /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
         button.timesheet-tab-button {
@@ -730,186 +698,24 @@ function LayoutContent({ children, currentPageName }) {
           transform: translateY(1px);
         }
 
-        /* Boutons onglets Agenda (Semaine/Mois) avec dégradé violet/indigo */
-        button.agenda-tab-button {
-          background: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
-          background-color: rgb(168, 85, 247) !important;
-          background-image: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
-          color: white !important;
-          border: none !important;
-          box-shadow: 0 4px 12px -3px rgba(168, 85, 247, 0.4) !important;
-        }
 
-        button.agenda-tab-button:hover {
-          background: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
-          background-image: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
-          box-shadow: 0 6px 16px -3px rgba(168, 85, 247, 0.5) !important;
-        }
 
-        button.agenda-tab-button:active {
-          transform: translateY(1px);
-        }
-
-        /* Bouton "Ajouter" dans la section Feuille de temps */
-        button.timesheet-add-button {
-          background: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
-          background-color: rgb(0, 184, 212) !important;
-          background-image: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
-          color: white !important;
-          border: none !important;
-          box-shadow: 0 10px 15px -3px rgba(0, 184, 212, 0.5) !important;
-        }
-
-        button.timesheet-add-button:hover {
-          background: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
-          background-image: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
-        }
-
-        /* Tabs avec couleur purple */
-        button[role="tab"][class*="purple"]:hover,
-        [role="tab"][class*="purple"]:hover {
-          background: rgba(168, 85, 247, 0.15) !important;
-          background-color: rgba(168, 85, 247, 0.15) !important;
-          background-image: none !important;
-          color: rgb(168, 85, 247) !important;
-        }
-
-        button[role="tab"][class*="purple"][class*="border-purple"],
-        [role="tab"][class*="purple"][class*="border-purple"] {
-          background: rgba(168, 85, 247, 0.1) !important;
-          color: rgb(168, 85, 247) !important;
-          border-bottom-color: rgb(168, 85, 247) !important;
-        }
-
-        /* Tabs avec couleur orange - en orange */
-        button[role="tab"][class*="orange"]:not([data-state="active"]),
-        [role="tab"][class*="orange"]:not([data-state="active"]) {
-          color: rgb(148, 163, 184) !important;
-        }
-
-        button[role="tab"][class*="orange"]:not([data-state="active"]):hover,
-        [role="tab"][class*="orange"]:not([data-state="active"]):hover {
-          background: rgba(249, 115, 22, 0.15) !important;
-          background-color: rgba(249, 115, 22, 0.15) !important;
-          background-image: none !important;
-          color: rgb(251, 146, 60) !important;
-        }
-
-        button[role="tab"][class*="orange"][data-state="active"],
-        [role="tab"][class*="orange"][data-state="active"] {
-          background: rgba(249, 115, 22, 0.25) !important;
-          background-color: rgba(249, 115, 22, 0.25) !important;
-          background-image: none !important;
-          color: rgb(251, 146, 60) !important;
-          border-bottom: 2px solid rgb(251, 146, 60) !important;
-        }
-
-        /* Tabs spécifiques pour les retours d'appel - inactives */
-        .retour-appel-tab:not(.border-emerald-500) {
-          background: transparent !important;
-          color: rgb(148, 163, 184) !important;
-        }
-
-        .retour-appel-tab:not(.border-emerald-500):hover {
-          background: rgba(16, 185, 129, 0.05) !important;
-          color: rgb(16, 185, 129) !important;
-        }
-
-        .retour-appel-tab.border-emerald-500 {
-          background: rgba(16, 185, 129, 0.1) !important;
-          color: rgb(16, 185, 129) !important;
-          border-bottom-color: rgb(16, 185, 129) !important;
-        }
-
-        .message-laisse-tab:not(.border-orange-500) {
-          background: transparent !important;
-          color: rgb(148, 163, 184) !important;
-        }
-
-        .message-laisse-tab:not(.border-orange-500):hover {
-          background: rgba(249, 115, 22, 0.05) !important;
-          color: rgb(251, 146, 60) !important;
-        }
-
-        .message-laisse-tab.border-orange-500 {
-          background: rgba(249, 115, 22, 0.1) !important;
-          color: rgb(251, 146, 60) !important;
-          border-bottom-color: rgb(251, 146, 60) !important;
-        }
-
-        .termine-tab:not(.border-blue-500) {
-          background: transparent !important;
-          color: rgb(148, 163, 184) !important;
-        }
-
-        .termine-tab:not(.border-blue-500):hover {
-          background: rgba(59, 130, 246, 0.2) !important;
-          color: rgb(59, 130, 246) !important;
-        }
-
-        .termine-tab.border-blue-500 {
-          background: rgba(59, 130, 246, 0.1) !important;
-          color: rgb(59, 130, 246) !important;
-          border-bottom-color: rgb(59, 130, 246) !important;
-        }
-
-        /* Badges et éléments orange dans les sections mandats - en orange */
-        .bg-orange-500\/20 {
-          background-color: rgba(249, 115, 22, 0.2) !important;
-        }
-
-        .text-orange-400 {
-          color: rgb(251, 146, 60) !important;
-        }
-
-        .border-orange-500\/30 {
-          border-color: rgba(249, 115, 22, 0.3) !important;
-        }
-
-        .hover\:bg-orange-900\/40:hover {
-          background-color: rgba(194, 65, 12, 0.4) !important;
-        }
-
-        .bg-orange-900\/20 {
-          background-color: rgba(194, 65, 12, 0.2) !important;
-        }
-
-        .bg-orange-500\/30 {
-          background-color: rgba(249, 115, 22, 0.3) !important;
-        }
-
-        /* Tabs avec couleur red */
-        button[role="tab"][class*="red"]:hover,
-        [role="tab"][class*="red"]:hover {
-          background: rgba(239, 68, 68, 0.15) !important;
-          background-color: rgba(239, 68, 68, 0.15) !important;
-          background-image: none !important;
-          color: rgb(239, 68, 68) !important;
-        }
-
-        button[role="tab"][class*="red"][class*="border-red"],
-        [role="tab"][class*="red"][class*="border-red"] {
-          background: rgba(239, 68, 68, 0.1) !important;
-          color: rgb(239, 68, 68) !important;
-          border-bottom-color: rgb(239, 68, 68) !important;
-        }
-
-        /* Tabs par défaut (emerald/green) */
+        /* Tabs par défaut avec couleur primary */
         button[role="tab"]:hover,
         [role="tab"]:hover {
-          background: rgba(16, 185, 129, 0.15) !important;
-          background-color: rgba(16, 185, 129, 0.15) !important;
+          background: hsla(207, 85%, 55%, 0.15) !important;
+          background-color: hsla(207, 85%, 55%, 0.15) !important;
           background-image: none !important;
-          color: rgb(16, 185, 129) !important;
+          color: hsl(207, 85%, 55%) !important;
         }
 
         button[role="tab"][data-state="active"],
         [role="tab"][data-state="active"] {
-          background: rgba(16, 185, 129, 0.25) !important;
-          background-color: rgba(16, 185, 129, 0.25) !important;
+          background: hsla(207, 85%, 55%, 0.2) !important;
+          background-color: hsla(207, 85%, 55%, 0.2) !important;
           background-image: none !important;
-          color: rgb(16, 185, 129) !important;
-          border-bottom: 2px solid rgb(16, 185, 129) !important;
+          color: hsl(207, 85%, 55%) !important;
+          border-bottom: 2px solid hsl(207, 85%, 55%) !important;
         }
 
         button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
@@ -1010,14 +816,7 @@ function LayoutContent({ children, currentPageName }) {
           width: 0 !important;
         }
 
-        /* Switch actif en brun clair (amber) - section terrain */
-        button[role="switch"][data-state="checked"] {
-          background-color: rgb(251, 191, 36) !important;
-        }
-        
-        button[role="switch"][data-state="checked"] span {
-          background-color: white !important;
-        }
+
       `}</style>
       
       {/* Notification Banner */}
