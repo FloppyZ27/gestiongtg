@@ -1154,11 +1154,23 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
             <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
             <Button
               size="sm"
-              onClick={(e) => { e.stopPropagation(); isLinked ? handleUnlinkCard(linkedGroup.id, card.id) : handleLinkCard(card.id); }}
-              className={`h-6 w-6 p-0 flex-shrink-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
-              title={isLinked ? 'Retirer du groupe lié' : isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Lier avec une autre carte'}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (linkingMode) {
+                  // En mode liaison: cliquer pour lier (même si déjà dans un groupe)
+                  handleLinkCard(card.id);
+                } else if (isLinked) {
+                  // Pas en mode liaison + déjà lié: retirer du groupe
+                  handleUnlinkCard(linkedGroup.id, card.id);
+                } else {
+                  // Pas en mode liaison + pas lié: démarrer une liaison
+                  handleLinkCard(card.id);
+                }
+              }}
+              className={`h-6 w-6 p-0 flex-shrink-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked && !linkingMode ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : isLinked && linkingMode ? 'bg-violet-500/40 hover:bg-violet-500/60 text-violet-200' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
+              title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
             >
-              {isLinked ? <Unlink className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+              {isLinked && !linkingMode ? <Unlink className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
             </Button>
             {showLock && (
               <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>
