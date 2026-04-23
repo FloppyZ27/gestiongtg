@@ -18,6 +18,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer } from "lucide-react";
 import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -322,6 +324,11 @@ export default function GestionDeMandat() {
     if (dragging) return;
     setEditingDossier({ ...card.dossier, initialMandatIndex: card.mandatIndex });
     setIsEditingDialogOpen(true);
+  };
+
+  const handleViewDossier = (dossier) => {
+    const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
+    window.open(url, '_blank');
   };
 
   const getWeeksToDisplay = () => {
