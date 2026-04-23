@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -172,6 +172,22 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [equipeExistanteWarning, setEquipeExistanteWarning] = useState(null); // { equipeNom, targetDate }
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
+
+  // Cartes verrouillées (lock) — stockées en localStorage
+  const [lockedCards, setLockedCards] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('lockedTerrainCards') || '[]')); } catch { return new Set(); }
+  });
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  const toggleLockCard = (cardId) => {
+    setLockedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(cardId)) next.delete(cardId);
+      else next.add(cardId);
+      localStorage.setItem('lockedTerrainCards', JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const prevEquipesRef = useRef(null);
   const isInitialLoadRef = useRef(true);
@@ -559,6 +575,96 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     setShowMapDialog(true);
   };
 
+  // ---- Optimisation globale des trajets ----
+  const handleOptimizeAll = useCallback(async () => {
+    setIsOptimizing(true);
+    try {
+      const today = format(new Date(), "yyyy-MM-dd");
+      // Préparer les données des équipes futures uniquement
+      const futureEquipes = {};
+      Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
+        if (dateStr <= today) return;
+        const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+        if (filtered.length > 0) futureEquipes[dateStr] = filtered;
+      });
+
+      if (Object.keys(futureEquipes).length === 0) {
+        alert("Aucune journée future à optimiser.");
+        return;
+      }
+
+      // Préparer les données des cartes
+      const cardsData = terrainCards.map(card => ({
+        id: card.id,
+        address: formatAdresse(card.mandat?.adresse_travaux),
+        date_limite_leve: card.terrain?.date_limite_leve || null,
+        a_rendez_vous: card.terrain?.a_rendez_vous || false,
+        date_rendez_vous: card.terrain?.date_rendez_vous || null,
+        heure_rendez_vous: card.terrain?.heure_rendez_vous || null,
+        technicien: card.terrain?.technicien || null,
+      }));
+
+      const res = await base44.functions.invoke('optimizeTeamRoutes', {
+        equipes: futureEquipes,
+        cardsData,
+        lockedCardIds: [...lockedCards],
+      });
+
+      const optimizedResult = res.data?.result;
+      if (!optimizedResult) return;
+
+      // Appliquer les résultats
+      setEquipes(prev => {
+        const ne = { ...prev };
+        Object.entries(optimizedResult).forEach(([dateStr, equipeOrders]) => {
+          if (!ne[dateStr]) return;
+          ne[dateStr] = ne[dateStr].map(equipe => {
+            const newOrder = equipeOrders[equipe.id];
+            if (!newOrder) return equipe;
+            return { ...equipe, mandats: newOrder };
+          });
+        });
+        return ne;
+      });
+
+      // Mettre à jour les dossiers avec les nouvelles dates/équipes
+      Object.entries(optimizedResult).forEach(([dateStr, equipeOrders]) => {
+        const dayEqs = equipes[dateStr] || [];
+        Object.entries(equipeOrders).forEach(([equipeId, cardIds]) => {
+          const equipe = dayEqs.find(e => e.id === equipeId);
+          if (!equipe) return;
+          const posIdx = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()).findIndex(e => e.id === equipeId);
+          const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
+          cardIds.forEach(cardId => {
+            const card = terrainCards.find(c => c.id === cardId);
+            if (!card) return;
+            const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+            if (!freshDossier) return;
+            const idParts = card.id.split('-');
+            const mandatIdx = parseInt(idParts[idParts.length - 2]);
+            const terrainIdx = parseInt(idParts[idParts.length - 1]);
+            const um = freshDossier.mandats.map((m, idx) => {
+              if (idx !== mandatIdx) return m;
+              let tl = m.terrains_list && m.terrains_list.length > 0
+                ? [...m.terrains_list]
+                : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+              const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
+              tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
+              const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
+              return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
+            });
+            onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
+          });
+        });
+      });
+    } catch (e) {
+      console.error('Erreur optimisation:', e);
+      alert("Erreur lors de l'optimisation.");
+    } finally {
+      setIsOptimizing(false);
+    }
+  }, [equipes, terrainCards, lockedCards, placeAffaire, dossiers, onUpdateDossier, generateTeamDisplayName]);
+
   // ---- Custom drag & drop pour les DossierCards ----
   const executeDrop = useCallback((card, columnId, insertIndex) => {
     if (!card) return;
@@ -842,13 +948,15 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   };
 
   // ---- Render DossierCard (custom drag) ----
-  const DossierCard = ({ card }) => {
+  const DossierCard = ({ card, showLock = false }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
     const isDraggingThis = dragging?.card?.id === card.id;
+    const isLocked = lockedCards.has(card.id);
 
     const onMouseDown = (e) => {
+      if (isLocked) return; // Locked cards can't be dragged
       e.stopPropagation();
       didDragRef.current = false;
       const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
@@ -873,8 +981,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 cursor-pointer select-none transition-all duration-150 hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer', boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${isLocked ? 'opacity-80 ring-1 ring-amber-500/60' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        style={{ cursor: isLocked ? 'default' : (dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2">
@@ -883,6 +991,11 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           </div>
           <div className="flex gap-1">
             <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
+            {showLock && (
+              <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller (permettre déplacement et optimisation)' : 'Verrouiller (fixer la position)'}>
+                {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span></div>
@@ -973,7 +1086,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               return (
                 <div key={cId} data-card-id={cId}>
                   {showIndicator && <div className="h-1 bg-emerald-400 rounded-full mx-1 mb-1 opacity-80" />}
-                  <DossierCard card={card} />
+                  <DossierCard card={card} showLock={true} />
                 </div>
               );
             })}
@@ -1051,11 +1164,27 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center flex-wrap">
               <span className="text-white text-sm">Afficher :</span>
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "techniciens" ? null : "techniciens")} className={globalViewMode === "techniciens" ? "bg-blue-500/30 text-blue-400 border border-blue-500" : "bg-slate-800 text-white"}><Users className="w-3 h-3 mr-1" />Techniciens</Button>
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "vehicules" ? null : "vehicules")} className={globalViewMode === "vehicules" ? "bg-purple-500/30 text-purple-400 border border-purple-500" : "bg-slate-800 text-white"}><Truck className="w-3 h-3 mr-1" />Véhicules</Button>
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "equipements" ? null : "equipements")} className={globalViewMode === "equipements" ? "bg-orange-500/30 text-orange-400 border border-orange-500" : "bg-slate-800 text-white"}><Wrench className="w-3 h-3 mr-1" />Équipements</Button>
+              <div className="ml-auto flex items-center gap-2">
+                {lockedCards.size > 0 && (
+                  <span className="text-xs text-amber-400 flex items-center gap-1">
+                    <Lock className="w-3 h-3" />{lockedCards.size} carte{lockedCards.size > 1 ? 's' : ''} verrouillée{lockedCards.size > 1 ? 's' : ''}
+                  </span>
+                )}
+                <Button
+                  size="sm"
+                  onClick={handleOptimizeAll}
+                  disabled={isOptimizing}
+                  className="bg-gradient-to-r from-violet-500/30 to-purple-500/30 hover:from-violet-500/50 hover:to-purple-500/50 text-violet-300 border border-violet-500/40"
+                >
+                  {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                  {isOptimizing ? 'Optimisation...' : 'Optimiser trajets'}
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
