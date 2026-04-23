@@ -115,8 +115,8 @@ function ConnectorLine({ card1Id, card2Id }) {
             zIndex: 70,
           }}
         >
-          <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-full p-2 border-2 border-red-400 shadow-lg shadow-red-500/50">
-            <Link2 className="w-5 h-5 text-white" />
+          <div className="bg-gradient-to-r from-violet-500 to-violet-600 rounded-full p-1.5 border-2 border-violet-400 shadow-lg shadow-violet-500/50">
+            <Link2 className="w-4 h-4 text-white" />
           </div>
         </div>,
         document.body
