@@ -217,8 +217,14 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const toggleLockCard = (cardId) => {
     setLockedCards(prev => {
       const next = new Set(prev);
-      if (next.has(cardId)) next.delete(cardId);
-      else next.add(cardId);
+      const isLocked = next.has(cardId);
+      // Trouver toutes les cartes du groupe lié
+      const group = linkedGroups.find(g => g.cardIds.includes(cardId));
+      const idsToToggle = group ? group.cardIds : [cardId];
+      idsToToggle.forEach(id => {
+        if (isLocked) next.delete(id);
+        else next.add(id);
+      });
       localStorage.setItem('lockedTerrainCards', JSON.stringify([...next]));
       return next;
     });
