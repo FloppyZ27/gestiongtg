@@ -580,7 +580,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     setIsOptimizing(true);
     try {
       const today = format(new Date(), "yyyy-MM-dd");
-      // Préparer les données des équipes futures uniquement
+
+      // Équipes futures existantes
       const futureEquipes = {};
       Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
         if (dateStr <= today) return;
@@ -588,13 +589,11 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         if (filtered.length > 0) futureEquipes[dateStr] = filtered;
       });
 
-      if (Object.keys(futureEquipes).length === 0) {
-        alert("Aucune journée future à optimiser.");
-        return;
-      }
+      // Cartes déjà assignées
+      const assignedIds = new Set(Object.values(equipes).flatMap(de => de.flatMap(eq => eq.mandats)));
 
-      // Préparer les données des cartes
-      const cardsData = terrainCards.map(card => ({
+      // Données de toutes les cartes
+      const allCardsData = terrainCards.map(card => ({
         id: card.id,
         address: formatAdresse(card.mandat?.adresse_travaux),
         date_limite_leve: card.terrain?.date_limite_leve || null,
@@ -602,39 +601,76 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         date_rendez_vous: card.terrain?.date_rendez_vous || null,
         heure_rendez_vous: card.terrain?.heure_rendez_vous || null,
         technicien: card.terrain?.technicien || null,
+        temps_prevu: card.terrain?.temps_prevu || null,
       }));
+
+      // Cartes non assignées à planifier (statut a_ceduler)
+      const unassignedCardsData = terrainCards
+        .filter(c => !assignedIds.has(c.id) && c.terrain?.statut_terrain === 'a_ceduler')
+        .map(card => ({
+          id: card.id,
+          address: formatAdresse(card.mandat?.adresse_travaux),
+          date_limite_leve: card.terrain?.date_limite_leve || null,
+          a_rendez_vous: card.terrain?.a_rendez_vous || false,
+          date_rendez_vous: card.terrain?.date_rendez_vous || null,
+          heure_rendez_vous: card.terrain?.heure_rendez_vous || null,
+          technicien: card.terrain?.technicien || null,
+          temps_prevu: card.terrain?.temps_prevu || null,
+        }));
 
       const res = await base44.functions.invoke('optimizeTeamRoutes', {
         equipes: futureEquipes,
-        cardsData,
+        cardsData: allCardsData,
         lockedCardIds: [...lockedCards],
+        unassignedCards: unassignedCardsData,
+        availableTechniciens: techniciens.filter(t => t.statut === 'Actif' || !t.statut).map(t => ({ id: t.id, prenom: t.prenom, nom: t.nom })),
+        placeAffaire,
       });
 
       const optimizedResult = res.data?.result;
+      const newEquipesFromServer = res.data?.newEquipes || [];
+
       if (!optimizedResult) return;
 
-      // Appliquer les résultats
+      // Appliquer les résultats (équipes existantes réordonnées + nouvelles équipes)
       setEquipes(prev => {
         const ne = { ...prev };
+
+        // Mettre à jour les équipes existantes
         Object.entries(optimizedResult).forEach(([dateStr, equipeOrders]) => {
-          if (!ne[dateStr]) return;
+          if (!ne[dateStr]) ne[dateStr] = [];
+          // Mettre à jour les équipes existantes dans ce jour
           ne[dateStr] = ne[dateStr].map(equipe => {
             const newOrder = equipeOrders[equipe.id];
             if (!newOrder) return equipe;
             return { ...equipe, mandats: newOrder };
           });
+          // Ajouter les nouvelles équipes créées ce jour
+          const newEqForDate = newEquipesFromServer.filter(ne2 => ne2.dateStr === dateStr);
+          newEqForDate.forEach(({ equipe }) => {
+            if (!ne[dateStr].find(e => e.id === equipe.id)) {
+              ne[dateStr].push(equipe);
+            }
+          });
         });
+
         return ne;
       });
 
-      // Mettre à jour les dossiers avec les nouvelles dates/équipes
+      // Mettre à jour les dossiers pour toutes les cartes assignées
+      const allEquipesAfter = { ...equipes };
       Object.entries(optimizedResult).forEach(([dateStr, equipeOrders]) => {
-        const dayEqs = equipes[dateStr] || [];
+        if (!allEquipesAfter[dateStr]) allEquipesAfter[dateStr] = [];
+        newEquipesFromServer.filter(e => e.dateStr === dateStr).forEach(({ equipe }) => {
+          if (!allEquipesAfter[dateStr].find(e2 => e2.id === equipe.id)) allEquipesAfter[dateStr].push(equipe);
+        });
+        const dayEqs = allEquipesAfter[dateStr] || [];
         Object.entries(equipeOrders).forEach(([equipeId, cardIds]) => {
-          const equipe = dayEqs.find(e => e.id === equipeId);
+          const equipe = dayEqs.find(e => e.id === equipeId) ||
+            newEquipesFromServer.find(n => n.equipe.id === equipeId)?.equipe;
           if (!equipe) return;
           const posIdx = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()).findIndex(e => e.id === equipeId);
-          const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
+          const eqNom = equipe.nom || generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
           cardIds.forEach(cardId => {
             const card = terrainCards.find(c => c.id === cardId);
             if (!card) return;
@@ -657,13 +693,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           });
         });
       });
+
+      const totalNew = newEquipesFromServer.length;
+      if (totalNew > 0) {
+        alert(`Optimisation terminée ! ${totalNew} nouvelle${totalNew > 1 ? 's' : ''} équipe${totalNew > 1 ? 's' : ''} créée${totalNew > 1 ? 's' : ''} sur des journées libres.`);
+      }
     } catch (e) {
       console.error('Erreur optimisation:', e);
       alert("Erreur lors de l'optimisation.");
     } finally {
       setIsOptimizing(false);
     }
-  }, [equipes, terrainCards, lockedCards, placeAffaire, dossiers, onUpdateDossier, generateTeamDisplayName]);
+  }, [equipes, terrainCards, lockedCards, placeAffaire, dossiers, onUpdateDossier, generateTeamDisplayName, techniciens]);
 
   // ---- Custom drag & drop pour les DossierCards ----
   const executeDrop = useCallback((card, columnId, insertIndex) => {
