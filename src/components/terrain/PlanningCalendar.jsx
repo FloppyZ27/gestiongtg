@@ -569,7 +569,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== card.id); }));
       setEquipes(ne);
       if (onUpdateDossier) {
-        const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+        const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+        if (!freshDossier) return;
         const um = freshDossier.mandats.map((m, idx) => {
           if (idx !== card.mandatIndex) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
@@ -605,7 +606,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
         const posIdx = dayEqs.findIndex(e => e.id === equipeId);
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-        const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+        const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+        if (!freshDossier) return;
         const um = freshDossier.mandats.map((m, idx) => {
           if (idx !== card.mandatIndex) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
@@ -757,7 +759,8 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
       const posIdx = dayEqs.findIndex(e => e.id === equipeId);
       const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-      const freshDossier = dossiers.find(d => d.id === card.dossier.id) || card.dossier;
+      const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+      if (!freshDossier) { setRendezVousWarning(null); setPendingDrop(null); return; }
       const um = freshDossier.mandats.map((m, idx) => {
         if (idx !== card.mandatIndex) return m;
         let tl = m.terrains_list && m.terrains_list.length > 0
@@ -900,15 +903,17 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               {(() => {
                 const { totalTime } = calculateEquipeTimings(equipe);
                 const travelSecs = equipeTravelSeconds[equipe.id] || 0;
-                const totalH = travelSecs > 0 ? (parseFloat(totalTime) + travelSecs / 3600).toFixed(1) : null;
-                const travelMin = Math.round(travelSecs / 60);
-                const travelH = Math.floor(travelMin / 60);
-                const travelM = travelMin % 60;
-                const travelLabel = travelSecs > 0 ? (travelH > 0 ? `${travelH}h${travelM > 0 ? travelM + 'min' : ''}` : `${travelM}min`) : null;
+                const formatHHMM = (secs) => {
+                  const h = Math.floor(secs / 3600);
+                  const m = Math.round((secs % 3600) / 60);
+                  return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
+                };
+                const travailSecs = parseFloat(totalTime) * 3600;
+                const totalSecs = travailSecs + travelSecs;
                 return (
                   <span className="text-emerald-300 text-xs">
-                    {totalH ? `${totalH}h` : `${totalTime}h`}
-                    {travelLabel && <span className="text-slate-400 ml-1">({travelLabel} 🚗)</span>}
+                    {formatHHMM(totalSecs)}
+                    {travelSecs > 0 && <span className="text-slate-400 ml-1">({formatHHMM(travelSecs)} 🚗)</span>}
                   </span>
                 );
               })()}
@@ -1174,16 +1179,11 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 {mapRoutes.map((route, i) => {
                   const isSelected = selectedRoutes.includes(i);
                   const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
-                  const travelMin = Math.round(travelSecs / 60);
-                  const travelH = Math.floor(travelMin / 60);
-                  const travelM = travelMin % 60;
-                  const travelLabel = travelSecs > 0 ? (travelH > 0 ? `${travelH}h${travelM > 0 ? travelM + 'min' : ''}` : `${travelM}min`) : null;
+                  const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
+                  const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
                   // Temps travaux
-                  const travailH = parseFloat(route.dossiers?.reduce((sum, d) => {
-                    const m = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/);
-                    return sum + (m ? parseFloat(m[0]) : 0);
-                  }, 0).toFixed(1));
-                  const totalH = travelSecs > 0 ? (travailH + travelSecs / 3600).toFixed(1) : null;
+                  const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
+                  const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
                   return (
                     <button
                       key={i}
@@ -1199,7 +1199,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                     >
                       <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
                       {route.label}
-                      {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalH ? ` · Total: ${totalH}h` : ''}</span>}
+                      {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalLabel ? ` · Total: ${totalLabel}` : ''}</span>}
                     </button>
                   );
                 })}
