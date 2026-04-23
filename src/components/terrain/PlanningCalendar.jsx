@@ -69,14 +69,11 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
-// Ghost card pour le drag custom — affiche toutes les infos de la carte
-function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
-  if (!card) return null;
+// Mini carte pour le ghost (une seule carte du groupe)
+function GhostCardMini({ card, clients, rotateStyle }) {
   const { dossier, mandat, terrain } = card;
   const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
   const clientsNames = clients.filter(c => dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
-  const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
-  const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   const formatAdresse = (addr) => {
     if (!addr) return "";
     const parts = [];
@@ -85,36 +82,96 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens }) {
     if (addr.ville) parts.push(addr.ville);
     return parts.filter(p => p).join(', ');
   };
+  return (
+    <div className={`${arpColor.split(' ')[0]} rounded-xl p-2 border-2 ${arpColor.split(' ')[2]}`} style={{ boxShadow: '0 2px 12px 0 rgba(0,0,0,0.5)', ...rotateStyle }}>
+      <div className="flex gap-1 flex-wrap mb-1">
+        <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+        <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
+      </div>
+      <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{clientsNames}</span></div>
+      {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && <div className="flex items-start gap-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><span className="text-xs text-slate-400 truncate">{formatAdresse(mandat.adresse_travaux)}</span></div>}
+      {terrain?.temps_prevu && <div className="flex items-center gap-1 mt-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}
+    </div>
+  );
+}
+
+// Ghost card pour le drag custom — affiche le groupe de cartes liées en stack
+function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups, terrainCards }) {
+  if (!card) return null;
+
+  // Trouver toutes les cartes du groupe lié
+  const linkedGroup = linkedGroups?.find(g => g.cardIds.includes(card.id));
+  const groupCards = linkedGroup
+    ? linkedGroup.cardIds.map(id => terrainCards?.find(c => c.id === id)).filter(Boolean)
+    : [card];
+
+  const isGroup = groupCards.length > 1;
+
+  if (!isGroup) {
+    // Ghost simple pour une seule carte
+    const { dossier, mandat, terrain } = card;
+    const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+    const clientsNames = clients.filter(c => dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
+    const formatAdresse = (addr) => {
+      if (!addr) return "";
+      const parts = [];
+      if (addr.numeros_civiques?.length > 0 && addr.numeros_civiques[0] !== "") parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+      if (addr.rue) parts.push(addr.rue);
+      if (addr.ville) parts.push(addr.ville);
+      return parts.filter(p => p).join(', ');
+    };
+    return ReactDOM.createPortal(
+      <div style={{
+        position: 'fixed', left: pos.x - 110, top: pos.y - 40, width: 220, zIndex: 99999,
+        pointerEvents: 'none', opacity: 0.95, transform: 'rotate(2deg) scale(1.04)',
+        filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
+      }}>
+        <GhostCardMini card={card} clients={clients} rotateStyle={{}} />
+      </div>,
+      document.body
+    );
+  }
+
+  // Ghost en stack pour groupe lié
+  const MAX_VISIBLE = 4;
+  const visible = groupCards.slice(0, MAX_VISIBLE);
   return ReactDOM.createPortal(
     <div style={{
       position: 'fixed', left: pos.x - 110, top: pos.y - 40, width: 220, zIndex: 99999,
-      pointerEvents: 'none', opacity: 0.95, transform: 'rotate(2deg) scale(1.04)',
-      filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
+      pointerEvents: 'none', transition: 'none',
     }}>
-      <div className={`${arpColor.split(' ')[0]} rounded-xl p-2 border-2 ${arpColor.split(' ')[2]} shadow-md`} style={{ boxShadow: '0 2px 12px 0 rgba(0,0,0,0.35)' }}>
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex gap-1 flex-wrap">
-            <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
-            <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
+      {/* Cartes de derrière en décalé */}
+      {visible.slice(1).reverse().map((c, i) => {
+        const revIdx = visible.length - 2 - i;
+        const offset = (revIdx + 1) * 6;
+        return (
+          <div key={c.id} style={{
+            position: 'absolute', top: offset, left: offset, width: 220,
+            opacity: 0.7 - revIdx * 0.1,
+            transform: `rotate(${(revIdx + 1) * 2.5}deg) scale(${1 - (revIdx + 1) * 0.02})`,
+            filter: `drop-shadow(0 4px 8px rgba(0,0,0,0.5))`,
+          }}>
+            <GhostCardMini card={c} clients={clients} rotateStyle={{}} />
           </div>
-        </div>
-        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{clientsNames}</span></div>
-        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && <div className="flex items-start gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span></div>}
-        {mandat?.date_livraison && <div className="flex items-center gap-1 mb-1"><Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span></div>}
-        {terrain?.date_limite_leve && <div className="flex items-center gap-1 mb-1"><AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" /><span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span></div>}
-        {terrain?.a_rendez_vous && terrain?.date_rendez_vous && <div className="flex items-center gap-1 mb-1"><Clock className="w-3 h-3 text-orange-400 flex-shrink-0" /><span className="text-xs text-orange-300">RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}{terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}</span></div>}
-        {terrain?.instruments_requis && <div className="flex items-center gap-1 mb-1"><Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span></div>}
-        {terrain?.technicien && <div className="flex items-center gap-1 mb-1"><UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" /><span className="text-xs text-blue-300 truncate">{terrain.technicien}</span></div>}
-        {terrain?.dossier_simultane && <div className="flex items-center gap-1 mb-1"><Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" /><span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span></div>}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-          <div>{terrain?.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
-          {assignedUser ? (
-            <div className="flex items-center gap-1">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center border-2 border-emerald-500/50">
-                <span className="text-xs text-white font-bold">{getUserInitials(assignedUser.full_name)}</span>
-              </div>
-            </div>
-          ) : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
+        );
+      })}
+      {/* Carte principale au-dessus */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        transform: 'rotate(2deg) scale(1.04)',
+        filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))',
+      }}>
+        <GhostCardMini card={groupCards[0]} clients={clients} rotateStyle={{}} />
+        {/* Badge compteur du groupe */}
+        <div style={{
+          position: 'absolute', top: -8, right: -8,
+          background: 'rgb(139,92,246)', color: 'white',
+          borderRadius: '9999px', width: 22, height: 22,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, fontWeight: 'bold', boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+          border: '2px solid rgba(255,255,255,0.2)',
+        }}>
+          {groupCards.length}
         </div>
       </div>
     </div>,
@@ -1266,7 +1323,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       <style>{`* { border: none !important; outline: none !important; } [class*="border"],[class*="shadow"],[class*="outline"] { border: none !important; box-shadow: none !important; outline: none !important; }`}</style>
 
       {/* Ghost card pendant le drag custom */}
-      {dragging && <TerrainGhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} techniciens={techniciens} />}
+      {dragging && <TerrainGhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} techniciens={techniciens} linkedGroups={linkedGroups} terrainCards={terrainCards} />}
 
       {/* Ghost équipe pendant le drag d'équipe */}
       {draggingEquipe && ReactDOM.createPortal(
