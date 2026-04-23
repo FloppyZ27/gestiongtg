@@ -421,6 +421,22 @@ export default function GestionDeMandat() {
             <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
               {getAbbreviatedMandatType(card.mandat.type_mandat)}
             </Badge>
+            <Button
+              size="icon"
+              variant="ghost"
+              className={`h-5 w-5 p-0 text-xs ${selectedCardForLink?.id === card.id ? 'bg-violet-500/20 text-violet-400' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (selectedCardForLink?.id === card.id) {
+                  setSelectedCardForLink(null);
+                } else {
+                  setSelectedCardForLink(card);
+                }
+              }}
+              title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
+            >
+              <Link2 className="w-3 h-3" />
+            </Button>
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1">
