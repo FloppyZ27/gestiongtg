@@ -1469,12 +1469,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                     </div>
                   ))}
                 </div>
-                <LinkedGroupManager
-                  linkedGroups={linkedGroups}
-                  terrainCards={terrainCards}
-                  onUnlinkGroup={handleUnlinkGroup}
-                  onUnlinkCard={handleUnlinkCard}
-                />
+
               </TabsContent>
             </Tabs>
           </Card>
