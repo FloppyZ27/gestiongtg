@@ -70,6 +70,8 @@ export default function CreateTeamDialog({
 
   // Ressources disponibles
   const availableTechs = techniciens.filter(t => !usedTechIds.includes(t.id) && !isResourceInOtherPlace(t.id, 'techniciens'));
+  const availableChefs = availableTechs.filter(t => t.poste === 'Technicien Terrain (Chef)');
+  const availableTechsRegular = availableTechs.filter(t => t.poste === 'Technicien Terrain');
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
@@ -141,7 +143,7 @@ export default function CreateTeamDialog({
         </DialogHeader>
 
         <div className="space-y-2">
-          {/* Techniciens */}
+          {/* Techniciens (Chef) */}
           <Collapsible open={expandedSections.techniciens} onOpenChange={() => toggleSection('techniciens')}>
             <div className="rounded-lg overflow-hidden border border-blue-800/40">
               <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-600 hover:bg-blue-700">
@@ -150,8 +152,8 @@ export default function CreateTeamDialog({
                     <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
                       <Users className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-white font-bold text-sm">Techniciens</span>
-                    <span className="text-blue-100 text-xs">({availableTechs.length} disponibles)</span>
+                    <span className="text-white font-bold text-sm">Techniciens (Chef)</span>
+                    <span className="text-blue-100 text-xs">({availableChefs.length} disponibles)</span>
                   </div>
                   {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
@@ -159,7 +161,45 @@ export default function CreateTeamDialog({
               <CollapsibleContent>
                 <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-40 overflow-y-auto space-y-2">
-                    {techniciens.map(tech => {
+                    {availableChefs.map(tech => {
+                      const isUsedToday = usedTechIds.includes(tech.id);
+                      const otherPlace = isResourceInOtherPlace(tech.id, 'techniciens');
+                      const isAvailable = !isUsedToday && !otherPlace;
+                      const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
+                      return (
+                        <div key={tech.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
+                          <Checkbox id={`tech-${tech.id}`} checked={selectedTechniciens.includes(tech.id)} onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)} disabled={!isAvailable} className="border-slate-500" />
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {tech.prenom} {tech.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+
+          {/* Techniciens */}
+          <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
+            <div className="rounded-lg overflow-hidden border border-blue-800/40">
+              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-blue-500 hover:bg-blue-600">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-white font-bold text-sm">Techniciens</span>
+                    <span className="text-blue-100 text-xs">({availableTechsRegular.length} disponibles)</span>
+                  </div>
+                  {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="bg-blue-950/20 pt-2 pb-3 px-3">
+                  <div className="max-h-40 overflow-y-auto space-y-2">
+                    {availableTechsRegular.map(tech => {
                       const isUsedToday = usedTechIds.includes(tech.id);
                       const otherPlace = isResourceInOtherPlace(tech.id, 'techniciens');
                       const isAvailable = !isUsedToday && !otherPlace;
@@ -180,7 +220,7 @@ export default function CreateTeamDialog({
           </Collapsible>
 
           {/* Véhicules */}
-          <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
+          <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
             <div className="rounded-lg overflow-hidden border border-purple-800/40">
               <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-purple-600 hover:bg-purple-700">
                 <div className="flex items-center justify-between">
@@ -191,7 +231,7 @@ export default function CreateTeamDialog({
                     <span className="text-white font-bold text-sm">Véhicules</span>
                     <span className="text-purple-100 text-xs">({availableVehs.length} disponibles)</span>
                   </div>
-                  {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
+                  {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -218,9 +258,9 @@ export default function CreateTeamDialog({
           </Collapsible>
 
           {/* Équipements */}
-          <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
-            <div className="rounded-lg overflow-hidden border border-orange-800/40">
-              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-500 hover:bg-orange-600">
+          <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
+           <div className="rounded-lg overflow-hidden border border-orange-800/40">
+             <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-500 hover:bg-orange-600">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
@@ -229,7 +269,7 @@ export default function CreateTeamDialog({
                     <span className="text-white font-bold text-sm">Équipements</span>
                     <span className="text-orange-100 text-xs">({availableEqs.length} disponibles)</span>
                   </div>
-                  {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
+                  {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
