@@ -18,9 +18,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer } from "lucide-react";
 import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Link2 } from "lucide-react";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 import LinkedCardsConnector from "../components/terrain/LinkedCardsConnector";
 
@@ -115,12 +113,9 @@ function GhostCard({ card, pos, clients, users, linkedGroupIds }) {
         <Badge variant="outline" className={`${arpColor} border text-xs`}>
           {getArpenteurInitials(cardItem.dossier.arpenteur_geometre)}{cardItem.dossier.numero_dossier}
         </Badge>
-        <div className="flex items-center gap-1">
-          {isLinked && <Link2 className="w-3 h-3 text-violet-400" />}
-          <Badge className={`${getMandatColor(cardItem.mandat.type_mandat)} border text-xs font-semibold`}>
-            {getAbbreviatedMandatType(cardItem.mandat.type_mandat)}
-          </Badge>
-        </div>
+        <Badge className={`${getMandatColor(cardItem.mandat.type_mandat)} border text-xs font-semibold`}>
+          {getAbbreviatedMandatType(cardItem.mandat.type_mandat)}
+        </Badge>
       </div>
       <div className="flex items-center gap-1 mb-1">
         <User className="w-3 h-3 text-white flex-shrink-0" />
@@ -344,6 +339,28 @@ export default function GestionDeMandat() {
     newGroups.push({ id: Date.now().toString(), cardIds: mergedCardIds });
     setLinkedGroups(newGroups);
     setSelectedCardForLink(null);
+
+    // Déplacer automatiquement card2 à la même position que card1 (regrouper les cartes)
+    const card2Dossier = card2.dossier;
+    const card2Column = activeView === "taches" ? card1.tache : activeView === "utilisateurs" ? card1.utilisateur : card1.mandat.date_livraison;
+    
+    if (card2.tache !== card1.tache && activeView === "taches") {
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, tache_actuelle: card1.tache } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    } else if (card2.utilisateur !== card1.utilisateur && activeView === "utilisateurs") {
+      const nouvelUtilisateur = card1.utilisateur === "non-assigne" ? "" : card1.utilisateur;
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    } else if (card2.mandat.date_livraison !== card1.mandat.date_livraison && activeView === "calendrier") {
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, date_livraison: card1.mandat.date_livraison } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    }
   };
 
   const handleUnlinkGroup = (groupId) => {
@@ -408,7 +425,7 @@ export default function GestionDeMandat() {
         onMouseUp={onMouseUp}
         onClick={onClick}
         onContextMenu={onContextMenu}
-        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''} ${isLinked ? 'ring-1 ring-violet-400' : ''}`}
+        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
         title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Clic droit pour lier"}
       >
@@ -417,7 +434,6 @@ export default function GestionDeMandat() {
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {isLinked && <Link2 className="w-3 h-3 text-violet-400" />}
             <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
               {getAbbreviatedMandatType(card.mandat.type_mandat)}
             </Badge>
@@ -435,7 +451,10 @@ export default function GestionDeMandat() {
               }}
               title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
             >
-              <Link2 className="w-3 h-3" />
+              <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
             </Button>
           </div>
         </div>
