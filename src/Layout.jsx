@@ -558,92 +558,54 @@ function LayoutContent({ children, currentPageName }) {
     <TooltipProvider>
   
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+          * {
+            font-family: 'Poppins', sans-serif !important;
+          }
+          code, pre {
+            font-family: 'JetBrains Mono', monospace !important;
+          }
 
-          :root {
-          --background: 8 12% 6.3%;
-          --foreground: 210 14% 97%;
-          --card: 8 12% 9%;
-          --card-foreground: 210 14% 97%;
-          --popover: 8 12% 9%;
-          --popover-foreground: 210 14% 97%;
-          --primary: 264 85% 63%;
-          --primary-foreground: 8 12% 6.3%;
-          --secondary: 200 70% 55%;
-          --secondary-foreground: 8 12% 6.3%;
-          --muted: 210 10% 22%;
-          --muted-foreground: 210 7% 64%;
-          --accent: 160 84% 47%;
-          --accent-foreground: 8 12% 6.3%;
-          --destructive: 0 84.2% 60.2%;
-          --destructive-foreground: 8 12% 6.3%;
-          --border: 210 8% 18%;
-          --input: 8 12% 13%;
-          --ring: 264 85% 63%;
-        }
-
-        /* Overlay transparent avec flou */
+        /* Overlay avec flou doux */
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
-          background-color: transparent !important;
-          backdrop-filter: blur(5px) !important;
-          -webkit-backdrop-filter: blur(5px) !important;
-          opacity: 1 !important;
+        background-color: hsl(210, 17%, 9.8%, 0.4) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        opacity: 1 !important;
         }
 
-        /* Forcer la transparence de tous les overlays avec flou */
-        .fixed.inset-0.z-50.bg-black\\/80,
-        .fixed.inset-0.z-50 {
-          background-color: transparent !important;
-          backdrop-filter: blur(5px) !important;
-          -webkit-backdrop-filter: blur(5px) !important;
-        }
-
-        /* Effet glassmorphism sur les fenêtres dialog avec trame de fond */
+        /* Dialog glassmorphique professionnel */
         [role="dialog"] {
-          background: rgba(15, 23, 42, 0.7) !important;
-          backdrop-filter: blur(21px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(21px) saturate(180%) !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-          position: fixed !important;
-          left: 50% !important;
-          top: 52% !important;
-          transform: translate(-50%, -50%) !important;
-          animation: dialogSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        background: hsl(210, 16%, 13%, 0.95) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid hsl(210, 10%, 19%, 0.8) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        border-radius: 0.75rem !important;
         }
 
-        /* Titres des fenêtres dialog en Outfit et majuscules */
+        /* Titre dialog */
         [role="dialog"] h2,
         [role="dialog"] [class*="DialogTitle"],
         .DialogTitle {
-          font-family: 'Outfit', sans-serif !important;
-          text-transform: uppercase !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.5px !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.2px !important;
         }
 
-        @keyframes dialogSlideIn {
-          from {
-            opacity: 0;
-            transform: translate(-50%, calc(-55% + 120px));
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, -50%);
-          }
-        }
-
-        /* Design épuré 2026 - Glassmorphism minimaliste */
+        /* Design professionnel et neutre */
         .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-          background: rgba(15, 23, 42, 0.4);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+        background: hsl(210, 16%, 13%) !important;
+        border: 1px solid hsl(210, 10%, 19%) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         }
 
-        /* Boutons minimalistes 2026 */
+        /* Boutons minimalistes neutre */
         button[class*="size-icon"],
         button.h-10.w-10,
         button.h-9.w-9,
@@ -659,71 +621,36 @@ function LayoutContent({ children, currentPageName }) {
         button[class*="variant-ghost"],
         button[class*="border-b-"],
         .border-b button {
-          background-color: transparent !important;
-          background-image: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          transition: all 0.2s ease !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
         }
 
         button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
         [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-          background: rgba(264, 85%, 63%, 0.08) !important;
-          border: 1px solid rgba(264, 85%, 63%, 0.2) !important;
-          color: #a78bfa;
-          border-radius: 0.6rem;
-          transition: all 0.2s ease !important;
-          padding: 0.5rem 1rem;
+        background: hsl(207, 85%, 55%, 0.08) !important;
+        border: 1px solid hsl(207, 85%, 55%, 0.2) !important;
+        color: hsl(207, 85%, 55%);
+        border-radius: 0.5rem;
+        transition: all 0.2s ease !important;
+        padding: 0.5rem 1rem;
         }
 
-        /* Boutons primaires gradient 2026 */
+        /* Boutons primaires dégradé discret */
         button[class*="agenda-add-button"] {
-          background: linear-gradient(135deg, rgb(196, 110, 255) 0%, rgb(167, 139, 250) 100%) !important;
-          color: white !important;
+          background: linear-gradient(135deg, hsl(207, 85%, 55%) 0%, hsl(207, 85%, 50%) 100%) !important;
+          color: hsl(210, 17%, 9.8%) !important;
           border: none !important;
-          box-shadow: 0 12px 32px rgba(196, 110, 255, 0.3) !important;
+          box-shadow: 0 8px 16px hsla(207, 85%, 55%, 0.2) !important;
           font-weight: 600;
         }
 
         button[class*="agenda-add-button"]:hover {
-          background: linear-gradient(135deg, rgb(200, 120, 255) 0%, rgb(175, 150, 255) 100%) !important;
-          box-shadow: 0 16px 40px rgba(196, 110, 255, 0.4) !important;
+          background: linear-gradient(135deg, hsl(207, 85%, 60%) 0%, hsl(207, 85%, 55%) 100%) !important;
+          box-shadow: 0 12px 24px hsla(207, 85%, 55%, 0.25) !important;
           transform: translateY(-2px);
-        }
-
-        /* Contours colorés pour les boutons avec gradient emerald/teal */
-        button[class*="from-emerald"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
-          border: 2px solid rgb(16, 185, 129) !important;
-          color: rgb(16, 185, 129) !important;
-        }
-
-        /* Contours colorés pour les boutons avec gradient blue/indigo */
-        button[class*="from-blue"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
-          border: 2px solid rgb(59, 130, 246) !important;
-          color: rgb(59, 130, 246) !important;
-        }
-
-        /* Contours colorés pour les boutons avec gradient red */
-        button[class*="from-red"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
-          border: 2px solid rgb(239, 68, 68) !important;
-          color: rgb(239, 68, 68) !important;
-        }
-
-        /* Contours par défaut pour les autres boutons */
-        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):not([class*="border-red"]):not([class*="border-0"]),
-        [role="button"]:not([class*="size-icon"]):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):not([class*="border-red"]):not([class*="border-0"]) {
-          border: 2px solid rgba(148, 163, 184, 0.5) !important;
-        }
-
-        /* Contours rouges pour les boutons Annuler */
-        button[class*="border-red"],
-        [role="button"][class*="border-red"] {
-          border: 2px solid rgb(239, 68, 68) !important;
-        }
-
-        button[class*="border-red"]:hover,
-        [role="button"][class*="border-red"]:hover {
-          color: rgb(248, 113, 113) !important;
         }
 
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
@@ -1139,9 +1066,9 @@ function LayoutContent({ children, currentPageName }) {
         onContinue={() => setShowUnsavedWarning(false)}
       />
       
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-[#1a1a2e] to-slate-950">
-        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-gradient-to-b from-slate-950 via-[#0f1620] to-slate-950">
-          <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar">
+          <SidebarHeader className="border-b border-border p-3 bg-card">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <img 
@@ -1164,7 +1091,7 @@ function LayoutContent({ children, currentPageName }) {
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-1.5 bg-slate-950">
+          <SidebarContent className="p-1.5 bg-sidebar">
             <SidebarGroup>
               {!isCollapsed && (
                 <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
@@ -1183,8 +1110,8 @@ function LayoutContent({ children, currentPageName }) {
                                 asChild 
                                 className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
                                   location.pathname === item.url 
-                                    ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                    ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/20' 
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                                 }`}
                               >
                                 <Link to={item.url} className="flex items-center justify-center p-2.5">
@@ -1201,8 +1128,8 @@ function LayoutContent({ children, currentPageName }) {
                             asChild 
                             className={`transition-all duration-200 rounded-lg mb-0.5 ${
                               location.pathname === item.url 
-                                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/20' 
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                             }`}
                           >
                             <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
@@ -1225,8 +1152,8 @@ function LayoutContent({ children, currentPageName }) {
                               asChild 
                               className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
                                 location.pathname === createPageUrl("Administration")
-                                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
-                                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                  ? 'bg-destructive/15 text-destructive border border-destructive/30 shadow-lg shadow-destructive/20' 
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                               }`}
                             >
                               <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5">
@@ -1243,8 +1170,8 @@ function LayoutContent({ children, currentPageName }) {
                           asChild 
                           className={`transition-all duration-200 rounded-lg mb-0.5 ${
                             location.pathname === createPageUrl("Administration")
-                              ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
-                              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                              ? 'bg-destructive/15 text-destructive border border-destructive/30 shadow-lg shadow-destructive/20' 
+                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                           }`}
                         >
                           <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5">
@@ -1260,7 +1187,7 @@ function LayoutContent({ children, currentPageName }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
+          <SidebarFooter className="border-t border-border p-2.5 bg-card space-y-2.5">
             {isCollapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1268,12 +1195,12 @@ function LayoutContent({ children, currentPageName }) {
                     onClick={() => base44.auth.logout()}
                     variant="ghost"
                     size="icon"
-                    className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400"
+                    className="w-full bg-destructive/15 hover:bg-destructive/25 text-destructive"
                   >
                     <LogOut className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
+                <TooltipContent side="right" className="bg-card border-border text-foreground">
                   <p>Déconnexion</p>
                 </TooltipContent>
               </Tooltip>
@@ -1281,7 +1208,7 @@ function LayoutContent({ children, currentPageName }) {
               <Button
                 onClick={() => base44.auth.logout()}
                 variant="ghost"
-                className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400 justify-center"
+                className="w-full bg-destructive/15 hover:bg-destructive/25 text-destructive justify-center"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
@@ -1291,7 +1218,7 @@ function LayoutContent({ children, currentPageName }) {
               onClick={() => setOpen(!open)}
               variant="ghost"
               size="icon"
-              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300"
+              className="w-full bg-muted hover:bg-muted/80 text-muted-foreground"
             >
               {isCollapsed ? (
                 <ChevronRight className="w-4 h-4" />
@@ -1303,15 +1230,15 @@ function LayoutContent({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-gradient-to-b from-slate-950/90 to-slate-950/70 backdrop-blur-md border-b border-slate-800/40 px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
+          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <SidebarTrigger className="lg:hidden text-slate-300 hover:text-white" />
+              <SidebarTrigger className="lg:hidden text-muted-foreground hover:text-foreground" />
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                 alt="GTG Logo"
                 className="w-10 h-auto"
               />
-              <h1 className="text-xl font-bold text-white">GestionGTG</h1>
+              <h1 className="text-xl font-bold text-foreground">GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}
@@ -1326,22 +1253,22 @@ function LayoutContent({ children, currentPageName }) {
                 <Button
                   onClick={() => setShowPunchControls(!showPunchControls)}
                   variant="ghost"
-                  className="h-7 w-7 p-0 text-slate-400 hover:text-white hover:bg-slate-800/50 relative"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/40 relative"
                 >
                   <div className="relative w-4 h-4 flex items-center justify-center">
                     {pointageEnCours ? (
                       <>
-                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+                          <div className="w-3 h-3 bg-primary rounded-full animate-ping"></div>
                         </div>
                       </>
                     ) : (
-                      <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
+                      <div className="w-3 h-3 bg-muted rounded-full"></div>
                     )}
                   </div>
                 </Button>
-                <span className="text-[9px] text-slate-400 whitespace-nowrap">
+                <span className="text-[9px] text-muted-foreground whitespace-nowrap">
                   {pointageEnCours ? "En travail" : "Hors travail"}
                 </span>
               </div>
@@ -1362,31 +1289,31 @@ function LayoutContent({ children, currentPageName }) {
                       onMouseLeave={() => setIsHoveringPunch(false)}
                     >
                       {/* Chronomètre */}
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-                        <span className="text-white text-sm font-bold tabular-nums min-w-[70px]">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-card backdrop-blur-sm rounded-lg border border-border">
+                        <span className="text-foreground text-sm font-bold tabular-nums min-w-[70px]">
                           {formatElapsedTime(elapsedTime)}
                         </span>
                       </div>
 
                       {/* Bouton Punch In/Out */}
                       {!pointageEnCours ? (
-                        <Button
-                          onClick={handlePunchIn}
-                          size="sm"
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg h-8"
-                        >
-                          <Play className="w-4 h-4 mr-1" />
-                          Punch In
-                        </Button>
+                       <Button
+                         onClick={handlePunchIn}
+                         size="sm"
+                         className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg h-8"
+                       >
+                         <Play className="w-4 h-4 mr-1" />
+                         Punch In
+                       </Button>
                       ) : (
-                        <Button
-                          onClick={handlePunchOut}
-                          size="sm"
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
-                        >
-                          <Square className="w-4 h-4 mr-1" />
-                          Punch Out
-                        </Button>
+                       <Button
+                         onClick={handlePunchOut}
+                         size="sm"
+                         className="bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 shadow-lg h-8"
+                       >
+                         <Square className="w-4 h-4 mr-1" />
+                         Punch Out
+                       </Button>
                       )}
                     </div>
                   </motion.div>
@@ -1396,9 +1323,9 @@ function LayoutContent({ children, currentPageName }) {
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
                 size="icon"
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
+                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg"
               >
-                <Timer className="w-5 h-5 text-white" />
+                <Timer className="w-5 h-5 text-accent-foreground" />
               </Button>
               <NotificationButton user={user} />
             </div>
