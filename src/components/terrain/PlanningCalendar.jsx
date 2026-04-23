@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -21,6 +21,7 @@ import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
 import MultiRouteMap from "./MultiRouteMap";
 import { useKanbanDrag } from "@/hooks/useKanbanDrag";
+import LinkedGroupManager from "./LinkedGroupManager";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -179,6 +180,13 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   });
   const [isOptimizing, setIsOptimizing] = useState(false);
 
+  // Groupes de cartes liées: [{id: string, cardIds: [string, ...]}]
+  const [linkedGroups, setLinkedGroups] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('terrainLinkedGroups') || '[]'); } catch { return []; }
+  });
+  // Mode liaison: null | { firstCardId: string }
+  const [linkingMode, setLinkingMode] = useState(null);
+
   const toggleLockCard = (cardId) => {
     setLockedCards(prev => {
       const next = new Set(prev);
@@ -187,6 +195,70 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       localStorage.setItem('lockedTerrainCards', JSON.stringify([...next]));
       return next;
     });
+  };
+
+  const saveLinkedGroups = (groups) => {
+    localStorage.setItem('terrainLinkedGroups', JSON.stringify(groups));
+    setLinkedGroups(groups);
+  };
+
+  const getLinkedGroupForCard = (cardId) => linkedGroups.find(g => g.cardIds.includes(cardId));
+
+  const handleLinkCard = (cardId) => {
+    if (!linkingMode) {
+      // Premier clic: entrer en mode liaison
+      setLinkingMode({ firstCardId: cardId });
+      return;
+    }
+    if (linkingMode.firstCardId === cardId) {
+      // Clic sur la même carte: annuler
+      setLinkingMode(null);
+      return;
+    }
+    // Deuxième clic: créer/étendre le lien
+    const firstCard = linkingMode.firstCardId;
+    const secondCard = cardId;
+    const groups = JSON.parse(JSON.stringify(linkedGroups));
+    const groupOfFirst = groups.find(g => g.cardIds.includes(firstCard));
+    const groupOfSecond = groups.find(g => g.cardIds.includes(secondCard));
+
+    if (groupOfFirst && groupOfSecond) {
+      if (groupOfFirst.id === groupOfSecond.id) {
+        // Déjà dans le même groupe
+      } else {
+        // Fusionner les deux groupes
+        groupOfFirst.cardIds = [...new Set([...groupOfFirst.cardIds, ...groupOfSecond.cardIds])];
+        const filtered = groups.filter(g => g.id !== groupOfSecond.id);
+        saveLinkedGroups(filtered);
+      }
+    } else if (groupOfFirst) {
+      if (!groupOfFirst.cardIds.includes(secondCard)) groupOfFirst.cardIds.push(secondCard);
+      saveLinkedGroups(groups);
+    } else if (groupOfSecond) {
+      if (!groupOfSecond.cardIds.includes(firstCard)) groupOfSecond.cardIds.push(firstCard);
+      saveLinkedGroups(groups);
+    } else {
+      // Créer un nouveau groupe
+      groups.push({ id: `link-${Date.now()}`, cardIds: [firstCard, secondCard] });
+      saveLinkedGroups(groups);
+    }
+    setLinkingMode(null);
+  };
+
+  const handleUnlinkGroup = (groupId) => {
+    saveLinkedGroups(linkedGroups.filter(g => g.id !== groupId));
+  };
+
+  const handleUnlinkCard = (groupId, cardId) => {
+    const groups = JSON.parse(JSON.stringify(linkedGroups));
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return;
+    group.cardIds = group.cardIds.filter(id => id !== cardId);
+    if (group.cardIds.length < 2) {
+      saveLinkedGroups(groups.filter(g => g.id !== groupId));
+    } else {
+      saveLinkedGroups(groups);
+    }
   };
 
   const prevEquipesRef = useRef(null);
@@ -708,32 +780,70 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   }, [equipes, terrainCards, lockedCards, placeAffaire, dossiers, onUpdateDossier, generateTeamDisplayName, techniciens]);
 
   // ---- Custom drag & drop pour les DossierCards ----
+  // Applique un mouvement de carte (ou groupe) sur l'état equipes et met à jour les dossiers
+  const applyCardDrop = useCallback((cardIds, dateStr, equipeId, insertIndex, equipes) => {
+    const ne = JSON.parse(JSON.stringify(equipes));
+    if (!ne[dateStr]) return ne;
+    const equipe = ne[dateStr].find(e => e.id === equipeId);
+    if (!equipe) return ne;
+
+    // Retirer toutes les cartes du groupe de leurs équipes précédentes
+    Object.keys(ne).forEach(d => ne[d].forEach(eq => {
+      if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => !cardIds.includes(id));
+    }));
+
+    // Retirer les cartes du groupe de la cible (pour réinsérer au bon endroit)
+    const withoutGroup = equipe.mandats.filter(id => !cardIds.includes(id));
+    const targetIndex = insertIndex != null ? Math.min(insertIndex, withoutGroup.length) : withoutGroup.length;
+    withoutGroup.splice(targetIndex, 0, ...cardIds);
+    equipe.mandats = withoutGroup;
+
+    return ne;
+  }, []);
+
+  const updateDossierForCard = useCallback((card, dateStr, equipeNom) => {
+    if (!onUpdateDossier) return;
+    const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+    if (!freshDossier) return;
+    const idParts = card.id.split('-');
+    const mandatIdx = parseInt(idParts[idParts.length - 2]);
+    const terrainIdx = parseInt(idParts[idParts.length - 1]);
+    const um = freshDossier.mandats.map((m, idx) => {
+      if (idx !== mandatIdx) return m;
+      let tl = m.terrains_list && m.terrains_list.length > 0
+        ? [...m.terrains_list]
+        : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+      const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
+      if (dateStr === null) {
+        tl[tIdx] = { ...tl[tIdx], date_cedulee: null, equipe_assignee: null };
+        const terrainPrincipal = { ...(m.terrain || {}), ...tl[0], date_cedulee: null, equipe_assignee: null };
+        return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl, terrain: terrainPrincipal };
+      } else {
+        tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: equipeNom };
+        const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
+        return { ...m, date_terrain: dateStr, equipe_assignee: equipeNom, terrains_list: tl, terrain: terrainPrincipal };
+      }
+    });
+    onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
+  }, [onUpdateDossier, dossiers]);
+
   const executeDrop = useCallback((card, columnId, insertIndex) => {
     if (!card) return;
 
+    // Déterminer toutes les cartes à déplacer (groupe lié ou carte seule)
+    const linkedGroup = getLinkedGroupForCard(card.id);
+    const cardIds = linkedGroup
+      ? linkedGroup.cardIds.filter(id => terrainCards.some(c => c.id === id))
+      : [card.id];
+
     if (columnId === 'unassigned') {
-      // Retirer de toutes les équipes
-      const ne = { ...equipes };
-      Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== card.id); }));
+      const ne = JSON.parse(JSON.stringify(equipes));
+      Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => !cardIds.includes(id)); }));
       setEquipes(ne);
-      if (onUpdateDossier) {
-        const freshDossier = dossiers.find(d => d.id === card.dossier.id);
-        if (!freshDossier) return;
-        const idParts = card.id.split('-');
-        const mandatIdx = parseInt(idParts[idParts.length - 2]);
-        const terrainIdx = parseInt(idParts[idParts.length - 1]);
-        const um = freshDossier.mandats.map((m, idx) => {
-          if (idx !== mandatIdx) return m;
-          let tl = m.terrains_list && m.terrains_list.length > 0
-            ? [...m.terrains_list]
-            : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-          const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
-          tl[tIdx] = { ...tl[tIdx], date_cedulee: null, equipe_assignee: null };
-          const terrainPrincipal = { ...(m.terrain || {}), ...tl[0], date_cedulee: null, equipe_assignee: null };
-          return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl, terrain: terrainPrincipal };
-        });
-        onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
-      }
+      cardIds.forEach(cid => {
+        const c = terrainCards.find(t => t.id === cid);
+        if (c) updateDossierForCard(c, null, null);
+      });
       return;
     }
 
@@ -741,51 +851,27 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     if (!dest) return;
 
     const doTheDrop = (dateStr, equipeId) => {
-      const ne = { ...equipes };
-      if (!ne[dateStr]) return;
-      const equipe = ne[dateStr].find(e => e.id === equipeId);
-      if (!equipe) return;
-      // Remove from previous equipe
-      Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
-      // Insert at index or reorder within same equipe
-      const withoutCard = equipe.mandats.filter(id => id !== card.id);
-      const targetIndex = insertIndex != null ? Math.min(insertIndex, withoutCard.length) : withoutCard.length;
-      withoutCard.splice(targetIndex, 0, card.id);
-      equipe.mandats = withoutCard;
+      const ne = applyCardDrop(cardIds, dateStr, equipeId, insertIndex, equipes);
       setEquipes(ne);
-      if (onUpdateDossier) {
-        const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
-        const posIdx = dayEqs.findIndex(e => e.id === equipeId);
-        const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-        const freshDossier = dossiers.find(d => d.id === card.dossier.id);
-        if (!freshDossier) return;
-        // Décoder mandatIndex et terrainIndex directement depuis card.id pour éviter les problèmes de stale closure
-        const idParts = card.id.split('-');
-        const mandatIdx = parseInt(idParts[idParts.length - 2]);
-        const terrainIdx = parseInt(idParts[idParts.length - 1]);
-        const um = freshDossier.mandats.map((m, idx) => {
-          if (idx !== mandatIdx) return m;
-          let tl = m.terrains_list && m.terrains_list.length > 0
-            ? [...m.terrains_list]
-            : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-          const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
-          tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-          const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
-          return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
-        });
-        onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
-      }
+      const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+      const equipe = ne[dateStr]?.find(e => e.id === equipeId);
+      const posIdx = dayEqs.findIndex(e => e.id === equipeId);
+      const eqNom = equipe ? generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined) : '';
+      cardIds.forEach(cid => {
+        const c = terrainCards.find(t => t.id === cid);
+        if (c) updateDossierForCard(c, dateStr, eqNom);
+      });
     };
 
-    // Check rendez-vous warning
+    // Vérifier rendez-vous uniquement pour la carte principale
     if (card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous && card.terrain.date_rendez_vous !== dest.dateStr) {
       setRendezVousWarning({ card, newDateStr: dest.dateStr });
-      setPendingDrop({ card, dateStr: dest.dateStr, equipeId: dest.equipeId, insertIndex });
+      setPendingDrop({ cardIds, dateStr: dest.dateStr, equipeId: dest.equipeId, insertIndex });
       return;
     }
 
     doTheDrop(dest.dateStr, dest.equipeId);
-  }, [equipes, onUpdateDossier, dossiers, placeAffaire, generateTeamDisplayName]);
+  }, [equipes, linkedGroups, terrainCards, applyCardDrop, updateDossierForCard, placeAffaire, generateTeamDisplayName]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
@@ -925,38 +1011,19 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const executePendingDrop = () => {
     if (!pendingDrop) return;
-    const { card, dateStr, equipeId, insertIndex } = pendingDrop;
-    const ne = { ...equipes };
+    const { cardIds, dateStr, equipeId, insertIndex } = pendingDrop;
+    if (!cardIds || cardIds.length === 0) { setRendezVousWarning(null); setPendingDrop(null); return; }
+    const ne = applyCardDrop(cardIds, dateStr, equipeId, insertIndex, equipes);
     if (!ne[dateStr]) { setRendezVousWarning(null); setPendingDrop(null); return; }
-    const equipe = ne[dateStr].find(e => e.id === equipeId);
-    if (!equipe) { setRendezVousWarning(null); setPendingDrop(null); return; }
-    Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== equipeId) eq.mandats = eq.mandats.filter(id => id !== card.id); }));
-    const withoutCard = equipe.mandats.filter(id => id !== card.id);
-    const targetIndex = insertIndex != null ? Math.min(insertIndex, withoutCard.length) : withoutCard.length;
-    withoutCard.splice(targetIndex, 0, card.id);
-    equipe.mandats = withoutCard;
     setEquipes(ne);
-    if (onUpdateDossier) {
-      const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
-      const posIdx = dayEqs.findIndex(e => e.id === equipeId);
-      const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
-      const freshDossier = dossiers.find(d => d.id === card.dossier.id);
-      if (!freshDossier) { setRendezVousWarning(null); setPendingDrop(null); return; }
-      const idParts = card.id.split('-');
-      const mandatIdx = parseInt(idParts[idParts.length - 2]);
-      const terrainIdx = parseInt(idParts[idParts.length - 1]);
-      const um = freshDossier.mandats.map((m, idx) => {
-        if (idx !== mandatIdx) return m;
-        let tl = m.terrains_list && m.terrains_list.length > 0
-          ? [...m.terrains_list]
-          : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-        const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
-        tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
-        const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
-        return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
-      });
-      onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
-    }
+    const dayEqs = (ne[dateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+    const equipe = ne[dateStr]?.find(e => e.id === equipeId);
+    const posIdx = dayEqs.findIndex(e => e.id === equipeId);
+    const eqNom = equipe ? generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined) : '';
+    cardIds.forEach(cid => {
+      const c = terrainCards.find(t => t.id === cid);
+      if (c) updateDossierForCard(c, dateStr, eqNom);
+    });
     setRendezVousWarning(null); setPendingDrop(null);
   };
 
@@ -996,9 +1063,14 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
     const isDraggingThis = dragging?.card?.id === card.id;
     const isLocked = lockedCards.has(card.id);
+    const linkedGroup = getLinkedGroupForCard(card.id);
+    const isLinked = !!linkedGroup;
+    const isLinkingFirst = linkingMode?.firstCardId === card.id;
+    const isLinkingTarget = !!linkingMode && !isLinkingFirst;
 
     const onMouseDown = (e) => {
-      if (isLocked) return; // Locked cards can't be dragged
+      if (isLocked) return;
+      if (linkingMode !== null) return; // Ne pas drag en mode liaison
       e.stopPropagation();
       didDragRef.current = false;
       const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
@@ -1015,26 +1087,47 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
     const onClick = (e) => {
       e.stopPropagation();
+      if (linkingMode !== null) {
+        handleLinkCard(card.id);
+        return;
+      }
       if (!didDragRef.current) handleCardClick(card);
     };
+
+    const ringStyle = isLinkingFirst
+      ? 'ring-2 ring-violet-400'
+      : isLinked
+        ? 'ring-1 ring-violet-500/60'
+        : isLocked
+          ? 'ring-1 ring-amber-500/60'
+          : '';
 
     return (
       <div
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${isLocked ? 'opacity-80 ring-1 ring-amber-500/60' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
-        style={{ cursor: isLocked ? 'default' : (dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${ringStyle} ${isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
+        style={{ cursor: isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
+            {isLinked && <Badge className="bg-violet-500/20 text-violet-300 border-violet-500/30 border text-xs flex-shrink-0 flex items-center gap-0.5"><Link2 className="w-2.5 h-2.5" />Lié</Badge>}
           </div>
           <div className="flex gap-1">
             <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
+            <Button
+              size="sm"
+              onClick={(e) => { e.stopPropagation(); isLinked ? handleUnlinkCard(linkedGroup.id, card.id) : handleLinkCard(card.id); }}
+              className={`h-6 w-6 p-0 flex-shrink-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
+              title={isLinked ? 'Retirer du groupe lié' : isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Lier avec une autre carte'}
+            >
+              {isLinked ? <Unlink className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+            </Button>
             {showLock && (
-              <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller (permettre déplacement et optimisation)' : 'Verrouiller (fixer la position)'}>
+              <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>
                 {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
               </Button>
             )}
@@ -1211,7 +1304,16 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "techniciens" ? null : "techniciens")} className={globalViewMode === "techniciens" ? "bg-blue-500/30 text-blue-400 border border-blue-500" : "bg-slate-800 text-white"}><Users className="w-3 h-3 mr-1" />Techniciens</Button>
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "vehicules" ? null : "vehicules")} className={globalViewMode === "vehicules" ? "bg-purple-500/30 text-purple-400 border border-purple-500" : "bg-slate-800 text-white"}><Truck className="w-3 h-3 mr-1" />Véhicules</Button>
               <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "equipements" ? null : "equipements")} className={globalViewMode === "equipements" ? "bg-orange-500/30 text-orange-400 border border-orange-500" : "bg-slate-800 text-white"}><Wrench className="w-3 h-3 mr-1" />Équipements</Button>
-              <div className="ml-auto flex items-center gap-2">
+              <div className="ml-auto flex items-center gap-2 flex-wrap">
+                {linkingMode && (
+                  <div className="flex items-center gap-2 bg-violet-900/40 border border-violet-500/40 rounded-lg px-2 py-1">
+                    <Link2 className="w-3 h-3 text-violet-400 animate-pulse" />
+                    <span className="text-xs text-violet-300">
+                      {linkingMode.firstCardId ? 'Cliquer sur une autre carte pour lier' : 'Cliquer sur une carte'}
+                    </span>
+                    <button onClick={() => setLinkingMode(null)} className="text-slate-400 hover:text-white ml-1"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
                 {lockedCards.size > 0 && (
                   <span className="text-xs text-amber-400 flex items-center gap-1">
                     <Lock className="w-3 h-3" />{lockedCards.size} carte{lockedCards.size > 1 ? 's' : ''} verrouillée{lockedCards.size > 1 ? 's' : ''}
@@ -1266,6 +1368,12 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                     </div>
                   ))}
                 </div>
+                <LinkedGroupManager
+                  linkedGroups={linkedGroups}
+                  terrainCards={terrainCards}
+                  onUnlinkGroup={handleUnlinkGroup}
+                  onUnlinkCard={handleUnlinkCard}
+                />
               </TabsContent>
             </Tabs>
           </Card>
