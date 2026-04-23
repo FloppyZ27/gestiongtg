@@ -97,7 +97,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   const lastDossierIdRef = React.useRef(null);
 
-  // Synchroniser date_terrain et equipe_assignee depuis le dossier externe (mis à jour par drag-drop)
+  // Synchroniser date_terrain, equipe_assignee et terrains_list depuis le dossier externe (mis à jour par drag-drop)
   useEffect(() => {
     if (!dossier || !dossier.mandats || dossier.id !== lastDossierIdRef.current) return;
     setFormData(prev => {
@@ -107,16 +107,21 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         if (!ext) return m;
         const newDateTerrain = ext.date_terrain || "";
         const newEquipe = ext.equipe_assignee || "";
-        if (m.date_terrain !== newDateTerrain || m.equipe_assignee !== newEquipe) {
+        const newTerrainsListKey = JSON.stringify((ext.terrains_list || []).map(t => `${t.date_cedulee}|${t.equipe_assignee}`));
+        const oldTerrainsListKey = JSON.stringify((m.terrains_list || []).map(t => `${t.date_cedulee}|${t.equipe_assignee}`));
+        if (m.date_terrain !== newDateTerrain || m.equipe_assignee !== newEquipe || newTerrainsListKey !== oldTerrainsListKey) {
           changed = true;
-          return { ...m, date_terrain: newDateTerrain, equipe_assignee: newEquipe };
+          return { ...m, date_terrain: newDateTerrain, equipe_assignee: newEquipe, terrains_list: ext.terrains_list || m.terrains_list };
         }
         return m;
       });
       if (!changed) return prev;
-      return { ...prev, mandats: updatedMandats };
+      const newData = { ...prev, mandats: updatedMandats };
+      // Mettre à jour initialFormData pour éviter que l'auto-save réécrase ces champs
+      setInitialFormData(JSON.parse(JSON.stringify(newData)));
+      return newData;
     });
-  }, [dossier?.mandats?.map(m => `${m.date_terrain}|${m.equipe_assignee}`).join(',')]);
+  }, [dossier?.mandats?.map(m => `${m.date_terrain}|${m.equipe_assignee}|${(m.terrains_list||[]).map(t=>t.date_cedulee).join(',')}`).join(';')]);
 
   useEffect(() => {
     if (dossier && dossier.id !== lastDossierIdRef.current) {
