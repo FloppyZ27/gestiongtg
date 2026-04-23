@@ -634,19 +634,26 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       // Appliquer les résultats (équipes existantes réordonnées + nouvelles équipes)
       setEquipes(prev => {
-        const ne = { ...prev };
+        const ne = JSON.parse(JSON.stringify(prev)); // deep clone
 
-        // Mettre à jour les équipes existantes
+        // 1. Vider les mandats non-lockés de TOUTES les équipes futures (le backend les a réoptimisées)
+        Object.keys(ne).forEach(dateStr => {
+          if (dateStr < today) return;
+          ne[dateStr].forEach(equipe => {
+            equipe.mandats = equipe.mandats.filter(id => lockedCards.has(id));
+          });
+        });
+
+        // 2. Appliquer les nouveaux ordres retournés par le backend
         Object.entries(optimizedResult).forEach(([dateStr, equipeOrders]) => {
           if (!ne[dateStr]) ne[dateStr] = [];
-          // Mettre à jour les équipes existantes dans ce jour
           ne[dateStr] = ne[dateStr].map(equipe => {
             const newOrder = equipeOrders[equipe.id];
-            if (!newOrder) return equipe;
+            if (newOrder === undefined) return equipe;
             return { ...equipe, mandats: newOrder };
           });
           // Ajouter les nouvelles équipes créées ce jour
-          const newEqForDate = newEquipesFromServer.filter(ne2 => ne2.dateStr === dateStr);
+          const newEqForDate = newEquipesFromServer.filter(n => n.dateStr === dateStr);
           newEqForDate.forEach(({ equipe }) => {
             if (!ne[dateStr].find(e => e.id === equipe.id)) {
               ne[dateStr].push(equipe);
