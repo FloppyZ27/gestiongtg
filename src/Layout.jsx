@@ -588,8 +588,6 @@ function LayoutContent({ children, currentPageName }) {
         /* Dialog glassmorphique professionnel */
         [role="dialog"] {
         background: hsl(210, 16%, 13%, 0.95) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
         border: 1px solid hsl(210, 10%, 19%, 0.8) !important;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
         position: fixed !important;
