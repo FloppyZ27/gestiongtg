@@ -1,24 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const BUREAU_ADDRESS = "11 rue melancon est, Alma, QC";
-const MAX_HOURS = 9; // heures max par équipe (travail + trajet)
+const MAX_HOURS = 9;
 
 // Retourne { durationSeconds, order } pour une liste d'adresses (round trip depuis le bureau)
 async function getOptimizedRoute(apiKey, addresses) {
   if (!addresses || addresses.length === 0) return { durationSeconds: 0, order: [] };
-  if (addresses.length === 1) {
-    // Aller-retour simple
-    try {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(BUREAU_ADDRESS)}&destination=${encodeURIComponent(BUREAU_ADDRESS)}&waypoints=${encodeURIComponent(addresses[0])}&key=${apiKey}`;
-      const data = await (await fetch(url)).json();
-      if (data.status !== 'OK') return { durationSeconds: 0, order: [0] };
-      const secs = (data.routes[0].legs || []).reduce((s, l) => s + (l.duration?.value || 0), 0);
-      return { durationSeconds: secs, order: [0] };
-    } catch { return { durationSeconds: 0, order: [0] }; }
-  }
   try {
-    const waypoints = addresses.map(a => `via:${encodeURIComponent(a)}`).join('|');
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(BUREAU_ADDRESS)}&destination=${encodeURIComponent(BUREAU_ADDRESS)}&waypoints=optimize:true|${waypoints}&key=${apiKey}`;
+    const waypoints = addresses.map(a => encodeURIComponent(a)).join('|');
+    const optimizeFlag = addresses.length >= 2 ? 'optimize:true|' : '';
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(BUREAU_ADDRESS)}&destination=${encodeURIComponent(BUREAU_ADDRESS)}&waypoints=${optimizeFlag}${waypoints}&key=${apiKey}`;
     const data = await (await fetch(url)).json();
     if (data.status !== 'OK' || !data.routes?.[0]) return { durationSeconds: 0, order: addresses.map((_, i) => i) };
     const route = data.routes[0];
@@ -39,58 +30,62 @@ function parseTempsPrevu(s) {
   return n ? parseFloat(n[1]) : 0;
 }
 
-// Construit une liste ordonnée de cartes dont le total (travail + trajet réel) <= MAX_HOURS.
-// Retourne { orderedIds, travelHours } après avoir appelé Google Maps sur les cartes retenues.
-async function buildFinalOrder(apiKey, candidateCards, lockedCards) {
-  if (candidateCards.length === 0) return { orderedIds: [], travelHours: 0 };
+// Prend une liste de cartes candidates (déjà ordonnées par priorité),
+// optimise géographiquement et retourne les cartes qui tiennent dans MAX_HOURS.
+// Un seul appel Google Maps.
+async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds) {
+  if (candidateCards.length === 0) return [];
 
-  // 1. Optimiser l'ordre géographique pour toutes les cartes candidates
   const withAddr = candidateCards.filter(c => c.address);
-  let geoOrder = candidateCards.map((_, i) => i); // indices dans candidateCards
+  let orderedCards = [...candidateCards];
+
+  // Optimiser l'ordre géographique si >= 2 adresses
   if (withAddr.length >= 2) {
     try {
-      const { order } = await getOptimizedRoute(apiKey, withAddr.map(c => c.address));
-      // Reconstruire l'ordre complet: adresses optimisées + sans adresse à la fin
+      const { order, durationSeconds } = await getOptimizedRoute(apiKey, withAddr.map(c => c.address));
       const withAddrSorted = order.map(i => withAddr[i]);
       const withoutAddr = candidateCards.filter(c => !c.address);
-      const sorted = [...withAddrSorted, ...withoutAddr];
-      geoOrder = sorted.map(c => candidateCards.indexOf(c));
-    } catch { /* garder l'ordre actuel */ }
-  }
+      orderedCards = [...withAddrSorted, ...withoutAddr];
 
-  const orderedCandidates = geoOrder.map(i => candidateCards[i]).filter(Boolean);
+      const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
+      const travelH = durationSeconds / 3600;
 
-  // 2. Ajouter les cartes une par une jusqu'à MAX_HOURS (trajet recalculé à chaque ajout serait trop lent)
-  //    Approche: ajouter toutes, calculer le trajet réel, enlever depuis la fin si dépassement.
-  let kept = [...orderedCandidates];
-
-  while (kept.length > 0) {
-    const travailH = kept.reduce((sum, c) => sum + parseTempsPrevu(c.temps_prevu), 0);
-    const addrs = kept.filter(c => c.address).map(c => c.address);
-    const { durationSeconds } = await getOptimizedRoute(apiKey, addrs);
-    const travelH = durationSeconds / 3600;
-    const totalH = travailH + travelH;
-
-    if (totalH <= MAX_HOURS) {
-      return { orderedIds: kept.map(c => c.id), travelHours: travelH };
-    }
-
-    // Retirer la dernière carte non-lockée
-    let removed = false;
-    for (let i = kept.length - 1; i >= 0; i--) {
-      if (!lockedCards.includes(kept[i].id)) {
-        kept.splice(i, 1);
-        removed = true;
-        break;
+      if (totalTravail + travelH <= MAX_HOURS) {
+        return orderedCards; // tout rentre
       }
-    }
-    if (!removed) break; // toutes lockées, on ne peut pas réduire
+
+      // Trop plein: retirer depuis la fin (sauf lockées) en utilisant trajet proportionnel
+      const travelPerAddr = travelH / withAddr.length;
+      let cumH = 0;
+      const kept = [];
+      for (const card of orderedCards) {
+        const h = parseTempsPrevu(card.temps_prevu) + (card.address ? travelPerAddr : 0);
+        if (cumH + h <= MAX_HOURS) {
+          kept.push(card);
+          cumH += h;
+        } else if (lockedCardIds.includes(card.id)) {
+          kept.push(card); // lockée: toujours garder
+        }
+      }
+      return kept;
+    } catch { /* fallback ci-dessous */ }
   }
 
-  const travailH = kept.reduce((sum, c) => sum + parseTempsPrevu(c.temps_prevu), 0);
-  const addrs = kept.filter(c => c.address).map(c => c.address);
-  const { durationSeconds } = await getOptimizedRoute(apiKey, addrs);
-  return { orderedIds: kept.map(c => c.id), travelHours: durationSeconds / 3600 };
+  // Pas assez d'adresses: estimation trajet 1h total
+  const ESTIMATED_TRAVEL = 1;
+  const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
+  if (totalTravail + ESTIMATED_TRAVEL <= MAX_HOURS) return orderedCards;
+
+  let cumH = 0;
+  const kept = [];
+  for (const card of orderedCards) {
+    const h = parseTempsPrevu(card.temps_prevu);
+    if (cumH + h + ESTIMATED_TRAVEL <= MAX_HOURS || lockedCardIds.includes(card.id)) {
+      kept.push(card);
+      cumH += h;
+    }
+  }
+  return kept;
 }
 
 Deno.serve(async (req) => {
@@ -107,15 +102,17 @@ Deno.serve(async (req) => {
     const result = {};
     const newEquipes = [];
 
-    // Cartes déjà assignées
-    const assignedCardIds = new Set();
-    Object.values(equipes).forEach(dayEqs => dayEqs.forEach(eq => eq.mandats.forEach(id => assignedCardIds.add(id))));
+    // Map rapide pour retrouver les données d'une carte par id
+    const cardDataMap = {};
+    cardsData.forEach(c => { cardDataMap[c.id] = c; });
+    unassignedCards.forEach(c => { cardDataMap[c.id] = c; });
 
     // Pool de cartes à planifier (non assignées, statut a_ceduler)
+    const assignedCardIds = new Set();
+    Object.values(equipes).forEach(dayEqs => dayEqs.forEach(eq => eq.mandats.forEach(id => assignedCardIds.add(id))));
     let pool = unassignedCards.filter(c => !assignedCardIds.has(c.id));
 
-    // Trier le pool: RDV d'abord, puis date_limite_leve croissante
-    const sortPool = (arr) => arr.sort((a, b) => {
+    const sortByPriority = (arr) => arr.sort((a, b) => {
       if (a.a_rendez_vous && !b.a_rendez_vous) return -1;
       if (!a.a_rendez_vous && b.a_rendez_vous) return 1;
       if (!a.date_limite_leve && !b.date_limite_leve) return 0;
@@ -123,10 +120,10 @@ Deno.serve(async (req) => {
       if (!b.date_limite_leve) return -1;
       return a.date_limite_leve.localeCompare(b.date_limite_leve);
     });
-    sortPool(pool);
+    sortByPriority(pool);
 
-    // Collecter tous les jours futurs à traiter
-    const futureDates = new Set(Object.keys(equipes).filter(d => d > today));
+    // Tous les jours futurs à traiter: jours avec équipes + 30 jours ouvrables à venir
+    const futureDates = new Set(Object.keys(equipes).filter(d => d >= today));
     const addDate = new Date(today); addDate.setDate(addDate.getDate() + 1);
     for (let i = 0; i < 30; i++) {
       while (addDate.getDay() === 0 || addDate.getDay() === 6) addDate.setDate(addDate.getDate() + 1);
@@ -135,77 +132,51 @@ Deno.serve(async (req) => {
     }
     const sortedDates = [...futureDates].sort();
 
-    // --- TRAITEMENT PAR JOUR ---
     for (const dateStr of sortedDates) {
-      if (pool.length === 0 && !equipes[dateStr]?.length) continue;
-
       const dayEquipes = (equipes[dateStr] || []).filter(eq =>
         !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
       );
 
-      if (!result[dateStr]) result[dateStr] = {};
-
-      // ÉTAPE A: Optimiser les équipes existantes + les remplir avec des cartes du pool
+      // ÉTAPE A: Traiter chaque équipe existante (optimisation géo + remplissage depuis pool)
       for (const equipe of dayEquipes) {
-        if (dateStr < today) {
-          result[dateStr][equipe.id] = equipe.mandats;
-          continue;
-        }
+        if (!result[dateStr]) result[dateStr] = {};
 
-        const lockedInEquipe = (equipe.mandats || []).filter(id => lockedCardIds.includes(id));
-        const unlockedInEquipe = (equipe.mandats || []).filter(id => !lockedCardIds.includes(id));
+        // Séparer lockées et non-lockées
+        const lockedIds = (equipe.mandats || []).filter(id => lockedCardIds.includes(id));
+        const unlockedIds = (equipe.mandats || []).filter(id => !lockedCardIds.includes(id));
 
-        // Cartes RDV du pool correspondant à ce jour
-        const rdvPoolForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
+        // Données des cartes existantes non-lockées + cartes RDV du pool pour ce jour
+        const unlockedExisting = unlockedIds.map(id => cardDataMap[id]).filter(Boolean);
+        const rdvFromPool = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
+        const otherFromPool = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
 
-        // Construire les candidats: lockées + non-lockées existantes + RDV du pool + autres du pool (triés)
-        const otherPool = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
-        sortPool(otherPool);
-
-        const lockedCards_data = lockedInEquipe.map(id => cardsData.find(c => c.id === id)).filter(Boolean);
-        const unlockedExisting = unlockedInEquipe.map(id => cardsData.find(c => c.id === id)).filter(Boolean);
-
-        // Ordre prioritaire: lockées (positions fixes), puis non-lockées existantes (RDV du jour d'abord), puis pool RDV, puis pool autre
+        // RDV existants en premier (triés par heure), puis autres existants, puis pool RDV, puis pool autres
         const unlockedExistingRdv = unlockedExisting.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
         const unlockedExistingOther = unlockedExisting.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
         unlockedExistingRdv.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-        rdvPoolForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
+        rdvFromPool.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
+        sortByPriority(otherFromPool);
 
-        // Candidats non-lockés (ordre de tentative)
+        const lockedCards_data = lockedIds.map(id => cardDataMap[id]).filter(Boolean);
         const candidates = [
+          ...lockedCards_data,
           ...unlockedExistingRdv,
-          ...rdvPoolForDay,
+          ...rdvFromPool,
           ...unlockedExistingOther,
-          ...otherPool,
+          ...otherFromPool,
         ];
 
-        // Calculer la capacité disponible avec les lockées seules
-        const lockedHours = lockedCards_data.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
-        const lockedAddresses = lockedCards_data.filter(c => c.address).map(c => c.address);
-        const { durationSeconds: lockedTravelSec } = await getOptimizedRoute(apiKey, lockedAddresses);
-        const usedHours = lockedHours + lockedTravelSec / 3600;
+        const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds);
+        const keptIds = keptCards.map(c => c.id);
 
-        if (usedHours >= MAX_HOURS) {
-          // Équipe déjà pleine avec les cartes lockées
-          result[dateStr][equipe.id] = equipe.mandats;
-          continue;
-        }
-
-        // Tentative d'ajout des candidats jusqu'à remplir 9h
-        // Inclure les lockées dans le calcul final
-        const allCandidates = [...lockedCards_data, ...candidates];
-        const { orderedIds, travelHours } = await buildFinalOrder(apiKey, allCandidates, lockedCardIds);
-
-        // Retirer les nouvelles cartes (pool) qui ont été intégrées
-        const addedFromPool = orderedIds.filter(id =>
-          !equipe.mandats.includes(id) && pool.some(c => c.id === id)
-        );
+        // Mettre à jour le pool: retirer les cartes du pool qui ont été intégrées
+        const addedFromPool = keptIds.filter(id => pool.some(c => c.id === id));
         pool = pool.filter(c => !addedFromPool.includes(c.id));
 
-        result[dateStr][equipe.id] = orderedIds;
+        result[dateStr][equipe.id] = keptIds;
       }
 
-      // ÉTAPE B: Si des cartes restent dans le pool et qu'il y a des techniciens libres → créer une nouvelle équipe
+      // ÉTAPE B: S'il reste des cartes dans le pool et des techniciens libres → nouvelle équipe
       if (pool.length === 0) continue;
 
       const usedTechIds = new Set([
@@ -215,21 +186,25 @@ Deno.serve(async (req) => {
       const freeTechs = availableTechniciens.filter(t => !usedTechIds.has(t.id));
       if (freeTechs.length === 0) continue;
 
-      // Cartes RDV ce jour + autres triées
       const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
       const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
       rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
+      sortByPriority(othersForDay);
 
       const candidates = [...rdvForDay, ...othersForDay];
       if (candidates.length === 0) continue;
 
-      const { orderedIds } = await buildFinalOrder(apiKey, candidates, []);
-      if (orderedIds.length === 0) continue;
+      const keptCards = await fitCardsIntoShift(apiKey, candidates, []);
+      if (keptCards.length === 0) continue;
+      const orderedIds = keptCards.map(c => c.id);
 
       const techIds = freeTechs.slice(0, 2).map(t => t.id);
       const techInitials = freeTechs.slice(0, 2).map(t => t.prenom.charAt(0) + t.nom.charAt(0)).join('-');
       const dayNewCount = newEquipes.filter(n => n.dateStr === dateStr).length;
-      const newEquipeNom = `Équipe ${(dayEquipes.length + dayNewCount + 1)} - ${techInitials}`;
+      const existingCount = (equipes[dateStr] || []).filter(eq =>
+        !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
+      ).length;
+      const newEquipeNom = `Équipe ${existingCount + dayNewCount + 1} - ${techInitials}`;
 
       const newEquipeData = {
         date_terrain: dateStr,
@@ -243,9 +218,10 @@ Deno.serve(async (req) => {
 
       const created = await base44.asServiceRole.entities.EquipeTerrain.create(newEquipeData);
       newEquipes.push({ dateStr, equipe: { id: created.id, ...newEquipeData } });
+      if (!result[dateStr]) result[dateStr] = {};
+      result[dateStr][created.id] = orderedIds;
 
       pool = pool.filter(c => !orderedIds.includes(c.id));
-      result[dateStr][created.id] = orderedIds;
     }
 
     return Response.json({ result, newEquipes });
