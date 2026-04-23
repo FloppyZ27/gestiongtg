@@ -570,6 +570,11 @@ function LayoutContent({ children, currentPageName }) {
             color: hsl(207, 85%, 55%) !important;
           }
 
+          /* Logos en bleu */
+          img[src*="GTG-ETOILE"] {
+            filter: hue-rotate(200deg) saturate(1.2) brightness(1.1) !important;
+          }
+
         /* Overlay avec flou doux */
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
