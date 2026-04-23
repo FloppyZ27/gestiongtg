@@ -97,6 +97,27 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   const lastDossierIdRef = React.useRef(null);
 
+  // Synchroniser date_terrain et equipe_assignee depuis le dossier externe (mis à jour par drag-drop)
+  useEffect(() => {
+    if (!dossier || !dossier.mandats || dossier.id !== lastDossierIdRef.current) return;
+    setFormData(prev => {
+      let changed = false;
+      const updatedMandats = prev.mandats.map((m, i) => {
+        const ext = dossier.mandats[i];
+        if (!ext) return m;
+        const newDateTerrain = ext.date_terrain || "";
+        const newEquipe = ext.equipe_assignee || "";
+        if (m.date_terrain !== newDateTerrain || m.equipe_assignee !== newEquipe) {
+          changed = true;
+          return { ...m, date_terrain: newDateTerrain, equipe_assignee: newEquipe };
+        }
+        return m;
+      });
+      if (!changed) return prev;
+      return { ...prev, mandats: updatedMandats };
+    });
+  }, [dossier?.mandats?.map(m => `${m.date_terrain}|${m.equipe_assignee}`).join(',')]);
+
   useEffect(() => {
     if (dossier && dossier.id !== lastDossierIdRef.current) {
       lastDossierIdRef.current = dossier.id;
