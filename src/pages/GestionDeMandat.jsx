@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Link2 } from "lucide-react";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
+import LinkedCardsConnector from "../components/terrain/LinkedCardsConnector";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -92,11 +93,41 @@ const formatAdresse = (addr) => {
 // Hook importé depuis hooks/useKanbanDrag.js
 
 // Ghost card rendu dans un portal
-function GhostCard({ card, pos, clients, users }) {
+function GhostCard({ card, pos, clients, users, linkedGroupIds }) {
   if (!card) return null;
   const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
   const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
   const clientsNames = clients.filter(c => card.dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
+  const isLinked = linkedGroupIds?.includes(card.id);
+  const cardsToShow = isLinked ? 2 : 1;
+
+  const renderCardItem = (cardItem, index) => (
+    <div
+      key={cardItem.id}
+      className={`${arpColor.split(' ')[0]} rounded-lg p-2 border ${arpColor.split(' ')[2]}`}
+      style={{
+        position: 'absolute',
+        transform: `translateY(${index * 8}px)`,
+        zIndex: cardsToShow - index
+      }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <Badge variant="outline" className={`${arpColor} border text-xs`}>
+          {getArpenteurInitials(cardItem.dossier.arpenteur_geometre)}{cardItem.dossier.numero_dossier}
+        </Badge>
+        <div className="flex items-center gap-1">
+          {isLinked && <Link2 className="w-3 h-3 text-violet-400" />}
+          <Badge className={`${getMandatColor(cardItem.mandat.type_mandat)} border text-xs font-semibold`}>
+            {getAbbreviatedMandatType(cardItem.mandat.type_mandat)}
+          </Badge>
+        </div>
+      </div>
+      <div className="flex items-center gap-1 mb-1">
+        <User className="w-3 h-3 text-white flex-shrink-0" />
+        <span className="text-xs text-white font-medium truncate">{clients.filter(c => cardItem.dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-'}</span>
+      </div>
+    </div>
+  );
 
   return ReactDOM.createPortal(
     <div
@@ -105,6 +136,7 @@ function GhostCard({ card, pos, clients, users }) {
         left: pos.x - 135,
         top: pos.y - 30,
         width: 270,
+        height: isLinked ? 130 : 100,
         zIndex: 99999,
         pointerEvents: 'none',
         opacity: 0.92,
@@ -113,40 +145,7 @@ function GhostCard({ card, pos, clients, users }) {
         transition: 'none',
       }}
     >
-      <div className={`${arpColor.split(' ')[0]} rounded-lg p-2 border ${arpColor.split(' ')[2]}`}>
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <Badge variant="outline" className={`${arpColor} border text-xs`}>
-            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-          </Badge>
-          <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
-            {getAbbreviatedMandatType(card.mandat.type_mandat)}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-1 mb-1">
-          <User className="w-3 h-3 text-white flex-shrink-0" />
-          <span className="text-xs text-white font-medium truncate">{clientsNames}</span>
-        </div>
-        {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-          <div className="flex items-center gap-1 mb-1">
-            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-xs text-slate-400 truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
-          </div>
-        )}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-          {card.mandat.date_livraison ? (
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-yellow-400" />
-              <span className="text-xs text-yellow-300">{format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM yy", { locale: fr })}</span>
-            </div>
-          ) : <div />}
-          {assignedUser && (
-            <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-              <AvatarImage src={assignedUser.photo_url} />
-              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
-            </Avatar>
-          )}
-        </div>
-      </div>
+      {renderCardItem(card, 0)}
     </div>,
     document.body
   );
@@ -404,6 +403,7 @@ export default function GestionDeMandat() {
     return (
       <div
         key={card.id}
+        data-card-id={card.id}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
@@ -526,8 +526,11 @@ export default function GestionDeMandat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      {/* Connecteur visuel entre cartes liées */}
+      <LinkedCardsConnector linkedGroups={linkedGroups} terrainCards={allCards} />
+      
       {/* Ghost card pendant le drag */}
-      {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} />}
+      {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} linkedGroupIds={getLinkedCardIds(dragging.card.id)} />}
 
       <div className="w-full">
         <div className="pb-4 pt-4">
