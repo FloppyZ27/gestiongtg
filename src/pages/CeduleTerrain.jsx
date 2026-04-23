@@ -267,11 +267,11 @@ export default function CeduleTerrain() {
           </div>
           <p className="text-slate-400 mb-4">Planification des équipes de terrain</p>
           <Tabs value={activePlace} onValueChange={setActivePlace}>
-            <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700 h-12 w-full">
-              <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
+            <TabsList className="bg-slate-800/50 h-12 w-full">
+              <TabsTrigger value="alma" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 text-slate-400 flex-1 h-full">
                 Alma
               </TabsTrigger>
-              <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
+              <TabsTrigger value="saguenay" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 text-slate-400 flex-1 h-full">
                 Saguenay
               </TabsTrigger>
             </TabsList>
