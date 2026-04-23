@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const BUREAU_ADDRESS = "11 rue melancon est, Alma, QC";
 const MAX_HOURS = 9;
+const MAX_HOURS_FRIDAY = 5;
 
 // Retourne { durationSeconds, order } pour une liste d'adresses (round trip depuis le bureau)
 async function getOptimizedRoute(apiKey, addresses) {
@@ -33,7 +34,13 @@ function parseTempsPrevu(s) {
 // Prend une liste de cartes candidates (déjà ordonnées par priorité),
 // optimise géographiquement et retourne les cartes qui tiennent dans MAX_HOURS.
 // Un seul appel Google Maps.
-async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds) {
+function getMaxHours(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.getDay() === 5 ? MAX_HOURS_FRIDAY : MAX_HOURS;
+}
+
+async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr) {
+  const maxH = getMaxHours(dateStr);
   if (candidateCards.length === 0) return [];
 
   const withAddr = candidateCards.filter(c => c.address);
@@ -50,7 +57,7 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds) {
       const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
       const travelH = durationSeconds / 3600;
 
-      if (totalTravail + travelH <= MAX_HOURS) {
+      if (totalTravail + travelH <= maxH) {
         return orderedCards; // tout rentre
       }
 
@@ -60,7 +67,7 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds) {
       const kept = [];
       for (const card of orderedCards) {
         const h = parseTempsPrevu(card.temps_prevu) + (card.address ? travelPerAddr : 0);
-        if (cumH + h <= MAX_HOURS) {
+        if (cumH + h <= maxH) {
           kept.push(card);
           cumH += h;
         } else if (lockedCardIds.includes(card.id)) {
@@ -74,13 +81,13 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds) {
   // Pas assez d'adresses: estimation trajet 1h total
   const ESTIMATED_TRAVEL = 1;
   const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
-  if (totalTravail + ESTIMATED_TRAVEL <= MAX_HOURS) return orderedCards;
+  if (totalTravail + ESTIMATED_TRAVEL <= maxH) return orderedCards;
 
   let cumH = 0;
   const kept = [];
   for (const card of orderedCards) {
     const h = parseTempsPrevu(card.temps_prevu);
-    if (cumH + h + ESTIMATED_TRAVEL <= MAX_HOURS || lockedCardIds.includes(card.id)) {
+    if (cumH + h + ESTIMATED_TRAVEL <= maxH || lockedCardIds.includes(card.id)) {
       kept.push(card);
       cumH += h;
     }
@@ -166,7 +173,7 @@ Deno.serve(async (req) => {
           ...otherFromPool,
         ];
 
-        const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds);
+        const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr);
         const keptIds = keptCards.map(c => c.id);
 
         // Mettre à jour le pool: retirer les cartes du pool qui ont été intégrées
@@ -194,7 +201,7 @@ Deno.serve(async (req) => {
       const candidates = [...rdvForDay, ...othersForDay];
       if (candidates.length === 0) continue;
 
-      const keptCards = await fitCardsIntoShift(apiKey, candidates, []);
+      const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr);
       if (keptCards.length === 0) continue;
       const orderedIds = keptCards.map(c => c.id);
 
