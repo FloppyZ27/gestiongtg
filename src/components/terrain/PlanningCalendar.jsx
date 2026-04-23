@@ -910,7 +910,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex items-start justify-between gap-2">
             <div>
               <span className="text-white text-sm font-bold block hover:text-emerald-400" onClick={onEquipeHeaderClick}>{equipeNom}</span>
-              {(() => {
+              {equipe.mandats.length > 0 && (() => {
                 const { totalTime } = calculateEquipeTimings(equipe);
                 const travelSecs = equipeTravelSeconds[equipe.id] || 0;
                 const formatHHMM = (secs) => {
