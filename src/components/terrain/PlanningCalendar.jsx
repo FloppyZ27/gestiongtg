@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Sparkles } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -170,6 +170,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [equipeExistanteWarning, setEquipeExistanteWarning] = useState(null); // { equipeNom, targetDate }
+  const [optimizingEquipeId, setOptimizingEquipeId] = useState(null); // equipeId en cours d'optimisation
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
@@ -454,6 +455,53 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const ne = { ...equipes }; if (ne[dateStr]) { ne[dateStr] = ne[dateStr].filter(e => e.id !== equipeId); if (!ne[dateStr].length) delete ne[dateStr]; }
     setEquipes(ne); setDeleteEquipeWarning(null);
   };
+
+  const optimizeEquipeRoute = useCallback(async (dateStr, equipeId) => {
+    const equipe = (equipes[dateStr] || []).find(e => e.id === equipeId);
+    if (!equipe || equipe.mandats.length < 2) return;
+
+    setOptimizingEquipeId(equipeId);
+    try {
+      const mandatsData = equipe.mandats.map(cardId => {
+        const card = terrainCards.find(c => c.id === cardId);
+        if (!card?.mandat?.adresse_travaux) return null;
+        const adresse = formatAdresse(card.mandat.adresse_travaux);
+        if (!adresse) return null;
+        return {
+          id: cardId,
+          adresse,
+          date_livraison: card.mandat?.date_livraison || null,
+        };
+      }).filter(Boolean);
+
+      if (mandatsData.length < 2) return;
+
+      const res = await base44.functions.invoke('optimizeTeamRoute', {
+        mandats: mandatsData,
+        bureauAddress: '11 rue melancon est, Alma',
+      });
+
+      const optimizedOrder = res.data?.optimizedOrder;
+      if (!optimizedOrder || optimizedOrder.length === 0) return;
+
+      // Reconstruire la liste des mandats dans l'ordre optimisé
+      // Les mandats sans adresse sont conservés à la fin
+      const withAdresse = new Set(mandatsData.map(m => m.id));
+      const withoutAdresse = equipe.mandats.filter(id => !withAdresse.has(id));
+      const newMandats = [...optimizedOrder, ...withoutAdresse];
+
+      setEquipes(prev => {
+        const ne = { ...prev };
+        const eq = (ne[dateStr] || []).find(e => e.id === equipeId);
+        if (eq) eq.mandats = newMandats;
+        return ne;
+      });
+    } catch (e) {
+      console.error('Erreur optimisation trajet:', e);
+    } finally {
+      setOptimizingEquipeId(null);
+    }
+  }, [equipes, terrainCards, formatAdresse]);
 
   const handleEdit = (dossier, mandatIndex = 0) => { setEditingDossier({ ...dossier, initialMandatIndex: mandatIndex }); setIsEditingDialogOpen(true); };
   const handleCardClick = (card) => { if (dragging) return; handleEdit(card.dossier, card.mandatIndex); };
@@ -955,6 +1003,18 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
               })()}
             </div>
             <div className="flex gap-1" onMouseDown={e => e.stopPropagation()}>
+              {equipe.mandats.length >= 2 && (
+                <button
+                  onClick={() => optimizeEquipeRoute(dateStr, equipe.id)}
+                  disabled={optimizingEquipeId === equipe.id}
+                  title="Optimiser l'ordre des mandats (date livraison + trajet)"
+                  className="text-yellow-400 hover:text-yellow-300 disabled:opacity-40"
+                >
+                  {optimizingEquipeId === equipe.id
+                    ? <span className="text-xs animate-pulse">...</span>
+                    : <Sparkles className="w-3 h-3" />}
+                </button>
+              )}
               <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300"><Copy className="w-3 h-3" /></button>
               <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
             </div>
