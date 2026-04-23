@@ -691,6 +691,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         unassignedCards: unassignedCardsData,
         availableTechniciens: techniciens.filter(t => t.statut === 'Actif' || !t.statut).map(t => ({ id: t.id, prenom: t.prenom, nom: t.nom })),
         placeAffaire,
+        linkedGroups,
       });
 
       const optimizedResult = res.data?.result;
@@ -1114,7 +1115,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div className="flex gap-2 flex-wrap">
             <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
-            {isLinked && <Badge className="bg-violet-500/20 text-violet-300 border-violet-500/30 border text-xs flex-shrink-0 flex items-center gap-0.5"><Link2 className="w-2.5 h-2.5" />Lié</Badge>}
+
           </div>
           <div className="flex gap-1">
             <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
@@ -1313,11 +1314,6 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                     </span>
                     <button onClick={() => setLinkingMode(null)} className="text-slate-400 hover:text-white ml-1"><X className="w-3 h-3" /></button>
                   </div>
-                )}
-                {lockedCards.size > 0 && (
-                  <span className="text-xs text-amber-400 flex items-center gap-1">
-                    <Lock className="w-3 h-3" />{lockedCards.size} carte{lockedCards.size > 1 ? 's' : ''} verrouillée{lockedCards.size > 1 ? 's' : ''}
-                  </span>
                 )}
                 <Button
                   size="sm"

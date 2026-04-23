@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { equipes, cardsData, lockedCardIds = [], unassignedCards = [], availableTechniciens = [], placeAffaire } = await req.json();
+    const { equipes, cardsData, lockedCardIds = [], unassignedCards = [], availableTechniciens = [], placeAffaire, linkedGroups = [] } = await req.json();
     const apiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
     if (!apiKey) return Response.json({ error: 'Missing Google Maps API key' }, { status: 500 });
 
@@ -178,6 +178,51 @@ Deno.serve(async (req) => {
     });
     let pool = [...poolCards.values()];
     sortByPriority(pool, today);
+
+    // Construire un map cardId -> groupId pour les cartes liées
+    const cardToGroup = new Map(); // cardId -> group {id, cardIds}
+    linkedGroups.forEach(group => {
+      group.cardIds.forEach(id => cardToGroup.set(id, group));
+    });
+
+    // Helper: obtenir toutes les cartes du pool qui font partie du même groupe qu'une carte donnée
+    const getGroupCards = (cardId) => {
+      const group = cardToGroup.get(cardId);
+      if (!group) return null;
+      return group.cardIds.filter(id => pool.some(c => c.id === id) || cardDataMap[id]).map(id => cardDataMap[id]).filter(Boolean);
+    };
+
+    // Quand on retire des cartes du pool, retirer tout le groupe lié
+    const removeFromPool = (ids) => {
+      const toRemove = new Set(ids);
+      // Étendre aux groupes liés
+      ids.forEach(id => {
+        const group = cardToGroup.get(id);
+        if (group) group.cardIds.forEach(gid => toRemove.add(gid));
+      });
+      pool = pool.filter(c => !toRemove.has(c.id));
+    };
+
+    // Quand on sélectionne une carte candidate, ajouter tout son groupe
+    const expandWithLinkedGroup = (cards) => {
+      const expanded = [];
+      const seen = new Set();
+      cards.forEach(card => {
+        if (seen.has(card.id)) return;
+        seen.add(card.id);
+        expanded.push(card);
+        const group = cardToGroup.get(card.id);
+        if (group) {
+          group.cardIds.forEach(gid => {
+            if (!seen.has(gid)) {
+              const gcard = cardDataMap[gid];
+              if (gcard) { seen.add(gid); expanded.push(gcard); }
+            }
+          });
+        }
+      });
+      return expanded;
+    };
 
     // Vider les mandats non-lockés de toutes les équipes futures (on va les réassigner)
     const equipesCopy = {};
@@ -219,13 +264,14 @@ Deno.serve(async (req) => {
         rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
         sortByPriority(othersForDay, dateStr);
 
-        const candidates = [...lockedCards_data, ...rdvForDay, ...othersForDay];
+        const candidatesRaw = [...lockedCards_data, ...rdvForDay, ...othersForDay];
+        const candidates = expandWithLinkedGroup(candidatesRaw);
         const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr);
         const keptIds = keptCards.map(c => c.id);
 
-        // Retirer du pool les cartes intégrées
+        // Retirer du pool les cartes intégrées (et leurs groupes liés)
         const addedFromPool = keptIds.filter(id => pool.some(c => c.id === id));
-        pool = pool.filter(c => !addedFromPool.includes(c.id));
+        removeFromPool(addedFromPool);
 
         result[dateStr][equipe.id] = keptIds;
       }
@@ -246,8 +292,9 @@ Deno.serve(async (req) => {
         rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
         sortByPriority(othersForDay, dateStr);
 
-        const candidates = [...rdvForDay, ...othersForDay];
-        if (candidates.length === 0) break;
+        const candidatesRaw = [...rdvForDay, ...othersForDay];
+        if (candidatesRaw.length === 0) break;
+        const candidates = expandWithLinkedGroup(candidatesRaw);
 
         const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr);
         if (keptCards.length === 0) break;
@@ -277,8 +324,8 @@ Deno.serve(async (req) => {
         if (!result[dateStr]) result[dateStr] = {};
         result[dateStr][created.id] = orderedIds;
 
-        // Retirer du pool les cartes assignées à cette nouvelle équipe
-        pool = pool.filter(c => !orderedIds.includes(c.id));
+        // Retirer du pool les cartes assignées (et leurs groupes liés)
+        removeFromPool(orderedIds);
       }
     }
 
