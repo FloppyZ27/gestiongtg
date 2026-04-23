@@ -343,18 +343,19 @@ export default function Administration() {
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
                                   <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
+                                  <SelectItem value="Technicien Terrain (Chef)">Technicien Terrain (Chef)</SelectItem>
                                   <SelectItem value="Analyste-Foncier">Analyste-Foncier</SelectItem>
                                   <SelectItem value="Collaboratrice">Collaboratrice</SelectItem>
                                   <SelectItem value="Dessinateur">Dessinateur</SelectItem>
                                   <SelectItem value="Comptabilité">Comptabilité</SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.equipe || ""} 
                                 onValueChange={(value) => handleUpdateUser(user, "equipe", value)}
-                              >
+                                >
                                 <SelectTrigger className="w-36 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
@@ -363,22 +364,22 @@ export default function Administration() {
                                   <SelectItem value="Pierre-Luc">Pierre-Luc</SelectItem>
                                   <SelectItem value="Dany">Dany</SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Input
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Input
                                 type="date"
                                 value={user.date_embauche || ""}
                                 onChange={(e) => handleUpdateUser(user, "date_embauche", e.target.value)}
                                 className="bg-slate-800 border-slate-700 text-white"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                />
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.role || "user"} 
                                 onValueChange={(value) => handleUpdateUser(user, "role", value)}
                                 disabled={user.email === currentUser?.email}
-                              >
+                                >
                                 <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -399,14 +400,14 @@ export default function Administration() {
                                     </Badge>
                                   </SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.statut || "Actif"} 
                                 onValueChange={(value) => handleUpdateUser(user, "statut", value)}
                                 disabled={user.email === currentUser?.email}
-                              >
+                                >
                                 <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -424,10 +425,10 @@ export default function Administration() {
                                     </div>
                                   </SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
+                                </Select>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                <div className="flex gap-2 justify-end">
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -444,21 +445,21 @@ export default function Administration() {
                                 >
                                   <KeyRound className="w-4 h-4" />
                                 </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                            Aucun utilisateur actif trouvé
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
+                                </div>
+                                </TableCell>
+                                </TableRow>
+                                ))
+                                ) : (
+                                <TableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                                Aucun utilisateur actif trouvé
+                                </TableCell>
+                                </TableRow>
+                                )}
+                                </TableBody>
+                                </Table>
+                                </div>
+                                </TabsContent>
 
 
 
@@ -505,18 +506,19 @@ export default function Administration() {
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   <SelectItem value="Arpenteur-Géomètre">Arpenteur-Géomètre</SelectItem>
                                   <SelectItem value="Technicien Terrain">Technicien Terrain</SelectItem>
+                                  <SelectItem value="Technicien Terrain (Chef)">Technicien Terrain (Chef)</SelectItem>
                                   <SelectItem value="Analyste-Foncier">Analyste-Foncier</SelectItem>
                                   <SelectItem value="Collaboratrice">Collaboratrice</SelectItem>
                                   <SelectItem value="Dessinateur">Dessinateur</SelectItem>
                                   <SelectItem value="Comptabilité">Comptabilité</SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.equipe || ""} 
                                 onValueChange={(value) => handleUpdateUser(user, "equipe", value)}
-                              >
+                                >
                                 <SelectTrigger className="w-36 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
@@ -525,22 +527,22 @@ export default function Administration() {
                                   <SelectItem value="Pierre-Luc">Pierre-Luc</SelectItem>
                                   <SelectItem value="Dany">Dany</SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Input
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Input
                                 type="date"
                                 value={user.date_embauche || ""}
                                 onChange={(e) => handleUpdateUser(user, "date_embauche", e.target.value)}
                                 className="bg-slate-800 border-slate-700 text-white"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                />
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.role || "user"} 
                                 onValueChange={(value) => handleUpdateUser(user, "role", value)}
                                 disabled={user.email === currentUser?.email}
-                              >
+                                >
                                 <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -561,14 +563,14 @@ export default function Administration() {
                                     </Badge>
                                   </SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Select 
+                                </Select>
+                                </TableCell>
+                                <TableCell>
+                                <Select 
                                 value={user.statut || "Actif"} 
                                 onValueChange={(value) => handleUpdateUser(user, "statut", value)}
                                 disabled={user.email === currentUser?.email}
-                              >
+                                >
                                 <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -586,10 +588,10 @@ export default function Administration() {
                                     </div>
                                   </SelectItem>
                                 </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
+                                </Select>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                <div className="flex gap-2 justify-end">
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -606,14 +608,14 @@ export default function Administration() {
                                 >
                                   <KeyRound className="w-4 h-4" />
                                 </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                            Aucun utilisateur inactif trouvé
+                                </div>
+                                </TableCell>
+                                </TableRow>
+                                ))
+                                ) : (
+                                <TableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                                Aucun utilisateur inactif trouvé
                           </TableCell>
                         </TableRow>
                       )}
@@ -636,7 +638,7 @@ export default function Administration() {
                     </CardHeader>
                     <CardContent className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {["Arpenteur-Géomètre", "Technicien Terrain", "Analyste-Foncier", "Collaboratrice", "Dessinateur", "Comptabilité"].map(poste => {
+                        {["Arpenteur-Géomètre", "Technicien Terrain", "Technicien Terrain (Chef)", "Analyste-Foncier", "Collaboratrice", "Dessinateur", "Comptabilité"].map(poste => {
                           const template = templates.find(t => t.type === 'poste' && t.nom === poste);
                           return (
                             <Button
