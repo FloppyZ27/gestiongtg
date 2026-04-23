@@ -1157,6 +1157,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const isLinked = !!linkedGroup;
     const isLinkingFirst = linkingMode?.firstCardId === card.id;
     const isLinkingTarget = !!linkingMode && !isLinkingFirst;
+    const groupIndex = isLinked ? linkedGroup.cardIds.indexOf(card.id) : -1;
+    const isFirstInGroup = groupIndex === 0;
+    const isLastInGroup = isLinked && groupIndex === linkedGroup.cardIds.length - 1;
 
     const onMouseDown = (e) => {
       if (isLocked) return;
@@ -1193,13 +1196,19 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           : '';
 
     return (
-      <div
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${ringStyle} ${isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
-        style={{ cursor: isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
-      >
+      <div className="relative">
+        {/* Connecteur vers la carte précédente */}
+        {isLinked && !isFirstInGroup && (
+          <div className="absolute -top-1 left-1/2 w-0.5 h-1 bg-gradient-to-b from-violet-400 to-transparent transform -translate-x-1/2" style={{ pointerEvents: 'none' }} />
+        )}
+        
+        <div
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+          onClick={onClick}
+          className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${ringStyle} ${isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
+          style={{ cursor: isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), borderLeft: isLinked ? '3px solid rgba(139,92,246,0.8)' : undefined, boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
+        >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2 flex-wrap">
             <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
@@ -1247,6 +1256,16 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
           <div>{terrain.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
           {assignedUser ? <div className="flex items-center gap-1"><Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar></div> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
         </div>
+        </div>
+
+        {/* Connecteur vers la carte suivante */}
+        {isLinked && !isLastInGroup && (
+          <div className="flex flex-col items-center -mt-1 mb-0 pointer-events-none" style={{ marginBottom: '-4px' }}>
+            <div className="w-0.5 h-2 bg-violet-500/70" />
+            <div className="w-2 h-2 rounded-full bg-violet-500/80 border border-violet-300/50" />
+            <div className="w-0.5 h-2 bg-violet-500/70" />
+          </div>
+        )}
       </div>
     );
   };
