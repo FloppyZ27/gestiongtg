@@ -145,6 +145,11 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
     if (!apiKey) return Response.json({ error: 'Missing Google Maps API key' }, { status: 500 });
 
+    // Séparer les chefs des techniciens réguliers
+    // Un chef technicien a un poste contenant "Chef" ou "chef"
+    const chefs = availableTechniciens.filter(t => t.poste && t.poste.toLowerCase().includes('chef'));
+    const techsReguliers = availableTechniciens.filter(t => !t.poste || !t.poste.toLowerCase().includes('chef'));
+
     const today = new Date().toISOString().split('T')[0];
     const result = {};
     const newEquipes = [];
@@ -276,15 +281,30 @@ Deno.serve(async (req) => {
         result[dateStr][equipe.id] = keptIds;
       }
 
-      // ÉTAPE B: Créer de nouvelles équipes pour ce jour jusqu'à épuisement des techniciens libres
+      // ÉTAPE B: Créer de nouvelles équipes pour ce jour jusqu'à épuisement des chefs libres
       while (pool.length > 0) {
-        // Techniciens déjà utilisés ce jour (équipes existantes + nouvelles équipes créées ce jour)
-        const usedTechIds = new Set([
-          ...(equipesCopy[dateStr] || []).flatMap(eq => eq.techniciens),
-          ...newEquipes.filter(n => n.dateStr === dateStr).flatMap(n => n.equipe.techniciens),
-        ]);
-        const freeTechs = availableTechniciens.filter(t => !usedTechIds.has(t.id));
-        if (freeTechs.length === 0) break; // plus de techniciens dispo ce jour
+        // Chefs déjà utilisés ce jour (équipes existantes + nouvelles équipes créées ce jour)
+        const usedChefIds = new Set();
+        (equipesCopy[dateStr] || []).forEach(eq => {
+          // Un chef est un technicien dans l'équipe dont le poste contient "Chef"
+          eq.techniciens.forEach(tid => {
+            const t = availableTechniciens.find(av => av.id === tid);
+            if (t && t.poste && t.poste.toLowerCase().includes('chef')) {
+              usedChefIds.add(tid);
+            }
+          });
+        });
+        newEquipes.filter(n => n.dateStr === dateStr).forEach(n => {
+          n.equipe.techniciens.forEach(tid => {
+            const t = availableTechniciens.find(av => av.id === tid);
+            if (t && t.poste && t.poste.toLowerCase().includes('chef')) {
+              usedChefIds.add(tid);
+            }
+          });
+        });
+
+        const freeChefs = chefs.filter(t => !usedChefIds.has(t.id));
+        if (freeChefs.length === 0) break; // plus de chefs dispo ce jour
 
         // Cartes candidates: RDV ce jour d'abord, puis par priorité
         const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
@@ -300,9 +320,37 @@ Deno.serve(async (req) => {
         if (keptCards.length === 0) break;
         const orderedIds = keptCards.map(c => c.id);
 
-        // Prendre 2 techniciens libres pour cette nouvelle équipe
-        const techIds = freeTechs.slice(0, 2).map(t => t.id);
-        const techInitials = freeTechs.slice(0, 2).map(t => t.prenom.charAt(0) + t.nom.charAt(0)).join('-');
+        // Toujours prendre 1 chef (obligatoire)
+        const chef = freeChefs[0];
+        let techIds = [chef.id];
+        let techInitials = chef.prenom.charAt(0) + chef.nom.charAt(0);
+
+        // Optionnellement ajouter 1 technicien régulier libre (accompagnateur)
+        const usedTechRegIds = new Set();
+        (equipesCopy[dateStr] || []).forEach(eq => {
+          eq.techniciens.forEach(tid => {
+            const t = availableTechniciens.find(av => av.id === tid);
+            if (t && (!t.poste || !t.poste.toLowerCase().includes('chef'))) {
+              usedTechRegIds.add(tid);
+            }
+          });
+        });
+        newEquipes.filter(n => n.dateStr === dateStr).forEach(n => {
+          n.equipe.techniciens.forEach(tid => {
+            const t = availableTechniciens.find(av => av.id === tid);
+            if (t && (!t.poste || !t.poste.toLowerCase().includes('chef'))) {
+              usedTechRegIds.add(tid);
+            }
+          });
+        });
+
+        const freeRegTechs = techsReguliers.filter(t => !usedTechRegIds.has(t.id));
+        if (freeRegTechs.length > 0) {
+          const regTech = freeRegTechs[0];
+          techIds.push(regTech.id);
+          techInitials += '-' + regTech.prenom.charAt(0) + regTech.nom.charAt(0);
+        }
+
         const dayNewCount = newEquipes.filter(n => n.dateStr === dateStr).length;
         const existingCount = (equipesCopy[dateStr] || []).filter(eq =>
           !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
