@@ -571,12 +571,15 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       if (onUpdateDossier) {
         const freshDossier = dossiers.find(d => d.id === card.dossier.id);
         if (!freshDossier) return;
+        const idParts = card.id.split('-');
+        const mandatIdx = parseInt(idParts[idParts.length - 2]);
+        const terrainIdx = parseInt(idParts[idParts.length - 1]);
         const um = freshDossier.mandats.map((m, idx) => {
-          if (idx !== card.mandatIndex) return m;
+          if (idx !== mandatIdx) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
             ? [...m.terrains_list]
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-          const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+          const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: null, equipe_assignee: null };
           const terrainPrincipal = { ...(m.terrain || {}), ...tl[0], date_cedulee: null, equipe_assignee: null };
           return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl, terrain: terrainPrincipal };
@@ -608,12 +611,16 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
         const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
         const freshDossier = dossiers.find(d => d.id === card.dossier.id);
         if (!freshDossier) return;
+        // Décoder mandatIndex et terrainIndex directement depuis card.id pour éviter les problèmes de stale closure
+        const idParts = card.id.split('-');
+        const mandatIdx = parseInt(idParts[idParts.length - 2]);
+        const terrainIdx = parseInt(idParts[idParts.length - 1]);
         const um = freshDossier.mandats.map((m, idx) => {
-          if (idx !== card.mandatIndex) return m;
+          if (idx !== mandatIdx) return m;
           let tl = m.terrains_list && m.terrains_list.length > 0
             ? [...m.terrains_list]
             : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-          const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+          const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
           tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
           const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
           return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
@@ -761,12 +768,15 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
       const eqNom = generateTeamDisplayName(equipe, posIdx >= 0 ? posIdx : undefined);
       const freshDossier = dossiers.find(d => d.id === card.dossier.id);
       if (!freshDossier) { setRendezVousWarning(null); setPendingDrop(null); return; }
+      const idParts = card.id.split('-');
+      const mandatIdx = parseInt(idParts[idParts.length - 2]);
+      const terrainIdx = parseInt(idParts[idParts.length - 1]);
       const um = freshDossier.mandats.map((m, idx) => {
-        if (idx !== card.mandatIndex) return m;
+        if (idx !== mandatIdx) return m;
         let tl = m.terrains_list && m.terrains_list.length > 0
           ? [...m.terrains_list]
           : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
-        const tIdx = card.terrainIndex < tl.length ? card.terrainIndex : 0;
+        const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
         tl[tIdx] = { ...tl[tIdx], date_cedulee: dateStr, equipe_assignee: eqNom };
         const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
         return { ...m, date_terrain: dateStr, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
