@@ -31,14 +31,13 @@ function parseTempsPrevu(s) {
   return n ? parseFloat(n[1]) : 0;
 }
 
-// Prend une liste de cartes candidates (déjà ordonnées par priorité),
-// optimise géographiquement et retourne les cartes qui tiennent dans MAX_HOURS.
-// Un seul appel Google Maps.
 function getMaxHours(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return d.getDay() === 5 ? MAX_HOURS_FRIDAY : MAX_HOURS;
 }
 
+// Prend une liste de cartes candidates (déjà ordonnées par priorité),
+// optimise géographiquement et retourne les cartes qui tiennent dans la limite horaire.
 async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr) {
   const maxH = getMaxHours(dateStr);
   if (candidateCards.length === 0) return [];
@@ -95,6 +94,15 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr)
   return kept;
 }
 
+const sortByPriority = (arr) => arr.sort((a, b) => {
+  if (a.a_rendez_vous && !b.a_rendez_vous) return -1;
+  if (!a.a_rendez_vous && b.a_rendez_vous) return 1;
+  if (!a.date_limite_leve && !b.date_limite_leve) return 0;
+  if (!a.date_limite_leve) return 1;
+  if (!b.date_limite_leve) return -1;
+  return a.date_limite_leve.localeCompare(b.date_limite_leve);
+});
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -114,25 +122,46 @@ Deno.serve(async (req) => {
     cardsData.forEach(c => { cardDataMap[c.id] = c; });
     unassignedCards.forEach(c => { cardDataMap[c.id] = c; });
 
-    // Pool de cartes à planifier (non assignées, statut a_ceduler)
-    const assignedCardIds = new Set();
-    Object.values(equipes).forEach(dayEqs => dayEqs.forEach(eq => eq.mandats.forEach(id => assignedCardIds.add(id))));
-    let pool = unassignedCards.filter(c => !assignedCardIds.has(c.id));
+    // POOL GLOBAL: cartes non assignées (a_ceduler) + cartes déjà cédulées dans des équipes futures (non lockées)
+    // Les cartes lockées restent dans leur équipe actuelle.
+    const lockedSet = new Set(lockedCardIds);
 
-    const sortByPriority = (arr) => arr.sort((a, b) => {
-      if (a.a_rendez_vous && !b.a_rendez_vous) return -1;
-      if (!a.a_rendez_vous && b.a_rendez_vous) return 1;
-      if (!a.date_limite_leve && !b.date_limite_leve) return 0;
-      if (!a.date_limite_leve) return 1;
-      if (!b.date_limite_leve) return -1;
-      return a.date_limite_leve.localeCompare(b.date_limite_leve);
+    // Récupérer toutes les cartes cédulées dans des équipes futures (non lockées) pour les réoptimiser
+    const futureAssignedIds = new Set();
+    Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
+      if (dateStr < today) return; // ne pas toucher le passé
+      dayEqs.forEach(eq => {
+        eq.mandats.forEach(id => {
+          if (!lockedSet.has(id)) futureAssignedIds.add(id);
+        });
+      });
     });
+
+    // Pool = cartes non assignées (a_ceduler) + cartes futures non lockées
+    const poolCards = new Map(); // id -> cardData
+    unassignedCards.forEach(c => { poolCards.set(c.id, c); });
+    futureAssignedIds.forEach(id => {
+      const data = cardDataMap[id];
+      if (data) poolCards.set(id, data);
+    });
+    let pool = [...poolCards.values()];
     sortByPriority(pool);
 
-    // Tous les jours futurs à traiter: jours avec équipes + 30 jours ouvrables à venir
-    const futureDates = new Set(Object.keys(equipes).filter(d => d >= today));
+    // Vider les mandats non-lockés de toutes les équipes futures (on va les réassigner)
+    const equipesCopy = {};
+    Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
+      equipesCopy[dateStr] = dayEqs.map(eq => ({
+        ...eq,
+        mandats: dateStr < today
+          ? [...eq.mandats] // passé: intouché
+          : eq.mandats.filter(id => lockedSet.has(id)), // futur: garder seulement les lockées
+      }));
+    });
+
+    // Tous les jours futurs à traiter: jours avec équipes + 45 jours ouvrables à venir
+    const futureDates = new Set(Object.keys(equipesCopy).filter(d => d >= today));
     const addDate = new Date(today); addDate.setDate(addDate.getDate() + 1);
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 45; i++) {
       while (addDate.getDay() === 0 || addDate.getDay() === 6) addDate.setDate(addDate.getDate() + 1);
       futureDates.add(addDate.toISOString().split('T')[0]);
       addDate.setDate(addDate.getDate() + 1);
@@ -140,95 +169,85 @@ Deno.serve(async (req) => {
     const sortedDates = [...futureDates].sort();
 
     for (const dateStr of sortedDates) {
-      const dayEquipes = (equipes[dateStr] || []).filter(eq =>
+      if (pool.length === 0) break;
+
+      const dayEquipes = (equipesCopy[dateStr] || []).filter(eq =>
         !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
       );
 
-      // ÉTAPE A: Traiter chaque équipe existante (optimisation géo + remplissage depuis pool)
+      // ÉTAPE A: Remplir les équipes existantes avec des cartes du pool
       for (const equipe of dayEquipes) {
         if (!result[dateStr]) result[dateStr] = {};
 
-        // Séparer lockées et non-lockées
-        const lockedIds = (equipe.mandats || []).filter(id => lockedCardIds.includes(id));
-        const unlockedIds = (equipe.mandats || []).filter(id => !lockedCardIds.includes(id));
+        const lockedCards_data = equipe.mandats.map(id => cardDataMap[id]).filter(Boolean);
 
-        // Données des cartes existantes non-lockées + cartes RDV du pool pour ce jour
-        const unlockedExisting = unlockedIds.map(id => cardDataMap[id]).filter(Boolean);
-        const rdvFromPool = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
-        const otherFromPool = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
+        // RDV pour ce jour en priorité, puis autres par priorité
+        const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
+        const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
+        rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
+        sortByPriority(othersForDay);
 
-        // RDV existants en premier (triés par heure), puis autres existants, puis pool RDV, puis pool autres
-        const unlockedExistingRdv = unlockedExisting.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
-        const unlockedExistingOther = unlockedExisting.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
-        unlockedExistingRdv.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-        rdvFromPool.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-        sortByPriority(otherFromPool);
-
-        const lockedCards_data = lockedIds.map(id => cardDataMap[id]).filter(Boolean);
-        const candidates = [
-          ...lockedCards_data,
-          ...unlockedExistingRdv,
-          ...rdvFromPool,
-          ...unlockedExistingOther,
-          ...otherFromPool,
-        ];
-
+        const candidates = [...lockedCards_data, ...rdvForDay, ...othersForDay];
         const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr);
         const keptIds = keptCards.map(c => c.id);
 
-        // Mettre à jour le pool: retirer les cartes du pool qui ont été intégrées
+        // Retirer du pool les cartes intégrées
         const addedFromPool = keptIds.filter(id => pool.some(c => c.id === id));
         pool = pool.filter(c => !addedFromPool.includes(c.id));
 
         result[dateStr][equipe.id] = keptIds;
       }
 
-      // ÉTAPE B: S'il reste des cartes dans le pool et des techniciens libres → nouvelle équipe
-      if (pool.length === 0) continue;
+      // ÉTAPE B: Créer de nouvelles équipes pour ce jour jusqu'à épuisement des techniciens libres
+      while (pool.length > 0) {
+        // Techniciens déjà utilisés ce jour (équipes existantes + nouvelles équipes créées ce jour)
+        const usedTechIds = new Set([
+          ...(equipesCopy[dateStr] || []).flatMap(eq => eq.techniciens),
+          ...newEquipes.filter(n => n.dateStr === dateStr).flatMap(n => n.equipe.techniciens),
+        ]);
+        const freeTechs = availableTechniciens.filter(t => !usedTechIds.has(t.id));
+        if (freeTechs.length === 0) break; // plus de techniciens dispo ce jour
 
-      const usedTechIds = new Set([
-        ...(equipes[dateStr] || []).flatMap(eq => eq.techniciens),
-        ...newEquipes.filter(n => n.dateStr === dateStr).flatMap(n => n.equipe.techniciens),
-      ]);
-      const freeTechs = availableTechniciens.filter(t => !usedTechIds.has(t.id));
-      if (freeTechs.length === 0) continue;
+        // Cartes candidates: RDV ce jour d'abord, puis par priorité
+        const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
+        const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
+        rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
+        sortByPriority(othersForDay);
 
-      const rdvForDay = pool.filter(c => c.a_rendez_vous && c.date_rendez_vous === dateStr);
-      const othersForDay = pool.filter(c => !(c.a_rendez_vous && c.date_rendez_vous === dateStr));
-      rdvForDay.sort((a, b) => (a.heure_rendez_vous || '').localeCompare(b.heure_rendez_vous || ''));
-      sortByPriority(othersForDay);
+        const candidates = [...rdvForDay, ...othersForDay];
+        if (candidates.length === 0) break;
 
-      const candidates = [...rdvForDay, ...othersForDay];
-      if (candidates.length === 0) continue;
+        const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr);
+        if (keptCards.length === 0) break;
+        const orderedIds = keptCards.map(c => c.id);
 
-      const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr);
-      if (keptCards.length === 0) continue;
-      const orderedIds = keptCards.map(c => c.id);
+        // Prendre 2 techniciens libres pour cette nouvelle équipe
+        const techIds = freeTechs.slice(0, 2).map(t => t.id);
+        const techInitials = freeTechs.slice(0, 2).map(t => t.prenom.charAt(0) + t.nom.charAt(0)).join('-');
+        const dayNewCount = newEquipes.filter(n => n.dateStr === dateStr).length;
+        const existingCount = (equipesCopy[dateStr] || []).filter(eq =>
+          !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
+        ).length;
+        const newEquipeNom = `Équipe ${existingCount + dayNewCount + 1} - ${techInitials}`;
 
-      const techIds = freeTechs.slice(0, 2).map(t => t.id);
-      const techInitials = freeTechs.slice(0, 2).map(t => t.prenom.charAt(0) + t.nom.charAt(0)).join('-');
-      const dayNewCount = newEquipes.filter(n => n.dateStr === dateStr).length;
-      const existingCount = (equipes[dateStr] || []).filter(eq =>
-        !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
-      ).length;
-      const newEquipeNom = `Équipe ${existingCount + dayNewCount + 1} - ${techInitials}`;
+        const newEquipeData = {
+          date_terrain: dateStr,
+          nom: newEquipeNom,
+          place_affaire: placeAffaire || 'Alma',
+          techniciens: techIds,
+          vehicules: [],
+          equipements: [],
+          mandats: orderedIds,
+        };
 
-      const newEquipeData = {
-        date_terrain: dateStr,
-        nom: newEquipeNom,
-        place_affaire: placeAffaire || 'Alma',
-        techniciens: techIds,
-        vehicules: [],
-        equipements: [],
-        mandats: orderedIds,
-      };
+        const created = await base44.asServiceRole.entities.EquipeTerrain.create(newEquipeData);
+        newEquipes.push({ dateStr, equipe: { id: created.id, ...newEquipeData } });
+        if (!result[dateStr]) result[dateStr] = {};
+        result[dateStr][created.id] = orderedIds;
 
-      const created = await base44.asServiceRole.entities.EquipeTerrain.create(newEquipeData);
-      newEquipes.push({ dateStr, equipe: { id: created.id, ...newEquipeData } });
-      if (!result[dateStr]) result[dateStr] = {};
-      result[dateStr][created.id] = orderedIds;
-
-      pool = pool.filter(c => !orderedIds.includes(c.id));
+        // Retirer du pool les cartes assignées à cette nouvelle équipe
+        pool = pool.filter(c => !orderedIds.includes(c.id));
+      }
     }
 
     return Response.json({ result, newEquipes });
