@@ -1427,7 +1427,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                   className="bg-gradient-to-r from-violet-500/30 to-purple-500/30 hover:from-violet-500/50 hover:to-purple-500/50 text-violet-300 border border-violet-500/40"
                 >
                   {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                  {isOptimizing ? 'Optimisation...' : 'Optimiser trajets'}
+                  {isOptimizing ? 'Optimisation...' : 'Optimiser'}
                 </Button>
               </div>
             </div>
