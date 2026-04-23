@@ -712,7 +712,33 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
                 ne2[srcDate] = src2.filter(e => e.id !== equipeId);
                 if (!ne2[srcDate].length) delete ne2[srcDate];
                 if (!ne2[targetDate]) ne2[targetDate] = [];
-                ne2[targetDate] = [...(ne2[targetDate] || []), { ...equipe }];
+                const destEquipes = ne2[targetDate] || [];
+                const posIdx = destEquipes.length; // sera ajouté à la fin
+                const eqNom = generateTeamDisplayName(equipe, posIdx);
+                ne2[targetDate] = [...destEquipes, { ...equipe }];
+                // Mettre à jour date_cedulee de toutes les cartes de l'équipe
+                if (onUpdateDossier) {
+                  equipe.mandats.forEach(cardId => {
+                    const card = terrainCards.find(c => c.id === cardId);
+                    if (!card) return;
+                    const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+                    if (!freshDossier) return;
+                    const idParts = card.id.split('-');
+                    const mandatIdx = parseInt(idParts[idParts.length - 2]);
+                    const terrainIdx = parseInt(idParts[idParts.length - 1]);
+                    const um = freshDossier.mandats.map((m, idx) => {
+                      if (idx !== mandatIdx) return m;
+                      let tl = m.terrains_list && m.terrains_list.length > 0
+                        ? [...m.terrains_list]
+                        : [{ ...(m.terrain || {}), statut_terrain: m.statut_terrain }];
+                      const tIdx = terrainIdx < tl.length ? terrainIdx : 0;
+                      tl[tIdx] = { ...tl[tIdx], date_cedulee: targetDate, equipe_assignee: eqNom };
+                      const terrainPrincipal = { ...(m.terrain || {}), ...tl[0] };
+                      return { ...m, date_terrain: targetDate, equipe_assignee: eqNom, terrains_list: tl, terrain: terrainPrincipal };
+                    });
+                    onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: um });
+                  });
+                }
                 syncDossiersAfterEquipeChange(ne2);
                 return ne2;
               });
