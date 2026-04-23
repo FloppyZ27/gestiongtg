@@ -22,6 +22,7 @@ import EditTeamDialog from "./EditTeamDialog";
 import MultiRouteMap from "./MultiRouteMap";
 import { useKanbanDrag } from "@/hooks/useKanbanDrag";
 import LinkedGroupManager from "./LinkedGroupManager";
+import LinkedCardsConnector from "./LinkedCardsConnector";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -1365,6 +1366,9 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
   return (
     <div className="space-y-4">
       <style>{`* { border: none !important; outline: none !important; } [class*="border"],[class*="shadow"],[class*="outline"] { border: none !important; box-shadow: none !important; outline: none !important; }`}</style>
+
+      {/* Connecteurs visuels pour les cartes liées */}
+      <LinkedCardsConnector linkedGroups={linkedGroups} terrainCards={terrainCards} />
 
       {/* Ghost card pendant le drag custom */}
       {dragging && <TerrainGhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} techniciens={techniciens} linkedGroups={linkedGroups} terrainCards={terrainCards} />}
