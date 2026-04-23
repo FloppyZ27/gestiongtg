@@ -558,28 +558,28 @@ function LayoutContent({ children, currentPageName }) {
     <TooltipProvider>
   
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
           :root {
-          --background: 222.2 84% 4.9%;
-          --foreground: 210 40% 98%;
-          --card: 222.2 84% 4.9%;
-          --card-foreground: 210 40% 98%;
-          --popover: 222.2 84% 4.9%;
-          --popover-foreground: 210 40% 98%;
-          --primary: 217.2 91.2% 59.8%;
-          --primary-foreground: 222.2 47.4% 11.2%;
-          --secondary: 217.2 32.6% 17.5%;
-          --secondary-foreground: 210 40% 98%;
-          --muted: 217.2 32.6% 17.5%;
-          --muted-foreground: 215 20.2% 65.1%;
-          --accent: 217.2 32.6% 17.5%;
-          --accent-foreground: 210 40% 98%;
-          --destructive: 0 62.8% 30.6%;
-          --destructive-foreground: 210 40% 98%;
-          --border: 217.2 32.6% 17.5%;
-          --input: 217.2 32.6% 17.5%;
-          --ring: 224.3 76.3% 48%;
+          --background: 8 12% 6.3%;
+          --foreground: 210 14% 97%;
+          --card: 8 12% 9%;
+          --card-foreground: 210 14% 97%;
+          --popover: 8 12% 9%;
+          --popover-foreground: 210 14% 97%;
+          --primary: 264 85% 63%;
+          --primary-foreground: 8 12% 6.3%;
+          --secondary: 200 70% 55%;
+          --secondary-foreground: 8 12% 6.3%;
+          --muted: 210 10% 22%;
+          --muted-foreground: 210 7% 64%;
+          --accent: 160 84% 47%;
+          --accent-foreground: 8 12% 6.3%;
+          --destructive: 0 84.2% 60.2%;
+          --destructive-foreground: 8 12% 6.3%;
+          --border: 210 8% 18%;
+          --input: 8 12% 13%;
+          --ring: 264 85% 63%;
         }
 
         /* Overlay transparent avec flou */
@@ -635,14 +635,15 @@ function LayoutContent({ children, currentPageName }) {
           }
         }
 
-        /* Effet Neumorphism global */
+        /* Design épuré 2026 - Glassmorphism minimaliste */
         .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-          box-shadow: 
-            12px 12px 24px rgba(0, 0, 0, 0.5),
-            -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
+          background: rgba(15, 23, 42, 0.4);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
         }
 
-        /* Boutons icon, ghost et dans tableaux - pas de contour */
+        /* Boutons minimalistes 2026 */
         button[class*="size-icon"],
         button.h-10.w-10,
         button.h-9.w-9,
@@ -662,31 +663,32 @@ function LayoutContent({ children, currentPageName }) {
           background-image: none !important;
           border: none !important;
           box-shadow: none !important;
+          transition: all 0.2s ease !important;
         }
 
-        /* Style minimaliste pour les autres boutons - contour coloré */
         button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
         [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-          background: transparent !important;
-          background-color: transparent !important;
-          background-image: none !important;
-          box-shadow: none !important;
-          transition: all 0.3s ease !important;
+          background: rgba(264, 85%, 63%, 0.08) !important;
+          border: 1px solid rgba(264, 85%, 63%, 0.2) !important;
+          color: #a78bfa;
+          border-radius: 0.6rem;
+          transition: all 0.2s ease !important;
+          padding: 0.5rem 1rem;
         }
 
-        /* Boutons avec fond plein violet/indigo - exception au transparent */
+        /* Boutons primaires gradient 2026 */
         button[class*="agenda-add-button"] {
-          background: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
-          background-color: rgb(168, 85, 247) !important;
-          background-image: linear-gradient(to right, rgb(168, 85, 247), rgb(99, 102, 241)) !important;
+          background: linear-gradient(135deg, rgb(196, 110, 255) 0%, rgb(167, 139, 250) 100%) !important;
           color: white !important;
           border: none !important;
-          box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.5) !important;
+          box-shadow: 0 12px 32px rgba(196, 110, 255, 0.3) !important;
+          font-weight: 600;
         }
 
         button[class*="agenda-add-button"]:hover {
-          background: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
-          background-image: linear-gradient(to right, rgb(147, 51, 234), rgb(79, 70, 229)) !important;
+          background: linear-gradient(135deg, rgb(200, 120, 255) 0%, rgb(175, 150, 255) 100%) !important;
+          box-shadow: 0 16px 40px rgba(196, 110, 255, 0.4) !important;
+          transform: translateY(-2px);
         }
 
         /* Contours colorés pour les boutons avec gradient emerald/teal */
@@ -726,10 +728,9 @@ function LayoutContent({ children, currentPageName }) {
 
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
         [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
-          background: rgba(255, 255, 255, 0.08) !important;
-          background-color: rgba(255, 255, 255, 0.08) !important;
-          background-image: none !important;
-          transform: translateY(-1px);
+          background: rgba(264, 85%, 63%, 0.15) !important;
+          border-color: rgba(264, 85%, 63%, 0.4) !important;
+          transform: translateY(-2px);
         }
 
         /* Retirer complètement l'encadré des TabsTrigger */
@@ -995,34 +996,27 @@ function LayoutContent({ children, currentPageName }) {
 
 
         .border-slate-700, .border-slate-800 {
-          border: none !important;
-          box-shadow: 
-            6px 6px 12px rgba(0, 0, 0, 0.4),
-            -6px -6px 12px rgba(71, 85, 105, 0.05) !important;
+          border: 1px solid rgba(255, 255, 255, 0.06) !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
         }
 
         input, textarea, select {
-          background-color: rgb(30, 41, 59) !important;
-          box-shadow: 
-            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-            inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
-          border: none !important;
-          transition: all 0.3s ease !important;
+          background-color: rgba(30, 41, 59, 0.5) !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          transition: all 0.2s ease !important;
+          backdrop-filter: blur(4px);
         }
 
         input:hover, textarea:hover, select:hover {
-          box-shadow: 
-            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
-            0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+          background-color: rgba(30, 41, 59, 0.7) !important;
+          border-color: rgba(196, 110, 255, 0.2) !important;
         }
 
         input:focus, textarea:focus, select:focus {
           outline: none !important;
-          box-shadow: 
-            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
-            0 0 0 3px rgba(16, 185, 129, 0.5) !important;
+          background-color: rgba(30, 41, 59, 0.8) !important;
+          border-color: rgb(196, 110, 255) !important;
+          box-shadow: 0 0 0 3px rgba(196, 110, 255, 0.15) !important;
         }
 
         /* Fond gris pour les menus déroulants et leurs déclencheurs */
@@ -1145,8 +1139,8 @@ function LayoutContent({ children, currentPageName }) {
         onContinue={() => setShowUnsavedWarning(false)}
       />
       
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-[#1a1a2e] to-slate-950">
+        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-gradient-to-b from-slate-950 via-[#0f1620] to-slate-950">
           <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
@@ -1309,7 +1303,7 @@ function LayoutContent({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
+          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-gradient-to-b from-slate-950/90 to-slate-950/70 backdrop-blur-md border-b border-slate-800/40 px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="lg:hidden text-slate-300 hover:text-white" />
               <img 
