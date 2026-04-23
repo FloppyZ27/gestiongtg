@@ -579,9 +579,9 @@ function LayoutContent({ children, currentPageName }) {
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
-        background-color: hsl(210, 17%, 9.8%, 0.4) !important;
-        backdrop-filter: blur(6px) !important;
-        -webkit-backdrop-filter: blur(6px) !important;
+        background-color: hsl(210, 17%, 9.8%, 0.5) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
         opacity: 1 !important;
         }
 
