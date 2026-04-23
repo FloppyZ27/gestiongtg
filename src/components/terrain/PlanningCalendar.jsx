@@ -132,48 +132,18 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups
     );
   }
 
-  // Ghost en stack pour groupe lié
-  const MAX_VISIBLE = 4;
-  const visible = groupCards.slice(0, MAX_VISIBLE);
+  // Ghost en stack vertical pour groupe lié (comme dans une équipe)
   return ReactDOM.createPortal(
     <div style={{
       position: 'fixed', left: pos.x - 110, top: pos.y - 40, width: 220, zIndex: 99999,
-      pointerEvents: 'none', transition: 'none',
+      pointerEvents: 'none', opacity: 0.95,
+      filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))', transition: 'none',
     }}>
-      {/* Cartes de derrière en décalé */}
-      {visible.slice(1).reverse().map((c, i) => {
-        const revIdx = visible.length - 2 - i;
-        const offset = (revIdx + 1) * 6;
-        return (
-          <div key={c.id} style={{
-            position: 'absolute', top: offset, left: offset, width: 220,
-            opacity: 0.7 - revIdx * 0.1,
-            transform: `rotate(${(revIdx + 1) * 2.5}deg) scale(${1 - (revIdx + 1) * 0.02})`,
-            filter: `drop-shadow(0 4px 8px rgba(0,0,0,0.5))`,
-          }}>
-            <GhostCardMini card={c} clients={clients} rotateStyle={{}} />
-          </div>
-        );
-      })}
-      {/* Carte principale au-dessus */}
-      <div style={{
-        position: 'relative', zIndex: 10,
-        transform: 'rotate(2deg) scale(1.04)',
-        filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.7))',
-      }}>
-        <GhostCardMini card={groupCards[0]} clients={clients} rotateStyle={{}} />
-        {/* Badge compteur du groupe */}
-        <div style={{
-          position: 'absolute', top: -8, right: -8,
-          background: 'rgb(139,92,246)', color: 'white',
-          borderRadius: '9999px', width: 22, height: 22,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 11, fontWeight: 'bold', boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-          border: '2px solid rgba(255,255,255,0.2)',
-        }}>
-          {groupCards.length}
+      {groupCards.map((c) => (
+        <div key={c.id} style={{ marginBottom: 6 }}>
+          <GhostCardMini card={c} clients={clients} rotateStyle={{}} />
         </div>
-      </div>
+      ))}
     </div>,
     document.body
   );
