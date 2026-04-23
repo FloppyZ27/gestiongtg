@@ -1577,10 +1577,10 @@ export default function EditDossierForm({
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs">
-                                    {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">
-                                    {terrain.date_cedulee ? format(new Date(terrain.date_cedulee), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                    {terrain.date_cedulee ? format(new Date(terrain.date_cedulee + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.equipe_assignee || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.instruments_requis || "-"}</TableCell>
@@ -1926,7 +1926,7 @@ export default function EditDossierForm({
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300">
-                                      {minute.date_minute ? format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr }) : "-"}
+                                      {minute.date_minute ? format(new Date(minute.date_minute + 'T00:00:00'), "d MMMM yyyy", { locale: fr }) : "-"}
                                     </TableCell>
                                     <TableCell className="text-slate-300">{minute.type_minute || "Initiale"}</TableCell>
                                     <TableCell className="text-slate-300">{minute.minute_reference || "-"}</TableCell>
@@ -2125,7 +2125,7 @@ export default function EditDossierForm({
                             {entreesTemps.map((entree) => (
                               <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
                                 <TableCell className="text-slate-300 text-xs">
-                                  {entree.date ? format(new Date(entree.date), "dd MMM yyyy", { locale: fr }) : "-"}
+                                  {entree.date ? format(new Date(entree.date + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs font-medium">
                                   {entree.heures}h
@@ -2351,7 +2351,7 @@ export default function EditDossierForm({
                               return sortedRetoursAppel.map((retour) => (
                                 <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
                                   <TableCell className="text-slate-300 text-xs w-[22.5%]">
-                                    {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    {retour.date_appel ? format(new Date(retour.date_appel + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs w-[22.5%]">
                                     <TooltipProvider>
