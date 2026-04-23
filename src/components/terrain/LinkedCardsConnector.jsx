@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { Link2 } from "lucide-react";
 
 /**
@@ -141,18 +142,18 @@ function CardSymbol({ cardId }) {
     const observer = new ResizeObserver(updatePosition);
     const scrollHandler = () => updatePosition();
     
-    document.addEventListener('scroll', scrollHandler, true);
+    window.addEventListener('scroll', scrollHandler, true);
     observer.observe(document.body);
     
     return () => {
-      document.removeEventListener('scroll', scrollHandler, true);
+      window.removeEventListener('scroll', scrollHandler, true);
       observer.disconnect();
     };
   }, [cardId]);
 
   if (!position) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div
       className="fixed flex items-center justify-center pointer-events-none"
       style={{
@@ -165,6 +166,7 @@ function CardSymbol({ cardId }) {
       <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-full p-2 border-2 border-red-400 shadow-lg shadow-red-500/50">
         <Link2 className="w-5 h-5 text-white" />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
