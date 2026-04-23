@@ -20,6 +20,7 @@ import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, 
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Link2 } from "lucide-react";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -174,6 +175,8 @@ export default function GestionDeMandat() {
     date: new Date().toISOString().split('T')[0],
     heures: "", tache: "", tache_suivante: "", utilisateur_assigne: ""
   });
+  const [linkedGroups, setLinkedGroups] = useState([]);
+  const [selectedCardForLink, setSelectedCardForLink] = useState(null);
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
@@ -266,57 +269,54 @@ export default function GestionDeMandat() {
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
-    const dossier = card.dossier;
+    const linkedCardIds = getLinkedCardIds(card.id);
+    const linkedCards = allCards.filter(c => linkedCardIds.includes(c.id));
 
-    if (activeView === "taches") {
-      if (card.tache === targetColumn) return;
-      const updatedMandats = dossier.mandats.map((m, idx) => {
-        if (idx === card.mandatIndex) {
-          const updated = { ...m, tache_actuelle: targetColumn };
-          // Si la tâche devient "Cédule", ajouter une nouvelle entrée terrain
-          if (targetColumn === "Cédule") {
-            updated.statut_terrain = "en_verification";
-            // Ajouter une nouvelle entrée terrain (toujours, même s'il en existe déjà)
-            if (!updated.terrains_list) {
-              updated.terrains_list = [];
+    linkedCards.forEach((linkedCard) => {
+      const dossier = linkedCard.dossier;
+
+      if (activeView === "taches") {
+        if (linkedCard.tache === targetColumn) return;
+        const updatedMandats = dossier.mandats.map((m, idx) => {
+          if (idx === linkedCard.mandatIndex) {
+            const updated = { ...m, tache_actuelle: targetColumn };
+            if (targetColumn === "Cédule") {
+              updated.statut_terrain = "en_verification";
+              if (!updated.terrains_list) {
+                updated.terrains_list = [];
+              }
+              updated.terrains_list.push({
+                date_limite_leve: null,
+                instruments_requis: "",
+                a_rendez_vous: false,
+                date_rendez_vous: null,
+                heure_rendez_vous: "",
+                donneur: "",
+                technicien: "",
+                dossier_simultane: "",
+                temps_prevu: "",
+                notes: "",
+                date_cedulee: new Date().toISOString().split('T')[0],
+                equipe_assignee: ""
+              });
             }
-            updated.terrains_list.push({
-              date_limite_leve: null,
-              instruments_requis: "",
-              a_rendez_vous: false,
-              date_rendez_vous: null,
-              heure_rendez_vous: "",
-              donneur: "",
-              technicien: "",
-              dossier_simultane: "",
-              temps_prevu: "",
-              notes: "",
-              date_cedulee: new Date().toISOString().split('T')[0],
-              equipe_assignee: ""
-            });
+            return updated;
           }
-          return updated;
-        }
-        return m;
-      });
-      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } }, {
-        onSuccess: () => {
-          setEntreeTempsCardInfo({ dossierId: dossier.id, mandatType: card.mandat.type_mandat, nouvelleTache: targetColumn, ancienneTache: card.tache });
-          setEntreeTempsForm({ date: new Date().toISOString().split('T')[0], heures: "", tache: card.tache, tache_suivante: targetColumn, utilisateur_assigne: card.mandat.utilisateur_assigne || "" });
-          setIsEntreeTempsDialogOpen(true);
-        }
-      });
-    } else if (activeView === "utilisateurs") {
-      if (card.utilisateur === targetColumn) return;
-      const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
-      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m);
-      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
-    } else if (activeView === "calendrier") {
-      const newDateStr = targetColumn.replace("day-", "");
-      const updatedMandats = dossier.mandats.map((m, idx) => idx === card.mandatIndex ? { ...m, date_livraison: newDateStr } : m);
-      updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
-    }
-  }, [activeView, updateDossierMutation]);
+          return m;
+        });
+        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+      } else if (activeView === "utilisateurs") {
+        if (linkedCard.utilisateur === targetColumn) return;
+        const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
+        const updatedMandats = dossier.mandats.map((m, idx) => idx === linkedCard.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m);
+        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+      } else if (activeView === "calendrier") {
+        const newDateStr = targetColumn.replace("day-", "");
+        const updatedMandats = dossier.mandats.map((m, idx) => idx === linkedCard.mandatIndex ? { ...m, date_livraison: newDateStr } : m);
+        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+      }
+    });
+  }, [activeView, updateDossierMutation, linkedGroups, allCards]);
 
   const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
@@ -331,6 +331,26 @@ export default function GestionDeMandat() {
     window.open(url, '_blank');
   };
 
+  const getLinkedCardIds = (cardId) => {
+    const group = linkedGroups.find(g => g.cardIds.includes(cardId));
+    return group ? group.cardIds : [cardId];
+  };
+
+  const handleLinkCards = (card1, card2) => {
+    const group1 = linkedGroups.find(g => g.cardIds.includes(card1.id));
+    const group2 = linkedGroups.find(g => g.cardIds.includes(card2.id));
+
+    let newGroups = linkedGroups.filter(g => g.id !== group1?.id && g.id !== group2?.id);
+    const mergedCardIds = [...new Set([...(group1?.cardIds || [card1.id]), ...(group2?.cardIds || [card2.id])])];
+    newGroups.push({ id: Date.now().toString(), cardIds: mergedCardIds });
+    setLinkedGroups(newGroups);
+    setSelectedCardForLink(null);
+  };
+
+  const handleUnlinkGroup = (groupId) => {
+    setLinkedGroups(linkedGroups.filter(g => g.id !== groupId));
+  };
+
   const getWeeksToDisplay = () => {
     return eachWeekOfInterval({ start: startOfMonth(currentMonthStart), end: endOfMonth(currentMonthStart) }, { locale: fr });
   };
@@ -342,6 +362,7 @@ export default function GestionDeMandat() {
     const isDraggingThis = dragging?.card?.id === card.id;
     const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
+    const isLinked = linkedGroups.some(g => g.cardIds.includes(card.id));
 
     const onMouseDown = (e) => {
       e.stopPropagation();
@@ -362,7 +383,22 @@ export default function GestionDeMandat() {
     };
 
     const onClick = () => {
-      if (!didDragRef.current) handleCardClick(card);
+      if (!didDragRef.current) {
+        if (selectedCardForLink && selectedCardForLink.id !== card.id) {
+          handleLinkCards(selectedCardForLink, card);
+        } else {
+          handleCardClick(card);
+        }
+      }
+    };
+
+    const onContextMenu = (e) => {
+      e.preventDefault();
+      if (selectedCardForLink?.id === card.id) {
+        setSelectedCardForLink(null);
+      } else {
+        setSelectedCardForLink(card);
+      }
     };
 
     return (
@@ -371,16 +407,21 @@ export default function GestionDeMandat() {
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        onContextMenu={onContextMenu}
+        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''} ${isLinked ? 'ring-1 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
+        title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Clic droit pour lier"}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
-          <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
-            {getAbbreviatedMandatType(card.mandat.type_mandat)}
-          </Badge>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {isLinked && <Link2 className="w-3 h-3 text-violet-400" />}
+            <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
+              {getAbbreviatedMandatType(card.mandat.type_mandat)}
+            </Badge>
+          </div>
         </div>
         <div className="flex items-center gap-1 mb-1">
           <User className="w-3 h-3 text-white flex-shrink-0" />
