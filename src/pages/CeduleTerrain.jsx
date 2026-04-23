@@ -259,25 +259,23 @@ export default function CeduleTerrain() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
       <div className="w-full">
         <div className="mb-8">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Cédule Terrain
-              </h1>
-              <CalendarDays className="w-6 h-6 text-cyan-400" />
-            </div>
-            <Tabs value={activePlace} onValueChange={setActivePlace}>
-              <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700 h-12">
-                <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
-                  Alma
-                </TabsTrigger>
-                <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
-                  Saguenay
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="flex items-center gap-3 mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Cédule Terrain
+            </h1>
+            <CalendarDays className="w-6 h-6 text-cyan-400" />
           </div>
-          <p className="text-slate-400">Planification des équipes de terrain</p>
+          <p className="text-slate-400 mb-4">Planification des équipes de terrain</p>
+          <Tabs value={activePlace} onValueChange={setActivePlace}>
+            <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700 h-12 w-full">
+              <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
+                Alma
+              </TabsTrigger>
+              <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
+                Saguenay
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <PlanningCalendar 
