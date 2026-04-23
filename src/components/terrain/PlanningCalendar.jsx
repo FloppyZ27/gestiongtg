@@ -237,6 +237,59 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
   const getLinkedGroupForCard = (cardId) => linkedGroups.find(g => g.cardIds.includes(cardId));
 
+  // Déplace toutes les cartes d'un groupe dans l'équipe de la carte de référence
+  const moveGroupToSameEquipe = useCallback((allCardIds, anchorCardId) => {
+    // Trouver où est la carte ancre
+    let anchorDateStr = null;
+    let anchorEquipeId = null;
+    Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
+      dayEqs.forEach(eq => {
+        if (eq.mandats.includes(anchorCardId)) {
+          anchorDateStr = dateStr;
+          anchorEquipeId = eq.id;
+        }
+      });
+    });
+    if (!anchorDateStr || !anchorEquipeId) return; // carte ancre non assignée, rien à faire
+
+    // Vérifier si toutes les cartes sont déjà dans la même équipe
+    const alreadyTogether = allCardIds.every(id => {
+      const eq = equipes[anchorDateStr]?.find(e => e.id === anchorEquipeId);
+      return eq?.mandats.includes(id);
+    });
+    if (alreadyTogether) return;
+
+    setEquipes(prev => {
+      const ne = JSON.parse(JSON.stringify(prev));
+      // Retirer les cartes du groupe de toutes les équipes sauf l'ancre
+      Object.keys(ne).forEach(d => {
+        ne[d].forEach(eq => {
+          if (eq.id !== anchorEquipeId) {
+            eq.mandats = eq.mandats.filter(id => !allCardIds.includes(id));
+          }
+        });
+      });
+      // Ajouter les cartes manquantes dans l'équipe ancre
+      const anchorEq = ne[anchorDateStr]?.find(e => e.id === anchorEquipeId);
+      if (anchorEq) {
+        allCardIds.forEach(id => {
+          if (!anchorEq.mandats.includes(id)) anchorEq.mandats.push(id);
+        });
+      }
+      return ne;
+    });
+
+    // Mettre à jour les dossiers pour les cartes déplacées
+    const anchorEq = equipes[anchorDateStr]?.find(e => e.id === anchorEquipeId);
+    const dayEqs = (equipes[anchorDateStr] || []).filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+    const posIdx = dayEqs.findIndex(e => e.id === anchorEquipeId);
+    const eqNom = anchorEq ? generateTeamDisplayName(anchorEq, posIdx >= 0 ? posIdx : undefined) : '';
+    allCardIds.forEach(id => {
+      const c = terrainCards.find(t => t.id === id);
+      if (c) updateDossierForCard(c, anchorDateStr, eqNom);
+    });
+  }, [equipes, terrainCards, placeAffaire, generateTeamDisplayName, updateDossierForCard]);
+
   const handleLinkCard = (cardId) => {
     if (!linkingMode) {
       // Premier clic: entrer en mode liaison
@@ -255,26 +308,34 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
     const groupOfFirst = groups.find(g => g.cardIds.includes(firstCard));
     const groupOfSecond = groups.find(g => g.cardIds.includes(secondCard));
 
+    let finalCardIds;
     if (groupOfFirst && groupOfSecond) {
       if (groupOfFirst.id === groupOfSecond.id) {
-        // Déjà dans le même groupe
+        finalCardIds = groupOfFirst.cardIds;
       } else {
-        // Fusionner les deux groupes
         groupOfFirst.cardIds = [...new Set([...groupOfFirst.cardIds, ...groupOfSecond.cardIds])];
         const filtered = groups.filter(g => g.id !== groupOfSecond.id);
         saveLinkedGroups(filtered);
+        finalCardIds = groupOfFirst.cardIds;
       }
     } else if (groupOfFirst) {
       if (!groupOfFirst.cardIds.includes(secondCard)) groupOfFirst.cardIds.push(secondCard);
       saveLinkedGroups(groups);
+      finalCardIds = groupOfFirst.cardIds;
     } else if (groupOfSecond) {
       if (!groupOfSecond.cardIds.includes(firstCard)) groupOfSecond.cardIds.push(firstCard);
       saveLinkedGroups(groups);
+      finalCardIds = groupOfSecond.cardIds;
     } else {
-      // Créer un nouveau groupe
-      groups.push({ id: `link-${Date.now()}`, cardIds: [firstCard, secondCard] });
+      const newGroup = { id: `link-${Date.now()}`, cardIds: [firstCard, secondCard] };
+      groups.push(newGroup);
       saveLinkedGroups(groups);
+      finalCardIds = newGroup.cardIds;
     }
+
+    // Déplacer toutes les cartes du groupe dans l'équipe de la première carte cliquée
+    if (finalCardIds) moveGroupToSameEquipe(finalCardIds, firstCard);
+
     setLinkingMode(null);
   };
 
