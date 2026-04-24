@@ -1386,7 +1386,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             </div>
             <div className="flex gap-0.5" onMouseDown={e => e.stopPropagation()}>
               <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-px rounded hover:bg-cyan-500/10"><Copy className="w-3 h-3" /></button>
-              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-px rounded hover:bg-red-500/10"><X className="w-3 h-3" /></button>
+              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-white hover:bg-red-600 transition-all duration-150 p-1 rounded"><X className="w-3 h-3" /></button>
             </div>
           </div>
         </div>
