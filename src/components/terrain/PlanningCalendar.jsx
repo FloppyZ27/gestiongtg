@@ -527,12 +527,26 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const getEquipeActiveTab = (id) => equipeActiveTabs[id] !== undefined ? equipeActiveTabs[id] : null;
 
   const addEquipe = (dateStr) => { setCreateTeamDateStr(dateStr); setIsCreateTeamDialogOpen(true); };
-  const handleCreateTeam = (newEquipe) => {
+  const handleCreateTeam = async (newEquipe) => {
+    const dateStr = createTeamDateStr;
+    const data = {
+      date_terrain: dateStr,
+      nom: newEquipe.nom,
+      place_affaire: newEquipe.place_affaire || placeAffaire || "",
+      techniciens: newEquipe.techniciens || [],
+      vehicules: newEquipe.vehicules || [],
+      equipements: newEquipe.equipements || [],
+      mandats: []
+    };
+    // Sauvegarder directement en BD pour avoir un vrai ID
+    const created = await base44.entities.EquipeTerrain.create(data);
+    const equipeAvecId = { ...data, id: created.id };
     const ne = { ...equipes };
-    if (!ne[createTeamDateStr]) ne[createTeamDateStr] = [];
-    if (ne[createTeamDateStr].find(eq => generateTeamDisplayName(eq) === generateTeamDisplayName(newEquipe))) { alert('Équipe existante.'); return; }
-    ne[createTeamDateStr].push(newEquipe); setEquipes(ne);
-    setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
+    if (!ne[dateStr]) ne[dateStr] = [];
+    ne[dateStr].push(equipeAvecId);
+    setEquipes(ne);
+    prevEquipesRef.current = JSON.parse(JSON.stringify(ne)); // sync pour éviter double-save
+    setEquipeActiveTabs({ ...equipeActiveTabs, [created.id]: null });
     setIsCreateTeamDialogOpen(false);
   };
   const handleEditTeam = (dateStr, equipe) => { setEditingTeam(equipe); setEditTeamDateStr(dateStr); setIsEditTeamDialogOpen(true); };
@@ -1586,7 +1600,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
 
 
-      <CreateTeamTerrainDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} users={users} vehicules={vehicules} equipements={equipements} />
+      <CreateTeamTerrainDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} techniciens={allTechniciens || techniciens} vehicules={vehicules} equipements={equipements} />
 
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 

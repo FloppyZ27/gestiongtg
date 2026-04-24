@@ -1,0 +1,57 @@
+{
+  "name": "Employe",
+  "type": "object",
+  "properties": {
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom de l'employ\u00e9"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'employ\u00e9"
+    },
+    "poste": {
+      "type": "string",
+      "enum": [
+        "Technicien Terrain",
+        "Technicien Terrain Chef",
+        "Arpenteur-G\u00e9om\u00e8tre",
+        "Administratif",
+        "Autre"
+      ],
+      "description": "Poste de l'employ\u00e9"
+    },
+    "telephone": {
+      "type": "string",
+      "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "courriel": {
+      "type": "string",
+      "description": "Adresse courriel"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Actif",
+        "Inactif",
+        "En cong\u00e9"
+      ],
+      "default": "Actif",
+      "description": "Statut de l'employ\u00e9"
+    },
+    "date_embauche": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'embauche"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes suppl\u00e9mentaires"
+    }
+  },
+  "required": [
+    "prenom",
+    "nom",
+    "poste"
+  ]
+}

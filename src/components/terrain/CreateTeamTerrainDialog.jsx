@@ -11,7 +11,7 @@ export default function CreateTeamTerrainDialog({
   onClose,
   onCreateTeam,
   dateStr,
-  users,
+  techniciens,
   vehicules,
   equipements
 }) {
@@ -24,13 +24,13 @@ export default function CreateTeamTerrainDialog({
   const [vehiculeOpen, setVehiculeOpen] = useState(false);
   const [equipementOpen, setEquipementOpen] = useState(false);
 
-  // Filtrer les utilisateurs par poste et statut
-  const chefs = users?.filter(u => 
-    u.poste === "Technicien Terrain (Chef)" && (u.statut === "Actif" || !u.statut)
+  // Filtrer les techniciens (entité Employe) par poste et statut
+  const chefs = techniciens?.filter(t => 
+    t.poste === "Technicien Terrain Chef" && (t.statut === "Actif" || !t.statut)
   ) || [];
   
-  const techs = users?.filter(u => 
-    u.poste === "Technicien Terrain" && (u.statut === "Actif" || !u.statut)
+  const techs = techniciens?.filter(t => 
+    t.poste === "Technicien Terrain" && (t.statut === "Actif" || !t.statut)
   ) || [];
 
   const availableVehicules = vehicules || [];
@@ -47,8 +47,8 @@ export default function CreateTeamTerrainDialog({
     
     // Générer initiales des chefs
     const chefInitials = selectedChefs.map(id => {
-      const user = users.find(u => u.id === id);
-      return user ? user.prenom.charAt(0) + user.nom.charAt(0) : '';
+      const t = techniciens?.find(t => t.id === id);
+      return t ? t.prenom.charAt(0) + t.nom.charAt(0) : '';
     }).join('/');
 
     const teamName = `Équipe ${chefInitials} - ${(new Date().getTime() % 100)}`;
