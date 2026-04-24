@@ -1281,11 +1281,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             const currentStatut = cardStatuts[card.id]?.statut || null;
             const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
             const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
-            const triggerStyle = isOrange
-              ? 'bg-orange-500/25 text-orange-300 font-semibold'
+            const triggerInlineStyle = isOrange
+              ? { background: 'rgba(249,115,22,0.3)', color: '#fb923c', fontWeight: 600 }
               : isMauve
-              ? 'bg-violet-500/25 text-violet-300 font-semibold'
-              : 'bg-slate-800/60 text-slate-400';
+              ? { background: 'rgba(139,92,246,0.3)', color: '#c084fc', fontWeight: 600 }
+              : { background: 'rgba(30,41,59,0.6)', color: '#94a3b8' };
             return (
               <div className="flex items-center gap-1">
                 {/* Temps prévu */}
@@ -1307,7 +1307,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     }}
                   >
                     <SelectTrigger
-                      className={`w-full h-5 text-[10px] px-1.5 py-0 ${triggerStyle}`}
+                      className="w-full h-6 text-xs px-1.5 py-0"
+                      style={triggerInlineStyle}
                       onMouseDown={e => e.stopPropagation()}
                     >
                       <SelectValue placeholder="Statut..." />
