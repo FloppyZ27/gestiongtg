@@ -34,9 +34,9 @@ export default function CreateTeamDialog({
   const usedVehIds = usedResources?.vehicules || [];
   const usedEqIds = usedResources?.equipements || [];
 
-  // Filtrer users par poste (accepter tous les statuts)
-  const allChefs = users?.filter(u => u.poste === "Technicien Terrain (Chef)") || [];
-  const allTechs = users?.filter(u => u.poste === "Technicien Terrain") || [];
+  // Afficher tous les utilisateurs
+  const allChefs = users || [];
+  const allTechs = users || [];
 
   // Trouver quelle équipe utilise une ressource
   const getTeamForResource = (resourceId, resourceType) => {
