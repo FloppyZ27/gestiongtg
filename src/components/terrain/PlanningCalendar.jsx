@@ -759,7 +759,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         cardsData: allCardsData,
         lockedCardIds: [...lockedCards],
         unassignedCards: unassignedCardsData,
-        availableTechniciens: techniciens.filter(t => t.statut === 'Actif' || !t.statut).map(t => ({ id: t.id, prenom: t.prenom, nom: t.nom })),
+        availableTechniciens: techniciens.filter(t => t.statut === 'Actif' || !t.statut).map(t => ({ id: t.id, prenom: t.prenom, nom: t.nom, poste: t.poste })),
         placeAffaire,
         linkedGroups,
       });
