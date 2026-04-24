@@ -1259,7 +1259,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             >
               {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
             </Button>}
-            {showLock && <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-5 w-5 p-0" title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>{isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}</Button>}
+            {showLock && <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className="bg-slate-700/40 hover:bg-yellow-500 text-slate-400 hover:text-white h-5 w-5 p-0 transition-all" title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>{isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}</Button>}
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span></div>
