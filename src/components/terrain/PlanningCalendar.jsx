@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2, ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2 } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -1274,44 +1274,44 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         {terrain.instruments_requis && <div className="flex items-center gap-1 mb-1"><Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span></div>}
         {terrain.technicien && <div className="flex items-center gap-1 mb-1"><UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" /><span className="text-xs text-blue-300 truncate">{terrain.technicien}</span></div>}
         {terrain.dossier_simultane && <div className="flex items-center gap-1 mb-1"><Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" /><span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span></div>}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-          <div>{terrain.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
-          <div className="flex items-center gap-1">
-            {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
-            {assignedUser ? <Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
-            <button
-              onClick={(e) => { e.stopPropagation(); setExpandedCardMenus(prev => ({ ...prev, [card.id]: !prev[card.id] })); }}
-              className="ml-0.5 text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              {expandedCardMenus[card.id] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
+        <div className="mt-2 pt-1 border-t border-emerald-500/30" onClick={e => e.stopPropagation()}>
+          {/* Menu déroulant statut — sélection unique */}
+          {(() => {
+            const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
+            const currentStatut = cardStatuts[card.id]?.statut || null;
+            return (
+              <Select
+                value={currentStatut || ""}
+                onValueChange={(val) => {
+                  setCardStatuts(prev => {
+                    const next = { ...prev, [card.id]: { ...prev[card.id], statut: val === currentStatut ? null : val } };
+                    localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+                    return next;
+                  });
+                }}
+              >
+                <SelectTrigger
+                  className="w-full h-6 text-xs bg-slate-800/60 border-slate-600/40 text-slate-400 px-2 py-0"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <SelectValue placeholder="Statut..." />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {STATUT_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          })()}
+          <div className="flex items-center justify-between mt-1">
+            <div>{terrain.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
+            <div className="flex items-center gap-1">
+              {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
+              {assignedUser ? <Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
+            </div>
           </div>
         </div>
-        {expandedCardMenus[card.id] && (() => {
-          const statuts = cardStatuts[card.id] || {};
-          const items = [
-            { key: 'rdv', label: 'Rendez-Vous' },
-            { key: 'client_avise', label: 'Client Avisé' },
-            { key: 'confirme_veille', label: 'Confirmé la veille' },
-            { key: 'retour_terrain', label: 'Retour terrain' },
-          ];
-          return (
-            <div className="mt-1 pt-1 border-t border-slate-600/50 space-y-0.5" onClick={e => e.stopPropagation()}>
-              {items.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={(e) => { e.stopPropagation(); toggleCardStatut(card.id, key); }}
-                  className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded hover:bg-slate-700/50 transition-colors"
-                >
-                  {statuts[key]
-                    ? <CheckSquare className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                    : <Square className="w-3 h-3 text-slate-500 flex-shrink-0" />}
-                  <span className={`text-xs ${statuts[key] ? 'text-emerald-300 line-through' : 'text-slate-400'}`}>{label}</span>
-                </button>
-              ))}
-            </div>
-          );
-        })()}
       </div>
     );
   };
@@ -1370,8 +1370,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               })()}
             </div>
             <div className="flex gap-0.5" onMouseDown={e => e.stopPropagation()}>
-              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2 h-2" /></button>
-              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2 h-2" /></button>
+              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-px rounded hover:bg-cyan-500/10"><Copy className="w-3 h-3" /></button>
+              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-px rounded hover:bg-red-500/10"><X className="w-3 h-3" /></button>
             </div>
           </div>
         </div>
