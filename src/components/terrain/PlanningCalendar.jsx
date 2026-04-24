@@ -1539,7 +1539,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           {/* Panneau gauche - cartes non assignées */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs defaultValue="verification" className="w-full">
-              <TabsList className="bg-slate-800/50 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
+              <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-1 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
                 <TabsTrigger value="planifier" className="text-xs px-1 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-slate-300">À planifier</TabsTrigger>
               </TabsList>
