@@ -1142,7 +1142,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
-    const isDraggingThis = dragging?.card?.id === card.id;
+    const draggingLinkedGroup = dragging ? getLinkedGroupForCard(dragging.card.id) : null;
+    const isDraggingThis = !!dragging && (
+      dragging.card.id === card.id ||
+      (draggingLinkedGroup?.cardIds.includes(card.id) ?? false)
+    );
     const isLocked = lockedCards.has(card.id);
     const linkedGroup = getLinkedGroupForCard(card.id);
     const isLinked = !!linkedGroup;
