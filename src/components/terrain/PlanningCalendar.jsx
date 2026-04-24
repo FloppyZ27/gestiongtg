@@ -171,7 +171,7 @@ function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurati
   );
 }
 
-export default function PlanningCalendar({ dossiers, techniciens, vehicules, equipements, clients, onUpdateDossier, onAddTechnicien, onAddVehicule, onAddEquipement, onEditTechnicien, onDeleteTechnicien, onEditVehicule, onDeleteVehicule, onEditEquipement, onDeleteEquipement, users, lots, placeAffaire }) {
+export default function PlanningCalendar({ dossiers, techniciens, allTechniciens, vehicules, equipements, clients, onUpdateDossier, onAddTechnicien, onAddVehicule, onAddEquipement, onEditTechnicien, onDeleteTechnicien, onEditVehicule, onDeleteVehicule, onEditEquipement, onDeleteEquipement, users, lots, placeAffaire }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week");
   const [equipes, setEquipes] = useState({});
@@ -1485,7 +1485,7 @@ export default function PlanningCalendar({ dossiers, techniciens, vehicules, equ
 
       <EditDossierDialog isOpen={isEditingDialogOpen} onClose={() => { setIsEditingDialogOpen(false); setEditingDossier(null); }} dossier={editingDossier} onSuccess={() => {}} clients={clients} users={users} />
 
-      <CreateTeamDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} techniciens={techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }} placeAffaire={placeAffaire} />
+      <CreateTeamDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} techniciens={techniciens} allTechniciens={allTechniciens || techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }} placeAffaire={placeAffaire} />
 
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
