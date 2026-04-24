@@ -71,8 +71,8 @@ export default function CreateTeamDialog({
 
 
 
-  const availableChefs = allChefs.filter(u => !usedTechIds.includes(u.id));
-  const availableTechsRegular = allTechs.filter(u => !usedTechIds.includes(u.id));
+  const availableChefs = allChefs;
+  const availableTechsRegular = allTechs;
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
