@@ -77,10 +77,15 @@ export default function CreateTeamDialog({
     return null;
   };
 
-  // Techniciens de ma place d'affaire
-  const myPlaceTechs = allTechs.filter(t => t.place_affaire === (placeAffaire === 'alma' ? 'Alma' : 'Saguenay'));
+  // Techniciens de ma place d'affaire (avec fallback si placeAffaire non défini)
+  const targetPlace = placeAffaire === 'alma' || placeAffaire === 'Alma' ? 'Alma' : placeAffaire === 'saguenay' || placeAffaire === 'Saguenay' ? 'Saguenay' : null;
+  const myPlaceTechs = targetPlace 
+    ? allTechs.filter(t => t.place_affaire === targetPlace)
+    : allTechs; // Si pas de placeAffaire, afficher tous
   // Techniciens de l'autre place d'affaire (empruntables si pas déjà cédulés là-bas)
-  const otherPlaceTechs = allTechs.filter(t => t.place_affaire !== (placeAffaire === 'alma' ? 'Alma' : 'Saguenay') && t.place_affaire);
+  const otherPlaceTechs = targetPlace
+    ? allTechs.filter(t => t.place_affaire && t.place_affaire !== targetPlace)
+    : [];
 
   const myChefs = myPlaceTechs.filter(t => t.poste && t.poste.toLowerCase().includes('chef'));
   const myTechsRegular = myPlaceTechs.filter(t => !t.poste || !t.poste.toLowerCase().includes('chef'));
