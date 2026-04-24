@@ -405,6 +405,20 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     return parts.filter(p => p).join(', ');
   };
 
+  const getInitialsWithHyphens = (text) => {
+    return text.split('-').map(part => part[0]?.toUpperCase()).join('');
+  };
+
+  const getUserInitials = (user) => {
+    if (!user) return 'U';
+    if (typeof user === 'string') {
+      return user.split(' ').map(n => getInitialsWithHyphens(n)).join('').toUpperCase() || 'U';
+    }
+    const prenomInitials = getInitialsWithHyphens(user.prenom || '');
+    const nomInitials = getInitialsWithHyphens(user.nom || '');
+    return (prenomInitials + nomInitials) || 'U';
+  };
+
   const getDays = () => {
     if (viewMode === "week") {
       const start = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -424,10 +438,6 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const goToPrevious = () => viewMode === "week" ? setCurrentDate(subWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const goToNext = () => viewMode === "week" ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
-
-  const getInitialsWithHyphens = (text) => {
-    return text.split('-').map(part => part[0]?.toUpperCase()).join('');
-  };
 
   const generateTeamDisplayName = useCallback((equipe, positionIndex) => {
     // Si positionIndex fourni, utiliser ce numéro (1-based), sinon extraire du nom
@@ -518,7 +528,6 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     return !isAssigned;
   });
 
-  const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
 
   const calculateEquipeTimings = (equipe) => {
@@ -1344,7 +1353,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
                   {assignedUser
-                    ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar>
+                    ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser)}</AvatarFallback></Avatar>
                     : <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-2.5 h-2.5 text-emerald-500" /></div>}
                 </div>
               </div>
