@@ -81,10 +81,8 @@ export default function Dashboard() {
 
     // Handle string fields (including numero_acte)
     if (typeof aValue === 'string' && typeof bValue === 'string') {
-      // Try to compare as numbers if they look like numbers
       const aNum = parseFloat(aValue.replace(/[^\d.-]/g, ''));
       const bNum = parseFloat(bValue.replace(/[^\d.-]/g, ''));
-      
       if (!isNaN(aNum) && !isNaN(bNum)) {
         aValue = aNum;
         bValue = bNum;
@@ -92,12 +90,14 @@ export default function Dashboard() {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
-    } else if (typeof aValue === 'string') { // For cases where only aValue is string, bValue might be null/undefined initially
-        aValue = aValue.toLowerCase();
-        // bValue will be handled by the undefined/null check below
-    } else if (typeof bValue === 'string') { // For cases where only bValue is string
-        bValue = bValue.toLowerCase();
-        // aValue will be handled by the undefined/null check below
+    } else if (typeof aValue === 'string') {
+      aValue = aValue.toLowerCase();
+    } else if (typeof bValue === 'string') {
+      bValue = bValue.toLowerCase();
+    } else if (typeof aValue !== 'number') {
+      aValue = null;
+    } else if (typeof bValue !== 'number') {
+      bValue = null;
     }
 
 
