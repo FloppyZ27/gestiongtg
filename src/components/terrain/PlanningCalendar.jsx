@@ -1540,8 +1540,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs defaultValue="verification" className="w-full">
               <TabsList className="bg-slate-800/50 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
-                <TabsTrigger value="verification" className="text-xs px-1 py-1 rounded-md text-slate-400 transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:hover:text-slate-200">En vérification</TabsTrigger>
-                <TabsTrigger value="planifier" className="text-xs px-1 py-1 rounded-md text-slate-400 transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:hover:text-slate-200">À planifier</TabsTrigger>
+                <TabsTrigger value="verification" className="text-xs px-1 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
+                <TabsTrigger value="planifier" className="text-xs px-1 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:bg-slate-700/30 data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-slate-300">À planifier</TabsTrigger>
               </TabsList>
               <TabsContent value="verification" className="mt-0">
                 <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
