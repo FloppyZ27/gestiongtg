@@ -1254,10 +1254,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   handleLinkCard(card.id);
                 }
               }}
-              className={`h-5 w-5 p-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked ? 'bg-violet-500/20 hover:bg-violet-500/30 text-violet-400' : 'bg-slate-500/20 hover:bg-slate-500/30 text-slate-400'}`}
+              className={`h-5 w-5 p-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked && !linkingMode ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : isLinked && linkingMode ? 'bg-violet-500/40 hover:bg-violet-500/60 text-violet-200' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
               title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
             >
-              {isLinked ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
+              {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
             </Button>}
             {showLock && <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-5 w-5 p-0" title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>{isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}</Button>}
           </div>
