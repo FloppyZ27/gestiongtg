@@ -135,8 +135,8 @@ export default function CreateTeamTerrainDialog({
                           className="border-blue-400"
                         />
                         <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {chef.full_name.split(' ')[0]} {chef.full_name.split(' ').slice(1).join(' ')}
-                        </Label>
+                           {chef.prenom} {chef.nom}
+                         </Label>
                       </div>
                     ))
                   ) : (
@@ -174,8 +174,8 @@ export default function CreateTeamTerrainDialog({
                           className="border-cyan-400"
                         />
                         <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {tech.full_name.split(' ')[0]} {tech.full_name.split(' ').slice(1).join(' ')}
-                        </Label>
+                           {tech.prenom} {tech.nom}
+                         </Label>
                       </div>
                     ))
                   ) : (
