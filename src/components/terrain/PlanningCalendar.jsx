@@ -1503,11 +1503,31 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   size="sm"
                   onClick={handleOptimizeAll}
                   disabled={isOptimizing}
-                  className="bg-gradient-to-r from-violet-500/30 to-purple-500/30 hover:from-violet-500/50 hover:to-purple-500/50 text-violet-300 border border-violet-500/40"
+                  style={{
+                    background: 'linear-gradient(90deg, rgb(59, 130, 246), rgb(96, 165, 250), rgb(59, 130, 246))',
+                    backgroundSize: '200% 200%',
+                    color: 'white',
+                    border: '1px solid rgb(96, 165, 250)',
+                    transition: 'all 300ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 20px rgb(59, 130, 246), 0 0 40px rgb(96, 165, 250)';
+                    e.currentTarget.style.animation = 'shimmer 2s infinite';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.animation = 'none';
+                  }}
                 >
                   {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
                   {isOptimizing ? 'Optimisation...' : 'Optimiser'}
                 </Button>
+                <style>{`
+                  @keyframes shimmer {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                  }
+                `}</style>
               </div>
             </div>
           </div>
