@@ -14,7 +14,8 @@ export default function CreateTeamTerrainDialog({
   users,
   vehicules,
   equipements,
-  equipes = {}
+  equipes = {},
+  placeAffaire
 }) {
   const [selectedChefs, setSelectedChefs] = useState([]);
   const [selectedTechs, setSelectedTechs] = useState([]);
@@ -63,6 +64,9 @@ export default function CreateTeamTerrainDialog({
     }
     return null;
   };
+
+  const isChefWrongPlace = (chef) => chef.place_affaire && chef.place_affaire !== placeAffaire;
+  const isTechWrongPlace = (tech) => tech.place_affaire && tech.place_affaire !== placeAffaire;
 
   const handleCreateTeam = () => {
     // Validation : au moins un chef doit être sélectionné
@@ -162,18 +166,19 @@ export default function CreateTeamTerrainDialog({
                     chefs.map(chef => {
                       const isSelected = selectedChefs.includes(chef.id);
                       const isUsed = isChefUsed(chef.id);
+                      const isWrongPlace = isChefWrongPlace(chef);
                       const equipeNom = isUsed ? getEquipeNameForElement(chef.id, 'tech') : null;
                       return (
-                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
+                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isWrongPlace || isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`chef-${chef.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(chef.id, "chefs")}
-                            disabled={isUsed}
+                            disabled={isUsed || isWrongPlace}
                             className="border-blue-400"
                           />
-                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
-                             {chef.prenom} {chef.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}
+                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isWrongPlace || isUsed ? 'text-slate-400' : isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
+                             {chef.prenom} {chef.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}{isWrongPlace && <span className="text-slate-500"> ({chef.place_affaire})</span>}
                            </Label>
                         </div>
                       );
@@ -207,18 +212,19 @@ export default function CreateTeamTerrainDialog({
                     techs.map(tech => {
                       const isSelected = selectedTechs.includes(tech.id);
                       const isUsed = isTechUsed(tech.id);
+                      const isWrongPlace = isTechWrongPlace(tech);
                       const equipeNom = isUsed ? getEquipeNameForElement(tech.id, 'tech') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
+                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isWrongPlace || isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`tech-${tech.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(tech.id, "techs")}
-                            disabled={isUsed}
+                            disabled={isUsed || isWrongPlace}
                             className="border-cyan-400"
                           />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
-                             {tech.prenom} {tech.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isWrongPlace || isUsed ? 'text-slate-400' : isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
+                             {tech.prenom} {tech.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}{isWrongPlace && <span className="text-slate-500"> ({tech.place_affaire})</span>}
                            </Label>
                         </div>
                       );

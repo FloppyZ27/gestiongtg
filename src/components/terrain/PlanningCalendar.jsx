@@ -1619,7 +1619,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
 
 
-      <CreateTeamTerrainDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} users={users} vehicules={vehicules} equipements={equipements} equipes={equipes} />
+      <CreateTeamTerrainDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} users={users} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
