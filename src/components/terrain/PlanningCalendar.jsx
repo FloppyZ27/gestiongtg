@@ -1307,9 +1307,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     }}
                   >
                     <SelectTrigger
-                      className="w-full h-6 text-xs px-1.5 py-0"
-                      style={triggerInlineStyle}
-                      onMouseDown={e => e.stopPropagation()}
+                     className="w-full h-6 text-xs px-1.5 py-0"
+                     style={{ ...triggerInlineStyle, boxShadow: `0 0 0 1px ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`, border: 'none', outline: 'none' }}
+                     onMouseDown={e => e.stopPropagation()}
                     >
                       <SelectValue placeholder="Statut..." />
                     </SelectTrigger>
