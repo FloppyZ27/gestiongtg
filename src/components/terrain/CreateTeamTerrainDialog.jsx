@@ -40,10 +40,12 @@ export default function CreateTeamTerrainDialog({
 
     const allTechIds = [...selectedChefs, ...selectedTechs];
     
-    // Générer initiales des chefs
+    // Générer initiales des chefs (première lettre du prénom + première lettre du nom de famille)
     const chefInitials = selectedChefs.map(id => {
       const u = users?.find(u => u.id === id);
-      return u ? u.full_name.split(' ').map(n => n[0]).join('') : '';
+      if (!u) return '';
+      const parts = u.full_name.split(' ');
+      return (parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '');
     }).join('/');
 
     const teamName = `Équipe ${chefInitials} - ${(new Date().getTime() % 100)}`;
@@ -133,7 +135,7 @@ export default function CreateTeamTerrainDialog({
                           className="border-blue-400"
                         />
                         <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {chef.full_name}
+                          {chef.full_name.split(' ')[0]} {chef.full_name.split(' ').slice(1).join(' ')}
                         </Label>
                       </div>
                     ))
@@ -172,7 +174,7 @@ export default function CreateTeamTerrainDialog({
                           className="border-cyan-400"
                         />
                         <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {tech.full_name}
+                          {tech.full_name.split(' ')[0]} {tech.full_name.split(' ').slice(1).join(' ')}
                         </Label>
                       </div>
                     ))

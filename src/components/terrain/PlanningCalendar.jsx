@@ -433,9 +433,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     if (equipe.techniciens.length === 0) {
       return numStr ? `Équipe ${numStr}` : equipe.nom;
     }
-    const initials = equipe.techniciens.map(id => { const t = techniciens.find(t => t.id === id); return t ? t.prenom.charAt(0) + t.nom.charAt(0) : ''; }).filter(n => n).join('-');
+    const initials = equipe.techniciens.map(id => {
+      const u = users?.find(u => u.id === id);
+      if (!u) return '';
+      const parts = u.full_name.split(' ');
+      return (parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '');
+    }).filter(n => n).join('-');
     return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
-  }, [techniciens]);
+  }, [users]);
 
   const parseEquipeDroppableId = (id) => {
     if (!id.startsWith('equipe-')) return null;
