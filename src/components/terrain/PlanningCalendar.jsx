@@ -1228,32 +1228,29 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
 
           </div>
-          <div className="flex gap-1">
-            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>}
-            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/20 hover:bg-red-500/40 text-red-400 h-6 w-6 p-0 flex-shrink-0"><Trash2 className="w-3 h-3" /></Button>}
+          <div className="grid grid-cols-2 gap-0.5 flex-shrink-0">
+            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-5 w-5 p-0"><Edit className="w-2.5 h-2.5" /></Button>}
+            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/20 hover:bg-red-500/40 text-red-400 h-5 w-5 p-0"><Trash2 className="w-2.5 h-2.5" /></Button>}
             {!hideLinkedButton && <Button
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 if (linkingMode) {
-                  // En mode liaison: cliquer pour lier (même si déjà dans un groupe)
                   handleLinkCard(card.id);
                 } else if (isLinked) {
-                  // Pas en mode liaison + déjà lié: retirer du groupe
                   handleUnlinkCard(linkedGroup.id, card.id);
                 } else {
-                  // Pas en mode liaison + pas lié: démarrer une liaison
                   handleLinkCard(card.id);
                 }
               }}
-              className={`h-6 w-6 p-0 flex-shrink-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked && !linkingMode ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : isLinked && linkingMode ? 'bg-violet-500/40 hover:bg-violet-500/60 text-violet-200' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
+              className={`h-5 w-5 p-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked && !linkingMode ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : isLinked && linkingMode ? 'bg-violet-500/40 hover:bg-violet-500/60 text-violet-200' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
               title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
             >
-              {isLinked && !linkingMode ? <Unlink className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+              {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
             </Button>}
             {showLock && (
-              <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>
-                {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-5 w-5 p-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>
+                {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
               </Button>
             )}
           </div>
@@ -1331,8 +1328,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               })()}
             </div>
             <div className="flex gap-1" onMouseDown={e => e.stopPropagation()}>
-              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="opacity-40 hover:opacity-100 text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2.5 h-2.5" /></button>
-              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="opacity-40 hover:opacity-100 text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2.5 h-2.5" /></button>
+              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2.5 h-2.5" /></button>
+              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2.5 h-2.5" /></button>
             </div>
           </div>
         </div>
