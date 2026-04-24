@@ -1138,7 +1138,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   };
 
   // ---- Render DossierCard (custom drag) ----
-  const DossierCard = ({ card, showLock = false }) => {
+  const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
@@ -1202,8 +1202,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
           </div>
           <div className="flex gap-1">
-            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>
-            <Button
+            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>}
+            {!hideLinkedButton && <Button
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
@@ -1222,7 +1222,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
             >
               {isLinked && !linkingMode ? <Unlink className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
-            </Button>
+            </Button>}
             {showLock && (
               <Button size="sm" onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} className={`h-6 w-6 p-0 flex-shrink-0 ${isLocked ? 'bg-amber-500/30 hover:bg-amber-500/40 text-amber-400' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-400'}`} title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>
                 {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
@@ -1443,7 +1443,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                   {unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").map(card => (
                     <div key={card.id} className="mb-2">
-                      <DossierCard card={card} />
+                      <DossierCard card={card} hideEditButton hideLinkedButton />
                       <TerrainVerificationCard card={card} onUpdateDossier={onUpdateDossier} />
                     </div>
                   ))}
