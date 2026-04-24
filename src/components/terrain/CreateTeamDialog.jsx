@@ -34,9 +34,10 @@ export default function CreateTeamDialog({
   const usedVehIds = usedResources?.vehicules || [];
   const usedEqIds = usedResources?.equipements || [];
 
-  // Filtrer users par poste
-  const allChefs = users?.filter(u => u.poste === "Technicien Terrain (Chef)") || [];
-  const allTechs = users?.filter(u => u.poste === "Technicien Terrain") || [];
+  // Filtrer users par email pour les chefs
+  const chefEmails = ['dvallee@girardtremblaygilbert.com', 'dgaboury@girardtremblaygilbert.com'];
+  const allChefs = users?.filter(u => chefEmails.includes(u.email)) || [];
+  const allTechs = users?.filter(u => u.poste === "Technicien Terrain" && !chefEmails.includes(u.email)) || [];
 
   // Trouver quelle équipe utilise une ressource
   const getTeamForResource = (resourceId, resourceType) => {
