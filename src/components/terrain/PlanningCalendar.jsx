@@ -1241,7 +1241,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
           <div className="grid grid-cols-2 gap-0.5 flex-shrink-0">
             {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-5 w-5 p-0"><Edit className="w-2.5 h-2.5" /></Button>}
-            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/20 hover:bg-red-500/40 text-red-400 h-5 w-5 p-0"><Trash2 className="w-2.5 h-2.5" /></Button>}
+            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/20 hover:bg-red-500/50 text-red-400 hover:text-red-300 h-5 w-5 p-0"><Trash2 className="w-2.5 h-2.5" /></Button>}
             {!hideLinkedButton && <Button
               size="sm"
               onClick={(e) => {
