@@ -37,10 +37,6 @@ export default function CreateTeamDialog({
 
   // Tous les techniciens (ma place + autres places)
   const allTechs = allTechniciens || techniciens;
-  console.log('allTechs:', allTechs);
-  console.log('targetPlace:', targetPlace, 'placeAffaire:', placeAffaire);
-  console.log('myPlaceTechs:', myPlaceTechs);
-  console.log('myChefs:', myChefs);
 
   // Trouver quelle équipe utilise une ressource
   const getTeamForResource = (resourceId, resourceType) => {
