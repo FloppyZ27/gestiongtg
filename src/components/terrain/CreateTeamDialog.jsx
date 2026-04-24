@@ -193,15 +193,15 @@ export default function CreateTeamDialog({
                         </div>
                       );
                     })}
-                    {/* Chefs de l'autre place (empruntables) */}
+                    {/* Chefs de l'autre place (empruntables uniquement via bouton) */}
                     {otherChefs.map(tech => {
                       const alreadyScheduled = isAlreadyScheduledOtherPlace(tech.id);
                       const isSelected = selectedTechniciens.includes(tech.id);
                       const canBorrow = !alreadyScheduled;
                       return (
-                        <div key={tech.id} className="flex items-center gap-2 opacity-60">
-                          <Checkbox id={`chef-${tech.id}`} checked={isSelected} onCheckedChange={() => canBorrow && toggleTechnicien(tech.id)} disabled={!canBorrow} className="border-slate-600" />
-                          <Label htmlFor={`chef-${tech.id}`} className="flex-1 text-slate-500 text-xs">
+                        <div key={tech.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
+                          <Checkbox id={`chef-${tech.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
+                          <Label className="flex-1 text-slate-500 text-xs cursor-default">
                             {tech.prenom} {tech.nom}
                           </Label>
                           <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{tech.place_affaire}</Badge>
@@ -254,15 +254,15 @@ export default function CreateTeamDialog({
                         </div>
                       );
                     })}
-                    {/* Techniciens de l'autre place (empruntables) */}
+                    {/* Techniciens de l'autre place (empruntables uniquement via bouton) */}
                     {otherTechsRegular.map(tech => {
                       const alreadyScheduled = isAlreadyScheduledOtherPlace(tech.id);
                       const isSelected = selectedTechniciens.includes(tech.id);
                       const canBorrow = !alreadyScheduled;
                       return (
-                        <div key={tech.id} className="flex items-center gap-2 opacity-60">
-                          <Checkbox id={`tech-${tech.id}`} checked={isSelected} onCheckedChange={() => canBorrow && toggleTechnicien(tech.id)} disabled={!canBorrow} className="border-slate-600" />
-                          <Label htmlFor={`tech-${tech.id}`} className="flex-1 text-slate-500 text-xs">
+                        <div key={tech.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
+                          <Checkbox id={`tech-${tech.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
+                          <Label className="flex-1 text-slate-500 text-xs cursor-default">
                             {tech.prenom} {tech.nom}
                           </Label>
                           <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{tech.place_affaire}</Badge>
