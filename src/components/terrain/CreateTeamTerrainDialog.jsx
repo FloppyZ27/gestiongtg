@@ -13,7 +13,8 @@ export default function CreateTeamTerrainDialog({
   dateStr,
   users,
   vehicules,
-  equipements
+  equipements,
+  equipes = {}
 }) {
   const [selectedChefs, setSelectedChefs] = useState([]);
   const [selectedTechs, setSelectedTechs] = useState([]);
@@ -30,6 +31,23 @@ export default function CreateTeamTerrainDialog({
 
   const availableVehicules = vehicules || [];
   const availableEquipements = equipements || [];
+
+  // Vérifier les éléments déjà utilisés dans les équipes du jour
+  const dayEquipes = equipes[dateStr] || [];
+  const usedTechIds = new Set();
+  const usedVehiculeIds = new Set();
+  const usedEquipementIds = new Set();
+
+  dayEquipes.forEach(equipe => {
+    equipe.techniciens?.forEach(id => usedTechIds.add(id));
+    equipe.vehicules?.forEach(id => usedVehiculeIds.add(id));
+    equipe.equipements?.forEach(id => usedEquipementIds.add(id));
+  });
+
+  const isChefUsed = (chefId) => usedTechIds.has(chefId);
+  const isTechUsed = (techId) => usedTechIds.has(techId);
+  const isVehiculeUsed = (vehId) => usedVehiculeIds.has(vehId);
+  const isEquipementUsed = (eqId) => usedEquipementIds.has(eqId);
 
   const handleCreateTeam = () => {
     // Validation : au moins un chef doit être sélectionné
@@ -128,15 +146,17 @@ export default function CreateTeamTerrainDialog({
                   {chefs.length > 0 ? (
                     chefs.map(chef => {
                       const isSelected = selectedChefs.includes(chef.id);
+                      const isUsed = isChefUsed(chef.id);
                       return (
-                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
+                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`chef-${chef.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(chef.id, "chefs")}
+                            disabled={isUsed}
                             className="border-blue-400"
                           />
-                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
+                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
                              {chef.prenom} {chef.nom}
                            </Label>
                         </div>
@@ -170,15 +190,17 @@ export default function CreateTeamTerrainDialog({
                   {techs.length > 0 ? (
                     techs.map(tech => {
                       const isSelected = selectedTechs.includes(tech.id);
+                      const isUsed = isTechUsed(tech.id);
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
+                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`tech-${tech.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(tech.id, "techs")}
+                            disabled={isUsed}
                             className="border-cyan-400"
                           />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
                              {tech.prenom} {tech.nom}
                            </Label>
                         </div>
@@ -212,15 +234,17 @@ export default function CreateTeamTerrainDialog({
                   {availableVehicules.length > 0 ? (
                     availableVehicules.map(veh => {
                       const isSelected = selectedVehicules.includes(veh.id);
+                      const isUsed = isVehiculeUsed(veh.id);
                       return (
-                        <div key={veh.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-purple-500/40 border border-purple-400 ring-1 ring-purple-400' : 'hover:bg-purple-500/20 bg-slate-700/20'}`}>
+                        <div key={veh.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-purple-500/40 border border-purple-400 ring-1 ring-purple-400' : 'hover:bg-purple-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`veh-${veh.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleVehicule(veh.id)}
+                            disabled={isUsed}
                             className="border-purple-400"
                           />
-                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-purple-100' : 'text-slate-200'}`}>
+                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-purple-100' : 'text-slate-200'}`}>
                             {veh.nom}
                           </Label>
                         </div>
@@ -254,15 +278,17 @@ export default function CreateTeamTerrainDialog({
                   {availableEquipements.length > 0 ? (
                     availableEquipements.map(eq => {
                       const isSelected = selectedEquipements.includes(eq.id);
+                      const isUsed = isEquipementUsed(eq.id);
                       return (
-                        <div key={eq.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-orange-500/40 border border-orange-400 ring-1 ring-orange-400' : 'hover:bg-orange-500/20 bg-slate-700/20'}`}>
+                        <div key={eq.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-orange-500/40 border border-orange-400 ring-1 ring-orange-400' : 'hover:bg-orange-500/20 bg-slate-700/20'}`}>
                           <Checkbox
                             id={`eq-${eq.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleEquipement(eq.id)}
+                            disabled={isUsed}
                             className="border-orange-400"
                           />
-                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-orange-100' : 'text-slate-200'}`}>
+                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-orange-100' : 'text-slate-200'}`}>
                             {eq.nom}
                           </Label>
                         </div>
