@@ -3,13 +3,11 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 
-// Suppress harmless ResizeObserver errors that have no stack trace
-const _origError = window.onerror;
-window.onerror = function(message, source, lineno, colno, error) {
-  if (message && typeof message === 'string' && message.includes('ResizeObserver')) return true;
-  if (!error || !error.stack) return true;
-  if (_origError) return _origError(message, source, lineno, colno, error);
-};
+// Suppress harmless ResizeObserver errors and errors without stack traces
+window.addEventListener('error', (event) => {
+  if (!event.error || !event.error.stack) { event.stopImmediatePropagation(); event.preventDefault(); return; }
+  if (event.message && event.message.includes('ResizeObserver')) { event.stopImmediatePropagation(); event.preventDefault(); }
+}, true);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
