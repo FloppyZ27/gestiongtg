@@ -82,10 +82,10 @@ export default function CreateTeamDialog({
   // Techniciens de l'autre place d'affaire (empruntables si pas déjà cédulés là-bas)
   const otherPlaceTechs = allTechs.filter(t => t.place_affaire !== (placeAffaire === 'alma' ? 'Alma' : 'Saguenay') && t.place_affaire);
 
-  const myChefs = myPlaceTechs.filter(t => t.poste === 'Technicien Terrain (Chef)');
-  const myTechsRegular = myPlaceTechs.filter(t => t.poste === 'Technicien Terrain');
-  const otherChefs = otherPlaceTechs.filter(t => t.poste === 'Technicien Terrain (Chef)');
-  const otherTechsRegular = otherPlaceTechs.filter(t => t.poste === 'Technicien Terrain');
+  const myChefs = myPlaceTechs.filter(t => t.poste && t.poste.toLowerCase().includes('chef'));
+  const myTechsRegular = myPlaceTechs.filter(t => !t.poste || !t.poste.toLowerCase().includes('chef'));
+  const otherChefs = otherPlaceTechs.filter(t => t.poste && t.poste.toLowerCase().includes('chef'));
+  const otherTechsRegular = otherPlaceTechs.filter(t => !t.poste || !t.poste.toLowerCase().includes('chef'));
 
   const availableMyTechs = myPlaceTechs.filter(t => !usedTechIds.includes(t.id));
   const availableChefs = availableMyTechs.filter(t => t.poste === 'Technicien Terrain (Chef)');
