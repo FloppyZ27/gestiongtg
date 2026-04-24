@@ -1390,20 +1390,20 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             <div className="flex justify-between items-center">
               <div className="text-white font-bold text-lg">{viewMode === "week" ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}` : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
               <div className="flex gap-2 items-center">
-                <Button size="sm" variant="outline" onClick={goToPrevious} className="bg-slate-800 border-slate-700 text-white">← Précédent</Button>
-                <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400">Aujourd'hui</Button>
-                <Button size="sm" variant="outline" onClick={goToNext} className="bg-slate-800 border-slate-700 text-white">Suivant →</Button>
+                <Button size="sm" variant="outline" onClick={goToPrevious} className="bg-slate-800 border-slate-700 text-white transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white hover:scale-105">← Précédent</Button>
+                <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
+                <Button size="sm" variant="outline" onClick={goToNext} className="bg-slate-800 border-slate-700 text-white transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white hover:scale-105">Suivant →</Button>
                 <div className="flex gap-1">
-                  <Button size="sm" onClick={() => setViewMode("week")} className={viewMode === "week" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 text-white"}>Semaine</Button>
-                  <Button size="sm" onClick={() => setViewMode("month")} className={viewMode === "month" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 text-white"}>Mois</Button>
+                  <Button size="sm" onClick={() => setViewMode("week")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
+                  <Button size="sm" onClick={() => setViewMode("month")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
                 </div>
               </div>
             </div>
             <div className="flex gap-2 items-center flex-wrap">
               <span className="text-white text-sm">Afficher :</span>
-              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "techniciens" ? null : "techniciens")} className={globalViewMode === "techniciens" ? "bg-blue-500/30 text-blue-400 border border-blue-500" : "bg-slate-800 text-white"}><Users className="w-3 h-3 mr-1" />Techniciens</Button>
-              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "vehicules" ? null : "vehicules")} className={globalViewMode === "vehicules" ? "bg-purple-500/30 text-purple-400 border border-purple-500" : "bg-slate-800 text-white"}><Truck className="w-3 h-3 mr-1" />Véhicules</Button>
-              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "equipements" ? null : "equipements")} className={globalViewMode === "equipements" ? "bg-orange-500/30 text-orange-400 border border-orange-500" : "bg-slate-800 text-white"}><Wrench className="w-3 h-3 mr-1" />Équipements</Button>
+              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "techniciens" ? null : "techniciens")} className={`transition-all duration-200 hover:scale-105 ${globalViewMode === "techniciens" ? "bg-blue-500/40 text-blue-300 ring-2 ring-blue-500/60 shadow-lg shadow-blue-500/20" : "bg-slate-800 text-white hover:bg-blue-500/20 hover:text-blue-300 hover:ring-1 hover:ring-blue-500/40"}`}><Users className="w-3 h-3 mr-1" />Techniciens</Button>
+              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "vehicules" ? null : "vehicules")} className={`transition-all duration-200 hover:scale-105 ${globalViewMode === "vehicules" ? "bg-purple-500/40 text-purple-300 ring-2 ring-purple-500/60 shadow-lg shadow-purple-500/20" : "bg-slate-800 text-white hover:bg-purple-500/20 hover:text-purple-300 hover:ring-1 hover:ring-purple-500/40"}`}><Truck className="w-3 h-3 mr-1" />Véhicules</Button>
+              <Button size="sm" onClick={() => setGlobalViewMode(globalViewMode === "equipements" ? null : "equipements")} className={`transition-all duration-200 hover:scale-105 ${globalViewMode === "equipements" ? "bg-orange-500/40 text-orange-300 ring-2 ring-orange-500/60 shadow-lg shadow-orange-500/20" : "bg-slate-800 text-white hover:bg-orange-500/20 hover:text-orange-300 hover:ring-1 hover:ring-orange-500/40"}`}><Wrench className="w-3 h-3 mr-1" />Équipements</Button>
               <div className="ml-auto flex items-center gap-2 flex-wrap">
                 {linkingMode && (
                   <div className="flex items-center gap-2 bg-violet-900/40 border border-violet-500/40 rounded-lg px-2 py-1">
