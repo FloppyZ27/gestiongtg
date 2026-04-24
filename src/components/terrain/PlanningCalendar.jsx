@@ -1282,10 +1282,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
             const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
             const triggerInlineStyle = isOrange
-              ? { background: 'rgba(249,115,22,0.3)', color: '#fb923c', fontWeight: 600, border: '1px solid rgba(249,115,22,0.6)' }
+              ? { background: 'rgba(249,115,22,0.3)', color: '#fb923c', fontWeight: 600, border: '1px solid #fb923c', textAlign: 'center', justifyContent: 'center' }
               : isMauve
-              ? { background: 'rgba(139,92,246,0.3)', color: '#c084fc', fontWeight: 600, border: '1px solid rgba(139,92,246,0.6)' }
-              : { background: 'rgba(30,41,59,0.4)', color: '#94a3b8', opacity: 0.5 };
+              ? { background: 'rgba(139,92,246,0.3)', color: '#c084fc', fontWeight: 600, border: '1px solid #c084fc', textAlign: 'center', justifyContent: 'center' }
+              : { background: 'rgba(30,41,59,0.4)', color: '#94a3b8', opacity: 0.5, border: '1px solid #94a3b8', textAlign: 'center', justifyContent: 'center' };
             return (
               <div className="flex items-center gap-1">
                 {/* Temps prévu */}
