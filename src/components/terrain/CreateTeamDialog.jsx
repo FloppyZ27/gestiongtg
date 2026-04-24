@@ -87,10 +87,10 @@ export default function CreateTeamDialog({
     ? allTechs.filter(t => t.place_affaire && t.place_affaire !== targetPlace)
     : [];
 
-  const myChefs = myPlaceTechs.filter(t => t.poste === 'Techniciens (Chef)' || (t.poste && t.poste.toLowerCase().includes('chef')));
-  const myTechsRegular = myPlaceTechs.filter(t => t.poste !== 'Techniciens (Chef)' && (!t.poste || !t.poste.toLowerCase().includes('chef')));
-  const otherChefs = otherPlaceTechs.filter(t => t.poste === 'Techniciens (Chef)' || (t.poste && t.poste.toLowerCase().includes('chef')));
-  const otherTechsRegular = otherPlaceTechs.filter(t => t.poste !== 'Techniciens (Chef)' && (!t.poste || !t.poste.toLowerCase().includes('chef')));
+  const myChefs = myPlaceTechs.filter(t => t.poste?.toLowerCase().includes('chef'));
+  const myTechsRegular = myPlaceTechs.filter(t => !t.poste?.toLowerCase().includes('chef'));
+  const otherChefs = otherPlaceTechs.filter(t => t.poste?.toLowerCase().includes('chef'));
+  const otherTechsRegular = otherPlaceTechs.filter(t => !t.poste?.toLowerCase().includes('chef'));
 
   const availableChefs = myChefs.filter(t => !usedTechIds.includes(t.id));
   const availableTechsRegular = myTechsRegular.filter(t => !usedTechIds.includes(t.id));
