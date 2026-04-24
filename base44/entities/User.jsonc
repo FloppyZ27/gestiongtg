@@ -1,0 +1,100 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom de l'utilisateur"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'utilisateur"
+    },
+    "poste": {
+      "type": "string",
+      "enum": [
+        "Technicien Terrain",
+        "Technicien Terrain (Chef)",
+        "Arpenteur-G\u00e9om\u00e8tre",
+        "Administratif",
+        "Autre"
+      ],
+      "description": "Poste de l'utilisateur"
+    },
+    "place_affaire": {
+      "type": "string",
+      "enum": [
+        "Alma",
+        "Saguenay"
+      ],
+      "description": "Place d'affaire de l'utilisateur"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Actif",
+        "Inactif"
+      ],
+      "default": "Actif",
+      "description": "Statut de l'utilisateur"
+    },
+    "equipe": {
+      "type": "string",
+      "description": "\u00c9quipe de travail de l'utilisateur"
+    },
+    "telephone": {
+      "type": "string",
+      "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "adresse": {
+      "type": "string",
+      "description": "Adresse de l'utilisateur"
+    },
+    "date_naissance": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de naissance"
+    },
+    "date_embauche": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'embauche"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL de la photo de profil"
+    },
+    "permissions_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Pages auxquelles l'utilisateur a acc\u00e8s"
+    }
+  },
+  "permissions": {
+    "list": {
+      "user": true,
+      "admin": true
+    },
+    "read": {
+      "user": true,
+      "admin": true
+    },
+    "create": {
+      "user": false,
+      "admin": true
+    },
+    "update": {
+      "user": "$isOwner",
+      "admin": true
+    },
+    "delete": {
+      "user": false,
+      "admin": true
+    }
+  },
+  "required": [
+    "poste"
+  ]
+}
