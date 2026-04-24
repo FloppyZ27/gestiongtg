@@ -68,6 +68,10 @@ export default function CreateTeamTerrainDialog({
   const isChefWrongPlace = (chef) => chef.place_affaire && chef.place_affaire !== placeAffaire;
   const isTechWrongPlace = (tech) => tech.place_affaire && tech.place_affaire !== placeAffaire;
 
+  // Compter les chefs et techs disponibles (même place ou pas de place définie, et non assignés)
+  const availableChefs = chefs.filter(c => !isChefUsed(c.id) && !isChefWrongPlace(c)).length;
+  const availableTechs = techs.filter(t => !isTechUsed(t.id) && !isTechWrongPlace(t)).length;
+
   const handleCreateTeam = () => {
     // Validation : au moins un chef doit être sélectionné
     if (selectedChefs.length === 0) {
@@ -155,7 +159,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
                       <Users className="w-3 h-3 text-blue-400" />
                     </div>
-                    <CardTitle className="text-blue-300 text-sm">Chef ({selectedChefs.length}/{chefs.length})</CardTitle>
+                    <CardTitle className="text-blue-300 text-sm">Chef ({selectedChefs.length}/{availableChefs})</CardTitle>
                   </div>
                   {chefOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -201,7 +205,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
                       <Users className="w-3 h-3 text-cyan-400" />
                     </div>
-                    <CardTitle className="text-cyan-300 text-sm">Technicien ({selectedTechs.length}/{techs.length})</CardTitle>
+                    <CardTitle className="text-cyan-300 text-sm">Technicien ({selectedTechs.length}/{availableTechs})</CardTitle>
                   </div>
                   {techOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
