@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2 } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -185,6 +185,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const pendingEquipeMoveRef = useRef(null);
   const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteCardConfirm, setDeleteCardConfirm] = useState(null); // card à supprimer
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
@@ -584,6 +585,32 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     if (!def) { const m = card.mandat; let base = null; if (m.date_livraison) base = new Date(m.date_livraison + 'T00:00:00'); else if (m.date_signature) base = new Date(m.date_signature + 'T00:00:00'); else if (m.date_debut_travaux) base = new Date(m.date_debut_travaux + 'T00:00:00'); if (base) { base.setDate(base.getDate() - 14); def = format(base, "yyyy-MM-dd"); } }
     setTerrainForm({ date_limite_leve: def, instruments_requis: card.terrain?.instruments_requis || "", a_rendez_vous: card.terrain?.a_rendez_vous || false, date_rendez_vous: card.terrain?.date_rendez_vous || "", heure_rendez_vous: card.terrain?.heure_rendez_vous || "", donneur: card.terrain?.donneur || "", technicien: card.terrain?.technicien || "", dossier_simultane: card.terrain?.dossier_simultane || "", temps_prevu: card.terrain?.temps_prevu || "", notes: card.terrain?.notes || "" });
     setIsTerrainDialogOpen(true);
+  };
+
+  const handleDeleteCard = (card) => {
+    // Retirer la carte de toutes les équipes
+    setEquipes(prev => {
+      const ne = JSON.parse(JSON.stringify(prev));
+      Object.keys(ne).forEach(d => ne[d].forEach(eq => { eq.mandats = eq.mandats.filter(id => id !== card.id); }));
+      return ne;
+    });
+    // Retirer du groupe lié
+    const group = getLinkedGroupForCard(card.id);
+    if (group) handleUnlinkCard(group.id, card.id);
+    // Mettre à jour le dossier: retirer le terrain de la liste
+    if (onUpdateDossier) {
+      const dossier = dossiers.find(d => d.id === card.dossier.id);
+      if (dossier) {
+        const updatedMandats = dossier.mandats.map((m, idx) => {
+          if (idx !== card.mandatIndex) return m;
+          const tl = [...(m.terrains_list || [])];
+          tl.splice(card.terrainIndex, 1);
+          return { ...m, terrains_list: tl };
+        });
+        onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+      }
+    }
+    setDeleteCardConfirm(null);
   };
 
   const handleSaveTerrain = () => {
@@ -1203,6 +1230,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
           <div className="flex gap-1">
             {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"><Edit className="w-3 h-3" /></Button>}
+            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/20 hover:bg-red-500/40 text-red-400 h-6 w-6 p-0 flex-shrink-0"><Trash2 className="w-3 h-3" /></Button>}
             {!hideLinkedButton && <Button
               size="sm"
               onClick={(e) => {
@@ -1240,7 +1268,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         {terrain.dossier_simultane && <div className="flex items-center gap-1 mb-1"><Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" /><span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span></div>}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
           <div>{terrain.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
-          {assignedUser ? <div className="flex items-center gap-1"><Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar></div> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
+          <div className="flex items-center gap-1">
+            {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
+            {assignedUser ? <Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
+          </div>
         </div>
       </div>
     );
@@ -1300,8 +1331,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               })()}
             </div>
             <div className="flex gap-1" onMouseDown={e => e.stopPropagation()}>
-              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300"><Copy className="w-3 h-3" /></button>
-              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="opacity-40 hover:opacity-100 text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2.5 h-2.5" /></button>
+              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="opacity-40 hover:opacity-100 text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2.5 h-2.5" /></button>
             </div>
           </div>
         </div>
@@ -1569,6 +1600,20 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             <p className="text-slate-400 text-center text-sm">Impossible de déplacer ou copier cette équipe vers ce jour.</p>
             <div className="flex justify-center pt-2">
               <Button onClick={() => setEquipeExistanteWarning(null)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
+            </div>
+          </div>}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteCardConfirm} onOpenChange={() => setDeleteCardConfirm(null)}>
+        <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
+          <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">🗑️ Supprimer ce terrain</DialogTitle></DialogHeader>
+          {deleteCardConfirm && <div className="space-y-4">
+            <p className="text-slate-300 text-center">Voulez-vous vraiment supprimer le terrain <span className="text-emerald-400 font-semibold">{getArpenteurInitials(deleteCardConfirm.dossier.arpenteur_geometre)}{deleteCardConfirm.dossier.numero_dossier}</span> ?</p>
+            <p className="text-slate-400 text-center text-sm">Cette action est irréversible.</p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button onClick={() => setDeleteCardConfirm(null)} className="border border-slate-500 text-slate-300 bg-transparent">Annuler</Button>
+              <Button onClick={() => handleDeleteCard(deleteCardConfirm)} className="bg-gradient-to-r from-red-500 to-red-700 border-none">Supprimer</Button>
             </div>
           </div>}
         </DialogContent>
