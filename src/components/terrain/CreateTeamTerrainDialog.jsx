@@ -126,19 +126,22 @@ export default function CreateTeamTerrainDialog({
               {!chefOpen ? null : (
                 <CardContent className="pt-2 pb-2 space-y-1">
                   {chefs.length > 0 ? (
-                    chefs.map(chef => (
-                      <div key={chef.id} className="flex items-center gap-2 p-1.5 hover:bg-blue-500/10 rounded text-xs">
-                        <Checkbox
-                          id={`chef-${chef.id}`}
-                          checked={selectedChefs.includes(chef.id)}
-                          onCheckedChange={() => toggleUser(chef.id, "chefs")}
-                          className="border-blue-400"
-                        />
-                        <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
-                           {chef.prenom} {chef.nom}
-                         </Label>
-                      </div>
-                    ))
+                    chefs.map(chef => {
+                      const isSelected = selectedChefs.includes(chef.id);
+                      return (
+                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
+                          <Checkbox
+                            id={`chef-${chef.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => toggleUser(chef.id, "chefs")}
+                            className="border-blue-400"
+                          />
+                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
+                             {chef.prenom} {chef.nom}
+                           </Label>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                   )}
@@ -165,19 +168,22 @@ export default function CreateTeamTerrainDialog({
               {!techOpen ? null : (
                 <CardContent className="pt-2 pb-2 space-y-1">
                   {techs.length > 0 ? (
-                    techs.map(tech => (
-                      <div key={tech.id} className="flex items-center gap-2 p-1.5 hover:bg-cyan-500/10 rounded text-xs">
-                        <Checkbox
-                          id={`tech-${tech.id}`}
-                          checked={selectedTechs.includes(tech.id)}
-                          onCheckedChange={() => toggleUser(tech.id, "techs")}
-                          className="border-cyan-400"
-                        />
-                        <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
-                           {tech.prenom} {tech.nom}
-                         </Label>
-                      </div>
-                    ))
+                    techs.map(tech => {
+                      const isSelected = selectedTechs.includes(tech.id);
+                      return (
+                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
+                          <Checkbox
+                            id={`tech-${tech.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => toggleUser(tech.id, "techs")}
+                            className="border-cyan-400"
+                          />
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
+                             {tech.prenom} {tech.nom}
+                           </Label>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                   )}
@@ -204,19 +210,22 @@ export default function CreateTeamTerrainDialog({
               {!vehiculeOpen ? null : (
                 <CardContent className="pt-2 pb-2 space-y-1">
                   {availableVehicules.length > 0 ? (
-                    availableVehicules.map(veh => (
-                      <div key={veh.id} className="flex items-center gap-2 p-1.5 hover:bg-purple-500/10 rounded text-xs">
-                        <Checkbox
-                          id={`veh-${veh.id}`}
-                          checked={selectedVehicules.includes(veh.id)}
-                          onCheckedChange={() => toggleVehicule(veh.id)}
-                          className="border-purple-400"
-                        />
-                        <Label htmlFor={`veh-${veh.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {veh.nom}
-                        </Label>
-                      </div>
-                    ))
+                    availableVehicules.map(veh => {
+                      const isSelected = selectedVehicules.includes(veh.id);
+                      return (
+                        <div key={veh.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-purple-500/40 border border-purple-400 ring-1 ring-purple-400' : 'hover:bg-purple-500/20 bg-slate-700/20'}`}>
+                          <Checkbox
+                            id={`veh-${veh.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => toggleVehicule(veh.id)}
+                            className="border-purple-400"
+                          />
+                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-purple-100' : 'text-slate-200'}`}>
+                            {veh.nom}
+                          </Label>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                   )}
@@ -243,19 +252,22 @@ export default function CreateTeamTerrainDialog({
               {!equipementOpen ? null : (
                 <CardContent className="pt-2 pb-2 space-y-1">
                   {availableEquipements.length > 0 ? (
-                    availableEquipements.map(eq => (
-                      <div key={eq.id} className="flex items-center gap-2 p-1.5 hover:bg-orange-500/10 rounded text-xs">
-                        <Checkbox
-                          id={`eq-${eq.id}`}
-                          checked={selectedEquipements.includes(eq.id)}
-                          onCheckedChange={() => toggleEquipement(eq.id)}
-                          className="border-orange-400"
-                        />
-                        <Label htmlFor={`eq-${eq.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {eq.nom}
-                        </Label>
-                      </div>
-                    ))
+                    availableEquipements.map(eq => {
+                      const isSelected = selectedEquipements.includes(eq.id);
+                      return (
+                        <div key={eq.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isSelected ? 'bg-orange-500/40 border border-orange-400 ring-1 ring-orange-400' : 'hover:bg-orange-500/20 bg-slate-700/20'}`}>
+                          <Checkbox
+                            id={`eq-${eq.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => toggleEquipement(eq.id)}
+                            className="border-orange-400"
+                          />
+                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 cursor-pointer font-medium ${isSelected ? 'text-orange-100' : 'text-slate-200'}`}>
+                            {eq.nom}
+                          </Label>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                   )}
