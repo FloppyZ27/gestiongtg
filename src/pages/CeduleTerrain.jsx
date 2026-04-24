@@ -89,27 +89,20 @@ export default function CeduleTerrain() {
     initialData: [],
   });
 
-  // Utiliser les utilisateurs actifs avec les postes technicien
-  // Les champs custom sont parfois dans u.data, parfois aplatis directement sur u
-  const getPoste = (u) => u.poste || u.data?.poste || '';
-  const getPlaceAffaire = (u) => u.place_affaire || u.data?.place_affaire || '';
-
+  // Utiliser les utilisateurs actifs avec le poste "Technicien Terrain"
   const techniciensTerrain = users
-    .filter(u => getPoste(u) === "Technicien Terrain" || getPoste(u) === "Technicien Terrain (Chef)")
+    .filter(u => u.poste === "Technicien Terrain")
     .map(u => {
       const parts = (u.full_name || '').split(' ');
       return {
         ...u,
-        poste: getPoste(u),
-        place_affaire: getPlaceAffaire(u),
         prenom: parts[0] || '',
         nom: parts.slice(1).join(' ') || ''
       };
     });
 
-  // Filtrer les techniciens par place d'affaire selon l'onglet actif
-  const activePlaceLabel = activePlace === "alma" ? "Alma" : "Saguenay";
-  const techniciensByPlace = techniciensTerrain.filter(u => !u.place_affaire || u.place_affaire === activePlaceLabel);
+  // Filtrer les ressources par place d'affaire
+  const techniciensByPlace = techniciensTerrain;
   const vehiculesByPlace = vehicules;
   const equipementsByPlace = equipements;
 
@@ -288,7 +281,6 @@ export default function CeduleTerrain() {
         <PlanningCalendar 
               dossiers={dossiers}
               techniciens={techniciensByPlace}
-              allTechniciens={techniciensTerrain}
               vehicules={vehiculesByPlace}
               equipements={equipementsByPlace}
               clients={clients}
