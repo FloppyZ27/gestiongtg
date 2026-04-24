@@ -78,7 +78,7 @@ button:focus-visible {
 
 @layer base {
   :root {
-    --background: 222 28% 7%;
+    --background: 220 13% 13%;
     --foreground: 210 14% 95%;
     --card: 220 24% 11%;
     --card-foreground: 210 14% 95%;
@@ -113,7 +113,7 @@ button:focus-visible {
     --sidebar-ring: 207 85% 55%;
   }
   .dark {
-    --background: 222 28% 7%;
+    --background: 220 13% 13%;
     --foreground: 210 14% 95%;
     --card: 220 24% 11%;
     --card-foreground: 210 14% 95%;
