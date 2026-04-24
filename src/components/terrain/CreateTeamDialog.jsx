@@ -13,8 +13,7 @@ export default function CreateTeamDialog({
   onClose,
   onCreateTeam,
   dateStr,
-  techniciens,
-  allTechniciens,
+  users,
   vehicules,
   equipements,
   equipes,
@@ -35,8 +34,9 @@ export default function CreateTeamDialog({
   const usedVehIds = usedResources?.vehicules || [];
   const usedEqIds = usedResources?.equipements || [];
 
-  // Tous les techniciens (ma place + autres places)
-  const allTechs = allTechniciens || techniciens;
+  // Filtrer users par poste
+  const allChefs = users?.filter(u => u.poste === "Technicien Terrain (Chef)") || [];
+  const allTechs = users?.filter(u => u.poste === "Technicien Terrain") || [];
 
   // Trouver quelle équipe utilise une ressource
   const getTeamForResource = (resourceId, resourceType) => {
@@ -46,21 +46,22 @@ export default function CreateTeamDialog({
     const match = equipe.nom.match(/Équipe (\d+)/);
     const teamNumber = match ? match[1] : '';
     if (equipe.techniciens?.length > 0) {
-      const initials = equipe.techniciens.map(techId => {
-        const tech = allTechs.find(t => t.id === techId);
-        return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+      const allUsers = [...allChefs, ...allTechs];
+      const initials = equipe.techniciens.map(userId => {
+        const user = allUsers.find(u => u.id === userId);
+        return user ? user.prenom.charAt(0) + user.nom.charAt(0) : '';
       }).filter(n => n).join('/');
       return teamNumber ? `Équipe ${teamNumber} - ${initials}` : initials;
     }
     return equipe.nom;
   };
 
-  // Vérifier si un technicien est déjà cédulé dans l'autre place d'affaire ce jour-là
-  const isAlreadyScheduledOtherPlace = (techId) => {
+  // Vérifier si un user est déjà cédulé dans l'autre place d'affaire ce jour-là
+  const isAlreadyScheduledOtherPlace = (userId) => {
     const dayEquipes = equipes[dateStr] || [];
     for (const eq of dayEquipes) {
       if (eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
-        if (eq.techniciens?.includes(techId)) return eq.place_affaire;
+        if (eq.techniciens?.includes(userId)) return eq.place_affaire;
       }
     }
     return null;
@@ -77,34 +78,36 @@ export default function CreateTeamDialog({
     return null;
   };
 
-  // Techniciens de ma place d'affaire (avec fallback si placeAffaire non défini)
+  // Utilisateurs de ma place d'affaire
   const targetPlace = placeAffaire === 'alma' || placeAffaire === 'Alma' ? 'Alma' : placeAffaire === 'saguenay' || placeAffaire === 'Saguenay' ? 'Saguenay' : null;
+  const myPlaceChefs = targetPlace 
+    ? allChefs.filter(u => u.place_affaire === targetPlace)
+    : allChefs;
   const myPlaceTechs = targetPlace 
-    ? allTechs.filter(t => t.place_affaire === targetPlace)
-    : allTechs; // Si pas de placeAffaire, afficher tous
-  // Techniciens de l'autre place d'affaire (empruntables si pas déjà cédulés là-bas)
+    ? allTechs.filter(u => u.place_affaire === targetPlace)
+    : allTechs;
+  // Utilisateurs de l'autre place d'affaire
+  const otherPlaceChefs = targetPlace
+    ? allChefs.filter(u => u.place_affaire && u.place_affaire !== targetPlace)
+    : [];
   const otherPlaceTechs = targetPlace
-    ? allTechs.filter(t => t.place_affaire && t.place_affaire !== targetPlace)
+    ? allTechs.filter(u => u.place_affaire && u.place_affaire !== targetPlace)
     : [];
 
-  const myChefs = myPlaceTechs.filter(t => t.poste === "Technicien Terrain (Chef)");
-  const myTechsRegular = myPlaceTechs.filter(t => t.poste === "Technicien Terrain");
-  const otherChefs = otherPlaceTechs.filter(t => t.poste === "Technicien Terrain (Chef)");
-  const otherTechsRegular = otherPlaceTechs.filter(t => t.poste === "Technicien Terrain");
-
-  const availableChefs = myChefs.filter(t => !usedTechIds.includes(t.id));
-  const availableTechsRegular = myTechsRegular.filter(t => !usedTechIds.includes(t.id));
+  const availableChefs = myPlaceChefs.filter(u => !usedTechIds.includes(u.id));
+  const availableTechsRegular = myPlaceTechs.filter(u => !usedTechIds.includes(u.id));
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
-  const generateTeamName = (techs) => {
+  const generateTeamName = (userIds) => {
     const teamNumber = (equipes[dateStr]?.length || 0) + 1;
-    if (techs.length === 0) {
+    if (userIds.length === 0) {
       return `Équipe ${teamNumber}`;
     }
-    const initials = techs.map(techId => {
-      const tech = allTechs.find(t => t.id === techId);
-      return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+    const allUsersMap = [...allChefs, ...allTechs];
+    const initials = userIds.map(userId => {
+      const user = allUsersMap.find(u => u.id === userId);
+      return user ? user.prenom.charAt(0) + user.nom.charAt(0) : '';
     }).filter(n => n).join('/');
     return `Équipe ${teamNumber} - ${initials}`;
   };
@@ -184,35 +187,35 @@ export default function CreateTeamDialog({
                 <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-48 overflow-y-auto space-y-1.5">
                     {/* Chefs de ma place */}
-                    {myChefs.map(tech => {
-                      const isUsedToday = usedTechIds.includes(tech.id);
+                    {myPlaceChefs.map(user => {
+                      const isUsedToday = usedTechIds.includes(user.id);
                       const isAvailable = !isUsedToday;
-                      const isSelected = selectedTechniciens.includes(tech.id);
-                      const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
+                      const isSelected = selectedTechniciens.includes(user.id);
+                      const assignedTeam = isUsedToday ? getTeamForResource(user.id, 'techniciens') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
-                          onClick={() => isAvailable && toggleTechnicien(tech.id)}>
-                          <Checkbox id={`chef-${tech.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
-                          <Label htmlFor={`chef-${tech.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
+                        <div key={user.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleTechnicien(user.id)}>
+                          <Checkbox id={`chef-${user.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`chef-${user.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {user.prenom} {user.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
                         </div>
                       );
                     })}
                     {/* Chefs de l'autre place (empruntables uniquement via bouton) */}
-                    {otherChefs.map(tech => {
-                      const alreadyScheduled = isAlreadyScheduledOtherPlace(tech.id);
-                      const isSelected = selectedTechniciens.includes(tech.id);
+                    {otherPlaceChefs.map(user => {
+                      const alreadyScheduled = isAlreadyScheduledOtherPlace(user.id);
+                      const isSelected = selectedTechniciens.includes(user.id);
                       const canBorrow = !alreadyScheduled;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
-                          <Checkbox id={`chef-${tech.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
+                        <div key={user.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
+                          <Checkbox id={`chef-${user.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
                           <Label className="flex-1 text-slate-500 text-xs cursor-default">
-                            {tech.prenom} {tech.nom}
+                            {user.prenom} {user.nom}
                           </Label>
-                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{tech.place_affaire}</Badge>
+                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{user.place_affaire}</Badge>
                           {canBorrow ? (
-                            <Button type="button" size="sm" onClick={() => toggleTechnicien(tech.id)}
+                            <Button type="button" size="sm" onClick={() => toggleTechnicien(user.id)}
                               className={`h-5 px-2 text-[10px] ${isSelected ? 'bg-amber-600 hover:bg-amber-700' : 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/40'}`}>
                               {isSelected ? 'Annuler' : 'Emprunter'}
                             </Button>
@@ -247,35 +250,35 @@ export default function CreateTeamDialog({
                 <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-48 overflow-y-auto space-y-1.5">
                     {/* Techniciens de ma place */}
-                    {myTechsRegular.map(tech => {
-                      const isUsedToday = usedTechIds.includes(tech.id);
+                    {myPlaceTechs.map(user => {
+                      const isUsedToday = usedTechIds.includes(user.id);
                       const isAvailable = !isUsedToday;
-                      const isSelected = selectedTechniciens.includes(tech.id);
-                      const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
+                      const isSelected = selectedTechniciens.includes(user.id);
+                      const assignedTeam = isUsedToday ? getTeamForResource(user.id, 'techniciens') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
-                          onClick={() => isAvailable && toggleTechnicien(tech.id)}>
-                          <Checkbox id={`tech-${tech.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
+                        <div key={user.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleTechnicien(user.id)}>
+                          <Checkbox id={`tech-${user.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`tech-${user.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {user.prenom} {user.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
                         </div>
                       );
                     })}
                     {/* Techniciens de l'autre place (empruntables uniquement via bouton) */}
-                    {otherTechsRegular.map(tech => {
-                      const alreadyScheduled = isAlreadyScheduledOtherPlace(tech.id);
-                      const isSelected = selectedTechniciens.includes(tech.id);
+                    {otherPlaceTechs.map(user => {
+                      const alreadyScheduled = isAlreadyScheduledOtherPlace(user.id);
+                      const isSelected = selectedTechniciens.includes(user.id);
                       const canBorrow = !alreadyScheduled;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
-                          <Checkbox id={`tech-${tech.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
+                        <div key={user.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
+                          <Checkbox id={`tech-${user.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
                           <Label className="flex-1 text-slate-500 text-xs cursor-default">
-                            {tech.prenom} {tech.nom}
+                            {user.prenom} {user.nom}
                           </Label>
-                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{tech.place_affaire}</Badge>
+                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{user.place_affaire}</Badge>
                           {canBorrow ? (
-                            <Button type="button" size="sm" onClick={() => toggleTechnicien(tech.id)}
+                            <Button type="button" size="sm" onClick={() => toggleTechnicien(user.id)}
                               className={`h-5 px-2 text-[10px] ${isSelected ? 'bg-amber-600 hover:bg-amber-700' : 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/40'}`}>
                               {isSelected ? 'Annuler' : 'Emprunter'}
                             </Button>
