@@ -17,7 +17,6 @@ import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMo
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
 import TerrainVerificationCard from "./TerrainVerificationCard";
-import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
 import MultiRouteMap from "./MultiRouteMap";
 import { useKanbanDrag } from "@/hooks/useKanbanDrag";
@@ -1584,7 +1583,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
       <EditDossierDialog isOpen={isEditingDialogOpen} onClose={() => { setIsEditingDialogOpen(false); setEditingDossier(null); }} dossier={editingDossier} onSuccess={() => {}} clients={clients} users={users} />
 
-      <CreateTeamDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} techniciens={techniciens} allTechniciens={allTechniciens || techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }} placeAffaire={placeAffaire} />
+
 
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={techniciens} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
