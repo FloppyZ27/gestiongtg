@@ -3,8 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users, Truck, Wrench, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Users, Truck, Wrench, X, ChevronDown } from "lucide-react";
 
 export default function CreateTeamTerrainDialog({
   isOpen,
@@ -19,6 +19,10 @@ export default function CreateTeamTerrainDialog({
   const [selectedTechs, setSelectedTechs] = useState([]);
   const [selectedVehicules, setSelectedVehicules] = useState([]);
   const [selectedEquipements, setSelectedEquipements] = useState([]);
+  const [chefOpen, setChefOpen] = useState(true);
+  const [techOpen, setTechOpen] = useState(true);
+  const [vehiculeOpen, setVehiculeOpen] = useState(false);
+  const [equipementOpen, setEquipementOpen] = useState(false);
 
   // Filtrer les utilisateurs par poste et statut
   const chefs = users?.filter(u => 
@@ -91,24 +95,24 @@ export default function CreateTeamTerrainDialog({
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) resetForm();
     }}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col gap-0 p-0">
-        <DialogHeader className="p-6 border-b border-slate-800">
-          <DialogTitle className="text-xl">Création d'une équipe terrain</DialogTitle>
+      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 py-4 border-b border-slate-800">
+          <DialogTitle className="text-lg">Création équipe terrain</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-hidden">
-          <div className="space-y-4 p-6">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-2 p-4">
             {/* Section Technicien Chef */}
-            <div className="rounded-lg overflow-hidden border border-blue-800/40">
-              <div className="bg-blue-600 px-4 py-3 flex items-center gap-3">
-                <Users className="w-5 h-5 text-white" />
-                <h3 className="text-white font-bold">Technicien Chef</h3>
-                <span className="text-blue-100 text-sm ml-auto">({chefs.length} disponibles)</span>
-              </div>
-              <div className="bg-blue-950/20 p-4 space-y-2 max-h-48 overflow-y-auto">
+            <Collapsible open={chefOpen} onOpenChange={setChefOpen} className="border border-blue-800/40 rounded overflow-hidden">
+              <CollapsibleTrigger className="w-full bg-blue-600 hover:bg-blue-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
+                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: chefOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+                <Users className="w-4 h-4" />
+                <span>Chef ({selectedChefs.length}/{chefs.length})</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="bg-blue-950/30 p-2 space-y-1">
                 {chefs.length > 0 ? (
                   chefs.map(chef => (
-                    <div key={chef.id} className="flex items-center gap-3 p-2 hover:bg-blue-500/10 rounded">
+                    <div key={chef.id} className="flex items-center gap-2 p-1.5 hover:bg-blue-500/10 rounded text-xs">
                       <Checkbox
                         id={`chef-${chef.id}`}
                         checked={selectedChefs.includes(chef.id)}
@@ -121,22 +125,22 @@ export default function CreateTeamTerrainDialog({
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 text-sm py-2">Aucun technicien chef disponible</p>
+                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                 )}
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Section Technicien */}
-            <div className="rounded-lg overflow-hidden border border-cyan-800/40">
-              <div className="bg-cyan-600 px-4 py-3 flex items-center gap-3">
-                <Users className="w-5 h-5 text-white" />
-                <h3 className="text-white font-bold">Technicien</h3>
-                <span className="text-cyan-100 text-sm ml-auto">({techs.length} disponibles)</span>
-              </div>
-              <div className="bg-cyan-950/20 p-4 space-y-2 max-h-48 overflow-y-auto">
+            <Collapsible open={techOpen} onOpenChange={setTechOpen} className="border border-cyan-800/40 rounded overflow-hidden">
+              <CollapsibleTrigger className="w-full bg-cyan-600 hover:bg-cyan-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
+                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: techOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+                <Users className="w-4 h-4" />
+                <span>Technicien ({selectedTechs.length}/{techs.length})</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="bg-cyan-950/30 p-2 space-y-1">
                 {techs.length > 0 ? (
                   techs.map(tech => (
-                    <div key={tech.id} className="flex items-center gap-3 p-2 hover:bg-cyan-500/10 rounded">
+                    <div key={tech.id} className="flex items-center gap-2 p-1.5 hover:bg-cyan-500/10 rounded text-xs">
                       <Checkbox
                         id={`tech-${tech.id}`}
                         checked={selectedTechs.includes(tech.id)}
@@ -149,22 +153,22 @@ export default function CreateTeamTerrainDialog({
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 text-sm py-2">Aucun technicien disponible</p>
+                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                 )}
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Section Véhicules */}
-            <div className="rounded-lg overflow-hidden border border-purple-800/40">
-              <div className="bg-purple-600 px-4 py-3 flex items-center gap-3">
-                <Truck className="w-5 h-5 text-white" />
-                <h3 className="text-white font-bold">Véhicules</h3>
-                <span className="text-purple-100 text-sm ml-auto">({availableVehicules.length} disponibles)</span>
-              </div>
-              <div className="bg-purple-950/20 p-4 space-y-2 max-h-48 overflow-y-auto">
+            <Collapsible open={vehiculeOpen} onOpenChange={setVehiculeOpen} className="border border-purple-800/40 rounded overflow-hidden">
+              <CollapsibleTrigger className="w-full bg-purple-600 hover:bg-purple-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
+                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: vehiculeOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+                <Truck className="w-4 h-4" />
+                <span>Véhicules ({selectedVehicules.length}/{availableVehicules.length})</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="bg-purple-950/30 p-2 space-y-1">
                 {availableVehicules.length > 0 ? (
                   availableVehicules.map(veh => (
-                    <div key={veh.id} className="flex items-center gap-3 p-2 hover:bg-purple-500/10 rounded">
+                    <div key={veh.id} className="flex items-center gap-2 p-1.5 hover:bg-purple-500/10 rounded text-xs">
                       <Checkbox
                         id={`veh-${veh.id}`}
                         checked={selectedVehicules.includes(veh.id)}
@@ -177,22 +181,22 @@ export default function CreateTeamTerrainDialog({
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 text-sm py-2">Aucun véhicule disponible</p>
+                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                 )}
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Section Équipements */}
-            <div className="rounded-lg overflow-hidden border border-orange-800/40">
-              <div className="bg-orange-600 px-4 py-3 flex items-center gap-3">
-                <Wrench className="w-5 h-5 text-white" />
-                <h3 className="text-white font-bold">Équipements</h3>
-                <span className="text-orange-100 text-sm ml-auto">({availableEquipements.length} disponibles)</span>
-              </div>
-              <div className="bg-orange-950/20 p-4 space-y-2 max-h-48 overflow-y-auto">
+            <Collapsible open={equipementOpen} onOpenChange={setEquipementOpen} className="border border-orange-800/40 rounded overflow-hidden">
+              <CollapsibleTrigger className="w-full bg-orange-600 hover:bg-orange-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
+                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: equipementOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+                <Wrench className="w-4 h-4" />
+                <span>Équipements ({selectedEquipements.length}/{availableEquipements.length})</span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="bg-orange-950/30 p-2 space-y-1">
                 {availableEquipements.length > 0 ? (
                   availableEquipements.map(eq => (
-                    <div key={eq.id} className="flex items-center gap-3 p-2 hover:bg-orange-500/10 rounded">
+                    <div key={eq.id} className="flex items-center gap-2 p-1.5 hover:bg-orange-500/10 rounded text-xs">
                       <Checkbox
                         id={`eq-${eq.id}`}
                         checked={selectedEquipements.includes(eq.id)}
@@ -205,27 +209,29 @@ export default function CreateTeamTerrainDialog({
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 text-sm py-2">Aucun équipement disponible</p>
+                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
                 )}
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
-        </ScrollArea>
+        </div>
 
-        <div className="border-t border-slate-800 p-6 flex justify-end gap-3">
+        <div className="border-t border-slate-800 px-4 py-3 flex justify-end gap-2">
           <Button
             variant="outline"
             onClick={resetForm}
-            className="border-red-500 text-red-400 hover:bg-red-500/10"
+            size="sm"
+            className="border-red-500 text-red-400 hover:bg-red-500/10 text-xs"
           >
-            <X className="w-4 h-4 mr-2" />
+            <X className="w-3 h-3 mr-1" />
             Annuler
           </Button>
           <Button
             onClick={handleCreateTeam}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
+            size="sm"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-xs"
           >
-            Créer l'équipe
+            Créer
           </Button>
         </div>
       </DialogContent>
