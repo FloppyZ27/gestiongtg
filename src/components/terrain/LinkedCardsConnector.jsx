@@ -27,7 +27,7 @@ export default function LinkedCardsConnector({ linkedGroups, terrainCards }) {
   }, [linkedGroups]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[60]">
+    <div className="fixed inset-0 pointer-events-none z-[200]">
       {/* Lignes de connexion avec symboles */}
       {connections.map((conn) => (
         <ConnectorLine
@@ -112,7 +112,7 @@ function ConnectorLine({ card1Id, card2Id }) {
             left: `${positions.midX}px`,
             top: `${positions.midY}px`,
             transform: `translate(-50%, -50%)`,
-            zIndex: 70,
+            zIndex: 200,
           }}
         >
           <div className="bg-gradient-to-r from-violet-500 to-violet-600 rounded-full p-1.5 border-2 border-violet-400 shadow-lg shadow-violet-500/50">
