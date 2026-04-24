@@ -183,12 +183,14 @@ export default function CreateTeamDialog({
                     {myChefs.map(tech => {
                       const isUsedToday = usedTechIds.includes(tech.id);
                       const isAvailable = !isUsedToday;
+                      const isSelected = selectedTechniciens.includes(tech.id);
                       const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox id={`chef-${tech.id}`} checked={selectedTechniciens.includes(tech.id)} onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)} disabled={!isAvailable} className="border-slate-500" />
-                          <Label htmlFor={`chef-${tech.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500">({assignedTeam})</span>}
+                        <div key={tech.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleTechnicien(tech.id)}>
+                          <Checkbox id={`chef-${tech.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`chef-${tech.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
                         </div>
                       );
@@ -244,12 +246,14 @@ export default function CreateTeamDialog({
                     {myTechsRegular.map(tech => {
                       const isUsedToday = usedTechIds.includes(tech.id);
                       const isAvailable = !isUsedToday;
+                      const isSelected = selectedTechniciens.includes(tech.id);
                       const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox id={`tech-${tech.id}`} checked={selectedTechniciens.includes(tech.id)} onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)} disabled={!isAvailable} className="border-slate-500" />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500">({assignedTeam})</span>}
+                        <div key={tech.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-blue-500/20 border border-blue-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleTechnicien(tech.id)}>
+                          <Checkbox id={`tech-${tech.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-blue-400 bg-blue-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {tech.prenom} {tech.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
                         </div>
                       );
@@ -305,12 +309,14 @@ export default function CreateTeamDialog({
                       const isUsedToday = usedVehIds.includes(veh.id);
                       const otherPlace = isResourceInOtherPlace(veh.id, 'vehicules');
                       const isAvailable = !isUsedToday && !otherPlace;
+                      const isSelected = selectedVehicules.includes(veh.id);
                       const assignedTeam = isUsedToday ? getTeamForResource(veh.id, 'vehicules') : null;
                       return (
-                        <div key={veh.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox id={`veh-${veh.id}`} checked={selectedVehicules.includes(veh.id)} onCheckedChange={() => isAvailable && toggleVehicule(veh.id)} disabled={!isAvailable} className="border-slate-500" />
-                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
+                        <div key={veh.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-purple-500/20 border border-purple-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleVehicule(veh.id)}>
+                          <Checkbox id={`veh-${veh.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-purple-400 bg-purple-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                           </Label>
                         </div>
                       );
@@ -343,12 +349,14 @@ export default function CreateTeamDialog({
                       const isUsedToday = usedEqIds.includes(eq.id);
                       const otherPlace = isResourceInOtherPlace(eq.id, 'equipements');
                       const isAvailable = !isUsedToday && !otherPlace;
+                      const isSelected = selectedEquipements.includes(eq.id);
                       const assignedTeam = isUsedToday ? getTeamForResource(eq.id, 'equipements') : null;
                       return (
-                        <div key={eq.id} className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}>
-                          <Checkbox id={`eq-${eq.id}`} checked={selectedEquipements.includes(eq.id)} onCheckedChange={() => isAvailable && toggleEquipement(eq.id)} disabled={!isAvailable} className="border-slate-500" />
-                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}>
-                            {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
+                        <div key={eq.id} className={`flex items-center gap-2 rounded-md px-2 py-1 transition-colors ${isSelected ? 'bg-orange-500/20 border border-orange-400/40' : ''} ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:bg-slate-700/40'}`}
+                          onClick={() => isAvailable && toggleEquipement(eq.id)}>
+                          <Checkbox id={`eq-${eq.id}`} checked={isSelected} disabled={!isAvailable} className={`border-2 ${isSelected ? 'border-orange-400 bg-orange-500' : 'border-slate-500'}`} />
+                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
+                            {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                           </Label>
                         </div>
                       );
