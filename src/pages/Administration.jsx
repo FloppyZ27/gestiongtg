@@ -48,24 +48,21 @@ export default function Administration() {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+    staleTime: 60000,
   });
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
     initialData: [],
-  });
-
-  const { data: actionLogs = [] } = useQuery({
-    queryKey: ['actionLogs'],
-    queryFn: () => base44.entities.ActionLog.list('-created_date', 100),
-    initialData: [],
+    staleTime: 60000,
   });
 
   const { data: templates = [] } = useQuery({
     queryKey: ['permissionsTemplates'],
     queryFn: () => base44.entities.PermissionsTemplate.list(),
     initialData: [],
+    staleTime: 60000,
   });
 
   const updateUserMutation = useMutation({
