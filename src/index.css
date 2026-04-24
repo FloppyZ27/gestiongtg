@@ -78,11 +78,11 @@ button:focus-visible {
 
 @layer base {
   :root {
-    --background: 210 17% 9.8%;
+    --background: 222 28% 7%;
     --foreground: 210 14% 95%;
-    --card: 210 16% 13%;
+    --card: 220 24% 11%;
     --card-foreground: 210 14% 95%;
-    --popover: 210 16% 13%;
+    --popover: 220 24% 11%;
     --popover-foreground: 210 14% 95%;
     --primary: 207 85% 55%;
     --primary-foreground: 210 17% 9.8%;
@@ -103,21 +103,21 @@ button:focus-visible {
     --chart-4: 30 85% 60%;
     --chart-5: 290 70% 58%;
     --radius: 0.625rem;
-    --sidebar-background: 210 16% 12%;
+    --sidebar-background: 222 30% 9%;
     --sidebar-foreground: 210 14% 95%;
     --sidebar-primary: 207 85% 55%;
-    --sidebar-primary-foreground: 210 17% 9.8%;
-    --sidebar-accent: 210 12% 28%;
+    --sidebar-primary-foreground: 222 28% 7%;
+    --sidebar-accent: 220 20% 18%;
     --sidebar-accent-foreground: 210 14% 95%;
-    --sidebar-border: 210 10% 19%;
+    --sidebar-border: 220 18% 16%;
     --sidebar-ring: 207 85% 55%;
   }
   .dark {
-    --background: 210 17% 9.8%;
+    --background: 222 28% 7%;
     --foreground: 210 14% 95%;
-    --card: 210 16% 13%;
+    --card: 220 24% 11%;
     --card-foreground: 210 14% 95%;
-    --popover: 210 16% 13%;
+    --popover: 220 24% 11%;
     --popover-foreground: 210 14% 95%;
     --primary: 207 85% 55%;
     --primary-foreground: 210 17% 9.8%;
@@ -137,13 +137,13 @@ button:focus-visible {
     --chart-3: 172 76% 48%;
     --chart-4: 30 85% 60%;
     --chart-5: 290 70% 58%;
-    --sidebar-background: 210 16% 12%;
+    --sidebar-background: 222 30% 9%;
     --sidebar-foreground: 210 14% 95%;
     --sidebar-primary: 207 85% 55%;
-    --sidebar-primary-foreground: 210 17% 9.8%;
-    --sidebar-accent: 210 12% 28%;
+    --sidebar-primary-foreground: 222 28% 7%;
+    --sidebar-accent: 220 20% 18%;
     --sidebar-accent-foreground: 210 14% 95%;
-    --sidebar-border: 210 10% 19%;
+    --sidebar-border: 220 18% 16%;
     --sidebar-ring: 207 85% 55%;
   }
 }
