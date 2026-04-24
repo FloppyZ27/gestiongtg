@@ -3,8 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Users, Truck, Wrench, X, ChevronDown } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Truck, Wrench, X, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function CreateTeamTerrainDialog({
   isOpen,
@@ -100,119 +100,163 @@ export default function CreateTeamTerrainDialog({
           <DialogTitle className="text-lg">Création équipe terrain</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="space-y-2 p-4">
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-3">
             {/* Section Technicien Chef */}
-            <Collapsible open={chefOpen} onOpenChange={setChefOpen} className="border border-blue-800/40 rounded overflow-hidden">
-              <CollapsibleTrigger className="w-full bg-blue-600 hover:bg-blue-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
-                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: chefOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
-                <Users className="w-4 h-4" />
-                <span>Chef ({selectedChefs.length}/{chefs.length})</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="bg-blue-950/30 p-2 space-y-1">
-                {chefs.length > 0 ? (
-                  chefs.map(chef => (
-                    <div key={chef.id} className="flex items-center gap-2 p-1.5 hover:bg-blue-500/10 rounded text-xs">
-                      <Checkbox
-                        id={`chef-${chef.id}`}
-                        checked={selectedChefs.includes(chef.id)}
-                        onCheckedChange={() => toggleUser(chef.id, "chefs")}
-                        className="border-blue-400"
-                      />
-                      <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
-                        {chef.prenom} {chef.nom}
-                      </Label>
+            <Card className="border-blue-700 bg-slate-800/30">
+              <CardHeader 
+                className="cursor-pointer hover:bg-blue-900/40 transition-colors py-2 px-4 bg-blue-900/20"
+                onClick={() => setChefOpen(!chefOpen)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                      <Users className="w-3 h-3 text-blue-400" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+                    <CardTitle className="text-blue-300 text-sm">Chef ({selectedChefs.length}/{chefs.length})</CardTitle>
+                  </div>
+                  {chefOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </div>
+              </CardHeader>
+              {!chefOpen ? null : (
+                <CardContent className="pt-2 pb-2 space-y-1">
+                  {chefs.length > 0 ? (
+                    chefs.map(chef => (
+                      <div key={chef.id} className="flex items-center gap-2 p-1.5 hover:bg-blue-500/10 rounded text-xs">
+                        <Checkbox
+                          id={`chef-${chef.id}`}
+                          checked={selectedChefs.includes(chef.id)}
+                          onCheckedChange={() => toggleUser(chef.id, "chefs")}
+                          className="border-blue-400"
+                        />
+                        <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
+                          {chef.prenom} {chef.nom}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
+                  )}
+                </CardContent>
+              )}
+            </Card>
 
             {/* Section Technicien */}
-            <Collapsible open={techOpen} onOpenChange={setTechOpen} className="border border-cyan-800/40 rounded overflow-hidden">
-              <CollapsibleTrigger className="w-full bg-cyan-600 hover:bg-cyan-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
-                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: techOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
-                <Users className="w-4 h-4" />
-                <span>Technicien ({selectedTechs.length}/{techs.length})</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="bg-cyan-950/30 p-2 space-y-1">
-                {techs.length > 0 ? (
-                  techs.map(tech => (
-                    <div key={tech.id} className="flex items-center gap-2 p-1.5 hover:bg-cyan-500/10 rounded text-xs">
-                      <Checkbox
-                        id={`tech-${tech.id}`}
-                        checked={selectedTechs.includes(tech.id)}
-                        onCheckedChange={() => toggleUser(tech.id, "techs")}
-                        className="border-cyan-400"
-                      />
-                      <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
-                        {tech.prenom} {tech.nom}
-                      </Label>
+            <Card className="border-cyan-700 bg-slate-800/30">
+              <CardHeader 
+                className="cursor-pointer hover:bg-cyan-900/40 transition-colors py-2 px-4 bg-cyan-900/20"
+                onClick={() => setTechOpen(!techOpen)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                      <Users className="w-3 h-3 text-cyan-400" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+                    <CardTitle className="text-cyan-300 text-sm">Technicien ({selectedTechs.length}/{techs.length})</CardTitle>
+                  </div>
+                  {techOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </div>
+              </CardHeader>
+              {!techOpen ? null : (
+                <CardContent className="pt-2 pb-2 space-y-1">
+                  {techs.length > 0 ? (
+                    techs.map(tech => (
+                      <div key={tech.id} className="flex items-center gap-2 p-1.5 hover:bg-cyan-500/10 rounded text-xs">
+                        <Checkbox
+                          id={`tech-${tech.id}`}
+                          checked={selectedTechs.includes(tech.id)}
+                          onCheckedChange={() => toggleUser(tech.id, "techs")}
+                          className="border-cyan-400"
+                        />
+                        <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
+                          {tech.prenom} {tech.nom}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
+                  )}
+                </CardContent>
+              )}
+            </Card>
 
             {/* Section Véhicules */}
-            <Collapsible open={vehiculeOpen} onOpenChange={setVehiculeOpen} className="border border-purple-800/40 rounded overflow-hidden">
-              <CollapsibleTrigger className="w-full bg-purple-600 hover:bg-purple-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
-                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: vehiculeOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
-                <Truck className="w-4 h-4" />
-                <span>Véhicules ({selectedVehicules.length}/{availableVehicules.length})</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="bg-purple-950/30 p-2 space-y-1">
-                {availableVehicules.length > 0 ? (
-                  availableVehicules.map(veh => (
-                    <div key={veh.id} className="flex items-center gap-2 p-1.5 hover:bg-purple-500/10 rounded text-xs">
-                      <Checkbox
-                        id={`veh-${veh.id}`}
-                        checked={selectedVehicules.includes(veh.id)}
-                        onCheckedChange={() => toggleVehicule(veh.id)}
-                        className="border-purple-400"
-                      />
-                      <Label htmlFor={`veh-${veh.id}`} className="flex-1 cursor-pointer text-slate-200">
-                        {veh.nom}
-                      </Label>
+            <Card className="border-purple-700 bg-slate-800/30">
+              <CardHeader 
+                className="cursor-pointer hover:bg-purple-900/40 transition-colors py-2 px-4 bg-purple-900/20"
+                onClick={() => setVehiculeOpen(!vehiculeOpen)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-purple-500/30 flex items-center justify-center">
+                      <Truck className="w-3 h-3 text-purple-400" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+                    <CardTitle className="text-purple-300 text-sm">Véhicules ({selectedVehicules.length}/{availableVehicules.length})</CardTitle>
+                  </div>
+                  {vehiculeOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </div>
+              </CardHeader>
+              {!vehiculeOpen ? null : (
+                <CardContent className="pt-2 pb-2 space-y-1">
+                  {availableVehicules.length > 0 ? (
+                    availableVehicules.map(veh => (
+                      <div key={veh.id} className="flex items-center gap-2 p-1.5 hover:bg-purple-500/10 rounded text-xs">
+                        <Checkbox
+                          id={`veh-${veh.id}`}
+                          checked={selectedVehicules.includes(veh.id)}
+                          onCheckedChange={() => toggleVehicule(veh.id)}
+                          className="border-purple-400"
+                        />
+                        <Label htmlFor={`veh-${veh.id}`} className="flex-1 cursor-pointer text-slate-200">
+                          {veh.nom}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
+                  )}
+                </CardContent>
+              )}
+            </Card>
 
             {/* Section Équipements */}
-            <Collapsible open={equipementOpen} onOpenChange={setEquipementOpen} className="border border-orange-800/40 rounded overflow-hidden">
-              <CollapsibleTrigger className="w-full bg-orange-600 hover:bg-orange-600/90 px-3 py-2 flex items-center gap-2 text-white text-sm font-semibold">
-                <ChevronDown className="w-4 h-4 transition-transform" style={{ transform: equipementOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
-                <Wrench className="w-4 h-4" />
-                <span>Équipements ({selectedEquipements.length}/{availableEquipements.length})</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="bg-orange-950/30 p-2 space-y-1">
-                {availableEquipements.length > 0 ? (
-                  availableEquipements.map(eq => (
-                    <div key={eq.id} className="flex items-center gap-2 p-1.5 hover:bg-orange-500/10 rounded text-xs">
-                      <Checkbox
-                        id={`eq-${eq.id}`}
-                        checked={selectedEquipements.includes(eq.id)}
-                        onCheckedChange={() => toggleEquipement(eq.id)}
-                        className="border-orange-400"
-                      />
-                      <Label htmlFor={`eq-${eq.id}`} className="flex-1 cursor-pointer text-slate-200">
-                        {eq.nom}
-                      </Label>
+            <Card className="border-orange-700 bg-slate-800/30">
+              <CardHeader 
+                className="cursor-pointer hover:bg-orange-900/40 transition-colors py-2 px-4 bg-orange-900/20"
+                onClick={() => setEquipementOpen(!equipementOpen)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
+                      <Wrench className="w-3 h-3 text-orange-400" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+                    <CardTitle className="text-orange-300 text-sm">Équipements ({selectedEquipements.length}/{availableEquipements.length})</CardTitle>
+                  </div>
+                  {equipementOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </div>
+              </CardHeader>
+              {!equipementOpen ? null : (
+                <CardContent className="pt-2 pb-2 space-y-1">
+                  {availableEquipements.length > 0 ? (
+                    availableEquipements.map(eq => (
+                      <div key={eq.id} className="flex items-center gap-2 p-1.5 hover:bg-orange-500/10 rounded text-xs">
+                        <Checkbox
+                          id={`eq-${eq.id}`}
+                          checked={selectedEquipements.includes(eq.id)}
+                          onCheckedChange={() => toggleEquipement(eq.id)}
+                          className="border-orange-400"
+                        />
+                        <Label htmlFor={`eq-${eq.id}`} className="flex-1 cursor-pointer text-slate-200">
+                          {eq.nom}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 text-xs py-1">Aucun disponible</p>
+                  )}
+                </CardContent>
+              )}
+            </Card>
           </div>
         </div>
 
