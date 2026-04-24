@@ -56,16 +56,7 @@ export default function CreateTeamDialog({
     return equipe.nom;
   };
 
-  // Vérifier si un user est déjà cédulé dans l'autre place d'affaire ce jour-là
-  const isAlreadyScheduledOtherPlace = (userId) => {
-    const dayEquipes = equipes[dateStr] || [];
-    for (const eq of dayEquipes) {
-      if (eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
-        if (eq.techniciens?.includes(userId)) return eq.place_affaire;
-      }
-    }
-    return null;
-  };
+
 
   // Vérifier si une ressource (véhicule/équipement) est dans l'autre place ce jour-là
   const isResourceInOtherPlace = (resourceId, resourceType) => {
@@ -78,24 +69,10 @@ export default function CreateTeamDialog({
     return null;
   };
 
-  // Utilisateurs de ma place d'affaire
-  const targetPlace = placeAffaire === 'alma' || placeAffaire === 'Alma' ? 'Alma' : placeAffaire === 'saguenay' || placeAffaire === 'Saguenay' ? 'Saguenay' : null;
-  const myPlaceChefs = targetPlace 
-    ? allChefs.filter(u => u.place_affaire === targetPlace)
-    : allChefs;
-  const myPlaceTechs = targetPlace 
-    ? allTechs.filter(u => u.place_affaire === targetPlace)
-    : allTechs;
-  // Utilisateurs de l'autre place d'affaire
-  const otherPlaceChefs = targetPlace
-    ? allChefs.filter(u => u.place_affaire && u.place_affaire !== targetPlace)
-    : [];
-  const otherPlaceTechs = targetPlace
-    ? allTechs.filter(u => u.place_affaire && u.place_affaire !== targetPlace)
-    : [];
 
-  const availableChefs = myPlaceChefs.filter(u => !usedTechIds.includes(u.id));
-  const availableTechsRegular = myPlaceTechs.filter(u => !usedTechIds.includes(u.id));
+
+  const availableChefs = allChefs.filter(u => !usedTechIds.includes(u.id));
+  const availableTechsRegular = allTechs.filter(u => !usedTechIds.includes(u.id));
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
@@ -186,8 +163,7 @@ export default function CreateTeamDialog({
               <CollapsibleContent>
                 <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-48 overflow-y-auto space-y-1.5">
-                    {/* Chefs de ma place */}
-                    {myPlaceChefs.map(user => {
+                    {allChefs.map(user => {
                       const isUsedToday = usedTechIds.includes(user.id);
                       const isAvailable = !isUsedToday;
                       const isSelected = selectedTechniciens.includes(user.id);
@@ -199,29 +175,6 @@ export default function CreateTeamDialog({
                           <Label htmlFor={`chef-${user.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
                             {user.prenom} {user.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
-                        </div>
-                      );
-                    })}
-                    {/* Chefs de l'autre place (empruntables uniquement via bouton) */}
-                    {otherPlaceChefs.map(user => {
-                      const alreadyScheduled = isAlreadyScheduledOtherPlace(user.id);
-                      const isSelected = selectedTechniciens.includes(user.id);
-                      const canBorrow = !alreadyScheduled;
-                      return (
-                        <div key={user.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
-                          <Checkbox id={`chef-${user.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
-                          <Label className="flex-1 text-slate-500 text-xs cursor-default">
-                            {user.prenom} {user.nom}
-                          </Label>
-                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{user.place_affaire}</Badge>
-                          {canBorrow ? (
-                            <Button type="button" size="sm" onClick={() => toggleTechnicien(user.id)}
-                              className={`h-5 px-2 text-[10px] ${isSelected ? 'bg-amber-600 hover:bg-amber-700' : 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/40'}`}>
-                              {isSelected ? 'Annuler' : 'Emprunter'}
-                            </Button>
-                          ) : (
-                            <span className="text-[10px] text-red-400">Déjà cédulé</span>
-                          )}
                         </div>
                       );
                     })}
@@ -249,8 +202,7 @@ export default function CreateTeamDialog({
               <CollapsibleContent>
                 <div className="bg-blue-950/20 pt-2 pb-3 px-3">
                   <div className="max-h-48 overflow-y-auto space-y-1.5">
-                    {/* Techniciens de ma place */}
-                    {myPlaceTechs.map(user => {
+                    {allTechs.map(user => {
                       const isUsedToday = usedTechIds.includes(user.id);
                       const isAvailable = !isUsedToday;
                       const isSelected = selectedTechniciens.includes(user.id);
@@ -262,29 +214,6 @@ export default function CreateTeamDialog({
                           <Label htmlFor={`tech-${user.id}`} className={`flex-1 ${isAvailable ? (isSelected ? 'text-white font-semibold cursor-pointer' : 'text-slate-300 cursor-pointer') : 'text-slate-500 cursor-not-allowed'} text-xs`}>
                             {user.prenom} {user.nom} {isUsedToday && assignedTeam && <span className="text-slate-500 font-normal">({assignedTeam})</span>}
                           </Label>
-                        </div>
-                      );
-                    })}
-                    {/* Techniciens de l'autre place (empruntables uniquement via bouton) */}
-                    {otherPlaceTechs.map(user => {
-                      const alreadyScheduled = isAlreadyScheduledOtherPlace(user.id);
-                      const isSelected = selectedTechniciens.includes(user.id);
-                      const canBorrow = !alreadyScheduled;
-                      return (
-                        <div key={user.id} className={`flex items-center gap-2 ${isSelected ? 'opacity-90' : 'opacity-50'}`}>
-                          <Checkbox id={`tech-${user.id}`} checked={isSelected} disabled className="border-slate-600 pointer-events-none" />
-                          <Label className="flex-1 text-slate-500 text-xs cursor-default">
-                            {user.prenom} {user.nom}
-                          </Label>
-                          <Badge className="text-[10px] px-1 py-0 bg-slate-700 text-slate-400 border-slate-600">{user.place_affaire}</Badge>
-                          {canBorrow ? (
-                            <Button type="button" size="sm" onClick={() => toggleTechnicien(user.id)}
-                              className={`h-5 px-2 text-[10px] ${isSelected ? 'bg-amber-600 hover:bg-amber-700' : 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 border border-amber-500/40'}`}>
-                              {isSelected ? 'Annuler' : 'Emprunter'}
-                            </Button>
-                          ) : (
-                            <span className="text-[10px] text-red-400">Déjà cédulé</span>
-                          )}
                         </div>
                       );
                     })}
