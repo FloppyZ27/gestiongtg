@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2 } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2, ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -186,6 +186,17 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
   const [isSaving, setIsSaving] = useState(false);
   const [deleteCardConfirm, setDeleteCardConfirm] = useState(null); // card à supprimer
+  const [expandedCardMenus, setExpandedCardMenus] = useState({}); // { cardId: bool }
+  const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
+
+  const toggleCardStatut = (cardId, key) => {
+    setCardStatuts(prev => {
+      const current = prev[cardId] || {};
+      const next = { ...prev, [cardId]: { ...current, [key]: !current[key] } };
+      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+      return next;
+    });
+  };
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
@@ -1268,8 +1279,39 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <div className="flex items-center gap-1">
             {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
             {assignedUser ? <Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
+            <button
+              onClick={(e) => { e.stopPropagation(); setExpandedCardMenus(prev => ({ ...prev, [card.id]: !prev[card.id] })); }}
+              className="ml-0.5 text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              {expandedCardMenus[card.id] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
           </div>
         </div>
+        {expandedCardMenus[card.id] && (() => {
+          const statuts = cardStatuts[card.id] || {};
+          const items = [
+            { key: 'rdv', label: 'Rendez-Vous' },
+            { key: 'client_avise', label: 'Client Avisé' },
+            { key: 'confirme_veille', label: 'Confirmé la veille' },
+            { key: 'retour_terrain', label: 'Retour terrain' },
+          ];
+          return (
+            <div className="mt-1 pt-1 border-t border-slate-600/50 space-y-0.5" onClick={e => e.stopPropagation()}>
+              {items.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={(e) => { e.stopPropagation(); toggleCardStatut(card.id, key); }}
+                  className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded hover:bg-slate-700/50 transition-colors"
+                >
+                  {statuts[key]
+                    ? <CheckSquare className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                    : <Square className="w-3 h-3 text-slate-500 flex-shrink-0" />}
+                  <span className={`text-xs ${statuts[key] ? 'text-emerald-300 line-through' : 'text-slate-400'}`}>{label}</span>
+                </button>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -1327,9 +1369,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 );
               })()}
             </div>
-            <div className="flex gap-1" onMouseDown={e => e.stopPropagation()}>
-              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2.5 h-2.5" /></button>
-              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2.5 h-2.5" /></button>
+            <div className="flex gap-0.5" onMouseDown={e => e.stopPropagation()}>
+              <button onClick={() => copyEquipe(dateStr, equipe.id)} className="text-cyan-400 hover:text-cyan-300 transition-all duration-150 p-0.5 rounded hover:bg-cyan-500/10"><Copy className="w-2 h-2" /></button>
+              <button onClick={() => removeEquipe(dateStr, equipe.id)} className="text-red-400 hover:text-red-300 transition-all duration-150 p-0.5 rounded hover:bg-red-500/10"><X className="w-2 h-2" /></button>
             </div>
           </div>
         </div>
@@ -1462,9 +1504,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           {/* Panneau gauche - cartes non assignées */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs defaultValue="verification" className="w-full">
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3 gap-1 p-1">
-                <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700 text-xs px-1 py-1">En vérification</TabsTrigger>
-                <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700 text-xs px-1 py-1">À planifier</TabsTrigger>
+              <TabsList className="bg-slate-800/50 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
+                <TabsTrigger value="verification" className="text-xs px-1 py-1 rounded-md text-slate-400 transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:hover:text-slate-200">En vérification</TabsTrigger>
+                <TabsTrigger value="planifier" className="text-xs px-1 py-1 rounded-md text-slate-400 transition-all duration-200 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=inactive]:hover:text-slate-200">À planifier</TabsTrigger>
               </TabsList>
               <TabsContent value="verification" className="mt-0">
                 <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
