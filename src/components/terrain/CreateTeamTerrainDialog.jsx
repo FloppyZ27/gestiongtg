@@ -37,13 +37,21 @@ export default function CreateTeamTerrainDialog({
   const availableEquipements = equipements || [];
 
   const handleCreateTeam = () => {
+    // Validation : au moins un chef doit être sélectionné
+    if (selectedChefs.length === 0) {
+      alert("Vous devez sélectionner au moins un technicien chef pour créer une équipe.");
+      return;
+    }
+
     const allTechIds = [...selectedChefs, ...selectedTechs];
-    const teamName = allTechIds.length > 0 
-      ? `Équipe ${(new Date().getTime() % 100)} - ${allTechIds.slice(0, 2).map(id => {
-          const user = users.find(u => u.id === id);
-          return user ? user.prenom.charAt(0) + user.nom.charAt(0) : '';
-        }).join('/')}`
-      : `Équipe ${new Date().getTime() % 100}`;
+    
+    // Générer initiales des chefs
+    const chefInitials = selectedChefs.map(id => {
+      const user = users.find(u => u.id === id);
+      return user ? user.prenom.charAt(0) + user.nom.charAt(0) : '';
+    }).join('/');
+
+    const teamName = `Équipe ${chefInitials} - ${(new Date().getTime() % 100)}`;
 
     const newTeam = {
       id: `eq${Date.now()}`,
