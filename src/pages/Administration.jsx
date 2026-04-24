@@ -308,6 +308,7 @@ export default function Administration() {
                         <SortableHead field="full_name" label="Utilisateur" />
                         <SortableHead field="poste" label="Poste" />
                         <SortableHead field="equipe" label="Équipe" />
+                        <SortableHead field="place_affaire" label="Place d'affaire" />
                         <SortableHead field="date_embauche" label="Date d'embauche" />
                         <SortableHead field="role" label="Rôle" />
                         <SortableHead field="statut" label="Statut" />
@@ -367,6 +368,20 @@ export default function Administration() {
                                 </Select>
                                 </TableCell>
                                 <TableCell>
+                                <Select 
+                                value={user.place_affaire || ""} 
+                                onValueChange={(value) => handleUpdateUser(user, "place_affaire", value)}
+                                >
+                                <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Alma">Alma</SelectItem>
+                                  <SelectItem value="Saguenay">Saguenay</SelectItem>
+                                </SelectContent>
+                                </Select>
+                                </TableCell>
+                                <TableCell>
                                 <Input
                                 type="date"
                                 value={user.date_embauche || ""}
@@ -451,7 +466,7 @@ export default function Administration() {
                                 ))
                                 ) : (
                                 <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                                <TableCell colSpan={7} className="text-center py-8 text-slate-500">
                                 Aucun utilisateur actif trouvé
                                 </TableCell>
                                 </TableRow>
@@ -471,6 +486,7 @@ export default function Administration() {
                         <SortableHead field="full_name" label="Utilisateur" />
                         <SortableHead field="poste" label="Poste" />
                         <SortableHead field="equipe" label="Équipe" />
+                        <SortableHead field="place_affaire" label="Place d'affaire" />
                         <SortableHead field="date_embauche" label="Date d'embauche" />
                         <SortableHead field="role" label="Rôle" />
                         <SortableHead field="statut" label="Statut" />
@@ -530,6 +546,20 @@ export default function Administration() {
                                 </Select>
                                 </TableCell>
                                 <TableCell>
+                                <Select 
+                                value={user.place_affaire || ""} 
+                                onValueChange={(value) => handleUpdateUser(user, "place_affaire", value)}
+                                >
+                                <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Alma">Alma</SelectItem>
+                                  <SelectItem value="Saguenay">Saguenay</SelectItem>
+                                </SelectContent>
+                                </Select>
+                                </TableCell>
+                                <TableCell>
                                 <Input
                                 type="date"
                                 value={user.date_embauche || ""}
@@ -614,7 +644,7 @@ export default function Administration() {
                                 ))
                                 ) : (
                                 <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                                <TableCell colSpan={7} className="text-center py-8 text-slate-500">
                                 Aucun utilisateur inactif trouvé
                           </TableCell>
                         </TableRow>
