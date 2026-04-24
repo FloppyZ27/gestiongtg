@@ -1274,43 +1274,61 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         {terrain.instruments_requis && <div className="flex items-center gap-1 mb-1"><Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span></div>}
         {terrain.technicien && <div className="flex items-center gap-1 mb-1"><UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" /><span className="text-xs text-blue-300 truncate">{terrain.technicien}</span></div>}
         {terrain.dossier_simultane && <div className="flex items-center gap-1 mb-1"><Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" /><span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span></div>}
-        <div className="mt-2 pt-1 border-t border-emerald-500/30" onClick={e => e.stopPropagation()}>
-          {/* Menu déroulant statut — sélection unique */}
+        <div className="mt-2 pt-1 border-t border-emerald-500/30" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
+          {/* Ligne unique : temps prévu | statut select | donneur + avatar */}
           {(() => {
             const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
             const currentStatut = cardStatuts[card.id]?.statut || null;
+            const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+            const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+            const triggerStyle = isOrange
+              ? 'bg-orange-500/25 text-orange-300 font-semibold'
+              : isMauve
+              ? 'bg-violet-500/25 text-violet-300 font-semibold'
+              : 'bg-slate-800/60 text-slate-400';
             return (
-              <Select
-                value={currentStatut || ""}
-                onValueChange={(val) => {
-                  setCardStatuts(prev => {
-                    const next = { ...prev, [card.id]: { ...prev[card.id], statut: val === currentStatut ? null : val } };
-                    localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
-                    return next;
-                  });
-                }}
-              >
-                <SelectTrigger
-                  className="w-full h-6 text-xs bg-slate-800/60 border-slate-600/40 text-slate-400 px-2 py-0"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <SelectValue placeholder="Statut..." />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {STATUT_OPTIONS.map(opt => (
-                    <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-1">
+                {/* Temps prévu */}
+                <div className="flex-shrink-0">
+                  {terrain.temps_prevu
+                    ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
+                    : <div className="w-10" />}
+                </div>
+                {/* Select statut — centre, flex-1 */}
+                <div className="flex-1 min-w-0" onMouseDown={e => e.stopPropagation()}>
+                  <Select
+                    value={currentStatut || ""}
+                    onValueChange={(val) => {
+                      setCardStatuts(prev => {
+                        const next = { ...prev, [card.id]: { ...prev[card.id], statut: val === currentStatut ? null : val } };
+                        localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+                        return next;
+                      });
+                    }}
+                  >
+                    <SelectTrigger
+                      className={`w-full h-5 text-[10px] px-1.5 py-0 ${triggerStyle}`}
+                      onMouseDown={e => e.stopPropagation()}
+                    >
+                      <SelectValue placeholder="Statut..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {STATUT_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Donneur + avatar */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
+                  {assignedUser
+                    ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar>
+                    : <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-2.5 h-2.5 text-emerald-500" /></div>}
+                </div>
+              </div>
             );
           })()}
-          <div className="flex items-center justify-between mt-1">
-            <div>{terrain.temps_prevu && <div className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>}</div>
-            <div className="flex items-center gap-1">
-              {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
-              {assignedUser ? <Avatar className="w-6 h-6 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar> : <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-3 h-3 text-emerald-500" /></div>}
-            </div>
-          </div>
         </div>
       </div>
     );
