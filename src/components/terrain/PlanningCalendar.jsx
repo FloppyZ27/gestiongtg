@@ -425,6 +425,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const goToNext = () => viewMode === "week" ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
 
+  const getInitialsWithHyphens = (text) => {
+    return text.split('-').map(part => part[0]?.toUpperCase()).join('');
+  };
+
   const generateTeamDisplayName = useCallback((equipe, positionIndex) => {
     // Si positionIndex fourni, utiliser ce numéro (1-based), sinon extraire du nom
     const numStr = positionIndex != null
@@ -436,8 +440,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const initials = equipe.techniciens.map(id => {
       const u = users?.find(u => u.id === id);
       if (!u) return '';
-      const parts = u.full_name.split(' ');
-      return (parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '');
+      const prenomInitials = getInitialsWithHyphens(u.prenom || '');
+      const nomInitials = getInitialsWithHyphens(u.nom || '');
+      return prenomInitials + nomInitials;
     }).filter(n => n).join('-');
     return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
   }, [users]);
