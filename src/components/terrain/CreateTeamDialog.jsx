@@ -89,13 +89,6 @@ export default function CreateTeamDialog({
 
   const myChefs = myPlaceTechs.filter(t => t.poste?.toLowerCase().includes('chef'));
   const myTechsRegular = myPlaceTechs.filter(t => !t.poste?.toLowerCase().includes('chef'));
-  
-  console.log('DEBUG CreateTeamDialog:', {
-    allTechs: allTechs?.map(t => ({ id: t.id, nom: t.nom, poste: t.poste, place_affaire: t.place_affaire })),
-    myPlaceTechs: myPlaceTechs?.map(t => ({ id: t.id, nom: t.nom, poste: t.poste })),
-    myChefs: myChefs?.map(t => ({ id: t.id, nom: t.nom, poste: t.poste })),
-    myTechsRegular: myTechsRegular?.map(t => ({ id: t.id, nom: t.nom, poste: t.poste }))
-  });
   const otherChefs = otherPlaceTechs.filter(t => t.poste?.toLowerCase().includes('chef'));
   const otherTechsRegular = otherPlaceTechs.filter(t => !t.poste?.toLowerCase().includes('chef'));
 
