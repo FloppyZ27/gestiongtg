@@ -92,9 +92,8 @@ export default function CreateTeamDialog({
   const otherChefs = otherPlaceTechs.filter(t => t.poste === 'Techniciens (Chef)' || (t.poste && t.poste.toLowerCase().includes('chef')));
   const otherTechsRegular = otherPlaceTechs.filter(t => t.poste !== 'Techniciens (Chef)' && (!t.poste || !t.poste.toLowerCase().includes('chef')));
 
-  const availableMyTechs = myPlaceTechs.filter(t => !usedTechIds.includes(t.id));
-  const availableChefs = availableMyTechs.filter(t => t.poste === 'Technicien Terrain (Chef)');
-  const availableTechsRegular = availableMyTechs.filter(t => t.poste === 'Technicien Terrain');
+  const availableChefs = myChefs.filter(t => !usedTechIds.includes(t.id));
+  const availableTechsRegular = myTechsRegular.filter(t => !usedTechIds.includes(t.id));
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
