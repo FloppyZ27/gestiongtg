@@ -89,9 +89,9 @@ export default function CeduleTerrain() {
     initialData: [],
   });
 
-  // Utiliser les utilisateurs actifs avec le poste "Technicien Terrain"
+  // Utiliser les utilisateurs actifs avec les postes technicien
   const techniciensTerrain = users
-    .filter(u => u.poste === "Technicien Terrain")
+    .filter(u => u.poste === "Technicien Terrain" || u.poste === "Technicien Terrain (Chef)")
     .map(u => {
       const parts = (u.full_name || '').split(' ');
       return {
@@ -101,8 +101,9 @@ export default function CeduleTerrain() {
       };
     });
 
-  // Filtrer les ressources par place d'affaire
-  const techniciensByPlace = techniciensTerrain;
+  // Filtrer les techniciens par place d'affaire selon l'onglet actif
+  const activePlaceLabel = activePlace === "alma" ? "Alma" : "Saguenay";
+  const techniciensByPlace = techniciensTerrain.filter(u => u.place_affaire === activePlaceLabel);
   const vehiculesByPlace = vehicules;
   const equipementsByPlace = equipements;
 
