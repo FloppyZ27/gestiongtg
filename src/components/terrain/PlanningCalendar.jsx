@@ -1444,7 +1444,27 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
   return (
     <div className="space-y-4">
-      <style>{`* { border: none !important; outline: none !important; } [class*="border"],[class*="shadow"],[class*="outline"] { border: none !important; box-shadow: none !important; outline: none !important; }`}</style>
+      <style>{`
+        * { border: none !important; outline: none !important; } 
+        [class*="border"],[class*="shadow"],[class*="outline"] { border: none !important; box-shadow: none !important; outline: none !important; }
+        
+        button[data-optimize-btn] {
+          background: linear-gradient(90deg, rgb(59, 130, 246), rgb(96, 165, 250), rgb(59, 130, 246)) !important;
+          background-size: 200% 200% !important;
+          color: white !important;
+          border: 1px solid rgb(96, 165, 250) !important;
+        }
+        
+        button[data-optimize-btn]:hover {
+          animation: shimmer 2s infinite !important;
+          box-shadow: 0 0 20px rgb(59, 130, 246), 0 0 40px rgb(96, 165, 250) !important;
+        }
+        
+        @keyframes shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+      `}</style>
 
       {/* Connecteurs visuels pour les cartes liées */}
       <LinkedCardsConnector linkedGroups={linkedGroups} terrainCards={terrainCards} />
@@ -1501,33 +1521,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 )}
                 <Button
                   size="sm"
+                  data-optimize-btn
                   onClick={handleOptimizeAll}
                   disabled={isOptimizing}
-                  style={{
-                    background: 'linear-gradient(90deg, rgb(59, 130, 246), rgb(96, 165, 250), rgb(59, 130, 246))',
-                    backgroundSize: '200% 200%',
-                    color: 'white',
-                    border: '1px solid rgb(96, 165, 250)',
-                    transition: 'all 300ms ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 20px rgb(59, 130, 246), 0 0 40px rgb(96, 165, 250)';
-                    e.currentTarget.style.animation = 'shimmer 2s infinite';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.animation = 'none';
-                  }}
                 >
                   {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
                   {isOptimizing ? 'Optimisation...' : 'Optimiser'}
                 </Button>
-                <style>{`
-                  @keyframes shimmer {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                  }
-                `}</style>
               </div>
             </div>
           </div>
