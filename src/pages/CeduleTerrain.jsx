@@ -103,7 +103,7 @@ export default function CeduleTerrain() {
 
   // Filtrer les techniciens par place d'affaire selon l'onglet actif
   const activePlaceLabel = activePlace === "alma" ? "Alma" : "Saguenay";
-  const techniciensByPlace = techniciensTerrain.filter(u => u.place_affaire === activePlaceLabel);
+  const techniciensByPlace = techniciensTerrain.filter(u => !u.place_affaire || u.place_affaire === activePlaceLabel);
   const vehiculesByPlace = vehicules;
   const equipementsByPlace = equipements;
 
