@@ -53,15 +53,13 @@ export default function CreateTeamDialog({
     return equipe.nom;
   };
 
-  // Vérifier si une ressource est assignée à une autre place d'affaire (toutes les équipes, pas seulement ce jour)
+  // Vérifier si une ressource est assignée à une autre place d'affaire POUR LA MÊME DATE
   const isResourceInOtherPlace = (resourceId, resourceType) => {
-    for (const dateKey in equipes) {
-      const dayEquipes = equipes[dateKey] || [];
-      for (const eq of dayEquipes) {
-        if (eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
-          if (eq[resourceType]?.includes(resourceId)) {
-            return eq.place_affaire;
-          }
+    const dayEquipes = equipes[dateStr] || [];
+    for (const eq of dayEquipes) {
+      if (eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
+        if (eq[resourceType]?.includes(resourceId)) {
+          return eq.place_affaire;
         }
       }
     }
