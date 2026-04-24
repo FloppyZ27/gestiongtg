@@ -11,7 +11,7 @@ export default function CreateTeamTerrainDialog({
   onClose,
   onCreateTeam,
   dateStr,
-  techniciens,
+  users,
   vehicules,
   equipements
 }) {
@@ -24,14 +24,9 @@ export default function CreateTeamTerrainDialog({
   const [vehiculeOpen, setVehiculeOpen] = useState(false);
   const [equipementOpen, setEquipementOpen] = useState(false);
 
-  // Filtrer les techniciens (entité Employe) par poste et statut
-  const chefs = techniciens?.filter(t => 
-    t.poste === "Technicien Terrain Chef" && (t.statut === "Actif" || !t.statut)
-  ) || [];
-  
-  const techs = techniciens?.filter(t => 
-    t.poste === "Technicien Terrain" && (t.statut === "Actif" || !t.statut)
-  ) || [];
+  // Filtrer les utilisateurs par rôle (simplement: admin = chef, user = technicien)
+  const chefs = users?.filter(u => u.role === "admin") || [];
+  const techs = users?.filter(u => u.role === "user") || [];
 
   const availableVehicules = vehicules || [];
   const availableEquipements = equipements || [];
@@ -47,8 +42,8 @@ export default function CreateTeamTerrainDialog({
     
     // Générer initiales des chefs
     const chefInitials = selectedChefs.map(id => {
-      const t = techniciens?.find(t => t.id === id);
-      return t ? t.prenom.charAt(0) + t.nom.charAt(0) : '';
+      const u = users?.find(u => u.id === id);
+      return u ? u.full_name.split(' ').map(n => n[0]).join('') : '';
     }).join('/');
 
     const teamName = `Équipe ${chefInitials} - ${(new Date().getTime() % 100)}`;
@@ -138,7 +133,7 @@ export default function CreateTeamTerrainDialog({
                           className="border-blue-400"
                         />
                         <Label htmlFor={`chef-${chef.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {chef.prenom} {chef.nom}
+                          {chef.full_name}
                         </Label>
                       </div>
                     ))
@@ -177,7 +172,7 @@ export default function CreateTeamTerrainDialog({
                           className="border-cyan-400"
                         />
                         <Label htmlFor={`tech-${tech.id}`} className="flex-1 cursor-pointer text-slate-200">
-                          {tech.prenom} {tech.nom}
+                          {tech.full_name}
                         </Label>
                       </div>
                     ))
