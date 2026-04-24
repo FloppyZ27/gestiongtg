@@ -332,7 +332,7 @@ export default function CreateTeamDialog({
           </Collapsible>
 
           {/* Équipements */}
-          <Collapsible open={expandedSections.vehicules} onOpenChange={() => toggleSection('vehicules')}>
+          <Collapsible open={expandedSections.equipements} onOpenChange={() => toggleSection('equipements')}>
            <div className="rounded-lg overflow-hidden border border-orange-800/40">
              <CollapsibleTrigger className="w-full cursor-pointer transition-colors py-2.5 px-3 bg-orange-500 hover:bg-orange-600">
                 <div className="flex items-center justify-between">
