@@ -1440,9 +1440,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           {/* Panneau gauche - cartes non assignées */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs defaultValue="verification" className="w-full">
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3">
-                <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700">En vérification</TabsTrigger>
-                <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700">À planifier</TabsTrigger>
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3 gap-1 p-1">
+                <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700 text-xs px-1 py-1">En vérification</TabsTrigger>
+                <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700 text-xs px-1 py-1">À planifier</TabsTrigger>
               </TabsList>
               <TabsContent value="verification" className="mt-0">
                 <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
