@@ -281,7 +281,7 @@ export default function CeduleTerrain() {
         <PlanningCalendar 
               dossiers={dossiers}
               techniciens={techniciensByPlace}
-              allTechniciens={employes}
+              allTechniciens={users}
               vehicules={vehiculesByPlace}
               equipements={equipementsByPlace}
               clients={clients}

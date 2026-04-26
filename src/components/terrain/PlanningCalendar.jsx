@@ -794,9 +794,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         unassignedCards: unassignedCardsData,
         availableTechniciens: (allTechniciens || techniciens)
           .filter(t => t.statut === 'Actif' || !t.statut)
+          .filter(t => t.poste === 'Technicien Terrain' || t.poste === 'Technicien Terrain (Chef)')
           .map(t => {
-            // Les users ont full_name, les employés ont prenom/nom
-            const parts = (t.full_name || `${t.prenom || ''} ${t.nom || ''}`).trim().split(' ');
+            const parts = (t.full_name || '').trim().split(' ');
             return {
               id: t.id,
               prenom: parts[0] || '',
