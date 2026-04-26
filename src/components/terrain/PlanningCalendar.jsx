@@ -1800,18 +1800,16 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       </Dialog>
 
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] p-0 gap-0" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', height: 'calc(100vh - 170px)', maxHeight: 'calc(100vh - 170px)' }}>
-          <DialogHeader className="p-4 border-b border-slate-800">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] p-0 gap-0" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', height: 'calc(100vh - 170px)', maxHeight: 'calc(100vh - 170px)', display: 'flex', flexDirection: 'column' }}>
+          <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
             <DialogTitle className="text-xl font-bold text-white">Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</DialogTitle>
             {mapRoutes.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
-
                 {mapRoutes.map((route, i) => {
                   const isSelected = selectedRoutes.includes(i);
                   const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
                   const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
                   const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
-                  // Temps travaux
                   const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
                   const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
                   return (
@@ -1836,18 +1834,92 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               </div>
             )}
           </DialogHeader>
-          <div className="flex-1 w-full h-full">
-            {!googleMapsApiKey
-              ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
-              : mapRoutes.length === 0
-                ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-                : <MapWithStableRoutes
-                    mapRoutes={mapRoutes}
-                    selectedRoutes={selectedRoutes}
-                    apiKey={googleMapsApiKey}
-                    onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
-                  />
-            }
+          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            {/* Colonne gauche — équipes et cartes terrain */}
+            <div style={{ width: 260, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
+              {selectedMapDate && (equipes[selectedMapDate] || [])
+                .filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase())
+                .map((equipe, posIdx) => {
+                  const routeForEquipe = mapRoutes.find(r => r.equipeId === equipe.id);
+                  const color = routeForEquipe ? routeForEquipe.color : COLORS[posIdx % COLORS.length];
+                  const equipeNom = generateTeamDisplayName(equipe, posIdx);
+                  const travelSecs = equipeTravelSeconds[equipe.id] || 0;
+                  const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
+                  return (
+                    <div key={equipe.id} style={{ marginBottom: 12 }}>
+                      {/* Header équipe */}
+                      <div style={{ background: `${color}22`, border: `1px solid ${color}66`, borderRadius: 8, padding: '6px 8px', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                          <span style={{ color: 'white', fontWeight: 700, fontSize: 12, flex: 1 }}>{equipeNom}</span>
+                        </div>
+                        {travelSecs > 0 && (
+                          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, paddingLeft: 16 }}>
+                            🚗 {formatHHMM(travelSecs)}
+                            {(() => {
+                              const travailSecs = equipe.mandats.reduce((sum, cId) => {
+                                const c = terrainCards.find(t => t.id === cId);
+                                const match = (c?.terrain?.temps_prevu || '').match(/(\d+(?:\.\d+)?)/);
+                                return sum + (match ? parseFloat(match[0]) * 3600 : 0);
+                              }, 0);
+                              return travailSecs > 0 ? ` · Total: ${formatHHMM(travailSecs + travelSecs)}` : '';
+                            })()}
+                          </div>
+                        )}
+                        {/* Techniciens */}
+                        {equipe.techniciens.length > 0 && (
+                          <div style={{ fontSize: 10, color: '#60a5fa', marginTop: 2, paddingLeft: 16 }}>
+                            {equipe.techniciens.map(id => { const u = users?.find(u => u.id === id); return u ? u.full_name : null; }).filter(Boolean).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                      {/* Cartes terrain */}
+                      {equipe.mandats.map(cId => {
+                        const card = terrainCards.find(c => c.id === cId);
+                        if (!card) return null;
+                        const { dossier, mandat, terrain } = card;
+                        const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                        const clientsNames = clients.filter(c => dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
+                        const adresse = formatAdresse(mandat?.adresse_travaux);
+                        return (
+                          <div key={cId} style={{ marginBottom: 6, borderRadius: 8, padding: '6px 8px', border: `1px solid ${color}44`, background: 'rgba(30,41,59,0.6)' }}>
+                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4 }}>
+                              <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(30,41,59,0.8)', color: 'white', border: '1px solid rgba(255,255,255,0.15)' }}>
+                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                              </span>
+                              <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)' }}>
+                                {getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 11, color: 'white', marginBottom: 2 }}>{clientsNames}</div>
+                            {adresse && <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 2 }}>📍 {adresse}</div>}
+                            {terrain?.a_rendez_vous && terrain?.date_rendez_vous && (
+                              <div style={{ fontSize: 10, color: '#fb923c' }}>🕐 RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}{terrain.heure_rendez_vous ? ` à ${terrain.heure_rendez_vous}` : ''}</div>
+                            )}
+                            {terrain?.temps_prevu && <div style={{ fontSize: 10, color: '#6ee7b7' }}>⏱ {terrain.temps_prevu}</div>}
+                            {terrain?.instruments_requis && <div style={{ fontSize: 10, color: '#a7f3d0' }}>🔧 {terrain.instruments_requis}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              }
+            </div>
+            {/* Carte Google Maps */}
+            <div style={{ flex: 1, height: '100%' }}>
+              {!googleMapsApiKey
+                ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
+                : mapRoutes.length === 0
+                  ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
+                  : <MapWithStableRoutes
+                      mapRoutes={mapRoutes}
+                      selectedRoutes={selectedRoutes}
+                      apiKey={googleMapsApiKey}
+                      onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                    />
+              }
+            </div>
           </div>
         </DialogContent>
       </Dialog>
