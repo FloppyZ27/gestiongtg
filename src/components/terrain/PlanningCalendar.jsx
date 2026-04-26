@@ -795,6 +795,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         availableTechniciens: (allTechniciens || techniciens)
           .filter(t => t.statut === 'Actif' || !t.statut)
           .filter(t => t.poste === 'Technicien Terrain' || t.poste === 'Technicien Terrain (Chef)')
+          .filter(t => !placeAffaire || !t.place_affaire || t.place_affaire.toLowerCase() === placeAffaire.toLowerCase())
           .map(t => {
             const parts = (t.full_name || '').trim().split(' ');
             return {
