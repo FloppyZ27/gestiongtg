@@ -206,6 +206,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
+  const [visibleTeams, setVisibleTeams] = useState([]); // Équipes visibles sur la carte
   const [equipeExistanteWarning, setEquipeExistanteWarning] = useState(null); // { equipeNom, targetDate }
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
@@ -700,12 +701,16 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
 
-  // Réinitialiser selectedRoutes uniquement quand la date change ou les routes sont recalculées
+  // Réinitialiser selectedRoutes et visibleTeams uniquement quand la date change ou les routes sont recalculées
   useEffect(() => {
     if (mapRoutes.length > 0) {
       setSelectedRoutes(mapRoutes.map((_, i) => i));
+      // Initialiser visibleTeams avec tous les equipeId uniques
+      const uniqueTeams = [...new Set(mapRoutes.map(r => r.equipeId))];
+      setVisibleTeams(uniqueTeams);
     } else {
       setSelectedRoutes([]);
+      setVisibleTeams([]);
     }
   }, [selectedMapDate, mapRoutes.length]);
 
@@ -1818,33 +1823,60 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
             <DialogTitle className="text-xl font-bold text-white">Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</DialogTitle>
             {mapRoutes.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {mapRoutes.map((route, i) => {
-                  const isSelected = selectedRoutes.includes(i);
-                  const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
-                  const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
-                  const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
-                  const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
-                  const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '6px',
-                        padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
-                        border: `2px solid ${route.color}`,
-                        background: isSelected ? `${route.color}33` : 'transparent',
-                        color: isSelected ? 'white' : 'rgba(255,255,255,0.5)',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
-                      {route.label}
-                      {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalLabel ? ` · Total: ${totalLabel}` : ''}</span>}
-                    </button>
-                  );
-                })}
+              <div className="space-y-3 mt-3">
+                {/* Filtre par équipe */}
+                <div className="flex flex-wrap gap-2">
+                  {[...new Set(mapRoutes.map(r => r.equipeId))].map(equipeId => {
+                    const route = mapRoutes.find(r => r.equipeId === equipeId);
+                    const isVisible = visibleTeams.includes(equipeId);
+                    return (
+                      <label key={equipeId} className="flex items-center gap-2 px-3 py-1 rounded-lg cursor-pointer transition-all" style={{ background: isVisible ? `${route?.color || '#666'}33` : 'rgba(71,85,105,0.3)', border: `1px solid ${isVisible ? (route?.color || '#666') : 'rgba(255,255,255,0.2)'}` }}>
+                        <input
+                          type="checkbox"
+                          checked={isVisible}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setVisibleTeams([...visibleTeams, equipeId]);
+                            } else {
+                              setVisibleTeams(visibleTeams.filter(id => id !== equipeId));
+                            }
+                          }}
+                          className="w-4 h-4 accent-emerald-500 cursor-pointer"
+                        />
+                        <span className="text-xs text-white font-medium">{route?.label || equipeId}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {/* Boutons trajets */}
+                <div className="flex flex-wrap gap-2">
+                  {mapRoutes.map((route, i) => {
+                    const isSelected = selectedRoutes.includes(i);
+                    const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
+                    const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
+                    const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
+                    const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
+                    const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
+                          border: `2px solid ${route.color}`,
+                          background: isSelected ? `${route.color}33` : 'transparent',
+                          color: isSelected ? 'white' : 'rgba(255,255,255,0.5)',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
+                        {route.label}
+                        {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalLabel ? ` · Total: ${totalLabel}` : ''}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </DialogHeader>
@@ -1940,13 +1972,21 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 ? <div className="flex items-center justify-center h-full text-slate-400">Chargement...</div>
                 : mapRoutes.length === 0
                   ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
-                  : <MapWithStableRoutes
-                    mapRoutes={mapRoutes}
-                    visibleRouteIndices={selectedRoutes}
-                    apiKey={googleMapsApiKey}
-                    onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
-                  />
-              }
+                  : (() => {
+                    // Filtrer les routes selon les équipes visibles et les trajets sélectionnés
+                    const filteredRoutes = mapRoutes.filter(route => visibleTeams.includes(route.equipeId));
+                    const visibleIndices = selectedRoutes.filter(i => filteredRoutes.some((_, idx) => mapRoutes.findIndex(r => r.equipeId === filteredRoutes[idx].equipeId && r === filteredRoutes[idx]) === i));
+                    return filteredRoutes.length > 0 ? (
+                      <MapWithStableRoutes
+                        mapRoutes={filteredRoutes}
+                        visibleRouteIndices={visibleIndices}
+                        apiKey={googleMapsApiKey}
+                        onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet correspondant aux filtres</div>
+                    );
+                  })()}
             </div>
           </div>
         </DialogContent>
