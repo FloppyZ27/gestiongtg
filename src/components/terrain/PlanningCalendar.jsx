@@ -1209,7 +1209,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   };
 
   // ---- Render DossierCard (custom drag) ----
-  const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false }) => {
+  const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
@@ -1325,11 +1325,12 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 </div>
                 {/* Select statut — centre, flex-1 */}
                 <div className="flex-1 min-w-0" onMouseDown={e => e.stopPropagation()}>
-                  <Select
+                  {!hideStatut && <Select
                     value={currentStatut || ""}
                     onValueChange={(val) => {
                       setCardStatuts(prev => {
-                        const next = { ...prev, [card.id]: { ...prev[card.id], statut: val === currentStatut ? null : val } };
+                        const newVal = (val === '__vide__' || val === currentStatut) ? null : val;
+                        const next = { ...prev, [card.id]: { ...prev[card.id], statut: newVal } };
                         localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
                         return next;
                       });
@@ -1343,11 +1344,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                       <SelectValue placeholder="Statut..." />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
                       {STATUT_OPTIONS.map(opt => (
                         <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>
+                    </Select>}
+                    {hideStatut && <div className="flex-1" />}
                 </div>
                 {/* Donneur + avatar */}
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -1581,7 +1584,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                   {unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").map(card => (
                     <div key={card.id} className="mb-2">
-                      <DossierCard card={card} hideEditButton hideLinkedButton />
+                      <DossierCard card={card} hideEditButton hideLinkedButton hideStatut />
                       <TerrainVerificationCard card={card} onUpdateDossier={onUpdateDossier} />
                     </div>
                   ))}
