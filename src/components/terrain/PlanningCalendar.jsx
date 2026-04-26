@@ -1837,9 +1837,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
             {/* Colonne gauche — équipes et cartes terrain (même style que le planning) */}
             <div style={{ width: 280, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
-              {selectedMapDate && (equipes[selectedMapDate] || [])
-                .filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase())
-                .map((equipe, posIdx) => {
+              {selectedMapDate && (() => {
+                const dayEquipes = (equipes[selectedMapDate] || [])
+                  .filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
+                return dayEquipes.map((equipe, posIdx) => {
+                  const routeIdx = mapRoutes.findIndex(r => r.equipeId === equipe.id);
+                  const routeForEquipe = routeIdx >= 0 ? mapRoutes[routeIdx] : null;
+                  const color = routeForEquipe ? routeForEquipe.color : COLORS[posIdx % COLORS.length];
+                  const isRouteVisible = routeIdx >= 0 ? selectedRoutes.includes(routeIdx) : false;
                   const equipeNom = generateTeamDisplayName(equipe, posIdx);
                   const travelSecs = equipeTravelSeconds[equipe.id] || 0;
                   const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
@@ -1847,12 +1852,12 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   const travailSecs = parseFloat(totalTime) * 3600;
                   const totalSecs = travailSecs + travelSecs;
                   return (
-                    <div key={equipe.id} className="bg-slate-800/50 rounded-lg overflow-hidden mb-3">
-                      {/* Header équipe — identique au planning */}
+                    <div key={equipe.id} className="bg-slate-800/50 rounded-lg overflow-hidden mb-3" style={{ opacity: routeIdx >= 0 && !isRouteVisible ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                      {/* Header équipe — avec bouton toggle trajet */}
                       <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                         <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <span className="text-white text-sm font-bold block">{equipeNom}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-white text-sm font-bold block truncate">{equipeNom}</span>
                             {equipe.mandats.length > 0 && (
                               <span className="text-emerald-300 text-xs">
                                 {formatHHMM(totalSecs)}
@@ -1868,15 +1873,42 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               </div>
                             )}
                           </div>
+                          {/* Bouton toggle trajet */}
+                          {routeIdx >= 0 && (
+                            <button
+                              onClick={() => setSelectedRoutes(isRouteVisible ? selectedRoutes.filter(r => r !== routeIdx) : [...selectedRoutes, routeIdx])}
+                              style={{
+                                flexShrink: 0, width: 28, height: 28, borderRadius: 6, border: `2px solid ${color}`,
+                                background: isRouteVisible ? `${color}44` : 'transparent',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 0.15s',
+                              }}
+                              title={isRouteVisible ? 'Masquer le trajet' : 'Afficher le trajet'}
+                            >
+                              <span style={{ width: 10, height: 10, borderRadius: '50%', background: isRouteVisible ? color : 'transparent', border: `2px solid ${color}`, display: 'block', transition: 'all 0.15s' }} />
+                            </button>
+                          )}
                         </div>
                       </div>
-                      {/* Cartes terrain — DossierCard sans boutons */}
+                      {/* Cartes terrain — DossierCard sans boutons + lettre pin */}
                       <div className="p-2">
-                        {equipe.mandats.map(cId => {
+                        {equipe.mandats.map((cId, cardIdx) => {
                           const card = terrainCards.find(c => c.id === cId);
                           if (!card) return null;
+                          const pinLetter = String.fromCharCode(65 + cardIdx); // A, B, C...
                           return (
-                            <div key={cId}>
+                            <div key={cId} style={{ position: 'relative' }}>
+                              {/* Badge lettre pin */}
+                              <div style={{
+                                position: 'absolute', top: 6, right: 6, zIndex: 10,
+                                width: 22, height: 22, borderRadius: '50%',
+                                background: color, border: '2px solid white',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 11, fontWeight: 700, color: 'white',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                              }}>
+                                {pinLetter}
+                              </div>
                               <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} />
                             </div>
                           );
@@ -1884,8 +1916,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                       </div>
                     </div>
                   );
-                })
-              }
+                });
+              })()}
             </div>
             {/* Carte Google Maps */}
             <div style={{ flex: 1, height: '100%' }}>
