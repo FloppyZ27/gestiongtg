@@ -1208,12 +1208,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     }
   };
 
-  // Bouton d'action carte — styles inline pour contourner le CSS global avec !important
+  // Bouton d'action carte — utilise div simple (pas button, pas role=button) pour échapper au CSS global
   const CardActionBtn = ({ onClick, baseColor, hoverColor, textColor, hoverTextColor, title, children }) => {
     const [hovered, setHovered] = useState(false);
-    const iconColor = hovered ? (hoverTextColor || '#ffffff') : textColor;
     return (
-      <button
+      <div
         onClick={onClick}
         title={title}
         onMouseEnter={() => setHovered(true)}
@@ -1221,17 +1220,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         style={{
           width: 26, height: 26, borderRadius: 5,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: hovered ? hoverColor : baseColor,
-          transition: 'background 150ms',
-          cursor: 'pointer', border: 'none', outline: 'none', padding: 0, flexShrink: 0,
-          // Ne pas mettre color ici — le CSS global le surcharge avec !important
+          backgroundColor: hovered ? hoverColor : baseColor,
+          color: hovered ? (hoverTextColor || '#ffffff') : textColor,
+          transition: 'background-color 150ms, color 150ms',
+          cursor: 'pointer', flexShrink: 0,
         }}
       >
-        {/* Wrapper span pour isoler la couleur de l'icône du CSS global */}
-        <span style={{ color: iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          {children}
-        </span>
-      </button>
+        {children}
+      </div>
     );
   };
 
