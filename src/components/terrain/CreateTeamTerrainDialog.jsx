@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Truck, Wrench, X, ChevronDown, ChevronUp, ArrowLeftRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function CreateTeamTerrainDialog({
   isOpen,
@@ -219,17 +220,19 @@ export default function CreateTeamTerrainDialog({
                             disabled={isUsed || (isWrongPlace && !isBorrowed)}
                             className="border-blue-400"
                           />
-                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 font-medium ${
+                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 font-medium flex items-center gap-1.5 flex-wrap ${
                             isUsed ? 'text-slate-400 cursor-default' :
                             isWrongPlace && !isBorrowed ? 'text-slate-400 cursor-default' :
                             isBorrowed ? 'text-amber-200 cursor-pointer' :
                             isSelected ? 'text-blue-100 cursor-pointer' :
                             'text-slate-200 cursor-pointer'
                           }`}>
-                            {chef.full_name || `${chef.prenom} ${chef.nom}`}
-                            {equipeNom && <span className="text-slate-500 ml-1">({equipeNom})</span>}
-                            {isWrongPlace && <span className="text-slate-400 ml-1">({chef.place_affaire})</span>}
-                            {isBorrowed && <span className="text-amber-400 ml-1">— Emprunté</span>}
+                            {chef.prenom} {chef.nom}
+                            {equipeNom && (
+                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeNom}</Badge>
+                            )}
+                            {isWrongPlace && <span className="text-slate-400 text-[10px]">({chef.place_affaire})</span>}
+                            {isBorrowed && <span className="text-amber-400 text-[10px]">— Emprunté</span>}
                           </Label>
                           {isWrongPlace && !isUsed && (
                             alreadyPlanned ? (
@@ -299,17 +302,19 @@ export default function CreateTeamTerrainDialog({
                             disabled={isUsed || (isWrongPlace && !isBorrowed)}
                             className="border-cyan-400"
                           />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 font-medium ${
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 font-medium flex items-center gap-1.5 flex-wrap ${
                             isUsed ? 'text-slate-400 cursor-default' :
                             isWrongPlace && !isBorrowed ? 'text-slate-400 cursor-default' :
                             isBorrowed ? 'text-amber-200 cursor-pointer' :
                             isSelected ? 'text-cyan-100 cursor-pointer' :
                             'text-slate-200 cursor-pointer'
                           }`}>
-                            {tech.full_name || `${tech.prenom} ${tech.nom}`}
-                            {equipeNom && <span className="text-slate-500 ml-1">({equipeNom})</span>}
-                            {isWrongPlace && <span className="text-slate-400 ml-1">({tech.place_affaire})</span>}
-                            {isBorrowed && <span className="text-amber-400 ml-1">— Emprunté</span>}
+                            {tech.prenom} {tech.nom}
+                            {equipeNom && (
+                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeNom}</Badge>
+                            )}
+                            {isWrongPlace && <span className="text-slate-400 text-[10px]">({tech.place_affaire})</span>}
+                            {isBorrowed && <span className="text-amber-400 text-[10px]">— Emprunté</span>}
                           </Label>
                           {isWrongPlace && !isUsed && (
                             alreadyPlanned ? (
