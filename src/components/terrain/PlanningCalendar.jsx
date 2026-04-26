@@ -697,9 +697,15 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     if (selectedMapDate) {
       const routes = buildRoutesForDate(selectedMapDate);
       setMapRoutes(routes);
-      setSelectedRoutes(routes.map((_, i) => i));
     }
   }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
+
+  // Réinitialiser selectedRoutes uniquement quand la date change ou les routes sont recalculées
+  useEffect(() => {
+    if (mapRoutes.length > 0) {
+      setSelectedRoutes(mapRoutes.map((_, i) => i));
+    }
+  }, [selectedMapDate, mapRoutes.length]);
 
   // Calculer les durées de trajet via le backend — debounce 2s pour éviter les appels excessifs
   const travelCalcTimerRef = useRef(null);
