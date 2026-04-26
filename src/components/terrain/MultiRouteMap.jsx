@@ -68,6 +68,9 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
   const markersGroupRef = useRef([]); // tableau de tableaux: markersGroupRef[routeIndex] = [markers...]
   const markersRef = useRef([]);
   const [hoveredDossier, setHoveredDossier] = useState(null);
+  // Garder une ref à jour sur visibleRouteIndices pour pouvoir l'utiliser dans les callbacks async
+  const visibleRouteIndicesRef = useRef(visibleRouteIndices);
+  useEffect(() => { visibleRouteIndicesRef.current = visibleRouteIndices; }, [visibleRouteIndices]);
 
   useEffect(() => {
     if (!apiKey || !routes || routes.length === 0) {
@@ -228,6 +231,13 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                 bounds.extend(leg.end_location);
               });
 
+              // Appliquer la visibilité initiale dès que le renderer est prêt
+              const visible = visibleRouteIndicesRef.current;
+              if (visible && !visible.includes(index)) {
+                directionsRenderer.setMap(null);
+                markersGroupRef.current[index]?.forEach(m => m.setMap(null));
+              }
+
               completedRoutes++;
               if (completedRoutes === routes.length) {
                 map.fitBounds(bounds);
@@ -266,7 +276,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
 
   // Effet séparé pour show/hide les routes sans recréer la carte
   useEffect(() => {
-    if (!googleMapRef.current || !visibleRouteIndices) return;
+    if (!visibleRouteIndices) return;
+    // Appliquer immédiatement sur ce qui est déjà chargé
     directionsRenderersRef.current.forEach((renderer, i) => {
       if (!renderer) return;
       const isVisible = visibleRouteIndices.includes(i);
