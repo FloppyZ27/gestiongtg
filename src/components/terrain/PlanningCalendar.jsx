@@ -792,7 +792,18 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         cardsData: allCardsData,
         lockedCardIds: [...lockedCards],
         unassignedCards: unassignedCardsData,
-        availableTechniciens: techniciens.filter(t => t.statut === 'Actif' || !t.statut).map(t => ({ id: t.id, prenom: t.prenom, nom: t.nom, poste: t.poste })),
+        availableTechniciens: (allTechniciens || techniciens)
+          .filter(t => t.statut === 'Actif' || !t.statut)
+          .map(t => {
+            // Les users ont full_name, les employés ont prenom/nom
+            const parts = (t.full_name || `${t.prenom || ''} ${t.nom || ''}`).trim().split(' ');
+            return {
+              id: t.id,
+              prenom: parts[0] || '',
+              nom: parts.slice(1).join(' ') || '',
+              poste: t.poste || '',
+            };
+          }),
         placeAffaire,
         linkedGroups,
       });
