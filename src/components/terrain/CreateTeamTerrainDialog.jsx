@@ -194,7 +194,7 @@ export default function CreateTeamTerrainDialog({
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) resetForm();
     }}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col gap-0 p-0">
+      <DialogContent hideClose className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 py-4 border-b border-slate-800">
           <DialogTitle className="text-lg">Création équipe terrain</DialogTitle>
         </DialogHeader>
@@ -461,20 +461,18 @@ export default function CreateTeamTerrainDialog({
           </div>
         </div>
 
-        <div className="border-t border-slate-800 px-4 py-3 flex justify-end gap-2">
+        <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
           <Button
+            type="button"
             variant="outline"
             onClick={resetForm}
-            size="sm"
-            className="border-red-500 text-red-400 hover:bg-red-500/10 text-xs"
+            className="border-red-500 text-red-400 hover:bg-red-500/10"
           >
-            <X className="w-3 h-3 mr-1" />
             Annuler
           </Button>
           <Button
             onClick={handleCreateTeam}
-            size="sm"
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-xs"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600"
           >
             Créer
           </Button>
