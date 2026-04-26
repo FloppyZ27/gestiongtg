@@ -1208,6 +1208,28 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     }
   };
 
+  // Bouton d'action carte — utilise style inline pour contourner le CSS global "border: none !important"
+  const CardActionBtn = ({ onClick, baseColor, hoverColor, textColor, title, children }) => {
+    const [hovered, setHovered] = useState(false);
+    return (
+      <button
+        onClick={onClick}
+        title={title}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: hovered ? hoverColor : baseColor,
+          color: hovered ? '#fff' : textColor,
+          transition: 'background 150ms, color 150ms',
+          cursor: 'pointer', border: 'none', outline: 'none', padding: 0, flexShrink: 0,
+        }}
+      >
+        {children}
+      </button>
+    );
+  };
+
   // ---- Render DossierCard (custom drag) ----
   const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false }) => {
     const { dossier, mandat, terrain } = card;
@@ -1272,63 +1294,55 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
 
           </div>
-          <div className="grid grid-cols-2 gap-0.5 flex-shrink-0">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', flexShrink: 0 }}>
             {!hideEditButton && (
-              <button
+              <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }}
-                className="h-5 w-5 rounded flex items-center justify-center transition-all duration-150 bg-blue-500/20 text-blue-400 hover:bg-blue-500/60 hover:text-white"
+                baseColor="rgba(59,130,246,0.25)"
+                hoverColor="rgba(59,130,246,0.75)"
+                textColor="#93c5fd"
                 title="Modifier le terrain"
               >
-                <Edit className="w-2.5 h-2.5" />
-              </button>
+                <Edit style={{ width: 10, height: 10 }} />
+              </CardActionBtn>
             )}
             {!hideEditButton && (
-              <button
+              <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }}
-                className="h-5 w-5 rounded flex items-center justify-center transition-all duration-150 bg-red-500/15 text-red-400 hover:bg-red-500/60 hover:text-white"
+                baseColor="rgba(239,68,68,0.2)"
+                hoverColor="rgba(239,68,68,0.7)"
+                textColor="#fca5a5"
                 title="Supprimer le terrain"
               >
-                <Trash2 className="w-2.5 h-2.5" />
-              </button>
+                <Trash2 style={{ width: 10, height: 10 }} />
+              </CardActionBtn>
             )}
             {!hideLinkedButton && (
-              <button
+              <CardActionBtn
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (linkingMode) {
-                    handleLinkCard(card.id);
-                  } else if (isLinked) {
-                    handleUnlinkCard(linkedGroup.id, card.id);
-                  } else {
-                    handleLinkCard(card.id);
-                  }
+                  if (linkingMode) handleLinkCard(card.id);
+                  else if (isLinked) handleUnlinkCard(linkedGroup.id, card.id);
+                  else handleLinkCard(card.id);
                 }}
-                className={`h-5 w-5 rounded flex items-center justify-center transition-all duration-150 ${
-                  isLinkingFirst
-                    ? 'bg-violet-500 text-white ring-1 ring-violet-300'
-                    : isLinked && !linkingMode
-                      ? 'bg-violet-500/40 text-violet-200 hover:bg-red-500/60 hover:text-white'
-                      : isLinked && linkingMode
-                        ? 'bg-violet-500/50 text-violet-200 hover:bg-violet-500/70'
-                        : 'bg-slate-700/50 text-slate-400 hover:bg-violet-500/40 hover:text-violet-200'
-                }`}
+                baseColor={isLinkingFirst ? 'rgba(139,92,246,0.8)' : isLinked ? 'rgba(139,92,246,0.4)' : 'rgba(71,85,105,0.4)'}
+                hoverColor={isLinked && !linkingMode ? 'rgba(239,68,68,0.6)' : 'rgba(139,92,246,0.7)'}
+                textColor={isLinkingFirst ? '#fff' : isLinked ? '#c4b5fd' : '#94a3b8'}
                 title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
               >
-                {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
-              </button>
+                {isLinked && !linkingMode ? <Unlink style={{ width: 10, height: 10 }} /> : <Link2 style={{ width: 10, height: 10 }} />}
+              </CardActionBtn>
             )}
             {showLock && (
-              <button
+              <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }}
-                className={`h-5 w-5 rounded flex items-center justify-center transition-all duration-150 ${
-                  isLocked
-                    ? 'bg-amber-500/70 text-white hover:bg-amber-400 hover:text-white'
-                    : 'bg-slate-700/50 text-slate-400 hover:bg-amber-500/40 hover:text-amber-300'
-                }`}
+                baseColor={isLocked ? 'rgba(245,158,11,0.8)' : 'rgba(71,85,105,0.4)'}
+                hoverColor={isLocked ? 'rgba(251,191,36,0.9)' : 'rgba(245,158,11,0.5)'}
+                textColor={isLocked ? '#fff' : '#94a3b8'}
                 title={isLocked ? 'Déverrouiller' : 'Verrouiller'}
               >
-                {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
-              </button>
+                {isLocked ? <Lock style={{ width: 10, height: 10 }} /> : <Unlock style={{ width: 10, height: 10 }} />}
+              </CardActionBtn>
             )}
           </div>
         </div>
