@@ -1893,14 +1893,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                                 {travelSecs > 0 && <span className="text-slate-400 ml-1">({formatHHMM(travelSecs)} 🚗)</span>}
                               </span>
                             )}
-                            {equipe.techniciens.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {equipe.techniciens.map(id => {
-                                  const u = users?.find(u => u.id === id);
-                                  return u ? <span key={id} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Users className="w-3 h-3 text-blue-400" />{u.full_name}</span> : null;
-                                })}
-                              </div>
-                            )}
+
                           </div>
 
                         </div>
