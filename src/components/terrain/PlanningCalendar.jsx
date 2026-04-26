@@ -1800,7 +1800,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       </Dialog>
 
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] p-0 gap-0" style={{ position: 'fixed', top: '120px', left: '50%', transform: 'translateX(-50%)', height: 'calc(100vh - 130px)', maxHeight: 'calc(100vh - 130px)' }}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] p-0 gap-0" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', height: 'calc(100vh - 170px)', maxHeight: 'calc(100vh - 170px)' }}>
           <DialogHeader className="p-4 border-b border-slate-800">
             <DialogTitle className="text-xl font-bold text-white">Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</DialogTitle>
             {mapRoutes.length > 0 && (
