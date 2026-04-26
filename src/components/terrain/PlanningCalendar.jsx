@@ -1835,72 +1835,53 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             )}
           </DialogHeader>
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            {/* Colonne gauche — équipes et cartes terrain */}
-            <div style={{ width: 260, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
+            {/* Colonne gauche — équipes et cartes terrain (même style que le planning) */}
+            <div style={{ width: 280, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
               {selectedMapDate && (equipes[selectedMapDate] || [])
                 .filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase())
                 .map((equipe, posIdx) => {
-                  const routeForEquipe = mapRoutes.find(r => r.equipeId === equipe.id);
-                  const color = routeForEquipe ? routeForEquipe.color : COLORS[posIdx % COLORS.length];
                   const equipeNom = generateTeamDisplayName(equipe, posIdx);
                   const travelSecs = equipeTravelSeconds[equipe.id] || 0;
                   const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
+                  const { totalTime } = calculateEquipeTimings(equipe);
+                  const travailSecs = parseFloat(totalTime) * 3600;
+                  const totalSecs = travailSecs + travelSecs;
                   return (
-                    <div key={equipe.id} style={{ marginBottom: 12 }}>
-                      {/* Header équipe */}
-                      <div style={{ background: `${color}22`, border: `1px solid ${color}66`, borderRadius: 8, padding: '6px 8px', marginBottom: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                          <span style={{ color: 'white', fontWeight: 700, fontSize: 12, flex: 1 }}>{equipeNom}</span>
-                        </div>
-                        {travelSecs > 0 && (
-                          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2, paddingLeft: 16 }}>
-                            🚗 {formatHHMM(travelSecs)}
-                            {(() => {
-                              const travailSecs = equipe.mandats.reduce((sum, cId) => {
-                                const c = terrainCards.find(t => t.id === cId);
-                                const match = (c?.terrain?.temps_prevu || '').match(/(\d+(?:\.\d+)?)/);
-                                return sum + (match ? parseFloat(match[0]) * 3600 : 0);
-                              }, 0);
-                              return travailSecs > 0 ? ` · Total: ${formatHHMM(travailSecs + travelSecs)}` : '';
-                            })()}
-                          </div>
-                        )}
-                        {/* Techniciens */}
-                        {equipe.techniciens.length > 0 && (
-                          <div style={{ fontSize: 10, color: '#60a5fa', marginTop: 2, paddingLeft: 16 }}>
-                            {equipe.techniciens.map(id => { const u = users?.find(u => u.id === id); return u ? u.full_name : null; }).filter(Boolean).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                      {/* Cartes terrain */}
-                      {equipe.mandats.map(cId => {
-                        const card = terrainCards.find(c => c.id === cId);
-                        if (!card) return null;
-                        const { dossier, mandat, terrain } = card;
-                        const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
-                        const clientsNames = clients.filter(c => dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-';
-                        const adresse = formatAdresse(mandat?.adresse_travaux);
-                        return (
-                          <div key={cId} style={{ marginBottom: 6, borderRadius: 8, padding: '6px 8px', border: `1px solid ${color}44`, background: 'rgba(30,41,59,0.6)' }}>
-                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4 }}>
-                              <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: 'rgba(30,41,59,0.8)', color: 'white', border: '1px solid rgba(255,255,255,0.15)' }}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                    <div key={equipe.id} className="bg-slate-800/50 rounded-lg overflow-hidden mb-3">
+                      {/* Header équipe — identique au planning */}
+                      <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-white text-sm font-bold block">{equipeNom}</span>
+                            {equipe.mandats.length > 0 && (
+                              <span className="text-emerald-300 text-xs">
+                                {formatHHMM(totalSecs)}
+                                {travelSecs > 0 && <span className="text-slate-400 ml-1">({formatHHMM(travelSecs)} 🚗)</span>}
                               </span>
-                              <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 4, background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)' }}>
-                                {getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}
-                              </span>
-                            </div>
-                            <div style={{ fontSize: 11, color: 'white', marginBottom: 2 }}>{clientsNames}</div>
-                            {adresse && <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 2 }}>📍 {adresse}</div>}
-                            {terrain?.a_rendez_vous && terrain?.date_rendez_vous && (
-                              <div style={{ fontSize: 10, color: '#fb923c' }}>🕐 RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}{terrain.heure_rendez_vous ? ` à ${terrain.heure_rendez_vous}` : ''}</div>
                             )}
-                            {terrain?.temps_prevu && <div style={{ fontSize: 10, color: '#6ee7b7' }}>⏱ {terrain.temps_prevu}</div>}
-                            {terrain?.instruments_requis && <div style={{ fontSize: 10, color: '#a7f3d0' }}>🔧 {terrain.instruments_requis}</div>}
+                            {equipe.techniciens.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {equipe.techniciens.map(id => {
+                                  const u = users?.find(u => u.id === id);
+                                  return u ? <span key={id} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Users className="w-3 h-3 text-blue-400" />{u.full_name}</span> : null;
+                                })}
+                              </div>
+                            )}
                           </div>
-                        );
-                      })}
+                        </div>
+                      </div>
+                      {/* Cartes terrain — DossierCard sans boutons */}
+                      <div className="p-2">
+                        {equipe.mandats.map(cId => {
+                          const card = terrainCards.find(c => c.id === cId);
+                          if (!card) return null;
+                          return (
+                            <div key={cId}>
+                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} />
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 })
