@@ -1857,24 +1857,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
                     const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
                     const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedRoutes(isSelected ? selectedRoutes.filter(r => r !== i) : [...selectedRoutes, i])}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '6px',
-                          padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', cursor: 'pointer',
-                          border: `2px solid ${route.color}`,
-                          background: isSelected ? `${route.color}33` : 'transparent',
-                          color: isSelected ? 'white' : 'rgba(255,255,255,0.5)',
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: route.color, flexShrink: 0 }} />
-                        {route.label}
-                        {travelLabel && <span style={{ opacity: 0.7, fontSize: '11px' }}>· 🚗 {travelLabel}{totalLabel ? ` · Total: ${totalLabel}` : ''}</span>}
-                      </button>
-                    );
+                    return null;
                   })}
                 </div>
               </div>
