@@ -146,9 +146,7 @@ Deno.serve(async (req) => {
     if (!apiKey) return Response.json({ error: 'Missing Google Maps API key' }, { status: 500 });
 
     // Séparer les chefs des techniciens réguliers
-    // Un chef technicien a un poste contenant "Chef" ou "chef"
     const chefs = availableTechniciens.filter(t => t.poste && t.poste.toLowerCase().includes('chef'));
-    const techsReguliers = availableTechniciens.filter(t => !t.poste || !t.poste.toLowerCase().includes('chef'));
 
     const today = new Date().toISOString().split('T')[0];
     const result = {};
@@ -324,32 +322,6 @@ Deno.serve(async (req) => {
         const chef = freeChefs[0];
         let techIds = [chef.id];
         let techInitials = chef.prenom.charAt(0) + chef.nom.charAt(0);
-
-        // Optionnellement ajouter 1 technicien régulier libre (accompagnateur)
-        const usedTechRegIds = new Set();
-        (equipesCopy[dateStr] || []).forEach(eq => {
-          eq.techniciens.forEach(tid => {
-            const t = availableTechniciens.find(av => av.id === tid);
-            if (t && (!t.poste || !t.poste.toLowerCase().includes('chef'))) {
-              usedTechRegIds.add(tid);
-            }
-          });
-        });
-        newEquipes.filter(n => n.dateStr === dateStr).forEach(n => {
-          n.equipe.techniciens.forEach(tid => {
-            const t = availableTechniciens.find(av => av.id === tid);
-            if (t && (!t.poste || !t.poste.toLowerCase().includes('chef'))) {
-              usedTechRegIds.add(tid);
-            }
-          });
-        });
-
-        const freeRegTechs = techsReguliers.filter(t => !usedTechRegIds.has(t.id));
-        if (freeRegTechs.length > 0) {
-          const regTech = freeRegTechs[0];
-          techIds.push(regTech.id);
-          techInitials += '-' + regTech.prenom.charAt(0) + regTech.nom.charAt(0);
-        }
 
         const dayNewCount = newEquipes.filter(n => n.dateStr === dateStr).length;
         const existingCount = (equipesCopy[dateStr] || []).filter(eq =>
