@@ -1658,7 +1658,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-visible" style={{ alignItems: 'flex-start' }}>
+        <div className="flex gap-4 overflow-visible" style={{ alignItems: 'flex-start', height: '100%' }}>
           {/* Panneau gauche - cartes non assignées */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0 sticky top-[160px] h-fit" style={{ maxHeight: 'calc(100vh - 170px)' }}>
             <Tabs defaultValue="verification" className="w-full flex flex-col">
@@ -1697,7 +1697,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
 
           {/* Calendrier */}
-          <div data-kanban-scroll className="flex-1 overflow-x-auto overflow-y-visible" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+          <div data-kanban-scroll className="flex-1 overflow-auto" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
             <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content', transform: 'scaleX(0.95)', transformOrigin: 'left top' }}>
               {days.map(day => renderDay(day, viewMode === "month"))}
             </div>
