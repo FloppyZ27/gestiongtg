@@ -26,9 +26,9 @@ export default function CreateTeamTerrainDialog({
   const [vehiculeOpen, setVehiculeOpen] = useState(false);
   const [equipementOpen, setEquipementOpen] = useState(false);
 
-  // Filtrer les utilisateurs par rôle (simplement: admin = chef, user = technicien)
-  const chefs = users?.filter(u => u.role === "admin") || [];
-  const techs = users?.filter(u => u.role === "user") || [];
+  // Filtrer par poste terrain
+  const chefs = users?.filter(u => u.poste === "Technicien Terrain (Chef)") || [];
+  const techs = users?.filter(u => u.poste === "Technicien Terrain") || [];
 
   const availableVehicules = vehicules || [];
   const availableEquipements = equipements || [];
