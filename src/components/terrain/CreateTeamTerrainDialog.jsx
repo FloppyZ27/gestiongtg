@@ -35,6 +35,19 @@ export default function CreateTeamTerrainDialog({
   const availableVehicules = vehicules || [];
   const availableEquipements = equipements || [];
 
+  // Reproduire la logique de generateTeamDisplayName du PlanningCalendar
+  const getDisplayName = (equipe, positionIndex) => {
+    const numStr = String(positionIndex + 1);
+    if (!equipe.techniciens || equipe.techniciens.length === 0) return `Équipe ${numStr}`;
+    const getInitialsWithHyphens = (text) => text.split('-').map(p => p[0]?.toUpperCase()).join('');
+    const initials = equipe.techniciens.map(id => {
+      const u = users?.find(u => u.id === id);
+      if (!u) return '';
+      return getInitialsWithHyphens(u.prenom || '') + getInitialsWithHyphens(u.nom || '');
+    }).filter(n => n).join('-');
+    return `Équipe ${numStr} - ${initials}`;
+  };
+
   // Vérifier les éléments déjà utilisés dans les équipes du jour (TOUTES places confondues)
   const dayEquipes = equipes[dateStr] || [];
   const usedTechIds = new Set();
@@ -65,16 +78,13 @@ export default function CreateTeamTerrainDialog({
   const isEquipementUsed = (eqId) => usedEquipementIds.has(eqId);
 
   const getEquipeNameForElement = (elementId, type) => {
-    for (const equipe of dayEquipes) {
-      if (type === 'tech' && equipe.techniciens?.includes(elementId)) {
-        return equipe.nom;
-      }
-      if (type === 'vehicule' && equipe.vehicules?.includes(elementId)) {
-        return equipe.nom;
-      }
-      if (type === 'equipement' && equipe.equipements?.includes(elementId)) {
-        return equipe.nom;
-      }
+    for (let i = 0; i < dayEquipes.length; i++) {
+      const equipe = dayEquipes[i];
+      const matches =
+        (type === 'tech' && equipe.techniciens?.includes(elementId)) ||
+        (type === 'vehicule' && equipe.vehicules?.includes(elementId)) ||
+        (type === 'equipement' && equipe.equipements?.includes(elementId));
+      if (matches) return getDisplayName(equipe, i);
     }
     return null;
   };
