@@ -84,7 +84,16 @@ export default function CreateTeamTerrainDialog({
         (type === 'tech' && equipe.techniciens?.includes(elementId)) ||
         (type === 'vehicule' && equipe.vehicules?.includes(elementId)) ||
         (type === 'equipement' && equipe.equipements?.includes(elementId));
-      if (matches) return getDisplayName(equipe, i);
+      if (matches) {
+        // Calculer le numéro de position dans la place d'affaire de cette équipe
+        const equipePlace = equipe.place_affaire || '';
+        const equipesDeMemePlage = dayEquipes.filter(e => (e.place_affaire || '') === equipePlace);
+        const posIdx = equipesDeMemePlage.findIndex(e => e.id === equipe.id);
+        const displayName = getDisplayName(equipe, posIdx >= 0 ? posIdx : i);
+        // Si l'équipe est d'une autre place que celle affichée, ajouter la place
+        const isDifferentPlace = placeAffaire && equipePlace.toLowerCase() !== placeAffaire.toLowerCase();
+        return { name: displayName, place: isDifferentPlace ? equipePlace : null };
+      }
     }
     return null;
   };
@@ -214,7 +223,7 @@ export default function CreateTeamTerrainDialog({
                       const isWrongPlace = isChefWrongPlace(chef);
                       const isBorrowed = borrowedTechs.includes(chef.id);
                       const alreadyPlanned = isWrongPlace && isWrongPlaceTechAlreadyPlanned(chef.id);
-                      const equipeNom = isUsed ? getEquipeNameForElement(chef.id, 'tech') : null;
+                      const equipeInfo = isUsed ? getEquipeNameForElement(chef.id, 'tech') : null;
                       return (
                         <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${
                           isUsed ? 'opacity-50 bg-slate-600/30' :
@@ -238,8 +247,10 @@ export default function CreateTeamTerrainDialog({
                             'text-slate-200 cursor-pointer'
                           }`}>
                             {chef.prenom} {chef.nom}
-                            {equipeNom && (
-                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeNom}</Badge>
+                            {equipeInfo && (
+                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">
+                                {equipeInfo.name}{equipeInfo.place ? ` (${equipeInfo.place})` : ''}
+                              </Badge>
                             )}
                             {isWrongPlace && <span className="text-slate-400 text-[10px]">({chef.place_affaire})</span>}
                             {isBorrowed && <span className="text-amber-400 text-[10px]">— Emprunté</span>}
@@ -296,7 +307,7 @@ export default function CreateTeamTerrainDialog({
                       const isWrongPlace = isTechWrongPlace(tech);
                       const isBorrowed = borrowedTechs.includes(tech.id);
                       const alreadyPlanned = isWrongPlace && isWrongPlaceTechAlreadyPlanned(tech.id);
-                      const equipeNom = isUsed ? getEquipeNameForElement(tech.id, 'tech') : null;
+                      const equipeInfo = isUsed ? getEquipeNameForElement(tech.id, 'tech') : null;
                       return (
                         <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${
                           isUsed ? 'opacity-50 bg-slate-600/30' :
@@ -320,8 +331,10 @@ export default function CreateTeamTerrainDialog({
                             'text-slate-200 cursor-pointer'
                           }`}>
                             {tech.prenom} {tech.nom}
-                            {equipeNom && (
-                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeNom}</Badge>
+                            {equipeInfo && (
+                              <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">
+                                {equipeInfo.name}{equipeInfo.place ? ` (${equipeInfo.place})` : ''}
+                              </Badge>
                             )}
                             {isWrongPlace && <span className="text-slate-400 text-[10px]">({tech.place_affaire})</span>}
                             {isBorrowed && <span className="text-amber-400 text-[10px]">— Emprunté</span>}
@@ -375,7 +388,7 @@ export default function CreateTeamTerrainDialog({
                     availableVehicules.map(veh => {
                       const isSelected = selectedVehicules.includes(veh.id);
                       const isUsed = isVehiculeUsed(veh.id);
-                      const equipeNom = isUsed ? getEquipeNameForElement(veh.id, 'vehicule') : null;
+                      const equipeInfo = isUsed ? getEquipeNameForElement(veh.id, 'vehicule') : null;
                       return (
                         <div key={veh.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-purple-500/40 border border-purple-400 ring-1 ring-purple-400' : 'hover:bg-purple-500/20 bg-slate-700/20'}`}>
                           <Checkbox
@@ -385,8 +398,8 @@ export default function CreateTeamTerrainDialog({
                             disabled={isUsed}
                             className="border-purple-400"
                           />
-                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-purple-100' : 'text-slate-200'}`}>
-                            {veh.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}
+                          <Label htmlFor={`veh-${veh.id}`} className={`flex-1 cursor-pointer font-medium flex items-center gap-1.5 ${isUsed ? 'text-slate-400' : isSelected ? 'text-purple-100' : 'text-slate-200'}`}>
+                            {veh.nom} {equipeInfo && <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeInfo.name}{equipeInfo.place ? ` (${equipeInfo.place})` : ''}</Badge>}
                           </Label>
                         </div>
                       );
@@ -420,7 +433,7 @@ export default function CreateTeamTerrainDialog({
                     availableEquipements.map(eq => {
                       const isSelected = selectedEquipements.includes(eq.id);
                       const isUsed = isEquipementUsed(eq.id);
-                      const equipeNom = isUsed ? getEquipeNameForElement(eq.id, 'equipement') : null;
+                      const equipeInfo = isUsed ? getEquipeNameForElement(eq.id, 'equipement') : null;
                       return (
                         <div key={eq.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-orange-500/40 border border-orange-400 ring-1 ring-orange-400' : 'hover:bg-orange-500/20 bg-slate-700/20'}`}>
                           <Checkbox
@@ -430,8 +443,8 @@ export default function CreateTeamTerrainDialog({
                             disabled={isUsed}
                             className="border-orange-400"
                           />
-                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 cursor-pointer font-medium ${isUsed ? 'text-slate-400' : isSelected ? 'text-orange-100' : 'text-slate-200'}`}>
-                            {eq.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}
+                          <Label htmlFor={`eq-${eq.id}`} className={`flex-1 cursor-pointer font-medium flex items-center gap-1.5 ${isUsed ? 'text-slate-400' : isSelected ? 'text-orange-100' : 'text-slate-200'}`}>
+                            {eq.nom} {equipeInfo && <Badge className="bg-blue-600/70 text-white text-[10px] px-1.5 py-0 h-4 font-semibold">{equipeInfo.name}{equipeInfo.place ? ` (${equipeInfo.place})` : ''}</Badge>}
                           </Label>
                         </div>
                       );
