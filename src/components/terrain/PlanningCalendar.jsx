@@ -1273,26 +1273,63 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
           </div>
           <div className="grid grid-cols-2 gap-0.5 flex-shrink-0">
-            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-5 w-5 p-0"><Edit className="w-2.5 h-2.5" /></Button>}
-            {!hideEditButton && <Button size="sm" onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }} className="bg-red-500/10 hover:bg-red-500/40 text-red-500 hover:text-red-300 h-5 w-5 p-0"><Trash2 className="w-2.5 h-2.5" /></Button>}
-            {!hideLinkedButton && <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (linkingMode) {
-                  handleLinkCard(card.id);
-                } else if (isLinked) {
-                  handleUnlinkCard(linkedGroup.id, card.id);
-                } else {
-                  handleLinkCard(card.id);
-                }
-              }}
-              className={`h-5 w-5 p-0 ${isLinkingFirst ? 'bg-violet-500/50 text-violet-200 ring-1 ring-violet-400' : isLinked && !linkingMode ? 'bg-violet-500/30 hover:bg-red-500/30 text-violet-300 hover:text-red-300' : isLinked && linkingMode ? 'bg-violet-500/40 hover:bg-violet-500/60 text-violet-200' : 'bg-slate-700/50 hover:bg-violet-500/30 text-slate-400 hover:text-violet-300'}`}
-              title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
-            >
-              {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
-            </Button>}
-            {showLock && <Button size="sm" data-lock-button onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }} style={{ background: isLocked ? '#fbbf24 !important' : 'rgba(59, 130, 246, 0.4) !important', color: '#60a5fa !important', transition: 'all 150ms !important' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#fbbf24 !important'; e.currentTarget.style.color = '#fbbf24 !important'; }} onMouseLeave={(e) => { e.currentTarget.style.background = (isLocked ? '#fbbf24' : 'rgba(59, 130, 246, 0.4)') + ' !important'; e.currentTarget.style.color = '#60a5fa !important'; }} className="h-5 w-5 p-0" title={isLocked ? 'Déverrouiller' : 'Verrouiller'}>{isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}</Button>}
+            {!hideEditButton && (
+              <button
+                onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }}
+                className="h-5 w-5 rounded flex items-center justify-center transition-all duration-150 bg-blue-500/20 text-blue-400 hover:bg-blue-500/60 hover:text-white"
+                title="Modifier le terrain"
+              >
+                <Edit className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {!hideEditButton && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }}
+                className="h-5 w-5 rounded flex items-center justify-center transition-all duration-150 bg-red-500/15 text-red-400 hover:bg-red-500/60 hover:text-white"
+                title="Supprimer le terrain"
+              >
+                <Trash2 className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {!hideLinkedButton && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (linkingMode) {
+                    handleLinkCard(card.id);
+                  } else if (isLinked) {
+                    handleUnlinkCard(linkedGroup.id, card.id);
+                  } else {
+                    handleLinkCard(card.id);
+                  }
+                }}
+                className={`h-5 w-5 rounded flex items-center justify-center transition-all duration-150 ${
+                  isLinkingFirst
+                    ? 'bg-violet-500 text-white ring-1 ring-violet-300'
+                    : isLinked && !linkingMode
+                      ? 'bg-violet-500/40 text-violet-200 hover:bg-red-500/60 hover:text-white'
+                      : isLinked && linkingMode
+                        ? 'bg-violet-500/50 text-violet-200 hover:bg-violet-500/70'
+                        : 'bg-slate-700/50 text-slate-400 hover:bg-violet-500/40 hover:text-violet-200'
+                }`}
+                title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
+              >
+                {isLinked && !linkingMode ? <Unlink className="w-2.5 h-2.5" /> : <Link2 className="w-2.5 h-2.5" />}
+              </button>
+            )}
+            {showLock && (
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }}
+                className={`h-5 w-5 rounded flex items-center justify-center transition-all duration-150 ${
+                  isLocked
+                    ? 'bg-amber-500/70 text-white hover:bg-amber-400 hover:text-white'
+                    : 'bg-slate-700/50 text-slate-400 hover:bg-amber-500/40 hover:text-amber-300'
+                }`}
+                title={isLocked ? 'Déverrouiller' : 'Verrouiller'}
+              >
+                {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
+              </button>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span></div>
