@@ -106,6 +106,8 @@ export default function CreateTeamTerrainDialog({
   // Compter les chefs et techs disponibles (même place ou pas de place définie, et non assignés)
   const availableChefs = chefs.filter(c => !isChefUsed(c.id) && !isChefWrongPlace(c)).length;
   const availableTechs = techs.filter(t => !isTechUsed(t.id) && !isTechWrongPlace(t)).length;
+  const totalChefs = chefs.filter(c => !isChefWrongPlace(c)).length;
+  const totalTechs = techs.filter(t => !isTechWrongPlace(t)).length;
 
   const handleCreateTeam = () => {
     // Validation : au moins un chef doit être sélectionné
@@ -210,7 +212,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
                       <Users className="w-3 h-3 text-blue-400" />
                     </div>
-                    <CardTitle className="text-blue-300 text-sm">Chef ({selectedChefs.length}/{availableChefs})</CardTitle>
+                    <CardTitle className="text-blue-300 text-sm">Chef ({availableChefs}/{totalChefs})</CardTitle>
                   </div>
                   {chefOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -294,7 +296,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
                       <Users className="w-3 h-3 text-cyan-400" />
                     </div>
-                    <CardTitle className="text-cyan-300 text-sm">Technicien ({selectedTechs.length}/{availableTechs})</CardTitle>
+                    <CardTitle className="text-cyan-300 text-sm">Technicien ({availableTechs}/{totalTechs})</CardTitle>
                   </div>
                   {techOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -378,7 +380,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-purple-500/30 flex items-center justify-center">
                       <Truck className="w-3 h-3 text-purple-400" />
                     </div>
-                    <CardTitle className="text-purple-300 text-sm">Véhicules ({selectedVehicules.length}/{availableVehicules.length})</CardTitle>
+                    <CardTitle className="text-purple-300 text-sm">Véhicules ({availableVehicules.filter(v => !isVehiculeUsed(v.id)).length}/{availableVehicules.length})</CardTitle>
                   </div>
                   {vehiculeOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -423,7 +425,7 @@ export default function CreateTeamTerrainDialog({
                     <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
                       <Wrench className="w-3 h-3 text-orange-400" />
                     </div>
-                    <CardTitle className="text-orange-300 text-sm">Équipements ({selectedEquipements.length}/{availableEquipements.length})</CardTitle>
+                    <CardTitle className="text-orange-300 text-sm">Équipements ({availableEquipements.filter(e => !isEquipementUsed(e.id)).length}/{availableEquipements.length})</CardTitle>
                   </div>
                   {equipementOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                 </div>
