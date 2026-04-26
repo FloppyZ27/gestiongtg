@@ -65,9 +65,9 @@ export default function CreateTeamTerrainDialog({
     return null;
   };
 
-  // Un utilisateur est "wrong place" si placeAffaire est défini ET que sa place ne correspond pas exactement
-  const isChefWrongPlace = (chef) => placeAffaire ? chef.place_affaire !== placeAffaire : false;
-  const isTechWrongPlace = (tech) => placeAffaire ? tech.place_affaire !== placeAffaire : false;
+  // Un utilisateur est "wrong place" si placeAffaire est défini ET que sa place ne correspond pas (comparaison insensible à la casse)
+  const isChefWrongPlace = (chef) => placeAffaire ? chef.place_affaire?.toLowerCase() !== placeAffaire.toLowerCase() : false;
+  const isTechWrongPlace = (tech) => placeAffaire ? tech.place_affaire?.toLowerCase() !== placeAffaire.toLowerCase() : false;
 
   // Compter les chefs et techs disponibles (même place ou pas de place définie, et non assignés)
   const availableChefs = chefs.filter(c => !isChefUsed(c.id) && !isChefWrongPlace(c)).length;
