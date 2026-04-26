@@ -1600,7 +1600,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 >
                   {unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").map((card) => (
                     <div key={card.id} className="mb-2">
-                      <DossierCard card={card} />
+                      <DossierCard card={card} showLock />
                     </div>
                   ))}
                 </div>
