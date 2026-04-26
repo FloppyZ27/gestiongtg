@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2 } from "lucide-react";
+import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Unlink, Timer, AlertCircle, Copy, Lock, Unlock, Sparkles, Loader, Trash2, Eye, EyeOff } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -1886,20 +1886,20 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                             )}
                           </div>
                           {/* Bouton toggle trajet */}
-                           {routeIdx >= 0 && (
-                             <button
-                               onClick={(e) => { e.stopPropagation(); setSelectedRoutes(isRouteVisible ? selectedRoutes.filter(r => r !== routeIdx) : [...selectedRoutes, routeIdx]); }}
-                               style={{
-                                 flexShrink: 0, width: 28, height: 28, borderRadius: 6, border: `2px solid ${color}`,
-                                 background: isRouteVisible ? `${color}44` : 'transparent',
-                                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                 transition: 'all 0.15s',
-                               }}
-                               title={isRouteVisible ? 'Masquer le trajet' : 'Afficher le trajet'}
-                             >
-                               <span style={{ width: 10, height: 10, borderRadius: '50%', background: isRouteVisible ? color : 'transparent', border: `2px solid ${color}`, display: 'block', transition: 'all 0.15s' }} />
-                             </button>
-                           )}
+                          {routeIdx >= 0 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedRoutes(isRouteVisible ? selectedRoutes.filter(r => r !== routeIdx) : [...selectedRoutes, routeIdx]); }}
+                              style={{
+                                flexShrink: 0, width: 28, height: 28, borderRadius: 6, border: `2px solid ${color}`,
+                                background: isRouteVisible ? `${color}44` : 'transparent',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 0.15s',
+                              }}
+                              title={isRouteVisible ? 'Masquer le trajet' : 'Afficher le trajet'}
+                            >
+                              {isRouteVisible ? <Eye style={{ width: 16, height: 16, color }} /> : <EyeOff style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.4)' }} />}
+                            </button>
+                          )}
                         </div>
                       </div>
                       {/* Cartes terrain — DossierCard sans boutons + lettre pin */}
@@ -1938,11 +1938,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 : mapRoutes.length === 0
                   ? <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet</div>
                   : <MapWithStableRoutes
-                      mapRoutes={mapRoutes}
-                      selectedRoutes={selectedRoutes}
-                      apiKey={googleMapsApiKey}
-                      onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
-                    />
+                    mapRoutes={mapRoutes}
+                    visibleRouteIndices={selectedRoutes}
+                    apiKey={googleMapsApiKey}
+                    onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                  />
               }
             </div>
           </div>
