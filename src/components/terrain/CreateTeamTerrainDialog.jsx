@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Truck, Wrench, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Truck, Wrench, X, ChevronDown, ChevronUp, ArrowLeftRight } from "lucide-react";
 
 export default function CreateTeamTerrainDialog({
   isOpen,
@@ -19,6 +19,7 @@ export default function CreateTeamTerrainDialog({
 }) {
   const [selectedChefs, setSelectedChefs] = useState([]);
   const [selectedTechs, setSelectedTechs] = useState([]);
+  const [borrowedTechs, setBorrowedTechs] = useState([]); // techniciens empruntés d'une autre place
   const [selectedVehicules, setSelectedVehicules] = useState([]);
   const [selectedEquipements, setSelectedEquipements] = useState([]);
   const [chefOpen, setChefOpen] = useState(true);
@@ -33,7 +34,7 @@ export default function CreateTeamTerrainDialog({
   const availableVehicules = vehicules || [];
   const availableEquipements = equipements || [];
 
-  // Vérifier les éléments déjà utilisés dans les équipes du jour
+  // Vérifier les éléments déjà utilisés dans les équipes du jour (TOUTES places confondues)
   const dayEquipes = equipes[dateStr] || [];
   const usedTechIds = new Set();
   const usedVehiculeIds = new Set();
@@ -44,6 +45,18 @@ export default function CreateTeamTerrainDialog({
     equipe.vehicules?.forEach(id => usedVehiculeIds.add(id));
     equipe.equipements?.forEach(id => usedEquipementIds.add(id));
   });
+
+  // Un technicien wrong-place est "déjà planifié" s'il est dans une équipe de son propre place ce jour-là
+  const isWrongPlaceTechAlreadyPlanned = (userId) => {
+    const user = users?.find(u => u.id === userId);
+    if (!user) return false;
+    const userPlace = user.place_affaire?.toLowerCase();
+    // Chercher dans toutes les équipes du jour appartenant à sa propre place
+    return dayEquipes.some(eq =>
+      eq.place_affaire?.toLowerCase() === userPlace &&
+      eq.techniciens?.includes(userId)
+    );
+  };
 
   const isChefUsed = (chefId) => usedTechIds.has(chefId);
   const isTechUsed = (techId) => usedTechIds.has(techId);
@@ -106,11 +119,27 @@ export default function CreateTeamTerrainDialog({
     resetForm();
   };
 
+  const toggleBorrow = (userId, type) => {
+    const isBorrowed = borrowedTechs.includes(userId);
+    if (isBorrowed) {
+      // Retirer de l'emprunt et de la sélection
+      setBorrowedTechs(prev => prev.filter(id => id !== userId));
+      if (type === "chefs") setSelectedChefs(prev => prev.filter(id => id !== userId));
+      else setSelectedTechs(prev => prev.filter(id => id !== userId));
+    } else {
+      // Ajouter à l'emprunt et à la sélection
+      setBorrowedTechs(prev => [...prev, userId]);
+      if (type === "chefs") setSelectedChefs(prev => prev.includes(userId) ? prev : [...prev, userId]);
+      else setSelectedTechs(prev => prev.includes(userId) ? prev : [...prev, userId]);
+    }
+  };
+
   const resetForm = () => {
     setSelectedChefs([]);
     setSelectedTechs([]);
     setSelectedVehicules([]);
     setSelectedEquipements([]);
+    setBorrowedTechs([]);
     onClose();
   };
 
@@ -172,19 +201,53 @@ export default function CreateTeamTerrainDialog({
                       const isSelected = selectedChefs.includes(chef.id);
                       const isUsed = isChefUsed(chef.id);
                       const isWrongPlace = isChefWrongPlace(chef);
+                      const isBorrowed = borrowedTechs.includes(chef.id);
+                      const alreadyPlanned = isWrongPlace && isWrongPlaceTechAlreadyPlanned(chef.id);
                       const equipeNom = isUsed ? getEquipeNameForElement(chef.id, 'tech') : null;
                       return (
-                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isWrongPlace || isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' : 'hover:bg-blue-500/20 bg-slate-700/20'}`}>
+                        <div key={chef.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${
+                          isUsed ? 'opacity-50 bg-slate-600/30' :
+                          isWrongPlace && !isBorrowed ? 'opacity-60 bg-slate-600/20' :
+                          isBorrowed ? 'bg-amber-500/20 border border-amber-500/50' :
+                          isSelected ? 'bg-blue-500/40 border border-blue-400 ring-1 ring-blue-400' :
+                          'hover:bg-blue-500/20 bg-slate-700/20'
+                        }`}>
                           <Checkbox
                             id={`chef-${chef.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(chef.id, "chefs")}
-                            disabled={isUsed || isWrongPlace}
+                            disabled={isUsed || (isWrongPlace && !isBorrowed)}
                             className="border-blue-400"
                           />
-                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 cursor-pointer font-medium ${isWrongPlace || isUsed ? 'text-slate-400' : isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
-                             {chef.prenom} {chef.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}{isWrongPlace && <span className="text-slate-500"> ({chef.place_affaire})</span>}
-                           </Label>
+                          <Label htmlFor={`chef-${chef.id}`} className={`flex-1 font-medium ${
+                            isUsed ? 'text-slate-400 cursor-default' :
+                            isWrongPlace && !isBorrowed ? 'text-slate-400 cursor-default' :
+                            isBorrowed ? 'text-amber-200 cursor-pointer' :
+                            isSelected ? 'text-blue-100 cursor-pointer' :
+                            'text-slate-200 cursor-pointer'
+                          }`}>
+                            {chef.full_name || `${chef.prenom} ${chef.nom}`}
+                            {equipeNom && <span className="text-slate-500 ml-1">({equipeNom})</span>}
+                            {isWrongPlace && <span className="text-slate-400 ml-1">({chef.place_affaire})</span>}
+                            {isBorrowed && <span className="text-amber-400 ml-1">— Emprunté</span>}
+                          </Label>
+                          {isWrongPlace && !isUsed && (
+                            alreadyPlanned ? (
+                              <span className="text-red-400 text-[10px] italic">Déjà planifié</span>
+                            ) : (
+                              <button
+                                onClick={() => toggleBorrow(chef.id, "chefs")}
+                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                                  isBorrowed
+                                    ? 'bg-amber-500/30 text-amber-300 hover:bg-red-500/20 hover:text-red-300'
+                                    : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/40'
+                                }`}
+                              >
+                                <ArrowLeftRight className="w-2.5 h-2.5" />
+                                {isBorrowed ? 'Annuler' : 'Emprunter'}
+                              </button>
+                            )
+                          )}
                         </div>
                       );
                     })
@@ -218,19 +281,53 @@ export default function CreateTeamTerrainDialog({
                       const isSelected = selectedTechs.includes(tech.id);
                       const isUsed = isTechUsed(tech.id);
                       const isWrongPlace = isTechWrongPlace(tech);
+                      const isBorrowed = borrowedTechs.includes(tech.id);
+                      const alreadyPlanned = isWrongPlace && isWrongPlaceTechAlreadyPlanned(tech.id);
                       const equipeNom = isUsed ? getEquipeNameForElement(tech.id, 'tech') : null;
                       return (
-                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${isWrongPlace || isUsed ? 'opacity-50 bg-slate-600/30' : isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' : 'hover:bg-cyan-500/20 bg-slate-700/20'}`}>
+                        <div key={tech.id} className={`flex items-center gap-2 p-1.5 rounded text-xs transition-all ${
+                          isUsed ? 'opacity-50 bg-slate-600/30' :
+                          isWrongPlace && !isBorrowed ? 'opacity-60 bg-slate-600/20' :
+                          isBorrowed ? 'bg-amber-500/20 border border-amber-500/50' :
+                          isSelected ? 'bg-cyan-500/40 border border-cyan-400 ring-1 ring-cyan-400' :
+                          'hover:bg-cyan-500/20 bg-slate-700/20'
+                        }`}>
                           <Checkbox
                             id={`tech-${tech.id}`}
                             checked={isSelected}
                             onCheckedChange={() => toggleUser(tech.id, "techs")}
-                            disabled={isUsed || isWrongPlace}
+                            disabled={isUsed || (isWrongPlace && !isBorrowed)}
                             className="border-cyan-400"
                           />
-                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 cursor-pointer font-medium ${isWrongPlace || isUsed ? 'text-slate-400' : isSelected ? 'text-cyan-100' : 'text-slate-200'}`}>
-                             {tech.prenom} {tech.nom} {equipeNom && <span className="text-slate-500">({equipeNom})</span>}{isWrongPlace && <span className="text-slate-500"> ({tech.place_affaire})</span>}
-                           </Label>
+                          <Label htmlFor={`tech-${tech.id}`} className={`flex-1 font-medium ${
+                            isUsed ? 'text-slate-400 cursor-default' :
+                            isWrongPlace && !isBorrowed ? 'text-slate-400 cursor-default' :
+                            isBorrowed ? 'text-amber-200 cursor-pointer' :
+                            isSelected ? 'text-cyan-100 cursor-pointer' :
+                            'text-slate-200 cursor-pointer'
+                          }`}>
+                            {tech.full_name || `${tech.prenom} ${tech.nom}`}
+                            {equipeNom && <span className="text-slate-500 ml-1">({equipeNom})</span>}
+                            {isWrongPlace && <span className="text-slate-400 ml-1">({tech.place_affaire})</span>}
+                            {isBorrowed && <span className="text-amber-400 ml-1">— Emprunté</span>}
+                          </Label>
+                          {isWrongPlace && !isUsed && (
+                            alreadyPlanned ? (
+                              <span className="text-red-400 text-[10px] italic">Déjà planifié</span>
+                            ) : (
+                              <button
+                                onClick={() => toggleBorrow(tech.id, "techs")}
+                                className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                                  isBorrowed
+                                    ? 'bg-amber-500/30 text-amber-300 hover:bg-red-500/20 hover:text-red-300'
+                                    : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/40'
+                                }`}
+                              >
+                                <ArrowLeftRight className="w-2.5 h-2.5" />
+                                {isBorrowed ? 'Annuler' : 'Emprunter'}
+                              </button>
+                            )
+                          )}
                         </div>
                       );
                     })
