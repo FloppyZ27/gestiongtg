@@ -197,7 +197,7 @@ export default function CreateTeamTerrainDialog({
     }}>
       <DialogContent hideClose className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col gap-0 p-0">
         <DialogHeader className="px-6 py-4 border-b border-slate-800">
-          <DialogTitle className="text-lg">Création équipe terrain</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white">Création équipe terrain</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-4">
