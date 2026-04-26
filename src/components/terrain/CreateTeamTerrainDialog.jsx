@@ -23,6 +23,7 @@ export default function CreateTeamTerrainDialog({
   const [borrowedTechs, setBorrowedTechs] = useState([]); // techniciens empruntés d'une autre place
   const [selectedVehicules, setSelectedVehicules] = useState([]);
   const [selectedEquipements, setSelectedEquipements] = useState([]);
+  const [showChefWarning, setShowChefWarning] = useState(false);
   const [chefOpen, setChefOpen] = useState(true);
   const [techOpen, setTechOpen] = useState(true);
   const [vehiculeOpen, setVehiculeOpen] = useState(false);
@@ -112,7 +113,7 @@ export default function CreateTeamTerrainDialog({
   const handleCreateTeam = () => {
     // Validation : au moins un chef doit être sélectionné
     if (selectedChefs.length === 0) {
-      alert("Vous devez sélectionner au moins un technicien chef pour créer une équipe.");
+      setShowChefWarning(true);
       return;
     }
 
@@ -460,6 +461,22 @@ export default function CreateTeamTerrainDialog({
             </Card>
           </div>
         </div>
+
+        <Dialog open={showChefWarning} onOpenChange={setShowChefWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">Vous devez sélectionner au moins un technicien chef pour créer une équipe.</p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button onClick={() => setShowChefWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
           <Button
