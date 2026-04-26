@@ -1658,9 +1658,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4">
+        <div className="flex gap-4 overflow-visible">
           {/* Panneau gauche - cartes non assignées */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[160px] self-start" style={{ maxHeight: 'calc(100vh - 170px)' }}>
+          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col w-[240px] flex-shrink-0 sticky top-[160px] self-start overflow-visible" style={{ maxHeight: 'calc(100vh - 170px)', height: 'fit-content' }}>
             <Tabs defaultValue="verification" className="w-full">
               <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
@@ -1697,7 +1697,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </Card>
 
           {/* Calendrier */}
-          <div data-kanban-scroll className="flex-1 overflow-x-auto" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+          <div data-kanban-scroll className="flex-1 overflow-x-auto overflow-y-visible" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
             <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content', transform: 'scaleX(0.95)', transformOrigin: 'left top' }}>
               {days.map(day => renderDay(day, viewMode === "month"))}
             </div>
