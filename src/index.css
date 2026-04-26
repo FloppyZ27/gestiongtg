@@ -177,30 +177,3 @@ button:focus-visible {
 *::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
 }
-
-/* Planning status panel - fixed floating panel */
-.planning-status-panel {
-  position: fixed;
-  top: 160px;
-  right: 24px;
-  z-index: 50;
-  width: 360px;
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
-}
-
-/* Responsive - disable fixed on small screens */
-@media (max-width: 1024px) {
-  .planning-status-panel {
-    position: static;
-    width: 100%;
-    max-height: none;
-    overflow: visible;
-    right: auto;
-    top: auto;
-  }
-
-  [data-kanban-scroll] {
-    padding-right: 0 !important;
-  }
-}
