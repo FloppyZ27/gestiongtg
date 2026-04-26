@@ -1209,7 +1209,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   };
 
   // Bouton d'action carte — utilise style inline pour contourner le CSS global "border: none !important"
-  const CardActionBtn = ({ onClick, baseColor, hoverColor, textColor, title, children }) => {
+  const CardActionBtn = ({ onClick, baseColor, hoverColor, textColor, hoverTextColor, title, children }) => {
     const [hovered, setHovered] = useState(false);
     return (
       <button
@@ -1218,9 +1218,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
-          width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 26, height: 26, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: hovered ? hoverColor : baseColor,
-          color: hovered ? '#fff' : textColor,
+          color: hovered ? (hoverTextColor || '#fff') : textColor,
           transition: 'background 150ms, color 150ms',
           cursor: 'pointer', border: 'none', outline: 'none', padding: 0, flexShrink: 0,
         }}
@@ -1294,27 +1294,29 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
 
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', flexShrink: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px', flexShrink: 0 }}>
             {!hideEditButton && (
               <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); handleEditTerrain(card); }}
                 baseColor="rgba(59,130,246,0.25)"
-                hoverColor="rgba(59,130,246,0.75)"
+                hoverColor="rgba(59,130,246,0.85)"
                 textColor="#93c5fd"
+                hoverTextColor="#fff"
                 title="Modifier le terrain"
               >
-                <Edit style={{ width: 10, height: 10 }} />
+                <Edit style={{ width: 13, height: 13 }} />
               </CardActionBtn>
             )}
             {!hideEditButton && (
               <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); setDeleteCardConfirm(card); }}
                 baseColor="rgba(239,68,68,0.2)"
-                hoverColor="rgba(239,68,68,0.7)"
+                hoverColor="rgba(239,68,68,0.85)"
                 textColor="#fca5a5"
+                hoverTextColor="#fff"
                 title="Supprimer le terrain"
               >
-                <Trash2 style={{ width: 10, height: 10 }} />
+                <Trash2 style={{ width: 13, height: 13 }} />
               </CardActionBtn>
             )}
             {!hideLinkedButton && (
@@ -1325,23 +1327,25 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   else if (isLinked) handleUnlinkCard(linkedGroup.id, card.id);
                   else handleLinkCard(card.id);
                 }}
-                baseColor={isLinkingFirst ? 'rgba(139,92,246,0.8)' : isLinked ? 'rgba(139,92,246,0.4)' : 'rgba(71,85,105,0.4)'}
-                hoverColor={isLinked && !linkingMode ? 'rgba(239,68,68,0.6)' : 'rgba(139,92,246,0.7)'}
+                baseColor={isLinkingFirst ? 'rgba(139,92,246,0.8)' : isLinked ? 'rgba(139,92,246,0.4)' : 'rgba(71,85,105,0.35)'}
+                hoverColor={isLinked && !linkingMode ? 'rgba(239,68,68,0.85)' : 'rgba(139,92,246,0.85)'}
                 textColor={isLinkingFirst ? '#fff' : isLinked ? '#c4b5fd' : '#94a3b8'}
+                hoverTextColor="#fff"
                 title={linkingMode ? (isLinkingFirst ? 'Cliquer sur une autre carte pour lier' : 'Ajouter au groupe') : isLinked ? 'Retirer du groupe lié' : 'Lier avec une autre carte'}
               >
-                {isLinked && !linkingMode ? <Unlink style={{ width: 10, height: 10 }} /> : <Link2 style={{ width: 10, height: 10 }} />}
+                {isLinked && !linkingMode ? <Unlink style={{ width: 13, height: 13 }} /> : <Link2 style={{ width: 13, height: 13 }} />}
               </CardActionBtn>
             )}
             {showLock && (
               <CardActionBtn
                 onClick={(e) => { e.stopPropagation(); toggleLockCard(card.id); }}
-                baseColor={isLocked ? 'rgba(245,158,11,0.8)' : 'rgba(71,85,105,0.4)'}
-                hoverColor={isLocked ? 'rgba(251,191,36,0.9)' : 'rgba(245,158,11,0.5)'}
+                baseColor={isLocked ? 'rgba(245,158,11,0.85)' : 'rgba(71,85,105,0.35)'}
+                hoverColor={isLocked ? 'rgba(251,191,36,1)' : 'rgba(245,158,11,0.7)'}
                 textColor={isLocked ? '#fff' : '#94a3b8'}
+                hoverTextColor={isLocked ? '#1c1917' : '#fff'}
                 title={isLocked ? 'Déverrouiller' : 'Verrouiller'}
               >
-                {isLocked ? <Lock style={{ width: 10, height: 10 }} /> : <Unlock style={{ width: 10, height: 10 }} />}
+                {isLocked ? <Lock style={{ width: 13, height: 13 }} /> : <Unlock style={{ width: 13, height: 13 }} />}
               </CardActionBtn>
             )}
           </div>
