@@ -92,7 +92,8 @@ export default function CreateTeamTerrainDialog({
         const displayName = getDisplayName(equipe, posIdx >= 0 ? posIdx : i);
         // Si l'équipe est d'une autre place que celle affichée, ajouter la place
         const isDifferentPlace = placeAffaire && equipePlace.toLowerCase() !== placeAffaire.toLowerCase();
-        return { name: displayName, place: isDifferentPlace ? equipePlace : null };
+        const placeFormatted = equipePlace ? equipePlace.charAt(0).toUpperCase() + equipePlace.slice(1) : equipePlace;
+        return { name: displayName, place: isDifferentPlace ? placeFormatted : null };
       }
     }
     return null;
