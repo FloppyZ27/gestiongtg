@@ -59,12 +59,13 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const googleMapRef = useRef(null);
   const directionsRenderersRef = useRef([]);
+  const markersGroupRef = useRef([]); // tableau de tableaux: markersGroupRef[routeIndex] = [markers...]
   const markersRef = useRef([]);
   const [hoveredDossier, setHoveredDossier] = useState(null);
 
@@ -110,6 +111,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
         directionsRenderersRef.current = [];
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
+        markersGroupRef.current = [];
         setHoveredDossier(null);
 
         const bounds = new window.google.maps.LatLngBounds();
@@ -146,7 +148,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
                 preserveViewport: true,
               });
 
-              directionsRenderersRef.current.push(directionsRenderer);
+              directionsRenderersRef.current[index] = directionsRenderer;
+              if (!markersGroupRef.current[index]) markersGroupRef.current[index] = [];
 
               // Créer des marqueurs personnalisés pour le départ et l'arrivée
               const route = result.routes[0];
@@ -154,7 +157,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
               const endLocation = route.legs[route.legs.length - 1].end_location;
 
               // Marqueur de départ
-              new window.google.maps.Marker({
+              const startMarker = new window.google.maps.Marker({
                 position: startLocation,
                 map: map,
                 label: {
@@ -174,6 +177,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
                 title: `${label} - Départ`,
                 zIndex: 1000 + index,
               });
+              markersGroupRef.current[index].push(startMarker);
 
               // Marqueurs pour chaque waypoint avec informations des dossiers
               // Les legs : leg[0] = bureau → wp[0], leg[1] = wp[0] → wp[1], ..., leg[n-1] = wp[n-2] → bureau
@@ -214,6 +218,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
                   });
 
                   markersRef.current.push(marker);
+                  markersGroupRef.current[index].push(marker);
                 }
               });
 
@@ -250,13 +255,29 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations }) {
 
     return () => {
       // Cleanup
-      directionsRenderersRef.current.forEach(renderer => renderer.setMap(null));
+      directionsRenderersRef.current.forEach(renderer => renderer && renderer.setMap(null));
       directionsRenderersRef.current = [];
       markersRef.current.forEach(marker => marker.setMap(null));
       markersRef.current = [];
+      markersGroupRef.current = [];
       setHoveredDossier(null);
     };
   }, [apiKey, routes]);
+
+  // Effet séparé pour show/hide les routes sans recréer la carte
+  useEffect(() => {
+    if (!googleMapRef.current || !visibleRouteIndices) return;
+    directionsRenderersRef.current.forEach((renderer, i) => {
+      if (!renderer) return;
+      const isVisible = visibleRouteIndices.includes(i);
+      renderer.setMap(isVisible ? googleMapRef.current : null);
+    });
+    markersGroupRef.current.forEach((markers, i) => {
+      if (!markers) return;
+      const isVisible = visibleRouteIndices.includes(i);
+      markers.forEach(marker => marker.setMap(isVisible ? googleMapRef.current : null));
+    });
+  }, [visibleRouteIndices]);
 
   if (error) {
     return (
