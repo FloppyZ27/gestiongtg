@@ -704,6 +704,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   useEffect(() => {
     if (mapRoutes.length > 0) {
       setSelectedRoutes(mapRoutes.map((_, i) => i));
+    } else {
+      setSelectedRoutes([]);
     }
   }, [selectedMapDate, mapRoutes.length]);
 
@@ -1894,10 +1896,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                                 background: isRouteVisible ? `${color}44` : 'transparent',
                                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 transition: 'all 0.15s',
+                                color: isRouteVisible ? color : 'rgba(255,255,255,0.4)',
                               }}
                               title={isRouteVisible ? 'Masquer le trajet' : 'Afficher le trajet'}
                             >
-                              {isRouteVisible ? <Eye style={{ width: 16, height: 16, color }} /> : <EyeOff style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.4)' }} />}
+                              {isRouteVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
                           )}
                         </div>
