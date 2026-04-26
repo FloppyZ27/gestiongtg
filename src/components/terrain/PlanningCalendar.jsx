@@ -142,16 +142,23 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups
 
 // Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
 function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
+  // Stabiliser les routes par contenu pour éviter de recréer la carte inutilement
+  const stableRoutes = useMemo(
+    () => mapRoutes,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(mapRoutes.map(r => ({ id: r.equipeId, wp: r.waypoints })))]
+  );
+
   const handleDurations = useCallback((durations) => {
-    mapRoutes.forEach((route, i) => {
+    stableRoutes.forEach((route, i) => {
       if (route.equipeId) onEquipeDurations(route.equipeId, durations[i] || 0);
     });
-  }, [mapRoutes, onEquipeDurations]);
+  }, [stableRoutes, onEquipeDurations]);
 
   return (
     <div style={{ height: 'calc(90vh - 120px)', width: '100%' }}>
       <MultiRouteMap
-        routes={mapRoutes}
+        routes={stableRoutes}
         apiKey={apiKey}
         onRouteDurations={handleDurations}
         visibleRouteIndices={selectedRoutes}
