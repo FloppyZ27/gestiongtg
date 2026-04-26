@@ -280,15 +280,28 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
     // Appliquer immédiatement sur ce qui est déjà chargé
     const map = googleMapRef.current;
     if (!map) return; // Vérifier que la carte existe
+    
     directionsRenderersRef.current.forEach((renderer, i) => {
       if (!renderer) return;
       const isVisible = visibleRouteIndices.includes(i);
-      renderer.setMap(isVisible ? map : null);
+      const currentMap = renderer.getMap();
+      const shouldBeVisible = isVisible ? map : null;
+      // Forcer la mise à jour même si c'est la même valeur
+      if ((currentMap === null) !== (shouldBeVisible === null)) {
+        renderer.setMap(shouldBeVisible);
+      }
     });
+    
     markersGroupRef.current.forEach((markers, i) => {
       if (!markers) return;
       const isVisible = visibleRouteIndices.includes(i);
-      markers.forEach(marker => marker.setMap(isVisible ? map : null));
+      const shouldBeVisible = isVisible ? map : null;
+      markers.forEach(marker => {
+        const currentMap = marker.getMap();
+        if ((currentMap === null) !== (shouldBeVisible === null)) {
+          marker.setMap(shouldBeVisible);
+        }
+      });
     });
   }, [visibleRouteIndices]);
 
