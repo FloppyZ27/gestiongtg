@@ -1658,16 +1658,16 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-visible">
+        <div className="flex gap-4 overflow-visible" style={{ alignItems: 'flex-start' }}>
           {/* Panneau gauche - cartes non assignées */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0 fixed left-6 top-[160px] overflow-visible" style={{ height: 'calc(100vh - 170px)', zIndex: 30 }}>
-            <Tabs defaultValue="verification" className="w-full flex flex-col h-full">
-              <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg flex-shrink-0">
+          <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0 sticky top-[160px] h-fit" style={{ maxHeight: 'calc(100vh - 170px)' }}>
+            <Tabs defaultValue="verification" className="w-full flex flex-col">
+              <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
                 <TabsTrigger value="planifier" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">À planifier</TabsTrigger>
               </TabsList>
-              <TabsContent value="verification" className="mt-0 flex-1 overflow-y-auto">
-                <h3 className="text-white font-semibold mb-3 text-sm sticky top-0 bg-slate-900/50 py-1 z-10">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
+              <TabsContent value="verification" className="mt-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+                <h3 className="text-white font-semibold mb-3 text-sm">En vérification ({unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").length})</h3>
                 <div className="pr-2">
                   {unassignedCards.filter(c => !c.terrain?.statut_terrain || c.terrain?.statut_terrain === "en_verification").map(card => (
                     <div key={card.id} className="mb-2">
@@ -1677,8 +1677,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   ))}
                 </div>
               </TabsContent>
-              <TabsContent value="planifier" className="mt-0 flex-1 overflow-y-auto">
-                <h3 className="text-white font-semibold mb-3 text-sm sticky top-0 bg-slate-900/50 py-1 z-10">À planifier ({unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").length})</h3>
+              <TabsContent value="planifier" className="mt-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+                <h3 className="text-white font-semibold mb-3 text-sm">À planifier ({unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").length})</h3>
                 {/* Zone de drop "retour" pour désassigner */}
                 <div
                   data-kanban-column="unassigned"
