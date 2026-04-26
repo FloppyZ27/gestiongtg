@@ -1919,22 +1919,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               </div>
                             )}
                           </div>
-                          {/* Bouton toggle trajet */}
-                          {routeIdx >= 0 && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setSelectedRoutes(isRouteVisible ? selectedRoutes.filter(r => r !== routeIdx) : [...selectedRoutes, routeIdx]); }}
-                              style={{
-                                flexShrink: 0, width: 28, height: 28, borderRadius: 6, border: `2px solid ${color}`,
-                                background: isRouteVisible ? `${color}44` : 'transparent',
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'all 0.15s',
-                                color: isRouteVisible ? color : 'rgba(255,255,255,0.4)',
-                              }}
-                              title={isRouteVisible ? 'Masquer le trajet' : 'Afficher le trajet'}
-                            >
-                              {isRouteVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                            </button>
-                          )}
+
                         </div>
                       </div>
                       {/* Cartes terrain — DossierCard sans boutons + lettre pin */}
