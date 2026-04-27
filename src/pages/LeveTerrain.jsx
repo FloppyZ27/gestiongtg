@@ -573,22 +573,15 @@ export default function LeveTerrain() {
     <TooltipProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 bg-slate-900/50">
-          <div className="flex items-center justify-between">
+        <div className="border-b border-slate-800 bg-slate-900/50">
+          {/* Titre + sous-titre */}
+          <div className="px-6 py-5 flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
                 <Mountain className="w-8 h-8 text-blue-400" />
               </div>
               <p className="text-slate-400 text-sm">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
-              {user && (
-                <div className="flex flex-col items-center justify-center mt-2 gap-1">
-                  <div className="text-3xl font-bold text-white">{user.full_name}</div>
-                  {employeConnecte && (
-                    <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
-                  )}
-                </div>
-              )}
             </div>
             {/* Navigation de journée */}
             <div className="flex items-center gap-3">
@@ -635,6 +628,16 @@ export default function LeveTerrain() {
               )}
             </div>
           </div>
+
+          {/* Nom de l'utilisateur centré */}
+          {user && (
+            <div className="flex flex-col items-center justify-center py-4 px-6 bg-slate-900/30">
+              <div className="text-4xl font-bold text-white">{user.full_name}</div>
+              {employeConnecte && (
+                <span className="text-slate-500 text-xs mt-1">— {employeConnecte.poste}</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-1 overflow-hidden">
