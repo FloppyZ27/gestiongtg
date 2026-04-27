@@ -9,6 +9,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PhotoMapOverlay from "@/components/terrain/PhotoMapOverlay";
 
@@ -537,28 +539,34 @@ export default function LeveTerrain() {
                 <ChevronLeft className="w-4 h-4" />
               </Button>
 
-              {/* Date cliquable — input date stylisé */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-600 hover:border-blue-500 transition-all">
-                <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0 pointer-events-none" />
-                <div className="relative">
-                  <p className="text-white font-semibold capitalize text-sm pointer-events-none">
-                    {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
-                  </p>
-                  {selectedDate === today && <p className="text-emerald-400 text-xs pointer-events-none">Aujourd'hui</p>}
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setSelectedDate(e.target.value);
+              {/* Calendrier popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-600 hover:border-blue-500 transition-all cursor-pointer">
+                    <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="text-white font-semibold capitalize text-sm">
+                        {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                      </p>
+                      {selectedDate === today && <p className="text-emerald-400 text-xs">Aujourd'hui</p>}
+                    </div>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700" align="center">
+                  <CalendarUI
+                    mode="single"
+                    selected={new Date(selectedDate + 'T00:00:00')}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(format(date, 'yyyy-MM-dd'));
                         setSelectedItem(null);
                       }
                     }}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    style={{ colorScheme: 'dark' }}
+                    locale={fr}
+                    className="text-white"
                   />
-                </div>
-              </div>
+                </PopoverContent>
+              </Popover>
 
               <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
                 <ChevronRight className="w-4 h-4" />
