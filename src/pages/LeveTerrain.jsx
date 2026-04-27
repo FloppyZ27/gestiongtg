@@ -575,14 +575,19 @@ export default function LeveTerrain() {
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
-              <Mountain className="w-8 h-8 text-blue-400" />
-              {employeConnecte && (
-                <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                  <UserCheck className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-300 text-sm font-medium">{employeConnecte.prenom} {employeConnecte.nom}</span>
-                  <span className="text-emerald-600 text-xs">— {employeConnecte.poste}</span>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
+                <Mountain className="w-8 h-8 text-blue-400" />
+              </div>
+              <p className="text-slate-400 text-sm">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
+              {user && (
+                <div className="flex items-center gap-2 mt-1">
+                  <User className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="text-slate-400 text-xs">Connecté en tant que <span className="text-white font-medium">{user.full_name}</span></span>
+                  {employeConnecte && (
+                    <span className="text-slate-600 text-xs">— {employeConnecte.poste}</span>
+                  )}
                 </div>
               )}
             </div>
