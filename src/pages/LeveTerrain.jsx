@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn } from "lucide-react";
+import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn, Map } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -120,6 +120,9 @@ export default function LeveTerrain() {
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
   const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
+  const [routeDuration, setRouteDuration] = useState(null); // durée totale de l'itinéraire en secondes
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -276,6 +279,49 @@ export default function LeveTerrain() {
       setPhotosFiles([]);
     }
     setLoadingPhotos(false);
+  };
+
+  const calculateRouteTime = async (dossiersList) => {
+    if (dossiersList.length === 0) {
+      setRouteDuration(null);
+      return;
+    }
+
+    setIsLoadingRoute(true);
+    try {
+      // Extraire les adresses des dossiers
+      const addresses = dossiersList
+        .map(({ dossier, mandat }) => {
+          const addr = mandat?.adresse_travaux;
+          if (!addr) return null;
+          return getAdresseString(addr);
+        })
+        .filter(Boolean);
+
+      if (addresses.length === 0) {
+        setRouteDuration(null);
+        setIsLoadingRoute(false);
+        return;
+      }
+
+      // Calculer l'itinéraire via la fonction backend
+      const response = await base44.functions.invoke('calculateRouteDuration', {
+        origin: addresses[0],
+        destination: addresses[addresses.length - 1],
+        waypoints: addresses.slice(1, -1)
+      });
+
+      if (response.data?.duration_seconds) {
+        setRouteDuration(response.data.duration_seconds);
+      } else {
+        setRouteDuration(null);
+      }
+    } catch (e) {
+      console.error('Erreur calcul itinéraire:', e);
+      setRouteDuration(null);
+    } finally {
+      setIsLoadingRoute(false);
+    }
   };
 
   const handleSelectDossier = (item) => {
@@ -646,12 +692,50 @@ export default function LeveTerrain() {
         <div className="flex flex-1 overflow-hidden">
           {/* ===== COLONNE GAUCHE : Dossiers du jour ===== */}
           <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex flex-col overflow-hidden">
-            <div className="px-3 py-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler ce jour</span>
+            <div className="px-3 py-3 border-b border-slate-800 space-y-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler ce jour</span>
+                </div>
+                <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
               </div>
-              <p className="text-emerald-400 font-bold text-lg mt-1">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
+
+              {/* Temps total + Itinéraire */}
+              {dossiersDuJour.length > 0 && (
+                <div className="pt-2 border-t border-slate-700 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-slate-500">Durée totale</p>
+                        {isLoadingRoute ? (
+                          <p className="text-sm text-slate-400">Calcul...</p>
+                        ) : routeDuration ? (
+                          <p className="text-sm font-semibold text-blue-400">
+                            {Math.floor(routeDuration / 3600)}h {Math.floor((routeDuration % 3600) / 60)}m
+                          </p>
+                        ) : (
+                          <p className="text-sm text-slate-500">-</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        calculateRouteTime(dossiersDuJour);
+                        setShowRouteMap(true);
+                      }}
+                      disabled={isLoadingRoute || dossiersDuJour.length === 0}
+                      className="h-8 px-2 text-slate-400 hover:text-white text-xs"
+                      title="Ouvrir la carte de l'itinéraire"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -1172,6 +1256,41 @@ export default function LeveTerrain() {
            </div>
         );
       })()}
+
+      {/* ===== MODAL CARTE ITINÉRAIRE ===== */}
+      {showRouteMap && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-slate-700">
+            <div className="flex items-center gap-2">
+              <Map className="w-5 h-5 text-blue-400" />
+              <h3 className="text-white font-semibold">Itinéraire de la journée</h3>
+              {routeDuration && (
+                <span className="ml-auto text-sm text-slate-400">
+                  Durée: {Math.floor(routeDuration / 3600)}h {Math.floor((routeDuration % 3600) / 60)}m
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setShowRouteMap(false)}
+              className="text-slate-400 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <iframe
+              title="Itinéraire"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen=""
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${dossiersDuJour[0] ? encodeURIComponent(getAdresseString(dossiersDuJour[0].mandat?.adresse_travaux || '')) : ''}&destination=${dossiersDuJour[dossiersDuJour.length - 1] ? encodeURIComponent(getAdresseString(dossiersDuJour[dossiersDuJour.length - 1].mandat?.adresse_travaux || '')) : ''}`}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ===== MODAL CAMÉRA ===== */}
       {showCamera && (
