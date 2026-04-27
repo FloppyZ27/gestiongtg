@@ -408,26 +408,32 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const container = document.getElementById('main-scroll-container');
     if (!container) return;
 
+    const HEADER_HEIGHT = 73;
+    let initialTopFromViewport = null;
+
+    const captureInitialTop = () => {
+      if (!sidebarContainerRef.current) return;
+      // Position du placeholder par rapport au viewport au moment du montage (scroll=0)
+      const rect = sidebarContainerRef.current.getBoundingClientRect();
+      initialTopFromViewport = rect.top; // ex: ~300px depuis le haut du viewport
+    };
+
     const updateSidebarTop = () => {
-      if (!sidebarRef.current || !sidebarContainerRef.current) return;
+      if (!sidebarRef.current || initialTopFromViewport === null) return;
       const scrollTop = container.scrollTop;
-      const placeholderRect = sidebarContainerRef.current.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      // Position absolue du placeholder par rapport au haut du viewport
-      const placeholderTopInViewport = placeholderRect.top;
-      // On veut que le panneau reste à sa position naturelle tant qu'elle est > 73px
-      // et se colle à 73px dès qu'elle atteint le header
-      const HEADER_HEIGHT = 73;
-      const naturalTop = placeholderTopInViewport;
+      // Position naturelle du panneau = sa position initiale moins le scroll actuel
+      const naturalTop = initialTopFromViewport - scrollTop;
+      // On commence à coller uniquement quand la position naturelle atteint le header
       const stickyTop = Math.max(HEADER_HEIGHT, naturalTop);
       sidebarRef.current.style.top = stickyTop + 'px';
     };
 
-    // Mise à jour initiale
+    // Capturer la position initiale puis mettre à jour
+    captureInitialTop();
     updateSidebarTop();
 
     container.addEventListener('scroll', updateSidebarTop, { passive: true });
-    window.addEventListener('resize', updateSidebarTop);
+    window.addEventListener('resize', () => { captureInitialTop(); updateSidebarTop(); });
     return () => {
       container.removeEventListener('scroll', updateSidebarTop);
       window.removeEventListener('resize', updateSidebarTop);
