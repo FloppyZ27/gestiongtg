@@ -1,59 +1,65 @@
 import { useEffect } from "react";
 
 /**
- * Rend un élément (sidebarRef) sticky par rapport à un conteneur scrollable.
- * L'élément reste à sa position naturelle (position: fixed, top = initialViewportTop - scrollTop)
- * jusqu'à ce que le haut du viewport à headerHeight px soit atteint, puis il colle là.
+ * Simule un comportement sticky pour un panneau dans un conteneur scrollable interne.
  *
- * @param {React.RefObject} sidebarRef - ref sur le panneau fixe (position: fixed)
- * @param {React.RefObject} placeholderRef - ref sur le placeholder dans le flux DOM
- * @param {number} headerHeight - hauteur de la topbar (px)
+ * Au départ : l'élément est dans le flux normal (position: static/relative).
+ * Quand le scroll fait que l'élément toucherait la topbar, on le passe en position: fixed.
+ *
+ * @param {React.RefObject} sidebarRef - ref sur le panneau à rendre sticky
+ * @param {number} topOffset - distance depuis le haut du viewport une fois sticky (px)
  * @param {string} scrollContainerId - id du conteneur scrollable
  */
-export function useStickySidebar(sidebarRef, placeholderRef, headerHeight = 73, scrollContainerId = 'main-scroll-container') {
+export function useStickySidebar(sidebarRef, topOffset = 160, scrollContainerId = 'main-scroll-container') {
   useEffect(() => {
     const container = document.getElementById(scrollContainerId);
-    if (!container) return;
+    if (!container || !sidebarRef.current) return;
 
-    let cleanup = null;
-
+    // Attendre que le layout soit stable
     const timer = setTimeout(() => {
-      if (!placeholderRef.current || !sidebarRef.current) return;
+      if (!sidebarRef.current) return;
 
-      // Position du placeholder dans le viewport au moment du montage (scroll = valeur actuelle)
-      // On veut sa position viewport quand scrollTop=0, donc on corrige avec scrollTop courant.
-      const placeholderRect = placeholderRef.current.getBoundingClientRect();
-      const scrollAtMount = container.scrollTop;
+      const el = sidebarRef.current;
 
-      // initialViewportTop = top dans le viewport si scrollTop était 0
-      const initialViewportTop = placeholderRect.top + scrollAtMount;
+      // Position initiale du panneau par rapport au haut du conteneur scrollable
+      // = distance depuis le haut du conteneur jusqu'au haut de l'élément (quand scroll=0)
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const initialOffsetInContainer = elRect.top - containerRect.top + container.scrollTop;
 
-      // Seuil : scrollTop à partir duquel le panneau touche la topbar
-      // naturalTop = initialViewportTop - scrollTop
-      // naturalTop === headerHeight => scrollTop = initialViewportTop - headerHeight
-      const stickyThreshold = initialViewportTop - headerHeight;
+      // Seuil : à quel scrollTop l'élément toucherait la topbar
+      // naturalTop dans viewport = initialOffsetInContainer - scrollTop + containerRect.top
+      // On colle quand naturalTop <= topOffset
+      // => initialOffsetInContainer - scrollTop + containerRect.top <= topOffset
+      // => scrollTop >= initialOffsetInContainer + containerRect.top - topOffset
+      const stickyThreshold = initialOffsetInContainer + containerRect.top - topOffset;
+
+      // Largeur initiale à conserver quand on passe en fixed
+      const width = el.offsetWidth;
 
       const update = () => {
         if (!sidebarRef.current) return;
         const scrollTop = container.scrollTop;
-        if (scrollTop < stickyThreshold) {
-          // Position naturelle dans le viewport
-          const naturalTop = initialViewportTop - scrollTop;
-          sidebarRef.current.style.top = naturalTop + 'px';
+
+        if (scrollTop >= stickyThreshold) {
+          // Mode sticky : fixed sous la topbar
+          el.style.position = 'fixed';
+          el.style.top = topOffset + 'px';
+          el.style.width = width + 'px';
         } else {
-          // Collé sous la topbar
-          sidebarRef.current.style.top = headerHeight + 'px';
+          // Mode normal : dans le flux
+          el.style.position = '';
+          el.style.top = '';
+          el.style.width = '';
         }
       };
 
       update();
       container.addEventListener('scroll', update, { passive: true });
-      cleanup = () => container.removeEventListener('scroll', update);
-    }, 150);
 
-    return () => {
-      clearTimeout(timer);
-      if (cleanup) cleanup();
-    };
+      return () => container.removeEventListener('scroll', update);
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, []);
 }

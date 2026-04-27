@@ -16,6 +16,7 @@ import { Users, Truck, Wrench, Plus, Edit, X, MapPin, Calendar, User, Clock, Use
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
+import { useStickySidebar } from "@/hooks/useStickySidebar";
 import TerrainVerificationCard from "./TerrainVerificationCard";
 import CreateTeamTerrainDialog from "./CreateTeamTerrainDialog";
 import EditTeamDialog from "./EditTeamDialog";
@@ -209,6 +210,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [visibleTeams, setVisibleTeams] = useState([]); // Équipes visibles sur la carte
   const [equipeExistanteWarning, setEquipeExistanteWarning] = useState(null); // { equipeNom, targetDate }
+  const sidebarRef = useRef(null);
+  useStickySidebar(sidebarRef, 160);
+
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
@@ -1665,7 +1669,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4" style={{ alignItems: 'flex-start' }}>
           {/* Panneau gauche - cartes non assignées */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ position: 'sticky', top: '160px', alignSelf: 'flex-start', maxHeight: 'calc(100vh - 170px)', zIndex: 10 }}>
+          <div ref={sidebarRef} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ maxHeight: 'calc(100vh - 170px)', zIndex: 10 }}>
             <Tabs defaultValue="verification" className="w-full flex flex-col">
               <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
