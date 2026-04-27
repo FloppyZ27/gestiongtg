@@ -156,10 +156,6 @@ export default function LeveTerrain() {
 
   // Dossiers du jour sélectionné — filtrés selon les équipes de l'utilisateur connecté
   const dossiersDuJour = useMemo(() => {
-    // Si l'utilisateur n'est pas un technicien terrain, afficher tous les dossiers (admin / arpenteur)
-    const isAdmin = user?.role === 'admin';
-    const isTechnicien = employeConnecte?.poste?.toLowerCase().includes('technicien');
-
     return dossiers
       .filter(d => d.statut === "Ouvert")
       .flatMap(d => (d.mandats || [])
@@ -168,22 +164,21 @@ export default function LeveTerrain() {
                           (m.terrain?.date_cedulee === selectedDate ? m.terrain : null);
           if (!terrain) return false;
 
-          // Si technicien, filtrer par équipe assignée
-          if (isTechnicien && !isAdmin && equipesDuJourIds.size > 0) {
+          // Si l'utilisateur est associé à un employé, filtrer par équipe
+          if (employeConnecte) {
+            if (equipesDuJourIds.size === 0) return false; // Pas dans une équipe ce jour
             const equipeNom = terrain.equipe_assignee;
             if (!equipeNom) return false;
-            const equipeMatch = equipesTerrain.find(e => 
-              e.nom === equipeNom && equipesDuJourIds.has(e.id)
-            );
-            return !!equipeMatch;
+            return equipesTerrain.some(e => e.nom === equipeNom && equipesDuJourIds.has(e.id));
           }
 
-          return true;
+          // Aucun employé associé → ne rien afficher
+          return false;
         })
         .map(m => ({ dossier: d, mandat: m }))
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, equipesDuJourIds, equipesTerrain, employeConnecte, user]);
+  }, [dossiers, selectedDate, equipesDuJourIds, equipesTerrain, employeConnecte]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
