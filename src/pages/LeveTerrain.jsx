@@ -583,61 +583,62 @@ export default function LeveTerrain() {
               </div>
               <p className="text-slate-400 text-sm">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
             </div>
-            {/* Navigation de journée */}
-            <div className="flex items-center gap-3 absolute right-6 top-5">
-              <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
 
-              <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              {selectedDate !== today && (
-                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 text-xs">
-                  Aujourd'hui
-                </Button>
-              )}
-            </div>
           </div>
 
-          {/* Nom + Date et navigation */}
+          {/* Nom centré + Date/Navigation à droite */}
           {user && (
-            <div className="flex items-center justify-center gap-8 py-4 px-6 bg-slate-900/30">
-              <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center justify-between py-4 px-6 bg-slate-900/30">
+              <div className="flex flex-col items-center gap-1 flex-1">
                 <div className="text-4xl font-bold text-white">{user.full_name}</div>
                 {employeConnecte && (
                   <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
                 )}
               </div>
 
-              {/* Calendrier popover */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-600 hover:border-blue-500 transition-all cursor-pointer">
-                    <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="text-left">
-                      <p className="text-white font-semibold capitalize text-sm">
-                        {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
-                      </p>
-                      {selectedDate === today && <p className="text-emerald-400 text-xs">Aujourd'hui</p>}
-                    </div>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700" align="center" side="bottom" sideOffset={8} avoidCollisions={false} style={{ marginTop: '80px' }}>
-                  <CalendarUI
-                    mode="single"
-                    selected={new Date(selectedDate + 'T00:00:00')}
-                    onSelect={(date) => {
-                      if (date) {
-                        setSelectedDate(format(date, 'yyyy-MM-dd'));
-                        setSelectedItem(null);
-                      }
-                    }}
-                    locale={fr}
-                    className="text-white"
-                  />
-                </PopoverContent>
-              </Popover>
+              {/* Calendrier avec flèches de navigation à droite */}
+              <div className="flex items-center gap-3">
+                <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-600 hover:border-blue-500 transition-all cursor-pointer">
+                      <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="text-left">
+                        <p className="text-white font-semibold capitalize text-sm">
+                          {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                        </p>
+                        {selectedDate === today && <p className="text-emerald-400 text-xs">Aujourd'hui</p>}
+                      </div>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700" align="center" side="bottom" sideOffset={8} avoidCollisions={false} style={{ marginTop: '80px' }}>
+                    <CalendarUI
+                      mode="single"
+                      selected={new Date(selectedDate + 'T00:00:00')}
+                      onSelect={(date) => {
+                        if (date) {
+                          setSelectedDate(format(date, 'yyyy-MM-dd'));
+                          setSelectedItem(null);
+                        }
+                      }}
+                      locale={fr}
+                      className="text-white"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                {selectedDate !== today && (
+                  <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 text-xs">
+                    Aujourd'hui
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>
