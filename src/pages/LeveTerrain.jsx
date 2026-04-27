@@ -692,14 +692,12 @@ export default function LeveTerrain() {
         <div className="flex flex-1 overflow-hidden">
           {/* ===== COLONNE GAUCHE : Dossiers du jour ===== */}
           <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex flex-col overflow-hidden">
-            <div className="px-3 py-3 border-b border-slate-800 space-y-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler ce jour</span>
-                </div>
-                <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
+            <div className="px-3 py-3 border-b border-slate-800 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers cédulés ce jour</span>
               </div>
+              <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
 
               {/* Temps total travail + Itinéraire */}
               {dossiersDuJour.length > 0 && (
@@ -1273,7 +1271,7 @@ export default function LeveTerrain() {
               <Map className="w-5 h-5 text-blue-400" />
               <h3 className="text-white font-semibold">Itinéraire de la journée</h3>
               {routeDuration && (
-                <span className="ml-auto text-sm text-slate-400">
+                <span className="text-sm text-slate-400">
                   Durée: {Math.floor(routeDuration / 3600)}h {Math.floor((routeDuration % 3600) / 60)}m
                 </span>
               )}
@@ -1286,16 +1284,22 @@ export default function LeveTerrain() {
             </button>
           </div>
           <div className="flex-1 overflow-auto">
-            <iframe
-              title="Itinéraire"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen=""
-              referrerPolicy="no-referrer-when-downgrade"
-              src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${dossiersDuJour[0] ? encodeURIComponent(getAdresseString(dossiersDuJour[0].mandat?.adresse_travaux || '')) : ''}&destination=${dossiersDuJour[dossiersDuJour.length - 1] ? encodeURIComponent(getAdresseString(dossiersDuJour[dossiersDuJour.length - 1].mandat?.adresse_travaux || '')) : ''}`}
-            />
+            {dossiersDuJour.length > 0 ? (
+              <iframe
+                title="Itinéraire"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen=""
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps/embed/v1/directions?key=AIzaSyDkcn0J2jEqEFb5ygUPqAn8qqJlNWl3I74&origin=${dossiersDuJour[0] ? encodeURIComponent(getAdresseString(dossiersDuJour[0].mandat?.adresse_travaux || 'Alma')) : 'Alma'}&destination=${dossiersDuJour[dossiersDuJour.length - 1] ? encodeURIComponent(getAdresseString(dossiersDuJour[dossiersDuJour.length - 1].mandat?.adresse_travaux || 'Alma')) : 'Alma'}`}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                <p>Aucun dossier disponible</p>
+              </div>
+            )}
           </div>
         </div>
       )}
