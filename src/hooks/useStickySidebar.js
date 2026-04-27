@@ -36,14 +36,16 @@ export function useStickySidebar(sidebarRef, placeholderRef, headerHeight = 73, 
       const update = () => {
         if (!sidebarRef.current) return;
         const scrollTop = container.scrollTop;
+        let topValue;
         if (scrollTop < stickyThreshold) {
           // Position naturelle dans le viewport
-          const naturalTop = initialViewportTop - scrollTop;
-          sidebarRef.current.style.top = naturalTop + 'px';
+          topValue = initialViewportTop - scrollTop;
         } else {
           // Collé sous la topbar
-          sidebarRef.current.style.top = headerHeight + 'px';
+          topValue = headerHeight;
         }
+        sidebarRef.current.style.top = topValue + 'px';
+        sidebarRef.current.style.maxHeight = (window.innerHeight - topValue - 10) + 'px';
       };
 
       update();
