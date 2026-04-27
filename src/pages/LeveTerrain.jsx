@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import piexif from 'piexifjs';
@@ -128,6 +128,15 @@ export default function LeveTerrain() {
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
+  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
+  const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
+
+  // Trouver le(s) technicien(s) chef du jour
+  const technicienChef = React.useMemo(() => {
+    const allTechIds = equipesTerrain.flatMap(e => e.techniciens || []);
+    const chefs = employes.filter(emp => allTechIds.includes(emp.id) && emp.poste === 'Technicien Terrain Chef');
+    return chefs.map(c => `${c.prenom} ${c.nom}`).join(', ');
+  }, [equipesTerrain, employes]);
 
   // Dossiers du jour sélectionné
   const dossiersDuJour = dossiers
@@ -525,6 +534,12 @@ export default function LeveTerrain() {
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
               <Mountain className="w-8 h-8 text-blue-400" />
+              {technicienChef && (
+                <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <UserCheck className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300 text-sm font-medium">{technicienChef}</span>
+                </div>
+              )}
             </div>
             {/* Navigation de journée */}
             <div className="flex items-center gap-3">
