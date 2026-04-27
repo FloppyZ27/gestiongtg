@@ -1668,9 +1668,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4" style={{ alignItems: 'flex-start' }}>
           {/* Panneau gauche - cartes non assignées */}
-
-          {/* Panneau sticky */}
-          <div ref={sidebarRef} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ position: 'sticky', top: '160px', maxHeight: 'calc(100vh - 170px)', zIndex: 10 }}>
+          {/* Placeholder pour réserver l'espace dans le flux + mesurer la position initiale */}
+          <div ref={sidebarContainerRef} className="w-[240px] flex-shrink-0" style={{ visibility: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
+          {/* Panneau fixe dont le top est calculé dynamiquement via JS */}
+          <div ref={sidebarRef} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ position: 'fixed', top: '73px', maxHeight: 'calc(100vh - 83px)', zIndex: 10 }}>
             <Tabs defaultValue="verification" className="w-full flex flex-col">
               <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
