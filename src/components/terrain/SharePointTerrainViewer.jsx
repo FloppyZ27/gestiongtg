@@ -279,9 +279,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           <p className="text-slate-500 text-xs truncate">
             📁 {currentFolderPath}
           </p>
-          {activeTab === "in" && currentSubPath && selectedTerrainFolder && (
-            <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5 flex-shrink-0">📷 Photos actif</span>
-          )}
+
         </div>
         <div className="flex items-center gap-1">
           {!currentSubPath && (
