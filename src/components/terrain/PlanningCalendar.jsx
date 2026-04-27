@@ -23,6 +23,7 @@ import MultiRouteMap from "./MultiRouteMap";
 import { useKanbanDrag } from "@/hooks/useKanbanDrag";
 import LinkedGroupManager from "./LinkedGroupManager";
 import LinkedCardsConnector from "./LinkedCardsConnector";
+import { useStickySidebar } from "@/hooks/useStickySidebar";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -403,42 +404,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     load();
   }, []);
 
-  // Sticky sidebar : au départ sous le header du planning, puis collé à 73px quand on scrolle
-  useEffect(() => {
-    const container = document.getElementById('main-scroll-container');
-    if (!container) return;
-
-    const HEADER_HEIGHT = 73;
-    let initialTopFromViewport = null;
-
-    const captureInitialTop = () => {
-      if (!sidebarContainerRef.current) return;
-      // Position du placeholder par rapport au viewport au moment du montage (scroll=0)
-      const rect = sidebarContainerRef.current.getBoundingClientRect();
-      initialTopFromViewport = rect.top; // ex: ~300px depuis le haut du viewport
-    };
-
-    const updateSidebarTop = () => {
-      if (!sidebarRef.current || initialTopFromViewport === null) return;
-      const scrollTop = container.scrollTop;
-      // Position naturelle du panneau = sa position initiale moins le scroll actuel
-      const naturalTop = initialTopFromViewport - scrollTop;
-      // On commence à coller uniquement quand la position naturelle atteint le header
-      const stickyTop = Math.max(HEADER_HEIGHT, naturalTop);
-      sidebarRef.current.style.top = stickyTop + 'px';
-    };
-
-    // Capturer la position initiale puis mettre à jour
-    captureInitialTop();
-    updateSidebarTop();
-
-    container.addEventListener('scroll', updateSidebarTop, { passive: true });
-    window.addEventListener('resize', () => { captureInitialTop(); updateSidebarTop(); });
-    return () => {
-      container.removeEventListener('scroll', updateSidebarTop);
-      window.removeEventListener('resize', updateSidebarTop);
-    };
-  }, []);
+  // Sticky sidebar : fixe à sa position initiale, colle à 73px quand la topbar l'atteint
+  useStickySidebar(sidebarRef, sidebarContainerRef, 73);
 
   const getClientsNames = (ids) => {
     if (!ids?.length) return "-";
