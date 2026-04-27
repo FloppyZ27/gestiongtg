@@ -552,7 +552,7 @@ export default function LeveTerrain() {
                     </div>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700" align="center" side="bottom" sideOffset={8}>
+                <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700" align="center" side="bottom" sideOffset={8} avoidCollisions={false} style={{ marginTop: '80px' }}>
                   <CalendarUI
                     mode="single"
                     selected={new Date(selectedDate + 'T00:00:00')}
