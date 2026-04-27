@@ -131,24 +131,59 @@ export default function LeveTerrain() {
   const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
   const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
 
-  // Trouver le(s) technicien(s) chef du jour
-  const technicienChef = React.useMemo(() => {
+  // Trouver l'employé correspondant à l'utilisateur connecté
+  const employeConnecte = useMemo(() => {
+    if (!user?.email) return null;
+    return employes.find(emp => emp.courriel?.toLowerCase() === user.email.toLowerCase()) || null;
+  }, [employes, user]);
+
+  // Trouver le(s) technicien(s) chef du jour (pour affichage header)
+  const technicienChef = useMemo(() => {
     const allTechIds = equipesTerrain.flatMap(e => e.techniciens || []);
     const chefs = employes.filter(emp => allTechIds.includes(emp.id) && emp.poste === 'Technicien Terrain Chef');
     return chefs.map(c => `${c.prenom} ${c.nom}`).join(', ');
   }, [equipesTerrain, employes]);
 
-  // Dossiers du jour sélectionné
-  const dossiersDuJour = dossiers
-    .filter(d => d.statut === "Ouvert")
-    .flatMap(d => (d.mandats || [])
-      .filter(m => 
-        m.terrains_list?.some(t => t.date_cedulee === selectedDate) ||
-        m.terrain?.date_cedulee === selectedDate
+  // IDs des équipes du jour dont l'utilisateur connecté fait partie
+  const equipesDuJourIds = useMemo(() => {
+    if (!employeConnecte) return new Set();
+    return new Set(
+      equipesTerrain
+        .filter(e => (e.techniciens || []).includes(employeConnecte.id))
+        .map(e => e.id)
+    );
+  }, [equipesTerrain, employeConnecte]);
+
+  // Dossiers du jour sélectionné — filtrés selon les équipes de l'utilisateur connecté
+  const dossiersDuJour = useMemo(() => {
+    // Si l'utilisateur n'est pas un technicien terrain, afficher tous les dossiers (admin / arpenteur)
+    const isAdmin = user?.role === 'admin';
+    const isTechnicien = employeConnecte?.poste?.toLowerCase().includes('technicien');
+
+    return dossiers
+      .filter(d => d.statut === "Ouvert")
+      .flatMap(d => (d.mandats || [])
+        .filter(m => {
+          const terrain = m.terrains_list?.find(t => t.date_cedulee === selectedDate) || 
+                          (m.terrain?.date_cedulee === selectedDate ? m.terrain : null);
+          if (!terrain) return false;
+
+          // Si technicien, filtrer par équipe assignée
+          if (isTechnicien && !isAdmin && equipesDuJourIds.size > 0) {
+            const equipeNom = terrain.equipe_assignee;
+            if (!equipeNom) return false;
+            const equipeMatch = equipesTerrain.find(e => 
+              e.nom === equipeNom && equipesDuJourIds.has(e.id)
+            );
+            return !!equipeMatch;
+          }
+
+          return true;
+        })
+        .map(m => ({ dossier: d, mandat: m }))
       )
-      .map(m => ({ dossier: d, mandat: m }))
-    )
-    .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
+      .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
+  }, [dossiers, selectedDate, equipesDuJourIds, equipesTerrain, employeConnecte, user]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
@@ -534,10 +569,11 @@ export default function LeveTerrain() {
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
               <Mountain className="w-8 h-8 text-blue-400" />
-              {technicienChef && (
+              {employeConnecte && (
                 <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                   <UserCheck className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-300 text-sm font-medium">{technicienChef}</span>
+                  <span className="text-emerald-300 text-sm font-medium">{employeConnecte.prenom} {employeConnecte.nom}</span>
+                  <span className="text-emerald-600 text-xs">— {employeConnecte.poste}</span>
                 </div>
               )}
             </div>
