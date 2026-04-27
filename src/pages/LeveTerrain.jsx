@@ -104,6 +104,7 @@ export default function LeveTerrain() {
     setSelectedItem(null);
   };
   const [selectedItem, setSelectedItem] = useState(null); // { dossier, mandat }
+  const [selectedTerrainFolder, setSelectedTerrainFolder] = useState(null); // chemin complet du dossier TI sélectionné
   const [terrainStartTime, setTerrainStartTime] = useState(null); // Date object quand punch in terrain
   const [elapsedTime, setElapsedTime] = useState(0);
   const [spFiles, setSpFiles] = useState({ IN: [], OUT: [] });
@@ -211,15 +212,10 @@ export default function LeveTerrain() {
     setLoadingFiles(false);
   };
 
-  const loadPhotos = async (dossier) => {
-    if (!dossier) return;
+  const loadPhotos = async (folderPath) => {
+    if (!folderPath) return;
     setLoadingPhotos(true);
-    const arp = dossier.arpenteur_geometre;
-    const initiale = ARPENTEUR_INITIALS[arp] || arp;
-    const numDossier = dossier.numero_dossier;
-    const dateStr = format(new Date(), "yyyyMMdd");
-    const photoPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
-
+    const photoPath = `${folderPath}/PHOTOS`;
     try {
       const res = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: photoPath });
       setPhotosFiles(res.data?.files || []);
@@ -231,10 +227,10 @@ export default function LeveTerrain() {
 
   const handleSelectDossier = (item) => {
     setSelectedItem(item);
+    setSelectedTerrainFolder(null);
     setSpFiles({ IN: [], OUT: [] });
     setPhotosFiles([]);
     loadSharePointFiles(item.dossier, item.mandat);
-    loadPhotos(item.dossier);
   };
 
   const handleCameraCapture = async (e) => {
@@ -244,12 +240,8 @@ export default function LeveTerrain() {
   };
 
   const uploadPhoto = async (file, deviceGPS) => {
-    if (!selectedItem) return;
-    const arp = selectedItem.dossier.arpenteur_geometre;
-    const initiale = ARPENTEUR_INITIALS[arp] || arp;
-    const numDossier = selectedItem.dossier.numero_dossier;
-    const dateStr = format(new Date(), "yyyyMMdd");
-    const photoFolderPath = `ARPENTEUR/${initiale}/DOSSIER/${initiale}-${numDossier}/TERRAIN/IN/${initiale}-${numDossier}_T_${dateStr}/PHOTOS`;
+    if (!selectedItem || !selectedTerrainFolder) return;
+    const photoFolderPath = `${selectedTerrainFolder}/PHOTOS`;
     try {
       const base64Content = await fileToBase64(file);
       await base44.functions.invoke('uploadToSharePoint', { folderPath: photoFolderPath, fileName: file.name, fileContent: base64Content });
@@ -301,7 +293,7 @@ export default function LeveTerrain() {
         await base44.entities.PhotoGPS.create(photoGPSRecord);
       }
 
-      loadPhotos(selectedItem.dossier);
+      loadPhotos(selectedTerrainFolder);
     } catch (e) {
       console.error("Upload photo error:", e);
     }
@@ -859,6 +851,11 @@ export default function LeveTerrain() {
                     <SharePointTerrainViewer
                       arpenteurGeometre={selectedItem.dossier.arpenteur_geometre}
                       numeroDossier={selectedItem.dossier.numero_dossier}
+                      onTerrainINFolderSelect={(folderPath) => {
+                        setSelectedTerrainFolder(folderPath);
+                        loadPhotos(folderPath);
+                      }}
+                      selectedTerrainFolder={selectedTerrainFolder}
                     />
                   </CardContent>
                 </Card>
@@ -871,19 +868,24 @@ export default function LeveTerrain() {
                         <Camera className="w-5 h-5 text-blue-400" />
                         <div>
                           <h3 className="text-white font-semibold">Photos</h3>
-                          <p className="text-slate-600 text-[10px]">
-                            ARPENTEUR/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}/DOSSIER/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}-{selectedItem.dossier.numero_dossier}/TERRAIN/IN/{ARPENTEUR_INITIALS[selectedItem.dossier.arpenteur_geometre]}-{selectedItem.dossier.numero_dossier}_T_{ format(new Date(), "yyyyMMdd")}/PHOTOS
-                          </p>
+                          {selectedTerrainFolder ? (
+                            <p className="text-emerald-500 text-[10px]">{selectedTerrainFolder}/PHOTOS</p>
+                          ) : (
+                            <p className="text-amber-500 text-[10px]">Sélectionnez un dossier terrain IN dans "Documents Terrain"</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => loadPhotos(selectedItem.dossier)} className="text-slate-500 hover:text-slate-300 transition-colors">
-                          <RefreshCw className={`w-4 h-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
-                        </button>
+                        {selectedTerrainFolder && (
+                          <button onClick={() => loadPhotos(selectedTerrainFolder)} className="text-slate-500 hover:text-slate-300 transition-colors">
+                            <RefreshCw className={`w-4 h-4 ${loadingPhotos ? 'animate-spin' : ''}`} />
+                          </button>
+                        )}
                         <Button
                           size="sm"
                           onClick={openCamera}
-                          className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none h-8 text-xs"
+                          disabled={!selectedTerrainFolder}
+                          className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none h-8 text-xs disabled:opacity-40"
                         >
                           <Camera className="w-3.5 h-3.5 mr-1" /> Prendre photo
                         </Button>
@@ -891,12 +893,18 @@ export default function LeveTerrain() {
                       </div>
                     </div>
 
-                    {loadingPhotos ? (
+                    {!selectedTerrainFolder ? (
+                      <div className="text-center py-8 text-slate-600">
+                        <FolderOpen className="w-10 h-10 mx-auto mb-2 text-slate-700" />
+                        <p className="text-sm">Aucun dossier terrain sélectionné</p>
+                        <p className="text-xs mt-1">Ouvrez un dossier TI dans "Documents Terrain" pour activer les photos</p>
+                      </div>
+                    ) : loadingPhotos ? (
                       <p className="text-slate-600 text-sm text-center py-4">Chargement des photos...</p>
                     ) : photosFiles.length === 0 ? (
                       <div className="text-center py-8 text-slate-700">
                         <Image className="w-10 h-10 mx-auto mb-2 text-slate-800" />
-                        <p className="text-sm">Aucune photo pour aujourd'hui</p>
+                        <p className="text-sm">Aucune photo dans ce dossier</p>
                         <p className="text-xs mt-1">Utilisez le bouton "Prendre photo" pour en ajouter</p>
                       </div>
                     ) : (

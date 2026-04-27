@@ -33,7 +33,7 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
-export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossier }) {
+export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossier, onTerrainINFolderSelect, selectedTerrainFolder }) {
   const [viewMode, setViewMode] = useState("list");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -226,13 +226,25 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const handleFolderClick = (folder) => {
     const newSubPath = currentSubPath ? `${currentSubPath}/${folder.name}` : folder.name;
     setCurrentSubPath(newSubPath);
+    // Si on entre dans un sous-dossier du terrain IN (ex: BL-123_TI1_20260427), notifier le parent
+    if (activeTab === "in" && onTerrainINFolderSelect) {
+      const newFullPath = `${baseFolderPath}/${newSubPath}`;
+      onTerrainINFolderSelect(newFullPath);
+    }
   };
 
   const handleGoBack = () => {
     if (!currentSubPath) return;
     const pathParts = currentSubPath.split('/');
     pathParts.pop();
-    setCurrentSubPath(pathParts.join('/'));
+    const newSubPath = pathParts.join('/');
+    setCurrentSubPath(newSubPath);
+    // Si on remonte au niveau racine du IN, effacer la sélection de dossier photos
+    if (activeTab === "in" && onTerrainINFolderSelect && !newSubPath) {
+      onTerrainINFolderSelect(null);
+    } else if (activeTab === "in" && onTerrainINFolderSelect && newSubPath) {
+      onTerrainINFolderSelect(`${baseFolderPath}/${newSubPath}`);
+    }
   };
 
   return (
@@ -267,6 +279,9 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           <p className="text-slate-500 text-xs truncate">
             📁 {currentFolderPath}
           </p>
+          {activeTab === "in" && currentSubPath && selectedTerrainFolder && (
+            <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5 flex-shrink-0">📷 Photos actif</span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           {!currentSubPath && (
