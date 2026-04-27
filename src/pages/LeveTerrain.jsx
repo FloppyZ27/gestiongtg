@@ -701,24 +701,32 @@ export default function LeveTerrain() {
                 <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
               </div>
 
-              {/* Temps total + Itinéraire */}
+              {/* Temps total travail + Itinéraire */}
               {dossiersDuJour.length > 0 && (
-                <div className="pt-2 border-t border-slate-700 space-y-2">
+                <div className="pt-2 border-t border-slate-700">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-slate-500">Durée totale</p>
-                        {isLoadingRoute ? (
-                          <p className="text-sm text-slate-400">Calcul...</p>
-                        ) : routeDuration ? (
-                          <p className="text-sm font-semibold text-blue-400">
-                            {Math.floor(routeDuration / 3600)}h {Math.floor((routeDuration % 3600) / 60)}m
-                          </p>
-                        ) : (
-                          <p className="text-sm text-slate-500">-</p>
-                        )}
-                      </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Durée totale</p>
+                      {isLoadingRoute ? (
+                        <p className="text-sm text-slate-400">Calcul...</p>
+                      ) : (
+                        <p className="text-emerald-300 text-sm font-semibold">
+                          {(() => {
+                            const totalWorkSecs = dossiersDuJour.reduce((sum, { mandat }) => {
+                              const timeStr = mandat?.terrain?.temps_prevu || '';
+                              const match = timeStr.match(/(\d+(?:\.\d+)?)/);
+                              return sum + (match ? parseFloat(match[0]) * 3600 : 0);
+                            }, 0);
+                            const travelSecs = routeDuration || 0;
+                            const totalSecs = totalWorkSecs + travelSecs;
+                            const h = Math.floor(totalSecs / 3600);
+                            const m = Math.round((totalSecs % 3600) / 60);
+                            const th = Math.floor(travelSecs / 3600);
+                            const tm = Math.round((travelSecs % 3600) / 60);
+                            return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')} ${travelSecs > 0 ? `(${String(th).padStart(2, '0')}h${String(tm).padStart(2, '0')} 🚗)` : ''}`;
+                          })()}
+                        </p>
+                      )}
                     </div>
                     <Button
                       size="sm"
@@ -728,7 +736,7 @@ export default function LeveTerrain() {
                         setShowRouteMap(true);
                       }}
                       disabled={isLoadingRoute || dossiersDuJour.length === 0}
-                      className="h-8 px-2 text-slate-400 hover:text-white text-xs"
+                      className="h-8 px-2 text-slate-400 hover:text-white"
                       title="Ouvrir la carte de l'itinéraire"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
