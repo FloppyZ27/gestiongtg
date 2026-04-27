@@ -131,8 +131,7 @@ export default function LeveTerrain() {
   const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
   const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
 
-  // Trouver l'employé correspondant à l'utilisateur connecté
-  // Priorité: compte_utilisateur (email de connexion), sinon courriel
+  // Trouver l'employé correspondant à l'utilisateur connecté (pour affichage)
   const employeConnecte = useMemo(() => {
     if (!user?.email) return null;
     const email = user.email.toLowerCase();
@@ -149,41 +148,51 @@ export default function LeveTerrain() {
     return chefs.map(c => `${c.prenom} ${c.nom}`).join(', ');
   }, [equipesTerrain, employes]);
 
-  // IDs des équipes du jour dont l'utilisateur connecté fait partie
+  // Équipes du jour dont l'utilisateur connecté fait partie
+  // Les techniciens peuvent être des IDs User OU des IDs Employe
   const equipesDuJourIds = useMemo(() => {
-    if (!employeConnecte) return new Set();
+    if (!user?.id) return new Set();
+    const possibleIds = new Set([user.id]);
+    if (employeConnecte) possibleIds.add(employeConnecte.id);
     return new Set(
       equipesTerrain
-        .filter(e => (e.techniciens || []).includes(employeConnecte.id))
+        .filter(e => (e.techniciens || []).some(id => possibleIds.has(id)))
         .map(e => e.id)
     );
-  }, [equipesTerrain, employeConnecte]);
+  }, [equipesTerrain, user, employeConnecte]);
 
-  // Dossiers du jour sélectionné — filtrés selon les équipes de l'utilisateur connecté
+  // Ensemble des cartes assignées aux équipes de l'utilisateur (format dossierId-mandatIdx-terrainIdx)
+  const mandatsAssignes = useMemo(() => {
+    const result = new Set();
+    equipesTerrain
+      .filter(e => equipesDuJourIds.has(e.id))
+      .forEach(e => (e.mandats || []).forEach(m => result.add(m)));
+    return result;
+  }, [equipesTerrain, equipesDuJourIds]);
+
+  // Dossiers du jour sélectionné — filtrés selon les cartes assignées à l'utilisateur
   const dossiersDuJour = useMemo(() => {
+    if (equipesDuJourIds.size === 0) return [];
+
     return dossiers
       .filter(d => d.statut === "Ouvert")
       .flatMap(d => (d.mandats || [])
-        .filter(m => {
-          const terrain = m.terrains_list?.find(t => t.date_cedulee === selectedDate) || 
-                          (m.terrain?.date_cedulee === selectedDate ? m.terrain : null);
-          if (!terrain) return false;
-
-          // Si l'utilisateur est associé à un employé, filtrer par équipe
-          if (employeConnecte) {
-            if (equipesDuJourIds.size === 0) return false; // Pas dans une équipe ce jour
-            const equipeNom = terrain.equipe_assignee;
-            if (!equipeNom) return false;
-            return equipesTerrain.some(e => e.nom === equipeNom && equipesDuJourIds.has(e.id));
-          }
-
-          // Aucun employé associé → ne rien afficher
-          return false;
+        .flatMap((m, mandatIdx) => {
+          // Chercher les terrains cédulés ce jour
+          const terrains = m.terrains_list || (m.terrain?.date_cedulee ? [m.terrain] : []);
+          return terrains
+            .map((t, terrainIdx) => ({ terrain: t, terrainIdx }))
+            .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
+            .filter(({ terrainIdx }) => {
+              // Vérifier si cette carte est dans les mandats assignés à l'utilisateur
+              const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
+              return mandatsAssignes.has(cardId);
+            })
+            .map(() => ({ dossier: d, mandat: m }));
         })
-        .map(m => ({ dossier: d, mandat: m }))
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, equipesDuJourIds, equipesTerrain, employeConnecte]);
+  }, [dossiers, selectedDate, equipesDuJourIds, mandatsAssignes]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
