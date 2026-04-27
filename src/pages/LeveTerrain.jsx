@@ -588,8 +588,8 @@ export default function LeveTerrain() {
 
           {/* Nom centré + Date/Navigation à droite */}
           {user && (
-            <div className="flex items-center justify-between py-4 px-6 bg-slate-900/30">
-              <div className="flex flex-col items-center gap-1 flex-1">
+            <div className="relative flex items-center justify-center py-4 px-6 bg-slate-900/30">
+              <div className="flex flex-col items-center gap-1">
                 <div className="text-4xl font-bold text-white">{user.full_name}</div>
                 {employeConnecte && (
                   <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
@@ -597,7 +597,7 @@ export default function LeveTerrain() {
               </div>
 
               {/* Calendrier avec flèches de navigation à droite */}
-              <div className="flex items-center gap-3">
+              <div className="absolute right-6 flex items-center gap-3">
                 <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
