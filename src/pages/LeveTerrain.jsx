@@ -79,7 +79,27 @@ const getAdresseString = (addr) => {
 };
 
 export default function LeveTerrain() {
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const today = new Date().toISOString().split('T')[0];
+
+  const goToPrevDay = () => {
+    const d = new Date(selectedDate + 'T00:00:00');
+    d.setDate(d.getDate() - 1);
+    // Passer les weekends
+    if (d.getDay() === 0) d.setDate(d.getDate() - 2);
+    if (d.getDay() === 6) d.setDate(d.getDate() - 1);
+    setSelectedDate(d.toISOString().split('T')[0]);
+    setSelectedItem(null);
+  };
+
+  const goToNextDay = () => {
+    const d = new Date(selectedDate + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+    if (d.getDay() === 6) d.setDate(d.getDate() + 2);
+    setSelectedDate(d.toISOString().split('T')[0]);
+    setSelectedItem(null);
+  };
   const [selectedItem, setSelectedItem] = useState(null); // { dossier, mandat }
   const [terrainStartTime, setTerrainStartTime] = useState(null); // Date object quand punch in terrain
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -104,13 +124,13 @@ export default function LeveTerrain() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
 
-  // Dossiers du jour : tous les dossiers céduler aujourd'hui dans la Cédule Terrain
+  // Dossiers du jour sélectionné
   const dossiersDuJour = dossiers
     .filter(d => d.statut === "Ouvert")
     .flatMap(d => (d.mandats || [])
       .filter(m => 
-        m.terrains_list?.some(t => t.date_cedulee === today) ||
-        m.terrain?.date_cedulee === today
+        m.terrains_list?.some(t => t.date_cedulee === selectedDate) ||
+        m.terrain?.date_cedulee === selectedDate
       )
       .map(m => ({ dossier: d, mandat: m }))
     )
@@ -148,7 +168,7 @@ export default function LeveTerrain() {
 
     if (selectedItem) {
       createEntreeMutation.mutate({
-        date: today,
+        date: selectedDate,
         heures: parseFloat(dureeHeures.toFixed(2)),
         dossier_id: selectedItem.dossier.id,
         mandat: selectedItem.mandat.type_mandat,
@@ -505,11 +525,28 @@ export default function LeveTerrain() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-800 bg-slate-900/50">
-          <div className="flex items-center gap-3">
-            <Mountain className="w-8 h-8 text-emerald-400" />
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Levé Terrain</h1>
-              <p className="text-slate-400 text-sm">{format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-blue-400">Levé Terrain</h1>
+              <Mountain className="w-8 h-8 text-blue-400" />
+            </div>
+            {/* Navigation de journée */}
+            <div className="flex items-center gap-3">
+              <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <div className="text-center">
+                <p className="text-white font-semibold capitalize">{format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</p>
+                {selectedDate === today && <p className="text-emerald-400 text-xs">Aujourd'hui</p>}
+              </div>
+              <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              {selectedDate !== today && (
+                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 text-xs">
+                  Aujourd'hui
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -520,7 +557,7 @@ export default function LeveTerrain() {
             <div className="px-3 py-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler aujourd'hui</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers céduler ce jour</span>
               </div>
               <p className="text-emerald-400 font-bold text-lg mt-1">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
             </div>
