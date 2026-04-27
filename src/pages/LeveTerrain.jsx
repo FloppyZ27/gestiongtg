@@ -116,8 +116,7 @@ export default function LeveTerrain() {
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
   const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const dateInputRef = useRef(null);
+
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
@@ -538,32 +537,27 @@ export default function LeveTerrain() {
                 <ChevronLeft className="w-4 h-4" />
               </Button>
 
-              {/* Date cliquable qui ouvre l'input calendrier */}
-              <div className="relative">
-                <button
-                  onClick={() => { setShowDatePicker(true); setTimeout(() => dateInputRef.current?.showPicker?.(), 50); }}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 transition-all cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <div className="text-center">
-                    <p className="text-white font-semibold capitalize text-sm">{format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</p>
-                    {selectedDate === today && <p className="text-emerald-400 text-xs">Aujourd'hui</p>}
-                  </div>
-                </button>
-                <input
-                  ref={dateInputRef}
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setSelectedDate(e.target.value);
-                      setSelectedItem(null);
-                    }
-                    setShowDatePicker(false);
-                  }}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full"
-                  style={{ colorScheme: 'dark' }}
-                />
+              {/* Date cliquable — input date stylisé */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-600 hover:border-blue-500 transition-all">
+                <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0 pointer-events-none" />
+                <div className="relative">
+                  <p className="text-white font-semibold capitalize text-sm pointer-events-none">
+                    {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                  </p>
+                  {selectedDate === today && <p className="text-emerald-400 text-xs pointer-events-none">Aujourd'hui</p>}
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setSelectedDate(e.target.value);
+                        setSelectedItem(null);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    style={{ colorScheme: 'dark' }}
+                  />
+                </div>
               </div>
 
               <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
