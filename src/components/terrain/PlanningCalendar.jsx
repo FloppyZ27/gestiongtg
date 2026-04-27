@@ -209,6 +209,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [visibleTeams, setVisibleTeams] = useState([]); // Équipes visibles sur la carte
   const [equipeExistanteWarning, setEquipeExistanteWarning] = useState(null); // { equipeNom, targetDate }
   const sidebarRef = useRef(null);
+  const sidebarContainerRef = useRef(null); // ref sur le placeholder pour connaître la position initiale
   // durées de trajet par equipeId (en secondes), calculées depuis Google Maps
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
@@ -400,6 +401,37 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       try { const r = await base44.functions.invoke('getGoogleMapsApiKey'); if (r.data?.apiKey) setGoogleMapsApiKey(r.data.apiKey); } catch (e) {}
     };
     load();
+  }, []);
+
+  // Sticky sidebar : au départ sous le header du planning, puis collé à 73px quand on scrolle
+  useEffect(() => {
+    const container = document.getElementById('main-scroll-container');
+    if (!container) return;
+
+    const updateSidebarTop = () => {
+      if (!sidebarRef.current || !sidebarContainerRef.current) return;
+      const scrollTop = container.scrollTop;
+      const placeholderRect = sidebarContainerRef.current.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      // Position absolue du placeholder par rapport au haut du viewport
+      const placeholderTopInViewport = placeholderRect.top;
+      // On veut que le panneau reste à sa position naturelle tant qu'elle est > 73px
+      // et se colle à 73px dès qu'elle atteint le header
+      const HEADER_HEIGHT = 73;
+      const naturalTop = placeholderTopInViewport;
+      const stickyTop = Math.max(HEADER_HEIGHT, naturalTop);
+      sidebarRef.current.style.top = stickyTop + 'px';
+    };
+
+    // Mise à jour initiale
+    updateSidebarTop();
+
+    container.addEventListener('scroll', updateSidebarTop, { passive: true });
+    window.addEventListener('resize', updateSidebarTop);
+    return () => {
+      container.removeEventListener('scroll', updateSidebarTop);
+      window.removeEventListener('resize', updateSidebarTop);
+    };
   }, []);
 
   const getClientsNames = (ids) => {
@@ -1663,10 +1695,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4" style={{ alignItems: 'flex-start' }}>
           {/* Panneau gauche - cartes non assignées */}
-          {/* Placeholder pour réserver l'espace dans le flux */}
-          <div className="w-[240px] flex-shrink-0" style={{ visibility: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
-          {/* Panneau fixe qui suit le scroll via JS */}
-          <div ref={sidebarRef} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ position: 'fixed', top: '160px', maxHeight: 'calc(100vh - 170px)', zIndex: 10 }}>
+          {/* Placeholder pour réserver l'espace dans le flux + mesurer la position initiale */}
+          <div ref={sidebarContainerRef} className="w-[240px] flex-shrink-0" style={{ visibility: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
+          {/* Panneau fixe dont le top est calculé dynamiquement via JS */}
+          <div ref={sidebarRef} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0" style={{ position: 'fixed', top: '73px', maxHeight: 'calc(100vh - 83px)', zIndex: 10 }}>
             <Tabs defaultValue="verification" className="w-full flex flex-col">
               <TabsList className="bg-slate-900/80 w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
