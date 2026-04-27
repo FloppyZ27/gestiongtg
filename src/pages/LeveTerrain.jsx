@@ -132,9 +132,14 @@ export default function LeveTerrain() {
   const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
 
   // Trouver l'employé correspondant à l'utilisateur connecté
+  // Priorité: compte_utilisateur (email de connexion), sinon courriel
   const employeConnecte = useMemo(() => {
     if (!user?.email) return null;
-    return employes.find(emp => emp.courriel?.toLowerCase() === user.email.toLowerCase()) || null;
+    const email = user.email.toLowerCase();
+    return employes.find(emp =>
+      emp.compte_utilisateur?.toLowerCase() === email ||
+      emp.courriel?.toLowerCase() === email
+    ) || null;
   }, [employes, user]);
 
   // Trouver le(s) technicien(s) chef du jour (pour affichage header)

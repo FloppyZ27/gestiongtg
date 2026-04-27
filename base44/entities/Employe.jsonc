@@ -27,7 +27,11 @@
     },
     "courriel": {
       "type": "string",
-      "description": "Adresse courriel"
+      "description": "Adresse courriel interne"
+    },
+    "compte_utilisateur": {
+      "type": "string",
+      "description": "Email du compte utilisateur de l'app (pour lier l'employ\u00e9 \u00e0 son compte de connexion)"
     },
     "statut": {
       "type": "string",
