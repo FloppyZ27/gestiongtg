@@ -582,11 +582,10 @@ export default function LeveTerrain() {
               </div>
               <p className="text-slate-400 text-sm">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
               {user && (
-                <div className="flex items-center gap-2 mt-1">
-                  <User className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="text-slate-400 text-xs">Connecté en tant que <span className="text-white font-medium">{user.full_name}</span></span>
+                <div className="flex flex-col items-center justify-center mt-2 gap-1">
+                  <div className="text-3xl font-bold text-white">{user.full_name}</div>
                   {employeConnecte && (
-                    <span className="text-slate-600 text-xs">— {employeConnecte.poste}</span>
+                    <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
                   )}
                 </div>
               )}
