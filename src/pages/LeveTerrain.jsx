@@ -590,7 +590,7 @@ export default function LeveTerrain() {
           {user && (
             <div className="relative flex items-center justify-center py-4 px-6 bg-slate-900/30">
               <div className="flex flex-col items-center gap-1">
-                <div className="text-4xl font-bold text-white">{user.full_name}</div>
+                <div className="text-2xl font-bold text-white">{user.full_name}</div>
                 {employeConnecte && (
                   <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
                 )}
