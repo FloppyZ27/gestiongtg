@@ -584,10 +584,31 @@ export default function LeveTerrain() {
               <p className="text-slate-400 text-sm">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
             </div>
             {/* Navigation de journée */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 absolute right-6 top-5">
               <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
                 <ChevronLeft className="w-4 h-4" />
               </Button>
+
+              <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              {selectedDate !== today && (
+                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 text-xs">
+                  Aujourd'hui
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Nom + Date et navigation */}
+          {user && (
+            <div className="flex items-center justify-center gap-8 py-4 px-6 bg-slate-900/30">
+              <div className="flex flex-col items-center gap-1">
+                <div className="text-4xl font-bold text-white">{user.full_name}</div>
+                {employeConnecte && (
+                  <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
+                )}
+              </div>
 
               {/* Calendrier popover */}
               <Popover>
@@ -617,25 +638,6 @@ export default function LeveTerrain() {
                   />
                 </PopoverContent>
               </Popover>
-
-              <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              {selectedDate !== today && (
-                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 text-xs">
-                  Aujourd'hui
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Nom de l'utilisateur centré */}
-          {user && (
-            <div className="flex flex-col items-center justify-center py-4 px-6 bg-slate-900/30">
-              <div className="text-4xl font-bold text-white">{user.full_name}</div>
-              {employeConnecte && (
-                <span className="text-slate-500 text-xs mt-1">— {employeConnecte.poste}</span>
-              )}
             </div>
           )}
         </div>
