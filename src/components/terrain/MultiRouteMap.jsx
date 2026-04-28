@@ -453,32 +453,46 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
             </div>
           )}
 
-          {/* Footer avec Temps prévu et Donneur */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            marginTop: '8px', 
-            paddingTop: '8px', 
-            borderTop: '1px solid rgba(16, 185, 129, 0.3)' 
-          }}>
-            {hoveredDossier.tempsPrevu && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg style={{ width: '12px', height: '12px', color: '#34d399' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style={{ fontSize: '12px', color: '#6ee7b7' }}>{hoveredDossier.tempsPrevu}</span>
-              </div>
-            )}
-            {hoveredDossier.donneur && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-                <svg style={{ width: '12px', height: '12px', color: '#a78bfa' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: '500' }}>{hoveredDossier.donneur}</span>
-              </div>
-            )}
-          </div>
+          {/* Footer avec Temps prévu, Statut et Donneur */}
+           <div style={{ 
+             display: 'flex', 
+             alignItems: 'center', 
+             justifyContent: 'space-between',
+             marginTop: '8px', 
+             paddingTop: '8px', 
+             borderTop: '1px solid rgba(16, 185, 129, 0.3)',
+             gap: '8px',
+             flexWrap: 'wrap'
+           }}>
+             {hoveredDossier.tempsPrevu && (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                 <svg style={{ width: '12px', height: '12px', color: '#34d399' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                 </svg>
+                 <span style={{ fontSize: '12px', color: '#6ee7b7' }}>{hoveredDossier.tempsPrevu}</span>
+               </div>
+             )}
+             {hoveredDossier.statut_terrain && (
+               <span style={{
+                 fontSize: '10px',
+                 fontWeight: '600',
+                 padding: '2px 6px',
+                 borderRadius: '3px',
+                 color: hoveredDossier.statut_terrain === 'en_verification' ? '#fbbf24' : hoveredDossier.statut_terrain === 'a_ceduler' ? '#60a5fa' : '#94a3b8',
+                 background: hoveredDossier.statut_terrain === 'en_verification' ? 'rgba(251, 191, 36, 0.2)' : hoveredDossier.statut_terrain === 'a_ceduler' ? 'rgba(96, 165, 250, 0.2)' : 'rgba(148, 163, 184, 0.2)',
+                 border: hoveredDossier.statut_terrain === 'en_verification' ? '1px solid rgba(251, 191, 36, 0.4)' : hoveredDossier.statut_terrain === 'a_ceduler' ? '1px solid rgba(96, 165, 250, 0.4)' : '1px solid rgba(148, 163, 184, 0.4)'
+               }}>
+                 {hoveredDossier.statut_terrain.replace(/_/g, ' ')}
+               </span>
+             )}
+             {hoveredDossier.donneur && (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto' }}>
+                 <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: '600' }}>
+                   {hoveredDossier.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}
+                 </span>
+               </div>
+             )}
+           </div>
         </div>
       )}
       
