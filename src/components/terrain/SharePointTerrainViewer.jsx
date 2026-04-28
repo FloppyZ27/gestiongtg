@@ -251,11 +251,11 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
     <div className="space-y-3">
       {/* Tabs IN / OUT */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
-          <TabsTrigger value="in" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-900/50">
+          <TabsTrigger value="in" className="data-[state=active]:bg-slate-700/50 data-[state=active]:text-slate-100">
             IN
           </TabsTrigger>
-          <TabsTrigger value="out" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="out" className="data-[state=active]:bg-slate-700/50 data-[state=active]:text-slate-100">
             OUT
           </TabsTrigger>
         </TabsList>
