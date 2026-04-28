@@ -1163,30 +1163,55 @@ export default function LeveTerrain() {
 
       {/* ===== MODAL CAMÉRA ===== */}
       {showCamera && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full max-w-2xl rounded-lg"
-            style={{ maxHeight: '70vh', objectFit: 'cover' }}
-          />
-          <canvas ref={canvasRef} className="hidden" />
-          <div className="flex gap-4 mt-6">
-            <Button
-              onClick={closeCamera}
-              size="lg"
-              className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={takeSnapshot}
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
-            >
-              <Camera className="w-5 h-5 mr-2" /> Capturer
-            </Button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col shadow-2xl"
+            style={{ width: '92vw', maxWidth: 900, marginTop: 90, height: 'calc(98vh - 94px)' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-blue-400" />
+                <span className="text-white font-semibold">Capture Photo</span>
+              </div>
+              <button onClick={closeCamera} className="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Vidéo */}
+            <div className="flex-1 flex items-center justify-center bg-black overflow-hidden">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full"
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+
+            <canvas ref={canvasRef} className="hidden" />
+
+            {/* Boutons */}
+            <div className="flex gap-4 justify-center px-4 py-4 border-t border-slate-700 flex-shrink-0">
+              <Button
+                onClick={closeCamera}
+                size="lg"
+                className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={takeSnapshot}
+                size="lg"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
+              >
+                <Camera className="w-5 h-5 mr-2" /> Capturer
+              </Button>
+            </div>
           </div>
         </div>
       )}
