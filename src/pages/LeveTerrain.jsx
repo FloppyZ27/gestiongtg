@@ -123,6 +123,7 @@ export default function LeveTerrain() {
   const [routeDuration, setRouteDuration] = useState(null); // durée totale de l'itinéraire en secondes
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [showRouteMap, setShowRouteMap] = useState(false);
+  const lastRouteKeyRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -311,11 +312,8 @@ export default function LeveTerrain() {
         waypoints: addresses.slice(1, -1)
       });
 
-      if (response.data?.duration_seconds) {
-        setRouteDuration(response.data.duration_seconds);
-      } else {
-        setRouteDuration(null);
-      }
+      const secs = response.data?.durationSeconds ?? response.data?.duration_seconds ?? null;
+      setRouteDuration(secs);
     } catch (e) {
       console.error('Erreur calcul itinéraire:', e);
       setRouteDuration(null);
@@ -323,6 +321,22 @@ export default function LeveTerrain() {
       setIsLoadingRoute(false);
     }
   };
+
+  // Calcul automatique de l'itinéraire quand les dossiers du jour changent
+  useEffect(() => {
+    if (dossiersDuJour.length === 0) {
+      setRouteDuration(null);
+      return;
+    }
+    const addresses = dossiersDuJour
+      .map(({ mandat }) => mandat?.adresse_travaux ? getAdresseString(mandat.adresse_travaux) : null)
+      .filter(Boolean);
+    if (addresses.length === 0) { setRouteDuration(null); return; }
+    const routeKey = addresses.join('|');
+    if (routeKey === lastRouteKeyRef.current) return;
+    lastRouteKeyRef.current = routeKey;
+    calculateRouteTime(dossiersDuJour);
+  }, [dossiersDuJour]);
 
   const handleSelectDossier = (item) => {
     setSelectedItem(item);
