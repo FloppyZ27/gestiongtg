@@ -1267,7 +1267,7 @@ export default function LeveTerrain() {
       })()}
 
       {/* ===== MODAL CARTE ITINÉRAIRE ===== */}
-      {showRouteMap && <RouteMapModal equipesTerrain={equipesTerrain} equipesDuJourIds={equipesDuJourIds} dossiers={dossiers} clients={clients} selectedDate={selectedDate} onClose={() => setShowRouteMap(false)} />}
+      {showRouteMap && <RouteMapModal equipesTerrain={equipesTerrain} equipesDuJourIds={equipesDuJourIds} dossiers={dossiers} clients={clients} users={users} selectedDate={selectedDate} onClose={() => setShowRouteMap(false)} />}
 
       {/* ===== MODAL CAMÉRA ===== */}
       {showCamera && (

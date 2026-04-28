@@ -51,7 +51,24 @@ const formatHHMM = (secs) => {
   return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
 };
 
-export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, selectedDate, onClose }) {
+const getInitialsWithHyphens = (text) => text.split('-').map(part => part[0]?.toUpperCase()).join('');
+
+const generateTeamDisplayName = (equipe, users, positionIndex) => {
+  const numStr = positionIndex != null
+    ? String(positionIndex + 1)
+    : (equipe.nom.match(/Équipe (\d+)/)?.[1] ?? null);
+  if (!equipe.techniciens || equipe.techniciens.length === 0) {
+    return numStr ? `Équipe ${numStr}` : equipe.nom;
+  }
+  const initials = equipe.techniciens.map(id => {
+    const u = users?.find(u => u.id === id);
+    if (!u) return '';
+    return getInitialsWithHyphens(u.prenom || '') + getInitialsWithHyphens(u.nom || '');
+  }).filter(n => n).join('-');
+  return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
+};
+
+export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, users, selectedDate, onClose }) {
   const [apiKey, setApiKey] = useState(null);
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
 
@@ -143,7 +160,7 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-blue-400" />
             <h3 className="text-white font-semibold text-lg">
-              Tous les trajets — {selectedDate && format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+              Mes Trajets — {selectedDate && format(new Date(selectedDate + 'T00:00:00'), "d MMMM yyyy", { locale: fr })}
             </h3>
           </div>
           <button
@@ -162,6 +179,7 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
               const route = mapRoutes.find(r => r.equipeId === equipe.id);
               const color = route ? route.color : COLORS[posIdx % COLORS.length];
               const travelSecs = equipeTravelSeconds[equipe.id] || 0;
+              const equipeNom = generateTeamDisplayName(equipe, users, posIdx);
 
               const totalWorkHours = (equipe.mandats || []).reduce((sum, cardId) => {
                 const parts = cardId.split('-');
@@ -182,7 +200,7 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
                   <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <span className="text-white text-sm font-bold block truncate">{equipe.nom}</span>
+                        <span className="text-white text-sm font-bold block truncate">{equipeNom}</span>
                         {totalSecs > 0 && (
                           <span className="text-emerald-300 text-xs">
                             {formatHHMM(totalSecs)}
