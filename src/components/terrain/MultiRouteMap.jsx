@@ -498,14 +498,25 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                  {hoveredDossier.cardStatut}
                </span>
              )}
-             {hoveredDossier.donneur && (
+             {hoveredDossier.donneurObj ? (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                 {hoveredDossier.donneurObj.photo_url ? (
+                   <img src={hoveredDossier.donneurObj.photo_url} alt={hoveredDossier.donneur} style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #c4b5fd', objectFit: 'cover' }} />
+                 ) : (
+                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 100%)', border: '2px solid #c4b5fd', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
+                     {hoveredDossier.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}
+                   </div>
+                 )}
+                 <span style={{ fontSize: '11px', color: '#c4b5fd', fontWeight: '600' }}>{hoveredDossier.donneur}</span>
+               </div>
+             ) : hoveredDossier.donneur && (
                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto' }}>
                  <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: '600' }}>
                    {hoveredDossier.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}
                  </span>
                </div>
              )}
-             </div>
+           </div>
         </div>
       )}
       
