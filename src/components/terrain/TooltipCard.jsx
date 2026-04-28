@@ -70,13 +70,18 @@ const getUserInitials = (user) => {
   return parts.map(p => p[0]).join('').toUpperCase() || 'U';
 };
 
-export function TooltipCard({ card, clients = [], users = [] }) {
-  const [statut, setStatut] = useState(null);
-  
+export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, onStatutChange }) {
   if (!card) return null;
 
   const { dossier, mandat, terrain } = card;
   const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+  const currentStatut = cardStatuts[card.id]?.statut || null;
+  
+  const handleStatutChange = (newStatut) => {
+    if (onStatutChange) {
+      onStatutChange(card.id, newStatut);
+    }
+  };
   
   // Récupérer les noms des clients
   const clientsNames = clients
@@ -216,11 +221,12 @@ export function TooltipCard({ card, clients = [], users = [] }) {
         </div>
         {/* Select statut */}
         <div className="flex-1 min-w-0">
-          <Select value={statut || ""} onValueChange={setStatut}>
+          <Select value={currentStatut || ""} onValueChange={(val) => handleStatutChange(val === "__vide__" || val === currentStatut ? null : val)}>
             <SelectTrigger className="w-full h-6 text-xs px-1.5 py-0 bg-slate-600 border-slate-500 text-white">
               <SelectValue placeholder="Statut..." />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
               <SelectItem value="Rendez-Vous" className="text-xs text-white">Rendez-Vous</SelectItem>
               <SelectItem value="Client Avisé" className="text-xs text-white">Client Avisé</SelectItem>
               <SelectItem value="Confirmé la veille" className="text-xs text-white">Confirmé la veille</SelectItem>

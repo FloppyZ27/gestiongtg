@@ -69,6 +69,17 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
   const markersGroupRef = useRef([]); // tableau de tableaux: markersGroupRef[routeIndex] = [markers...]
   const markersRef = useRef([]);
   const [hoveredDossier, setHoveredDossier] = useState(null);
+  const [cardStatuts, setCardStatuts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; }
+  });
+
+  const handleCardStatutChange = (cardId, newStatut) => {
+    setCardStatuts(prev => {
+      const next = { ...prev, [cardId]: { ...prev[cardId], statut: newStatut } };
+      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+      return next;
+    });
+  };
   // Garder une ref à jour sur visibleRouteIndices pour pouvoir l'utiliser dans les callbacks async
   const visibleRouteIndicesRef = useRef(visibleRouteIndices);
   useEffect(() => { visibleRouteIndicesRef.current = visibleRouteIndices; }, [visibleRouteIndices]);
@@ -214,7 +225,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    setHoveredDossier({ ...dossier, teamColor });
+                    setHoveredDossier({ ...dossier, teamColor, cardId: dossier.id });
                   });
 
                   marker.addListener('mouseout', () => {
@@ -331,7 +342,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           zIndex: 1000,
           pointerEvents: 'none'
         }}>
-          <TooltipCard card={hoveredDossier} clients={clients} users={users} />
+          <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
         </div>
       )}
       
