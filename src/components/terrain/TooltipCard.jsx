@@ -4,31 +4,31 @@ import { fr } from 'date-fns/locale';
 
 const getMandatColor = (typeMandat) => {
   const colors = {
-    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
-    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
-    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
-    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+    "Bornage": "bg-red-600 text-red-100 border-red-700",
+    "Certificat de localisation": "bg-emerald-600 text-emerald-100 border-emerald-700",
+    "CPTAQ": "bg-amber-600 text-amber-100 border-amber-700",
+    "Description Technique": "bg-blue-600 text-blue-100 border-blue-700",
+    "Dérogation mineure": "bg-violet-600 text-violet-100 border-violet-700",
+    "Implantation": "bg-cyan-600 text-cyan-100 border-cyan-700",
+    "Levé topographique": "bg-lime-600 text-lime-100 border-lime-700",
+    "OCTR": "bg-orange-600 text-orange-100 border-orange-700",
+    "Piquetage": "bg-pink-600 text-pink-100 border-pink-700",
+    "Plan montrant": "bg-indigo-600 text-indigo-100 border-indigo-700",
+    "Projet de lotissement": "bg-teal-600 text-teal-100 border-teal-700",
+    "Recherches": "bg-purple-600 text-purple-100 border-purple-700"
   };
-  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  return colors[typeMandat] || "bg-slate-600 text-slate-100 border-slate-700";
 };
 
 const getArpenteurColor = (arpenteur) => {
   const colors = {
-    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+    "Samuel Guay": "bg-red-600 text-red-100 border-red-700",
+    "Pierre-Luc Pilote": "bg-slate-600 text-slate-100 border-slate-700",
+    "Frédéric Gilbert": "bg-orange-600 text-orange-100 border-orange-700",
+    "Dany Gaboury": "bg-yellow-600 text-yellow-100 border-yellow-700",
+    "Benjamin Larouche": "bg-cyan-600 text-cyan-100 border-cyan-700"
   };
-  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+  return colors[arpenteur] || "bg-emerald-600 text-emerald-100 border-emerald-700";
 };
 
 const getAbbreviatedMandatType = (type) => {
@@ -92,7 +92,7 @@ export function TooltipCard({ card, clients = [], users = [] }) {
     : null;
 
   return (
-    <div className={`${arpColor.split(' ')[0]} rounded-xl p-2`}
+    <div className={`${arpColor.split(' ')[0]} rounded-xl p-2`} style={{ width: '320px' }}
       style={{ 
         boxShadow: `inset 0 0 0 1px ${arpColor.includes('border-red') ? 'rgba(239,68,68,0.6)' : arpColor.includes('border-slate') ? 'rgba(148,163,184,0.6)' : arpColor.includes('border-orange') ? 'rgba(249,115,22,0.6)' : arpColor.includes('border-yellow') ? 'rgba(234,179,8,0.6)' : 'rgba(34,211,238,0.6)'}, 0 4px 16px 0 rgba(0,0,0,0.4)` 
       }}>
