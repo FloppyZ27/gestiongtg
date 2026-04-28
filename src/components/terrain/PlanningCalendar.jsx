@@ -1927,7 +1927,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               }}>
                                 {pinLetter}
                               </div>
-                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={false} />
+                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} />
                             </div>
                           );
                         })}
