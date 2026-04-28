@@ -134,6 +134,7 @@ export default function LeveTerrain() {
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
   const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
   const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
+  const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
 
   // Trouver l'employé correspondant à l'utilisateur connecté (pour affichage)
   const employeConnecte = useMemo(() => {
@@ -947,7 +948,12 @@ export default function LeveTerrain() {
                         {selectedItem.mandat.lots?.length > 0 && (
                           <div>
                             <p className="text-slate-500 text-xs uppercase tracking-wider">Lot(s)</p>
-                            <p className="text-white">{selectedItem.mandat.lots.join(', ')}</p>
+                            <p className="text-white">
+                              {selectedItem.mandat.lots.map(lotId => {
+                                const lot = lots.find(l => l.id === lotId);
+                                return lot ? lot.numero_lot : lotId;
+                              }).join(', ')}
+                            </p>
                           </div>
                         )}
                       </div>
