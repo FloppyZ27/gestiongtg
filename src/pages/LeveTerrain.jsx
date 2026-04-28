@@ -281,7 +281,14 @@ export default function LeveTerrain() {
 
   // Calcul du temps total de travail — même logique que calculateEquipeTimings dans CeduleTerrain
   // On cherche le terrain dont date_cedulee === selectedDate (même filtrage que dossiersDuJour)
-  const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
+  const parseTimeString = (ts) => {
+    if (!ts) return 0;
+    // Format "Xh" ou "XhYY" ou "X.Y" (heures décimales)
+    const hhmm = ts.match(/(\d+)h(\d+)?/);
+    if (hhmm) return parseInt(hhmm[1]) + (hhmm[2] ? parseInt(hhmm[2]) / 60 : 0);
+    const decimal = ts.match(/(\d+(?:\.\d+)?)/);
+    return decimal ? parseFloat(decimal[0]) : 0;
+  };
   const totalWorkHours = useMemo(() => {
     return dossiers
       .filter(d => d.statut === "Ouvert")
