@@ -201,11 +201,12 @@ export function TooltipCard({ card, clients = [], users = [] }) {
         </div>
       )}
 
-      {/* Footer : Temps prévu, Donneur */}
-      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-600 gap-2 mb-2">
-        <div>
+      {/* Footer : Temps prévu | Statut | Donneur */}
+      <div className="flex items-center gap-1 mt-2 pt-1 border-t border-slate-600">
+        {/* Temps prévu */}
+        <div className="flex-shrink-0">
           {terrain?.temps_prevu && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <svg className="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -213,47 +214,51 @@ export function TooltipCard({ card, clients = [], users = [] }) {
             </div>
           )}
         </div>
-        {assignedUser ? (
-          <div className="flex items-center gap-1">
-            {assignedUser.photo_url ? (
-              <img src={assignedUser.photo_url} alt={assignedUser.full_name} className="w-6 h-6 rounded-full border-2 border-emerald-500/50 object-cover" />
-            ) : (
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs flex items-center justify-center font-bold">
-                {getUserInitials(assignedUser)}
-              </div>
-            )}
-          </div>
-        ) : donneurUser ? (
-          <div className="flex items-center gap-1">
-            {donneurUser.photo_url ? (
-              <img src={donneurUser.photo_url} alt={donneurUser.full_name} className="w-6 h-6 rounded-full border-2 border-emerald-500/50 object-cover" />
-            ) : (
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs flex items-center justify-center font-bold">
-                {getUserInitials(donneurUser)}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
-            <svg className="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-        )}
+        {/* Select statut */}
+        <div className="flex-1 min-w-0">
+          <Select value={statut || ""} onValueChange={setStatut}>
+            <SelectTrigger className="w-full h-6 text-xs px-1.5 py-0 bg-slate-600 border-slate-500 text-white">
+              <SelectValue placeholder="Statut..." />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectItem value="Rendez-Vous" className="text-xs text-white">Rendez-Vous</SelectItem>
+              <SelectItem value="Client Avisé" className="text-xs text-white">Client Avisé</SelectItem>
+              <SelectItem value="Confirmé la veille" className="text-xs text-white">Confirmé la veille</SelectItem>
+              <SelectItem value="Retour terrain" className="text-xs text-white">Retour terrain</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Donneur */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {assignedUser ? (
+            <>
+              {assignedUser.photo_url ? (
+                <img src={assignedUser.photo_url} alt={assignedUser.full_name} className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] flex items-center justify-center font-bold">
+                  {getUserInitials(assignedUser)}
+                </div>
+              )}
+            </>
+          ) : donneurUser ? (
+            <>
+              {donneurUser.photo_url ? (
+                <img src={donneurUser.photo_url} alt={donneurUser.full_name} className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] flex items-center justify-center font-bold">
+                  {getUserInitials(donneurUser)}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+              <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Statut */}
-      <Select value={statut || ""} onValueChange={setStatut}>
-        <SelectTrigger className="h-6 text-xs bg-slate-600 border-slate-500 text-white">
-          <SelectValue placeholder="Statut..." />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-slate-700">
-          <SelectItem value="Rendez-Vous" className="text-xs text-white">Rendez-Vous</SelectItem>
-          <SelectItem value="Client Avisé" className="text-xs text-white">Client Avisé</SelectItem>
-          <SelectItem value="Confirmé la veille" className="text-xs text-white">Confirmé la veille</SelectItem>
-          <SelectItem value="Retour terrain" className="text-xs text-white">Retour terrain</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 }
