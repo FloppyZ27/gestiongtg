@@ -1271,7 +1271,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   };
 
   // ---- Render DossierCard (custom drag) ----
-  const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false }) => {
+  const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false, disableInteractions = false }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
     const donnerUser = terrain?.donneur ? users?.find(u => u.full_name === terrain.donneur) : null;
@@ -1288,8 +1288,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const isLinkingTarget = !!linkingMode && !isLinkingFirst;
 
     const onMouseDown = (e) => {
-      if (isLocked) return;
-      if (linkingMode !== null) return; // Ne pas drag en mode liaison
+      if (disableInteractions || isLocked) return;
+      if (linkingMode !== null) return;
       e.stopPropagation();
       didDragRef.current = false;
       const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
@@ -1305,6 +1305,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     };
 
     const onClick = (e) => {
+      if (disableInteractions) return;
       e.stopPropagation();
       if (linkingMode !== null) {
         handleLinkCard(card.id);
@@ -1326,8 +1327,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${ringStyle} ${isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer'} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
-        style={{ cursor: isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer'), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none ${disableInteractions ? '' : 'transition-all duration-150'} ${ringStyle} ${disableInteractions ? 'cursor-default' : (isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer')} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
+        style={{ pointerEvents: disableInteractions ? 'none' : 'auto', cursor: disableInteractions ? 'default' : (isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer')), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex gap-2 flex-wrap">
@@ -1927,7 +1928,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               }}>
                                 {pinLetter}
                               </div>
-                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} />
+                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} disableInteractions={true} />
                             </div>
                           );
                         })}
