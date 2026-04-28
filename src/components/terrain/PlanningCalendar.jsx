@@ -1274,6 +1274,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const DossierCard = ({ card, showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = mandat?.utilisateur_assigne ? users?.find(u => u.email === mandat.utilisateur_assigne) : null;
+    const donnerUser = terrain?.donneur ? users?.find(u => u.full_name === terrain.donneur) : null;
     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
     const draggingLinkedGroup = dragging ? getLinkedGroupForCard(dragging.card.id) : null;
     const isDraggingThis = !!dragging && (
@@ -1450,8 +1451,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 {/* Donneur + avatar */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
-                  {assignedUser
-                    ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser)}</AvatarFallback></Avatar>
+                  {donnerUser
+                    ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={donnerUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(donnerUser)}</AvatarFallback></Avatar>
                     : <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-2.5 h-2.5 text-emerald-500" /></div>}
                 </div>
               </div>
@@ -1926,7 +1927,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               }}>
                                 {pinLetter}
                               </div>
-                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={true} />
+                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={false} />
                             </div>
                           );
                         })}
