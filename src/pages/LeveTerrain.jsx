@@ -707,8 +707,8 @@ export default function LeveTerrain() {
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* ===== COLONNE GAUCHE : Dossiers du jour ===== */}
-          <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex flex-col overflow-hidden">
+           {/* ===== COLONNE GAUCHE : Dossiers du jour + Infobulle ===== */}
+           <div className="w-full max-w-4xl flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex overflow-hidden">
             <div className="px-3 py-3 border-b border-slate-800 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -743,7 +743,7 @@ export default function LeveTerrain() {
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto relative">
+            <div className="flex-1 overflow-y-auto">
               {dossiersDuJour.length === 0 ? (
                 <div className="p-4 text-center text-slate-600 text-sm mt-8">
                   <Mountain className="w-10 h-10 mx-auto mb-3 text-slate-700" />
@@ -783,23 +783,28 @@ export default function LeveTerrain() {
                   })}
                 </div>
               )}
-              
-              {/* Infobulle survolée */}
-              {hoveredCard && (
-                <div className="absolute bottom-2 right-2 z-20 pointer-events-none">
-                  <TooltipCard 
-                    card={hoveredCard} 
-                    clients={clients} 
-                    users={users}
-                    cardStatuts={cardStatuts}
-                    onStatutChange={(cId, newStatut) => {
-                      setCardStatuts(prev => {
-                        const next = { ...prev, [cId]: { ...prev[cId], statut: newStatut } };
-                        localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
-                        return next;
-                      });
-                    }}
-                  />
+            </div>
+
+            {/* Infobulle survolée à droite */}
+            <div className="w-60 flex-shrink-0 border-l border-slate-800 bg-slate-900/20 p-4 overflow-y-auto flex items-center justify-center">
+              {hoveredCard ? (
+                <TooltipCard 
+                  card={hoveredCard} 
+                  clients={clients} 
+                  users={users}
+                  cardStatuts={cardStatuts}
+                  onStatutChange={(cId, newStatut) => {
+                    setCardStatuts(prev => {
+                      const next = { ...prev, [cId]: { ...prev[cId], statut: newStatut } };
+                      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+                      return next;
+                    });
+                  }}
+                />
+              ) : (
+                <div className="text-center text-slate-600 text-sm">
+                  <MapPin className="w-8 h-8 mx-auto mb-2 text-slate-700" />
+                  Survolez une carte
                 </div>
               )}
             </div>
