@@ -213,7 +213,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    setHoveredDossier({ ...dossier, color: teamColor });
+                    // Passer l'objet dossier complet
+                    setHoveredDossier({ ...dossier, teamColor });
                   });
 
                   marker.addListener('mouseout', () => {
@@ -327,7 +328,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           position: 'absolute',
           top: '16px',
           right: '16px',
-          background: getArpenteurBgColor(hoveredDossier.arpenteur),
+          background: getArpenteurBgColor(hoveredDossier.dossier?.arpenteur_geometre || hoveredDossier.arpenteur),
           borderRadius: '8px',
           padding: '8px',
           minWidth: '260px',
