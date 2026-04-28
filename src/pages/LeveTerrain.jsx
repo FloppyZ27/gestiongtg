@@ -723,34 +723,23 @@ export default function LeveTerrain() {
               {dossiersDuJour.length > 0 && totalWorkHours > 0 && (
                 <div className="pt-2 border-t border-slate-700">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Durée totale</p>
-                      {(() => {
-                        const formatHHMM = (secs) => {
-                          const h = Math.floor(secs / 3600);
-                          const m = Math.round((secs % 3600) / 60);
-                          return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
-                        };
-                        const travailSecs = totalWorkHours * 3600;
-                        const totalSecs = travailSecs + travelSecs;
-                        return (
-                          <>
-                            <p className="text-emerald-300 text-sm font-semibold">{formatHHMM(totalSecs)}</p>
-                            {travelSecs > 0 && (
-                              <p className="text-slate-400 text-xs">{formatHHMM(travelSecs)} 🚗</p>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowRouteMap(true)}
-                      className="h-8 px-2 text-slate-400 hover:text-white"
-                      title="Ouvrir la carte de l'itinéraire"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                    {(() => {
+                      const formatHHMM = (secs) => {
+                        const h = Math.floor(secs / 3600);
+                        const m = Math.round((secs % 3600) / 60);
+                        return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
+                      };
+                      const travailSecs = totalWorkHours * 3600;
+                      const totalSecs = travailSecs + travelSecs;
+                      return (
+                        <span className="text-emerald-300 text-sm font-semibold">
+                          {formatHHMM(totalSecs)}
+                          {travelSecs > 0 && <span className="text-slate-400 ml-1">({formatHHMM(travelSecs)} 🚗)</span>}
+                        </span>
+                      );
+                    })()}
+                    <Button size="sm" onClick={() => setShowRouteMap(true)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0">
+                      <MapPin className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
