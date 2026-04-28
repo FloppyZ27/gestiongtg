@@ -697,10 +697,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         const card = terrainCards.find(c => c.id === cId);
         if (card?.mandat?.adresse_travaux) { const address = formatAdresse(card.mandat.adresse_travaux); if (address) { waypoints.push(address); dossiersInfo.push({ cardId: card.id, ...card, color: COLORS[index % COLORS.length] }); } }
       });
-      if (waypoints.length > 0) routes.push({ equipeId: equipe.id, origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe), dossiers: dossiersInfo });
+      if (waypoints.length > 0) routes.push({ equipeId: equipe.id, origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe, index), dossiers: dossiersInfo });
     });
     return routes;
-  }, [equipes, terrainCards, placeAffaire]);
+  }, [equipes, terrainCards, placeAffaire, generateTeamDisplayName]);
 
   // Recalculer automatiquement les routes pour tous les jours visibles dès que les équipes ou dossiers changent
   useEffect(() => {
