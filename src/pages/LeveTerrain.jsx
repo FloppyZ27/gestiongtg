@@ -120,10 +120,7 @@ export default function LeveTerrain() {
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
   const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
-  const [routeDuration, setRouteDuration] = useState(null); // durée totale de l'itinéraire en secondes
-  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [showRouteMap, setShowRouteMap] = useState(false);
-  const lastRouteKeyRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -282,60 +279,13 @@ export default function LeveTerrain() {
     setLoadingPhotos(false);
   };
 
-  const calculateRouteTime = async (dossiersList) => {
-    if (dossiersList.length === 0) {
-      setRouteDuration(null);
-      return;
-    }
-
-    setIsLoadingRoute(true);
-    try {
-      // Extraire les adresses des dossiers
-      const addresses = dossiersList
-        .map(({ dossier, mandat }) => {
-          const addr = mandat?.adresse_travaux;
-          if (!addr) return null;
-          return getAdresseString(addr);
-        })
-        .filter(Boolean);
-
-      if (addresses.length === 0) {
-        setRouteDuration(null);
-        setIsLoadingRoute(false);
-        return;
-      }
-
-      // Calculer l'itinéraire via la fonction backend
-      const response = await base44.functions.invoke('calculateRouteDuration', {
-        origin: addresses[0],
-        destination: addresses[addresses.length - 1],
-        waypoints: addresses.slice(1, -1)
-      });
-
-      const secs = response.data?.durationSeconds ?? response.data?.duration_seconds ?? null;
-      setRouteDuration(secs);
-    } catch (e) {
-      console.error('Erreur calcul itinéraire:', e);
-      setRouteDuration(null);
-    } finally {
-      setIsLoadingRoute(false);
-    }
-  };
-
-  // Calcul automatique de l'itinéraire quand les dossiers du jour changent
-  useEffect(() => {
-    if (dossiersDuJour.length === 0) {
-      setRouteDuration(null);
-      return;
-    }
-    const addresses = dossiersDuJour
-      .map(({ mandat }) => mandat?.adresse_travaux ? getAdresseString(mandat.adresse_travaux) : null)
-      .filter(Boolean);
-    if (addresses.length === 0) { setRouteDuration(null); return; }
-    const routeKey = addresses.join('|');
-    if (routeKey === lastRouteKeyRef.current) return;
-    lastRouteKeyRef.current = routeKey;
-    calculateRouteTime(dossiersDuJour);
+  // Calcul du temps total de travail (même logique que calculateEquipeTimings dans CeduleTerrain)
+  const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
+  const totalWorkHours = useMemo(() => {
+    return dossiersDuJour.reduce((sum, { mandat }) => {
+      const terrain = mandat?.terrains_list?.[0] || mandat?.terrain;
+      return sum + parseTimeString(terrain?.temps_prevu);
+    }, 0);
   }, [dossiersDuJour]);
 
   const handleSelectDossier = (item) => {
@@ -713,41 +663,20 @@ export default function LeveTerrain() {
               </div>
               <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
 
-              {/* Temps total travail + Itinéraire */}
-              {dossiersDuJour.length > 0 && (
+              {/* Temps total travail (même info que l'équipe dans CeduleTerrain) */}
+              {dossiersDuJour.length > 0 && totalWorkHours > 0 && (
                 <div className="pt-2 border-t border-slate-700">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-slate-500 mb-1">Durée totale</p>
-                      {isLoadingRoute ? (
-                        <p className="text-sm text-slate-400">Calcul...</p>
-                      ) : (
-                        <p className="text-emerald-300 text-sm font-semibold">
-                          {(() => {
-                            const totalWorkSecs = dossiersDuJour.reduce((sum, { mandat }) => {
-                              const timeStr = mandat?.terrain?.temps_prevu || '';
-                              const match = timeStr.match(/(\d+(?:\.\d+)?)/);
-                              return sum + (match ? parseFloat(match[0]) * 3600 : 0);
-                            }, 0);
-                            const travelSecs = routeDuration || 0;
-                            const totalSecs = totalWorkSecs + travelSecs;
-                            const h = Math.floor(totalSecs / 3600);
-                            const m = Math.round((totalSecs % 3600) / 60);
-                            const th = Math.floor(travelSecs / 3600);
-                            const tm = Math.round((travelSecs % 3600) / 60);
-                            return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')} ${travelSecs > 0 ? `(${String(th).padStart(2, '0')}h${String(tm).padStart(2, '0')} 🚗)` : ''}`;
-                          })()}
-                        </p>
-                      )}
+                      <p className="text-emerald-300 text-sm font-semibold">
+                        {String(Math.floor(totalWorkHours)).padStart(2, '0')}h{String(Math.round((totalWorkHours % 1) * 60)).padStart(2, '0')}
+                      </p>
                     </div>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => {
-                        calculateRouteTime(dossiersDuJour);
-                        setShowRouteMap(true);
-                      }}
-                      disabled={isLoadingRoute || dossiersDuJour.length === 0}
+                      onClick={() => setShowRouteMap(true)}
                       className="h-8 px-2 text-slate-400 hover:text-white"
                       title="Ouvrir la carte de l'itinéraire"
                     >
