@@ -1213,11 +1213,6 @@ export default function LeveTerrain() {
             <div className="flex items-center gap-2">
               <Map className="w-5 h-5 text-blue-400" />
               <h3 className="text-white font-semibold">Itinéraire de la journée</h3>
-              {routeDuration && (
-                <span className="text-sm text-slate-400">
-                  Durée: {Math.floor(routeDuration / 3600)}h {Math.floor((routeDuration % 3600) / 60)}m
-                </span>
-              )}
             </div>
             <button
               onClick={() => setShowRouteMap(false)}
