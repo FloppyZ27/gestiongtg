@@ -356,12 +356,12 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
               padding: '2px 10px',
               fontSize: '12px',
               fontWeight: '600',
-              color: getMandatTextColor(hoveredDossier.mandatType),
-              background: getMandatBgColor(hoveredDossier.mandatType),
+              color: getMandatTextColor(hoveredDossier.mandat?.type_mandat || hoveredDossier.mandatType),
+              background: getMandatBgColor(hoveredDossier.mandat?.type_mandat || hoveredDossier.mandatType),
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '4px'
             }}>
-              {hoveredDossier.mandat}
+              {hoveredDossier.mandat?.type_mandat || hoveredDossier.mandat}
             </span>
           </div>
 
