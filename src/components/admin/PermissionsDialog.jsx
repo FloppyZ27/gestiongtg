@@ -148,7 +148,7 @@ export default function PermissionsDialog({ open, onOpenChange, user, onSave }) 
           </div>
 
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800" style={{boxShadow: 'none', transform: 'none', filter: 'none'}}>
+          <div className="flex justify-end gap-3 pt-4" style={{boxShadow: 'none', transform: 'none', filter: 'none'}}>
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
