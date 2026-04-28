@@ -92,10 +92,10 @@ export function TooltipCard({ card, clients = [], users = [] }) {
     : null;
 
   return (
-    <div className={`${arpColor.split(' ')[0]} rounded-xl p-2`} style={{ width: '240px' }}
-      style={{ 
-        boxShadow: `inset 0 0 0 1px ${arpColor.includes('border-red') ? 'rgba(239,68,68,0.6)' : arpColor.includes('border-slate') ? 'rgba(148,163,184,0.6)' : arpColor.includes('border-orange') ? 'rgba(249,115,22,0.6)' : arpColor.includes('border-yellow') ? 'rgba(234,179,8,0.6)' : 'rgba(34,211,238,0.6)'}, 0 4px 16px 0 rgba(0,0,0,0.4)` 
-      }}>
+    <div className="bg-slate-700 text-slate-100 rounded-xl p-2" style={{ 
+      width: '240px',
+      boxShadow: '0 4px 16px 0 rgba(0,0,0,0.4)' 
+    }}>
 
       {/* Badges : N° Dossier et Type Mandat */}
       <div className="flex items-start justify-between gap-2 mb-2">
