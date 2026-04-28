@@ -289,6 +289,16 @@ export default function LeveTerrain() {
     const decimal = ts.match(/(\d+(?:\.\d+)?)/);
     return decimal ? parseFloat(decimal[0]) : 0;
   };
+  // Toutes les cartes de l'équipe ce jour (pas seulement celles de l'utilisateur)
+  // Pour refléter le même total que CeduleTerrain (calculateEquipeTimings sur toute l'équipe)
+  const mandatsEquipe = useMemo(() => {
+    const result = new Set();
+    equipesTerrain
+      .filter(e => equipesDuJourIds.has(e.id))
+      .forEach(e => (e.mandats || []).forEach(m => result.add(m)));
+    return result;
+  }, [equipesTerrain, equipesDuJourIds]);
+
   const totalWorkHours = useMemo(() => {
     return dossiers
       .filter(d => d.statut === "Ouvert")
@@ -299,12 +309,12 @@ export default function LeveTerrain() {
           .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
           .filter(({ terrainIdx, mandatIdx }) => {
             const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
-            return mandatsAssignes.has(cardId);
+            return mandatsEquipe.has(cardId);
           })
           .map(({ terrain }) => parseTimeString(terrain?.temps_prevu));
       }))
       .reduce((sum, h) => sum + h, 0);
-  }, [dossiers, selectedDate, mandatsAssignes]);
+  }, [dossiers, selectedDate, mandatsEquipe]);
 
   const handleSelectDossier = (item) => {
     setSelectedItem(item);
