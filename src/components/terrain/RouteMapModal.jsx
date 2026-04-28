@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
@@ -46,15 +46,15 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
 
   const bureauAddress = "11 rue melancon est, Alma";
 
-  const equipesDuJour = equipesTerrain.filter(e => equipesDuJourIds.has(e.id));
+  const equipesDuJour = useMemo(() => equipesTerrain.filter(e => equipesDuJourIds.has(e.id)), [equipesTerrain, equipesDuJourIds]);
 
-  const getClientsNames = (clientIds) => {
+  const getClientsNames = useCallback((clientIds) => {
     if (!clientIds?.length) return "-";
     return clientIds.map(id => { const c = clients?.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(Boolean).join(", ");
-  };
+  }, [clients]);
 
-  // Construire les routes pour MultiRouteMap
-  const mapRoutes = equipesDuJour.map((equipe, index) => {
+  // Construire les routes pour MultiRouteMap — mémoïsé pour éviter les re-renders infinis
+  const mapRoutes = useMemo(() => equipesDuJour.map((equipe, index) => {
     const waypoints = [];
     const dossiersInfo = [];
 
@@ -90,7 +90,15 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
       label: equipe.nom,
       dossiers: dossiersInfo,
     };
-  }).filter(r => r.waypoints.length > 0);
+  }).filter(r => r.waypoints.length > 0), [equipesDuJour, dossiers, clients, getClientsNames]);
+
+  const handleRouteDurations = useCallback((durations) => {
+    setEquipeTravelSeconds(prev => {
+      const newDurations = { ...prev };
+      mapRoutes.forEach((r, i) => { newDurations[r.equipeId] = durations[i] || 0; });
+      return newDurations;
+    });
+  }, [mapRoutes]);
 
   const formatHHMM = (secs) => {
     const h = Math.floor(secs / 3600);
@@ -203,11 +211,7 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
               routes={mapRoutes}
               apiKey={apiKey}
               visibleRouteIndices={mapRoutes.map((_, i) => i)}
-              onRouteDurations={(durations) => {
-                const newDurations = {};
-                mapRoutes.forEach((r, i) => { newDurations[r.equipeId] = durations[i] || 0; });
-                setEquipeTravelSeconds(newDurations);
-              }}
+              onRouteDurations={handleRouteDurations}
             />
           )}
         </div>
