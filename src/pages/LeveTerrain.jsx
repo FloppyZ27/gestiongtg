@@ -653,18 +653,26 @@ export default function LeveTerrain() {
 
           </div>
 
-          {/* Nom centré + Date/Navigation à droite */}
+          {/* Nom à gauche + Date/Navigation à droite */}
           {user && (
-            <div className="relative flex items-center justify-center py-4 px-6 bg-slate-900/30">
-              <div className="flex flex-col items-center gap-1">
-                <div className="text-2xl font-bold text-white">{user.full_name}</div>
-                {employeConnecte && (
-                  <span className="text-slate-500 text-xs">— {employeConnecte.poste}</span>
-                )}
+            <div className="flex items-center justify-between py-4 px-6 bg-slate-900/30">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10 border-2 border-blue-500/50">
+                  <AvatarImage src={user.photo_url} />
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm">
+                    {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <div className="text-xl font-bold text-white">{user.full_name}</div>
+                  {employeConnecte && (
+                    <span className="text-slate-500 text-xs">{employeConnecte.poste}</span>
+                  )}
+                </div>
               </div>
 
               {/* Calendrier avec flèches de navigation à droite */}
-              <div className="absolute right-6 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -708,6 +716,7 @@ export default function LeveTerrain() {
               </div>
             </div>
           )}
+
         </div>
 
         <div className="flex flex-1 overflow-hidden">
