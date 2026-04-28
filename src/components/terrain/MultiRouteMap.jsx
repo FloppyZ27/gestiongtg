@@ -485,6 +485,19 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                  {hoveredDossier.statut_terrain.replace(/_/g, ' ')}
                </span>
              )}
+             {hoveredDossier.cardStatut && (
+               <span style={{
+                 fontSize: '10px',
+                 fontWeight: '600',
+                 padding: '2px 6px',
+                 borderRadius: '3px',
+                 color: hoveredDossier.cardStatut === 'Rendez-Vous' || hoveredDossier.cardStatut === 'Client Avisé' ? '#fb923c' : hoveredDossier.cardStatut === 'Confirmé la veille' || hoveredDossier.cardStatut === 'Retour terrain' ? '#c084fc' : '#94a3b8',
+                 background: hoveredDossier.cardStatut === 'Rendez-Vous' || hoveredDossier.cardStatut === 'Client Avisé' ? 'rgba(249, 115, 22, 0.3)' : hoveredDossier.cardStatut === 'Confirmé la veille' || hoveredDossier.cardStatut === 'Retour terrain' ? 'rgba(192, 132, 252, 0.3)' : 'rgba(148, 163, 184, 0.2)',
+                 border: hoveredDossier.cardStatut === 'Rendez-Vous' || hoveredDossier.cardStatut === 'Client Avisé' ? '1px solid #fb923c' : hoveredDossier.cardStatut === 'Confirmé la veille' || hoveredDossier.cardStatut === 'Retour terrain' ? '1px solid #c084fc' : '1px solid rgba(148, 163, 184, 0.4)'
+               }}>
+                 {hoveredDossier.cardStatut}
+               </span>
+             )}
              {hoveredDossier.donneur && (
                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto' }}>
                  <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: '600' }}>
@@ -492,7 +505,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                  </span>
                </div>
              )}
-           </div>
+             </div>
         </div>
       )}
       
