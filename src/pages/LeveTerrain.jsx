@@ -121,6 +121,7 @@ export default function LeveTerrain() {
   const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
   const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
   const [showRouteMap, setShowRouteMap] = useState(false);
+  const [travelSecs, setTravelSecs] = useState(0);
 
   const queryClient = useQueryClient();
 
@@ -315,6 +316,33 @@ export default function LeveTerrain() {
       }))
       .reduce((sum, h) => sum + h, 0);
   }, [dossiers, selectedDate, mandatsEquipe]);
+
+  // Calculer le temps de trajet pour les équipes du jour (même logique que CeduleTerrain)
+  useEffect(() => {
+    const equipesDuJour = equipesTerrain.filter(e => equipesDuJourIds.has(e.id));
+    if (!equipesDuJour.length) { setTravelSecs(0); return; }
+
+    const bureauAddress = "11 rue melancon est, Alma";
+    const waypoints = equipesDuJour.flatMap(equipe =>
+      (equipe.mandats || []).map(cardId => {
+        const idParts = cardId.split('-');
+        const mandatIdx = parseInt(idParts[idParts.length - 2]);
+        const dossier = dossiers.find(d => d.id === idParts.slice(0, idParts.length - 2).join('-'));
+        const mandat = dossier?.mandats?.[mandatIdx];
+        return mandat?.adresse_travaux ? formatAdresse(mandat.adresse_travaux) : null;
+      }).filter(Boolean)
+    );
+
+    if (!waypoints.length) { setTravelSecs(0); return; }
+
+    base44.functions.invoke('calculateRouteDuration', {
+      origin: bureauAddress,
+      destination: bureauAddress,
+      waypoints,
+    }).then(res => {
+      setTravelSecs(res.data?.durationSeconds ?? 0);
+    }).catch(() => setTravelSecs(0));
+  }, [equipesTerrain, equipesDuJourIds, dossiers, selectedDate]);
 
   const handleSelectDossier = (item) => {
     setSelectedItem(item);
@@ -697,9 +725,23 @@ export default function LeveTerrain() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-slate-500 mb-1">Durée totale</p>
-                      <p className="text-emerald-300 text-sm font-semibold">
-                        {String(Math.floor(totalWorkHours)).padStart(2, '0')}h{String(Math.round((totalWorkHours % 1) * 60)).padStart(2, '0')}
-                      </p>
+                      {(() => {
+                        const formatHHMM = (secs) => {
+                          const h = Math.floor(secs / 3600);
+                          const m = Math.round((secs % 3600) / 60);
+                          return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
+                        };
+                        const travailSecs = totalWorkHours * 3600;
+                        const totalSecs = travailSecs + travelSecs;
+                        return (
+                          <>
+                            <p className="text-emerald-300 text-sm font-semibold">{formatHHMM(totalSecs)}</p>
+                            {travelSecs > 0 && (
+                              <p className="text-slate-400 text-xs">{formatHHMM(travelSecs)} 🚗</p>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                     <Button
                       size="sm"
