@@ -71,7 +71,7 @@ const getUserInitials = (user) => {
 };
 
 export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, onStatutChange }) {
-  if (!card) return null;
+  if (!card || !card.dossier) return null;
 
   const { dossier, mandat, terrain } = card;
   const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
