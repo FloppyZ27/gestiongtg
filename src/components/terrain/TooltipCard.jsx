@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const getMandatColor = (typeMandat) => {
   const colors = {
@@ -74,6 +75,7 @@ export function TooltipCard({ card, clients = [], users = [] }) {
 
   const { dossier, mandat, terrain } = card;
   const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+  const [statut, setStatut] = useState(null);
   
   // Récupérer les noms des clients
   const clientsNames = clients
@@ -198,8 +200,8 @@ export function TooltipCard({ card, clients = [], users = [] }) {
         </div>
       )}
 
-      {/* Footer : Temps prévu, Statut, Donneur */}
-      <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30 gap-2">
+      {/* Footer : Temps prévu, Donneur */}
+      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-600 gap-2 mb-2">
         <div>
           {terrain?.temps_prevu && (
             <div className="flex items-center gap-1">
@@ -238,6 +240,19 @@ export function TooltipCard({ card, clients = [], users = [] }) {
           </div>
         )}
       </div>
+
+      {/* Statut */}
+      <Select value={statut || ""} onValueChange={setStatut}>
+        <SelectTrigger className="h-6 text-xs bg-slate-600 border-slate-500 text-white">
+          <SelectValue placeholder="Statut..." />
+        </SelectTrigger>
+        <SelectContent className="bg-slate-800 border-slate-700">
+          <SelectItem value="Rendez-Vous" className="text-xs text-white">Rendez-Vous</SelectItem>
+          <SelectItem value="Client Avisé" className="text-xs text-white">Client Avisé</SelectItem>
+          <SelectItem value="Confirmé la veille" className="text-xs text-white">Confirmé la veille</SelectItem>
+          <SelectItem value="Retour terrain" className="text-xs text-white">Retour terrain</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
