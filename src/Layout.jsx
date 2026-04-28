@@ -796,7 +796,7 @@ function LayoutContent({ children, currentPageName }) {
           box-shadow: 
             inset 3px 3px 6px rgba(0, 0, 0, 0.3),
             inset -3px -3px 6px rgba(71, 85, 105, 0.05),
-            0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+            0 0 0 2px rgba(100, 116, 139, 0.3) !important;
         }
 
 
