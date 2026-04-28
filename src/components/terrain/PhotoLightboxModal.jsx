@@ -34,9 +34,7 @@ export default function PhotoLightboxModal({
   setLightboxIndex,
   onClose,
 }) {
-  if (lightboxIndex === null || !photosFiles.length) return null;
-
-  const current = photosFiles[lightboxIndex];
+  const current = photosFiles[lightboxIndex] ?? null;
   const isImg = current && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
     current.name.split('.').pop()?.toLowerCase()
   );
@@ -69,6 +67,7 @@ export default function PhotoLightboxModal({
 
   // Keyboard navigation
   useEffect(() => {
+    if (lightboxIndex === null || !photosFiles.length) return;
     const handleKey = (e) => {
       if (e.key === 'ArrowLeft') goPrev();
       if (e.key === 'ArrowRight') goNext();
@@ -76,7 +75,9 @@ export default function PhotoLightboxModal({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [photosFiles.length]);
+  }, [photosFiles.length, lightboxIndex]);
+
+  if (lightboxIndex === null || !photosFiles.length) return null;
 
   return (
     <div
