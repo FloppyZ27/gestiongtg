@@ -716,7 +716,7 @@ export default function LeveTerrain() {
 
               {/* Temps total travail (même info que l'équipe dans CeduleTerrain) */}
               {dossiersDuJour.length > 0 && totalWorkHours > 0 && (
-                <div className="pt-2 border-t border-slate-700">
+                <div className="pt-2">
                   <div className="flex items-center justify-between">
                     {(() => {
                       const formatHHMM = (secs) => {
