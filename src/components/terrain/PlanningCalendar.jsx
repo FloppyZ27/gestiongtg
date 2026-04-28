@@ -1327,7 +1327,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none transition-all duration-150 ${ringStyle} ${disableInteractions ? '' : (isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer')} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
+        className={`${arpColor.split(' ')[0]} rounded-xl p-2 mb-2 select-none ${disableInteractions ? '' : 'transition-all duration-150'} ${ringStyle} ${disableInteractions ? '' : (isLocked ? 'opacity-80' : 'hover:scale-[1.02] cursor-pointer')} ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${isLinkingTarget ? 'cursor-crosshair' : ''}`}
         style={{ pointerEvents: disableInteractions ? 'none' : 'auto', cursor: disableInteractions ? 'default' : (isLocked ? 'default' : (linkingMode ? 'crosshair' : dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer')), boxShadow: (() => { const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' }; const bg = arpColor.split(' ')[0]; const clr = colorMap[bg] || 'rgba(16,185,129,0.6)'; return isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`; })() }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
