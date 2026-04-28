@@ -707,7 +707,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       const routes = buildRoutesForDate(selectedMapDate);
       setMapRoutes(routes);
     }
-  }, [equipes, dossiers, selectedMapDate, buildRoutesForDate]);
+  }, [selectedMapDate]);
 
   // Réinitialiser selectedRoutes et visibleTeams uniquement quand la date change ou les routes sont recalculées
   useEffect(() => {
