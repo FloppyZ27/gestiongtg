@@ -1528,7 +1528,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           {globalViewMode === "vehicules" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-purple-500/20' : 'border border-slate-700'}`}>{equipe.vehicules.map(id => { const v = vehicules.find(v => v.id === id); return v ? <span key={id} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Truck className="w-3 h-3 text-purple-400" />{v.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
           {globalViewMode === "equipements" && <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">{(p, s) => <div ref={p.innerRef} {...p.droppableProps} className={`min-h-[24px] p-0.5 rounded flex flex-wrap gap-0.5 ${s.isDraggingOver ? 'bg-orange-500/20' : 'border border-slate-700'}`}>{equipe.equipements.map(id => { const e = equipements.find(e => e.id === id); return e ? <span key={id} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white flex items-center gap-1"><Wrench className="w-3 h-3 text-orange-400" />{e.nom}</span> : null; })}{p.placeholder}</div>}</Droppable>}
           {/* Zone de drop custom pour les DossierCards */}
-          <div key={`kanban-${columnId}-${!showMapDialog}`} data-kanban-column={columnId} className={`min-h-[50px] -mx-2 px-2 rounded transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
+          <div data-kanban-column={columnId} className={`min-h-[50px] -mx-2 px-2 rounded transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
             {equipe.mandats.map((cId, idx) => {
               const card = terrainCards.find(c => c.id === cId);
               if (!card) return null;
@@ -1536,7 +1536,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               return (
                 <div key={cId} data-card-id={cId}>
                   {showIndicator && <div className="h-1 bg-emerald-400 rounded-full mx-1 mb-1 opacity-80" />}
-                  <DossierCard card={card} showLock={true} />
+                  <DossierCard card={card} showLock={true} disableInteractions={showMapDialog} />
                 </div>
               );
             })}
