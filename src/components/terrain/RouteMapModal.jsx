@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import MultiRouteMap from "./MultiRouteMap";
 
 const COLORS = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899','#14b8a6','#f97316','#06b6d4'];
@@ -67,6 +68,8 @@ const generateTeamDisplayName = (equipe, users, positionIndex) => {
   }).filter(n => n).join('-');
   return numStr ? `Équipe ${numStr} - ${initials}` : equipe.nom;
 };
+
+const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
 export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, users, selectedDate, onClose }) {
   const [apiKey, setApiKey] = useState(null);
@@ -315,9 +318,18 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
                                       <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
                                     </div>
                                   )}
-                                  {terrain.donneur && (
-                                    <span className="text-xs text-slate-400 font-medium">{terrain.donneur}</span>
-                                  )}
+                                  {terrain.donneur && (() => {
+                                    const donnerUser = users.find(u => u.full_name === terrain.donneur);
+                                    return (
+                                      <div className="flex items-center gap-1">
+                                        <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ')[0][0]}</span>
+                                        <Avatar className="w-4 h-4 border border-slate-500/50">
+                                          <AvatarImage src={donnerUser?.photo_url} />
+                                          <AvatarFallback className="text-[7px] bg-gradient-to-r from-slate-600 to-slate-700 text-white">{getInitials(terrain.donneur)}</AvatarFallback>
+                                        </Avatar>
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               )}
                             </>
