@@ -679,6 +679,13 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
+        /* Badges et logos noirs au hover dans les menus déroulants */
+        [data-radix-select-content] [role="option"]:hover [class*="Badge"],
+        [data-radix-select-content] [role="option"]:hover [class*="bg-"],
+        [data-radix-select-content] [role="option"]:hover img {
+          filter: brightness(0) !important;
+        }
+
 
 
         /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
