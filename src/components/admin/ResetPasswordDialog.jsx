@@ -40,7 +40,7 @@ export default function ResetPasswordDialog({ open, onOpenChange, user, onReset 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
             <p className="text-sm text-yellow-300">
-              Réinitialisation du mot de passe pour: <strong>{user?.full_name}</strong>
+              Réinitialisation du mot de passe pour: <strong>{user?.prenom} {user?.nom}</strong>
             </p>
           </div>
 
