@@ -279,14 +279,25 @@ export default function LeveTerrain() {
     setLoadingPhotos(false);
   };
 
-  // Calcul du temps total de travail (même logique que calculateEquipeTimings dans CeduleTerrain)
+  // Calcul du temps total de travail — même logique que calculateEquipeTimings dans CeduleTerrain
+  // On cherche le terrain dont date_cedulee === selectedDate (même filtrage que dossiersDuJour)
   const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
   const totalWorkHours = useMemo(() => {
-    return dossiersDuJour.reduce((sum, { mandat }) => {
-      const terrain = mandat?.terrains_list?.[0] || mandat?.terrain;
-      return sum + parseTimeString(terrain?.temps_prevu);
-    }, 0);
-  }, [dossiersDuJour]);
+    return dossiers
+      .filter(d => d.statut === "Ouvert")
+      .flatMap(d => (d.mandats || []).flatMap((m, mandatIdx) => {
+        const terrains = m.terrains_list || (m.terrain?.date_cedulee ? [m.terrain] : []);
+        return terrains
+          .map((t, terrainIdx) => ({ terrain: t, terrainIdx, mandatIdx }))
+          .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
+          .filter(({ terrainIdx, mandatIdx }) => {
+            const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
+            return mandatsAssignes.has(cardId);
+          })
+          .map(({ terrain }) => parseTimeString(terrain?.temps_prevu));
+      }))
+      .reduce((sum, h) => sum + h, 0);
+  }, [dossiers, selectedDate, mandatsAssignes]);
 
   const handleSelectDossier = (item) => {
     setSelectedItem(item);
