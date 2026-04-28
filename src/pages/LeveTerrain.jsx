@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn, Map } from "lucide-react";
+import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn, Map, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -124,6 +124,7 @@ export default function LeveTerrain() {
   const [showRouteMap, setShowRouteMap] = useState(false);
   const [travelSecs, setTravelSecs] = useState(0);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
+  const [deletePhotoConfirm, setDeletePhotoConfirm] = useState(null); // { idx, photoName }
 
   const queryClient = useQueryClient();
 
@@ -608,7 +609,13 @@ export default function LeveTerrain() {
   };
 
   const handleDeletePhoto = async (idx, photoName) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) return;
+    setDeletePhotoConfirm({ idx, photoName });
+  };
+
+  const confirmDeletePhoto = async () => {
+    if (!deletePhotoConfirm) return;
+    const { idx, photoName } = deletePhotoConfirm;
+    setDeletePhotoConfirm(null);
     try {
       // Supprimer la photo de SharePoint (via function)
       base44.functions.invoke('deleteSharePointFile', { 
@@ -1293,6 +1300,34 @@ export default function LeveTerrain() {
            </div>
         );
       })()}
+
+      {/* ===== MODAL CONFIRMATION SUPPRESSION PHOTO ===== */}
+      {deletePhotoConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setDeletePhotoConfirm(null)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Supprimer la photo</h3>
+                <p className="text-slate-400 text-sm">Cette action est irréversible.</p>
+              </div>
+            </div>
+            <p className="text-slate-300 text-sm mb-5 bg-slate-800/50 rounded-lg p-3 truncate">
+              📷 {deletePhotoConfirm.photoName}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setDeletePhotoConfirm(null)} className="border-slate-600 text-slate-300">
+                Annuler
+              </Button>
+              <Button onClick={confirmDeletePhoto} className="bg-red-600 hover:bg-red-700 border-none text-white">
+                <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===== MODAL CARTE ITINÉRAIRE ===== */}
       {showRouteMap && <RouteMapModal equipesTerrain={equipesTerrain} equipesDuJourIds={equipesDuJourIds} dossiers={dossiers} clients={clients} users={users} selectedDate={selectedDate} onClose={() => setShowRouteMap(false)} />}
