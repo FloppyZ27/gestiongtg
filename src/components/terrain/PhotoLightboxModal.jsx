@@ -88,7 +88,7 @@ export default function PhotoLightboxModal({
       {/* Fenêtre modale */}
       <div
         className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ width: '92vw', maxWidth: 1300, height: 'calc(98vh - 90px)', marginTop: 90 }}
+        style={{ width: '92vw', maxWidth: 1300, height: 'calc(98vh - 94px)', marginTop: 90 }}
         onClick={e => e.stopPropagation()}
       >
         {/* ── Header ── */}
