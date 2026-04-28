@@ -686,6 +686,13 @@ function LayoutContent({ children, currentPageName }) {
           filter: brightness(0) !important;
         }
 
+        /* Override vert opaque des dropdown menus */
+        [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
+        [data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
+        [data-radix-dropdown-menu-content] [role="menuitemradio"]:hover {
+          background-color: rgba(100, 116, 139, 0.15) !important;
+        }
+
 
 
         /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
