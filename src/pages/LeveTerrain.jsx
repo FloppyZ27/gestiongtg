@@ -718,7 +718,7 @@ export default function LeveTerrain() {
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dossiers cédulés ce jour</span>
               </div>
-              <p className="text-emerald-400 font-bold text-lg">{dossiersDuJour.length} dossier{dossiersDuJour.length !== 1 ? 's' : ''}</p>
+
 
               {/* Temps total travail (même info que l'équipe dans CeduleTerrain) */}
               {dossiersDuJour.length > 0 && totalWorkHours > 0 && (
