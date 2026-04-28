@@ -142,7 +142,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups
 }
 
 // Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
-function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations }) {
+function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations, clients, users }) {
   // Stabiliser les routes par contenu pour éviter de recréer la carte inutilement
   const stableRoutes = useMemo(
     () => mapRoutes,
@@ -163,6 +163,8 @@ function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurati
         apiKey={apiKey}
         onRouteDurations={handleDurations}
         visibleRouteIndices={selectedRoutes}
+        clients={clients}
+        users={users}
       />
     </div>
   );
@@ -1958,6 +1960,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                         visibleRouteIndices={visibleIndices}
                         apiKey={googleMapsApiKey}
                         onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
+                        clients={clients}
+                        users={users}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet correspondant aux filtres</div>

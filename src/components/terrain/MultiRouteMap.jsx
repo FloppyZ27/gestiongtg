@@ -60,7 +60,7 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices }) {
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices, clients = [], users = [] }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -214,8 +214,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    // Passer l'objet dossier complet
-                    setHoveredDossier({ ...dossier, teamColor });
+                    // Passer l'objet card complet avec toutes les infos
+                    setHoveredDossier({ ...dossier, mandat, terrain, teamColor });
                   });
 
                   marker.addListener('mouseout', () => {
@@ -332,7 +332,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           zIndex: 1000,
           pointerEvents: 'none'
         }}>
-          <TooltipCard card={hoveredDossier} />
+          <TooltipCard card={hoveredDossier} clients={clients} users={users} />
         </div>
       )}
       
