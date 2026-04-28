@@ -1266,40 +1266,63 @@ export default function LeveTerrain() {
       })()}
 
       {/* ===== MODAL CARTE ITINÉRAIRE ===== */}
-      {showRouteMap && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-slate-700">
-            <div className="flex items-center gap-2">
-              <Map className="w-5 h-5 text-blue-400" />
-              <h3 className="text-white font-semibold">Itinéraire de la journée</h3>
-            </div>
-            <button
-              onClick={() => setShowRouteMap(false)}
-              className="text-slate-400 hover:text-white"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-auto">
-            {dossiersDuJour.length > 0 ? (
-              <iframe
-                title="Itinéraire"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen=""
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/directions?key=AIzaSyDkcn0J2jEqEFb5ygUPqAn8qqJlNWl3I74&origin=${dossiersDuJour[0] ? encodeURIComponent(getAdresseString(dossiersDuJour[0].mandat?.adresse_travaux || 'Alma')) : 'Alma'}&destination=${dossiersDuJour[dossiersDuJour.length - 1] ? encodeURIComponent(getAdresseString(dossiersDuJour[dossiersDuJour.length - 1].mandat?.adresse_travaux || 'Alma')) : 'Alma'}`}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
-                <p>Aucun dossier disponible</p>
+      {showRouteMap && (() => {
+        const apiKey = "AIzaSyDkcn0J2jEqEFb5ygUPqAn8qqJlNWl3I74";
+        const bureauAddress = "11 rue melancon est, Alma";
+        // Récupérer tous les waypoints dans l'ordre des mandats de l'équipe
+        const equipesDuJour = equipesTerrain.filter(e => equipesDuJourIds.has(e.id));
+        const waypointAddresses = equipesDuJour.flatMap(equipe =>
+          (equipe.mandats || []).map(cardId => {
+            const parts = cardId.split('-');
+            const mandatIdx = parseInt(parts[parts.length - 2]);
+            const dossierId = parts.slice(0, parts.length - 2).join('-');
+            const dossier = dossiers.find(d => d.id === dossierId);
+            const mandat = dossier?.mandats?.[mandatIdx];
+            return mandat?.adresse_travaux ? getAdresseString(mandat.adresse_travaux) : null;
+          }).filter(Boolean)
+        );
+
+        const waypointsParam = waypointAddresses.length > 1
+          ? `&waypoints=${waypointAddresses.slice(0, -1).map(encodeURIComponent).join('|')}`
+          : '';
+        const destination = waypointAddresses.length > 0
+          ? encodeURIComponent(waypointAddresses[waypointAddresses.length - 1])
+          : encodeURIComponent(bureauAddress);
+        const mapsUrl = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${encodeURIComponent(bureauAddress)}&destination=${destination}${waypointsParam}&mode=driving`;
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-400" />
+                <h3 className="text-white font-semibold">Itinéraire de la journée</h3>
+                <span className="text-slate-400 text-sm ml-2">{waypointAddresses.length} arrêt{waypointAddresses.length !== 1 ? 's' : ''}</span>
               </div>
-            )}
+              <button onClick={() => setShowRouteMap(false)} className="text-slate-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1">
+              {waypointAddresses.length > 0 ? (
+                <iframe
+                  title="Itinéraire"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={mapsUrl}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  <p>Aucune adresse disponible pour tracer l'itinéraire</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ===== MODAL CAMÉRA ===== */}
       {showCamera && (
