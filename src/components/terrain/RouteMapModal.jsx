@@ -307,10 +307,17 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
                                   <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
                                 </div>
                               )}
-                              {terrain.temps_prevu && (
-                                <div className="flex items-center gap-1 mt-1 pt-1 border-t border-emerald-500/30">
-                                  <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                                  <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+                              {(terrain.temps_prevu || terrain.donneur) && (
+                                <div className="flex items-center justify-between gap-1 mt-1 pt-1 border-t border-emerald-500/30">
+                                  {terrain.temps_prevu && (
+                                    <div className="flex items-center gap-1">
+                                      <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                      <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+                                    </div>
+                                  )}
+                                  {terrain.donneur && (
+                                    <span className="text-xs text-slate-400 font-medium">{terrain.donneur}</span>
+                                  )}
                                 </div>
                               )}
                             </>
