@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, ChevronRight, ChevronLeft, Mountain, ExternalLink, RefreshCw, User, Calendar, AlertCircle, Wrench, UserCheck, Link2, Timer, Users, X, ZoomIn, Map } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PhotoMapOverlay from "@/components/terrain/PhotoMapOverlay";
@@ -123,6 +124,7 @@ export default function LeveTerrain() {
   const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
   const [showRouteMap, setShowRouteMap] = useState(false);
   const [travelSecs, setTravelSecs] = useState(0);
+  const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
 
   const queryClient = useQueryClient();
 
@@ -877,6 +879,48 @@ export default function LeveTerrain() {
                                     );
                                   })()}
                                 </div>
+                                {/* Statut — identique à CeduleTerrain */}
+                                {(() => {
+                                  const cardId = `${dossier.id}-0-0`;
+                                  const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
+                                  const currentStatut = cardStatuts[cardId]?.statut || null;
+                                  const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+                                  const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+                                  return (
+                                    <div className="mt-1" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
+                                      <Select
+                                        value={currentStatut || ""}
+                                        onValueChange={(val) => {
+                                          setCardStatuts(prev => {
+                                            const newVal = (val === '__vide__' || val === currentStatut) ? null : val;
+                                            const next = { ...prev, [cardId]: { ...prev[cardId], statut: newVal } };
+                                            localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+                                            return next;
+                                          });
+                                        }}
+                                      >
+                                        <SelectTrigger
+                                          className="w-full h-6 text-xs px-1.5 py-0"
+                                          style={{
+                                            background: isOrange ? 'rgba(249,115,22,0.3)' : isMauve ? 'rgba(139,92,246,0.3)' : 'rgba(30,41,59,0.4)',
+                                            color: isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8',
+                                            fontWeight: currentStatut ? 600 : 400,
+                                            border: `1px solid ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`,
+                                            justifyContent: 'center',
+                                          }}
+                                        >
+                                          <SelectValue placeholder="Statut..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
+                                          {STATUT_OPTIONS.map(opt => (
+                                            <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  );
+                                })()}
                               </>
                             )}
                           </div>
