@@ -71,11 +71,12 @@ const getUserInitials = (user) => {
 };
 
 export function TooltipCard({ card, clients = [], users = [] }) {
+  const [statut, setStatut] = useState(null);
+  
   if (!card) return null;
 
   const { dossier, mandat, terrain } = card;
   const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
-  const [statut, setStatut] = useState(null);
   
   // Récupérer les noms des clients
   const clientsNames = clients
