@@ -221,23 +221,38 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
         </div>
         {/* Select statut */}
         <div className="flex-1 min-w-0">
-          <Select value={currentStatut || ""} onValueChange={(val) => handleStatutChange(val === "__vide__" || val === currentStatut ? null : val)}>
-            <SelectTrigger className="w-full h-6 text-xs px-1.5 py-0 bg-slate-600 border-slate-500 text-white">
-              <SelectValue placeholder="Statut..." />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700">
-              <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
-              <SelectItem value="Rendez-Vous" className="text-xs text-white">Rendez-Vous</SelectItem>
-              <SelectItem value="Client Avisé" className="text-xs text-white">Client Avisé</SelectItem>
-              <SelectItem value="Confirmé la veille" className="text-xs text-white">Confirmé la veille</SelectItem>
-              <SelectItem value="Retour terrain" className="text-xs text-white">Retour terrain</SelectItem>
-            </SelectContent>
-          </Select>
+          {(() => {
+            const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
+            const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+            const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+            const triggerInlineStyle = isOrange
+              ? { background: 'rgba(249,115,22,0.3)', color: '#fb923c', fontWeight: 600, border: '1px solid #fb923c', textAlign: 'center', justifyContent: 'center' }
+              : isMauve
+              ? { background: 'rgba(139,92,246,0.3)', color: '#c084fc', fontWeight: 600, border: '1px solid #c084fc', textAlign: 'center', justifyContent: 'center' }
+              : { background: 'rgba(30,41,59,0.4)', color: '#94a3b8', opacity: 0.5, border: '1px solid #94a3b8', textAlign: 'center', justifyContent: 'center' };
+            return (
+              <Select value={currentStatut || ""} onValueChange={(val) => handleStatutChange(val === "__vide__" || val === currentStatut ? null : val)}>
+                <SelectTrigger 
+                  className="w-full h-6 text-xs px-1.5 py-0"
+                  style={{ ...triggerInlineStyle, boxShadow: `0 0 0 1px ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`, border: 'none', outline: 'none' }}
+                >
+                  <SelectValue placeholder="Statut..." />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
+                  {STATUT_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          })()}
         </div>
         {/* Donneur */}
         <div className="flex items-center gap-1 flex-shrink-0">
           {assignedUser ? (
             <>
+              <span className="text-xs text-slate-400 font-medium">{assignedUser.prenom?.[0]?.toUpperCase()}{assignedUser.nom?.[0]?.toUpperCase()}</span>
               {assignedUser.photo_url ? (
                 <img src={assignedUser.photo_url} alt={assignedUser.full_name} className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
               ) : (
@@ -248,6 +263,7 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
             </>
           ) : donneurUser ? (
             <>
+              <span className="text-xs text-slate-400 font-medium">{donneurUser.prenom?.[0]?.toUpperCase()}{donneurUser.nom?.[0]?.toUpperCase()}</span>
               {donneurUser.photo_url ? (
                 <img src={donneurUser.photo_url} alt={donneurUser.full_name} className="w-5 h-5 rounded-full border border-emerald-500/50 object-cover" />
               ) : (
