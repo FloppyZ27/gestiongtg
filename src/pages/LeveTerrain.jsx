@@ -12,9 +12,9 @@ import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, Chevr
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import PhotoMapOverlay from "@/components/terrain/PhotoMapOverlay";
 import SharePointTerrainViewer from "@/components/terrain/SharePointTerrainViewer";
 import RouteMapModal from "@/components/terrain/RouteMapModal";
+import PhotoLightboxModal from "@/components/terrain/PhotoLightboxModal";
 
 const ARPENTEUR_INITIALS = {
   "Samuel Guay": "SG",
@@ -119,8 +119,6 @@ export default function LeveTerrain() {
   const deviceOrientationRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null); // null = fermé, number = index ouvert
-  const [thumbnailScroll, setThumbnailScroll] = useState(0); // position de scroll des miniatures
-  const [photoGPS, setPhotoGPS] = useState(null); // { lat, lng } des coordonnées GPS de la photo actuelle
   const [showRouteMap, setShowRouteMap] = useState(false);
   const [travelSecs, setTravelSecs] = useState(0);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
@@ -523,29 +521,7 @@ export default function LeveTerrain() {
     reader.readAsDataURL(file);
   });
 
-  // Récupérer les coordonnées GPS à chaque changement de photo
-  useEffect(() => {
-    if (lightboxIndex === null || !selectedItem) {
-      setPhotoGPS(null);
-      return;
-    }
-    const current = photosFiles[lightboxIndex];
-    if (!current) {
-      setPhotoGPS(null);
-      return;
-    }
-    
-    // Chercher les coordonnées GPS sauvegardées pour cette photo
-    const gpsData = photosGPS.find(
-      gps => gps.dossier_id === selectedItem.dossier.id && gps.photo_name === current.name
-    );
-    
-    if (gpsData) {
-      setPhotoGPS({ lat: gpsData.latitude, lng: gpsData.longitude });
-    } else {
-      setPhotoGPS(null);
-    }
-  }, [lightboxIndex, photosFiles, photosGPS, selectedItem]);
+
 
   // Extraire les coordonnées GPS et l'orientation d'une image
   const extractGPSAndOrientationFromImage = async (imageUrl) => {
@@ -1145,161 +1121,14 @@ export default function LeveTerrain() {
         </div>
       </div>
       {/* ===== LIGHTBOX PHOTOS ===== */}
-      {lightboxIndex !== null && (() => {
-        const current = photosFiles[lightboxIndex];
-        const isImg = ['jpg','jpeg','png','gif','webp'].includes(current?.name.split('.').pop()?.toLowerCase());
-        
-        const goPrev = () => {
-          setLightboxIndex(i => (i - 1 + photosFiles.length) % photosFiles.length);
-          setThumbnailScroll(Math.max(0, thumbnailScroll - 1));
-        };
-        const goNext = () => {
-          setLightboxIndex(i => (i + 1) % photosFiles.length);
-          setThumbnailScroll(Math.min(Math.max(0, photosFiles.length - 5), thumbnailScroll + 1));
-        };
-        const handleThumbClick = (idx) => {
-          setLightboxIndex(idx);
-          const visibleCount = 5;
-          if (idx < thumbnailScroll) {
-            setThumbnailScroll(idx);
-          } else if (idx >= thumbnailScroll + visibleCount) {
-            setThumbnailScroll(Math.max(0, idx - visibleCount + 1));
-          }
-        };
-        return (
-          <div
-            className="fixed inset-0 z-50 bg-black/90 flex flex-col"
-            onClick={() => setLightboxIndex(null)}
-          >
-            {/* Fermer + Supprimer */}
-            <div className="absolute top-4 right-4 flex gap-2 z-10">
-              <button
-                className="text-white bg-red-700/80 hover:bg-red-600 rounded-full p-2 transition-colors"
-                onClick={() => {
-                  if (selectedItem) {
-                    handleDeletePhoto(lightboxIndex, photosFiles[lightboxIndex].name);
-                  }
-                }}
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <button
-                className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-2 z-10 transition-colors"
-                onClick={() => setLightboxIndex(null)}
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Compteur */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-slate-300 text-sm bg-slate-800/80 px-3 py-1 rounded-full">
-              {lightboxIndex + 1} / {photosFiles.length}
-            </div>
-
-            {/* Flèche gauche */}
-            {photosFiles.length > 1 && (
-              <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 z-10"
-                onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Conteneur principal : photo à gauche, flèche, carte à droite */}
-            <div className="flex-1 flex items-center justify-center px-6 py-4 gap-4" onClick={e => e.stopPropagation()}>
-              {/* Image centrée à gauche */}
-              <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-                {isImg && current.downloadUrl ? (
-                  <img src={current.downloadUrl} alt={current.name} className="max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
-                ) : (
-                  <div className="w-64 h-64 flex flex-col items-center justify-center text-slate-500">
-                    <Image className="w-16 h-16 mb-3" />
-                    <p className="text-sm">{current?.name}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Flèche droite */}
-              {photosFiles.length > 1 && (
-                <button
-                  className="text-white bg-slate-800/80 hover:bg-slate-700 rounded-full p-3 flex-shrink-0"
-                  onClick={(e) => { e.stopPropagation(); goNext(); }}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              )}
-
-              {/* Carte satellite avec tous les pins des photos */}
-              {selectedItem && photosFiles.length > 0 && (
-                <div className="w-[450px] h-[450px] rounded-lg overflow-hidden border border-slate-600 shadow-lg flex-shrink-0" onClick={e => e.stopPropagation()}>
-                  <PhotoMapOverlay 
-                    photosGPS={photosGPS} 
-                    photosFiles={photosFiles} 
-                    selectedDossier={selectedItem.dossier}
-                    lightboxIndex={lightboxIndex}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Bande de miniatures en bas */}
-            {photosFiles.length > 1 && (
-              <div className="flex items-center justify-center gap-2 bg-black/80 px-4 py-3 rounded-lg mx-auto mb-4 w-full">
-                {/* Flèche scroll gauche */}
-                {thumbnailScroll > 0 && (
-                  <button
-                    className="text-slate-400 hover:text-white flex-shrink-0"
-                    onClick={(e) => { e.stopPropagation(); setThumbnailScroll(Math.max(0, thumbnailScroll - 1)); }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                )}
-
-                {/* Miniatures */}
-                <div className="flex gap-2 overflow-hidden flex-1">
-                  {photosFiles.slice(thumbnailScroll, thumbnailScroll + 5).map((file, i) => {
-                    const realIdx = thumbnailScroll + i;
-                    const isImage = ['jpg','jpeg','png','gif','webp'].includes(file.name.split('.').pop()?.toLowerCase());
-                    return (
-                      <button
-                        key={file.id}
-                        onClick={(e) => { e.stopPropagation(); handleThumbClick(realIdx); }}
-                        className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
-                          lightboxIndex === realIdx ? 'border-blue-500 ring-2 ring-blue-400' : 'border-slate-600 hover:border-slate-400'
-                        }`}
-                      >
-                        {isImage && file.downloadUrl ? (
-                          <img src={file.downloadUrl} alt={file.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                            <Image className="w-6 h-6 text-slate-600" />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Flèche scroll droite */}
-                {thumbnailScroll + 5 < photosFiles.length && (
-                  <button
-                    className="text-slate-400 hover:text-white flex-shrink-0"
-                    onClick={(e) => { e.stopPropagation(); setThumbnailScroll(Math.min(photosFiles.length - 5, thumbnailScroll + 1)); }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Nom du fichier */}
-            <div className="text-center text-slate-400 text-xs pb-4">
-              {current?.name}
-            </div>
-           </div>
-        );
-      })()}
+      <PhotoLightboxModal
+        photosFiles={photosFiles}
+        photosGPS={photosGPS}
+        selectedDossier={selectedItem?.dossier}
+        lightboxIndex={lightboxIndex}
+        setLightboxIndex={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
 
       {/* ===== MODAL CONFIRMATION SUPPRESSION PHOTO ===== */}
       {deletePhotoConfirm && (
