@@ -15,7 +15,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import SharePointTerrainViewer from "@/components/terrain/SharePointTerrainViewer";
 import RouteMapModal from "@/components/terrain/RouteMapModal";
 import PhotoLightboxModal from "@/components/terrain/PhotoLightboxModal";
-import { TooltipCard } from "@/components/terrain/TooltipCard";
 
 const ARPENTEUR_INITIALS = {
   "Samuel Guay": "SG",
@@ -124,7 +123,6 @@ export default function LeveTerrain() {
   const [travelSecs, setTravelSecs] = useState(0);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
   const [deletePhotoConfirm, setDeletePhotoConfirm] = useState(null); // { idx, photoName }
-  const [hoveredCard, setHoveredCard] = useState(null); // carte survolée pour infobulle
 
   const queryClient = useQueryClient();
 
@@ -707,8 +705,8 @@ export default function LeveTerrain() {
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-           {/* ===== COLONNE GAUCHE : Dossiers du jour + Infobulle ===== */}
-           <div className="w-full max-w-4xl flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex overflow-hidden">
+          {/* ===== COLONNE GAUCHE : Dossiers du jour ===== */}
+          <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex flex-col overflow-hidden">
             <div className="px-3 py-3 border-b border-slate-800 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -750,62 +748,146 @@ export default function LeveTerrain() {
                   Aucun dossier céduler aujourd'hui
                 </div>
               ) : (
-                <div className="p-2 space-y-2">
-                  {dossiersDuJour.map(({ dossier, mandat }, idx) => {
-                    const isSelected = selectedItem?.dossier?.id === dossier.id && selectedItem?.mandat?.type_mandat === mandat.type_mandat;
-                    const terrain = mandat.terrains_list?.[0] || mandat.terrain;
-                    const cardData = { dossier, mandat, terrain };
-                    const cardId = `${dossier.id}-0-0`;
-                    
-                    return (
-                      <button
-                        key={`${dossier.id}-${idx}`}
-                        onClick={() => handleSelectDossier({ dossier, mandat })}
-                        onMouseEnter={() => setHoveredCard(cardData)}
-                        onMouseLeave={() => setHoveredCard(null)}
-                        className={`w-full text-left transition-all ${isSelected ? 'ring-2 ring-inset ring-emerald-500' : ''}`}
-                      >
-                        <TooltipCard 
-                          card={cardData} 
-                          clients={clients} 
-                          users={users}
-                          cardStatuts={cardStatuts}
-                          onStatutChange={(cId, newStatut) => {
-                            setCardStatuts(prev => {
-                              const next = { ...prev, [cId]: { ...prev[cId], statut: newStatut } };
-                              localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
-                              return next;
-                            });
-                          }}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Infobulle survolée à droite */}
-            <div className="w-60 flex-shrink-0 border-l border-slate-800 bg-slate-900/20 p-4 overflow-y-auto flex items-center justify-center">
-              {hoveredCard ? (
-                <TooltipCard 
-                  card={hoveredCard} 
-                  clients={clients} 
-                  users={users}
-                  cardStatuts={cardStatuts}
-                  onStatutChange={(cId, newStatut) => {
-                    setCardStatuts(prev => {
-                      const next = { ...prev, [cId]: { ...prev[cId], statut: newStatut } };
-                      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
-                      return next;
-                    });
-                  }}
-                />
-              ) : (
-                <div className="text-center text-slate-600 text-sm">
-                  <MapPin className="w-8 h-8 mx-auto mb-2 text-slate-700" />
-                  Survolez une carte
-                </div>
+                dossiersDuJour.map(({ dossier, mandat }, idx) => {
+                  const isSelected = selectedItem?.dossier?.id === dossier.id && selectedItem?.mandat?.type_mandat === mandat.type_mandat;
+                  return (
+                    <button
+                      key={`${dossier.id}-${idx}`}
+                      onClick={() => handleSelectDossier({ dossier, mandat })}
+                      className={`w-full text-left p-2 border-b border-slate-800/50 transition-all ${isSelected ? 'ring-2 ring-inset ring-emerald-500' : ''}`}
+                    >
+                      {/* Carte identique à DossierCard dans CéduleTerrain */}
+                      {(() => {
+                        const terrain = mandat.terrains_list?.[0] || mandat.terrain;
+                        const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                        const bgColorClass = arpColor.split(' ')[0];
+                        const assignedUser = mandat.utilisateur_assigne
+                          ? users.find(u => u.email === mandat.utilisateur_assigne)
+                          : null;
+                        const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+                        return (
+                          <div className={`${bgColorClass} rounded-lg p-2`}>
+                            {/* Entête badges */}
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex gap-1 flex-wrap">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                                <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+                                  {getAbbreviatedMandatType(mandat.type_mandat)}
+                                </Badge>
+                              </div>
+                              {isSelected && <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />}
+                            </div>
+                            {/* Client */}
+                            <div className="flex items-center gap-1 mb-1">
+                              <User className="w-3 h-3 text-white flex-shrink-0" />
+                              <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                            </div>
+                            {/* Adresse */}
+                            {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                              <div className="flex items-start gap-1 mb-1">
+                                <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
+                              </div>
+                            )}
+                            {/* Date livraison */}
+                            {mandat.date_livraison && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                <span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                              </div>
+                            )}
+                            {terrain && (
+                              <>
+                                {terrain.date_limite_leve && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                    <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
+                                  </div>
+                                )}
+                                {terrain.a_rendez_vous && terrain.date_rendez_vous && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                                    <span className="text-xs text-orange-300">
+                                      RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
+                                      {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
+                                    </span>
+                                  </div>
+                                )}
+                                {terrain.instruments_requis && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                    <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
+                                  </div>
+                                )}
+                                {terrain.technicien && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                    <span className="text-xs text-blue-300 truncate">{terrain.technicien}</span>
+                                  </div>
+                                )}
+                                {terrain.dossier_simultane && (
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                    <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
+                                  </div>
+                                )}
+                                {/* Temps prévu | Statut (lecture seule) | Donneur + Avatar */}
+                                {(() => {
+                                  const cardId = `${dossier.id}-0-0`;
+                                  const currentStatut = cardStatuts[cardId]?.statut || null;
+                                  const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+                                  const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+                                  const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
+                                  return (
+                                    <div className="flex items-center gap-1 mt-2 pt-1 border-t border-emerald-500/30">
+                                      {/* Temps prévu */}
+                                      <div className="flex-shrink-0">
+                                        {terrain.temps_prevu
+                                          ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
+                                          : <div className="w-10" />}
+                                      </div>
+                                      {/* Statut — lecture seule, badge coloré */}
+                                      <div className="flex-1 min-w-0 flex justify-center">
+                                        {currentStatut ? (
+                                          <span
+                                            className="text-xs font-semibold px-2 py-0.5 rounded text-center truncate"
+                                            style={{
+                                              background: isOrange ? 'rgba(249,115,22,0.3)' : isMauve ? 'rgba(139,92,246,0.3)' : 'rgba(30,41,59,0.4)',
+                                              color: isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8',
+                                              border: `1px solid ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`,
+                                            }}
+                                          >
+                                            {currentStatut}
+                                          </span>
+                                        ) : <div className="flex-1" />}
+                                      </div>
+                                      {/* Donneur + Avatar */}
+                                      <div className="flex items-center gap-1 flex-shrink-0">
+                                        {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
+                                        {assignedUser ? (
+                                          <Avatar className="w-5 h-5 border border-emerald-500/50">
+                                            <AvatarImage src={assignedUser.photo_url} />
+                                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+                                          </Avatar>
+                                        ) : (
+                                          <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                            <User className="w-2.5 h-2.5 text-emerald-500" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>
