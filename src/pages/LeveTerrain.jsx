@@ -946,14 +946,8 @@ export default function LeveTerrain() {
                         )}
                         {selectedItem.mandat.lots?.length > 0 && (
                           <div>
-                            <p className="text-slate-500 text-xs uppercase tracking-wider">Lots</p>
+                            <p className="text-slate-500 text-xs uppercase tracking-wider">Lot(s)</p>
                             <p className="text-white">{selectedItem.mandat.lots.join(', ')}</p>
-                          </div>
-                        )}
-                        {selectedItem.mandat.notes && (
-                          <div>
-                            <p className="text-slate-500 text-xs uppercase tracking-wider">Notes</p>
-                            <p className="text-slate-300 text-sm">{selectedItem.mandat.notes}</p>
                           </div>
                         )}
                       </div>
