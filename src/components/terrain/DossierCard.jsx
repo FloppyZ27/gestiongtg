@@ -170,7 +170,7 @@ export function DossierCard({
             className="text-xs font-bold px-1.5 py-0.5 rounded"
             style={{ background: badgeBg, color: textColorLimite, border: `1px solid ${badgeBorder}`, boxShadow: badgeGlow, letterSpacing: '0.02em' }}
           >
-            ⏰ {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}
+            {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}
           </span>
         </div>
       )}
