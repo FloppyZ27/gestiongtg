@@ -1083,7 +1083,7 @@ export default function Lots() {
                 className="hidden"
                 disabled={isBulkImporting}
               />
-              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg">
+              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg cursor-pointer">
                 {isBulkImporting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1106,7 +1106,7 @@ export default function Lots() {
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg">
+                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 transition-all text-white shadow-lg">
                   <Plus className="w-5 h-5 mr-2" />
                   Nouveau lot
                 </Button>
