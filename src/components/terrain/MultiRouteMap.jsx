@@ -225,7 +225,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    setHoveredDossier({ ...dossier, teamColor, cardId: dossier.id });
+                    // dossier.cardId contient déjà le vrai cardId (dossierId-mandatIdx-terrainIdx) passé depuis buildRoutesForDate
+                    setHoveredDossier({ ...dossier, teamColor });
                   });
 
                   marker.addListener('mouseout', () => {

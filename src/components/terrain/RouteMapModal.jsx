@@ -104,25 +104,18 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
       const dossier = dossiers.find(d => d.id === dossierId);
       const mandat = dossier?.mandats?.[mandatIdx];
       const terrain = mandat?.terrains_list?.[terrainIdx] || mandat?.terrain;
-      if (mandat?.adresse_travaux) {
+      if (dossier && mandat?.adresse_travaux) {
         const address = formatAdresse(mandat.adresse_travaux);
         if (address) {
           waypoints.push(address);
+          // Structure identique à terrainCard pour que TooltipCard fonctionne
           dossiersInfo.push({
+            id: cardId,
+            cardId,
+            dossier,
+            mandat,
+            terrain: terrain || {},
             numero: `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`,
-            clients: getClientsNames(dossier.clients_ids),
-            mandat: getAbbreviatedMandatType(mandat.type_mandat),
-            mandatType: mandat.type_mandat,
-            adresse: address,
-            arpenteur: dossier.arpenteur_geometre,
-            dateLivraison: mandat.date_livraison ? format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : null,
-            dateLimite: terrain?.date_limite_leve ? format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr }) : null,
-            rendezVous: terrain?.a_rendez_vous && terrain?.date_rendez_vous ? `${format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}${terrain.heure_rendez_vous ? ` à ${terrain.heure_rendez_vous}` : ''}` : null,
-            instrumentsRequis: terrain?.instruments_requis || null,
-            technicien: terrain?.technicien || null,
-            dossierSimultane: terrain?.dossier_simultane || null,
-            tempsPrevu: terrain?.temps_prevu || null,
-            notes: terrain?.notes || null,
           });
         }
       }
