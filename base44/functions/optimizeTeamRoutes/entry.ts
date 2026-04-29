@@ -38,12 +38,37 @@ function getMaxHours(dateStr) {
 
 // Prend une liste de cartes candidates (déjà ordonnées par priorité),
 // optimise géographiquement et retourne les cartes qui tiennent dans la limite horaire.
-async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr) {
+// Les groupes liés (linkedGroups) sont traités comme des unités atomiques.
+async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr, cardToGroup) {
   const maxH = getMaxHours(dateStr);
   if (candidateCards.length === 0) return [];
 
-  // Séparer urgents (délai dépassé/proche) et non-urgents
-  // Les urgents gardent leur ordre de priorité; les non-urgents sont optimisés géographiquement
+  // Helper: obtenir tous les membres d'un groupe liés présents dans candidateCards
+  const getGroupMembers = (cardId) => {
+    const group = cardToGroup?.get(cardId);
+    if (!group) return null;
+    return group.cardIds.filter(id => candidateCards.some(c => c.id === id)).map(id => candidateCards.find(c => c.id === id)).filter(Boolean);
+  };
+
+  // Construire des "unités" (groupe lié = une unité atomique, carte seule = une unité)
+  const buildUnits = (cards) => {
+    const seen = new Set();
+    const units = [];
+    for (const card of cards) {
+      if (seen.has(card.id)) continue;
+      const members = getGroupMembers(card.id);
+      if (members && members.length > 1) {
+        members.forEach(m => seen.add(m.id));
+        units.push({ cards: members, isGroup: true, isLocked: members.some(m => lockedCardIds.includes(m.id)) });
+      } else {
+        seen.add(card.id);
+        units.push({ cards: [card], isGroup: false, isLocked: lockedCardIds.includes(card.id) });
+      }
+    }
+    return units;
+  };
+
+  // Séparer urgents et non-urgents
   const urgentCards = candidateCards.filter(c => lockedCardIds.includes(c.id) || c.a_rendez_vous || isUrgent(c, dateStr));
   const relaxedCards = candidateCards.filter(c => !lockedCardIds.includes(c.id) && !c.a_rendez_vous && !isUrgent(c, dateStr));
 
@@ -59,51 +84,36 @@ async function fitCardsIntoShift(apiKey, candidateCards, lockedCardIds, dateStr)
     } catch { /* garder l'ordre original */ }
   }
 
-  // Ordre final: urgents en premier (ordre priorité), puis non-urgents (ordre géo)
   let orderedCards = [...urgentCards, ...orderedRelaxed];
 
-  // Maintenant calculer le trajet total pour la liste complète et élaguer si nécessaire
+  // Maintenant élaguer si nécessaire en respectant l'atomicité des groupes liés
   const withAddr = orderedCards.filter(c => c.address);
+  let travelH = 1; // estimation par défaut
   if (withAddr.length >= 2) {
     try {
       const { durationSeconds } = await getOptimizedRoute(apiKey, withAddr.map(c => c.address));
-      const travelH = durationSeconds / 3600;
-      const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
-
-      if (totalTravail + travelH <= maxH) return orderedCards;
-
-      // Trop plein: retirer depuis la fin (non-urgents d'abord, sauf lockées)
-      const travelPerAddr = travelH / withAddr.length;
-      let cumH = 0;
-      const kept = [];
-      for (const card of orderedCards) {
-        const h = parseTempsPrevu(card.temps_prevu) + (card.address ? travelPerAddr : 0);
-        if (cumH + h <= maxH) {
-          kept.push(card);
-          cumH += h;
-        } else if (lockedCardIds.includes(card.id)) {
-          kept.push(card); // lockée: toujours garder
-        }
-      }
-      return kept;
-    } catch { /* fallback ci-dessous */ }
+      travelH = durationSeconds / 3600;
+    } catch { /* garder estimation */ }
   }
 
-  // Pas assez d'adresses: estimation trajet 1h total
-  const ESTIMATED_TRAVEL = 1;
   const totalTravail = orderedCards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu), 0);
-  if (totalTravail + ESTIMATED_TRAVEL <= maxH) return orderedCards;
+  if (totalTravail + travelH <= maxH) return orderedCards;
 
+  // Trop plein: retirer des unités entières depuis la fin (groupes liés non séparables)
+  const travelPerAddr = withAddr.length > 0 ? travelH / withAddr.length : 0;
+  const units = buildUnits(orderedCards);
   let cumH = 0;
-  const kept = [];
-  for (const card of orderedCards) {
-    const h = parseTempsPrevu(card.temps_prevu);
-    if (cumH + h + ESTIMATED_TRAVEL <= maxH || lockedCardIds.includes(card.id)) {
-      kept.push(card);
-      cumH += h;
+  const keptCards = [];
+
+  for (const unit of units) {
+    const unitH = unit.cards.reduce((s, c) => s + parseTempsPrevu(c.temps_prevu) + (c.address ? travelPerAddr : 0), 0);
+    if (cumH + unitH <= maxH || unit.isLocked) {
+      unit.cards.forEach(c => keptCards.push(c));
+      cumH += unitH;
     }
+    // Si l'unité ne rentre pas et n'est pas lockée → on saute TOUTE l'unité (groupes liés non séparés)
   }
-  return kept;
+  return keptCards;
 }
 
 // Une carte est "en retard" si sa date_limite_leve ou date_livraison est dépassée (ou dans les 3 prochains jours)
@@ -269,7 +279,7 @@ Deno.serve(async (req) => {
 
         const candidatesRaw = [...lockedCards_data, ...rdvForDay, ...othersForDay];
         const candidates = expandWithLinkedGroup(candidatesRaw);
-        const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr);
+        const keptCards = await fitCardsIntoShift(apiKey, candidates, lockedCardIds, dateStr, cardToGroup);
         const keptIds = keptCards.map(c => c.id);
 
         // Retirer du pool les cartes intégrées (et leurs groupes liés)
@@ -314,7 +324,7 @@ Deno.serve(async (req) => {
         if (candidatesRaw.length === 0) break;
         const candidates = expandWithLinkedGroup(candidatesRaw);
 
-        const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr);
+        const keptCards = await fitCardsIntoShift(apiKey, candidates, [], dateStr, cardToGroup);
         if (keptCards.length === 0) break;
         const orderedIds = keptCards.map(c => c.id);
 
