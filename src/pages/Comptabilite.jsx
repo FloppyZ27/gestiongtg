@@ -755,7 +755,7 @@ export default function Comptabilite() {
 
             {!mandatsCollapsed && (
               <CardContent className="p-4">
-                <div className="flex gap-1 flex-wrap mb-4 border-b border-slate-700 pb-3">
+                <div className="grid mb-4 border-b border-slate-700" style={{ gridTemplateColumns: `repeat(${ARPENTEURS.length}, 1fr)` }}>
                   {ARPENTEURS.map(arp => {
                     const count = getMandatsOuverts(arp).length;
                     const isActive = selectedArpenteur === arp;
@@ -764,11 +764,15 @@ export default function Comptabilite() {
                       <button
                         key={arp}
                         onClick={() => setSelectedArpenteur(arp)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-80'}`}
-                        style={{ border: tabStyle.border, color: tabStyle.color, background: tabStyle.background }}
+                        className={`flex flex-col items-center justify-center py-2.5 px-2 text-xs font-medium transition-all border-b-2 ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
+                        style={{
+                          color: tabStyle.color,
+                          background: tabStyle.background,
+                          borderBottomColor: isActive ? tabStyle.color : 'transparent',
+                        }}
                       >
-                        {arp}
-                        <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'rgba(255,255,255,0.15)' }}>{count}</span>
+                        <span className="truncate max-w-full text-center leading-tight">{arp}</span>
+                        <span className="mt-1 px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'rgba(255,255,255,0.15)' }}>{count}</span>
                       </button>
                     );
                   })}
