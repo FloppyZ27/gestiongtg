@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info, Filter, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ChevronsUpDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info, Filter, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -557,11 +557,6 @@ export default function Lots() {
     }
   };
 
-  const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
-    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
-
   const handleViewSort = (field) => {
     if (viewSortField === field) {
       setViewSortDirection(viewSortDirection === "asc" ? "desc" : "asc");
@@ -571,10 +566,7 @@ export default function Lots() {
     }
   };
 
-  const getViewSortIcon = (field) => {
-    if (viewSortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
-    return viewSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
+  const getSortIco = (f, sf, sd) => sf === f ? (sd === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />;
 
   const handleFormSort = (field) => {
     if (formSortField === field) {
@@ -591,10 +583,7 @@ export default function Lots() {
     }
   };
 
-  const getFormSortIcon = (field) => {
-    if (formSortField !== field) return null;
-    return formSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
+  const getFormSortIcon = (field) => formSortField === field ? (formSortDirection === "asc" ? <ChevronUp className="w-3 h-3 text-emerald-400 inline ml-1" /> : <ChevronDown className="w-3 h-3 text-emerald-400 inline ml-1" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500 inline ml-1" />;
 
   const getFilteredAndSortedDossiers = (lotNumero, isFormDialog = false) => {
     const associatedDossiers = getDossiersWithLot(lotNumero);
@@ -1748,31 +1737,19 @@ export default function Lots() {
                                       className="text-slate-300 cursor-pointer hover:text-white"
                                       onClick={() => handleViewSort('numero_dossier')}
                                     >
-                                      N° Dossier {getViewSortIcon('numero_dossier')}
-                                    </TableHead>
-                                    <TableHead 
-                                      className="text-slate-300 cursor-pointer hover:text-white"
-                                      onClick={() => handleViewSort('clients')}
-                                    >
-                                      Clients {getViewSortIcon('clients')}
-                                    </TableHead>
-                                    <TableHead 
-                                      className="text-slate-300 cursor-pointer hover:text-white"
-                                      onClick={() => handleViewSort('type_mandat')}
-                                    >
-                                      Type de mandat {getViewSortIcon('type_mandat')}
-                                    </TableHead>
-                                    <TableHead 
-                                      className="text-slate-300 cursor-pointer hover:text-white"
-                                      onClick={() => handleViewSort('date_minute')}
-                                    >
-                                      Date de minute {getViewSortIcon('date_minute')}
-                                    </TableHead>
-                                    <TableHead 
-                                      className="text-slate-300 cursor-pointer hover:text-white"
-                                      onClick={() => handleViewSort('adresse_travaux')}
-                                    >
-                                      Adresse travaux {getViewSortIcon('adresse_travaux')}
+                                      N° Dossier {getSortIco('numero_dossier', viewSortField, viewSortDirection)}
+                                      </TableHead>
+                                      <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleViewSort('clients')}>
+                                      Clients {getSortIco('clients', viewSortField, viewSortDirection)}
+                                      </TableHead>
+                                      <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleViewSort('type_mandat')}>
+                                      Type de mandat {getSortIco('type_mandat', viewSortField, viewSortDirection)}
+                                      </TableHead>
+                                      <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleViewSort('date_minute')}>
+                                      Date de minute {getSortIco('date_minute', viewSortField, viewSortDirection)}
+                                      </TableHead>
+                                      <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleViewSort('adresse_travaux')}>
+                                      Adresse travaux {getSortIco('adresse_travaux', viewSortField, viewSortDirection)}
                                     </TableHead>
                                   </TableRow>
                                 </TableHeader>
@@ -1977,7 +1954,7 @@ export default function Lots() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     {[['numero_lot','Numéro de lot'],['circonscription','Circonscription'],['cadastre','Cadastre'],['rang','Rang'],['date_bpd','Date BPD'],['type_operation',"Type d'opération"]].map(([field, label]) => (
-                      <TableHead key={field} className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort(field)}>{label} {sortField === field && (sortDirection === 'asc' ? '↑' : '↓')}</TableHead>
+                      <TableHead key={field} className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none" onClick={() => handleSort(field)}><div className="flex items-center gap-1">{label}{getSortIco(field, sortField, sortDirection)}</div></TableHead>
                     ))}
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
