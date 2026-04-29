@@ -18,12 +18,7 @@ export default function Recherches() {
               <h1 className="text-3xl md:text-4xl font-bold text-blue-400">
                 Recherches
               </h1>
-              <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
-                alt="GTG Logo"
-                className="w-10 h-auto"
-                style={{ filter: 'hue-rotate(200deg) saturate(1.2) brightness(1.1)' }}
-              />
+              <SearchIcon className="w-10 h-10 text-blue-400" />
             </div>
             <p className="text-slate-400">Consultez les lots et les actes</p>
           </div>
