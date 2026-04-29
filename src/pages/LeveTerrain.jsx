@@ -793,17 +793,26 @@ export default function LeveTerrain() {
                           <motion.div
                             className="absolute inset-0 rounded pointer-events-none"
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: [0.5, 0.3, 0.5] }}
-                            transition={{ duration: 2, repeat: Infinity }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
                             style={{
-                              boxShadow: '0 0 20px rgba(16, 185, 129, 0.4), inset 0 0 20px rgba(16, 185, 129, 0.1)',
+                              boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.5)',
                             }}
                           />
                           <motion.div
-                            className="absolute inset-0 rounded border border-emerald-500/50 pointer-events-none"
-                            initial={{ opacity: 0, scale: 1 }}
-                            animate={{ opacity: 1, scale: 1.05 }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="absolute inset-0 rounded pointer-events-none"
+                            initial={{ opacity: 0 }}
+                            animate={{ boxShadow: ['0 0 30px rgba(16, 185, 129, 0)', '0 0 60px rgba(16, 185, 129, 0.6)', '0 0 30px rgba(16, 185, 129, 0)'] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                          <motion.div
+                            className="absolute -inset-2 rounded pointer-events-none blur-xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.2, 0.4, 0.2] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                            style={{
+                              background: 'radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%)',
+                            }}
                           />
                         </>
                       )}
