@@ -96,8 +96,9 @@ export function DossierCard({
   // Si pas de date cédulée mais qu'il y a une date limite, on calcule par rapport à aujourd'hui
   const couleurEffective = couleurCedulee || (() => {
     if (!terrain.date_limite_leve) return null;
-    const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - new Date()) / 86400000);
-    if (diff >= 7) return 'green';
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - today) / 86400000);
+    if (diff > 7) return 'green';
     if (diff >= 0) return 'orange';
     return 'red';
   })();
