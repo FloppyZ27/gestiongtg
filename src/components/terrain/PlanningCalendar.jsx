@@ -24,6 +24,7 @@ import { useKanbanDrag } from "@/hooks/useKanbanDrag";
 import LinkedGroupManager from "./LinkedGroupManager";
 import LinkedCardsConnector from "./LinkedCardsConnector";
 import { useStickySidebar } from "@/hooks/useStickySidebar";
+import { OptimizeConfirmDialog, OptimizeResultDialog } from "./OptimizeDialogs";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -222,6 +223,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     try { return new Set(JSON.parse(localStorage.getItem('lockedTerrainCards') || '[]')); } catch { return new Set(); }
   });
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [showOptimizeConfirm, setShowOptimizeConfirm] = useState(false);
+  const [optimizeResult, setOptimizeResult] = useState(null); // null | { totalNew: number }
 
   // Groupes de cartes liées: [{id: string, cardIds: [string, ...]}]
   const [linkedGroups, setLinkedGroups] = useState(() => {
@@ -935,12 +938,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       });
 
       const totalNew = newEquipesFromServer.length;
-      if (totalNew > 0) {
-        alert(`Optimisation terminée ! ${totalNew} nouvelle${totalNew > 1 ? 's' : ''} équipe${totalNew > 1 ? 's' : ''} créée${totalNew > 1 ? 's' : ''} sur des journées libres.`);
-      }
+      setOptimizeResult({ totalNew });
     } catch (e) {
       console.error('Erreur optimisation:', e);
-      alert("Erreur lors de l'optimisation.");
+      setOptimizeResult({ error: true });
     } finally {
       setIsOptimizing(false);
     }
@@ -1689,7 +1690,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <Button
                   size="sm"
                   data-optimize-btn
-                  onClick={handleOptimizeAll}
+                  onClick={() => setShowOptimizeConfirm(true)}
                   disabled={isOptimizing}
                 >
                   {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
@@ -1750,10 +1751,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         </div>
       </DragDropContext>
 
+      <OptimizeConfirmDialog
+        open={showOptimizeConfirm}
+        onClose={() => setShowOptimizeConfirm(false)}
+        onConfirm={() => { setShowOptimizeConfirm(false); handleOptimizeAll(); }}
+        isOptimizing={isOptimizing}
+      />
+      <OptimizeResultDialog result={optimizeResult} onClose={() => setOptimizeResult(null)} />
       <EditDossierDialog isOpen={isEditingDialogOpen} onClose={() => { setIsEditingDialogOpen(false); setEditingDossier(null); }} dossier={editingDossier} onSuccess={() => {}} clients={clients} users={users} />
-
-
-
       <CreateTeamTerrainDialog isOpen={isCreateTeamDialogOpen} onClose={() => setIsCreateTeamDialogOpen(false)} onCreateTeam={handleCreateTeam} dateStr={createTeamDateStr} users={users} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={users} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
