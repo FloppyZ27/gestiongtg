@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera } from "lucide-react";
+import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
@@ -288,10 +288,37 @@ export default function Comptabilite() {
             {!feuilleTempsCollapsed && (
               <CardContent className="p-4">
                 {/* Contrôles : navigation + toggle vue */}
-                <div className="flex items-center justify-between mb-4 gap-4">
-                  <div className="text-white font-semibold text-sm">
-                    Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
-                    <span className="ml-3 text-slate-400 font-normal text-xs">| {format(currentWeekDate, "MMMM yyyy", { locale: fr })}</span>
+                <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))}
+                      className="p-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-semibold text-sm whitespace-nowrap">
+                        Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
+                      </span>
+                      <input
+                        type="date"
+                        value={format(currentWeekDate, "yyyy-MM-dd")}
+                        onChange={(e) => { if (e.target.value) setCurrentWeekDate(new Date(e.target.value + 'T12:00:00')); }}
+                        className="h-7 text-xs bg-slate-800 border border-slate-700 text-slate-300 rounded-md px-2 cursor-pointer hover:border-slate-500 transition-colors w-[130px]"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))}
+                      className="p-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentWeekDate(new Date())}
+                      className="px-2.5 py-1 text-xs rounded-md bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-colors"
+                    >
+                      Aujourd'hui
+                    </button>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Toggle vue */}
@@ -309,10 +336,6 @@ export default function Comptabilite() {
                         <CalendarDays className="w-3.5 h-3.5" /> Agenda
                       </button>
                     </div>
-                    {/* Navigation */}
-                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">← Préc.</Button>
-                    <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 h-7 text-xs">Aujourd'hui</Button>
-                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-7 text-xs">Suiv. →</Button>
                   </div>
                 </div>
 
