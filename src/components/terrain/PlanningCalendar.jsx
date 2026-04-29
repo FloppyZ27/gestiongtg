@@ -196,18 +196,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const pendingEquipeMoveRef = useRef(null);
   const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
   const [isSaving, setIsSaving] = useState(false);
-  const [deleteCardConfirm, setDeleteCardConfirm] = useState(null); // card à supprimer
-  const [expandedCardMenus, setExpandedCardMenus] = useState({}); // { cardId: bool }
+  const [deleteCardConfirm, setDeleteCardConfirm] = useState(null);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
 
-  const toggleCardStatut = (cardId, key) => {
-    setCardStatuts(prev => {
-      const current = prev[cardId] || {};
-      const next = { ...prev, [cardId]: { ...current, [key]: !current[key] } };
-      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
-      return next;
-    });
-  };
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
@@ -518,11 +509,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
   const terrainCards = generateTerrainCards();
 
-  // Supprimé: syncDossiersAfterEquipeChange causait des appels API excessifs (rate limit 429)
-  // Les mises à jour de dossier sont faites directement dans executeDrop/executePendingDrop
-  const syncDossiersAfterEquipeChange = useCallback((_newEquipes) => {
-    // No-op: intentionnellement vide pour éviter le rate limiting
-  }, []);
+  const syncDossiersAfterEquipeChange = useCallback((_newEquipes) => {}, []);
 
   useEffect(() => {
     const validIds = new Set(terrainCards.map(c => c.id));
@@ -544,10 +531,18 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     });
   }, [dossiers]);
 
-  const unassignedCards = terrainCards.filter(card => {
-    const isAssigned = Object.values(equipes).some(de => de.some(eq => eq.mandats.includes(card.id)));
-    return !isAssigned;
-  });
+  // Cartes non assignées — cartes liées regroupées ensemble
+  const unassignedCards = useMemo(() => {
+    const raw = terrainCards.filter(c => !Object.values(equipes).some(de => de.some(eq => eq.mandats.includes(c.id))));
+    const seen = new Set(); const result = [];
+    for (const card of raw) {
+      if (seen.has(card.id)) continue;
+      seen.add(card.id); result.push(card);
+      const grp = linkedGroups.find(g => g.cardIds.includes(card.id));
+      if (grp) { for (const gid of grp.cardIds) { if (!seen.has(gid)) { const gc = raw.find(c => c.id === gid); if (gc) { seen.add(gid); result.push(gc); } } } }
+    }
+    return result;
+  }, [terrainCards, equipes, linkedGroups]);
 
   const parseTimeString = (ts) => { if (!ts) return 0; const m = ts.match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[0]) : 0; };
 
@@ -556,15 +551,6 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     equipe.mandats.forEach(id => { const c = terrainCards.find(c => c.id === id); if (c?.terrain?.temps_prevu) total += parseTimeString(c.terrain.temps_prevu); });
     return { totalTime: total.toFixed(1), cardCount: equipe.mandats.length };
   };
-
-  const getUsedResourcesForDate = (dateStr) => {
-    const de = equipes[dateStr] || [];
-    const t = new Set(); const v = new Set(); const e = new Set();
-    de.forEach(eq => { eq.techniciens.forEach(id => t.add(id)); eq.vehicules.forEach(id => v.add(id)); eq.equipements.forEach(id => e.add(id)); });
-    return { techniciens: Array.from(t), vehicules: Array.from(v), equipements: Array.from(e) };
-  };
-
-  const getEquipeActiveTab = (id) => equipeActiveTabs[id] !== undefined ? equipeActiveTabs[id] : null;
 
   const addEquipe = (dateStr) => { setCreateTeamDateStr(dateStr); setIsCreateTeamDialogOpen(true); };
   const handleCreateTeam = async (newEquipe) => {
@@ -891,10 +877,22 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           // Ajouter les nouvelles équipes créées ce jour
           const newEqForDate = newEquipesFromServer.filter(n => n.dateStr === dateStr);
           newEqForDate.forEach(({ equipe }) => {
-            if (!ne[dateStr].find(e => e.id === equipe.id)) {
-              ne[dateStr].push(equipe);
-            }
+            if (!ne[dateStr].find(e => e.id === equipe.id)) ne[dateStr].push(equipe);
           });
+        });
+
+        // Garantir que les cartes liées sont dans la même équipe après optimisation
+        linkedGroups.forEach(group => {
+          let anchorDate = null; let anchorEqId = null;
+          outer: for (const [d, eqs] of Object.entries(ne)) {
+            for (const eq of eqs) {
+              if (group.cardIds.some(id => eq.mandats.includes(id))) { anchorDate = d; anchorEqId = eq.id; break outer; }
+            }
+          }
+          if (!anchorDate || !anchorEqId) return;
+          Object.keys(ne).forEach(d => ne[d].forEach(eq => { if (eq.id !== anchorEqId) eq.mandats = eq.mandats.filter(id => !group.cardIds.includes(id)); }));
+          const ancEq = ne[anchorDate]?.find(e => e.id === anchorEqId);
+          if (ancEq) group.cardIds.forEach(id => { if (!ancEq.mandats.includes(id) && terrainCards.some(c => c.id === id)) ancEq.mandats.push(id); });
         });
 
         return ne;
