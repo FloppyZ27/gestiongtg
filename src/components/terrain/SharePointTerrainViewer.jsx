@@ -285,21 +285,18 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           {!currentSubPath && (
             <Button
               type="button"
-              variant="ghost"
               size="sm"
               onClick={handleCreateFolder}
               disabled={isCreatingFolder}
-              className="text-emerald-400 hover:text-emerald-300 h-6 px-2"
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg h-7 px-3 transition-all"
               title={activeTab === "in" ? "Créer un nouveau dossier TI" : "Créer un nouveau dossier TO"}
             >
               {isCreatingFolder ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="w-3 h-3 animate-spin mr-1" />
               ) : (
-                <>
-                  <FolderPlus className="w-3 h-3 mr-1" />
-                  <span className="text-xs">Nouveau</span>
-                </>
+                <FolderPlus className="w-3 h-3 mr-1" />
               )}
+              <span className="text-xs">Nouveau dossier</span>
             </Button>
           )}
           <Button
