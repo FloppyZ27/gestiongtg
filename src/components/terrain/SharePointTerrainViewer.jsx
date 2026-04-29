@@ -283,22 +283,20 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
         </div>
         <div className="flex items-center gap-1">
           {!currentSubPath && (
-            <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-7 px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg cursor-pointer text-xs">
-              <button
-                type="button"
-                onClick={handleCreateFolder}
-                disabled={isCreatingFolder}
-                className="flex items-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
-                title={activeTab === "in" ? "Créer un nouveau dossier TI" : "Créer un nouveau dossier TO"}
-              >
-                {isCreatingFolder ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <FolderPlus className="w-3 h-3 mr-1" />
-                )}
-                Nouveau dossier
-              </button>
-            </span>
+            <button
+              type="button"
+              onClick={handleCreateFolder}
+              disabled={isCreatingFolder}
+              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-all h-7 px-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg disabled:opacity-50 disabled:pointer-events-none"
+              title={activeTab === "in" ? "Créer un nouveau dossier TI" : "Créer un nouveau dossier TO"}
+            >
+              {isCreatingFolder ? (
+                <Loader2 className="w-3 h-3 animate-spin mr-1" />
+              ) : (
+                <FolderPlus className="w-3 h-3 mr-1" />
+              )}
+              Nouveau dossier
+            </button>
           )}
           <Button
             type="button"
