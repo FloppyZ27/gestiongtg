@@ -1743,8 +1743,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
 
           {/* Calendrier */}
-          <div data-kanban-scroll className="flex-1 min-w-0" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
-            <div className="grid grid-cols-5 w-full" style={{ gap: '2px', minWidth: 'max-content', transform: 'scaleX(0.95)', transformOrigin: 'left top' }}>
+          <div data-kanban-scroll className="flex-1 min-w-0 overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+            <div className="grid grid-cols-5" style={{ gap: '8px', minWidth: 'max-content' }}>
               {days.map(day => renderDay(day, viewMode === "month"))}
             </div>
           </div>
