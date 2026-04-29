@@ -316,10 +316,10 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               onChange={handleFileSelect}
               className="hidden"
             />
-            <span className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
+            <button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg px-3 h-7 text-xs rounded transition-all flex items-center gap-1 cursor-pointer">
               <Upload className="w-3 h-3" />
               Ajouter
-            </span>
+            </button>
           </label>
           <Button
             type="button"
