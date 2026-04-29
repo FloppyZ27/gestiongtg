@@ -1111,14 +1111,14 @@ export default function Lots() {
                   Nouveau lot
                 </Button>
                 </DialogTrigger>
-            <DialogContent className="border border-slate-700 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+            <DialogContent className="border border-slate-700 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', maxHeight: 'calc(100vh - 180px)' }} hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingLot ? "Modifier le lot" : "Nouveau lot"}
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex flex-col h-[90vh]">
+              <div className="flex flex-col" style={{ height: 'calc(100vh - 180px)' }}>
                 {/* Header pleine largeur */}
                 <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                   <div className="flex items-center justify-between">
