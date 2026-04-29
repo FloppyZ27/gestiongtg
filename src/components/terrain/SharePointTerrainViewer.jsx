@@ -288,7 +288,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               size="sm"
               onClick={handleCreateFolder}
               disabled={isCreatingFolder}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg h-7 px-3 transition-all"
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg h-7 px-3 text-xs transition-all"
               title={activeTab === "in" ? "Créer un nouveau dossier TI" : "Créer un nouveau dossier TO"}
             >
               {isCreatingFolder ? (
@@ -296,7 +296,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               ) : (
                 <FolderPlus className="w-3 h-3 mr-1" />
               )}
-              <span className="text-xs">Nouveau dossier</span>
+              Nouveau dossier
             </Button>
           )}
           <Button
@@ -316,10 +316,10 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               onChange={handleFileSelect}
               className="hidden"
             />
-            <button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 text-white shadow-lg px-3 h-7 text-xs rounded transition-all flex items-center gap-1 cursor-pointer">
+            <span className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
               <Upload className="w-3 h-3" />
               Ajouter
-            </button>
+            </span>
           </label>
           <Button
             type="button"
