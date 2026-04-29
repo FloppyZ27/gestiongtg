@@ -83,8 +83,12 @@ const getAdresseString = (addr) => {
 };
 
 export default function LeveTerrain() {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const today = new Date().toISOString().split('T')[0];
+  const getTodayLocal = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const [selectedDate, setSelectedDate] = useState(getTodayLocal);
+  const today = getTodayLocal();
 
   const goToPrevDay = () => {
     const d = new Date(selectedDate + 'T00:00:00');
@@ -129,7 +133,14 @@ export default function LeveTerrain() {
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
-  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      try { return await base44.entities.User.list(); } catch { return []; }
+    },
+    initialData: [],
+    retry: false,
+  });
   const { data: photosGPS = [] } = useQuery({ queryKey: ['photosGPS'], queryFn: () => base44.entities.PhotoGPS.list(), initialData: [] });
   const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
   const { data: equipesTerrain = [] } = useQuery({ queryKey: ['equipesTerrain', selectedDate], queryFn: () => base44.entities.EquipeTerrain.filter({ date_terrain: selectedDate }), initialData: [] });
@@ -155,19 +166,24 @@ export default function LeveTerrain() {
   // Équipes du jour dont l'utilisateur connecté fait partie
   // Les techniciens peuvent être des IDs User OU des IDs Employe OU des emails
   const equipesDuJourIds = useMemo(() => {
-    if (!user?.id) return new Set();
+    if (!user?.id && !user?.email) return new Set();
     const possibleIds = new Set([user.id, user.email?.toLowerCase()].filter(Boolean));
     if (employeConnecte) {
       possibleIds.add(employeConnecte.id);
       if (employeConnecte.courriel) possibleIds.add(employeConnecte.courriel.toLowerCase());
       if (employeConnecte.compte_utilisateur) possibleIds.add(employeConnecte.compte_utilisateur.toLowerCase());
     }
+    // Aussi chercher via le full_name dans users (au cas où les IDs ne matchent pas)
+    if (user?.full_name && users.length > 0) {
+      const matchedUser = users.find(u => u.full_name === user.full_name || u.email === user.email);
+      if (matchedUser) possibleIds.add(matchedUser.id);
+    }
     return new Set(
       equipesTerrain
         .filter(e => (e.techniciens || []).some(id => possibleIds.has(id) || possibleIds.has(String(id).toLowerCase())))
         .map(e => e.id)
     );
-  }, [equipesTerrain, user, employeConnecte]);
+  }, [equipesTerrain, user, employeConnecte, users]);
 
   // Ensemble des cartes assignées aux équipes de l'utilisateur (format dossierId-mandatIdx-terrainIdx)
   const mandatsAssignes = useMemo(() => {
@@ -185,9 +201,12 @@ export default function LeveTerrain() {
     return result;
   }, [equipesTerrain]);
 
-  // Dossiers du jour sélectionné — toujours filtré sur les cartes assignées à l'utilisateur connecté
+  // Dossiers du jour sélectionné — filtrés sur les cartes assignées à l'utilisateur connecté
+  // Si l'utilisateur est admin et n'est dans aucune équipe, on affiche toutes les cartes du jour
   const dossiersDuJour = useMemo(() => {
-    if (mandatsAssignes.size === 0) return [];
+    const useAllMandats = mandatsAssignes.size === 0 && tousLesMandatsDuJour.size > 0 && user?.role === 'admin';
+    const mandatsToUse = useAllMandats ? tousLesMandatsDuJour : mandatsAssignes;
+    if (mandatsToUse.size === 0) return [];
 
     return dossiers
       .flatMap(d => (d.mandats || [])
@@ -198,13 +217,13 @@ export default function LeveTerrain() {
             .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
             .filter(({ terrainIdx }) => {
               const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
-              return mandatsAssignes.has(cardId);
+              return mandatsToUse.has(cardId);
             })
-            .map(() => ({ dossier: d, mandat: m }));
+            .map(({ terrainIdx }) => ({ dossier: d, mandat: m, terrainIdx }));
         })
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, mandatsAssignes]);
+  }, [dossiers, selectedDate, mandatsAssignes, tousLesMandatsDuJour, user]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
