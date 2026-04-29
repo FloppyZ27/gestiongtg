@@ -157,11 +157,7 @@ export function DossierCard({
         <div className="flex items-center gap-1 mb-1">
           <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: iconColor }} />
           <span className="text-xs" style={{ color: textColorLimite }}>Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
-          {terrain.date_cedulee && (
-            <span className="text-xs px-1 rounded font-semibold" style={{ background: bgCedulee, color: textColorLimite }}>
-              Céd: {format(new Date(terrain.date_cedulee + 'T00:00:00'), "dd MMM", { locale: fr })}
-            </span>
-          )}
+
         </div>
       )}
 
