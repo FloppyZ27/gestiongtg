@@ -708,7 +708,7 @@ export default function Comptabilite() {
                   />
                 </TabsContent>
 
-                <div className="flex justify-end pt-4 border-t border-slate-700">
+                <div className="flex justify-end pt-4">
                   <Button
                     type="button"
                     variant="outline"
