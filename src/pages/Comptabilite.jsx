@@ -672,9 +672,9 @@ export default function Comptabilite() {
               </DialogHeader>
 
               <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setNotesFacturesTab(v)}>
-                <TabsList className="grid w-full grid-cols-2 bg-slate-900 border border-slate-700 p-1 rounded-lg">
-                  <TabsTrigger value="note" className="rounded-md data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400">Note</TabsTrigger>
-                  <TabsTrigger value="factures" className="flex items-center gap-2 rounded-md data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400">
+                <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 h-12">
+                  <TabsTrigger value="note" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-slate-400 h-full">Note</TabsTrigger>
+                  <TabsTrigger value="factures" className="flex items-center gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-slate-400 h-full">
                     Factures
                     {notesFacturesFileCount > 0 && (
                       <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-xs font-bold">
