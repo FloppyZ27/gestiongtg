@@ -30,8 +30,8 @@ const formatAdresse = (addr) => {
 const getDateCeduleeColor = (dateCedulee, dateLimite) => {
   if (!dateCedulee || !dateLimite) return null;
   const diff = Math.round((new Date(dateCedulee + 'T00:00:00') - new Date(dateLimite + 'T00:00:00')) / 86400000);
-  if (diff <= -7) return 'green';   // ≥ 7 jours d'avance → vert
-  if (diff <= 0) return 'orange';   // 0 à 7 jours avant la limite → orange
+  if (diff < -7) return 'green';    // plus de 7 jours d'avance → vert
+  if (diff <= 0) return 'orange';   // dans les 7 jours avant la limite → orange
   return 'red';                      // après la limite → rouge
 };
 
