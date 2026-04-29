@@ -85,24 +85,56 @@ function UserEntriesPanel({ userEmail, year }) {
     .filter(e => CONGE_TYPES.includes(e.tache) && e.date?.startsWith(String(year)))
     .sort((a, b) => b.date?.localeCompare(a.date));
 
+  const totals = {
+    Vacances: filtered.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0),
+    'Mieux-être': filtered.filter(e => e.tache === 'Mieux-être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0),
+    'En banque': filtered.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0),
+  };
+  const grandTotal = Object.values(totals).reduce((s, v) => s + v, 0);
+
   if (isLoading) return <p className="text-slate-500 text-xs py-2 pl-2">Chargement...</p>;
-  if (filtered.length === 0) return <p className="text-slate-500 text-xs py-2 pl-2">Aucune entrée de congé en {year}</p>;
+
+  const totalCards = (
+    <div className="flex gap-3 mb-3 flex-wrap">
+      {[
+        { label: 'Vacances', value: totals['Vacances'], color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' },
+        { label: 'Mieux-être', value: totals['Mieux-être'], color: 'text-pink-400', bg: 'bg-pink-500/10 border-pink-500/30' },
+        { label: 'En banque', value: totals['En banque'], color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' },
+        { label: 'Total', value: grandTotal, color: 'text-white', bg: 'bg-slate-700/50 border-slate-500/30' },
+      ].map(({ label, value, color, bg }) => (
+        <div key={label} className={`flex-1 min-w-[90px] rounded-lg border px-3 py-2 ${bg}`}>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">{label}</p>
+          <p className={`text-lg font-bold ${color}`}>{value % 1 === 0 ? value : value.toFixed(1)}<span className="text-xs ml-0.5">h</span></p>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (filtered.length === 0) return (
+    <div>
+      {totalCards}
+      <p className="text-slate-500 text-xs py-2 pl-2">Aucune entrée de congé en {year}</p>
+    </div>
+  );
 
   return (
-    <div className="divide-y divide-slate-800/50">
-      {filtered.map((e, idx) => {
-        const info = TYPE_INFO[e.tache] || { color: 'text-slate-400', bg: 'bg-slate-500/20 border-slate-500/30' };
-        const label = e.tache === 'Mieux-etre' ? 'Mieux-être' : e.tache;
-        return (
-          <div key={idx} className="grid px-3 py-2 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors items-center" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
-            <span className="text-slate-400 text-xs">
-              {e.date ? format(new Date(e.date + 'T12:00:00'), 'd MMM yyyy', { locale: fr }) : '-'}
-            </span>
-            <span className={`px-2 py-0.5 rounded-full border text-xs font-medium w-fit ${info.bg} ${info.color}`}>{label}</span>
-            <span className={`font-bold text-xs text-right ${info.color}`}>{e.heures}h</span>
-          </div>
-        );
-      })}
+    <div>
+      {totalCards}
+      <div className="divide-y divide-slate-800/50">
+        {filtered.map((e, idx) => {
+          const info = TYPE_INFO[e.tache] || { color: 'text-slate-400', bg: 'bg-slate-500/20 border-slate-500/30' };
+          const label = e.tache === 'Mieux-etre' ? 'Mieux-être' : e.tache;
+          return (
+            <div key={idx} className="grid px-3 py-2 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors items-center" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
+              <span className="text-slate-400 text-xs">
+                {e.date ? format(new Date(e.date + 'T12:00:00'), 'd MMM yyyy', { locale: fr }) : '-'}
+              </span>
+              <span className={`px-2 py-0.5 rounded-full border text-xs font-medium w-fit ${info.bg} ${info.color}`}>{label}</span>
+              <span className={`font-bold text-xs text-right ${info.color}`}>{e.heures}h</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -291,9 +323,11 @@ export default function SoldesCongesSection() {
                 <div className="grid bg-slate-800/60 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</span>
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</span>
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Nombre d'heures</span>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Heures</span>
                 </div>
-                <UserEntriesPanel userEmail={selectedUser.email} year={dialogYear} />
+                <div className="p-3 pb-0">
+                  <UserEntriesPanel userEmail={selectedUser.email} year={dialogYear} />
+                </div>
               </div>
             </div>
           )}
