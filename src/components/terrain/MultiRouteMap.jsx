@@ -60,7 +60,7 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices, clients = [], users = [] }) {
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices, clients = [], users = [], renderTooltip }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -341,9 +341,13 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           top: '16px',
           right: '16px',
           zIndex: 1000,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          width: 240,
         }}>
-          <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
+          {renderTooltip
+            ? renderTooltip(hoveredDossier)
+            : <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
+          }
         </div>
       )}
       

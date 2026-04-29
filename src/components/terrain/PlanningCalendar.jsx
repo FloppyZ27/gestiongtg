@@ -142,7 +142,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups
 }
 
 // Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
-function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations, clients, users }) {
+function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations, clients, users, renderTooltip }) {
   // Stabiliser les routes par contenu pour éviter de recréer la carte inutilement
   const stableRoutes = useMemo(
     () => mapRoutes,
@@ -165,6 +165,7 @@ function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurati
         visibleRouteIndices={selectedRoutes}
         clients={clients}
         users={users}
+        renderTooltip={renderTooltip}
       />
     </div>
   );
@@ -1962,6 +1963,16 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                         onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
                         clients={clients}
                         users={users}
+                        renderTooltip={(card) => (
+                          <DossierCard
+                            card={card}
+                            hideEditButton={true}
+                            hideLinkedButton={true}
+                            showLock={false}
+                            hideStatut={false}
+                            disableInteractions={true}
+                          />
+                        )}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet correspondant aux filtres</div>
