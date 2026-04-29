@@ -97,7 +97,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   const lastDossierIdRef = React.useRef(null);
 
-  // Synchroniser date_terrain, equipe_assignee et terrains_list depuis le dossier externe (mis à jour par drag-drop)
+  // Synchroniser tous les champs terrain depuis le dossier externe (mis à jour par drag-drop ou handleSaveTerrain)
   useEffect(() => {
     if (!dossier || !dossier.mandats || dossier.id !== lastDossierIdRef.current) return;
     setFormData(prev => {
@@ -105,13 +105,15 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       const updatedMandats = prev.mandats.map((m, i) => {
         const ext = dossier.mandats[i];
         if (!ext) return m;
+        const extTerrainsStr = JSON.stringify(ext.terrains_list || []);
+        const prevTerrainsStr = JSON.stringify(m.terrains_list || []);
+        const extTerrainStr = JSON.stringify(ext.terrain || {});
+        const prevTerrainStr = JSON.stringify(m.terrain || {});
         const newDateTerrain = ext.date_terrain || "";
         const newEquipe = ext.equipe_assignee || "";
-        const newTerrainsListKey = JSON.stringify((ext.terrains_list || []).map(t => `${t.date_cedulee}|${t.equipe_assignee}`));
-        const oldTerrainsListKey = JSON.stringify((m.terrains_list || []).map(t => `${t.date_cedulee}|${t.equipe_assignee}`));
-        if (m.date_terrain !== newDateTerrain || m.equipe_assignee !== newEquipe || newTerrainsListKey !== oldTerrainsListKey) {
+        if (m.date_terrain !== newDateTerrain || m.equipe_assignee !== newEquipe || extTerrainsStr !== prevTerrainsStr || extTerrainStr !== prevTerrainStr) {
           changed = true;
-          return { ...m, date_terrain: newDateTerrain, equipe_assignee: newEquipe, terrains_list: ext.terrains_list || m.terrains_list };
+          return { ...m, date_terrain: newDateTerrain, equipe_assignee: newEquipe, terrains_list: ext.terrains_list || m.terrains_list, terrain: ext.terrain || m.terrain };
         }
         return m;
       });
@@ -121,7 +123,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       setInitialFormData(JSON.parse(JSON.stringify(newData)));
       return newData;
     });
-  }, [dossier?.mandats?.map(m => `${m.date_terrain}|${m.equipe_assignee}|${(m.terrains_list||[]).map(t=>t.date_cedulee).join(',')}`).join(';')]);
+  }, [JSON.stringify(dossier?.mandats?.map(m => ({ dt: m.date_terrain, eq: m.equipe_assignee, tl: m.terrains_list, t: m.terrain })))]);
 
   useEffect(() => {
     if (dossier && dossier.id !== lastDossierIdRef.current) {
