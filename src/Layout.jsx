@@ -686,11 +686,15 @@ function LayoutContent({ children, currentPageName }) {
           filter: brightness(0) !important;
         }
 
-        /* Override vert opaque des dropdown menus */
+        /* Override vert opaque des dropdown menus et select */
         [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
         [data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
-        [data-radix-dropdown-menu-content] [role="menuitemradio"]:hover {
+        [data-radix-dropdown-menu-content] [role="menuitemradio"]:hover,
+        [data-radix-select-content] [role="option"]:hover,
+        [data-radix-select-content] [role="option"]:focus,
+        [data-radix-select-content] [role="option"][data-highlighted] {
           background-color: rgba(100, 116, 139, 0.15) !important;
+          color: white !important;
         }
 
 
