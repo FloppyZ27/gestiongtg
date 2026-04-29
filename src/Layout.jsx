@@ -807,6 +807,11 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
+        /* Portails Radix (dialogs, dropdowns) toujours au-dessus de la top bar */
+        [data-radix-portal] {
+          z-index: 1100 !important;
+        }
+
         /* Scrollbar personnalisée globale */
         *::-webkit-scrollbar,
         *::-webkit-scrollbar:vertical,
