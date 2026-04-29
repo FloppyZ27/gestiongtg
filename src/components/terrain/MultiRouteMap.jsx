@@ -195,10 +195,10 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
               markersGroupRef.current[index].push(startMarker);
 
               // Marqueurs pour chaque waypoint avec informations des dossiers
-              // Les legs : leg[0] = bureau → wp[0], leg[1] = wp[0] → wp[1], ..., leg[n-1] = wp[n-2] → bureau
-              // Donc le dossier[i] correspond au leg[i] (end_location de ce leg = le waypoint i)
-              route.legs.forEach((leg, legIndex) => {
-                const dossierIndex = legIndex; // leg[0] arrive au dossier[0], leg[1] au dossier[1], etc.
+              // Les legs : leg[0] = bureau → wp[0], leg[1] = wp[0] → wp[1], ..., leg[n-1] = dernier wp → bureau
+              // On exclut le dernier leg (retour au bureau, pas de dossier)
+              route.legs.slice(0, -1).forEach((leg, legIndex) => {
+                const dossierIndex = legIndex;
                 if (dossiers && dossiers[dossierIndex]) {
                   const dossier = dossiers[dossierIndex];
                   const marker = new window.google.maps.Marker({
