@@ -175,20 +175,24 @@ export default function LeveTerrain() {
   }, [equipesTerrain, equipesDuJourIds]);
 
   // Dossiers du jour sélectionné — filtrés selon les cartes assignées à l'utilisateur
+  // Pour les jours passés où l'utilisateur n'est plus dans une équipe active, on affiche tous les dossiers cédulés ce jour
   const dossiersDuJour = useMemo(() => {
-    if (equipesDuJourIds.size === 0) return [];
+    const isPastDay = selectedDate < today;
+    const hasEquipe = equipesDuJourIds.size > 0;
+
+    // Si pas d'équipe et pas un jour passé, rien à afficher
+    if (!hasEquipe && !isPastDay) return [];
 
     return dossiers
-      .filter(d => d.statut === "Ouvert")
       .flatMap(d => (d.mandats || [])
         .flatMap((m, mandatIdx) => {
-          // Chercher les terrains cédulés ce jour
           const terrains = m.terrains_list || (m.terrain?.date_cedulee ? [m.terrain] : []);
           return terrains
             .map((t, terrainIdx) => ({ terrain: t, terrainIdx }))
             .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
             .filter(({ terrainIdx }) => {
-              // Vérifier si cette carte est dans les mandats assignés à l'utilisateur
+              // Pour les jours passés sans équipe trouvée, montrer toutes les cartes du jour
+              if (isPastDay && !hasEquipe) return true;
               const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
               return mandatsAssignes.has(cardId);
             })
@@ -196,7 +200,7 @@ export default function LeveTerrain() {
         })
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, equipesDuJourIds, mandatsAssignes]);
+  }, [dossiers, selectedDate, today, equipesDuJourIds, mandatsAssignes]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
