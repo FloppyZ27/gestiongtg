@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, X, User, Clock, AlertCircle, Wrench, UserCheck, Link2, Timer, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -74,6 +75,7 @@ const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCa
 export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, users, selectedDate, onClose }) {
   const [apiKey, setApiKey] = useState(null);
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
+  const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
 
   useEffect(() => {
     base44.functions.invoke('getGoogleMapsApiKey').then(r => {
@@ -310,28 +312,77 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
                                   <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
                                 </div>
                               )}
-                              {(terrain.temps_prevu || terrain.donneur) && (
-                                <div className="flex items-center justify-between gap-1 mt-1 pt-1 border-t border-emerald-500/30">
-                                  {terrain.temps_prevu && (
-                                    <div className="flex items-center gap-1">
-                                      <Timer className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                                      <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+                              {/* Footer: temps prévu | statut coloré | donneur */}
+                              {(() => {
+                                const currentStatut = cardStatuts[cardId]?.statut || null;
+                                const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+                                const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+                                const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
+                                const donneurUser = terrain?.donneur ? users.find(u => u.full_name === terrain.donneur) : null;
+                                return (
+                                  <div className="flex items-center gap-1 mt-2 pt-1 border-t border-emerald-500/30">
+                                    {/* Temps prévu */}
+                                    <div className="flex-shrink-0">
+                                      {terrain?.temps_prevu
+                                        ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
+                                        : <div className="w-10" />}
                                     </div>
-                                  )}
-                                  {terrain.donneur && (() => {
-                                    const donnerUser = users.find(u => u.full_name === terrain.donneur);
-                                    return (
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ')[0][0]}</span>
-                                        <Avatar className="w-4 h-4 border border-slate-500/50">
-                                          <AvatarImage src={donnerUser?.photo_url} />
-                                          <AvatarFallback className="text-[7px] bg-gradient-to-r from-slate-600 to-slate-700 text-white">{getInitials(terrain.donneur)}</AvatarFallback>
+                                    {/* Select statut avec couleurs */}
+                                    <div className="flex-1 min-w-0">
+                                      <Select
+                                        value={currentStatut || ""}
+                                        onValueChange={(val) => {
+                                          setCardStatuts(prev => {
+                                            const newVal = (val === '__vide__' || val === currentStatut) ? null : val;
+                                            const next = { ...prev, [cardId]: { ...prev[cardId], statut: newVal } };
+                                            localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+                                            return next;
+                                          });
+                                        }}
+                                      >
+                                        <SelectTrigger
+                                          className="w-full h-6 text-xs px-1.5 py-0"
+                                          style={{
+                                            background: isOrange ? 'rgba(249,115,22,0.3)' : isMauve ? 'rgba(139,92,246,0.3)' : 'rgba(30,41,59,0.4)',
+                                            color: isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8',
+                                            fontWeight: (isOrange || isMauve) ? 600 : 400,
+                                            opacity: (!isOrange && !isMauve) ? 0.5 : 1,
+                                            boxShadow: `0 0 0 1px ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`,
+                                            border: 'none', outline: 'none',
+                                            justifyContent: 'center', textAlign: 'center',
+                                          }}
+                                        >
+                                          <SelectValue placeholder="Statut..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          <SelectItem value="__vide__" className="text-xs text-slate-400">— Aucun —</SelectItem>
+                                          {STATUT_OPTIONS.map(opt => (
+                                            <SelectItem key={opt} value={opt} className="text-xs text-white">{opt}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    {/* Donneur initiales + avatar */}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                      {terrain?.donneur && (
+                                        <span className="text-xs text-slate-400 font-medium">
+                                          {terrain.donneur.trim().split(' ').map(n => n[0]?.toUpperCase()).join('')}
+                                        </span>
+                                      )}
+                                      {donneurUser ? (
+                                        <Avatar className="w-5 h-5 border border-emerald-500/50">
+                                          <AvatarImage src={donneurUser.photo_url} />
+                                          <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(donneurUser.full_name)}</AvatarFallback>
                                         </Avatar>
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              )}
+                                      ) : (
+                                        <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                          <User className="w-2.5 h-2.5 text-emerald-500" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </>
                           )}
                         </div>
