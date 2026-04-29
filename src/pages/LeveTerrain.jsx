@@ -202,10 +202,9 @@ export default function LeveTerrain() {
   }, [equipesTerrain]);
 
   // Dossiers du jour sélectionné — filtrés sur les cartes assignées à l'utilisateur connecté
-  // Si l'utilisateur est admin et n'est dans aucune équipe, on affiche toutes les cartes du jour
+  // Si l'utilisateur n'est dans aucune équipe ce jour, on affiche toutes les cartes du jour
   const dossiersDuJour = useMemo(() => {
-    const useAllMandats = mandatsAssignes.size === 0 && tousLesMandatsDuJour.size > 0 && user?.role === 'admin';
-    const mandatsToUse = useAllMandats ? tousLesMandatsDuJour : mandatsAssignes;
+    const mandatsToUse = mandatsAssignes.size > 0 ? mandatsAssignes : tousLesMandatsDuJour;
     if (mandatsToUse.size === 0) return [];
 
     return dossiers
@@ -214,7 +213,6 @@ export default function LeveTerrain() {
           const terrains = m.terrains_list || (m.terrain?.date_cedulee ? [m.terrain] : []);
           return terrains
             .map((t, terrainIdx) => ({ terrain: t, terrainIdx }))
-            .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
             .filter(({ terrainIdx }) => {
               const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
               return mandatsToUse.has(cardId);
@@ -223,7 +221,7 @@ export default function LeveTerrain() {
         })
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, mandatsAssignes, tousLesMandatsDuJour, user]);
+  }, [dossiers, selectedDate, mandatsAssignes, tousLesMandatsDuJour]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
