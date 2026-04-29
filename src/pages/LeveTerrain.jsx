@@ -684,7 +684,7 @@ export default function LeveTerrain() {
 
               {/* Calendrier avec flèches de navigation à droite */}
               <div className="flex items-center gap-3">
-                <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-blue-600">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
 
@@ -716,7 +716,7 @@ export default function LeveTerrain() {
                   </PopoverContent>
                 </Popover>
 
-                <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">
+                <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-blue-600">
                   <ChevronRight className="w-4 h-4" />
                 </Button>
                 {selectedDate !== today && (
