@@ -29,7 +29,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import { motion } from "framer-motion";
 import DossiersFilterBar from "../components/dossiers/DossiersFilterBar";
-
+import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -2144,54 +2144,12 @@ export default function Dossiers() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
       {/* Dialog de confirmation de suppression */}
-      <Dialog open={showDeleteDossierConfirm} onOpenChange={setShowDeleteDossierConfirm}>
-        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              Attention
-              <span className="text-2xl">⚠️</span>
-            </DialogTitle>
-          </DialogHeader>
-          <motion.div 
-            className="space-y-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <p className="text-slate-300 text-center">
-              Êtes-vous sûr de vouloir supprimer le dossier <span className="font-bold text-white">{dossierNameToDelete}</span> ? Cette action est irréversible.
-            </p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button 
-                type="button" 
-                onClick={() => {
-                  setShowDeleteDossierConfirm(false);
-                  setDossierIdToDelete(null);
-                  setDossierNameToDelete("");
-                }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="button"
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                onClick={() => {
-                  if (dossierIdToDelete) {
-                    deleteDossierMutation.mutate(dossierIdToDelete);
-                  }
-                  setShowDeleteDossierConfirm(false);
-                  setDossierIdToDelete(null);
-                  setDossierNameToDelete("");
-                }}
-              >
-                Supprimer
-              </Button>
-            </div>
-          </motion.div>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDeleteDialog
+        open={showDeleteDossierConfirm}
+        onOpenChange={(open) => { setShowDeleteDossierConfirm(open); if (!open) { setDossierIdToDelete(null); setDossierNameToDelete(""); } }}
+        onConfirm={() => { if (dossierIdToDelete) deleteDossierMutation.mutate(dossierIdToDelete); setDossierIdToDelete(null); setDossierNameToDelete(""); }}
+        message={`Êtes-vous sûr de vouloir supprimer le dossier ${dossierNameToDelete} ? Cette action est irréversible.`}
+      />
 
       <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -3382,33 +3340,10 @@ export default function Dossiers() {
 
         {/* Dialog de succès d'import .d01 */}
         <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">✅</span>
-                Succès
-                <span className="text-2xl">✅</span>
-              </DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <p className="text-slate-300 text-center">
-                Données importées avec succès depuis le fichier .d01
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowD01ImportSuccess(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  OK
-                </Button>
-              </div>
-            </motion.div>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-sm">
+            <DialogHeader><DialogTitle className="text-emerald-400">✅ Import réussi</DialogTitle></DialogHeader>
+            <p className="text-slate-300 text-sm">Données importées avec succès depuis le fichier .d01</p>
+            <div className="flex justify-end pt-2"><Button onClick={() => setShowD01ImportSuccess(false)} className="bg-emerald-600 hover:bg-emerald-700">OK</Button></div>
           </DialogContent>
         </Dialog>
 

@@ -19,6 +19,7 @@ import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSectionClient from "../components/clients/CommentairesSectionClient";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
+import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -528,41 +529,12 @@ export default function Clients() {
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                Confirmation
-                <span className="text-2xl">⚠️</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir supprimer {clientToDelete?.prenom} {clientToDelete?.nom} ?
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setClientToDelete(null);
-                  }}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Annuler
-                </Button>
-                <Button 
-                  type="button" 
-                  onClick={confirmDelete}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                >
-                  Supprimer
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ConfirmDeleteDialog
+          open={showDeleteConfirm}
+          onOpenChange={(open) => { setShowDeleteConfirm(open); if (!open) setClientToDelete(null); }}
+          onConfirm={confirmDelete}
+          message={`Êtes-vous sûr de vouloir supprimer ${clientToDelete?.prenom} ${clientToDelete?.nom} ? Cette action est irréversible.`}
+        />
 
         {/* Dossier Details Dialog */}
         <Dialog open={!!viewingDossier} onOpenChange={(open) => !open && setViewingDossier(null)}>
