@@ -153,14 +153,18 @@ export default function LeveTerrain() {
   }, [equipesTerrain, employes]);
 
   // Équipes du jour dont l'utilisateur connecté fait partie
-  // Les techniciens peuvent être des IDs User OU des IDs Employe
+  // Les techniciens peuvent être des IDs User OU des IDs Employe OU des emails
   const equipesDuJourIds = useMemo(() => {
     if (!user?.id) return new Set();
-    const possibleIds = new Set([user.id]);
-    if (employeConnecte) possibleIds.add(employeConnecte.id);
+    const possibleIds = new Set([user.id, user.email?.toLowerCase()].filter(Boolean));
+    if (employeConnecte) {
+      possibleIds.add(employeConnecte.id);
+      if (employeConnecte.courriel) possibleIds.add(employeConnecte.courriel.toLowerCase());
+      if (employeConnecte.compte_utilisateur) possibleIds.add(employeConnecte.compte_utilisateur.toLowerCase());
+    }
     return new Set(
       equipesTerrain
-        .filter(e => (e.techniciens || []).some(id => possibleIds.has(id)))
+        .filter(e => (e.techniciens || []).some(id => possibleIds.has(id) || possibleIds.has(String(id).toLowerCase())))
         .map(e => e.id)
     );
   }, [equipesTerrain, user, employeConnecte]);
@@ -181,14 +185,9 @@ export default function LeveTerrain() {
     return result;
   }, [equipesTerrain]);
 
-  // Dossiers du jour sélectionné
-  // - Jour actuel/futur : seulement les cartes assignées à l'équipe de l'utilisateur
-  // - Jour passé : toutes les cartes qui étaient cédulées ce jour (dans n'importe quelle équipe terrain)
+  // Dossiers du jour sélectionné — toujours filtré sur les cartes assignées à l'utilisateur connecté
   const dossiersDuJour = useMemo(() => {
-    const isPastDay = selectedDate < today;
-
-    // Pour aujourd'hui/futur sans équipe : rien à afficher
-    if (!isPastDay && equipesDuJourIds.size === 0) return [];
+    if (mandatsAssignes.size === 0) return [];
 
     return dossiers
       .flatMap(d => (d.mandats || [])
@@ -199,18 +198,13 @@ export default function LeveTerrain() {
             .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
             .filter(({ terrainIdx }) => {
               const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
-              if (isPastDay) {
-                // Jours passés : afficher toutes les cartes qui étaient dans une équipe terrain ce jour
-                return tousLesMandatsDuJour.has(cardId);
-              }
-              // Jour actuel/futur : seulement les cartes de l'équipe de l'utilisateur
               return mandatsAssignes.has(cardId);
             })
             .map(() => ({ dossier: d, mandat: m }));
         })
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, today, equipesDuJourIds, mandatsAssignes, tousLesMandatsDuJour]);
+  }, [dossiers, selectedDate, mandatsAssignes]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
