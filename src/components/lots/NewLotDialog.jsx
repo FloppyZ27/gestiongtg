@@ -275,7 +275,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
         }
         onOpenChange(o);
       }}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 !z-[1100]" hideClose>
+        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" zIndex={1100} hideClose>
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
             <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
