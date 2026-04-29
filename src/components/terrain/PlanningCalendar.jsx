@@ -614,16 +614,20 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     if (equipe?.mandats?.length > 0) {
       equipe.mandats.forEach(cardId => {
         const card = terrainCards.find(c => c.id === cardId);
-        if (card && onUpdateDossier) {
-          const updatedMandats = card.dossier.mandats.map((m, idx) => {
-            if (idx === card.mandatIndex) { let tl = [...(m.terrains_list || [])]; if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: null, equipe_assignee: null }; return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl }; }
-            return m;
-          });
-          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
-        }
+        if (!card || !onUpdateDossier) return;
+        const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+        if (!freshDossier) return;
+        const updatedMandats = freshDossier.mandats.map((m, idx) => {
+          if (idx !== card.mandatIndex) return m;
+          let tl = [...(m.terrains_list || [])];
+          if (tl[card.terrainIndex]) tl[card.terrainIndex] = { ...tl[card.terrainIndex], date_cedulee: null, equipe_assignee: null };
+          return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: tl };
+        });
+        onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: updatedMandats });
       });
     }
-    const ne = { ...equipes }; if (ne[dateStr]) { ne[dateStr] = ne[dateStr].filter(e => e.id !== equipeId); if (!ne[dateStr].length) delete ne[dateStr]; }
+    const ne = { ...equipes };
+    if (ne[dateStr]) { ne[dateStr] = ne[dateStr].filter(e => e.id !== equipeId); if (!ne[dateStr].length) delete ne[dateStr]; }
     setEquipes(ne); setDeleteEquipeWarning(null);
   };
 
@@ -795,16 +799,12 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     setIsOptimizing(true);
     try {
       const today = format(new Date(), "yyyy-MM-dd");
-
-      // Équipes futures existantes
       const futureEquipes = {};
       Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
         if (dateStr <= today) return;
         const filtered = dayEqs.filter(eq => !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase());
         if (filtered.length > 0) futureEquipes[dateStr] = filtered;
       });
-
-      // Cartes déjà assignées
       const assignedIds = new Set(Object.values(equipes).flatMap(de => de.flatMap(eq => eq.mandats)));
 
       const toCardData = (card) => ({
