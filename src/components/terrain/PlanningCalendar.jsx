@@ -1654,7 +1654,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         <CardContent className="p-4">
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <div className="text-white font-bold text-lg">{viewMode === "week" ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}` : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
+              <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">{viewMode === "week" ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}` : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
+                <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                <input type="date" value={format(currentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
+              </div>
               <div className="flex gap-2 items-center">
                 <Button size="sm" variant="outline" onClick={goToPrevious} className="bg-slate-800 border-slate-700 text-white transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white hover:scale-105">← Précédent</Button>
                 <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
@@ -1887,18 +1891,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     );
                   })}
                 </div>
-                {/* Boutons trajets */}
-                <div className="flex flex-wrap gap-2">
-                  {mapRoutes.map((route, i) => {
-                    const isSelected = selectedRoutes.includes(i);
-                    const travelSecs = (route.equipeId ? equipeTravelSeconds[route.equipeId] : 0) || 0;
-                    const formatHHMM = (secs) => { const h = Math.floor(secs / 3600); const m = Math.round((secs % 3600) / 60); return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`; };
-                    const travelLabel = travelSecs > 0 ? formatHHMM(travelSecs) : null;
-                    const travailSecs = route.dossiers?.reduce((sum, d) => { const match = (d.tempsPrevu || '').match(/(\d+(?:\.\d+)?)/); return sum + (match ? parseFloat(match[0]) * 3600 : 0); }, 0) || 0;
-                    const totalLabel = travelSecs > 0 ? formatHHMM(travailSecs + travelSecs) : null;
-                    return null;
-                  })}
-                </div>
+
               </div>
             )}
           </DialogHeader>
