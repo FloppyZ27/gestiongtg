@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText } from "lucide-react";
+import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -74,20 +74,19 @@ function EditableNumber({ value, onSave, className = "", max = null }) {
   );
 }
 
-function UserEntriesPanel({ userEmail, showDescription = false }) {
-  const currentYear = new Date().getFullYear();
+function UserEntriesPanel({ userEmail, year }) {
   const { data: entrees = [], isLoading } = useQuery({
-    queryKey: ['entreeTempsConges', userEmail, currentYear],
+    queryKey: ['entreeTempsConges', userEmail],
     queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: userEmail }, '-date', 500),
     initialData: [],
   });
 
   const filtered = entrees
-    .filter(e => CONGE_TYPES.includes(e.tache) && e.date?.startsWith(String(currentYear)))
+    .filter(e => CONGE_TYPES.includes(e.tache) && e.date?.startsWith(String(year)))
     .sort((a, b) => b.date?.localeCompare(a.date));
 
   if (isLoading) return <p className="text-slate-500 text-xs py-2 pl-2">Chargement...</p>;
-  if (filtered.length === 0) return <p className="text-slate-500 text-xs py-2 pl-2">Aucune entrée de congé en {currentYear}</p>;
+  if (filtered.length === 0) return <p className="text-slate-500 text-xs py-2 pl-2">Aucune entrée de congé en {year}</p>;
 
   return (
     <div className="divide-y divide-slate-800/50">
@@ -111,6 +110,7 @@ function UserEntriesPanel({ userEmail, showDescription = false }) {
 export default function SoldesCongesSection() {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [dialogYear, setDialogYear] = useState(new Date().getFullYear());
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
 
@@ -259,22 +259,42 @@ export default function SoldesCongesSection() {
       )}
 
       {/* Dialog entrées de congé */}
-      <Dialog open={!!selectedUser} onOpenChange={(open) => { if (!open) setSelectedUser(null); }}>
+      <Dialog open={!!selectedUser} onOpenChange={(open) => { if (!open) { setSelectedUser(null); setDialogYear(new Date().getFullYear()); } }}>
         <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <FileText className="w-5 h-5 text-emerald-400" />
-              Entrées des Vacances, Mieux-Être et En Banque {new Date().getFullYear()} — {selectedUser?.full_name}
+              Vacances, Mieux-Être & En Banque — {selectedUser?.full_name}
             </DialogTitle>
           </DialogHeader>
           {selectedUser && (
-            <div className="mt-2 border border-slate-700 rounded-lg overflow-hidden">
-              <div className="grid bg-slate-800/60 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</span>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</span>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Nombre d'heures</span>
+            <div className="mt-2">
+              {/* Sélecteur d'année */}
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <button
+                  onClick={() => setDialogYear(y => y - 1)}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-white font-bold text-lg w-16 text-center">{dialogYear}</span>
+                <button
+                  onClick={() => setDialogYear(y => y + 1)}
+                  disabled={dialogYear >= currentYear}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-              <UserEntriesPanel userEmail={selectedUser.email} showDescription />
+
+              <div className="border border-slate-700 rounded-lg overflow-hidden">
+                <div className="grid bg-slate-800/60 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</span>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</span>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Nombre d'heures</span>
+                </div>
+                <UserEntriesPanel userEmail={selectedUser.email} year={dialogYear} />
+              </div>
             </div>
           )}
         </DialogContent>
