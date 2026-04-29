@@ -290,35 +290,16 @@ export default function Comptabilite() {
                 {/* Contrôles : navigation + toggle vue */}
                 <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))}
-                      className="p-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-semibold text-sm whitespace-nowrap">
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white hover:scale-105">←</Button>
+                    <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                      <div className="text-white font-bold text-sm group-hover:text-cyan-400 transition-colors whitespace-nowrap">
                         Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
-                      </span>
-                      <input
-                        type="date"
-                        value={format(currentWeekDate, "yyyy-MM-dd")}
-                        onChange={(e) => { if (e.target.value) setCurrentWeekDate(new Date(e.target.value + 'T12:00:00')); }}
-                        className="h-7 text-xs bg-slate-800 border border-slate-700 text-slate-300 rounded-md px-2 cursor-pointer hover:border-slate-500 transition-colors w-[130px]"
-                      />
+                      </div>
+                      <CalendarDays className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                      <input type="date" value={format(currentWeekDate, "yyyy-MM-dd")} onChange={(e) => { if (e.target.value) setCurrentWeekDate(new Date(e.target.value + 'T12:00:00')); }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{ zIndex: 1 }} />
                     </div>
-                    <button
-                      onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))}
-                      className="p-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentWeekDate(new Date())}
-                      className="px-2.5 py-1 text-xs rounded-md bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-colors"
-                    >
-                      Aujourd'hui
-                    </button>
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white hover:scale-105">→</Button>
+                    <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-cyan-500/20 text-cyan-400 transition-all duration-200 hover:bg-cyan-500/40 hover:text-cyan-300 hover:scale-105">Aujourd'hui</Button>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Toggle vue */}
