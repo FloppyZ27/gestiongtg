@@ -171,16 +171,10 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
               const startLocation = route.legs[0].start_location;
               const endLocation = route.legs[route.legs.length - 1].end_location;
 
-              // Marqueur de départ
+              // Marqueur de départ (sans étiquette)
               const startMarker = new window.google.maps.Marker({
                 position: startLocation,
                 map: map,
-                label: {
-                  text: `${index + 1}`,
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 'bold'
-                },
                 icon: {
                   path: window.google.maps.SymbolPath.CIRCLE,
                   scale: 12,
