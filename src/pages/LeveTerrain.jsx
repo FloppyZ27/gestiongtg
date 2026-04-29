@@ -12,6 +12,7 @@ import { MapPin, Play, Square, Clock, FolderOpen, Camera, Image, FileText, Chevr
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
 import SharePointTerrainViewer from "@/components/terrain/SharePointTerrainViewer";
 import RouteMapModal from "@/components/terrain/RouteMapModal";
 import PhotoLightboxModal from "@/components/terrain/PhotoLightboxModal";
@@ -776,13 +777,39 @@ export default function LeveTerrain() {
                 dossiersDuJour.map(({ dossier, mandat }, idx) => {
                   const isSelected = selectedItem?.dossier?.id === dossier.id && selectedItem?.mandat?.type_mandat === mandat.type_mandat;
                   return (
-                    <button
+                    <motion.button
                       key={`${dossier.id}-${idx}`}
                       onClick={() => handleSelectDossier({ dossier, mandat })}
-                      className={`w-full text-left p-2 border-b border-slate-800/50 transition-all ${isSelected ? 'ring-2 ring-inset ring-emerald-500' : ''}`}
+                      layout
+                      initial={{ opacity: 1 }}
+                      animate={isSelected ? { scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } } : { scale: 1, transition: { duration: 0.2 } }}
+                      className={`w-full text-left p-2 border-b border-slate-800/50 relative group`}
+                      style={{
+                        background: isSelected ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
+                      }}
                     >
-                      {/* Carte identique à DossierCard dans CéduleTerrain */}
-                      {(() => {
+                      {isSelected && (
+                        <>
+                          <motion.div
+                            className="absolute inset-0 rounded pointer-events-none"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.5, 0.3, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            style={{
+                              boxShadow: '0 0 20px rgba(16, 185, 129, 0.4), inset 0 0 20px rgba(16, 185, 129, 0.1)',
+                            }}
+                          />
+                          <motion.div
+                            className="absolute inset-0 rounded border border-emerald-500/50 pointer-events-none"
+                            initial={{ opacity: 0, scale: 1 }}
+                            animate={{ opacity: 1, scale: 1.05 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                          />
+                        </>
+                      )}
+                      <div className="relative z-10">
+                        {/* Carte identique à DossierCard dans CéduleTerrain */}
+                        {(() => {
                         const terrain = mandat.terrains_list?.[0] || mandat.terrain;
                         const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
                         const bgColorClass = arpColor.split(' ')[0];
@@ -923,7 +950,8 @@ export default function LeveTerrain() {
                           </div>
                         );
                       })()}
-                    </button>
+                      </div>
+                    </motion.button>
                   );
                 })
               )}
