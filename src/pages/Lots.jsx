@@ -1083,12 +1083,6 @@ export default function Lots() {
           </div>
           
           <div className="flex gap-3">
-            <Button
-              onClick={handleExportCSV}
-              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
-              <Download className="w-4 h-4 mr-2" />
-              Extraction CSV
-            </Button>
             <label className="cursor-pointer">
               <input
                 type="file"
