@@ -609,8 +609,19 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     if (equipe?.mandats?.length > 0) setDeleteEquipeWarning({ dateStr, equipeId, equipe });
     else confirmRemoveEquipe(dateStr, equipeId);
   };
-  const confirmRemoveEquipe = (dateStr, equipeId) => {
+  const confirmRemoveEquipe = async (dateStr, equipeId) => {
     const equipe = equipes[dateStr]?.find(e => e.id === equipeId);
+
+    // 1. Mettre à jour l'état local immédiatement
+    const ne = { ...equipes };
+    if (ne[dateStr]) { ne[dateStr] = ne[dateStr].filter(e => e.id !== equipeId); if (!ne[dateStr].length) delete ne[dateStr]; }
+    setEquipes(ne);
+    prevEquipesRef.current = JSON.parse(JSON.stringify(ne)); // éviter double-save via debounce
+
+    // 2. Supprimer l'équipe en BD immédiatement (sans attendre le debounce de 3s)
+    try { await base44.entities.EquipeTerrain.delete(equipeId); } catch (e) { console.error('Erreur suppression équipe:', e); }
+
+    // 3. Nettoyer les dossiers associés
     if (equipe?.mandats?.length > 0) {
       equipe.mandats.forEach(cardId => {
         const card = terrainCards.find(c => c.id === cardId);
@@ -626,9 +637,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: updatedMandats });
       });
     }
-    const ne = { ...equipes };
-    if (ne[dateStr]) { ne[dateStr] = ne[dateStr].filter(e => e.id !== equipeId); if (!ne[dateStr].length) delete ne[dateStr]; }
-    setEquipes(ne); setDeleteEquipeWarning(null);
+    setDeleteEquipeWarning(null);
   };
 
   const handleEdit = (dossier, mandatIndex = 0) => { setEditingDossier({ ...dossier, initialMandatIndex: mandatIndex }); setIsEditingDialogOpen(true); };
@@ -717,26 +726,15 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     return routes;
   }, [equipes, terrainCards, placeAffaire, generateTeamDisplayName]);
 
-  // Recalculer automatiquement les routes pour tous les jours visibles dès que les équipes ou dossiers changent
   useEffect(() => {
-    // Mettre à jour mapRoutes si une date est sélectionnée (pour la fenêtre carte)
-    if (selectedMapDate) {
-      const routes = buildRoutesForDate(selectedMapDate);
-      setMapRoutes(routes);
-    }
+    if (selectedMapDate) setMapRoutes(buildRoutesForDate(selectedMapDate));
   }, [selectedMapDate]);
 
-  // Réinitialiser selectedRoutes et visibleTeams uniquement quand la date change ou les routes sont recalculées
   useEffect(() => {
     if (mapRoutes.length > 0) {
       setSelectedRoutes(mapRoutes.map((_, i) => i));
-      // Initialiser visibleTeams avec tous les equipeId uniques
-      const uniqueTeams = [...new Set(mapRoutes.map(r => r.equipeId))];
-      setVisibleTeams(uniqueTeams);
-    } else {
-      setSelectedRoutes([]);
-      setVisibleTeams([]);
-    }
+      setVisibleTeams([...new Set(mapRoutes.map(r => r.equipeId))]);
+    } else { setSelectedRoutes([]); setVisibleTeams([]); }
   }, [selectedMapDate, mapRoutes.length]);
 
   // Calculer les durées de trajet via le backend — debounce 2s pour éviter les appels excessifs
