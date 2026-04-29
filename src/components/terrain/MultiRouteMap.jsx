@@ -344,10 +344,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           pointerEvents: 'none',
           width: 240,
         }}>
-          {renderTooltip
-            ? renderTooltip(hoveredDossier)
-            : <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
-          }
+          <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
         </div>
       )}
       

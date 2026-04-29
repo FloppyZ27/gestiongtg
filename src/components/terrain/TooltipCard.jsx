@@ -87,7 +87,7 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
   const clientsNames = clients
     .filter(c => dossier.clients_ids?.includes(c.id))
     .map(c => `${c.prenom} ${c.nom}`)
-    .join(', ') || '-';
+    .join(', ') || dossier.clients_texte || '-';
 
   // Utilisateur assigné au mandat
   const assignedUser = mandat?.utilisateur_assigne
@@ -108,8 +108,8 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
 
   return (
     <div
-      className={`${arpColor.split(' ')[0]} rounded-xl p-2`}
-      style={{ width: '240px', boxShadow: '0 4px 20px 0 rgba(0,0,0,0.5)' }}
+      className="bg-slate-800 rounded-xl p-2"
+      style={{ width: '240px', boxShadow: '0 4px 20px 0 rgba(0,0,0,0.5)', border: '1px solid rgba(71,85,105,0.6)' }}
     >
       {/* Badges : N° Dossier et Type Mandat */}
       <div className="flex items-start gap-2 mb-2 flex-wrap">
@@ -238,15 +238,15 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
               {terrain.donneur.trim().split(' ').map(n => n[0]?.toUpperCase()).join('')}
             </span>
           )}
-          {assignedUser ? (
-            <Avatar className="w-5 h-5 border border-emerald-500/50">
-              <AvatarImage src={assignedUser.photo_url} />
-              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
-            </Avatar>
-          ) : donneurUser ? (
+          {donneurUser ? (
             <Avatar className="w-5 h-5 border border-emerald-500/50">
               <AvatarImage src={donneurUser.photo_url} />
               <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(donneurUser.full_name)}</AvatarFallback>
+            </Avatar>
+          ) : assignedUser ? (
+            <Avatar className="w-5 h-5 border border-emerald-500/50">
+              <AvatarImage src={assignedUser.photo_url} />
+              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
             </Avatar>
           ) : (
             <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
