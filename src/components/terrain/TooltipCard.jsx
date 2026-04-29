@@ -83,20 +83,22 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
   const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
   const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
 
-  // Clients
-  const clientsNames = clients
+  // Clients — utiliser le nom précalculé si disponible, sinon chercher dans la liste
+  const clientsFromList = clients
     .filter(c => dossier.clients_ids?.includes(c.id))
-    .map(c => `${c.prenom} ${c.nom}`)
-    .join(', ') || dossier.clients_texte || '-';
+    .map(c => `${c.prenom} ${c.nom}`);
+  const clientsNames = dossier._clientsNoms ||
+    (clientsFromList.length > 0 ? clientsFromList.join(', ') : (dossier.clients_texte || '-'));
 
   // Utilisateur assigné au mandat
   const assignedUser = mandat?.utilisateur_assigne
     ? users.find(u => u.email === mandat.utilisateur_assigne)
     : null;
 
-  // Donneur
+  // Donneur — chercher par full_name (User entity) ou par nom composé
   const donneurUser = terrain?.donneur
-    ? users.find(u => u.full_name === terrain.donneur)
+    ? (users.find(u => u.full_name === terrain.donneur) ||
+       users.find(u => `${u.prenom || ''} ${u.nom || ''}`.trim() === terrain.donneur?.trim()))
     : null;
 
   const handleStatutChange = (val) => {
@@ -233,17 +235,17 @@ export function TooltipCard({ card, clients = [], users = [], cardStatuts = {}, 
 
         {/* Donneur initiales + avatar */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          {terrain?.donneur && (
+          {(terrain?._donneurInitials || terrain?.donneur) && (
             <span className="text-xs text-slate-400 font-medium">
-              {terrain.donneur.trim().split(' ').map(n => n[0]?.toUpperCase()).join('')}
+              {terrain._donneurInitials || terrain.donneur?.trim().split(' ').map(n => n[0]?.toUpperCase()).join('')}
             </span>
           )}
-          {donneurUser ? (
+          {(terrain?._donneurPhotoUrl || donneurUser?.photo_url) ? (
             <Avatar className="w-5 h-5 border border-emerald-500/50">
-              <AvatarImage src={donneurUser.photo_url} />
-              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(donneurUser.full_name)}</AvatarFallback>
+              <AvatarImage src={terrain._donneurPhotoUrl || donneurUser?.photo_url} />
+              <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{terrain._donneurInitials || getUserInitials(donneurUser?.full_name)}</AvatarFallback>
             </Avatar>
-          ) : assignedUser ? (
+          ) : assignedUser?.photo_url ? (
             <Avatar className="w-5 h-5 border border-emerald-500/50">
               <AvatarImage src={assignedUser.photo_url} />
               <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>

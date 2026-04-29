@@ -696,7 +696,28 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       const cardIds = equipe.mandats || []; const waypoints = []; const dossiersInfo = [];
       cardIds.forEach(cId => {
         const card = terrainCards.find(c => c.id === cId);
-        if (card?.mandat?.adresse_travaux) { const address = formatAdresse(card.mandat.adresse_travaux); if (address) { waypoints.push(address); dossiersInfo.push({ cardId: card.id, ...card, color: COLORS[index % COLORS.length] }); } }
+        if (card?.mandat?.adresse_travaux) {
+          const address = formatAdresse(card.mandat.adresse_travaux);
+          if (address) {
+            waypoints.push(address);
+            // Précalculer noms clients et donneur pour l'infobulle
+            const clientsNoms = clients
+              .filter(c => card.dossier.clients_ids?.includes(c.id))
+              .map(c => `${c.prenom} ${c.nom}`)
+              .join(', ') || card.dossier.clients_texte || '';
+            const tDonneur = card.terrain?.donneur;
+            const tDonneurUser = tDonneur
+              ? users?.find(u => u.full_name === tDonneur || `${u.prenom||''} ${u.nom||''}`.trim() === tDonneur.trim())
+              : null;
+            dossiersInfo.push({
+              cardId: card.id,
+              ...card,
+              dossier: { ...card.dossier, _clientsNoms: clientsNoms },
+              terrain: { ...card.terrain, _donneurPhotoUrl: tDonneurUser?.photo_url||null, _donneurInitials: tDonneur?.trim().split(' ').map(n=>n[0]?.toUpperCase()).join('')||null },
+              color: COLORS[index % COLORS.length],
+            });
+          }
+        }
       });
       if (waypoints.length > 0) routes.push({ equipeId: equipe.id, origin: bureauAddress, destination: bureauAddress, waypoints, color: COLORS[index % COLORS.length], label: generateTeamDisplayName(equipe, index), dossiers: dossiersInfo });
     });
@@ -1963,16 +1984,6 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                         onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
                         clients={clients}
                         users={users}
-                        renderTooltip={(card) => (
-                          <DossierCard
-                            card={card}
-                            hideEditButton={true}
-                            hideLinkedButton={true}
-                            showLock={false}
-                            hideStatut={false}
-                            disableInteractions={true}
-                          />
-                        )}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet correspondant aux filtres</div>

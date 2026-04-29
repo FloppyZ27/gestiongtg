@@ -97,28 +97,36 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
     const dossiersInfo = [];
 
     (equipe.mandats || []).forEach(cardId => {
-      const parts = cardId.split('-');
-      const mandatIdx = parseInt(parts[parts.length - 2]);
-      const terrainIdx = parseInt(parts[parts.length - 1]);
-      const dossierId = parts.slice(0, parts.length - 2).join('-');
-      const dossier = dossiers.find(d => d.id === dossierId);
-      const mandat = dossier?.mandats?.[mandatIdx];
-      const terrain = mandat?.terrains_list?.[terrainIdx] || mandat?.terrain;
-      if (dossier && mandat?.adresse_travaux) {
-        const address = formatAdresse(mandat.adresse_travaux);
-        if (address) {
-          waypoints.push(address);
-          // Structure identique à terrainCard pour que TooltipCard fonctionne
-          dossiersInfo.push({
-            id: cardId,
-            cardId,
-            dossier,
-            mandat,
-            terrain: terrain || {},
-            numero: `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`,
-          });
-        }
+    const parts = cardId.split('-');
+    const mandatIdx = parseInt(parts[parts.length - 2]);
+    const terrainIdx = parseInt(parts[parts.length - 1]);
+    const dossierId = parts.slice(0, parts.length - 2).join('-');
+    const dossier = dossiers.find(d => d.id === dossierId);
+    const mandat = dossier?.mandats?.[mandatIdx];
+    const terrain = mandat?.terrains_list?.[terrainIdx] || mandat?.terrain;
+    if (dossier && mandat?.adresse_travaux) {
+      const address = formatAdresse(mandat.adresse_travaux);
+      if (address) {
+        waypoints.push(address);
+        // Précalculer le nom des clients et le donneur pour éviter les problèmes de résolution dans TooltipCard
+        const clientsNoms = (clients || [])
+          .filter(c => dossier.clients_ids?.includes(c.id))
+          .map(c => `${c.prenom} ${c.nom}`)
+          .join(', ') || dossier.clients_texte || '';
+        const terrainObj = terrain || {};
+        const donneurUser = terrainObj.donneur
+          ? (users || []).find(u => u.full_name === terrainObj.donneur || `${u.prenom || ''} ${u.nom || ''}`.trim() === terrainObj.donneur?.trim())
+          : null;
+        dossiersInfo.push({
+          id: cardId,
+          cardId,
+          dossier: { ...dossier, _clientsNoms: clientsNoms },
+          mandat,
+          terrain: { ...terrainObj, _donneurPhotoUrl: donneurUser?.photo_url || null, _donneurInitials: terrainObj.donneur?.trim().split(' ').map(n => n[0]?.toUpperCase()).join('') || null },
+          numero: `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`,
+        });
       }
+    }
     });
 
     return {
