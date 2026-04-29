@@ -945,10 +945,10 @@ export default function LeveTerrain() {
                   {/* Info mandat */}
                   <Card className="border-slate-800 bg-slate-900/50">
                     <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-white font-bold text-lg">
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge className={`${getArpenteurColor(selectedItem.dossier.arpenteur_geometre)} border text-base font-bold`}>
                           {getArpenteurInitials(selectedItem.dossier.arpenteur_geometre)}{selectedItem.dossier.numero_dossier}
-                        </h2>
+                        </Badge>
                         <Badge className={`${getMandatColor(selectedItem.mandat.type_mandat)} border`}>{selectedItem.mandat.type_mandat}</Badge>
                       </div>
                       <div className="space-y-2 text-sm">
