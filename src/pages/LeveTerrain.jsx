@@ -789,33 +789,36 @@ export default function LeveTerrain() {
                       }}
                     >
                       {isSelected && (
-                        <>
-                          <motion.div
-                            className="absolute inset-0 rounded pointer-events-none"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.3 }}
-                            style={{
-                              boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.5)',
-                            }}
-                          />
-                          <motion.div
-                            className="absolute inset-0 rounded pointer-events-none"
-                            initial={{ opacity: 0 }}
-                            animate={{ boxShadow: ['0 0 30px rgba(16, 185, 129, 0)', '0 0 60px rgba(16, 185, 129, 0.6)', '0 0 30px rgba(16, 185, 129, 0)'] }}
-                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                          />
-                          <motion.div
-                            className="absolute -inset-2 rounded pointer-events-none blur-xl"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: [0.2, 0.4, 0.2] }}
-                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                            style={{
-                              background: 'radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%)',
-                            }}
-                          />
-                        </>
+                        <style>{`
+                          [data-selected-card="${dossier.id}"] {
+                            background: linear-gradient(90deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.3)) !important;
+                            background-size: 200% 200% !important;
+                            animation: glowFlutter 3s ease-in-out infinite !important;
+                            box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 0 80px rgba(16, 185, 129, 0.3), inset 0 0 30px rgba(16, 185, 129, 0.15) !important;
+                            border: 2px solid rgba(16, 185, 129, 0.8) !important;
+                          }
+                          @keyframes glowFlutter {
+                            0%, 100% { 
+                              background-position: 0% 50%;
+                              box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 0 80px rgba(16, 185, 129, 0.3), inset 0 0 30px rgba(16, 185, 129, 0.15);
+                              transform: translateY(0px);
+                            }
+                            25% { 
+                              box-shadow: 0 0 50px rgba(16, 185, 129, 0.8), 0 0 100px rgba(16, 185, 129, 0.4), inset 0 0 40px rgba(16, 185, 129, 0.2);
+                              transform: translateY(-2px);
+                            }
+                            50% { 
+                              background-position: 100% 50%;
+                              box-shadow: 0 0 60px rgba(16, 185, 129, 0.9), 0 0 120px rgba(16, 185, 129, 0.5), inset 0 0 50px rgba(16, 185, 129, 0.25);
+                            }
+                            75% { 
+                              box-shadow: 0 0 50px rgba(16, 185, 129, 0.8), 0 0 100px rgba(16, 185, 129, 0.4), inset 0 0 40px rgba(16, 185, 129, 0.2);
+                              transform: translateY(-1px);
+                            }
+                          }
+                        `}</style>
                       )}
+                      <div data-selected-card={isSelected ? dossier.id : undefined} />
                       <div className="relative z-10">
                         {/* Carte identique à DossierCard dans CéduleTerrain */}
                         {(() => {
