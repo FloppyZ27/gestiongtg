@@ -29,30 +29,29 @@ export default function ConfirmDeleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md text-white" style={{ background: 'rgba(15, 23, 42, 0.97)', border: '1px solid rgba(239,68,68,0.3)' }}>
+      <DialogContent className="max-w-md" style={{ background: 'rgba(15, 23, 42, 0.97)', border: '1px solid rgba(239,68,68,0.3)', color: 'white' }}>
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-white flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+          <DialogTitle className="text-lg font-semibold flex items-center gap-2" style={{ color: 'white' }}>
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: '#f87171' }} />
             {title}
           </DialogTitle>
         </DialogHeader>
-        <p className="text-slate-300 text-sm leading-relaxed mt-1">{message}</p>
+        <p className="text-sm leading-relaxed mt-1" style={{ color: '#cbd5e1' }}>{message}</p>
         <div className="flex justify-end gap-3 mt-4">
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+            style={{ background: 'rgba(51,65,85,0.8)', border: '1px solid rgba(100,116,139,0.5)', color: '#cbd5e1', borderRadius: '0.375rem', padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer' }}
           >
             {cancelLabel}
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
             onClick={handleConfirm}
-            className="bg-red-600 hover:bg-red-700 text-white border-none"
+            style={{ background: '#dc2626', border: 'none', color: 'white', borderRadius: '0.375rem', padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer', fontWeight: 500 }}
           >
             {confirmLabel}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>
