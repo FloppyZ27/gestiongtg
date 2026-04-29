@@ -26,6 +26,7 @@ import LinkedCardsConnector from "./LinkedCardsConnector";
 import { useStickySidebar } from "@/hooks/useStickySidebar";
 import { OptimizeConfirmDialog, OptimizeResultDialog } from "./OptimizeDialogs";
 import { DossierCard } from "./DossierCard";
+import ConfirmDeleteDialog from "@/components/shared/ConfirmDeleteDialog";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -1654,19 +1655,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!deleteCardConfirm} onOpenChange={() => setDeleteCardConfirm(null)}>
-        <DialogContent className="border-none text-white max-w-md" style={{ background: 'none' }}>
-          <DialogHeader><DialogTitle className="text-xl text-red-400 text-center">🗑️ Supprimer ce terrain</DialogTitle></DialogHeader>
-          {deleteCardConfirm && <div className="space-y-4">
-            <p className="text-slate-300 text-center">Voulez-vous vraiment supprimer le terrain <span className="text-emerald-400 font-semibold">{getArpenteurInitials(deleteCardConfirm.dossier.arpenteur_geometre)}{deleteCardConfirm.dossier.numero_dossier}</span> ?</p>
-            <p className="text-slate-400 text-center text-sm">Cette action est irréversible.</p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button onClick={() => setDeleteCardConfirm(null)} className="border border-slate-500 text-slate-300 bg-transparent">Annuler</Button>
-              <Button onClick={() => handleDeleteCard(deleteCardConfirm)} className="bg-gradient-to-r from-red-500 to-red-700 border-none">Supprimer</Button>
-            </div>
-          </div>}
-        </DialogContent>
-      </Dialog>
+      <ConfirmDeleteDialog
+        open={!!deleteCardConfirm}
+        onOpenChange={(open) => { if (!open) setDeleteCardConfirm(null); }}
+        onConfirm={() => handleDeleteCard(deleteCardConfirm)}
+        title="Supprimer ce terrain"
+        message={deleteCardConfirm ? `Voulez-vous vraiment supprimer le terrain ${getArpenteurInitials(deleteCardConfirm.dossier.arpenteur_geometre)}${deleteCardConfirm.dossier.numero_dossier} ? Cette action est irréversible.` : ""}
+      />
 
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] p-0 gap-0" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', height: 'calc(100vh - 170px)', maxHeight: 'calc(100vh - 170px)', display: 'flex', flexDirection: 'column' }}>
