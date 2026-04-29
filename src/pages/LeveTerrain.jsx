@@ -174,14 +174,21 @@ export default function LeveTerrain() {
     return result;
   }, [equipesTerrain, equipesDuJourIds]);
 
-  // Dossiers du jour sélectionné — filtrés selon les cartes assignées à l'utilisateur
-  // Pour les jours passés où l'utilisateur n'est plus dans une équipe active, on affiche tous les dossiers cédulés ce jour
+  // Toutes les cartes assignées à TOUTES les équipes du jour (peu importe l'utilisateur)
+  const tousLesMandatsDuJour = useMemo(() => {
+    const result = new Set();
+    equipesTerrain.forEach(e => (e.mandats || []).forEach(m => result.add(m)));
+    return result;
+  }, [equipesTerrain]);
+
+  // Dossiers du jour sélectionné
+  // - Jour actuel/futur : seulement les cartes assignées à l'équipe de l'utilisateur
+  // - Jour passé : toutes les cartes qui étaient cédulées ce jour (dans n'importe quelle équipe terrain)
   const dossiersDuJour = useMemo(() => {
     const isPastDay = selectedDate < today;
-    const hasEquipe = equipesDuJourIds.size > 0;
 
-    // Si pas d'équipe et pas un jour passé, rien à afficher
-    if (!hasEquipe && !isPastDay) return [];
+    // Pour aujourd'hui/futur sans équipe : rien à afficher
+    if (!isPastDay && equipesDuJourIds.size === 0) return [];
 
     return dossiers
       .flatMap(d => (d.mandats || [])
@@ -191,16 +198,19 @@ export default function LeveTerrain() {
             .map((t, terrainIdx) => ({ terrain: t, terrainIdx }))
             .filter(({ terrain }) => terrain.date_cedulee === selectedDate)
             .filter(({ terrainIdx }) => {
-              // Pour les jours passés sans équipe trouvée, montrer toutes les cartes du jour
-              if (isPastDay && !hasEquipe) return true;
               const cardId = `${d.id}-${mandatIdx}-${terrainIdx}`;
+              if (isPastDay) {
+                // Jours passés : afficher toutes les cartes qui étaient dans une équipe terrain ce jour
+                return tousLesMandatsDuJour.has(cardId);
+              }
+              // Jour actuel/futur : seulement les cartes de l'équipe de l'utilisateur
               return mandatsAssignes.has(cardId);
             })
             .map(() => ({ dossier: d, mandat: m }));
         })
       )
       .sort((a, b) => parseInt(a.dossier.numero_dossier) - parseInt(b.dossier.numero_dossier));
-  }, [dossiers, selectedDate, today, equipesDuJourIds, mandatsAssignes]);
+  }, [dossiers, selectedDate, today, equipesDuJourIds, mandatsAssignes, tousLesMandatsDuJour]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
