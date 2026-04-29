@@ -1111,20 +1111,14 @@ export default function Lots() {
                   Nouveau lot
                 </Button>
                 </DialogTrigger>
-            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+            <DialogContent className="border border-slate-700 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingLot ? "Modifier le lot" : "Nouveau lot"}
                 </DialogTitle>
               </DialogHeader>
 
-              <motion.div 
-                className="flex flex-col h-[90vh]"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
+              <div className="flex flex-col h-[90vh]">
                 {/* Header pleine largeur */}
                 <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                   <div className="flex items-center justify-between">
@@ -1612,7 +1606,7 @@ export default function Lots() {
                   <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
                 </div>
               )}
-            </motion.div>
+            </div>
             </DialogContent>
           </Dialog>
           </div>
@@ -1620,10 +1614,10 @@ export default function Lots() {
 
         {/* View Lot Dialog - Note: View dialog kept for reference, editing is done inline */}
         <Dialog open={isViewDialogOpen} onOpenChange={(open) => { setIsViewDialogOpen(open); if (!open) { setViewDossierSearchTerm(""); setViewFilterArpenteur("all"); setViewFilterTypeMandat("all"); setViewFilterVille("all"); setViewSortField(null); setViewSortDirection("asc"); } }}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="border border-slate-700 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
             <DialogHeader className="sr-only"><DialogTitle className="text-2xl">Détails du lot</DialogTitle></DialogHeader>
             {viewingLot && (
-              <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
+              <div className="flex flex-col h-[90vh]">
                 <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">Détails - Lot {viewingLot.numero_lot}</h2>
@@ -1828,7 +1822,7 @@ export default function Lots() {
                   Modifier
                 </Button>
               </div>
-            </motion.div>
+            </div>
             )}
           </DialogContent>
         </Dialog>
