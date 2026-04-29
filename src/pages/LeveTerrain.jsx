@@ -788,37 +788,24 @@ export default function LeveTerrain() {
                         background: isSelected ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
                       }}
                     >
-                      {isSelected && (
-                        <>
-                          <motion.div
-                            className="absolute inset-0 rounded pointer-events-none"
-                            animate={{
-                              boxShadow: [
-                                '0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2)',
-                                '0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
-                                '0 0 60px rgba(16, 185, 129, 0.9), 0 0 100px rgba(16, 185, 129, 0.5)',
-                                '0 0 40px rgba(16, 185, 129, 0.7), 0 0 80px rgba(16, 185, 129, 0.4)',
-                                '0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2)',
-                              ]
-                            }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          />
-                          <motion.div
-                            className="absolute inset-0 rounded border-2 border-emerald-500/80 pointer-events-none"
-                            animate={{
-                              boxShadow: [
-                                '0 0 0 0px rgba(16, 185, 129, 0.6)',
-                                '0 0 10px 2px rgba(16, 185, 129, 0.8)',
-                                '0 0 20px 4px rgba(16, 185, 129, 0.9)',
-                                '0 0 10px 2px rgba(16, 185, 129, 0.8)',
-                                '0 0 0 0px rgba(16, 185, 129, 0.6)',
-                              ]
-                            }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          />
-                        </>
-                      )}
                       <div className="relative z-10">
+                        {isSelected && (
+                          <>
+                            <motion.div
+                              className="absolute inset-0 rounded pointer-events-none"
+                              animate={{
+                                boxShadow: [
+                                  'inset 0 0 20px rgba(16, 185, 129, 0.4), inset 0 0 40px rgba(16, 185, 129, 0.2)',
+                                  'inset 0 0 40px rgba(16, 185, 129, 0.7), inset 0 0 80px rgba(16, 185, 129, 0.4)',
+                                  'inset 0 0 60px rgba(16, 185, 129, 0.9), inset 0 0 100px rgba(16, 185, 129, 0.5)',
+                                  'inset 0 0 40px rgba(16, 185, 129, 0.7), inset 0 0 80px rgba(16, 185, 129, 0.4)',
+                                  'inset 0 0 20px rgba(16, 185, 129, 0.4), inset 0 0 40px rgba(16, 185, 129, 0.2)',
+                                ]
+                              }}
+                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                          </>
+                        )}
                         {/* Carte identique à DossierCard dans CéduleTerrain */}
                         {(() => {
                         const terrain = mandat.terrains_list?.[0] || mandat.terrain;
