@@ -1063,10 +1063,10 @@ export default function Lots() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold text-blue-400">
                 Lots
               </h1>
-              <Grid3x3 className="w-6 h-6 text-emerald-400" />
+              <Grid3x3 className="w-6 h-6 text-blue-400" />
             </div>
             <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
