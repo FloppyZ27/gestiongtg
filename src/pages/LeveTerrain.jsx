@@ -834,52 +834,65 @@ export default function LeveTerrain() {
                                   </div>
                                 )}
                                 {/* Temps prévu | Statut (lecture seule) | Donneur + Avatar */}
-                                {(() => {
-                                  const cardId = `${dossier.id}-0-0`;
-                                  const currentStatut = cardStatuts[cardId]?.statut || null;
-                                  const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
-                                  const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
-                                  const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
-                                  return (
-                                    <div className="flex items-center gap-1 mt-2 pt-1 border-t border-emerald-500/30">
-                                      {/* Temps prévu */}
-                                      <div className="flex-shrink-0">
-                                        {terrain.temps_prevu
-                                          ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
-                                          : <div className="w-10" />}
-                                      </div>
-                                      {/* Statut — lecture seule, badge coloré */}
-                                      <div className="flex-1 min-w-0 flex justify-center">
-                                        {currentStatut ? (
-                                          <span
-                                            className="text-xs font-semibold px-2 py-0.5 rounded text-center truncate"
-                                            style={{
-                                              background: isOrange ? 'rgba(249,115,22,0.3)' : isMauve ? 'rgba(139,92,246,0.3)' : 'rgba(30,41,59,0.4)',
-                                              color: isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8',
-                                              border: `1px solid ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`,
-                                            }}
-                                          >
-                                            {currentStatut}
-                                          </span>
-                                        ) : <div className="flex-1" />}
-                                      </div>
-                                      {/* Donneur + Avatar */}
-                                      <div className="flex items-center gap-1 flex-shrink-0">
-                                        {terrain.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
-                                        {assignedUser ? (
-                                          <Avatar className="w-5 h-5 border border-emerald-500/50">
-                                            <AvatarImage src={assignedUser.photo_url} />
-                                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
-                                          </Avatar>
-                                        ) : (
-                                          <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
-                                            <User className="w-2.5 h-2.5 text-emerald-500" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })()}
+                                                {(() => {
+                                                  // Trouver le bon index de mandat et terrain pour construire le cardId correct
+                                                  const mandatIdx = dossier.mandats?.indexOf(mandat) ?? 0;
+                                                  const terrainIdx = mandat.terrains_list?.findIndex(t => t.date_cedulee === selectedDate) ?? 0;
+                                                  const cardId = `${dossier.id}-${mandatIdx >= 0 ? mandatIdx : 0}-${terrainIdx >= 0 ? terrainIdx : 0}`;
+                                                  const currentStatut = cardStatuts[cardId]?.statut || null;
+                                                  const isOrange = currentStatut === 'Rendez-Vous' || currentStatut === 'Client Avisé';
+                                                  const isMauve = currentStatut === 'Confirmé la veille' || currentStatut === 'Retour terrain';
+                                                  const assignedUser = users.find(u => u.email === mandat.utilisateur_assigne);
+                                                  const donneurUser = terrain.donneur ? users.find(u => u.full_name === terrain.donneur) : null;
+                                                  return (
+                                                    <div className="flex items-center gap-1 mt-2 pt-1 border-t border-emerald-500/30">
+                                                      {/* Temps prévu */}
+                                                      <div className="flex-shrink-0">
+                                                        {terrain.temps_prevu
+                                                          ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
+                                                          : <div className="w-10" />}
+                                                      </div>
+                                                      {/* Statut — lecture seule, badge coloré */}
+                                                      <div className="flex-1 min-w-0 flex justify-center">
+                                                        {currentStatut ? (
+                                                          <span
+                                                            className="text-xs font-semibold px-2 py-0.5 rounded text-center truncate"
+                                                            style={{
+                                                              background: isOrange ? 'rgba(249,115,22,0.3)' : isMauve ? 'rgba(139,92,246,0.3)' : 'rgba(30,41,59,0.4)',
+                                                              color: isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8',
+                                                              border: `1px solid ${isOrange ? '#fb923c' : isMauve ? '#c084fc' : '#94a3b8'}`,
+                                                            }}
+                                                          >
+                                                            {currentStatut}
+                                                          </span>
+                                                        ) : <div className="flex-1" />}
+                                                      </div>
+                                                      {/* Donneur + Avatar */}
+                                                      <div className="flex items-center gap-1 flex-shrink-0">
+                                                        {terrain.donneur && (
+                                                          <span className="text-xs text-slate-400 font-medium">
+                                                            {terrain.donneur.trim().split(' ').map(n => n[0]?.toUpperCase()).join('')}
+                                                          </span>
+                                                        )}
+                                                        {assignedUser ? (
+                                                          <Avatar className="w-5 h-5 border border-emerald-500/50">
+                                                            <AvatarImage src={assignedUser.photo_url} />
+                                                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+                                                          </Avatar>
+                                                        ) : donneurUser ? (
+                                                          <Avatar className="w-5 h-5 border border-emerald-500/50">
+                                                            <AvatarImage src={donneurUser.photo_url} />
+                                                            <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(donneurUser.full_name)}</AvatarFallback>
+                                                          </Avatar>
+                                                        ) : (
+                                                          <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+                                                            <User className="w-2.5 h-2.5 text-emerald-500" />
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                })()}
                               </>
                             )}
                           </div>
