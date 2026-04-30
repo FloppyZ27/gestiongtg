@@ -176,6 +176,13 @@ export default function GestionDeMandat() {
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
 
+  // Charger les groupes liés depuis la DB au démarrage
+  useEffect(() => {
+    if (linkedCardsGroupsDB.length > 0) {
+      setLinkedGroups(linkedCardsGroupsDB);
+    }
+  }, [linkedCardsGroupsDB]);
+
   const queryClient = useQueryClient();
 
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
@@ -183,10 +190,26 @@ export default function GestionDeMandat() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [], staleTime: 60000 });
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
+  const { data: linkedCardsGroupsDB = [] } = useQuery({ queryKey: ['linkedCardsGroups'], queryFn: () => base44.entities.LinkedCardsGroup.list(), initialData: [] });
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dossiers'] }),
+  });
+
+  const createLinkedGroupMutation = useMutation({
+    mutationFn: (groupData) => base44.entities.LinkedCardsGroup.create(groupData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
+  });
+
+  const updateLinkedGroupMutation = useMutation({
+    mutationFn: ({ id, groupData }) => base44.entities.LinkedCardsGroup.update(id, groupData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
+  });
+
+  const deleteLinkedGroupMutation = useMutation({
+    mutationFn: (id) => base44.entities.LinkedCardsGroup.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
   });
 
   const getClientsNames = (clientIds) => {
@@ -337,6 +360,23 @@ export default function GestionDeMandat() {
 
     let newGroups = linkedGroups.filter(g => g.id !== group1?.id && g.id !== group2?.id);
     const mergedCardIds = [...new Set([...(group1?.cardIds || [card1.id]), ...(group2?.cardIds || [card2.id])])];
+    
+    // Sauvegarder le nouveau groupe en DB
+    if (group1?.id && group2?.id) {
+      // Les deux cartes appartenaient déjà à des groupes : supprimer les anciens et créer le nouveau
+      deleteLinkedGroupMutation.mutate(group1.id);
+      deleteLinkedGroupMutation.mutate(group2.id);
+    } else if (group1?.id) {
+      // Mettre à jour le groupe existant
+      updateLinkedGroupMutation.mutate({ id: group1.id, groupData: { cardIds: mergedCardIds } });
+    } else if (group2?.id) {
+      // Mettre à jour le groupe existant
+      updateLinkedGroupMutation.mutate({ id: group2.id, groupData: { cardIds: mergedCardIds } });
+    } else {
+      // Créer un nouveau groupe
+      createLinkedGroupMutation.mutate({ cardIds: mergedCardIds });
+    }
+    
     newGroups.push({ id: Date.now().toString(), cardIds: mergedCardIds });
     setLinkedGroups(newGroups);
     setSelectedCardForLink(null);
@@ -365,6 +405,7 @@ export default function GestionDeMandat() {
   };
 
   const handleUnlinkGroup = (groupId) => {
+    deleteLinkedGroupMutation.mutate(groupId);
     setLinkedGroups(linkedGroups.filter(g => g.id !== groupId));
   };
 
@@ -454,10 +495,12 @@ export default function GestionDeMandat() {
                       // Dissocier cette carte du groupe
                       const remainingCards = group.cardIds.filter(id => id !== c.id);
                       if (remainingCards.length > 0) {
+                        updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
                         setLinkedGroups(linkedGroups.map(g => 
                           g.id === group.id ? { ...g, cardIds: remainingCards } : g
                         ));
                       } else {
+                        deleteLinkedGroupMutation.mutate(group.id);
                         setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
                       }
                       setDissociationMode(null);
@@ -479,10 +522,12 @@ export default function GestionDeMandat() {
                   // En mode dissociation : dissocier immédiatement cette carte
                   const remainingCards = group.cardIds.filter(id => id !== card.id);
                   if (remainingCards.length > 0) {
+                    updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
                     setLinkedGroups(linkedGroups.map(g => 
                       g.id === group.id ? { ...g, cardIds: remainingCards } : g
                     ));
                   } else {
+                    deleteLinkedGroupMutation.mutate(group.id);
                     setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
                   }
                   setSelectedCardForLink(null);

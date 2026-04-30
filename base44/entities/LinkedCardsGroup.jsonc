@@ -1,0 +1,16 @@
+{
+  "name": "LinkedCardsGroup",
+  "type": "object",
+  "properties": {
+    "cardIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des cartes li\u00e9es ensemble"
+    }
+  },
+  "required": [
+    "cardIds"
+  ]
+}
