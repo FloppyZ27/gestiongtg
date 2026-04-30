@@ -1457,13 +1457,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" onClick={goToPrevious} className="h-8 w-8 bg-slate-800/80 border border-slate-700 text-slate-300 hover:!bg-slate-700 hover:text-white rounded-lg"><ChevronLeft className="w-4 h-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={goToPrevious} className="h-8 w-8 bg-slate-800/80 border border-slate-700 text-slate-300 hover:!bg-blue-600 hover:!border-blue-600 hover:!text-white rounded-xl transition-all duration-200"><ChevronLeft className="w-4 h-4" /></Button>
                 <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
                   <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">{viewMode === "week" ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}` : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
                   <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
                   <input type="date" value={format(currentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
-                <Button size="icon" variant="ghost" onClick={goToNext} className="h-8 w-8 bg-slate-800/80 border border-slate-700 text-slate-300 hover:!bg-slate-700 hover:text-white rounded-lg"><ChevronRight className="w-4 h-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={goToNext} className="h-8 w-8 bg-slate-800/80 border border-slate-700 text-slate-300 hover:!bg-blue-600 hover:!border-blue-600 hover:!text-white rounded-xl transition-all duration-200"><ChevronRight className="w-4 h-4" /></Button>
               </div>
               <div className="flex gap-2 items-center">
                 <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
