@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, User, Calendar } from "lucide-react";
-import { DossierCard } from "./DossierCard";
+import { MapPin } from "lucide-react";
+import { TooltipCard } from "./TooltipCard";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
@@ -24,17 +23,22 @@ function formatAdresse(addr) {
   return parts.filter(p => p).join(', ');
 }
 
-// Composant carte Google Maps avec marqueurs custom
-function TerrainMap({ cards, apiKey, clients }) {
+function TerrainMap({ cards, apiKey, clients, users }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
-  const infoWindowRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [cardStatuts, setCardStatuts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; }
+  });
 
-  const getClientsNames = (ids) => {
-    if (!ids?.length) return "-";
-    return ids.map(id => { const c = clients.find(c => c.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
+  const handleStatutChange = (cardId, newVal) => {
+    setCardStatuts(prev => {
+      const next = { ...prev, [cardId]: { ...prev[cardId], statut: newVal } };
+      localStorage.setItem('terrainCardStatuts', JSON.stringify(next));
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -71,7 +75,6 @@ function TerrainMap({ cards, apiKey, clients }) {
       ],
     });
     mapInstanceRef.current = map;
-    infoWindowRef.current = new window.google.maps.InfoWindow();
   }, [isLoaded]);
 
   useEffect(() => {
@@ -79,6 +82,7 @@ function TerrainMap({ cards, apiKey, clients }) {
 
     markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
+    setHoveredCard(null);
 
     const geocoder = new window.google.maps.Geocoder();
     const bounds = new window.google.maps.LatLngBounds();
@@ -95,10 +99,6 @@ function TerrainMap({ cards, apiKey, clients }) {
           bounds.extend(pos);
 
           const color = card.isPlanned ? getArpenteurColorHex(card.dossier.arpenteur_geometre) : '#94a3b8';
-          const clientsNames = getClientsNames(card.dossier.clients_ids);
-          const dateLabel = card.isPlanned && card.dateCedulee
-            ? `📅 ${format(new Date(card.dateCedulee + 'T00:00:00'), "d MMM yyyy", { locale: fr })} — ${card.equipeNom || ''}`
-            : '📋 À planifier';
 
           const marker = new window.google.maps.Marker({
             position: pos,
@@ -114,39 +114,42 @@ function TerrainMap({ cards, apiKey, clients }) {
             },
           });
 
-          marker.addListener('click', () => {
-            infoWindowRef.current.setContent(`
-              <div style="background:#1e293b;color:white;padding:12px;border-radius:8px;min-width:220px;font-family:sans-serif;">
-                <div style="font-weight:700;font-size:14px;margin-bottom:6px;color:${color}">
-                  ${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier} — ${card.mandat?.type_mandat || ''}
-                </div>
-                <div style="font-size:12px;color:#cbd5e1;margin-bottom:4px;">👤 ${clientsNames}</div>
-                <div style="font-size:12px;color:#94a3b8;margin-bottom:4px;">📍 ${adresse}</div>
-                <div style="font-size:12px;color:${card.isPlanned ? '#34d399' : '#f59e0b'};">${dateLabel}</div>
-              </div>
-            `);
-            infoWindowRef.current.open(mapInstanceRef.current, marker);
-          });
+          marker.addListener('mouseover', () => setHoveredCard(card));
+          marker.addListener('mouseout', () => setHoveredCard(null));
 
           markersRef.current.push(marker);
           geocodedCount++;
-          if (geocodedCount >= 1) {
-            mapInstanceRef.current.fitBounds(bounds);
-          }
+          if (geocodedCount >= 1) mapInstanceRef.current.fitBounds(bounds);
         });
       }, index * 150);
     });
-  }, [isLoaded, cards, clients]);
+  }, [isLoaded, cards]);
 
   if (!apiKey) return <div className="flex items-center justify-center h-full text-slate-400">Clé API Google Maps non configurée</div>;
   if (!isLoaded) return <div className="flex items-center justify-center h-full text-slate-400">Chargement de la carte...</div>;
 
-  return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <div className="relative w-full h-full">
+      {/* Infobulle style TooltipCard dans le coin supérieur droit */}
+      {hoveredCard && (
+        <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1000, pointerEvents: 'none' }}>
+          <TooltipCard
+            card={hoveredCard}
+            clients={clients}
+            users={users}
+            cardStatuts={cardStatuts}
+            onStatutChange={handleStatutChange}
+          />
+        </div>
+      )}
+      <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+    </div>
+  );
 }
 
 export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, equipes, placeAffaire }) {
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all' | 'unplanned' | 'planned'
+  const [filter, setFilter] = useState('all');
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
@@ -160,12 +163,10 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
     load();
   }, []);
 
-  // Construire la liste des cartes terrain
   const allCards = useMemo(() => {
     const cards = [];
     const filtered = placeAffaire ? dossiers.filter(d => d.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()) : dossiers;
 
-    // Carte des assignments depuis les équipes (cardId -> {dateStr, equipeNom})
     const assignedMap = {};
     Object.entries(equipes || {}).forEach(([dateStr, dayEqs]) => {
       if (dateStr < today) return;
@@ -176,7 +177,7 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
       });
     });
 
-    filtered.forEach((dossier, dossierIdx) => {
+    filtered.forEach(dossier => {
       if (dossier.statut !== 'Ouvert') return;
       (dossier.mandats || []).forEach((mandat, mandatIndex) => {
         if (mandat.tache_actuelle !== 'Cédule') return;
@@ -186,37 +187,14 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
           mandat.terrains_list.forEach((terrain, terrainIndex) => {
             const cardId = `${dossier.id}-${mandatIndex}-${terrainIndex}`;
             const assignment = assignedMap[cardId];
-            const isPlanned = !!assignment;
-            // Construire une card compatible DossierCard
-            cards.push({
-              id: cardId,
-              dossier,
-              mandat,
-              terrain: { ...terrain, statut_terrain: mandat.statut_terrain },
-              mandatIndex,
-              terrainIndex,
-              isPlanned,
-              dateCedulee: assignment?.dateStr || null,
-              equipeNom: assignment?.equipeNom || null,
-            });
+            cards.push({ id: cardId, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex, terrainIndex, isPlanned: !!assignment, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
           });
         } else {
           const statutTerrain = mandat.statut_terrain;
           if (statutTerrain === 'en_verification') return;
           const cardId = `${dossier.id}-${mandatIndex}-0`;
           const assignment = assignedMap[cardId];
-          const isPlanned = !!assignment;
-          cards.push({
-            id: cardId,
-            dossier,
-            mandat,
-            terrain: { ...(mandat.terrain || {}), statut_terrain: statutTerrain },
-            mandatIndex,
-            terrainIndex: 0,
-            isPlanned,
-            dateCedulee: assignment?.dateStr || null,
-            equipeNom: assignment?.equipeNom || null,
-          });
+          cards.push({ id: cardId, dossier, mandat, terrain: { ...(mandat.terrain || {}), statut_terrain: statutTerrain }, mandatIndex, terrainIndex: 0, isPlanned: !!assignment, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
         }
       });
     });
@@ -233,39 +211,16 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
   const unplannedCount = allCards.filter(c => !c.isPlanned).length;
   const plannedCount = allCards.filter(c => c.isPlanned).length;
 
-  // Props factices pour DossierCard (mode lecture seule)
-  const dossierCardProps = {
-    users: [],
-    clients,
-    techniciens: [],
-    lockedCards: new Set(),
-    cardStatuts: {},
-    linkedGroups: [],
-    dragging: null,
-    linkingMode: null,
-    showLock: false,
-    hideEditButton: true,
-    hideLinkedButton: true,
-    hideStatut: false,
-    disableInteractions: true,
-    onCardClick: () => {},
-    onEditTerrain: () => {},
-    onDeleteCard: () => {},
-    onLinkCard: () => {},
-    onUnlinkCard: () => {},
-    onToggleLock: () => {},
-    onStatutChange: () => {},
-    holdTimerRef: { current: null },
-    didDragRef: { current: false },
-    handleDragStart: () => {},
-    getLinkedGroupForCard: () => null,
-  };
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         className="bg-slate-900 border-slate-800 text-white p-0 gap-0"
-        style={{ maxWidth: '95vw', width: '95vw', height: 'calc(100vh - 100px)', maxHeight: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column', position: 'fixed', top: '90px', left: '50%', transform: 'translateX(-50%)' }}
+        style={{
+          maxWidth: '85vw', width: '85vw',
+          height: 'calc(90vh - 100px)', maxHeight: 'calc(90vh - 100px)',
+          display: 'flex', flexDirection: 'column',
+          position: 'fixed', top: '90px', left: '50%', transform: 'translateX(-50%)'
+        }}
       >
         <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
           <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
@@ -287,42 +242,15 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
               </button>
             ))}
             <div className="ml-auto flex items-center gap-3 text-xs text-slate-400">
-              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-amber-400"></span> À planifier</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-slate-400"></span> À planifier</span>
               <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-emerald-400"></span> Planifié (futur)</span>
             </div>
           </div>
         </DialogHeader>
 
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Liste gauche — cartes identiques à Cédule Terrain */}
-          <div style={{ width: 280, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
-            {filteredCards.length === 0 ? (
-              <div className="text-center text-slate-500 mt-8 text-sm">Aucun terrain</div>
-            ) : (
-              filteredCards.map(card => (
-                <div key={card.id}>
-                  {/* Badge "Planifié" ou "À planifier" au-dessus de la carte */}
-                  {card.isPlanned && card.dateCedulee && (
-                    <div className="flex items-center gap-1 mb-1 px-1">
-                      <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                      <span className="text-xs text-emerald-300">{format(new Date(card.dateCedulee + 'T00:00:00'), "d MMM yyyy", { locale: fr })} — {card.equipeNom}</span>
-                    </div>
-                  )}
-                  {!card.isPlanned && (
-                    <div className="flex items-center gap-1 mb-1 px-1">
-                      <span className="text-xs text-amber-400">⏳ À planifier</span>
-                    </div>
-                  )}
-                  <DossierCard card={card} {...dossierCardProps} />
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Carte Google Maps */}
-          <div style={{ flex: 1, height: '100%' }}>
-            <TerrainMap cards={filteredCards} apiKey={googleMapsApiKey} clients={clients} />
-          </div>
+        {/* Carte pleine largeur */}
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <TerrainMap cards={filteredCards} apiKey={googleMapsApiKey} clients={clients} users={[]} />
         </div>
       </DialogContent>
     </Dialog>
