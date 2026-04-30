@@ -292,10 +292,16 @@ export default function GestionDeMandat() {
 
   const handleDrop = useCallback((card, targetColumn) => {
     if (!card) return;
-    const linkedCardIds = getLinkedCardIds(card.id);
-    const linkedCards = allCards.filter(c => linkedCardIds.includes(c.id));
-
-    linkedCards.forEach((linkedCard) => {
+    
+    // Obtenir le groupe lié
+    const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+    const linkedCardIds = group ? group.cardIds : [card.id];
+    
+    // Traiter chaque carte liée
+    linkedCardIds.forEach((cardId) => {
+      const linkedCard = allCards.find(c => c.id === cardId);
+      if (!linkedCard) return;
+      
       const dossier = linkedCard.dossier;
 
       if (activeView === "taches") {
