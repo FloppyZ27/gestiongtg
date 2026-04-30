@@ -664,24 +664,9 @@ export default function LeveTerrain() {
 
           </div>
 
-          {/* Nom à gauche + Date/Navigation à droite */}
+          {/* Date/Navigation à gauche + Nom à droite */}
           {user && (
             <div className="flex items-center justify-between py-4 px-6 bg-slate-900/30">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-10 h-10 border-2 border-blue-500/50">
-                  <AvatarImage src={user.photo_url} />
-                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm">
-                    {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <div className="text-xl font-bold text-white">{user.full_name}</div>
-                  {employeConnecte && (
-                    <span className="text-slate-500 text-xs">{employeConnecte.poste}</span>
-                  )}
-                </div>
-              </div>
-
               {/* Calendrier avec flèches de navigation */}
               <div className="flex items-center gap-2">
                 <button onClick={goToPrevDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', borderColor: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', borderColor: 'rgb(51,65,85)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '1px solid rgb(51,65,85)', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
@@ -701,6 +686,21 @@ export default function LeveTerrain() {
                     Aujourd'hui
                   </Button>
                 )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                  <div className="text-xl font-bold text-white">{user.full_name}</div>
+                  {employeConnecte && (
+                    <span className="text-slate-500 text-xs">{employeConnecte.poste}</span>
+                  )}
+                </div>
+                <Avatar className="w-10 h-10 border-2 border-blue-500/50">
+                  <AvatarImage src={user.photo_url} />
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm">
+                    {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             </div>
           )}
