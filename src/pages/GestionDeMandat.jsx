@@ -450,9 +450,10 @@ export default function GestionDeMandat() {
               onClick={(e) => {
                 e.stopPropagation();
                 const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
                 
-                if (dissociationMode === group?.id) {
-                  // Déjà en mode dissociation : clic sur la carte à dissocier
+                if (isInDissociationMode) {
+                  // En mode dissociation : sélectionner ou dissocier
                   if (selectedCardForLink?.id === card.id) {
                     // Dissocier cette carte du groupe
                     const remainingCards = group.cardIds.filter(id => id !== card.id);
