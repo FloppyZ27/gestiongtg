@@ -572,6 +572,7 @@ export default function GestionDeMandat() {
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
+        onContextMenu={(e) => e.preventDefault()}
 
         className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
