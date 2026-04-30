@@ -451,6 +451,7 @@ export default function GestionDeMandat() {
                 e.stopPropagation();
                 const group = linkedGroups.find(g => g.cardIds.includes(card.id));
                 const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+                const hasLinkedCardsInDossier = linkedCardsForSameDossier !== null && linkedCardsForSameDossier.length > 0;
                 
                 if (isInDissociationMode) {
                   // En mode dissociation : sélectionner ou dissocier
@@ -469,7 +470,7 @@ export default function GestionDeMandat() {
                   } else {
                     setSelectedCardForLink(card);
                   }
-                } else if (linkedCardsForSameDossier !== null && !dissociationMode) {
+                } else if (hasLinkedCardsInDossier && !dissociationMode) {
                   // Entrer en mode dissociation
                   setDissociationMode(group.id);
                   setSelectedCardForLink(null);
@@ -477,7 +478,7 @@ export default function GestionDeMandat() {
                   setSelectedCardForLink(null);
                 } else if (selectedCardForLink) {
                   // Deuxième carte sélectionnée : lier les deux
-                  handleLinkCards(selectedCardForLink.id, card.id);
+                  handleLinkCards(selectedCardForLink, card);
                   setSelectedCardForLink(null);
                 } else {
                   // Première carte sélectionnée
