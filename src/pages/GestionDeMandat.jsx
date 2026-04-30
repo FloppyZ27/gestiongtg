@@ -169,7 +169,9 @@ export default function GestionDeMandat() {
     date: new Date().toISOString().split('T')[0],
     heures: "", tache: "", tache_suivante: "", utilisateur_assigne: ""
   });
-
+  const [linkedGroups, setLinkedGroups] = useState([]);
+  const [selectedCardForLink, setSelectedCardForLink] = useState(null);
+  const [dissociationMode, setDissociationMode] = useState(null);
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
@@ -182,7 +184,18 @@ export default function GestionDeMandat() {
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   
+  const { data: linkedCardsGroupsDB = [] } = useQuery({ 
+    queryKey: ['linkedCardsGroups'], 
+    queryFn: () => base44.entities.LinkedCardsGroup.list(), 
+    initialData: [] 
+  });
 
+  // Charger les groupes liés depuis la DB au démarrage
+  useEffect(() => {
+    if (linkedCardsGroupsDB && linkedCardsGroupsDB.length > 0) {
+      setLinkedGroups(linkedCardsGroupsDB);
+    }
+  }, [linkedCardsGroupsDB]);
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
@@ -195,7 +208,20 @@ export default function GestionDeMandat() {
     },
   });
 
+  const createLinkedGroupMutation = useMutation({
+    mutationFn: (groupData) => base44.entities.LinkedCardsGroup.create(groupData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
+  });
 
+  const updateLinkedGroupMutation = useMutation({
+    mutationFn: ({ id, groupData }) => base44.entities.LinkedCardsGroup.update(id, groupData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
+  });
+
+  const deleteLinkedGroupMutation = useMutation({
+    mutationFn: (id) => base44.entities.LinkedCardsGroup.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['linkedCardsGroups'] }),
+  });
 
   const getClientsNames = (clientIds) => {
     if (!clientIds?.length) return "-";
@@ -274,7 +300,9 @@ export default function GestionDeMandat() {
   const handleDrop = useCallback((card, targetColumn, dropIndex) => {
     if (!card) return;
     
-    const linkedCardIds = [card.id];
+    // Obtenir le groupe lié
+    const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+    const linkedCardIds = group ? group.cardIds : [card.id];
     
     // Regrouper les mises à jour par dossier pour éviter les conflits
     const dossierUpdates = {};
@@ -407,7 +435,7 @@ export default function GestionDeMandat() {
         }
       );
     });
-  }, [activeView, updateDossierMutation, allCards, queryClient]);
+  }, [activeView, updateDossierMutation, linkedGroups, allCards, queryClient]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
@@ -428,7 +456,65 @@ export default function GestionDeMandat() {
     window.open(url, '_blank');
   };
 
+  const getLinkedCardIds = (cardId) => {
+    const group = linkedGroups.find(g => g.cardIds.includes(cardId));
+    return group ? group.cardIds : [cardId];
+  };
 
+  const handleLinkCards = (card1, card2) => {
+    const group1 = linkedGroups.find(g => g.cardIds.includes(card1.id));
+    const group2 = linkedGroups.find(g => g.cardIds.includes(card2.id));
+
+    let newGroups = linkedGroups.filter(g => g.id !== group1?.id && g.id !== group2?.id);
+    const mergedCardIds = [...new Set([...(group1?.cardIds || [card1.id]), ...(group2?.cardIds || [card2.id])])];
+    
+    // Sauvegarder le nouveau groupe en DB
+    if (group1?.id && group2?.id) {
+      // Les deux cartes appartenaient déjà à des groupes : supprimer les anciens et créer le nouveau
+      deleteLinkedGroupMutation.mutate(group1.id);
+      deleteLinkedGroupMutation.mutate(group2.id);
+    } else if (group1?.id) {
+      // Mettre à jour le groupe existant
+      updateLinkedGroupMutation.mutate({ id: group1.id, groupData: { cardIds: mergedCardIds } });
+    } else if (group2?.id) {
+      // Mettre à jour le groupe existant
+      updateLinkedGroupMutation.mutate({ id: group2.id, groupData: { cardIds: mergedCardIds } });
+    } else {
+      // Créer un nouveau groupe
+      createLinkedGroupMutation.mutate({ cardIds: mergedCardIds });
+    }
+    
+    newGroups.push({ id: Date.now().toString(), cardIds: mergedCardIds });
+    setLinkedGroups(newGroups);
+    setSelectedCardForLink(null);
+
+    // Déplacer automatiquement card2 à la même position que card1 (regrouper les cartes)
+    const card2Dossier = card2.dossier;
+    const card2Column = activeView === "taches" ? card1.tache : activeView === "utilisateurs" ? card1.utilisateur : card1.mandat.date_livraison;
+    
+    if (card2.tache !== card1.tache && activeView === "taches") {
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, tache_actuelle: card1.tache } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    } else if (card2.utilisateur !== card1.utilisateur && activeView === "utilisateurs") {
+      const nouvelUtilisateur = card1.utilisateur === "non-assigne" ? "" : card1.utilisateur;
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    } else if (card2.mandat.date_livraison !== card1.mandat.date_livraison && activeView === "calendrier") {
+      const updatedMandats = card2Dossier.mandats.map((m, idx) => 
+        idx === card2.mandatIndex ? { ...m, date_livraison: card1.mandat.date_livraison } : m
+      );
+      updateDossierMutation.mutate({ id: card2Dossier.id, dossierData: { ...card2Dossier, mandats: updatedMandats } });
+    }
+  };
+
+  const handleUnlinkGroup = (groupId) => {
+    deleteLinkedGroupMutation.mutate(groupId);
+    setLinkedGroups(linkedGroups.filter(g => g.id !== groupId));
+  };
 
   const getWeeksToDisplay = () => {
     return eachWeekOfInterval({ start: startOfMonth(currentMonthStart), end: endOfMonth(currentMonthStart) }, { locale: fr });
@@ -441,7 +527,8 @@ export default function GestionDeMandat() {
     const isDraggingThis = dragging?.card?.id === card.id;
     const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
-    const allMandatsForCard = [card];
+    const isLinked = linkedGroups.some(g => g.cardIds.includes(card.id));
+    const allMandatsForCard = linkedCardsForSameDossier ? [card, ...linkedCardsForSameDossier] : [card];
 
     const onMouseDown = (e) => {
       if (e.button !== 0) return; // Ignorer les clics droits/autres
@@ -465,7 +552,16 @@ export default function GestionDeMandat() {
 
     const onClick = () => {
       if (!didDragRef.current) {
-        handleCardClick(card);
+        const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+        if (dissociationMode === group?.id) {
+          // En mode dissociation : ne pas faire d'action sur la carte, seulement sur le badge
+          return;
+        }
+        if (selectedCardForLink && selectedCardForLink.id !== card.id) {
+          handleLinkCards(selectedCardForLink, card);
+        } else {
+          handleCardClick(card);
+        }
       }
     };
 
@@ -480,22 +576,121 @@ export default function GestionDeMandat() {
         onClick={onClick}
         onContextMenu={(e) => e.preventDefault()}
 
-        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''}`}
+        className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
+        title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez sur le bouton lien pour lier des cartes"}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
           <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
-            {allMandatsForCard.map(c => (
-              <Badge 
-                key={c.id} 
-                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold`}
-              >
-                {getAbbreviatedMandatType(c.mandat.type_mandat)}
-              </Badge>
-            ))}
+            {allMandatsForCard.map(c => {
+              const group = linkedGroups.find(g => g.cardIds.includes(c.id));
+              const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+              return (
+                <Badge 
+                  key={c.id} 
+                  className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold cursor-pointer transition-all`}
+                  onClick={(e) => {
+                    if (e.button !== 0) return; // Ignorer les clics droits
+                    e.stopPropagation();
+                    if (isInDissociationMode) {
+                      // Dissocier cette carte du groupe
+                      const remainingCards = group.cardIds.filter(id => id !== c.id);
+                      if (remainingCards.length > 0) {
+                        updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
+                        setLinkedGroups(linkedGroups.map(g => 
+                          g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                        ));
+                      } else {
+                        deleteLinkedGroupMutation.mutate(group.id);
+                        setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                      }
+                      setDissociationMode(null);
+                    }
+                  }}
+                >
+                  {getAbbreviatedMandatType(c.mandat.type_mandat)}
+                </Badge>
+              );
+            })}
+            <div
+              onClick={(e) => {
+                if (e.button !== 0) return; // Ignorer les clics droits
+                e.stopPropagation();
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+                const hasLinkedCardsInDossier = linkedCardsForSameDossier !== null && linkedCardsForSameDossier.length > 0;
+                
+                if (isInDissociationMode) {
+                  // En mode dissociation : dissocier immédiatement cette carte
+                  const remainingCards = group.cardIds.filter(id => id !== card.id);
+                  if (remainingCards.length > 0) {
+                    updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
+                    setLinkedGroups(linkedGroups.map(g => 
+                      g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                    ));
+                  } else {
+                    deleteLinkedGroupMutation.mutate(group.id);
+                    setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                  }
+                  setSelectedCardForLink(null);
+                  setDissociationMode(null);
+                } else if (hasLinkedCardsInDossier && !dissociationMode) {
+                  // Entrer en mode dissociation
+                  setDissociationMode(group.id);
+                  setSelectedCardForLink(null);
+                } else if (selectedCardForLink?.id === card.id) {
+                  setSelectedCardForLink(null);
+                } else if (selectedCardForLink) {
+                  // Deuxième carte sélectionnée : lier les deux
+                  handleLinkCards(selectedCardForLink, card);
+                  setSelectedCardForLink(null);
+                } else {
+                  // Première carte sélectionnée
+                  setSelectedCardForLink(card);
+                }
+              }}
+              title={dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id 
+                ? selectedCardForLink?.id === card.id ? "Cliquez pour dissocier cette carte" : "Sélectionnez la carte à dissocier"
+                : linkedCardsForSameDossier !== null ? "Cliquez pour dissocier une carte" : selectedCardForLink?.id === card.id ? "Cliquez pour annuler" : selectedCardForLink ? "Cliquez pour lier avec la première carte" : "Cliquez pour sélectionner cette carte"}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id 
+                  ? 'rgba(239,68,68,0.8)' 
+                  : linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
+                color: dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id || linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
+                transition: 'background-color 150ms, color 150ms',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+              onMouseEnter={(e) => {
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                if (dissociationMode === group?.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.9)';
+                } else {
+                  e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
+                }
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={(e) => {
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                if (dissociationMode === group?.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.8)';
+                } else {
+                  e.currentTarget.style.backgroundColor = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
+                }
+                e.currentTarget.style.color = dissociationMode === group?.id || linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
+              }}
+            >
+              <Link2 style={{ width: 13, height: 13 }} />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1">
@@ -544,6 +739,29 @@ export default function GestionDeMandat() {
   const renderColumn = (columnId, title, cards, headerContent) => {
     const isOver = overColumn === columnId && dragging;
     
+    // Fusionner les cartes liées avec le même dossier
+    const processedCards = [];
+    const seenCardIds = new Set();
+    
+    cards.forEach(card => {
+      if (seenCardIds.has(card.id)) return;
+      
+      // Trouver les cartes liées du même dossier
+      const linkedGroup = linkedGroups.find(g => g.cardIds.includes(card.id));
+      const linkedCardsWithSameDossier = linkedGroup
+        ? linkedGroup.cardIds
+            .map(id => cards.find(c => c.id === id))
+            .filter(c => c && c.dossier.id === card.dossier.id && c.id !== card.id)
+        : [];
+      
+      // Marquer tous les cartes comme vues
+      seenCardIds.add(card.id);
+      linkedCardsWithSameDossier.forEach(c => seenCardIds.add(c.id));
+      
+      // Ajouter la carte avec ses liées (ou null si pas de liées)
+      processedCards.push({ mainCard: card, linkedCards: linkedCardsWithSameDossier.length > 0 ? linkedCardsWithSameDossier : null });
+    });
+    
     return (
       <div
         key={columnId}
@@ -555,18 +773,18 @@ export default function GestionDeMandat() {
             {headerContent}
           </div>
           <div className="p-3 min-h-[120px]">
-            {cards.map((card, idx) => (
-              <div key={`card-${card.id}`}>
+            {processedCards.map(({ mainCard, linkedCards }, idx) => (
+              <div key={`card-${mainCard.id}`}>
                 {isOver && dropIndex === idx && (
                   <div className="h-1 bg-emerald-400 rounded-full mb-2 animate-pulse"></div>
                 )}
-                {renderCard(card)}
+                {renderCard(mainCard, linkedCards)}
               </div>
             ))}
-            {isOver && dropIndex === cards.length && (
+            {isOver && dropIndex === processedCards.length && (
               <div className="h-1 bg-emerald-400 rounded-full mb-2 animate-pulse"></div>
             )}
-            {cards.length === 0 && (
+            {processedCards.length === 0 && (
               <div className="text-center py-8 text-slate-600 text-sm">Aucun mandat</div>
             )}
           </div>
@@ -596,8 +814,11 @@ export default function GestionDeMandat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      {/* Connecteur visuel entre cartes liées */}
+      <LinkedCardsConnector linkedGroups={linkedGroups} terrainCards={allCards} />
+      
       {/* Ghost card pendant le drag */}
-      {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} linkedGroupIds={[dragging.card.id]} />}
+      {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} linkedGroupIds={getLinkedCardIds(dragging.card.id)} />}
 
       <div className="w-full">
         <div className="pb-4 pt-4">
