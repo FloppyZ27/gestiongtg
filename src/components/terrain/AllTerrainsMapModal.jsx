@@ -100,18 +100,37 @@ function TerrainMap({ cards, apiKey, clients, users }) {
 
           const color = card.isPlanned ? getArpenteurColorHex(card.dossier.arpenteur_geometre) : '#94a3b8';
 
+          // SVG pin style goutte avec label dossier
+          const label = `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`;
+          const svgPin = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="56" viewBox="0 0 44 56">
+              <filter id="shadow" x="-30%" y="-10%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(0,0,0,0.6)"/>
+              </filter>
+              <path d="M22 2 C10.4 2 1 11.4 1 23 C1 38 22 54 22 54 C22 54 43 38 43 23 C43 11.4 33.6 2 22 2 Z"
+                fill="${color}" stroke="white" stroke-width="2.5" filter="url(#shadow)"/>
+              <circle cx="22" cy="22" r="10" fill="white" opacity="0.25"/>
+              <circle cx="22" cy="22" r="7" fill="white" opacity="0.9"/>
+            </svg>
+          `;
+          const encodedSvg = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgPin);
+
           const marker = new window.google.maps.Marker({
             position: pos,
             map: mapInstanceRef.current,
-            title: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`,
+            title: label,
             icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
-              scale: 10,
-              fillColor: color,
-              fillOpacity: 0.9,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
+              url: encodedSvg,
+              scaledSize: new window.google.maps.Size(44, 56),
+              anchor: new window.google.maps.Point(22, 54),
             },
+            label: {
+              text: card.isPlanned ? '✓' : '·',
+              color: color,
+              fontSize: '11px',
+              fontWeight: 'bold',
+            },
+            zIndex: card.isPlanned ? 10 : 5,
           });
 
           marker.addListener('mouseover', () => setHoveredCard(card));
