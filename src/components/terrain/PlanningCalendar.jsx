@@ -1500,9 +1500,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <Button
                   size="sm"
                   onClick={() => setShowAllTerrainsMap(true)}
-                  className="bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                  className="bg-white/10 hover:bg-white/20"
+                  style={{ color: 'white' }}
                 >
-                  <Map className="w-3 h-3 mr-1" />
+                  <Map className="w-3 h-3 mr-1" style={{ color: 'white' }} />
                   Vue carte
                 </Button>
                 <Button
