@@ -319,11 +319,14 @@ export default function GestionDeMandat() {
       
       const dossierData = dossierUpdates[dossierId];
       
+      // Créer une clé stable pour le mandat (type + tâche + date_ouverture)
+      const mandatKey = `${linkedCard.mandat.type_mandat}-${linkedCard.tache}-${linkedCard.mandat.date_ouverture || ''}`;
+      
       // Trouver l'index réel du mandat dans le dossier
-      const actualMandatIndex = dossierData.mandats.findIndex(m => 
-        m.type_mandat === linkedCard.mandat.type_mandat && 
-        m.tache_actuelle === linkedCard.tache
-      );
+      const actualMandatIndex = dossierData.mandats.findIndex(m => {
+        const mKey = `${m.type_mandat}-${m.tache_actuelle}-${m.date_ouverture || ''}`;
+        return mKey === mandatKey;
+      });
       
       if (actualMandatIndex === -1) return; // Mandat pas trouvé
       
