@@ -268,7 +268,16 @@ export default function GestionDeMandat() {
 
   const sortCards = (cards, sortKey, sortMap) => {
     // Ne pas trier si aucun tri n'est sélectionné (préserve l'ordre manuel des mandats du dossier)
-    if (!sortMap[sortKey]) return cards;
+    if (!sortMap[sortKey]) {
+      // Conserver l'ordre d'apparition dans les mandats du dossier
+      return cards.sort((a, b) => {
+        const dossierA = dossiers.find(d => d.id === a.dossierId);
+        const dossierB = dossiers.find(d => d.id === b.dossierId);
+        const indexA = dossierA?.mandats?.findIndex(m => m.type_mandat === a.mandat.type_mandat && m.date_ouverture === a.mandat.date_ouverture) ?? -1;
+        const indexB = dossierB?.mandats?.findIndex(m => m.type_mandat === b.mandat.type_mandat && m.date_ouverture === b.mandat.date_ouverture) ?? -1;
+        return indexA - indexB;
+      });
+    }
     return [...cards].sort((a, b) => {
       const dA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
       const dB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
