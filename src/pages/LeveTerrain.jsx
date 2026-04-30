@@ -681,7 +681,7 @@ export default function LeveTerrain() {
 
                 <button onClick={goToNextDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgb(16,185,129)', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
 
-                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300">Aujourd'hui</Button>
+                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
               </div>
 
               <div className="flex items-center gap-3">
