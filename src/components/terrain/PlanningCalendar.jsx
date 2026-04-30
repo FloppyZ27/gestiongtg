@@ -1473,9 +1473,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   <input type="date" value={format(currentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
                 <button onClick={goToNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
+                <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
               </div>
               <div className="flex gap-2 items-center">
-                <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
                 <div className="flex gap-1">
                   <Button size="sm" onClick={() => setViewMode("week")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
                   <Button size="sm" onClick={() => setViewMode("month")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
