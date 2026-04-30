@@ -146,7 +146,7 @@ function TerrainGhostCard({ card, pos, clients, users, techniciens, linkedGroups
 }
 
 // Wrapper stable pour éviter le flickering de la carte quand selectedRoutes change
-function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations, clients, users, renderTooltip }) {
+function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurations, clients, users, renderTooltip, overlayCards }) {
   // Stabiliser les routes par contenu pour éviter de recréer la carte inutilement
   const stableRoutes = useMemo(
     () => mapRoutes,
@@ -170,6 +170,7 @@ function MapWithStableRoutes({ mapRoutes, selectedRoutes, apiKey, onEquipeDurati
         clients={clients}
         users={users}
         renderTooltip={renderTooltip}
+        overlayCards={overlayCards}
       />
     </div>
   );
@@ -1796,6 +1797,17 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     // Filtrer les routes selon les équipes visibles et les trajets sélectionnés
                     const filteredRoutes = mapRoutes.filter(route => visibleTeams.includes(route.equipeId));
                     const visibleIndices = selectedRoutes.filter(i => filteredRoutes.some((_, idx) => mapRoutes.findIndex(r => r.equipeId === filteredRoutes[idx].equipeId && r === filteredRoutes[idx]) === i));
+                    // Cartes overlay : tous les terrains à planifier/planifiés futurs
+                    const today = format(new Date(), "yyyy-MM-dd");
+                    const assignedMap = {};
+                    Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
+                      if (dateStr < today) return;
+                      dayEqs.forEach(eq => { eq.mandats?.forEach(cId => { assignedMap[cId] = { dateStr, equipeNom: eq.nom }; }); });
+                    });
+                    const overlayCards = terrainCards
+                      .filter(c => c.terrain?.statut_terrain !== 'en_verification' && formatAdresse(c.mandat?.adresse_travaux))
+                      .map(c => ({ ...c, isPlanned: !!assignedMap[c.id] }));
+
                     return filteredRoutes.length > 0 ? (
                       <MapWithStableRoutes
                         mapRoutes={filteredRoutes}
@@ -1804,6 +1816,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                         onEquipeDurations={(equipeId, secs) => setEquipeTravelSeconds(prev => ({ ...prev, [equipeId]: secs }))}
                         clients={clients}
                         users={users}
+                        overlayCards={overlayCards}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-slate-400">Aucun trajet correspondant aux filtres</div>

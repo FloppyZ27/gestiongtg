@@ -60,7 +60,26 @@ const getMandatTextColor = (typeMandat) => {
   return colors[typeMandat] || "#94a3b8";
 };
 
-export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices, clients = [], users = [], renderTooltip }) {
+const getArpenteurColorHex = (arpenteur) => {
+  const colors = { "Samuel Guay": "#ef4444", "Pierre-Luc Pilote": "#64748b", "Frédéric Gilbert": "#f97316", "Dany Gaboury": "#eab308", "Benjamin Larouche": "#06b6d4" };
+  return colors[arpenteur] || "#10b981";
+};
+
+const getArpenteurInitials = (arpenteur) => {
+  const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
+  return mapping[arpenteur] || "";
+};
+
+const formatAdresseOverlay = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques?.length > 0 && addr.numeros_civiques[0] !== "") parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  return parts.filter(p => p).join(', ');
+};
+
+export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibleRouteIndices, clients = [], users = [], renderTooltip, overlayCards = [] }) {
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -68,7 +87,9 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
   const directionsRenderersRef = useRef([]);
   const markersGroupRef = useRef([]); // tableau de tableaux: markersGroupRef[routeIndex] = [markers...]
   const markersRef = useRef([]);
+  const overlayMarkersRef = useRef([]);
   const [hoveredDossier, setHoveredDossier] = useState(null);
+  const [hoveredOverlay, setHoveredOverlay] = useState(null);
   const [cardStatuts, setCardStatuts] = useState(() => {
     try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; }
   });
@@ -297,9 +318,57 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
       markersRef.current.forEach(marker => marker.setMap(null));
       markersRef.current = [];
       markersGroupRef.current = [];
+      overlayMarkersRef.current.forEach(m => m.setMap(null));
+      overlayMarkersRef.current = [];
       setHoveredDossier(null);
     };
   }, [apiKey, routes]);
+
+  // Effet pour les pins overlay (terrains à planifier)
+  useEffect(() => {
+    const map = googleMapRef.current;
+    if (!map || !overlayCards.length) return;
+
+    overlayMarkersRef.current.forEach(m => m.setMap(null));
+    overlayMarkersRef.current = [];
+    setHoveredOverlay(null);
+
+    const geocoder = new window.google.maps.Geocoder();
+
+    overlayCards.forEach((card, index) => {
+      const adresse = formatAdresseOverlay(card.mandat?.adresse_travaux);
+      if (!adresse) return;
+
+      setTimeout(() => {
+        geocoder.geocode({ address: adresse + ', Québec, Canada' }, (results, status) => {
+          if (status !== 'OK' || !results?.[0] || !googleMapRef.current) return;
+          const pos = results[0].geometry.location;
+          const color = getArpenteurColorHex(card.dossier.arpenteur_geometre);
+          const label = `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`;
+
+          const svgPin = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="20" viewBox="0 0 44 56">
+            <filter id="sh${index}"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/></filter>
+            <path d="M22 2 C10.4 2 1 11.4 1 23 C1 38 22 54 22 54 C22 54 43 38 43 23 C43 11.4 33.6 2 22 2 Z"
+              fill="${color}" stroke="white" stroke-width="3" filter="url(#sh${index})" opacity="0.75"/>
+            <circle cx="22" cy="22" r="8" fill="white" opacity="0.85"/>
+          </svg>`;
+          const encodedSvg = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgPin);
+
+          const marker = new window.google.maps.Marker({
+            position: pos,
+            map: googleMapRef.current,
+            title: label,
+            icon: { url: encodedSvg, scaledSize: new window.google.maps.Size(16, 20), anchor: new window.google.maps.Point(8, 19) },
+            zIndex: 3,
+          });
+
+          marker.addListener('mouseover', () => setHoveredOverlay(card));
+          marker.addListener('mouseout', () => setHoveredOverlay(null));
+          overlayMarkersRef.current.push(marker);
+        });
+      }, index * 100);
+    });
+  }, [overlayCards, googleMapRef.current]);
 
   // Effet séparé pour show/hide les routes sans recréer la carte
   useEffect(() => {
@@ -349,7 +418,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
       )}
       
       {/* Infobulle dans le coin supérieur droit - style carte dossier */}
-      {hoveredDossier && (
+      {(hoveredDossier || hoveredOverlay) && (
         <div style={{
           position: 'absolute',
           top: '16px',
@@ -358,7 +427,7 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
           pointerEvents: 'none',
           width: 240,
         }}>
-          <TooltipCard card={hoveredDossier} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
+          <TooltipCard card={hoveredDossier || hoveredOverlay} clients={clients} users={users} cardStatuts={cardStatuts} onStatutChange={handleCardStatutChange} />
         </div>
       )}
       

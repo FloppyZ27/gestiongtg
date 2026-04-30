@@ -72,7 +72,7 @@ const generateTeamDisplayName = (equipe, users, positionIndex) => {
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
-export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, users, selectedDate, onClose }) {
+export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossiers, clients, users, selectedDate, onClose, equipes }) {
   const [apiKey, setApiKey] = useState(null);
   const [equipeTravelSeconds, setEquipeTravelSeconds] = useState({});
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
@@ -83,9 +83,45 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
     }).catch(() => {});
   }, []);
 
+  const today = selectedDate || format(new Date(), 'yyyy-MM-dd');
   const bureauAddress = "11 rue melancon est, Alma";
 
   const equipesDuJour = useMemo(() => equipesTerrain.filter(e => equipesDuJourIds.has(e.id)), [equipesTerrain, equipesDuJourIds]);
+
+  // Cartes terrain à planifier/planifiées futures (overlay sur la carte)
+  const overlayCards = useMemo(() => {
+    const cards = [];
+    const assignedMap = {};
+    Object.entries(equipes || {}).forEach(([dateStr, dayEqs]) => {
+      if (dateStr < today) return;
+      dayEqs.forEach(eq => {
+        eq.mandats?.forEach(cardId => { assignedMap[cardId] = { dateStr, equipeNom: eq.nom }; });
+      });
+    });
+
+    dossiers.forEach(dossier => {
+      if (dossier.statut !== 'Ouvert') return;
+      (dossier.mandats || []).forEach((mandat, mandatIndex) => {
+        if (mandat.tache_actuelle !== 'Cédule') return;
+        if (!formatAdresse(mandat.adresse_travaux)) return;
+
+        if (mandat.terrains_list?.length > 0) {
+          mandat.terrains_list.forEach((terrain, terrainIndex) => {
+            const cardId = `${dossier.id}-${mandatIndex}-${terrainIndex}`;
+            const assignment = assignedMap[cardId];
+            cards.push({ id: cardId, dossier, mandat, terrain: { ...terrain, statut_terrain: mandat.statut_terrain }, mandatIndex, terrainIndex, isPlanned: !!assignment, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
+          });
+        } else {
+          const statutTerrain = mandat.statut_terrain;
+          if (statutTerrain === 'en_verification') return;
+          const cardId = `${dossier.id}-${mandatIndex}-0`;
+          const assignment = assignedMap[cardId];
+          cards.push({ id: cardId, dossier, mandat, terrain: { ...(mandat.terrain || {}), statut_terrain: statutTerrain }, mandatIndex, terrainIndex: 0, isPlanned: !!assignment, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
+        }
+      });
+    });
+    return cards;
+  }, [dossiers, equipes, today]);
 
   const getClientsNames = useCallback((clientIds) => {
     if (!clientIds?.length) return "-";
@@ -410,6 +446,9 @@ export default function RouteMapModal({ equipesTerrain, equipesDuJourIds, dossie
                 apiKey={apiKey}
                 visibleRouteIndices={mapRoutes.map((_, i) => i)}
                 onRouteDurations={handleRouteDurations}
+                overlayCards={overlayCards}
+                clients={clients}
+                users={users}
               />
             )}
           </div>
