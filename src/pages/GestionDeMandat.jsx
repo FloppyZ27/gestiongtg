@@ -441,11 +441,33 @@ export default function GestionDeMandat() {
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
           <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
-            {allMandatsForCard.map(c => (
-              <Badge key={c.id} className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold`}>
-                {getAbbreviatedMandatType(c.mandat.type_mandat)}
-              </Badge>
-            ))}
+            {allMandatsForCard.map(c => {
+              const group = linkedGroups.find(g => g.cardIds.includes(c.id));
+              const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+              return (
+                <Badge 
+                  key={c.id} 
+                  className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold cursor-pointer transition-all`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isInDissociationMode) {
+                      // Dissocier cette carte du groupe
+                      const remainingCards = group.cardIds.filter(id => id !== c.id);
+                      if (remainingCards.length > 0) {
+                        setLinkedGroups(linkedGroups.map(g => 
+                          g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                        ));
+                      } else {
+                        setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                      }
+                      setDissociationMode(null);
+                    }
+                  }}
+                >
+                  {getAbbreviatedMandatType(c.mandat.type_mandat)}
+                </Badge>
+              );
+            })}
             <div
               onClick={(e) => {
                 e.stopPropagation();
