@@ -297,52 +297,63 @@ export default function GestionDeMandat() {
     const group = linkedGroups.find(g => g.cardIds.includes(card.id));
     const linkedCardIds = group ? group.cardIds : [card.id];
     
-    // Traiter chaque carte liée
+    // Regrouper les mises à jour par dossier pour éviter les conflits
+    const dossierUpdates = {};
+    
     linkedCardIds.forEach((cardId) => {
       const linkedCard = allCards.find(c => c.id === cardId);
       if (!linkedCard) return;
       
-      const dossier = linkedCard.dossier;
-
+      const dossierId = linkedCard.dossier.id;
+      
+      // Initialiser la copie du dossier si nécessaire
+      if (!dossierUpdates[dossierId]) {
+        dossierUpdates[dossierId] = { 
+          id: linkedCard.dossier.id, 
+          mandats: JSON.parse(JSON.stringify(linkedCard.dossier.mandats)) 
+        };
+      }
+      
+      // Mettre à jour le mandat dans cette copie du dossier
       if (activeView === "taches") {
         if (linkedCard.tache === targetColumn) return;
-        const updatedMandats = dossier.mandats.map((m, idx) => {
-          if (idx === linkedCard.mandatIndex) {
-            const updated = { ...m, tache_actuelle: targetColumn };
-            if (targetColumn === "Cédule") {
-              updated.statut_terrain = "en_verification";
-              if (!updated.terrains_list) {
-                updated.terrains_list = [];
-              }
-              updated.terrains_list.push({
-                date_limite_leve: null,
-                instruments_requis: "",
-                a_rendez_vous: false,
-                date_rendez_vous: null,
-                heure_rendez_vous: "",
-                donneur: "",
-                technicien: "",
-                dossier_simultane: "",
-                temps_prevu: "",
-                notes: "",
-                date_cedulee: new Date().toISOString().split('T')[0],
-                equipe_assignee: ""
-              });
-            }
-            return updated;
+        const updated = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], tache_actuelle: targetColumn };
+        if (targetColumn === "Cédule") {
+          updated.statut_terrain = "en_verification";
+          if (!updated.terrains_list) {
+            updated.terrains_list = [];
           }
-          return m;
-        });
-        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+          updated.terrains_list.push({
+            date_limite_leve: null,
+            instruments_requis: "",
+            a_rendez_vous: false,
+            date_rendez_vous: null,
+            heure_rendez_vous: "",
+            donneur: "",
+            technicien: "",
+            dossier_simultane: "",
+            temps_prevu: "",
+            notes: "",
+            date_cedulee: new Date().toISOString().split('T')[0],
+            equipe_assignee: ""
+          });
+        }
+        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = updated;
       } else if (activeView === "utilisateurs") {
         if (linkedCard.utilisateur === targetColumn) return;
         const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
-        const updatedMandats = dossier.mandats.map((m, idx) => idx === linkedCard.mandatIndex ? { ...m, utilisateur_assigne: nouvelUtilisateur } : m);
-        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], utilisateur_assigne: nouvelUtilisateur };
       } else if (activeView === "calendrier") {
         const newDateStr = targetColumn.replace("day-", "");
-        const updatedMandats = dossier.mandats.map((m, idx) => idx === linkedCard.mandatIndex ? { ...m, date_livraison: newDateStr } : m);
-        updateDossierMutation.mutate({ id: dossier.id, dossierData: { ...dossier, mandats: updatedMandats } });
+        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], date_livraison: newDateStr };
+      }
+    });
+    
+    // Envoyer une mutation par dossier unique
+    Object.values(dossierUpdates).forEach(dossierData => {
+      const fullDossier = allCards.find(c => c.dossier.id === dossierData.id)?.dossier;
+      if (fullDossier) {
+        updateDossierMutation.mutate({ id: dossierData.id, dossierData: { ...fullDossier, mandats: dossierData.mandats } });
       }
     });
   }, [activeView, updateDossierMutation, linkedGroups, allCards]);
