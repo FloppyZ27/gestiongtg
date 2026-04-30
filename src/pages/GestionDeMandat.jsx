@@ -319,11 +319,19 @@ export default function GestionDeMandat() {
       
       const dossierData = dossierUpdates[dossierId];
       
+      // Trouver l'index réel du mandat dans le dossier
+      const actualMandatIndex = dossierData.mandats.findIndex(m => 
+        m.type_mandat === linkedCard.mandat.type_mandat && 
+        m.tache_actuelle === linkedCard.tache
+      );
+      
+      if (actualMandatIndex === -1) return; // Mandat pas trouvé
+      
       // Mettre à jour le mandat dans cette copie du dossier
       if (activeView === "taches") {
         if (linkedCard.tache !== targetColumn) {
           // Changement de colonne (tâche)
-          const updated = { ...dossierData.mandats[linkedCard.mandatIndex], tache_actuelle: targetColumn };
+          const updated = { ...dossierData.mandats[actualMandatIndex], tache_actuelle: targetColumn };
           if (targetColumn === "Cédule") {
             updated.statut_terrain = "en_verification";
             if (!updated.terrains_list) {
@@ -344,28 +352,28 @@ export default function GestionDeMandat() {
               equipe_assignee: ""
             });
           }
-          dossierData.mandats[linkedCard.mandatIndex] = updated;
+          dossierData.mandats[actualMandatIndex] = updated;
         } else if (dropIndex !== null) {
           // Réordonnement dans la même colonne
-          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "utilisateurs") {
         if (linkedCard.utilisateur !== targetColumn) {
           const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
-          dossierData.mandats[linkedCard.mandatIndex] = { ...dossierData.mandats[linkedCard.mandatIndex], utilisateur_assigne: nouvelUtilisateur };
+          dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
         } else if (dropIndex !== null) {
-          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "calendrier") {
         const newDateStr = targetColumn.replace("day-", "");
         if (linkedCard.mandat.date_livraison !== newDateStr) {
-          dossierData.mandats[linkedCard.mandatIndex] = { ...dossierData.mandats[linkedCard.mandatIndex], date_livraison: newDateStr };
+          dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
         } else if (dropIndex !== null) {
-          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
