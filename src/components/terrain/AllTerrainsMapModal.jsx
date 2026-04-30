@@ -252,6 +252,13 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
           position: 'fixed', top: '90px', left: '50%', transform: 'translateX(-50%)'
         }}
       >
+        <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
+          <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-emerald-400" />
+            Vue d'ensemble — Tous les terrains à planifier
+          </DialogTitle>
+        </DialogHeader>
+
         {/* Carte pleine largeur */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <TerrainMap cards={allCards} apiKey={googleMapsApiKey} clients={clients} users={[]} />
