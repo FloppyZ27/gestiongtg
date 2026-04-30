@@ -83,6 +83,8 @@ function TerrainMap({ cards, apiKey, clients, users }) {
         { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
         { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
         { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
+        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+        { featureType: 'transit', stylers: [{ visibility: 'off' }] },
       ],
     });
     mapInstanceRef.current = map;
