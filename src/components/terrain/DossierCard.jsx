@@ -29,10 +29,11 @@ const formatAdresse = (addr) => {
 // Couleur de la date cédulée selon l'écart avec la date limite
 const getDateCeduleeColor = (dateCedulee, dateLimite) => {
   if (!dateCedulee || !dateLimite) return null;
-  const diff = Math.round((new Date(dateCedulee + 'T00:00:00') - new Date(dateLimite + 'T00:00:00')) / 86400000);
-  if (diff < -7) return 'green';    // plus de 7 jours d'avance → vert
-  if (diff <= 0) return 'orange';   // dans les 7 jours avant la limite → orange
-  return 'red';                      // après la limite → rouge
+  // diff = nb jours entre date cédulée et date limite (positif = limite après cédulée)
+  const diff = Math.round((new Date(dateLimite + 'T00:00:00') - new Date(dateCedulee + 'T00:00:00')) / 86400000);
+  if (diff > 7) return 'green';   // limite > 7 jours après cédulée → vert
+  if (diff > 0) return 'orange';  // limite dans les 7 jours suivant cédulée → orange
+  return 'red';                   // cédulée = ou après limite → rouge
 };
 
 const STATUT_OPTIONS = ['Rendez-Vous', 'Client Avisé', 'Confirmé la veille', 'Retour terrain'];
@@ -98,9 +99,9 @@ export function DossierCard({
     if (!terrain.date_limite_leve) return null;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - today) / 86400000);
-    if (diff > 7) return 'green';
-    if (diff >= 0) return 'orange';
-    return 'red';
+    if (diff > 7) return 'green';   // limite > 7 jours → vert
+    if (diff > 0) return 'orange';  // limite dans les 7 jours → orange
+    return 'red';                   // aujourd'hui = ou après limite → rouge
   })();
   const badgeBg = couleurEffective === 'green' ? 'rgba(22,163,74,0.85)' : couleurEffective === 'orange' ? 'rgba(234,88,12,0.85)' : couleurEffective === 'red' ? 'rgba(220,38,38,0.9)' : 'rgba(161,161,170,0.5)';
   const badgeBorder = couleurEffective === 'green' ? '#4ade80' : couleurEffective === 'orange' ? '#fb923c' : couleurEffective === 'red' ? '#f87171' : '#a1a1aa';
