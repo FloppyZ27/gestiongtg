@@ -3,19 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { X, MapPin, User, Calendar } from "lucide-react";
+import { MapPin, User, Calendar } from "lucide-react";
+import { DossierCard } from "./DossierCard";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = { "Samuel Guay": "SG-", "Dany Gaboury": "DG-", "Pierre-Luc Pilote": "PLP-", "Benjamin Larouche": "BL-", "Frédéric Gilbert": "FG-" };
   return mapping[arpenteur] || "";
 };
-const getArpenteurColor = (arpenteur) => {
+const getArpenteurColorHex = (arpenteur) => {
   const colors = { "Samuel Guay": "#ef4444", "Pierre-Luc Pilote": "#64748b", "Frédéric Gilbert": "#f97316", "Dany Gaboury": "#eab308", "Benjamin Larouche": "#06b6d4" };
   return colors[arpenteur] || "#10b981";
-};
-const getMandatColor = (typeMandat) => {
-  const colors = { "Bornage": "#ef4444", "Certificat de localisation": "#10b981", "CPTAQ": "#f59e0b", "Description Technique": "#3b82f6", "Dérogation mineure": "#8b5cf6", "Implantation": "#06b6d4", "Levé topographique": "#84cc16", "OCTR": "#f97316", "Piquetage": "#ec4899", "Plan montrant": "#6366f1", "Projet de lotissement": "#14b8a6", "Recherches": "#a855f7" };
-  return colors[typeMandat] || "#64748b";
 };
 
 function formatAdresse(addr) {
@@ -80,7 +77,6 @@ function TerrainMap({ cards, apiKey, clients }) {
   useEffect(() => {
     if (!mapInstanceRef.current || !isLoaded || !cards.length) return;
 
-    // Nettoyer les marqueurs précédents
     markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
 
@@ -92,14 +88,13 @@ function TerrainMap({ cards, apiKey, clients }) {
       const adresse = formatAdresse(card.mandat?.adresse_travaux);
       if (!adresse) return;
 
-      // Délai pour respecter les limites de l'API
       setTimeout(() => {
         geocoder.geocode({ address: adresse + ', Québec, Canada' }, (results, status) => {
           if (status !== 'OK' || !results?.[0]) return;
           const pos = results[0].geometry.location;
           bounds.extend(pos);
 
-          const color = card.isPlanned ? getArpenteurColor(card.dossier.arpenteur_geometre) : '#94a3b8';
+          const color = card.isPlanned ? getArpenteurColorHex(card.dossier.arpenteur_geometre) : '#94a3b8';
           const clientsNames = getClientsNames(card.dossier.clients_ids);
           const dateLabel = card.isPlanned && card.dateCedulee
             ? `📅 ${format(new Date(card.dateCedulee + 'T00:00:00'), "d MMM yyyy", { locale: fr })} — ${card.equipeNom || ''}`
@@ -166,14 +161,14 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
   }, []);
 
   // Construire la liste des cartes terrain
-  const allCards = React.useMemo(() => {
+  const allCards = useMemo(() => {
     const cards = [];
     const filtered = placeAffaire ? dossiers.filter(d => d.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()) : dossiers;
 
-    // Carte des assignments depuis les équipes (equipeId -> {dateStr, equipeNom})
+    // Carte des assignments depuis les équipes (cardId -> {dateStr, equipeNom})
     const assignedMap = {};
     Object.entries(equipes || {}).forEach(([dateStr, dayEqs]) => {
-      if (dateStr < today) return; // ignorer le passé
+      if (dateStr < today) return;
       dayEqs.forEach(eq => {
         eq.mandats?.forEach(cardId => {
           assignedMap[cardId] = { dateStr, equipeNom: eq.nom };
@@ -181,7 +176,7 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
       });
     });
 
-    filtered.forEach(dossier => {
+    filtered.forEach((dossier, dossierIdx) => {
       if (dossier.statut !== 'Ouvert') return;
       (dossier.mandats || []).forEach((mandat, mandatIndex) => {
         if (mandat.tache_actuelle !== 'Cédule') return;
@@ -192,15 +187,36 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
             const cardId = `${dossier.id}-${mandatIndex}-${terrainIndex}`;
             const assignment = assignedMap[cardId];
             const isPlanned = !!assignment;
-            cards.push({ id: cardId, dossier, mandat, terrain, isPlanned, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
+            // Construire une card compatible DossierCard
+            cards.push({
+              id: cardId,
+              dossier,
+              mandat,
+              terrain: { ...terrain, statut_terrain: mandat.statut_terrain },
+              mandatIndex,
+              terrainIndex,
+              isPlanned,
+              dateCedulee: assignment?.dateStr || null,
+              equipeNom: assignment?.equipeNom || null,
+            });
           });
         } else {
+          const statutTerrain = mandat.statut_terrain;
+          if (statutTerrain === 'en_verification') return;
           const cardId = `${dossier.id}-${mandatIndex}-0`;
           const assignment = assignedMap[cardId];
           const isPlanned = !!assignment;
-          const statutTerrain = mandat.statut_terrain;
-          if (statutTerrain === 'en_verification') return; // ignorer ceux en vérification
-          cards.push({ id: cardId, dossier, mandat, terrain: mandat.terrain || {}, isPlanned, dateCedulee: assignment?.dateStr || null, equipeNom: assignment?.equipeNom || null });
+          cards.push({
+            id: cardId,
+            dossier,
+            mandat,
+            terrain: { ...(mandat.terrain || {}), statut_terrain: statutTerrain },
+            mandatIndex,
+            terrainIndex: 0,
+            isPlanned,
+            dateCedulee: assignment?.dateStr || null,
+            equipeNom: assignment?.equipeNom || null,
+          });
         }
       });
     });
@@ -208,7 +224,7 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
     return cards;
   }, [dossiers, equipes, placeAffaire, today]);
 
-  const filteredCards = React.useMemo(() => {
+  const filteredCards = useMemo(() => {
     if (filter === 'unplanned') return allCards.filter(c => !c.isPlanned);
     if (filter === 'planned') return allCards.filter(c => c.isPlanned);
     return allCards;
@@ -217,9 +233,32 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
   const unplannedCount = allCards.filter(c => !c.isPlanned).length;
   const plannedCount = allCards.filter(c => c.isPlanned).length;
 
-  const getClientsNames = (ids) => {
-    if (!ids?.length) return "-";
-    return ids.map(id => { const c = clients.find(c => c.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
+  // Props factices pour DossierCard (mode lecture seule)
+  const dossierCardProps = {
+    users: [],
+    clients,
+    techniciens: [],
+    lockedCards: new Set(),
+    cardStatuts: {},
+    linkedGroups: [],
+    dragging: null,
+    linkingMode: null,
+    showLock: false,
+    hideEditButton: true,
+    hideLinkedButton: true,
+    hideStatut: false,
+    disableInteractions: true,
+    onCardClick: () => {},
+    onEditTerrain: () => {},
+    onDeleteCard: () => {},
+    onLinkCard: () => {},
+    onUnlinkCard: () => {},
+    onToggleLock: () => {},
+    onStatutChange: () => {},
+    holdTimerRef: { current: null },
+    didDragRef: { current: false },
+    handleDragStart: () => {},
+    getLinkedGroupForCard: () => null,
   };
 
   return (
@@ -255,43 +294,32 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
         </DialogHeader>
 
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Liste gauche */}
+          {/* Liste gauche — cartes identiques à Cédule Terrain */}
           <div style={{ width: 280, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid rgba(51,65,85,0.8)', background: 'rgba(15,23,42,0.6)', padding: '8px' }}>
             {filteredCards.length === 0 ? (
               <div className="text-center text-slate-500 mt-8 text-sm">Aucun terrain</div>
             ) : (
-              filteredCards.map(card => {
-                const color = card.isPlanned ? getArpenteurColor(card.dossier.arpenteur_geometre) : '#94a3b8';
-                return (
-                  <div key={card.id} className="mb-2 rounded-lg p-2 bg-slate-800/50" style={{ borderLeft: `3px solid ${color}` }}>
-                    <div className="flex items-center gap-1 mb-1 flex-wrap">
-                      <span className="text-xs font-bold" style={{ color }}>{getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}</span>
-                      <span className="text-xs text-slate-400">{card.mandat?.type_mandat}</span>
+              filteredCards.map(card => (
+                <div key={card.id}>
+                  {/* Badge "Planifié" ou "À planifier" au-dessus de la carte */}
+                  {card.isPlanned && card.dateCedulee && (
+                    <div className="flex items-center gap-1 mb-1 px-1">
+                      <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                      <span className="text-xs text-emerald-300">{format(new Date(card.dateCedulee + 'T00:00:00'), "d MMM yyyy", { locale: fr })} — {card.equipeNom}</span>
                     </div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <User className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                      <span className="text-xs text-slate-300 truncate">{getClientsNames(card.dossier.clients_ids)}</span>
+                  )}
+                  {!card.isPlanned && (
+                    <div className="flex items-center gap-1 mb-1 px-1">
+                      <span className="text-xs text-amber-400">⏳ À planifier</span>
                     </div>
-                    <div className="flex items-start gap-1">
-                      <MapPin className="w-3 h-3 text-slate-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-xs text-slate-500 break-words">{formatAdresse(card.mandat?.adresse_travaux)}</span>
-                    </div>
-                    {card.isPlanned && card.dateCedulee && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                        <span className="text-xs text-emerald-300">{format(new Date(card.dateCedulee + 'T00:00:00'), "d MMM yyyy", { locale: fr })} — {card.equipeNom}</span>
-                      </div>
-                    )}
-                    {!card.isPlanned && (
-                      <span className="text-xs text-amber-400 mt-1 block">⏳ À planifier</span>
-                    )}
-                  </div>
-                );
-              })
+                  )}
+                  <DossierCard card={card} {...dossierCardProps} />
+                </div>
+              ))
             )}
           </div>
 
-          {/* Carte */}
+          {/* Carte Google Maps */}
           <div style={{ flex: 1, height: '100%' }}>
             <TerrainMap cards={filteredCards} apiKey={googleMapsApiKey} clients={clients} />
           </div>
