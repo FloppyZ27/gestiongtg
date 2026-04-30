@@ -371,7 +371,7 @@ export default function GestionDeMandat() {
     return eachWeekOfInterval({ start: startOfMonth(currentMonthStart), end: endOfMonth(currentMonthStart) }, { locale: fr });
   };
 
-  const renderCard = (card) => {
+  const renderCard = (card, linkedCardsForSameDossier = null) => {
     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
     const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
     const [bg, text, border] = arpColor.split(' ');
@@ -379,6 +379,7 @@ export default function GestionDeMandat() {
     const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
     const isLinked = linkedGroups.some(g => g.cardIds.includes(card.id));
+    const allMandatsForCard = linkedCardsForSameDossier ? [card, ...linkedCardsForSameDossier] : [card];
 
     const onMouseDown = (e) => {
       e.stopPropagation();
@@ -433,44 +434,48 @@ export default function GestionDeMandat() {
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
-              {getAbbreviatedMandatType(card.mandat.type_mandat)}
-            </Badge>
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                if (selectedCardForLink?.id === card.id) {
-                  setSelectedCardForLink(null);
-                } else {
-                  setSelectedCardForLink(card);
-                }
-              }}
-              title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 5,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
-                color: selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
-                transition: 'background-color 150ms, color 150ms',
-                cursor: 'pointer',
-                flexShrink: 0
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
-                e.currentTarget.style.color = selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
-              }}
-            >
-              <Link2 style={{ width: 13, height: 13 }} />
-            </div>
+          <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
+            {allMandatsForCard.map(c => (
+              <Badge key={c.id} className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold`}>
+                {getAbbreviatedMandatType(c.mandat.type_mandat)}
+              </Badge>
+            ))}
+            {linkedCardsForSameDossier === null && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (selectedCardForLink?.id === card.id) {
+                    setSelectedCardForLink(null);
+                  } else {
+                    setSelectedCardForLink(card);
+                  }
+                }}
+                title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
+                  color: selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
+                  transition: 'background-color 150ms, color 150ms',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
+                  e.currentTarget.style.color = '#fff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
+                  e.currentTarget.style.color = selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
+                }}
+              >
+                <Link2 style={{ width: 13, height: 13 }} />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1">
@@ -518,6 +523,30 @@ export default function GestionDeMandat() {
 
   const renderColumn = (columnId, title, cards, headerContent) => {
     const isOver = overColumn === columnId && dragging;
+    
+    // Fusionner les cartes liées avec le même dossier
+    const processedCards = [];
+    const seenCardIds = new Set();
+    
+    cards.forEach(card => {
+      if (seenCardIds.has(card.id)) return;
+      
+      // Trouver les cartes liées du même dossier
+      const linkedGroup = linkedGroups.find(g => g.cardIds.includes(card.id));
+      const linkedCardsWithSameDossier = linkedGroup
+        ? linkedGroup.cardIds
+            .map(id => cards.find(c => c.id === id))
+            .filter(c => c && c.dossier.id === card.dossier.id && c.id !== card.id)
+        : [];
+      
+      // Marquer tous les cartes comme vues
+      seenCardIds.add(card.id);
+      linkedCardsWithSameDossier.forEach(c => seenCardIds.add(c.id));
+      
+      // Ajouter la carte avec ses liées (ou null si pas de liées)
+      processedCards.push({ mainCard: card, linkedCards: linkedCardsWithSameDossier.length > 0 ? linkedCardsWithSameDossier : null });
+    });
+    
     return (
       <div
         key={columnId}
@@ -529,8 +558,8 @@ export default function GestionDeMandat() {
             {headerContent}
           </div>
           <div className="p-3 min-h-[120px]">
-            {cards.map(card => renderCard(card))}
-            {cards.length === 0 && (
+            {processedCards.map(({ mainCard, linkedCards }) => renderCard(mainCard, linkedCards))}
+            {processedCards.length === 0 && (
               <div className="text-center py-8 text-slate-600 text-sm">Aucun mandat</div>
             )}
           </div>
