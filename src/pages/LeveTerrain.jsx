@@ -826,13 +826,23 @@ export default function LeveTerrain() {
                               </div>
                             )}
                             {terrain && (
-                              <>
-                                {terrain.date_limite_leve && (
-                                  <div className="flex items-center gap-1 mb-1">
-                                    <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-                                    <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
-                                  </div>
-                                )}
+                            <>
+                            {terrain.date_limite_leve && (() => {
+                              const today = new Date(); today.setHours(0,0,0,0);
+                              const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - today) / 86400000);
+                              const couleur = diff > 7 ? 'green' : diff >= 0 ? 'orange' : 'red';
+                              const badgeBg = couleur === 'green' ? 'rgba(22,163,74,0.85)' : couleur === 'orange' ? 'rgba(234,88,12,0.85)' : 'rgba(220,38,38,0.9)';
+                              const badgeBorder = couleur === 'green' ? '#4ade80' : couleur === 'orange' ? '#fb923c' : '#f87171';
+                              const badgeGlow = couleur === 'green' ? '0 0 8px rgba(74,222,128,0.5)' : couleur === 'orange' ? '0 0 8px rgba(251,146,60,0.6)' : '0 0 10px rgba(248,113,113,0.7)';
+                              return (
+                                <div className="flex items-center gap-1 mb-1">
+                                  <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: badgeBorder }} />
+                                  <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: badgeBg, color: '#ffffff', border: `1px solid ${badgeBorder}`, boxShadow: badgeGlow }}>
+                                    {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                                 {terrain.a_rendez_vous && terrain.date_rendez_vous && (
                                   <div className="flex items-center gap-1 mb-1">
                                     <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
