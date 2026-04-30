@@ -444,18 +444,24 @@ export default function GestionDeMandat() {
               onClick={(e) => {
                 e.stopPropagation();
                 if (linkedCardsForSameDossier !== null) {
-                  // Délier le groupe
+                  // Délier complètement le groupe
                   const group = linkedGroups.find(g => g.cardIds.includes(card.id));
                   if (group) {
                     handleUnlinkGroup(group.id);
+                    setSelectedCardForLink(null);
                   }
                 } else if (selectedCardForLink?.id === card.id) {
                   setSelectedCardForLink(null);
+                } else if (selectedCardForLink) {
+                  // Deuxième carte sélectionnée : lier les deux
+                  handleLinkCards(selectedCardForLink.id, card.id);
+                  setSelectedCardForLink(null);
                 } else {
+                  // Première carte sélectionnée
                   setSelectedCardForLink(card);
                 }
               }}
-              title={linkedCardsForSameDossier !== null ? "Cliquez pour séparer les cartes" : selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
+              title={linkedCardsForSameDossier !== null ? "Cliquez pour séparer les cartes" : selectedCardForLink?.id === card.id ? "Cliquez pour annuler" : selectedCardForLink ? "Cliquez pour lier avec la première carte" : "Cliquez pour sélectionner cette carte"}
               style={{
                 width: 26,
                 height: 26,
