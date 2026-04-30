@@ -274,9 +274,7 @@ export default function GestionDeMandat() {
   const handleDrop = useCallback((card, targetColumn, dropIndex) => {
     if (!card) return;
     
-    // Obtenir le groupe lié
-    const group = linkedGroups.find(g => g.cardIds.includes(card.id));
-    const linkedCardIds = group ? group.cardIds : [card.id];
+    const linkedCardIds = [card.id];
     
     // Regrouper les mises à jour par dossier pour éviter les conflits
     const dossierUpdates = {};
