@@ -357,28 +357,52 @@ export default function GestionDeMandat() {
             });
           }
           dossierData.mandats[actualMandatIndex] = updated;
-        } else if (dropIndex !== null) {
+        } else if (dropIndex !== null && linkedCard.tache === targetColumn) {
           // Réordonnement dans la même colonne
+          // Retirer le mandat de sa position actuelle
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
+          
+          // Calculer la position d'insertion correcte basée sur les mandats de cette tâche
+          const mandatsInColumn = dossierData.mandats.filter(m => m.tache_actuelle === targetColumn);
+          const targetMandatAtIndex = mandatsInColumn[dropIndex];
+          
+          // Trouver l'index où insérer le mandat dans la liste complète
+          let insertIndex = dossierData.mandats.length;
+          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
+            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          }
+          
+          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "utilisateurs") {
         if (linkedCard.utilisateur !== targetColumn) {
           const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
-        } else if (dropIndex !== null) {
+        } else if (dropIndex !== null && linkedCard.utilisateur === targetColumn) {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
+          const mandatsInColumn = dossierData.mandats.filter(m => (m.utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn));
+          const targetMandatAtIndex = mandatsInColumn[dropIndex];
+          let insertIndex = dossierData.mandats.length;
+          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
+            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          }
+          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "calendrier") {
         const newDateStr = targetColumn.replace("day-", "");
         if (linkedCard.mandat.date_livraison !== newDateStr) {
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
-        } else if (dropIndex !== null) {
+        } else if (dropIndex !== null && linkedCard.mandat.date_livraison === targetColumn.replace("day-", "")) {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          const insertIndex = Math.min(dropIndex, dossierData.mandats.length);
+          const mandatsInColumn = dossierData.mandats.filter(m => m.date_livraison === targetColumn.replace("day-", ""));
+          const targetMandatAtIndex = mandatsInColumn[dropIndex];
+          let insertIndex = dossierData.mandats.length;
+          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
+            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          }
+          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       }
