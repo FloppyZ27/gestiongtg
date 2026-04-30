@@ -178,7 +178,7 @@ export default function GestionDeMandat() {
 
   // Charger les groupes liés depuis la DB au démarrage
   useEffect(() => {
-    if (linkedCardsGroupsDB.length > 0) {
+    if (linkedCardsGroupsDB && linkedCardsGroupsDB.length > 0) {
       setLinkedGroups(linkedCardsGroupsDB);
     }
   }, [linkedCardsGroupsDB]);
@@ -190,7 +190,12 @@ export default function GestionDeMandat() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [], staleTime: 60000 });
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
-  const { data: linkedCardsGroupsDB = [] } = useQuery({ queryKey: ['linkedCardsGroups'], queryFn: () => base44.entities.LinkedCardsGroup.list(), initialData: [] });
+  
+  const { data: linkedCardsGroupsDB = [] } = useQuery({ 
+    queryKey: ['linkedCardsGroups'], 
+    queryFn: () => base44.entities.LinkedCardsGroup.list(), 
+    initialData: [] 
+  });
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
