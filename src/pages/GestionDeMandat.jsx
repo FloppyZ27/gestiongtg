@@ -366,7 +366,7 @@ export default function GestionDeMandat() {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           
           // Insérer à la position dropIndex parmi les mandats de cette colonne
-          let insertIndex = 0;
+          let insertIndex = dossierData.mandats.length;
           let countInColumn = 0;
           for (let i = 0; i < dossierData.mandats.length; i++) {
             if (dossierData.mandats[i].tache_actuelle === targetColumn) {
@@ -376,7 +376,6 @@ export default function GestionDeMandat() {
               }
               countInColumn++;
             }
-            insertIndex = i + 1;
           }
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
@@ -387,7 +386,7 @@ export default function GestionDeMandat() {
         } else if (dropIndex !== null && linkedCard.utilisateur === targetColumn) {
           setSortUtilisateurs(prev => ({ ...prev, [targetColumn]: null }));
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          let insertIndex = 0;
+          let insertIndex = dossierData.mandats.length;
           let countInColumn = 0;
           for (let i = 0; i < dossierData.mandats.length; i++) {
             if ((dossierData.mandats[i].utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn)) {
@@ -397,7 +396,6 @@ export default function GestionDeMandat() {
               }
               countInColumn++;
             }
-            insertIndex = i + 1;
           }
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
@@ -407,13 +405,17 @@ export default function GestionDeMandat() {
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
         } else if (dropIndex !== null && linkedCard.mandat.date_livraison === targetColumn.replace("day-", "")) {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          const mandatsInColumn = dossierData.mandats.filter(m => m.date_livraison === targetColumn.replace("day-", ""));
-          const targetMandatAtIndex = mandatsInColumn[dropIndex];
           let insertIndex = dossierData.mandats.length;
-          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
-            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          let countInColumn = 0;
+          for (let i = 0; i < dossierData.mandats.length; i++) {
+            if (dossierData.mandats[i].date_livraison === targetColumn.replace("day-", "")) {
+              if (countInColumn === dropIndex) {
+                insertIndex = i;
+                break;
+              }
+              countInColumn++;
+            }
           }
-          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       }
