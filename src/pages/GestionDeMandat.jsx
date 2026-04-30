@@ -563,14 +563,7 @@ export default function GestionDeMandat() {
       }
     };
 
-    const onContextMenu = (e) => {
-      e.preventDefault();
-      if (selectedCardForLink?.id === card.id) {
-        setSelectedCardForLink(null);
-      } else {
-        setSelectedCardForLink(card);
-      }
-    };
+
 
     return (
       <div
@@ -579,10 +572,10 @@ export default function GestionDeMandat() {
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onClick={onClick}
-        onContextMenu={onContextMenu}
+
         className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
-        title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Clic droit pour lier"}
+        title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez sur le bouton lien pour lier des cartes"}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
