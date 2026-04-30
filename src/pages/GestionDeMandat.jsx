@@ -317,38 +317,55 @@ export default function GestionDeMandat() {
         dossierUpdates[dossierId] = JSON.parse(JSON.stringify(linkedCard.dossier));
       }
       
+      const dossierData = dossierUpdates[dossierId];
+      
       // Mettre à jour le mandat dans cette copie du dossier
       if (activeView === "taches") {
-        if (linkedCard.tache === targetColumn) return;
-        const updated = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], tache_actuelle: targetColumn };
-        if (targetColumn === "Cédule") {
-          updated.statut_terrain = "en_verification";
-          if (!updated.terrains_list) {
-            updated.terrains_list = [];
+        if (linkedCard.tache !== targetColumn) {
+          // Changement de colonne (tâche)
+          const updated = { ...dossierData.mandats[linkedCard.mandatIndex], tache_actuelle: targetColumn };
+          if (targetColumn === "Cédule") {
+            updated.statut_terrain = "en_verification";
+            if (!updated.terrains_list) {
+              updated.terrains_list = [];
+            }
+            updated.terrains_list.push({
+              date_limite_leve: null,
+              instruments_requis: "",
+              a_rendez_vous: false,
+              date_rendez_vous: null,
+              heure_rendez_vous: "",
+              donneur: "",
+              technicien: "",
+              dossier_simultane: "",
+              temps_prevu: "",
+              notes: "",
+              date_cedulee: new Date().toISOString().split('T')[0],
+              equipe_assignee: ""
+            });
           }
-          updated.terrains_list.push({
-            date_limite_leve: null,
-            instruments_requis: "",
-            a_rendez_vous: false,
-            date_rendez_vous: null,
-            heure_rendez_vous: "",
-            donneur: "",
-            technicien: "",
-            dossier_simultane: "",
-            temps_prevu: "",
-            notes: "",
-            date_cedulee: new Date().toISOString().split('T')[0],
-            equipe_assignee: ""
-          });
+          dossierData.mandats[linkedCard.mandatIndex] = updated;
+        } else if (dropIndex !== null && dropIndex !== linkedCard.mandatIndex) {
+          // Réordonnement dans la même colonne
+          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          dossierData.mandats.splice(dropIndex, 0, mandat);
         }
-        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = updated;
       } else if (activeView === "utilisateurs") {
-        if (linkedCard.utilisateur === targetColumn) return;
-        const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
-        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], utilisateur_assigne: nouvelUtilisateur };
+        if (linkedCard.utilisateur !== targetColumn) {
+          const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
+          dossierData.mandats[linkedCard.mandatIndex] = { ...dossierData.mandats[linkedCard.mandatIndex], utilisateur_assigne: nouvelUtilisateur };
+        } else if (dropIndex !== null && dropIndex !== linkedCard.mandatIndex) {
+          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          dossierData.mandats.splice(dropIndex, 0, mandat);
+        }
       } else if (activeView === "calendrier") {
         const newDateStr = targetColumn.replace("day-", "");
-        dossierUpdates[dossierId].mandats[linkedCard.mandatIndex] = { ...dossierUpdates[dossierId].mandats[linkedCard.mandatIndex], date_livraison: newDateStr };
+        if (linkedCard.mandat.date_livraison !== newDateStr) {
+          dossierData.mandats[linkedCard.mandatIndex] = { ...dossierData.mandats[linkedCard.mandatIndex], date_livraison: newDateStr };
+        } else if (dropIndex !== null && dropIndex !== linkedCard.mandatIndex) {
+          const mandat = dossierData.mandats.splice(linkedCard.mandatIndex, 1)[0];
+          dossierData.mandats.splice(dropIndex, 0, mandat);
+        }
       }
     });
     
