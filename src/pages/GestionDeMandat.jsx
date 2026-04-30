@@ -176,13 +176,6 @@ export default function GestionDeMandat() {
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
 
-  // Charger les groupes liés depuis la DB au démarrage
-  useEffect(() => {
-    if (linkedCardsGroupsDB && linkedCardsGroupsDB.length > 0) {
-      setLinkedGroups(linkedCardsGroupsDB);
-    }
-  }, [linkedCardsGroupsDB]);
-
   const queryClient = useQueryClient();
 
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
@@ -196,6 +189,13 @@ export default function GestionDeMandat() {
     queryFn: () => base44.entities.LinkedCardsGroup.list(), 
     initialData: [] 
   });
+
+  // Charger les groupes liés depuis la DB au démarrage
+  useEffect(() => {
+    if (linkedCardsGroupsDB && linkedCardsGroupsDB.length > 0) {
+      setLinkedGroups(linkedCardsGroupsDB);
+    }
+  }, [linkedCardsGroupsDB]);
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
