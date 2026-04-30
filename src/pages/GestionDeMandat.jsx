@@ -306,12 +306,9 @@ export default function GestionDeMandat() {
       
       const dossierId = linkedCard.dossier.id;
       
-      // Initialiser la copie du dossier si nécessaire
+      // Initialiser la copie complète du dossier si nécessaire
       if (!dossierUpdates[dossierId]) {
-        dossierUpdates[dossierId] = { 
-          id: linkedCard.dossier.id, 
-          mandats: JSON.parse(JSON.stringify(linkedCard.dossier.mandats)) 
-        };
+        dossierUpdates[dossierId] = JSON.parse(JSON.stringify(linkedCard.dossier));
       }
       
       // Mettre à jour le mandat dans cette copie du dossier
@@ -350,11 +347,8 @@ export default function GestionDeMandat() {
     });
     
     // Envoyer une mutation par dossier unique
-    Object.values(dossierUpdates).forEach(dossierData => {
-      const fullDossier = allCards.find(c => c.dossier.id === dossierData.id)?.dossier;
-      if (fullDossier) {
-        updateDossierMutation.mutate({ id: dossierData.id, dossierData: { ...fullDossier, mandats: dossierData.mandats } });
-      }
+    Object.values(dossierUpdates).forEach(updatedDossier => {
+      updateDossierMutation.mutate({ id: updatedDossier.id, dossierData: updatedDossier });
     });
   }, [activeView, updateDossierMutation, linkedGroups, allCards]);
 
