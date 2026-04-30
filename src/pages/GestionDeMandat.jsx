@@ -171,6 +171,7 @@ export default function GestionDeMandat() {
   });
   const [linkedGroups, setLinkedGroups] = useState([]);
   const [selectedCardForLink, setSelectedCardForLink] = useState(null);
+  const [dissociationMode, setDissociationMode] = useState(null);
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
@@ -443,13 +444,29 @@ export default function GestionDeMandat() {
             <div
               onClick={(e) => {
                 e.stopPropagation();
-                if (linkedCardsForSameDossier !== null) {
-                  // Délier complètement le groupe
-                  const group = linkedGroups.find(g => g.cardIds.includes(card.id));
-                  if (group) {
-                    handleUnlinkGroup(group.id);
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                
+                if (dissociationMode === group?.id) {
+                  // Déjà en mode dissociation : clic sur la carte à dissocier
+                  if (selectedCardForLink?.id === card.id) {
+                    // Dissocier cette carte du groupe
+                    const remainingCards = group.cardIds.filter(id => id !== card.id);
+                    if (remainingCards.length > 0) {
+                      setLinkedGroups(linkedGroups.map(g => 
+                        g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                      ));
+                    } else {
+                      setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                    }
                     setSelectedCardForLink(null);
+                    setDissociationMode(null);
+                  } else {
+                    setSelectedCardForLink(card);
                   }
+                } else if (linkedCardsForSameDossier !== null && !dissociationMode) {
+                  // Entrer en mode dissociation
+                  setDissociationMode(group.id);
+                  setSelectedCardForLink(null);
                 } else if (selectedCardForLink?.id === card.id) {
                   setSelectedCardForLink(null);
                 } else if (selectedCardForLink) {
@@ -461,7 +478,9 @@ export default function GestionDeMandat() {
                   setSelectedCardForLink(card);
                 }
               }}
-              title={linkedCardsForSameDossier !== null ? "Cliquez pour séparer les cartes" : selectedCardForLink?.id === card.id ? "Cliquez pour annuler" : selectedCardForLink ? "Cliquez pour lier avec la première carte" : "Cliquez pour sélectionner cette carte"}
+              title={dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id 
+                ? selectedCardForLink?.id === card.id ? "Cliquez pour dissocier cette carte" : "Sélectionnez la carte à dissocier"
+                : linkedCardsForSameDossier !== null ? "Cliquez pour dissocier une carte" : selectedCardForLink?.id === card.id ? "Cliquez pour annuler" : selectedCardForLink ? "Cliquez pour lier avec la première carte" : "Cliquez pour sélectionner cette carte"}
               style={{
                 width: 26,
                 height: 26,
@@ -469,19 +488,31 @@ export default function GestionDeMandat() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
-                color: linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
+                backgroundColor: dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id 
+                  ? 'rgba(239,68,68,0.8)' 
+                  : linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
+                color: dissociationMode === linkedGroups.find(g => g.cardIds.includes(card.id))?.id || linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
                 transition: 'background-color 150ms, color 150ms',
                 cursor: 'pointer',
                 flexShrink: 0
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                if (dissociationMode === group?.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.9)';
+                } else {
+                  e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
+                }
                 e.currentTarget.style.color = '#fff';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
-                e.currentTarget.style.color = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
+                const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                if (dissociationMode === group?.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.8)';
+                } else {
+                  e.currentTarget.style.backgroundColor = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
+                }
+                e.currentTarget.style.color = dissociationMode === group?.id || linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
               }}
             >
               <Link2 style={{ width: 13, height: 13 }} />
