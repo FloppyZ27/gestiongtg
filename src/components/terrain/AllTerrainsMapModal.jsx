@@ -98,7 +98,7 @@ function TerrainMap({ cards, apiKey, clients, users }) {
           const pos = results[0].geometry.location;
           bounds.extend(pos);
 
-          const color = card.isPlanned ? getArpenteurColorHex(card.dossier.arpenteur_geometre) : '#94a3b8';
+          const color = getArpenteurColorHex(card.dossier.arpenteur_geometre);
 
           // SVG pin style goutte avec label dossier
           const label = `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`;
