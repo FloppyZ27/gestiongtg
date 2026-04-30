@@ -91,17 +91,8 @@ export function DossierCard({
   const clr = colorMap[bg] || 'rgba(16,185,129,0.6)';
   const boxShadow = isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`;
 
-  // Code couleur date limite
-  const couleurCedulee = getDateCeduleeColor(terrain.date_cedulee, terrain.date_limite_leve);
-  // Si pas de date cédulée mais qu'il y a une date limite, on calcule par rapport à aujourd'hui
-  const couleurEffective = couleurCedulee || (() => {
-    if (!terrain.date_limite_leve) return null;
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - today) / 86400000);
-    if (diff > 7) return 'green';
-    if (diff >= 0) return 'orange';
-    return 'red';
-  })();
+  // Code couleur date limite — comparaison date_cedulee vs date_limite uniquement
+  const couleurEffective = getDateCeduleeColor(terrain.date_cedulee, terrain.date_limite_leve);
   const badgeBg = couleurEffective === 'green' ? 'rgba(22,163,74,0.85)' : couleurEffective === 'orange' ? 'rgba(234,88,12,0.85)' : couleurEffective === 'red' ? 'rgba(220,38,38,0.9)' : 'rgba(161,161,170,0.5)';
   const badgeBorder = couleurEffective === 'green' ? '#4ade80' : couleurEffective === 'orange' ? '#fb923c' : couleurEffective === 'red' ? '#f87171' : '#a1a1aa';
   const badgeGlow = couleurEffective === 'green' ? '0 0 8px rgba(74,222,128,0.5)' : couleurEffective === 'orange' ? '0 0 8px rgba(251,146,60,0.6)' : couleurEffective === 'red' ? '0 0 10px rgba(248,113,113,0.7)' : 'none';
