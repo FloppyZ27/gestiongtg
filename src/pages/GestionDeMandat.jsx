@@ -440,7 +440,7 @@ export default function GestionDeMandat() {
             <Button
               size="icon"
               variant="ghost"
-              className={`h-5 w-5 p-0 text-xs ${selectedCardForLink?.id === card.id ? 'bg-violet-500/20 text-violet-400' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`h-5 w-5 p-0 transition-all ${selectedCardForLink?.id === card.id ? 'bg-violet-500/30 text-violet-300' : 'text-slate-400 hover:text-slate-200'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (selectedCardForLink?.id === card.id) {
@@ -557,7 +557,7 @@ export default function GestionDeMandat() {
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
               Gestion de Mandat
             </h1>
-            <Kanban className="w-6 h-6 text-emerald-400" />
+            <Kanban className="w-6 h-6 text-blue-400" />
           </div>
           <p className="text-slate-400 mb-6">Vue Kanban de vos mandats</p>
 
