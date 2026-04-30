@@ -402,6 +402,11 @@ export default function GestionDeMandat() {
 
     const onClick = () => {
       if (!didDragRef.current) {
+        const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+        if (dissociationMode === group?.id) {
+          // En mode dissociation : ne pas ouvrir le dialog
+          return;
+        }
         if (selectedCardForLink && selectedCardForLink.id !== card.id) {
           handleLinkCards(selectedCardForLink, card);
         } else {
