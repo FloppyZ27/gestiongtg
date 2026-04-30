@@ -373,10 +373,20 @@ export default function GestionDeMandat() {
     });
     
     // Envoyer une mutation par dossier unique
-    Object.values(dossierUpdates).forEach(updatedDossier => {
-      updateDossierMutation.mutate({ id: updatedDossier.id, dossierData: updatedDossier });
+    Object.values(dossierUpdates).forEach((updatedDossier, idx, arr) => {
+      updateDossierMutation.mutate(
+        { id: updatedDossier.id, dossierData: updatedDossier },
+        {
+          onSuccess: () => {
+            // Invalider et recharger après la dernière mutation
+            if (idx === arr.length - 1) {
+              queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+            }
+          }
+        }
+      );
     });
-  }, [activeView, updateDossierMutation, linkedGroups, allCards]);
+  }, [activeView, updateDossierMutation, linkedGroups, allCards, queryClient]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
