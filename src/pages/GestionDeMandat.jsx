@@ -404,7 +404,7 @@ export default function GestionDeMandat() {
       if (!didDragRef.current) {
         const group = linkedGroups.find(g => g.cardIds.includes(card.id));
         if (dissociationMode === group?.id) {
-          // En mode dissociation : ne pas ouvrir le dialog
+          // En mode dissociation : ne pas faire d'action sur la carte, seulement sur le badge
           return;
         }
         if (selectedCardForLink && selectedCardForLink.id !== card.id) {
