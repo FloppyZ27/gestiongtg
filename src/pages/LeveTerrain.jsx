@@ -681,9 +681,12 @@ export default function LeveTerrain() {
 
                 <button onClick={goToNextDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgb(16,185,129)', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
 
-                <button onClick={() => { setSelectedDate(today); setSelectedItem(null); }} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgba(37,99,235,0.3)', borderColor: '#3b82f6' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgba(37,99,235,0.1)', borderColor: '#3b82f6' }); }} style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid #3b82f6', outline: '1px solid #3b82f6', color: '#60a5fa', padding: '0 8px', height: '26px', borderRadius: '5px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s', boxSizing: 'border-box' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.25)'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 10px rgba(59,130,246,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.1)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>Aujourd'hui</button>
+                <button
+                  onClick={() => { setSelectedDate(today); setSelectedItem(null); }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.3)'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 10px rgba(59,130,246,0.3)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.1)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid #3b82f6', outline: '1px solid #3b82f6', color: '#60a5fa', padding: '0 8px', height: '26px', borderRadius: '5px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                >Aujourd'hui</button>
               </div>
 
               <div className="flex items-center gap-3">
