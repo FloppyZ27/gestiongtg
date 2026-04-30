@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer } from "lucide-react";
+import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer, Link2 } from "lucide-react";
 import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -469,10 +469,7 @@ export default function GestionDeMandat() {
                 e.currentTarget.style.color = selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
               }}
             >
-              <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-              </svg>
+              <Link2 style={{ width: 13, height: 13 }} />
             </div>
           </div>
         </div>
