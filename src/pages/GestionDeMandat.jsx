@@ -359,20 +359,25 @@ export default function GestionDeMandat() {
           dossierData.mandats[actualMandatIndex] = updated;
         } else if (dropIndex !== null && linkedCard.tache === targetColumn) {
           // Réordonnement dans la même colonne
+          // Désactiver le tri pour cette colonne (sinon le réordonnement sera annulé au rendu)
+          setSortTaches(prev => ({ ...prev, [targetColumn]: null }));
+          
           // Retirer le mandat de sa position actuelle
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           
-          // Calculer la position d'insertion correcte basée sur les mandats de cette tâche
-          const mandatsInColumn = dossierData.mandats.filter(m => m.tache_actuelle === targetColumn);
-          const targetMandatAtIndex = mandatsInColumn[dropIndex];
-          
-          // Trouver l'index où insérer le mandat dans la liste complète
-          let insertIndex = dossierData.mandats.length;
-          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
-            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          // Insérer à la position dropIndex parmi les mandats de cette colonne
+          let insertIndex = 0;
+          let countInColumn = 0;
+          for (let i = 0; i < dossierData.mandats.length; i++) {
+            if (dossierData.mandats[i].tache_actuelle === targetColumn) {
+              if (countInColumn === dropIndex) {
+                insertIndex = i;
+                break;
+              }
+              countInColumn++;
+            }
+            insertIndex = i + 1;
           }
-          
-          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "utilisateurs") {
@@ -380,14 +385,20 @@ export default function GestionDeMandat() {
           const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
         } else if (dropIndex !== null && linkedCard.utilisateur === targetColumn) {
+          setSortUtilisateurs(prev => ({ ...prev, [targetColumn]: null }));
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          const mandatsInColumn = dossierData.mandats.filter(m => (m.utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn));
-          const targetMandatAtIndex = mandatsInColumn[dropIndex];
-          let insertIndex = dossierData.mandats.length;
-          if (dropIndex < mandatsInColumn.length && targetMandatAtIndex) {
-            insertIndex = dossierData.mandats.findIndex(m => m === targetMandatAtIndex);
+          let insertIndex = 0;
+          let countInColumn = 0;
+          for (let i = 0; i < dossierData.mandats.length; i++) {
+            if ((dossierData.mandats[i].utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn)) {
+              if (countInColumn === dropIndex) {
+                insertIndex = i;
+                break;
+              }
+              countInColumn++;
+            }
+            insertIndex = i + 1;
           }
-          insertIndex = Math.max(0, Math.min(insertIndex, dossierData.mandats.length));
           dossierData.mandats.splice(insertIndex, 0, mandat);
         }
       } else if (activeView === "calendrier") {
