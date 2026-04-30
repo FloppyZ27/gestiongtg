@@ -199,7 +199,13 @@ export default function GestionDeMandat() {
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dossiers'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      // Attendre un peu pour que les données se synchronisent avant de les afficher
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['dossiers'] });
+      }, 100);
+    },
   });
 
   const createLinkedGroupMutation = useMutation({
