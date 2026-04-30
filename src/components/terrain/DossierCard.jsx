@@ -51,6 +51,7 @@ const CardActionBtn = ({ onClick, baseColor, hoverColor, textColor, hoverTextCol
 export function DossierCard({
   card, users, clients, techniciens, lockedCards, cardStatuts, linkedGroups, dragging, linkingMode,
   showLock = false, hideEditButton = false, hideLinkedButton = false, hideStatut = false, disableInteractions = false,
+  dateCedulee = null,
   onCardClick, onEditTerrain, onDeleteCard, onLinkCard, onUnlinkCard, onToggleLock, onStatutChange,
   holdTimerRef, didDragRef, handleDragStart, getLinkedGroupForCard,
 }) {
@@ -93,15 +94,16 @@ export function DossierCard({
   const boxShadow = isLinked ? `inset 0 0 0 2px rgba(139,92,246,0.6), 0 4px 16px 0 rgba(0,0,0,0.4)` : isLocked ? `inset 0 0 0 2px rgba(245,158,11,0.5), 0 4px 16px 0 rgba(0,0,0,0.4)` : `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`;
 
   // Code couleur date limite :
-  // - Si carte assignée (date_cedulee) → comparaison date_cedulee vs date_limite
+  // - Si carte assignée → comparaison date_cedulee (prop ou terrain) vs date_limite
   // - Sinon (pas encore planifiée) → comparaison aujourd'hui vs date_limite
-  const couleurEffective = getDateCeduleeColor(terrain.date_cedulee, terrain.date_limite_leve) || (() => {
+  const effectiveDateCedulee = dateCedulee || terrain.date_cedulee || null;
+  const couleurEffective = getDateCeduleeColor(effectiveDateCedulee, terrain.date_limite_leve) || (() => {
     if (!terrain.date_limite_leve) return null;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const diff = Math.round((new Date(terrain.date_limite_leve + 'T00:00:00') - today) / 86400000);
-    if (diff > 7) return 'green';   // limite > 7 jours → vert
-    if (diff > 0) return 'orange';  // limite dans les 7 jours → orange
-    return 'red';                   // aujourd'hui = ou après limite → rouge
+    if (diff > 7) return 'green';
+    if (diff > 0) return 'orange';
+    return 'red';
   })();
   const badgeBg = couleurEffective === 'green' ? 'rgba(22,163,74,0.85)' : couleurEffective === 'orange' ? 'rgba(234,88,12,0.85)' : couleurEffective === 'red' ? 'rgba(220,38,38,0.9)' : 'rgba(161,161,170,0.5)';
   const badgeBorder = couleurEffective === 'green' ? '#4ade80' : couleurEffective === 'orange' ? '#fb923c' : couleurEffective === 'red' ? '#f87171' : '#a1a1aa';

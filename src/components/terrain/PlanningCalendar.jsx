@@ -1359,13 +1359,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           {/* Zone de drop custom pour les DossierCards */}
           <div data-kanban-column={columnId} className={`min-h-[50px] -mx-2 px-2 rounded transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
             {equipe.mandats.map((cId, idx) => {
-              const card = terrainCards.find(c => c.id === cId);
-              if (!card) return null;
-              const showIndicator = isOver && dropIndex === idx;
-              return (
-                <div key={cId} data-card-id={cId}>
-                  {showIndicator && <div className="h-1 bg-emerald-400 rounded-full mx-1 mb-1 opacity-80" />}
-                  <DossierCard card={card} showLock={true} disableInteractions={showMapDialog} {...dossierCardProps} />
+                const card = terrainCards.find(c => c.id === cId);
+                if (!card) return null;
+                const showIndicator = isOver && dropIndex === idx;
+                return (
+                  <div key={cId} data-card-id={cId}>
+                    {showIndicator && <div className="h-1 bg-emerald-400 rounded-full mx-1 mb-1 opacity-80" />}
+                    <DossierCard card={card} showLock={true} disableInteractions={showMapDialog} dateCedulee={dateStr} {...dossierCardProps} />
                 </div>
               );
             })}
@@ -1777,7 +1777,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                               }}>
                                 {pinLetter}
                               </div>
-                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={false} disableInteractions={true} {...dossierCardProps} />
+                              <DossierCard card={card} hideEditButton={true} hideLinkedButton={true} showLock={false} hideStatut={false} disableInteractions={true} dateCedulee={selectedMapDate} {...dossierCardProps} />
                             </div>
                           );
                         })}
