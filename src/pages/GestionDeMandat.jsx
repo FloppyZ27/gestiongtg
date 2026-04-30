@@ -296,7 +296,7 @@ export default function GestionDeMandat() {
     ? usersList 
     : usersList.filter(u => u.email !== "non-assigne" && getUserTeam(u) === filterEquipe);
 
-  const handleDrop = useCallback((card, targetColumn) => {
+  const handleDrop = useCallback((card, targetColumn, dropIndex) => {
     if (!card) return;
     
     // Obtenir le groupe lié
@@ -358,7 +358,7 @@ export default function GestionDeMandat() {
     });
   }, [activeView, updateDossierMutation, linkedGroups, allCards]);
 
-  const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
+  const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
   const handleCardClick = async (card) => {
     if (dragging) return;
