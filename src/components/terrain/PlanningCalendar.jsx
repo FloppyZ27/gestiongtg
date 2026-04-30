@@ -1500,7 +1500,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <Button
                   size="sm"
                   onClick={() => setShowAllTerrainsMap(true)}
-                  className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 hover:text-blue-200"
+                  className="bg-blue-500/20 text-white hover:bg-blue-500/30 hover:text-white"
                 >
                   <Map className="w-3 h-3 mr-1" />
                   Vue carte
