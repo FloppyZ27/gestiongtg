@@ -593,7 +593,6 @@ export default function GestionDeMandat() {
                   key={c.id} 
                   className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold cursor-pointer transition-all`}
                   onClick={(e) => {
-                    if (e.button !== 0) return; // Ignorer les clics droits
                     e.stopPropagation();
                     if (isInDissociationMode) {
                       // Dissocier cette carte du groupe
@@ -617,7 +616,6 @@ export default function GestionDeMandat() {
             })}
             <div
               onClick={(e) => {
-                if (e.button !== 0) return; // Ignorer les clics droits
                 e.stopPropagation();
                 const group = linkedGroups.find(g => g.cardIds.includes(card.id));
                 const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
