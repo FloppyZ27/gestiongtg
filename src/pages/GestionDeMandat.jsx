@@ -440,42 +440,46 @@ export default function GestionDeMandat() {
                 {getAbbreviatedMandatType(c.mandat.type_mandat)}
               </Badge>
             ))}
-            {linkedCardsForSameDossier === null && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (selectedCardForLink?.id === card.id) {
-                    setSelectedCardForLink(null);
-                  } else {
-                    setSelectedCardForLink(card);
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (linkedCardsForSameDossier !== null) {
+                  // Délier le groupe
+                  const group = linkedGroups.find(g => g.cardIds.includes(card.id));
+                  if (group) {
+                    handleUnlinkGroup(group.id);
                   }
-                }}
-                title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
-                  color: selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
-                  transition: 'background-color 150ms, color 150ms',
-                  cursor: 'pointer',
-                  flexShrink: 0
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
-                  e.currentTarget.style.color = '#fff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
-                  e.currentTarget.style.color = selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
-                }}
-              >
-                <Link2 style={{ width: 13, height: 13 }} />
-              </div>
-            )}
+                } else if (selectedCardForLink?.id === card.id) {
+                  setSelectedCardForLink(null);
+                } else {
+                  setSelectedCardForLink(card);
+                }
+              }}
+              title={linkedCardsForSameDossier !== null ? "Cliquez pour séparer les cartes" : selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez pour lier cette carte"}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)',
+                color: linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8',
+                transition: 'background-color 150ms, color 150ms',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(139,92,246,0.85)';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? 'rgba(139,92,246,0.8)' : 'rgba(71,85,105,0.35)';
+                e.currentTarget.style.color = linkedCardsForSameDossier !== null || selectedCardForLink?.id === card.id ? '#fff' : '#94a3b8';
+              }}
+            >
+              <Link2 style={{ width: 13, height: 13 }} />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1 mb-1">
