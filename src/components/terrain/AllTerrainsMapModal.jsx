@@ -252,35 +252,9 @@ export default function AllTerrainsMapModal({ open, onClose, dossiers, clients, 
           position: 'fixed', top: '90px', left: '50%', transform: 'translateX(-50%)'
         }}
       >
-        <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
-          <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-emerald-400" />
-            Vue d'ensemble — Tous les terrains à planifier
-          </DialogTitle>
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            {[
-              { key: 'all', label: `Tous (${allCards.length})`, color: 'bg-slate-700 text-slate-200' },
-              { key: 'unplanned', label: `À planifier (${unplannedCount})`, color: 'bg-amber-500/20 text-amber-300' },
-              { key: 'planned', label: `Planifiés futurs (${plannedCount})`, color: 'bg-emerald-500/20 text-emerald-300' },
-            ].map(f => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${f.color} ${filter === f.key ? 'ring-2 ring-white/30 scale-105' : 'opacity-70 hover:opacity-100'}`}
-              >
-                {f.label}
-              </button>
-            ))}
-            <div className="ml-auto flex items-center gap-3 text-xs text-slate-400">
-              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-slate-400"></span> À planifier</span>
-              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-emerald-400"></span> Planifié (futur)</span>
-            </div>
-          </div>
-        </DialogHeader>
-
         {/* Carte pleine largeur */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          <TerrainMap cards={filteredCards} apiKey={googleMapsApiKey} clients={clients} users={[]} />
+          <TerrainMap cards={allCards} apiKey={googleMapsApiKey} clients={clients} users={[]} />
         </div>
       </DialogContent>
     </Dialog>
