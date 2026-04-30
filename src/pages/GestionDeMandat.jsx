@@ -738,7 +738,17 @@ export default function GestionDeMandat() {
             {headerContent}
           </div>
           <div className="p-3 min-h-[120px]">
-            {processedCards.map(({ mainCard, linkedCards }) => renderCard(mainCard, linkedCards))}
+            {processedCards.map(({ mainCard, linkedCards }, idx) => (
+              <div key={`card-${mainCard.id}`}>
+                {isOver && dropIndex === idx && (
+                  <div className="h-1 bg-emerald-400 rounded-full mb-2 animate-pulse"></div>
+                )}
+                {renderCard(mainCard, linkedCards)}
+              </div>
+            ))}
+            {isOver && dropIndex === processedCards.length && (
+              <div className="h-1 bg-emerald-400 rounded-full mb-2 animate-pulse"></div>
+            )}
             {processedCards.length === 0 && (
               <div className="text-center py-8 text-slate-600 text-sm">Aucun mandat</div>
             )}
