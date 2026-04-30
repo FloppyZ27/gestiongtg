@@ -103,7 +103,7 @@ function TerrainMap({ cards, apiKey, clients, users }) {
           // SVG pin style goutte avec label dossier
           const label = `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`;
           const svgPin = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="56" viewBox="0 0 44 56">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="28" viewBox="0 0 44 56">
               <filter id="shadow" x="-30%" y="-10%" width="160%" height="160%">
                 <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(0,0,0,0.6)"/>
               </filter>
@@ -121,8 +121,8 @@ function TerrainMap({ cards, apiKey, clients, users }) {
             title: label,
             icon: {
               url: encodedSvg,
-              scaledSize: new window.google.maps.Size(44, 56),
-              anchor: new window.google.maps.Point(22, 54),
+              scaledSize: new window.google.maps.Size(22, 28),
+              anchor: new window.google.maps.Point(11, 27),
             },
             label: {
               text: card.isPlanned ? '✓' : '·',
