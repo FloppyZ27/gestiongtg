@@ -531,6 +531,7 @@ export default function GestionDeMandat() {
     const allMandatsForCard = linkedCardsForSameDossier ? [card, ...linkedCardsForSameDossier] : [card];
 
     const onMouseDown = (e) => {
+      if (e.button !== 0) return; // Ignorer les clics droits/autres
       e.stopPropagation();
       didDragRef.current = false;
       const savedEvent = { clientX: e.clientX, clientY: e.clientY, currentTarget: e.currentTarget };
@@ -541,7 +542,8 @@ export default function GestionDeMandat() {
       }, 500);
     };
 
-    const onMouseUp = () => {
+    const onMouseUp = (e) => {
+      if (e.button !== 0) return; // Ignorer les clics droits/autres
       if (holdTimerRef.current) {
         clearTimeout(holdTimerRef.current);
         holdTimerRef.current = null;
