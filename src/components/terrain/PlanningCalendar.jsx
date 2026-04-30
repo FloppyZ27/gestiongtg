@@ -1463,13 +1463,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" onClick={goToPrevious} className="nav-arrow-btn h-8 w-8 bg-slate-800/80 text-slate-300 rounded-xl transition-all duration-200"><ChevronLeft className="w-4 h-4" /></Button>
+                <button onClick={goToPrevious} onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.color = 'white'; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(30,41,59,0.8)'; e.currentTarget.style.color = '#cbd5e1'; }} style={{ backgroundColor: 'rgba(30,41,59,0.8)', color: '#cbd5e1', width: '2rem', height: '2rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', cursor: 'pointer' }}><ChevronLeft className="w-4 h-4" /></button>
                 <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
                   <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">{viewMode === "week" ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}` : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
                   <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
                   <input type="date" value={format(currentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
-                <Button size="icon" variant="ghost" onClick={goToNext} className="nav-arrow-btn h-8 w-8 bg-slate-800/80 text-slate-300 rounded-xl transition-all duration-200"><ChevronRight className="w-4 h-4" /></Button>
+                <button onClick={goToNext} onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.color = 'white'; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(30,41,59,0.8)'; e.currentTarget.style.color = '#cbd5e1'; }} style={{ backgroundColor: 'rgba(30,41,59,0.8)', color: '#cbd5e1', width: '2rem', height: '2rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', cursor: 'pointer' }}><ChevronRight className="w-4 h-4" /></button>
               </div>
               <div className="flex gap-2 items-center">
                 <Button size="sm" onClick={goToToday} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
