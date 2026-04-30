@@ -267,6 +267,7 @@ export default function GestionDeMandat() {
   });
 
   const sortCards = (cards, sortKey, sortMap) => {
+    // Ne pas trier si aucun tri n'est sélectionné (préserve l'ordre manuel des mandats du dossier)
     if (!sortMap[sortKey]) return cards;
     return [...cards].sort((a, b) => {
       const dA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
