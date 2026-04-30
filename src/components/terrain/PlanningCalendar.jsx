@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Sparkles, Loader, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Truck, Wrench, Plus, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Sparkles, Loader, ChevronLeft, ChevronRight, Map } from "lucide-react";
+import AllTerrainsMapModal from "./AllTerrainsMapModal";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -218,6 +219,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showOptimizeConfirm, setShowOptimizeConfirm] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState(null); // null | { totalNew: number }
+  const [showAllTerrainsMap, setShowAllTerrainsMap] = useState(false);
 
   // Groupes de cartes liées: [{id: string, cardIds: [string, ...]}]
   const [linkedGroups, setLinkedGroups] = useState(() => {
@@ -1496,6 +1498,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 )}
                 <Button
                   size="sm"
+                  onClick={() => setShowAllTerrainsMap(true)}
+                  className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 hover:text-blue-200"
+                >
+                  <Map className="w-3 h-3 mr-1" />
+                  Vue carte
+                </Button>
+                <Button
+                  size="sm"
                   data-optimize-btn
                   onClick={() => setShowOptimizeConfirm(true)}
                   disabled={isOptimizing}
@@ -1557,6 +1567,15 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
         </div>
       </DragDropContext>
+
+      <AllTerrainsMapModal
+        open={showAllTerrainsMap}
+        onClose={() => setShowAllTerrainsMap(false)}
+        dossiers={dossiers}
+        clients={clients}
+        equipes={equipes}
+        placeAffaire={placeAffaire}
+      />
 
       <OptimizeConfirmDialog
         open={showOptimizeConfirm}
