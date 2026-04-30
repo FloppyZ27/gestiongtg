@@ -454,22 +454,17 @@ export default function GestionDeMandat() {
                 const hasLinkedCardsInDossier = linkedCardsForSameDossier !== null && linkedCardsForSameDossier.length > 0;
                 
                 if (isInDissociationMode) {
-                  // En mode dissociation : sélectionner ou dissocier
-                  if (selectedCardForLink?.id === card.id) {
-                    // Dissocier cette carte du groupe
-                    const remainingCards = group.cardIds.filter(id => id !== card.id);
-                    if (remainingCards.length > 0) {
-                      setLinkedGroups(linkedGroups.map(g => 
-                        g.id === group.id ? { ...g, cardIds: remainingCards } : g
-                      ));
-                    } else {
-                      setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
-                    }
-                    setSelectedCardForLink(null);
-                    setDissociationMode(null);
+                  // En mode dissociation : dissocier immédiatement cette carte
+                  const remainingCards = group.cardIds.filter(id => id !== card.id);
+                  if (remainingCards.length > 0) {
+                    setLinkedGroups(linkedGroups.map(g => 
+                      g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                    ));
                   } else {
-                    setSelectedCardForLink(card);
+                    setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
                   }
+                  setSelectedCardForLink(null);
+                  setDissociationMode(null);
                 } else if (hasLinkedCardsInDossier && !dissociationMode) {
                   // Entrer en mode dissociation
                   setDissociationMode(group.id);
