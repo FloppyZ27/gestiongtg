@@ -360,9 +360,15 @@ export default function GestionDeMandat() {
 
   const { dragging, ghostPos, overColumn, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
-  const handleCardClick = (card) => {
+  const handleCardClick = async (card) => {
     if (dragging) return;
-    setEditingDossier({ ...card.dossier, initialMandatIndex: card.mandatIndex });
+    // Recharger le dossier pour avoir les données les plus récentes
+    const freshDossier = dossiers.find(d => d.id === card.dossier.id);
+    if (freshDossier) {
+      setEditingDossier({ ...freshDossier, initialMandatIndex: card.mandatIndex });
+    } else {
+      setEditingDossier({ ...card.dossier, initialMandatIndex: card.mandatIndex });
+    }
     setIsEditingDialogOpen(true);
   };
 
