@@ -986,47 +986,47 @@ export default function GestionDeMandat() {
               </div>
               <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
                 <CardHeader className="border-b border-slate-800">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <CardTitle className="text-white text-sm"></CardTitle>
-                    <div className="flex gap-2 items-center flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setCurrentMonthStart(calendarMode === "week" ? subWeeks(currentMonthStart, 1) : subMonths(currentMonthStart, 1))}
-                          onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
-                          onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
-                          style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
-                        ><ChevronLeft className="w-4 h-4" /></button>
+                  <div className="flex justify-between items-center gap-2">
+                    {/* Gauche : navigation dates */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentMonthStart(calendarMode === "week" ? subWeeks(currentMonthStart, 1) : subMonths(currentMonthStart, 1))}
+                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
+                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
+                        style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+                      ><ChevronLeft className="w-4 h-4" /></button>
 
-                        <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
-                          <div className="text-white font-bold text-sm group-hover:text-emerald-400 transition-colors">
-                            {calendarMode === "week"
-                              ? `Semaine du ${format(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), "d MMMM", { locale: fr })} au ${format(addDays(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), 4), "d MMMM yyyy", { locale: fr })}`
-                              : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
-                            }
-                          </div>
-                          <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
-                          <input
-                            type="date"
-                            value={format(currentMonthStart, "yyyy-MM-dd")}
-                            onChange={(e) => { if (e.target.value) setCurrentMonthStart(new Date(e.target.value + 'T00:00:00')); }}
-                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                            style={{ zIndex: 1 }}
-                          />
+                      <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                        <div className="text-white font-bold text-sm group-hover:text-emerald-400 transition-colors">
+                          {calendarMode === "week"
+                            ? `Semaine du ${format(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), "d MMMM", { locale: fr })} au ${format(addDays(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), 4), "d MMMM yyyy", { locale: fr })}`
+                            : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
+                          }
                         </div>
-
-                        <button
-                          onClick={() => setCurrentMonthStart(calendarMode === "week" ? addWeeks(currentMonthStart, 1) : addMonths(currentMonthStart, 1))}
-                          onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
-                          onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
-                          style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
-                        ><ChevronRight className="w-4 h-4" /></button>
-
-                        <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Aujourd'hui</Button>
+                        <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                        <input
+                          type="date"
+                          value={format(currentMonthStart, "yyyy-MM-dd")}
+                          onChange={(e) => { if (e.target.value) setCurrentMonthStart(new Date(e.target.value + 'T00:00:00')); }}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          style={{ zIndex: 1 }}
+                        />
                       </div>
-                      <div className="flex gap-1">
-                        <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Semaine</Button>
-                        <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Mois</Button>
-                      </div>
+
+                      <button
+                        onClick={() => setCurrentMonthStart(calendarMode === "week" ? addWeeks(currentMonthStart, 1) : addMonths(currentMonthStart, 1))}
+                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
+                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
+                        style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+                      ><ChevronRight className="w-4 h-4" /></button>
+
+                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Aujourd'hui</Button>
+                    </div>
+
+                    {/* Droite : toggle Semaine/Mois */}
+                    <div className="flex gap-1">
+                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Semaine</Button>
+                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Mois</Button>
                     </div>
                   </div>
                 </CardHeader>
