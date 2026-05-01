@@ -1021,14 +1021,14 @@ export default function GestionDeMandat() {
                          >
                            <ChevronRight className="w-4 h-4" />
                          </Button>
-                         <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8 ml-2">Aujourd'hui</Button>
-                       </div>
+                         <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
+                         </div>
 
-                    {/* Droite : toggle Semaine/Mois */}
-                    <div className="flex gap-1">
-                      <button data-state={calendarMode === "week" ? "active" : "inactive"} onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className="timesheet-tab-button px-4 py-1.5 text-sm font-medium rounded transition-all">Semaine</button>
-                      <button data-state={calendarMode === "month" ? "active" : "inactive"} onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className="timesheet-tab-button px-4 py-1.5 text-sm font-medium rounded transition-all">Mois</button>
-                    </div>
+                         {/* Droite : toggle Semaine/Mois */}
+                         <div className="flex gap-1">
+                         <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
+                         <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
+                         </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
