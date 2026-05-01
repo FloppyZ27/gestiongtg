@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
 
 export default function TerrainEditDialog({
   open,
@@ -98,17 +99,17 @@ export default function TerrainEditDialog({
 
           <div className="space-y-2">
             <Label className="text-xs font-medium">Rendez-vous requis</Label>
-            <Button
+            <button
               type="button"
               onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: !terrainForm.a_rendez_vous })}
-              className={`w-full text-sm font-medium transition-all ${
-                terrainForm.a_rendez_vous
-                  ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                  : "bg-slate-600 hover:bg-slate-500 text-slate-200"
-              }`}
+              className="relative w-full h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all shadow-lg hover:shadow-xl"
             >
-              {terrainForm.a_rendez_vous ? "✓ Rendez-vous requis" : "Rendez-vous requis"}
-            </Button>
+              <motion.div
+                className="absolute top-1 left-1 w-10 h-10 bg-white rounded-full shadow-md"
+                animate={{ x: terrainForm.a_rendez_vous ? 44 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            </button>
             {terrainForm.a_rendez_vous && (
               <div className="grid grid-cols-2 gap-4 pl-6">
                 <div className="space-y-1">
