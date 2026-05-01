@@ -72,11 +72,18 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
-const getUserInitials = (name) => {
-  if (!name) return 'U';
+const getUserInitials = (user) => {
+  if (!user) return 'U';
+  const name = user.full_name || '';
+  const email = user.email || '';
   const parts = name.trim().split(' ').filter(p => p.length > 0);
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  // Un seul mot ou pas de nom : utiliser email (ex: dave.vallee@... → DV)
+  const emailLocal = email.split('@')[0];
+  const emailParts = emailLocal.split(/[._-]/).filter(p => p.length > 0);
+  if (emailParts.length >= 2) return (emailParts[0][0] + emailParts[emailParts.length - 1][0]).toUpperCase();
+  if (emailParts.length === 1) return emailParts[0][0].toUpperCase();
+  return 'U';
 };
 
 const getUserColor = (index) => {
@@ -693,10 +700,10 @@ export default function GestionDeMandat() {
           ) : <div />}
           {assignedUser ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser.full_name)}</span>
+              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser)}</span>
               <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
                 <AvatarImage src={assignedUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser)}</AvatarFallback>
               </Avatar>
             </div>
           ) : (
@@ -959,7 +966,7 @@ export default function GestionDeMandat() {
                         {user.email !== "non-assigne" ? (
                           <Avatar className="w-5 h-5 border border-white/20">
                             <AvatarImage src={user.photo_url} />
-                            <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user.full_name)}</AvatarFallback>
+                            <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user)}</AvatarFallback>
                           </Avatar>
                         ) : <User className="w-4 h-4 text-white" />}
                         <span className="text-base font-bold text-white truncate max-w-[130px]">{user.full_name}</span>
