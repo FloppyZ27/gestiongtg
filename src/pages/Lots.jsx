@@ -1059,7 +1059,7 @@ export default function Lots() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -1106,7 +1106,7 @@ export default function Lots() {
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-cyan-500/25 hover:shadow-lg hover:-translate-y-0.5 transition-all text-white shadow-lg">
+                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 transition-all text-white shadow-lg">
                   <Plus className="w-5 h-5 mr-2" />
                   Nouveau lot
                 </Button>
@@ -1561,26 +1561,21 @@ export default function Lots() {
 
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                         {actionLogs.length > 0 ? (
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {actionLogs.map((log) => (
-                              <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <Badge className={`text-xs ${
-                                        log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                                        log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                        'bg-red-500/20 text-red-400 border-red-500/30'
-                                      }`}>
-                                        {log.action}
-                                      </Badge>
-                                      <span className="text-slate-400 text-xs">
-                                        {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                                      </span>
-                                    </div>
-                                    <p className="text-slate-300 text-sm">{log.details}</p>
-                                    <p className="text-slate-500 text-xs mt-1">Par {log.utilisateur_nom}</p>
+                              <div key={log.id} className="pb-3 border-b border-slate-800/60 last:border-0">
+                                <p className="text-white text-sm font-semibold mb-1 leading-snug">{log.details}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                    <span className="text-emerald-400 text-[9px] font-bold">
+                                      {(log.utilisateur_nom || '?').charAt(0).toUpperCase()}
+                                    </span>
                                   </div>
+                                  <span className="text-slate-400 text-xs">{log.utilisateur_nom}</span>
+                                  <span className="text-slate-600 text-xs">•</span>
+                                  <span className="text-slate-500 text-xs">
+                                    {log.created_date && format(new Date(log.created_date), "d MMM yyyy 'à' HH:mm", { locale: fr })}
+                                  </span>
                                 </div>
                               </div>
                             ))}
