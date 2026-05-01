@@ -78,10 +78,12 @@ const getUserInitials = (user) => {
   const email = user.email || '';
   const parts = name.trim().split(' ').filter(p => p.length > 0);
   if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  // Un seul mot ou pas de nom : utiliser email (ex: dave.vallee@... → DV)
+  // Un seul mot ou pas de nom : utiliser email
   const emailLocal = email.split('@')[0];
   const emailParts = emailLocal.split(/[._-]/).filter(p => p.length > 0);
   if (emailParts.length >= 2) return (emailParts[0][0] + emailParts[emailParts.length - 1][0]).toUpperCase();
+  // Pas de séparateur (ex: dvallee@...) → prendre les 2 premières lettres
+  if (emailParts.length === 1 && emailParts[0].length >= 2) return emailParts[0].slice(0, 2).toUpperCase();
   if (emailParts.length === 1) return emailParts[0][0].toUpperCase();
   return 'U';
 };
