@@ -359,32 +359,35 @@ export default function Calendrier() {
                   >
                     <ChevronRight className="w-4 h-4" />
                   </Button>
-                </div>
-                <div className="flex gap-2 items-center">
                   <Button
                     size="sm"
                     onClick={() => setCurrentDate(new Date())}
-                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
+                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8 ml-2"
                   >
                     Aujourd'hui
                   </Button>
-                  <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      onClick={() => setViewMode("week")}
-                      className={`h-8 ${viewMode === "week" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                    >
-                      Semaine
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setViewMode("month")}
-                      className={`h-8 ${viewMode === "month" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                    >
-                      Mois
-                    </Button>
-                  </div>
+                  <Input
+                    type="date"
+                    value={format(currentDate, "yyyy-MM-dd")}
+                    onChange={(e) => setCurrentDate(new Date(e.target.value))}
+                    className="bg-slate-800 border-slate-700 text-white h-8 px-3 text-sm w-40"
+                  />
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    onClick={() => setViewMode("week")}
+                    className={`h-8 ${viewMode === "week" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
+                  >
+                    Semaine
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setViewMode("month")}
+                    className={`h-8 ${viewMode === "month" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
+                  >
+                    Mois
+                  </Button>
                 </div>
               </div>
 
