@@ -676,11 +676,11 @@ export default function GestionDeMandat() {
           ) : <div />}
           {assignedUser ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser.full_name)}</span>
               <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
                 <AvatarImage src={assignedUser.photo_url} />
                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
               </Avatar>
-              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser.full_name)}</span>
             </div>
           ) : (
             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
