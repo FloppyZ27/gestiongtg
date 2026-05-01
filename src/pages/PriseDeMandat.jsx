@@ -3890,7 +3890,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  onClick={() => setActiveListTab("nouveau")}
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "nouveau"
-                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
+                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/25"
                      : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
@@ -3905,7 +3905,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  onClick={() => setActiveListTab("ouvrir")}
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "ouvrir"
-                     ? "border-purple-500 text-purple-400 bg-purple-500/10"
+                     ? "border-purple-500 text-purple-400 bg-purple-500/25"
                      : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
@@ -3920,7 +3920,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  onClick={() => setActiveListTab("non-octroye")}
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "non-octroye"
-                     ? "border-red-500 text-red-400 bg-red-500/10"
+                     ? "border-red-500 text-red-400 bg-red-500/25"
                      : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
