@@ -102,12 +102,16 @@ export default function TerrainEditDialog({
             <button
               type="button"
               onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: !terrainForm.a_rendez_vous })}
-              className="relative w-full h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all shadow-lg hover:shadow-xl"
+              className={`relative w-32 h-16 rounded-full transition-all shadow-xl ${
+                terrainForm.a_rendez_vous
+                  ? "bg-gradient-to-r from-cyan-400 via-cyan-400 to-blue-500"
+                  : "bg-gradient-to-r from-slate-500 via-slate-500 to-slate-600"
+              }`}
             >
               <motion.div
-                className="absolute top-1 left-1 w-10 h-10 bg-white rounded-full shadow-md"
-                animate={{ x: terrainForm.a_rendez_vous ? 44 : 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="absolute top-1.5 left-1.5 w-12 h-12 bg-white rounded-full shadow-lg"
+                animate={{ x: terrainForm.a_rendez_vous ? 60 : 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               />
             </button>
             {terrainForm.a_rendez_vous && (
