@@ -109,7 +109,7 @@ export default function AgendaSection({
       {!agendaCollapsed && (
         <CardContent className="p-6">
           {/* Header avec navigation et contrôles */}
-          <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
+          <div className="flex flex-col gap-3 mb-6 pb-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <button onClick={goToAgendaPrevious} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
