@@ -120,8 +120,8 @@ export default function CommunicationClients() {
 
           </div>
 
-          <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
-            <div className="flex items-center justify-between mb-3">
+          <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
+            <div className="flex items-center justify-between gap-6 mb-3">
               <PlaceAffaireTabs
                 value={filterPlaceAffaire}
                 onChange={setFilterPlaceAffaire}
@@ -139,8 +139,8 @@ export default function CommunicationClients() {
             <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} onActiveTabChange={setActivePriseMandatTab} />
           </TabsContent>
 
-          <TabsContent value="retours-appel" className="mt-0">
-            <div className="flex items-center justify-between mb-3">
+          <TabsContent value="retours-appel" className="mt-6">
+            <div className="flex items-center justify-between gap-6 mb-3">
               <PlaceAffaireTabs
                 value={filterPlaceAffaire}
                 onChange={setFilterPlaceAffaire}
