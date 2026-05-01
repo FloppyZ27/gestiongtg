@@ -1673,6 +1673,55 @@ export default function Profil() {
           </DialogContent>
         </Dialog>
 
+        {/* Change Password Dialog */}
+        <Dialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle>Modifier mot de passe</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Mot de passe actuel</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nouveau mot de passe</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Confirmer le mot de passe</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsChangingPassword(false)} disabled={changePasswordMutation.isPending}>
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-600" disabled={changePasswordMutation.isPending}>
+                  {changePasswordMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {/* Edit Profile Dialog */}
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
