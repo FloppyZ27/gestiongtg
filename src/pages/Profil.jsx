@@ -1664,7 +1664,7 @@ export default function Profil() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/50 font-semibold border-2 border-purple-400 text-purple-100"
+                  className="bg-gradient-to-r from-purple-500 to-indigo-600 font-semibold border-2 border-purple-400 text-purple-100"
                 >
                   {editingEvent ? 'Modifier' : 'Ajouter'}
                 </Button>
