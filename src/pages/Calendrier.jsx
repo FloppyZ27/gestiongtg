@@ -325,7 +325,7 @@ export default function Calendrier() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Calendrier
               </h1>
-              <CalendarIcon className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+              <CalendarIcon className="w-8 h-8 text-blue-400 flex-shrink-0" />
             </div>
             <p className="text-slate-400">Vue d'ensemble des rendez-vous et absences</p>
           </div>
@@ -448,39 +448,39 @@ export default function Calendrier() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-6">
             {/* Header avec navigation et contrôles */}
-            <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="text-white font-semibold text-lg">
-                    {viewMode === "week" 
-                      ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
-                      : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                  </div>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={previousPeriod}
-                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                  >
-                    ← Précédent
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setCurrentDate(new Date())}
-                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
-                  >
-                    Aujourd'hui
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={nextPeriod}
-                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                  >
-                    Suivant →
-                  </Button>
+             <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
+               <div className="flex justify-between items-center">
+                 <div className="flex items-center gap-3">
+                   <Button
+                     size="sm"
+                     variant="outline"
+                     onClick={previousPeriod}
+                     className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                   >
+                     <ChevronLeft className="w-4 h-4" />
+                   </Button>
+                   <div className="text-white font-semibold text-lg min-w-[250px] text-center">
+                     {viewMode === "week" 
+                       ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
+                       : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                   </div>
+                   <Button
+                     size="sm"
+                     variant="outline"
+                     onClick={nextPeriod}
+                     className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                   >
+                     <ChevronRight className="w-4 h-4" />
+                   </Button>
+                 </div>
+                 <div className="flex gap-2 items-center">
+                   <Button
+                     size="sm"
+                     onClick={() => setCurrentDate(new Date())}
+                     className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
+                   >
+                     Aujourd'hui
+                   </Button>
                   <div className="h-6 w-px bg-slate-700 mx-1"></div>
                   <div className="flex gap-1">
                     <Button
