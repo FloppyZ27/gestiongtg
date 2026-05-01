@@ -150,7 +150,7 @@ export default function AgendaSection({
                 <Button
                   size="sm"
                   onClick={() => setIsAddingEvent(true)}
-                  className="h-8 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50 font-semibold"
+                  className="h-8 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Ajouter
