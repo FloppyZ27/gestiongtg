@@ -621,8 +621,8 @@ export default function FeuilleTempsSection({
           
           <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setActiveTab(v)}>
             <TabsList className="grid w-full grid-cols-2 bg-transparent">
-              <TabsTrigger value="note">Note</TabsTrigger>
-              <TabsTrigger value="factures" className="flex items-center gap-2">
+              <TabsTrigger value="note" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 data-[state=inactive]:bg-slate-700 data-[state=inactive]:text-slate-400">Note</TabsTrigger>
+              <TabsTrigger value="factures" className="flex items-center gap-2 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 data-[state=inactive]:bg-slate-700 data-[state=inactive]:text-slate-400">
                 Factures
                 {fileCount > 0 && (
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-xs font-bold">
