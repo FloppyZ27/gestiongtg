@@ -664,7 +664,7 @@ export default function GestionDeMandat() {
         )}
         {card.mandat.tache_actuelle && (
           <div className="mb-1">
-            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{card.mandat.tache_actuelle}</Badge>
+            <Badge style={{ pointerEvents: 'none' }} className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{card.mandat.tache_actuelle}</Badge>
           </div>
         )}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
