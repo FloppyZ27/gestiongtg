@@ -709,7 +709,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
               type="submit"
               size="sm"
               disabled={(!nouveauCommentaire.trim() && !audioUrl && !imageUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio || isUploadingImage}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
             >
               <Send className="w-4 h-4 mr-2" />
               Distribuer
