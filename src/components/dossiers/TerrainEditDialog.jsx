@@ -97,12 +97,30 @@ export default function TerrainEditDialog({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg border border-slate-700/60">
-              <Label className="text-sm font-medium">Rendez-vous requis</Label>
-              <Switch
-                checked={terrainForm.a_rendez_vous || false}
-                onCheckedChange={(checked) => setTerrainForm({ ...terrainForm, a_rendez_vous: checked })}
-              />
+            <Label className="text-xs font-medium">Rendez-vous requis</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: true })}
+                className={`flex-1 text-sm font-medium transition-colors ${
+                  terrainForm.a_rendez_vous
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+                }`}
+              >
+                Oui
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: false })}
+                className={`flex-1 text-sm font-medium transition-colors ${
+                  !terrainForm.a_rendez_vous
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-slate-700 hover:bg-slate-600 text-slate-300"
+                }`}
+              >
+                Non
+              </Button>
             </div>
             {terrainForm.a_rendez_vous && (
               <div className="grid grid-cols-2 gap-4 pl-6">
