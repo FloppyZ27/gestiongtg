@@ -39,7 +39,7 @@ import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
-import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2782,18 +2782,12 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
             </motion.div>
           </DialogContent>
         </Dialog>
-        <Dialog open={showDeletePriseMandatConfirm} onOpenChange={setShowDeletePriseMandatConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir supprimer cette prise de mandat ? Cette action est irréversible.</p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="button" onClick={()=>{setShowDeletePriseMandatConfirm(false);setPriseMandatIdToDelete(null);}} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Annuler</Button>
-                <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 border-none" onClick={()=>{if(priseMandatIdToDelete)deletePriseMandatMutation.mutate(priseMandatIdToDelete);setShowDeletePriseMandatConfirm(false);setPriseMandatIdToDelete(null);}}>Supprimer</Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        <ConfirmDeleteDialog
+          open={showDeletePriseMandatConfirm}
+          onOpenChange={(open) => { setShowDeletePriseMandatConfirm(open); if (!open) setPriseMandatIdToDelete(null); }}
+          onConfirm={() => { if(priseMandatIdToDelete)deletePriseMandatMutation.mutate(priseMandatIdToDelete); }}
+          message="Êtes-vous sûr de vouloir supprimer cette prise de mandat ? Cette action est irréversible."
+        />
         <Dialog open={showConcordanceWarning} onOpenChange={setShowConcordanceWarning}>
           <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
             <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
