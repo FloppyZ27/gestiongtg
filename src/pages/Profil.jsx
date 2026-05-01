@@ -1670,10 +1670,10 @@ export default function Profil() {
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Modifier mon profil</DialogTitle>
+              <DialogTitle>{false ? "Modifier" : "Modifier"} profil</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Prénom</Label>
                   <Input
@@ -1690,6 +1690,8 @@ export default function Profil() {
                     className="bg-slate-800 border-slate-700"
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Date de naissance</Label>
                   <Input
@@ -1715,11 +1717,11 @@ export default function Profil() {
                   onChange={(val) => setProfileForm({...profileForm, adresse: val})}
                 />
               </div>
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
                 <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)} disabled={updateProfileMutation.isPending}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600" disabled={updateProfileMutation.isPending}>
+                <Button type="submit" className="bg-gradient-to-r from-cyan-500 to-blue-600" disabled={updateProfileMutation.isPending}>
                   {updateProfileMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
