@@ -620,7 +620,7 @@ export default function FeuilleTempsSection({
           </DialogHeader>
           
           <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setActiveTab(v)}>
-            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+            <TabsList className="grid w-full grid-cols-2 bg-transparent">
               <TabsTrigger value="note">Note</TabsTrigger>
               <TabsTrigger value="factures" className="flex items-center gap-2">
                 Factures
