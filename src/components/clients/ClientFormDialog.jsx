@@ -972,7 +972,14 @@ export default function ClientFormDialog({
 
       {/* Main Client Form Dialog */}
       <Dialog open={open} onOpenChange={handleCloseAttempt}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '35px', maxHeight: 'calc(100vh - 43px)' }} hideClose>
+        <DialogContent className="backdrop-blur-xl border border-white/20 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden" style={{ 
+          marginTop: '35px', 
+          maxHeight: 'calc(100vh - 43px)',
+          background: 'rgba(30, 41, 59, 0.85)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          WebkitBackdropFilter: 'blur(12px)',
+          backdropFilter: 'blur(12px)'
+        }} hideClose>
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">
             {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
