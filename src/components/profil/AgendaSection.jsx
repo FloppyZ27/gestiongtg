@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CalendarDays, ChevronDown, ChevronUp, Plus, Trash2, RefreshCw } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, Trash2, RefreshCw, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -13,6 +13,7 @@ export default function AgendaSection({
   agendaViewMode,
   setAgendaViewMode,
   agendaCurrentDate,
+  setAgendaCurrentDate,
   setIsAddingEvent,
   goToAgendaPrevious,
   goToAgendaToday,
@@ -110,14 +111,33 @@ export default function AgendaSection({
           {/* Header avec navigation et contrôles */}
           <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="text-white font-semibold text-lg">
-                  {agendaViewMode === "semaine" 
-                    ? `Semaine du ${format(getAgendaWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getAgendaWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                    : format(agendaCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(agendaCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+              <div className="flex items-center gap-2">
+                <button onClick={goToAgendaPrevious} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
+                <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                  <div className="text-white font-bold text-lg group-hover:text-purple-400 transition-colors">{agendaViewMode === "semaine" ? `Semaine du ${format(getAgendaWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getAgendaWeekDays()[6], "d MMMM yyyy", { locale: fr })}` : format(agendaCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(agendaCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
+                  <Calendar className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors flex-shrink-0" />
+                  <input type="date" value={format(agendaCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setAgendaCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
+                <button onClick={goToAgendaNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
+                <Button size="sm" onClick={goToAgendaToday} className="bg-purple-500/20 text-purple-400 transition-all duration-200 hover:bg-purple-500/40 hover:text-purple-300 hover:scale-105">Aujourd'hui</Button>
               </div>
               <div className="flex gap-2 items-center">
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    onClick={() => setAgendaViewMode("semaine")}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "semaine" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60 shadow-lg shadow-purple-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                  >
+                    Semaine
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setAgendaViewMode("mois")}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "mois" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60 shadow-lg shadow-purple-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                  >
+                    Mois
+                  </Button>
+                </div>
                 <Button
                   size="sm"
                   onClick={() => refetchMsEvents?.()}
@@ -135,47 +155,6 @@ export default function AgendaSection({
                   <Plus className="w-4 h-4 mr-1" />
                   Ajouter
                 </Button>
-                <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={goToAgendaPrevious}
-                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                >
-                  ← Précédent
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={goToAgendaToday}
-                  className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
-                >
-                  Aujourd'hui
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={goToAgendaNext}
-                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                >
-                  Suivant →
-                </Button>
-                <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    onClick={() => setAgendaViewMode("semaine")}
-                    className={`h-8 ${agendaViewMode === "semaine" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                  >
-                    Semaine
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setAgendaViewMode("mois")}
-                    className={`h-8 ${agendaViewMode === "mois" ? "agenda-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                  >
-                    Mois
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

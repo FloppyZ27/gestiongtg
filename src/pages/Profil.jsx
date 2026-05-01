@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2, Palmtree, Heart, Wallet } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Loader2, Play, Square, Timer, UserCircle, CalendarDays, Plus, Trash2, Palmtree, Heart, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -1096,6 +1096,7 @@ export default function Profil() {
            agendaViewMode={agendaViewMode}
            setAgendaViewMode={setAgendaViewMode}
            agendaCurrentDate={agendaCurrentDate}
+           setAgendaCurrentDate={setAgendaCurrentDate}
            setIsAddingEvent={setIsAddingEvent}
            goToAgendaPrevious={goToAgendaPrevious}
            goToAgendaToday={goToAgendaToday}
@@ -1116,6 +1117,7 @@ export default function Profil() {
            viewMode={viewMode}
            setViewMode={setViewMode}
            pointageCurrentDate={pointageCurrentDate}
+           setPointageCurrentDate={setPointageCurrentDate}
            setIsAddingPointage={setIsAddingPointage}
            goToPointagePrevious={goToPointagePrevious}
            goToPointageToday={goToPointageToday}
@@ -1150,10 +1152,15 @@ export default function Profil() {
             <CardContent className="p-6">
               {/* Navigation */}
               <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={goToEntreeTemPrevious} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">← Précédent</Button>
-                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 h-8">Aujourd'hui</Button>
-                  <Button variant="outline" size="sm" onClick={goToEntreeTempsNext} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8">Suivant →</Button>
+                <div className="flex items-center gap-2">
+                  <button onClick={goToEntreeTemPrevious} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
+                  <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                    <div className="text-white font-bold text-lg group-hover:text-orange-400 transition-colors">{entreeTempsTab === "semaine" ? `Semaine du ${format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}` : format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
+                    <Calendar className="w-4 h-4 text-slate-500 group-hover:text-orange-400 transition-colors flex-shrink-0" />
+                    <input type="date" value={format(entreeTempsCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setEntreeTempsCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
+                  </div>
+                  <button onClick={goToEntreeTempsNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
+                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-orange-500/20 text-orange-400 transition-all duration-200 hover:bg-orange-500/40 hover:text-orange-300 hover:scale-105">Aujourd'hui</Button>
                 </div>
                 <div className="flex gap-1">
                   {["semaine", "mois"].map(tab => (
@@ -1161,7 +1168,7 @@ export default function Profil() {
                       key={tab}
                       size="sm"
                       onClick={() => setEntreeTempsTab(tab)}
-                      className={`h-8 capitalize ${entreeTempsTab === tab ? "bg-orange-500/30 text-orange-300 border border-orange-500/50" : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"}`}
+                      className={`transition-all duration-200 hover:scale-105 ${entreeTempsTab === tab ? "bg-orange-500/30 text-orange-300 ring-2 ring-orange-500/60 shadow-lg shadow-orange-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                     >
                       {tab === "semaine" ? "Semaine" : "Mois"}
                     </Button>

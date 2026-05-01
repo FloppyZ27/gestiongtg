@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timer, ChevronDown, ChevronUp, Plus, CalendarDays, Calendar, MessageSquare, Camera } from "lucide-react";
+import { Timer, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, CalendarDays, Calendar, MessageSquare, Camera } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,6 +20,7 @@ export default function FeuilleTempsSection({
   viewMode,
   setViewMode,
   pointageCurrentDate,
+  setPointageCurrentDate,
   setIsAddingPointage,
   goToPointagePrevious,
   goToPointageToday,
@@ -142,12 +143,15 @@ export default function FeuilleTempsSection({
         <CardContent className="p-6">
           <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="text-white font-semibold text-lg">
-                  {viewMode === "week" 
-                    ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
-                    : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+              <div className="flex items-center gap-2">
+                <button onClick={goToPointagePrevious} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
+                <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                  <div className="text-white font-bold text-lg group-hover:text-cyan-400 transition-colors">{viewMode === "week" ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}` : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
+                  <Calendar className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                  <input type="date" value={format(pointageCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setPointageCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
+                <button onClick={goToPointageNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
+                <Button size="sm" onClick={goToPointageToday} className="bg-cyan-500/20 text-cyan-400 transition-all duration-200 hover:bg-cyan-500/40 hover:text-cyan-300 hover:scale-105">Aujourd'hui</Button>
                 {viewMode === "month" && (() => {
                   const monthDays = getMonthDaysWithFullWeeks();
                   const totalInitial = monthDays.reduce((sum, day) => {
@@ -189,6 +193,10 @@ export default function FeuilleTempsSection({
                 })()}
               </div>
               <div className="flex gap-2 items-center">
+                <div className="flex gap-1">
+                  <Button size="sm" onClick={() => setViewMode("week")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-cyan-500/30 text-cyan-300 ring-2 ring-cyan-500/60 shadow-lg shadow-cyan-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
+                  <Button size="sm" onClick={() => setViewMode("month")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-cyan-500/30 text-cyan-300 ring-2 ring-cyan-500/60 shadow-lg shadow-cyan-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
+                </div>
                 <Button
                   size="sm"
                   onClick={() => setIsAddingPointage(true)}
@@ -208,47 +216,6 @@ export default function FeuilleTempsSection({
                     {commentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
                   </Button>
                 )}
-                <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={goToPointagePrevious}
-                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                >
-                  ← Précédent
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={goToPointageToday}
-                  className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
-                >
-                  Aujourd'hui
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={goToPointageNext}
-                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
-                >
-                  Suivant →
-                </Button>
-                <div className="h-6 w-px bg-slate-700 mx-1"></div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    onClick={() => setViewMode("week")}
-                    className={`h-8 ${viewMode === "week" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                  >
-                    Semaine
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setViewMode("month")}
-                    className={`h-8 ${viewMode === "month" ? "timesheet-tab-button" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}`}
-                  >
-                    Mois
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
