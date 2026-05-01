@@ -183,6 +183,7 @@ export default function GestionDeMandat() {
     heures: "", tache: "", tache_suivante: "", utilisateur_assigne: ""
   });
   const [linkedGroups, setLinkedGroups] = useState([]);
+  const [selectedMandatByCard, setSelectedMandatByCard] = useState({}); // { [mainCardId]: linkedCard }
   const [selectedCardForLink, setSelectedCardForLink] = useState(null);
   const [dissociationMode, setDissociationMode] = useState(null);
   // Ordre local des cartes par colonne: { [columnId]: [cardId, ...] }
@@ -496,11 +497,15 @@ export default function GestionDeMandat() {
   };
 
   const renderCard = (card, linkedCardsForSameDossier = null) => {
-    const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+    // Utiliser le mandat sélectionné si un badge lié a été cliqué
+    const selectedLinkedCard = selectedMandatByCard[card.id];
+    const displayCard = selectedLinkedCard || card;
+    
+    const assignedUser = users.find(u => u.email === displayCard.mandat.utilisateur_assigne);
     const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
     const [bg, text, border] = arpColor.split(' ');
     const isDraggingThis = dragging?.card?.id === card.id;
-    const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
+    const tacheIndex = TACHES.indexOf(displayCard.mandat.tache_actuelle);
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
     const isLinked = linkedGroups.some(g => g.cardIds.includes(card.id));
     const allMandatsForCard = linkedCardsForSameDossier ? [card, ...linkedCardsForSameDossier] : [card];
@@ -568,7 +573,7 @@ export default function GestionDeMandat() {
             return (
               <Badge 
                 key={c.id} 
-                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all cursor-pointer hover:opacity-80 ${isInDissociationMode ? 'ring-2 ring-red-400' : isMultiMandat ? 'ring-1 ring-white/20' : ''}`}
+                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all cursor-pointer hover:opacity-80 ${isInDissociationMode ? 'ring-2 ring-red-400' : (selectedLinkedCard?.id === c.id || (!selectedLinkedCard && c.id === card.id && isMultiMandat)) ? 'ring-2 ring-white/60' : isMultiMandat ? 'ring-1 ring-white/20 opacity-70' : ''}`}
                 style={{ pointerEvents: 'auto' }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -586,14 +591,14 @@ export default function GestionDeMandat() {
                     }
                     setDissociationMode(null);
                   } else {
-                    // Ouvrir le dialog d'édition du mandat cliqué (qu'il soit la carte courante ou une liée)
-                    const freshDossier = dossiers.find(d => d.id === c.dossier.id);
-                    if (freshDossier) {
-                      setEditingDossier({ ...freshDossier, initialMandatIndex: c.mandatIndex });
+                    // Remplacer les infos affichées par celles du mandat cliqué
+                    if (c.id === card.id) {
+                      // Badge de la carte principale : réinitialiser si déjà sélectionné
+                      setSelectedMandatByCard(prev => { const n = {...prev}; delete n[card.id]; return n; });
                     } else {
-                      setEditingDossier({ ...c.dossier, initialMandatIndex: c.mandatIndex });
+                      // Badge d'une carte liée : afficher ses infos
+                      setSelectedMandatByCard(prev => ({ ...prev, [card.id]: c }));
                     }
-                    setIsEditingDialogOpen(true);
                   }
                 }}
               >
@@ -680,24 +685,24 @@ export default function GestionDeMandat() {
         </div>
         <div className="flex items-center gap-1 mb-1">
           <User className="w-3 h-3 text-white flex-shrink-0" />
-          <span className="text-xs text-white font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</span>
+          <span className="text-xs text-white font-medium truncate">{getClientsNames(displayCard.dossier.clients_ids)}</span>
         </div>
-        {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+        {displayCard.mandat.adresse_travaux && formatAdresse(displayCard.mandat.adresse_travaux) && (
           <div className="flex items-center gap-1 mb-1">
             <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-xs text-slate-400 truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+            <span className="text-xs text-slate-400 truncate">{formatAdresse(displayCard.mandat.adresse_travaux)}</span>
           </div>
         )}
-        {card.mandat.tache_actuelle && (
+        {displayCard.mandat.tache_actuelle && (
           <div className="mb-1">
-            <Badge style={{ pointerEvents: 'none' }} className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{card.mandat.tache_actuelle}</Badge>
+            <Badge style={{ pointerEvents: 'none' }} className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{displayCard.mandat.tache_actuelle}</Badge>
           </div>
         )}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-          {card.mandat.date_livraison ? (
+          {displayCard.mandat.date_livraison ? (
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-              <span className="text-xs text-yellow-300">{format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM yy", { locale: fr })}</span>
+              <span className="text-xs text-yellow-300">{format(new Date(displayCard.mandat.date_livraison + "T00:00:00"), "dd MMM yy", { locale: fr })}</span>
             </div>
           ) : <div />}
           {assignedUser ? (
