@@ -2347,7 +2347,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
             }else{setIsDialogOpen(open);}
           }}>
 
-            <DialogContent className={`border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50`} style={{ marginTop: '19px', maxHeight: 'calc(80vh - 5px)' }}>
+            <DialogContent className={`border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50`} style={{ marginTop: '19px', maxHeight: 'calc(85vh - 5px)' }}>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
