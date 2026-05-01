@@ -130,7 +130,7 @@ export default function CommunicationClients() {
               <Button 
                 onClick={handleNewMandat}
                 size="sm"
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouveau mandat
@@ -149,7 +149,7 @@ export default function CommunicationClients() {
               <Button 
                 onClick={handleNewRetourAppel}
                 size="sm"
-                className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/50"
+                className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouveau retour d'appel
