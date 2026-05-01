@@ -265,7 +265,7 @@ export default function Clients() {
                 setEditingClient(null);
                 setIsDialogOpen(true);
               }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white">
               <Plus className="w-5 h-5 mr-2" />
               Nouveau client
             </Button>
