@@ -254,18 +254,12 @@ export default function Clients() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Clients
               </h1>
-              <Users className="w-6 h-6 text-emerald-400" />
+              <Users className="w-6 h-6 text-blue-400" />
             </div>
             <p className="text-slate-400">Gestion de vos clients</p>
           </div>
 
           <div className="flex gap-3">
-            <Button
-              onClick={handleExportCSV}
-              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
-              <Download className="w-4 h-4 mr-2" />
-              Extraction CSV
-            </Button>
             <Button 
               onClick={() => {
                 setEditingClient(null);
