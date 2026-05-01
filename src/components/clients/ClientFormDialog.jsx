@@ -995,7 +995,7 @@ export default function ClientFormDialog({
             {/* Main form content - 70% */}
             <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
             <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-xl font-bold text-white">
                 {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
               </h2>
             </div>
