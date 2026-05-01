@@ -931,8 +931,8 @@ export default function GestionDeMandat() {
                 <div className="flex gap-1">
                   {["Toutes", ...EQUIPES].map(equipe => {
                     const count = equipe === "Toutes"
-                      ? usersList.length
-                      : usersList.filter(u => u.email === "non-assigne" || getUserTeam(u) === equipe).length;
+                      ? usersList.filter(u => u.email !== "non-assigne").length
+                      : usersList.filter(u => u.email !== "non-assigne" && getUserTeam(u) === equipe).length;
                     const isActive = filterEquipe === equipe;
                     return (
                       <button key={equipe} onClick={() => setFilterEquipe(equipe)}
