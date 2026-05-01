@@ -1020,7 +1020,7 @@ export default function GestionDeMandat() {
                         style={{ background: '#2563eb', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
                       ><ChevronRight className="w-4 h-4" /></button>
 
-                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="!bg-transparent !border-2 !border-blue-500 !text-white hover:!bg-blue-500/20">Aujourd'hui</Button>
+                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-cyan-500/20 text-cyan-400 transition-all duration-200 hover:bg-cyan-500/40 hover:text-cyan-300 hover:scale-105">Aujourd'hui</Button>
                     </div>
 
                     {/* Droite : toggle Semaine/Mois */}
