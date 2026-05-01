@@ -640,7 +640,7 @@ export default function FeuilleTempsSection({
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Ex: J'ai travaillé en dehors des heures normales le mercredi soir pour un urgence client..."
-                className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm resize-none"
+                className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm resize-none placeholder-slate-500"
                 rows={6}
                 autoFocus
               />
