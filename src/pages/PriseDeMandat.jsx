@@ -3891,7 +3891,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "nouveau"
                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
-                     : "border-transparent text-slate-500 hover:text-slate-400"
+                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
                  <FileQuestion className="w-4 h-4" />
@@ -3906,7 +3906,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "ouvrir"
                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
-                     : "border-transparent text-slate-500 hover:text-slate-400"
+                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
                  <FolderOpen className="w-4 h-4" />
@@ -3921,7 +3921,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                    activeListTab === "non-octroye"
                      ? "border-red-500 text-red-400 bg-red-500/10"
-                     : "border-transparent text-slate-500 hover:text-slate-400"
+                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
                  }`}
                >
                  <XCircle className="w-4 h-4" />
