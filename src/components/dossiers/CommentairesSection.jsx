@@ -843,7 +843,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
               type="submit"
               size="sm"
               disabled={(!nouveauCommentaire.trim() && !audioUrl && !imageUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio || isUploadingImage}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-none"
             >
               <Send className="w-4 h-4 mr-2" />
               Distribuer
