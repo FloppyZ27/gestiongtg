@@ -16,11 +16,17 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
+const EQUIPES = ["Samuel", "Pierre-Luc", "Dany"];
+const USER_TEAM_MAP = {
+  "davevallee27@gmail.com": "Samuel"
+};
+
 export default function Calendrier() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('month');
   const [selectedUser, setSelectedUser] = useState([]);
   const [selectedType, setSelectedType] = useState([]);
+  const [filterEquipe, setFilterEquipe] = useState("Toutes");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -96,12 +102,25 @@ export default function Calendrier() {
     return mapping[arpenteur] || "";
   };
 
+  const getUserTeam = (user) => {
+    if (!user) return null;
+    return user.equipe || USER_TEAM_MAP[user.email] || null;
+  };
+
   // Filter events
   // This filter applies only to 'rendez-vous' and 'absence' entities from allRendezVous
   const filteredRendezVous = allRendezVous.filter(rdv => {
     const userMatch = selectedUser.length === 0 || selectedUser.includes(rdv.utilisateur_email);
     const typeMatch = selectedType.length === 0 || selectedType.includes(rdv.type);
-    return userMatch && typeMatch;
+    
+    // Filter by team
+    let teamMatch = true;
+    if (filterEquipe !== "Toutes") {
+      const user = users.find(u => u.email === rdv.utilisateur_email);
+      teamMatch = user && getUserTeam(user) === filterEquipe;
+    }
+    
+    return userMatch && typeMatch && teamMatch;
   });
 
   // Calcul dynamique de la date de Pâques (algorithme Meeus/Jones/Butcher)
@@ -410,9 +429,9 @@ export default function Calendrier() {
                       >
                         <Filter className="w-4 h-4 mr-2" />
                         <span className="text-sm">Filtres</span>
-                        {(selectedUser.length > 0 || selectedType.length > 0) && (
+                        {(selectedUser.length > 0 || selectedType.length > 0 || filterEquipe !== "Toutes") && (
                           <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                            {selectedUser.length + selectedType.length}
+                            {selectedUser.length + selectedType.length + (filterEquipe !== "Toutes" ? 1 : 0)}
                           </Badge>
                         )}
                         {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -428,13 +447,14 @@ export default function Calendrier() {
                                 <Filter className="w-3 h-3 text-emerald-500" />
                                 <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
                               </div>
-                              {(selectedUser.length > 0 || selectedType.length > 0) && (
+                              {(selectedUser.length > 0 || selectedType.length > 0 || filterEquipe !== "Toutes") && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
                                     setSelectedUser([]);
                                     setSelectedType([]);
+                                    setFilterEquipe("Toutes");
                                   }}
                                   className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
                                 >
@@ -444,35 +464,56 @@ export default function Calendrier() {
                               )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                    <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
-                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                                  {users.map((user) => (
-                                    <DropdownMenuCheckboxItem
-                                      key={user.email}
-                                      checked={selectedUser.includes(user.email)}
-                                      onCheckedChange={(checked) => {
-                                        setSelectedUser(
-                                          checked
-                                            ? [...selectedUser, user.email]
-                                            : selectedUser.filter((u) => u !== user.email)
-                                        );
-                                      }}
-                                      className="text-white text-xs"
-                                    >
-                                      {user.full_name}
-                                    </DropdownMenuCheckboxItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                            <div className="grid grid-cols-3 gap-2">
+                               <DropdownMenu>
+                                 <DropdownMenuTrigger asChild>
+                                   <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                     <span className="truncate">Équipes ({filterEquipe !== "Toutes" ? '1' : 'Toutes'})</span>
+                                     <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                   </Button>
+                                 </DropdownMenuTrigger>
+                                 <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                                   {["Toutes", ...EQUIPES].map((equipe) => (
+                                     <DropdownMenuCheckboxItem
+                                       key={equipe}
+                                       checked={filterEquipe === equipe}
+                                       onCheckedChange={() => setFilterEquipe(equipe)}
+                                       className="text-white text-xs"
+                                     >
+                                       {equipe}
+                                     </DropdownMenuCheckboxItem>
+                                   ))}
+                                 </DropdownMenuContent>
+                               </DropdownMenu>
 
-                              <DropdownMenu>
+                               <DropdownMenu>
+                                 <DropdownMenuTrigger asChild>
+                                   <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                     <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
+                                     <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                   </Button>
+                                 </DropdownMenuTrigger>
+                                 <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                   {users.filter(u => filterEquipe === "Toutes" || getUserTeam(u) === filterEquipe).map((user) => (
+                                     <DropdownMenuCheckboxItem
+                                       key={user.email}
+                                       checked={selectedUser.includes(user.email)}
+                                       onCheckedChange={(checked) => {
+                                         setSelectedUser(
+                                           checked
+                                             ? [...selectedUser, user.email]
+                                             : selectedUser.filter((u) => u !== user.email)
+                                         );
+                                       }}
+                                       className="text-white text-xs"
+                                     >
+                                       {user.full_name}
+                                     </DropdownMenuCheckboxItem>
+                                   ))}
+                                 </DropdownMenuContent>
+                               </DropdownMenu>
+
+                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                                     <span className="truncate">Types ({selectedType.length > 0 ? `${selectedType.length}` : 'Tous'})</span>
