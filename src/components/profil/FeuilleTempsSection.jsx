@@ -200,7 +200,7 @@ export default function FeuilleTempsSection({
                 <Button
                   size="sm"
                   onClick={() => setIsAddingPointage(true)}
-                  className="h-8 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 font-semibold"
+                  className="h-8 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Ajouter
