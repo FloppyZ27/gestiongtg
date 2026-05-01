@@ -490,6 +490,7 @@ export default function GestionDeMandat() {
     const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
     const isLinked = linkedGroups.some(g => g.cardIds.includes(card.id));
     const allMandatsForCard = linkedCardsForSameDossier ? [card, ...linkedCardsForSameDossier] : [card];
+    const isMultiMandat = allMandatsForCard.length > 1;
 
     const onMouseDown = (e) => {
       if (e.button !== 0) return; // Ignorer les clics droits/autres
@@ -549,26 +550,37 @@ export default function GestionDeMandat() {
             {allMandatsForCard.map(c => {
             const group = linkedGroups.find(g => g.cardIds.includes(c.id));
             const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+            const isCurrentCard = c.id === card.id;
             return (
               <Badge 
                 key={c.id} 
-                style={!isInDissociationMode ? { pointerEvents: 'none' } : undefined}
-                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : ''}`}
+                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : isMultiMandat && !isCurrentCard ? 'cursor-pointer hover:opacity-80 ring-1 ring-white/20' : ''}`}
+                style={{ pointerEvents: isInDissociationMode || (isMultiMandat && !isCurrentCard) ? 'auto' : 'none' }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!isInDissociationMode) return;
-                  // Dissocier cette carte du groupe
-                  const remainingCards = group.cardIds.filter(id => id !== c.id);
-                  if (remainingCards.length > 0) {
-                    updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
-                    setLinkedGroups(linkedGroups.map(g => 
-                      g.id === group.id ? { ...g, cardIds: remainingCards } : g
-                    ));
-                  } else {
-                    deleteLinkedGroupMutation.mutate(group.id);
-                    setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                  if (isInDissociationMode) {
+                    // Dissocier cette carte du groupe
+                    const remainingCards = group.cardIds.filter(id => id !== c.id);
+                    if (remainingCards.length > 0) {
+                      updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
+                      setLinkedGroups(linkedGroups.map(g => 
+                        g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                      ));
+                    } else {
+                      deleteLinkedGroupMutation.mutate(group.id);
+                      setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                    }
+                    setDissociationMode(null);
+                  } else if (isMultiMandat && !isCurrentCard) {
+                    // Ouvrir le dialog d'édition du mandat cliqué
+                    const freshDossier = dossiers.find(d => d.id === c.dossier.id);
+                    if (freshDossier) {
+                      setEditingDossier({ ...freshDossier, initialMandatIndex: c.mandatIndex });
+                    } else {
+                      setEditingDossier({ ...c.dossier, initialMandatIndex: c.mandatIndex });
+                    }
+                    setIsEditingDialogOpen(true);
                   }
-                  setDissociationMode(null);
                 }}
               >
                 {getAbbreviatedMandatType(c.mandat.type_mandat)}
