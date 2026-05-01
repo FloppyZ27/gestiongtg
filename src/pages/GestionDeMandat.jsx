@@ -987,12 +987,7 @@ export default function GestionDeMandat() {
               <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
                 <CardHeader className="border-b border-slate-800">
                   <div className="flex justify-between items-center flex-wrap gap-2">
-                    <CardTitle className="text-white text-sm">
-                      {calendarMode === "week"
-                        ? `Semaine du ${format(currentMonthStart, "d MMMM", { locale: fr })} au ${format(addDays(currentMonthStart, 4), "d MMMM yyyy", { locale: fr })}`
-                        : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
-                      }
-                    </CardTitle>
+                    <CardTitle className="text-white text-sm"></CardTitle>
                     <div className="flex gap-2 items-center flex-wrap">
                       <div className="flex items-center gap-2">
                         <button
