@@ -524,7 +524,7 @@ export default function PriseMandatTable({
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-2">
-                      {activeListTab === "ouvrir" && (
+                      {activeListTab === "ouvrir" && onOpenDossier && (
                         <Button
                           variant="ghost"
                           size="sm"
