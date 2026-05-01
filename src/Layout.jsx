@@ -701,30 +701,27 @@ function LayoutContent({ children, currentPageName }) {
 
         /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
         button.timesheet-tab-button {
-          background: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
-          background-color: rgb(0, 184, 212) !important;
-          background-image: linear-gradient(to right, rgb(0, 184, 212), rgb(0, 150, 136)) !important;
+          background: rgb(0, 184, 212) !important;
+          background-image: none !important;
           color: white !important;
           border: none !important;
-          box-shadow: 0 4px 12px -3px rgba(0, 184, 212, 0.4) !important;
+          box-shadow: none !important;
         }
 
         button.timesheet-tab-button[data-state="inactive"] {
           background: rgb(100, 116, 139) !important;
-          background-color: rgb(100, 116, 139) !important;
           background-image: none !important;
-          box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.3) !important;
+          box-shadow: none !important;
         }
 
         button.timesheet-tab-button:hover {
-          background: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
-          background-image: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
-          box-shadow: 0 6px 16px -3px rgba(0, 184, 212, 0.5) !important;
+          background: rgb(0, 160, 187) !important;
+          box-shadow: none !important;
         }
 
         button.timesheet-tab-button[data-state="inactive"]:hover {
-          background: rgb(125, 139, 156) !important;
-          box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.4) !important;
+          background: rgb(115, 127, 144) !important;
+          box-shadow: none !important;
         }
 
         button.timesheet-tab-button:active {
