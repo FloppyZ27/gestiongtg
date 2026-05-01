@@ -865,14 +865,14 @@ export default function GestionDeMandat() {
 
           {/* Vues */}
           <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-            <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
-              <TabsTrigger value="taches" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-2 text-sm">
+            <TabsList className="bg-slate-800/50 h-12 w-full grid grid-cols-3 mb-6">
+              <TabsTrigger value="taches" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-slate-400 flex-1 h-full text-sm">
                 <Kanban className="w-4 h-4 mr-1" />Par Tâches
               </TabsTrigger>
-              <TabsTrigger value="utilisateurs" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-2 text-sm">
+              <TabsTrigger value="utilisateurs" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-slate-400 flex-1 h-full text-sm">
                 <User className="w-4 h-4 mr-1" />Par Utilisateur
               </TabsTrigger>
-              <TabsTrigger value="calendrier" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-2 text-sm">
+              <TabsTrigger value="calendrier" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary text-slate-400 flex-1 h-full text-sm">
                 <Calendar className="w-4 h-4 mr-1" />Calendrier
               </TabsTrigger>
             </TabsList>
