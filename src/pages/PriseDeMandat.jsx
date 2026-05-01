@@ -2347,7 +2347,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
             }else{setIsDialogOpen(open);}
           }}>
 
-            <DialogContent className={`border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50`} style={{ marginTop: '19px', maxHeight: 'calc(75vh - 5px)' }}>
+            <DialogContent className={`border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50`} style={{ marginTop: '19px', maxHeight: 'calc(85vh - 5px)' }}>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2355,7 +2355,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
               </DialogHeader>
 
               <motion.div 
-                className="flex flex-col h-full"
+                className="flex flex-col h-[90vh]"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -2403,7 +2403,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                   </div>
                 </div>
 
-                <div className="flex-1 flex overflow-hidden min-h-0">
+                <div className="flex-1 flex overflow-hidden">
                   <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},...(editingPriseMandat?[{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}]:[])].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
                   <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
