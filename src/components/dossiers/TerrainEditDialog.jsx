@@ -98,30 +98,17 @@ export default function TerrainEditDialog({
 
           <div className="space-y-2">
             <Label className="text-xs font-medium">Rendez-vous requis</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: true })}
-                className={`flex-1 text-sm font-medium transition-colors ${
-                  terrainForm.a_rendez_vous
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "bg-slate-700 hover:bg-slate-600 text-slate-300"
-                }`}
-              >
-                Oui
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: false })}
-                className={`flex-1 text-sm font-medium transition-colors ${
-                  !terrainForm.a_rendez_vous
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "bg-slate-700 hover:bg-slate-600 text-slate-300"
-                }`}
-              >
-                Non
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={() => setTerrainForm({ ...terrainForm, a_rendez_vous: !terrainForm.a_rendez_vous })}
+              className={`w-full text-sm font-medium transition-all ${
+                terrainForm.a_rendez_vous
+                  ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                  : "bg-slate-600 hover:bg-slate-500 text-slate-200"
+              }`}
+            >
+              {terrainForm.a_rendez_vous ? "✓ Rendez-vous requis" : "Rendez-vous requis"}
+            </Button>
             {terrainForm.a_rendez_vous && (
               <div className="grid grid-cols-2 gap-4 pl-6">
                 <div className="space-y-1">
