@@ -1025,8 +1025,8 @@ export default function GestionDeMandat() {
 
                     {/* Droite : toggle Semaine/Mois */}
                     <div className="flex gap-1">
-                      <button onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`px-4 py-1.5 text-sm font-medium transition-all rounded ${calendarMode === "week" ? "bg-blue-600 text-white shadow-lg" : "bg-slate-600 text-white hover:bg-slate-700"}`}>Semaine</button>
-                      <button onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`px-4 py-1.5 text-sm font-medium transition-all rounded ${calendarMode === "month" ? "bg-blue-600 text-white shadow-lg" : "bg-slate-600 text-white hover:bg-slate-700"}`}>Mois</button>
+                      <button onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`px-4 py-1.5 text-sm font-medium transition-all rounded !border-0 !outline-none !shadow-none ${calendarMode === "week" ? "!bg-blue-600 !text-white" : "!bg-slate-600 !text-white hover:!bg-slate-700"}`}>Semaine</button>
+                      <button onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`px-4 py-1.5 text-sm font-medium transition-all rounded !border-0 !outline-none !shadow-none ${calendarMode === "month" ? "!bg-blue-600 !text-white" : "!bg-slate-600 !text-white hover:!bg-slate-700"}`}>Mois</button>
                     </div>
                   </div>
                 </CardHeader>
