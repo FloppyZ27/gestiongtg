@@ -894,7 +894,8 @@ export default function GestionDeMandat() {
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
                     <div className="flex items-center justify-between w-full">
                       <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByTache[tache] || []).length}</Badge>
-                      <span className="text-sm font-bold text-white">{tache}</span>
+                      <span className="text-base font-bold text-white flex-1 text-center">{tache}</span>
+                      <div className="w-8" />
                     </div>
                   ))}
                 </div>
@@ -934,15 +935,16 @@ export default function GestionDeMandat() {
                   {filteredUsersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
                     <div className="flex items-center justify-between w-full">
                       <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByUtilisateur[user.email] || []).length}</Badge>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-1 justify-center">
                         {user.email !== "non-assigne" ? (
                           <Avatar className="w-5 h-5 border border-white/20">
                             <AvatarImage src={user.photo_url} />
                             <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user.full_name)}</AvatarFallback>
                           </Avatar>
                         ) : <User className="w-4 h-4 text-white" />}
-                        <span className="text-sm font-bold text-white truncate max-w-[110px]">{user.prenom} {user.nom}</span>
+                        <span className="text-base font-bold text-white truncate max-w-[130px]">{user.full_name}</span>
                       </div>
+                      <div className="w-8" />
                     </div>
                   ))}
                 </div>
