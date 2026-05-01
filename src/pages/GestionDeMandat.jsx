@@ -898,7 +898,7 @@ export default function GestionDeMandat() {
                     const isActive = filterPlaceAffaire === val;
                     return (
                       <button key={val} onClick={() => setFilterPlaceAffaire(val)}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
                         {label}
                         <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
                       </button>
@@ -932,7 +932,7 @@ export default function GestionDeMandat() {
                     const isActive = filterEquipe === equipe;
                     return (
                       <button key={equipe} onClick={() => setFilterEquipe(equipe)}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
                         {equipe}
                         <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
                       </button>
@@ -972,7 +972,7 @@ export default function GestionDeMandat() {
                     const isActive = filterPlaceAffaireCalendrier === val;
                     return (
                       <button key={val} onClick={() => setFilterPlaceAffaireCalendrier(val)}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
                         {label}
                         <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
                       </button>
