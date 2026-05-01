@@ -991,9 +991,9 @@ export default function GestionDeMandat() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setCurrentMonthStart(calendarMode === "week" ? subWeeks(currentMonthStart, 1) : subMonths(currentMonthStart, 1))}
-                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
-                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
-                        style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#1d4ed8', color: 'white' })}
+                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
+                        style={{ background: '#2563eb', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
                       ><ChevronLeft className="w-4 h-4" /></button>
 
                       <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
@@ -1015,9 +1015,9 @@ export default function GestionDeMandat() {
 
                       <button
                         onClick={() => setCurrentMonthStart(calendarMode === "week" ? addWeeks(currentMonthStart, 1) : addMonths(currentMonthStart, 1))}
-                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
-                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' })}
-                        style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+                        onMouseEnter={e => Object.assign(e.currentTarget.style, { background: '#1d4ed8', color: 'white' })}
+                        onMouseLeave={e => Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' })}
+                        style={{ background: '#2563eb', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
                       ><ChevronRight className="w-4 h-4" /></button>
 
                       <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-blue-600 hover:bg-blue-700 text-white">Aujourd'hui</Button>
