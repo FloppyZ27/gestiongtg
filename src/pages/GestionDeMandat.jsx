@@ -72,7 +72,12 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
-const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+const getUserInitials = (name) => {
+  if (!name) return 'U';
+  const parts = name.trim().split(' ').filter(p => p.length > 0);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 const getUserColor = (index) => {
   const colors = ["from-blue-500 to-blue-600", "from-purple-500 to-purple-600", "from-green-500 to-green-600", "from-orange-500 to-orange-600", "from-pink-500 to-pink-600", "from-cyan-500 to-cyan-600", "from-yellow-500 to-yellow-600", "from-red-500 to-red-600"];
