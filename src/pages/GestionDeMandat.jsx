@@ -320,16 +320,10 @@ export default function GestionDeMandat() {
       
       const dossierData = dossierUpdates[dossierId];
       
-      // Créer une clé stable pour le mandat (type + tâche + date_ouverture)
-      const mandatKey = `${linkedCard.mandat.type_mandat}-${linkedCard.tache}-${linkedCard.mandat.date_ouverture || ''}`;
+      // Trouver le mandat par son index direct dans le dossier (plus fiable)
+      const actualMandatIndex = linkedCard.mandatIndex;
       
-      // Trouver l'index réel du mandat dans le dossier
-      const actualMandatIndex = dossierData.mandats.findIndex(m => {
-        const mKey = `${m.type_mandat}-${m.tache_actuelle}-${m.date_ouverture || ''}`;
-        return mKey === mandatKey;
-      });
-      
-      if (actualMandatIndex === -1) return; // Mandat pas trouvé
+      if (actualMandatIndex === undefined || actualMandatIndex === null || actualMandatIndex >= dossierData.mandats.length) return;
       
       // Mettre à jour le mandat dans cette copie du dossier
       if (activeView === "taches") {
@@ -357,24 +351,33 @@ export default function GestionDeMandat() {
             });
           }
           dossierData.mandats[actualMandatIndex] = updated;
-        } else if (dropIndex !== null && linkedCard.tache === targetColumn) {
+        } else if (dropIndex !== null) {
           // Réordonnement dans la même colonne
-          // Désactiver le tri pour cette colonne (sinon le réordonnement sera annulé au rendu)
-          setSortTaches(prev => ({ ...prev, [targetColumn]: null }));
+          // Construire la liste ordonnée des mandats de cette colonne dans tout le kanban
+          const allCardsInColumn = allCards.filter(c => c.tache === targetColumn);
+          const cardPositionInColumn = allCardsInColumn.findIndex(c => c.id === linkedCard.id);
           
-          // Retirer le mandat de sa position actuelle
+          if (cardPositionInColumn === dropIndex || cardPositionInColumn === dropIndex - 1) return; // Pas de changement
+
+          // On réorganise les mandats du dossier : extraire et réinsérer
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           
-          // Insérer à la position dropIndex parmi les mandats de cette colonne
+          // Calculer le nombre de mandats dans cette colonne avant l'index actuel dans ce dossier
           let insertIndex = dossierData.mandats.length;
           let countInColumn = 0;
+          
+          // dropIndex est relatif à toutes les cartes de la colonne (tous dossiers confondus)
+          // On doit trouver la position équivalente dans ce dossier
+          // Approche simplifiée : compter les mandats de cette colonne dans le dossier
+          const targetInColumn = dropIndex;
+          let seen = 0;
           for (let i = 0; i < dossierData.mandats.length; i++) {
             if (dossierData.mandats[i].tache_actuelle === targetColumn) {
-              if (countInColumn === dropIndex) {
+              if (seen === targetInColumn) {
                 insertIndex = i;
                 break;
               }
-              countInColumn++;
+              seen++;
             }
           }
           dossierData.mandats.splice(insertIndex, 0, mandat);
@@ -383,18 +386,18 @@ export default function GestionDeMandat() {
         if (linkedCard.utilisateur !== targetColumn) {
           const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
-        } else if (dropIndex !== null && linkedCard.utilisateur === targetColumn) {
-          setSortUtilisateurs(prev => ({ ...prev, [targetColumn]: null }));
+        } else if (dropIndex !== null) {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           let insertIndex = dossierData.mandats.length;
-          let countInColumn = 0;
+          let seen = 0;
+          const targetInColumn = dropIndex;
           for (let i = 0; i < dossierData.mandats.length; i++) {
             if ((dossierData.mandats[i].utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn)) {
-              if (countInColumn === dropIndex) {
+              if (seen === targetInColumn) {
                 insertIndex = i;
                 break;
               }
-              countInColumn++;
+              seen++;
             }
           }
           dossierData.mandats.splice(insertIndex, 0, mandat);
@@ -403,17 +406,17 @@ export default function GestionDeMandat() {
         const newDateStr = targetColumn.replace("day-", "");
         if (linkedCard.mandat.date_livraison !== newDateStr) {
           dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
-        } else if (dropIndex !== null && linkedCard.mandat.date_livraison === targetColumn.replace("day-", "")) {
+        } else if (dropIndex !== null) {
           const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
           let insertIndex = dossierData.mandats.length;
-          let countInColumn = 0;
+          let seen = 0;
           for (let i = 0; i < dossierData.mandats.length; i++) {
-            if (dossierData.mandats[i].date_livraison === targetColumn.replace("day-", "")) {
-              if (countInColumn === dropIndex) {
+            if (dossierData.mandats[i].date_livraison === newDateStr) {
+              if (seen === dropIndex) {
                 insertIndex = i;
                 break;
               }
-              countInColumn++;
+              seen++;
             }
           }
           dossierData.mandats.splice(insertIndex, 0, mandat);
@@ -427,7 +430,6 @@ export default function GestionDeMandat() {
         { id: updatedDossier.id, dossierData: updatedDossier },
         {
           onSuccess: () => {
-            // Invalider et recharger après la dernière mutation
             if (idx === arr.length - 1) {
               queryClient.invalidateQueries({ queryKey: ['dossiers'] });
             }
