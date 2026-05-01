@@ -620,9 +620,11 @@ export default function FeuilleTempsSection({
           </DialogHeader>
           
           <Tabs defaultValue="note" className="w-full" onValueChange={(v) => setActiveTab(v)}>
-            <TabsList className="grid w-full grid-cols-2 bg-transparent">
-              <TabsTrigger value="note" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 data-[state=inactive]:bg-slate-700 data-[state=inactive]:text-slate-400">Note</TabsTrigger>
-              <TabsTrigger value="factures" className="flex items-center gap-2 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 data-[state=inactive]:bg-slate-700 data-[state=inactive]:text-slate-400">
+            <TabsList className="bg-slate-800/50 h-12 w-full">
+              <TabsTrigger value="note" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border-b-2 data-[state=active]:border-cyan-400 text-slate-400 flex-1 h-full">
+                Note
+              </TabsTrigger>
+              <TabsTrigger value="factures" className="flex items-center gap-2 justify-center data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border-b-2 data-[state=active]:border-cyan-400 text-slate-400 flex-1 h-full">
                 Factures
                 {fileCount > 0 && (
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500/30 text-orange-400 text-xs font-bold">
