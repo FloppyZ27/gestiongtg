@@ -1025,8 +1025,8 @@ export default function GestionDeMandat() {
 
                     {/* Droite : toggle Semaine/Mois */}
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
-                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60 shadow-lg shadow-emerald-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
+                      <button data-state={calendarMode === "week" ? "active" : "inactive"} onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className="timesheet-tab-button px-4 py-1.5 text-sm font-medium rounded transition-all">Semaine</button>
+                      <button data-state={calendarMode === "month" ? "active" : "inactive"} onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className="timesheet-tab-button px-4 py-1.5 text-sm font-medium rounded transition-all">Mois</button>
                     </div>
                   </div>
                 </CardHeader>

@@ -709,10 +709,22 @@ function LayoutContent({ children, currentPageName }) {
           box-shadow: 0 4px 12px -3px rgba(0, 184, 212, 0.4) !important;
         }
 
+        button.timesheet-tab-button[data-state="inactive"] {
+          background: rgb(100, 116, 139) !important;
+          background-color: rgb(100, 116, 139) !important;
+          background-image: none !important;
+          box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.3) !important;
+        }
+
         button.timesheet-tab-button:hover {
           background: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
           background-image: linear-gradient(to right, rgb(0, 172, 193), rgb(0, 121, 107)) !important;
           box-shadow: 0 6px 16px -3px rgba(0, 184, 212, 0.5) !important;
+        }
+
+        button.timesheet-tab-button[data-state="inactive"]:hover {
+          background: rgb(125, 139, 156) !important;
+          box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.4) !important;
         }
 
         button.timesheet-tab-button:active {
