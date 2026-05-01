@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Palmtree, Heart, Banknote, Check, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -143,6 +143,7 @@ export default function SoldesCongesSection() {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [dialogYear, setDialogYear] = useState(new Date().getFullYear());
+  const [userSortOrder, setUserSortOrder] = useState('asc');
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
 
@@ -186,6 +187,12 @@ export default function SoldesCongesSection() {
   });
 
   const activeUsers = users.filter(u => u.statut !== 'Inactif');
+  
+  const sortedUsers = [...activeUsers].sort((a, b) => {
+    const nameA = (a.full_name || '').toLowerCase();
+    const nameB = (b.full_name || '').toLowerCase();
+    return userSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
 
   return (
     <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
@@ -209,7 +216,20 @@ export default function SoldesCongesSection() {
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             {/* En-tête */}
             <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
-              <div className="text-xs font-semibold text-slate-400">Utilisateur</div>
+              <div>
+                <button
+                  onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+                  className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                >
+                  Utilisateur
+                  {userSortOrder === 'asc'
+                    ? <ChevronUp className="w-3 h-3 text-emerald-400" />
+                    : userSortOrder === 'desc'
+                    ? <ChevronDown className="w-3 h-3 text-emerald-400" />
+                    : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
+                  }
+                </button>
+              </div>
               <div className="text-xs font-semibold text-slate-400 flex items-center gap-1"><Palmtree className="w-3 h-3 text-emerald-400" /> Vacances</div>
               <div className="text-xs font-semibold text-emerald-700">Max vac.</div>
               <div className="text-xs font-semibold text-slate-400 flex items-center gap-1"><Heart className="w-3 h-3 text-pink-400" /> Mieux-être</div>
@@ -219,7 +239,7 @@ export default function SoldesCongesSection() {
             </div>
 
             {/* Lignes */}
-            {activeUsers.map(u => {
+            {sortedUsers.map(u => {
               const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
               const maxVac = solde.max_vacances ?? 120;
               const maxMe = solde.max_mieux_etre ?? 40;
