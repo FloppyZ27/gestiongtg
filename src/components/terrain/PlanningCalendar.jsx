@@ -1594,7 +1594,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       <EditTeamDialog isOpen={isEditTeamDialogOpen} onClose={() => { setIsEditTeamDialogOpen(false); setEditingTeam(null); setEditTeamDateStr(null); }} onUpdateTeam={handleUpdateTeam} dateStr={editTeamDateStr} equipe={editingTeam} techniciens={users} vehicules={vehicules} equipements={equipements} equipes={equipes} placeAffaire={placeAffaire} />
 
       <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl" style={{ width: '105%' }}>
           <DialogHeader><DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle></DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
             <div className="grid grid-cols-4 gap-3">
