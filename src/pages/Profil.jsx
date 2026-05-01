@@ -954,7 +954,7 @@ export default function Profil() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Mon Profil
               </h1>
-              <UserCircle className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+              <UserCircle className="w-8 h-8 text-blue-400 flex-shrink-0" />
             </div>
             <p className="text-slate-400">Gérez vos informations personnelles et professionnelles</p>
           </div>
