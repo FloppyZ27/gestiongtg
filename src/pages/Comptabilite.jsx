@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera, ChevronLeft, ChevronRight } from "lucide-react";
+import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
@@ -331,7 +331,12 @@ export default function Comptabilite() {
                           className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
                         >
                           Utilisateur
-                          {userSortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                          {userSortOrder === 'asc'
+                            ? <ChevronUp className="w-3 h-3 text-emerald-400" />
+                            : userSortOrder === 'desc'
+                            ? <ChevronDown className="w-3 h-3 text-emerald-400" />
+                            : <ChevronsUpDown className="w-3 h-3 text-slate-500" />
+                          }
                         </button>
                       </div>
                       {weekDays.map((day, idx) => (
