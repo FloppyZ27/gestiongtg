@@ -785,8 +785,7 @@ export default function GestionDeMandat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      {/* Connecteur visuel entre cartes liées */}
-      <LinkedCardsConnector linkedGroups={linkedGroups} terrainCards={allCards} />
+      {/* Connecteur visuel désactivé */}
       
       {/* Ghost card pendant le drag */}
       {dragging && <GhostCard card={dragging.card} pos={ghostPos} clients={clients} users={users} linkedGroupIds={getLinkedCardIds(dragging.card.id)} />}
