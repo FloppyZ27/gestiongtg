@@ -552,7 +552,8 @@ export default function GestionDeMandat() {
             return (
               <Badge 
                 key={c.id} 
-                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : 'cursor-default'}`}
+                style={!isInDissociationMode ? { pointerEvents: 'none' } : undefined}
+                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!isInDissociationMode) return;
