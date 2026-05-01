@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronUp, ChevronDown, Palmtree, Heart, Banknote, Check, X, FileText, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -140,11 +140,12 @@ function UserEntriesPanel({ userEmail, year }) {
 }
 
 export default function SoldesCongesSection() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [dialogYear, setDialogYear] = useState(new Date().getFullYear());
-  const queryClient = useQueryClient();
-  const currentYear = new Date().getFullYear();
+   const [collapsed, setCollapsed] = useState(false);
+   const [selectedUser, setSelectedUser] = useState(null);
+   const [dialogYear, setDialogYear] = useState(new Date().getFullYear());
+   const [searchTerm, setSearchTerm] = useState("");
+   const queryClient = useQueryClient();
+   const currentYear = new Date().getFullYear();
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
@@ -206,6 +207,15 @@ export default function SoldesCongesSection() {
 
       {!collapsed && (
         <CardContent className="p-4">
+          <div className="mb-4 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+            <Input
+              placeholder="Rechercher un utilisateur..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+            />
+          </div>
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             {/* En-tête */}
             <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
@@ -219,7 +229,10 @@ export default function SoldesCongesSection() {
             </div>
 
             {/* Lignes */}
-            {activeUsers.map(u => {
+            {activeUsers.filter(u => {
+              const searchLower = searchTerm.toLowerCase();
+              return u.full_name?.toLowerCase().includes(searchLower) || u.poste?.toLowerCase().includes(searchLower);
+            }).map(u => {
               const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
               const maxVac = solde.max_vacances ?? 120;
               const maxMe = solde.max_mieux_etre ?? 40;
