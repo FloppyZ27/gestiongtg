@@ -568,8 +568,8 @@ export default function GestionDeMandat() {
             return (
               <Badge 
                 key={c.id} 
-                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : isMultiMandat && !isCurrentCard ? 'cursor-pointer hover:opacity-80 ring-1 ring-white/20' : ''}`}
-                style={{ pointerEvents: isInDissociationMode || (isMultiMandat && !isCurrentCard) ? 'auto' : 'none' }}
+                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all cursor-pointer hover:opacity-80 ${isInDissociationMode ? 'ring-2 ring-red-400' : isMultiMandat ? 'ring-1 ring-white/20' : ''}`}
+                style={{ pointerEvents: 'auto' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isInDissociationMode) {
@@ -585,8 +585,8 @@ export default function GestionDeMandat() {
                       setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
                     }
                     setDissociationMode(null);
-                  } else if (isMultiMandat && !isCurrentCard) {
-                    // Ouvrir le dialog d'édition du mandat cliqué
+                  } else {
+                    // Ouvrir le dialog d'édition du mandat cliqué (qu'il soit la carte courante ou une liée)
                     const freshDossier = dossiers.find(d => d.id === c.dossier.id);
                     if (freshDossier) {
                       setEditingDossier({ ...freshDossier, initialMandatIndex: c.mandatIndex });
