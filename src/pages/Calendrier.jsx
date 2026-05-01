@@ -331,156 +331,43 @@ export default function Calendrier() {
           </div>
         </div>
 
-        {/* Filters - Collapsible Box */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="pb-3 px-4 py-3">
-            <div className="space-y-3">
-              <div className="flex justify-end items-center">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Filtres</span>
-                  {(selectedUser.length > 0 || selectedType.length > 0) && (
-                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {selectedUser.length + selectedType.length}
-                    </Badge>
-                  )}
-                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                </Button>
-              </div>
-
-              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                <CollapsibleContent>
-                  <div className="p-3 border border-emerald-500/30 rounded-lg">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-3 h-3 text-emerald-500" />
-                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
-                        </div>
-                        {(selectedUser.length > 0 || selectedType.length > 0) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedUser([]);
-                              setSelectedType([]);
-                            }}
-                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                          >
-                            <X className="w-2.5 h-2.5 mr-1" />
-                            Réinitialiser
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            {users.map((user) => (
-                              <DropdownMenuCheckboxItem
-                                key={user.email}
-                                checked={selectedUser.includes(user.email)}
-                                onCheckedChange={(checked) => {
-                                  setSelectedUser(
-                                    checked
-                                      ? [...selectedUser, user.email]
-                                      : selectedUser.filter((u) => u !== user.email)
-                                  );
-                                }}
-                                className="text-white text-xs"
-                              >
-                                {user.full_name}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Types ({selectedType.length > 0 ? `${selectedType.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {['rendez-vous', 'absence', 'anniversaire', 'jour_ferie'].map((type) => (
-                              <DropdownMenuCheckboxItem
-                                key={type}
-                                checked={selectedType.includes(type)}
-                                onCheckedChange={(checked) => {
-                                  setSelectedType(
-                                    checked
-                                      ? [...selectedType, type]
-                                      : selectedType.filter((t) => t !== type)
-                                  );
-                                }}
-                                className="text-white text-xs"
-                              >
-                                {type === 'rendez-vous' ? 'Rendez-vous' :
-                                 type === 'absence' ? 'Absence' :
-                                 type === 'anniversaire' ? 'Anniversaire' :
-                                 'Jour férié'}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </CardHeader>
-        </Card>
-
         {/* Calendar */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-6">
             {/* Header avec navigation et contrôles */}
-             <div className="flex flex-col gap-3 mb-6 pb-4">
-               <div className="flex justify-between items-center">
-                 <div className="flex items-center gap-3">
-                   <Button
-                     size="sm"
-                     variant="outline"
-                     onClick={previousPeriod}
-                     className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
-                   >
-                     <ChevronLeft className="w-4 h-4" />
-                   </Button>
-                   <div className="text-white font-semibold text-lg min-w-[250px] text-center">
-                     {viewMode === "week" 
-                       ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
-                       : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                   </div>
-                   <Button
-                     size="sm"
-                     variant="outline"
-                     onClick={nextPeriod}
-                     className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
-                   >
-                     <ChevronRight className="w-4 h-4" />
-                   </Button>
-                 </div>
-                 <div className="flex gap-2 items-center">
-                   <Button
-                     size="sm"
-                     onClick={() => setCurrentDate(new Date())}
-                     className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
-                   >
-                     Aujourd'hui
-                   </Button>
+            <div className="flex flex-col gap-3 mb-6 pb-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={previousPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <div className="text-white font-semibold text-lg min-w-[250px] text-center">
+                    {viewMode === "week" 
+                      ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
+                      : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={nextPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentDate(new Date())}
+                    className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 h-8"
+                  >
+                    Aujourd'hui
+                  </Button>
                   <div className="h-6 w-px bg-slate-700 mx-1"></div>
                   <div className="flex gap-1">
                     <Button
@@ -500,6 +387,119 @@ export default function Calendrier() {
                   </div>
                 </div>
               </div>
+
+              {/* Filters - Collapsible Box */}
+              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-sm">
+                <CardHeader className="pb-3 px-4 py-3">
+                  <div className="space-y-3">
+                    <div className="flex justify-end items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                        className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                      >
+                        <Filter className="w-4 h-4 mr-2" />
+                        <span className="text-sm">Filtres</span>
+                        {(selectedUser.length > 0 || selectedType.length > 0) && (
+                          <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {selectedUser.length + selectedType.length}
+                          </Badge>
+                        )}
+                        {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                      </Button>
+                    </div>
+
+                    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                      <CollapsibleContent>
+                        <div className="p-3 border border-emerald-500/30 rounded-lg">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                              <div className="flex items-center gap-2">
+                                <Filter className="w-3 h-3 text-emerald-500" />
+                                <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
+                              </div>
+                              {(selectedUser.length > 0 || selectedType.length > 0) && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUser([]);
+                                    setSelectedType([]);
+                                  }}
+                                  className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                                >
+                                  <X className="w-2.5 h-2.5 mr-1" />
+                                  Réinitialiser
+                                </Button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                    <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
+                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                  {users.map((user) => (
+                                    <DropdownMenuCheckboxItem
+                                      key={user.email}
+                                      checked={selectedUser.includes(user.email)}
+                                      onCheckedChange={(checked) => {
+                                        setSelectedUser(
+                                          checked
+                                            ? [...selectedUser, user.email]
+                                            : selectedUser.filter((u) => u !== user.email)
+                                        );
+                                      }}
+                                      className="text-white text-xs"
+                                    >
+                                      {user.full_name}
+                                    </DropdownMenuCheckboxItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                    <span className="truncate">Types ({selectedType.length > 0 ? `${selectedType.length}` : 'Tous'})</span>
+                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                                  {['rendez-vous', 'absence', 'anniversaire', 'jour_ferie'].map((type) => (
+                                    <DropdownMenuCheckboxItem
+                                      key={type}
+                                      checked={selectedType.includes(type)}
+                                      onCheckedChange={(checked) => {
+                                        setSelectedType(
+                                          checked
+                                            ? [...selectedType, type]
+                                            : selectedType.filter((t) => t !== type)
+                                        );
+                                      }}
+                                      className="text-white text-xs"
+                                    >
+                                      {type === 'rendez-vous' ? 'Rendez-vous' :
+                                       type === 'absence' ? 'Absence' :
+                                       type === 'anniversaire' ? 'Anniversaire' :
+                                       'Jour férié'}
+                                    </DropdownMenuCheckboxItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                </CardHeader>
+              </Card>
             </div>
 
             {/* Vue Semaine */}
