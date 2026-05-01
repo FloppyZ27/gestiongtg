@@ -1020,13 +1020,13 @@ export default function GestionDeMandat() {
                         style={{ background: 'rgb(30,41,59)', border: 0, outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
                       ><ChevronRight className="w-4 h-4" /></button>
 
-                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Aujourd'hui</Button>
+                      <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-blue-600 hover:bg-blue-700 text-white">Aujourd'hui</Button>
                     </div>
 
                     {/* Droite : toggle Semaine/Mois */}
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Semaine</Button>
-                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-emerald-500/30 text-emerald-300 ring-2 ring-emerald-500/60" : "bg-slate-800 text-white hover:bg-slate-600"}>Mois</Button>
+                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-blue-600 text-white ring-2 ring-blue-400/60" : "bg-slate-800 text-white hover:bg-blue-600"}>Semaine</Button>
+                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-blue-600 text-white ring-2 ring-blue-400/60" : "bg-slate-800 text-white hover:bg-blue-600"}>Mois</Button>
                     </div>
                   </div>
                 </CardHeader>
