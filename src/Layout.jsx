@@ -671,9 +671,6 @@ function LayoutContent({ children, currentPageName }) {
         /* Retirer complètement l'encadré des TabsTrigger */
         button[role="tab"],
         [role="tab"] {
-          background: transparent !important;
-          background-color: transparent !important;
-          background-image: none !important;
           border: none !important;
           box-shadow: none !important;
           transition: all 0.3s ease !important;
