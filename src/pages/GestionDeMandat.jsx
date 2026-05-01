@@ -1025,8 +1025,8 @@ export default function GestionDeMandat() {
 
                     {/* Droite : toggle Semaine/Mois */}
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "bg-blue-600 text-white ring-2 ring-blue-400/60" : "bg-slate-800 text-white hover:bg-blue-600"}>Semaine</Button>
-                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "bg-blue-600 text-white ring-2 ring-blue-400/60" : "bg-slate-800 text-white hover:bg-blue-600"}>Mois</Button>
+                      <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={calendarMode === "week" ? "!bg-blue-600 !text-white" : "!bg-transparent !border-2 !border-slate-600 !text-white hover:!border-blue-500"}>Semaine</Button>
+                      <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={calendarMode === "month" ? "!bg-blue-600 !text-white" : "!bg-transparent !border-2 !border-slate-600 !text-white hover:!border-blue-500"}>Mois</Button>
                     </div>
                   </div>
                 </CardHeader>
