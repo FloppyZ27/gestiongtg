@@ -727,11 +727,11 @@ export default function GestionDeMandat() {
         data-kanban-column={columnId}
         style={{ flex: '0 0 270px', minWidth: 270, maxWidth: 270 }}
       >
-        <div className={`rounded-xl border transition-all duration-150 flex flex-col ${isOver ? 'border-emerald-400/80 bg-emerald-500/10 shadow-lg shadow-emerald-500/20' : 'border-slate-700/50 bg-slate-800/40'}`} style={{ maxHeight: 'calc(100vh - 280px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div className="px-3 py-2.5 border-b border-slate-700/50 bg-slate-800 rounded-t-xl flex-shrink-0">
+        <div className={`rounded-xl border transition-all duration-150 flex flex-col ${isOver ? 'border-emerald-400/80 bg-emerald-500/10 shadow-lg shadow-emerald-500/20' : 'border-slate-700/50 bg-slate-800/40'}`}>
+          <div className="px-3 py-2.5 border-b border-slate-700/50 bg-slate-800 rounded-t-xl sticky top-0 z-10">
             {headerContent}
           </div>
-          <div className="p-3 min-h-[120px] overflow-y-auto flex-1">
+          <div className="p-3 min-h-[120px]">
             {processedCards.map(({ mainCard, linkedCards }, idx) => (
               <div key={`card-${mainCard.id}`}>
                 {isOver && dropIndex === idx && (
