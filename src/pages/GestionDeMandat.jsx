@@ -205,6 +205,7 @@ export default function GestionDeMandat() {
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [], staleTime: 60000 });
   const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
+  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   
   const { data: linkedCardsGroupsDB = [] } = useQuery({ 
@@ -956,7 +957,7 @@ export default function GestionDeMandat() {
                             <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user)}</AvatarFallback>
                           </Avatar>
                         ) : <User className="w-4 h-4 text-white" />}
-                        <span className="text-base font-bold text-white truncate max-w-[130px]">{user.email === "non-assigne" ? "Non assigné" : (() => { const emp = user.full_name?.trim().split(' ') || []; return emp.length >= 2 ? `${emp[0]} ${emp[emp.length - 1]}` : user.full_name; })()}</span>
+                        <span className="text-base font-bold text-white truncate max-w-[130px]">{user.email === "non-assigne" ? "Non assigné" : (() => { const emp = employes.find(e => e.compte_utilisateur === user.email); return emp ? `${emp.prenom} ${emp.nom}` : user.full_name; })()}</span>
                       </div>
                       <div className="w-8" />
                     </div>
