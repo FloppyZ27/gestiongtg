@@ -939,7 +939,7 @@ function LayoutContent({ children, currentPageName }) {
                                 asChild 
                                 className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
                                   location.pathname === item.url 
-                                    ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/20' 
+                                    ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/30' 
                                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                                 }`}
                               >
