@@ -679,6 +679,12 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
+        /* Garder le glow pour les SidebarMenuButton actifs */
+        [class*="SidebarMenuButton"]:has(> a[href]),
+        a[class*="flex"] {
+          box-shadow: revert-layer !important;
+        }
+
         /* Badges et logos noirs au hover dans les menus déroulants */
         [data-radix-select-content] [role="option"]:hover [class*="Badge"],
         [data-radix-select-content] [role="option"]:hover [class*="bg-"],
