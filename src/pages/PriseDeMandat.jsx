@@ -3885,51 +3885,51 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
               <div className="flex w-full border-b border-slate-700">
-                <button
-                  role="tab"
-                  onClick={() => setActiveListTab("nouveau")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                    activeListTab === "nouveau"
-                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
-                      : "border-transparent text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
-                  }`}
-                >
-                  <FileQuestion className="w-4 h-4" />
-                  Nouveau mandat / Demande d'informations
-                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 ml-1">
-                    {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
-                  </Badge>
-                </button>
-                <button
-                  role="tab"
-                  onClick={() => setActiveListTab("ouvrir")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                    activeListTab === "ouvrir"
-                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
-                      : "border-transparent text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
-                  }`}
-                >
-                  <FolderOpen className="w-4 h-4" />
-                  Mandat à ouvrir
-                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 ml-1">
-                    {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
-                  </Badge>
-                </button>
-                <button
-                  role="tab"
-                  onClick={() => setActiveListTab("non-octroye")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                    activeListTab === "non-octroye"
-                      ? "border-red-500 text-red-400 bg-red-500/10"
-                      : "border-transparent text-slate-400 hover:text-red-400 hover:bg-red-500/5"
-                  }`}
-                >
-                  <XCircle className="w-4 h-4" />
-                  Mandat non-octroyé
-                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 ml-1">
-                    {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
-                  </Badge>
-                </button>
+               <button
+                 role="tab"
+                 onClick={() => setActiveListTab("nouveau")}
+                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                   activeListTab === "nouveau"
+                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
+                     : "border-transparent text-slate-500 hover:text-slate-400"
+                 }`}
+               >
+                 <FileQuestion className="w-4 h-4" />
+                 Nouveau mandat / Demande d'informations
+                 <Badge className={`ml-1 ${activeListTab === "nouveau" ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
+                 </Badge>
+               </button>
+               <button
+                 role="tab"
+                 onClick={() => setActiveListTab("ouvrir")}
+                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                   activeListTab === "ouvrir"
+                     ? "border-purple-500 text-purple-400 bg-purple-500/10"
+                     : "border-transparent text-slate-500 hover:text-slate-400"
+                 }`}
+               >
+                 <FolderOpen className="w-4 h-4" />
+                 Mandat à ouvrir
+                 <Badge className={`ml-1 ${activeListTab === "ouvrir" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
+                 </Badge>
+               </button>
+               <button
+                 role="tab"
+                 onClick={() => setActiveListTab("non-octroye")}
+                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                   activeListTab === "non-octroye"
+                     ? "border-red-500 text-red-400 bg-red-500/10"
+                     : "border-transparent text-slate-500 hover:text-slate-400"
+                 }`}
+               >
+                 <XCircle className="w-4 h-4" />
+                 Mandat non-octroyé
+                 <Badge className={`ml-1 ${activeListTab === "non-octroye" ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
+                 </Badge>
+               </button>
               </div>
 
               <div className="space-y-2">
