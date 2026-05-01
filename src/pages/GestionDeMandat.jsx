@@ -72,16 +72,11 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
-const getUserInitials = (name, email) => {
+const getUserInitials = (name) => {
   if (!name) return 'U';
   const parts = name.trim().split(' ').filter(p => p.length > 0);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  // Un seul mot dans full_name : utiliser l'email pour la 2e initiale
-  if (email) {
-    const emailParts = email.split('@')[0].split(/[._-]/);
-    if (emailParts.length >= 2) return (parts[0][0] + emailParts[emailParts.length - 1][0]).toUpperCase();
-  }
-  return parts[0][0].toUpperCase();
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
 const getUserColor = (index) => {
@@ -698,10 +693,10 @@ export default function GestionDeMandat() {
           ) : <div />}
           {assignedUser ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser.full_name, assignedUser.email)}</span>
+              <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 700, letterSpacing: '0.5px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>{getUserInitials(assignedUser.full_name)}</span>
               <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
                 <AvatarImage src={assignedUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name, assignedUser.email)}</AvatarFallback>
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
               </Avatar>
             </div>
           ) : (
