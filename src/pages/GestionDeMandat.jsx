@@ -675,12 +675,12 @@ export default function GestionDeMandat() {
             </div>
           ) : <div />}
           {assignedUser ? (
-            <div className="flex items-center gap-1.5">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
                 <AvatarImage src={assignedUser.photo_url} />
                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
               </Avatar>
-              <span className="text-xs text-slate-300 font-semibold">{getUserInitials(assignedUser.full_name)}</span>
+              <span style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 600 }}>{getUserInitials(assignedUser.full_name)}</span>
             </div>
           ) : (
             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
