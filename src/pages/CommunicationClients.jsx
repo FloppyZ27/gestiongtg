@@ -121,7 +121,7 @@ export default function CommunicationClients() {
           </div>
 
           <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
-            <div className="flex items-center justify-between gap-6 mb-1">
+            <div className="flex items-center justify-between gap-6 mb-0">
               <PlaceAffaireTabs
                 value={filterPlaceAffaire}
                 onChange={setFilterPlaceAffaire}
