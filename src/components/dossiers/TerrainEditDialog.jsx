@@ -97,12 +97,12 @@ export default function TerrainEditDialog({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg border border-slate-700/60">
+              <Label className="text-sm font-medium">Rendez-vous requis</Label>
               <Switch
                 checked={terrainForm.a_rendez_vous || false}
                 onCheckedChange={(checked) => setTerrainForm({ ...terrainForm, a_rendez_vous: checked })}
               />
-              <Label className="text-xs">Rendez-vous</Label>
             </div>
             {terrainForm.a_rendez_vous && (
               <div className="grid grid-cols-2 gap-4 pl-6">
