@@ -547,33 +547,32 @@ export default function GestionDeMandat() {
           </Badge>
           <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
             {allMandatsForCard.map(c => {
-              const group = linkedGroups.find(g => g.cardIds.includes(c.id));
-              const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
-              return (
-                <Badge 
-                  key={c.id} 
-                  className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold cursor-pointer transition-all`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isInDissociationMode) {
-                      // Dissocier cette carte du groupe
-                      const remainingCards = group.cardIds.filter(id => id !== c.id);
-                      if (remainingCards.length > 0) {
-                        updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
-                        setLinkedGroups(linkedGroups.map(g => 
-                          g.id === group.id ? { ...g, cardIds: remainingCards } : g
-                        ));
-                      } else {
-                        deleteLinkedGroupMutation.mutate(group.id);
-                        setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
-                      }
-                      setDissociationMode(null);
-                    }
-                  }}
-                >
-                  {getAbbreviatedMandatType(c.mandat.type_mandat)}
-                </Badge>
-              );
+            const group = linkedGroups.find(g => g.cardIds.includes(c.id));
+            const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
+            return (
+              <Badge 
+                key={c.id} 
+                className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all ${isInDissociationMode ? 'cursor-pointer ring-2 ring-red-400' : 'cursor-default'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isInDissociationMode) return;
+                  // Dissocier cette carte du groupe
+                  const remainingCards = group.cardIds.filter(id => id !== c.id);
+                  if (remainingCards.length > 0) {
+                    updateLinkedGroupMutation.mutate({ id: group.id, groupData: { cardIds: remainingCards } });
+                    setLinkedGroups(linkedGroups.map(g => 
+                      g.id === group.id ? { ...g, cardIds: remainingCards } : g
+                    ));
+                  } else {
+                    deleteLinkedGroupMutation.mutate(group.id);
+                    setLinkedGroups(linkedGroups.filter(g => g.id !== group.id));
+                  }
+                  setDissociationMode(null);
+                }}
+              >
+                {getAbbreviatedMandatType(c.mandat.type_mandat)}
+              </Badge>
+            );
             })}
             <div
               onClick={(e) => {
