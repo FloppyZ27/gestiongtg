@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock, FolderOpen, Filter, X } from "lucide-react";
+import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock, FolderOpen, Filter, X, Hand, Package } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { motion } from "framer-motion";
@@ -1069,19 +1069,22 @@ export default function ClientFormDialog({
                     {/* Préférences de Livraison - Pleine largeur */}
                     <div className="space-y-0.5">
                       <Label className="text-slate-400 text-xs">Préférences de livraison</Label>
-                      <div className="flex gap-1">
+                      <div className="flex gap-2">
                         {MODES_LIVRAISON.map((mode) => (
                           <button
                             key={mode}
                             type="button"
                             onClick={() => togglePreferenceLivraison(mode)}
-                            className={`px-1.5 py-0.5 rounded text-xs border transition-all ${
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs border transition-all ${
                               formData.preferences_livraison.includes(mode)
                                 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
                                 : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
                             }`}
                           >
-                            {mode === "Main propre" ? "Main" : mode === "Poste" ? "Poste" : "Email"}
+                            {mode === "Main propre" && <Hand className="w-3.5 h-3.5" />}
+                            {mode === "Poste" && <Package className="w-3.5 h-3.5" />}
+                            {mode === "Courriel" && <Mail className="w-3.5 h-3.5" />}
+                            <span>{mode === "Main propre" ? "Main" : mode === "Poste" ? "Poste" : "Email"}</span>
                           </button>
                         ))}
                       </div>
