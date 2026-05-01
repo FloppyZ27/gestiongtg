@@ -657,7 +657,7 @@ export default function FeuilleTempsSection({
                 onFileCountChange={setFileCount}
               />
             </TabsContent>
-            <div className="flex justify-between gap-3 pt-4 border-t border-slate-700">
+            <div className="flex justify-between gap-3 pt-4">
               {activeTab === 'factures' ? (
                 <Button 
                   onClick={() => setShowCamera(true)}
