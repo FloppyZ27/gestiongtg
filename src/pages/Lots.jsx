@@ -1564,15 +1564,26 @@ export default function Lots() {
                           <div className="space-y-2">
                             {actionLogs.map((log) => (
                               <div key={log.id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                                <div className="flex items-start gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                                <div className="flex items-start gap-3">
+                                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span className="text-emerald-400 text-xs font-bold">
+                                      {(log.utilisateur_nom || '?').charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-white text-sm font-medium">{log.action}</p>
                                     {log.details && (
-                                      <p className="text-slate-400 text-xs mt-1 break-words">{log.details}</p>
+                                      <div className="text-slate-400 text-xs mt-2 space-y-1">
+                                        {log.details.split(' • ').map((change, idx) => (
+                                          <div key={idx} className="flex items-start gap-2 text-slate-300">
+                                            <span className="text-emerald-400 flex-shrink-0">→</span>
+                                            <span className="break-words">{change}</span>
+                                          </div>
+                                        ))}
+                                      </div>
                                     )}
                                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
-                                      <span className="text-emerald-400">{log.utilisateur_nom}</span>
+                                      <span className="text-emerald-400 font-medium">{log.utilisateur_nom}</span>
                                       <span>•</span>
                                       <span>{log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                                     </div>
