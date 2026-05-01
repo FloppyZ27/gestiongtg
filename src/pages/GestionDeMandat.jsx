@@ -956,7 +956,7 @@ export default function GestionDeMandat() {
                             <AvatarFallback className="text-xs bg-slate-900 text-white">{getUserInitials(user)}</AvatarFallback>
                           </Avatar>
                         ) : <User className="w-4 h-4 text-white" />}
-                        <span className="text-base font-bold text-white truncate max-w-[130px]">{user.full_name}</span>
+                        <span className="text-base font-bold text-white truncate max-w-[130px]">{user.email === "non-assigne" ? "Non assigné" : (() => { const emp = user.full_name?.trim().split(' ') || []; return emp.length >= 2 ? `${emp[0]} ${emp[emp.length - 1]}` : user.full_name; })()}</span>
                       </div>
                       <div className="w-8" />
                     </div>
