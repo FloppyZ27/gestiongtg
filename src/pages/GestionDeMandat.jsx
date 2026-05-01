@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, Kanban, MapPin, Calendar, User, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer, Link2 } from "lucide-react";
+import { Search, Kanban, MapPin, Calendar, User, Filter, X, ChevronDown, ChevronUp, Timer, Link2 } from "lucide-react";
 import { format, startOfWeek, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -157,8 +157,7 @@ export default function GestionDeMandat() {
   const [activeView, setActiveView] = useState("taches");
   const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
   const [calendarMode, setCalendarMode] = useState("week");
-  const [sortTaches, setSortTaches] = useState({});
-  const [sortUtilisateurs, setSortUtilisateurs] = useState({});
+
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("Toutes");
   const [filterPlaceAffaireCalendrier, setFilterPlaceAffaireCalendrier] = useState("Toutes");
@@ -172,6 +171,15 @@ export default function GestionDeMandat() {
   const [linkedGroups, setLinkedGroups] = useState([]);
   const [selectedCardForLink, setSelectedCardForLink] = useState(null);
   const [dissociationMode, setDissociationMode] = useState(null);
+  // Ordre local des cartes par colonne: { [columnId]: [cardId, ...] }
+  const [columnOrder, setColumnOrder] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('kanbanColumnOrder') || '{}'); } catch { return {}; }
+  });
+
+  const saveColumnOrder = (newOrder) => {
+    localStorage.setItem('kanbanColumnOrder', JSON.stringify(newOrder));
+    setColumnOrder(newOrder);
+  };
 
   const holdTimerRef = useRef(null);
   const didDragRef = useRef(false);
@@ -266,25 +274,24 @@ export default function GestionDeMandat() {
     );
   });
 
-  const sortCards = (cards, sortKey, sortMap) => {
-    // Ne pas trier si aucun tri n'est sélectionné
-    if (!sortMap[sortKey]) return cards;
-    return [...cards].sort((a, b) => {
-      const dA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
-      const dB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
-      return sortMap[sortKey] === "asc" ? dA - dB : dB - dA;
-    });
+  const applyColumnOrder = (cards, columnKey) => {
+    const order = columnOrder[columnKey];
+    if (!order || order.length === 0) return cards;
+    const orderedIds = order.filter(id => cards.some(c => c.id === id));
+    const unordered = cards.filter(c => !orderedIds.includes(c.id));
+    const ordered = orderedIds.map(id => cards.find(c => c.id === id)).filter(Boolean);
+    return [...ordered, ...unordered];
   };
 
   const cardsByTache = TACHES.reduce((acc, tache) => {
-    acc[tache] = sortCards(filteredCards.filter(c => c.tache === tache), tache, sortTaches);
+    acc[tache] = applyColumnOrder(filteredCards.filter(c => c.tache === tache), `tache-${tache}`);
     return acc;
   }, {});
 
   const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
   
   const cardsByUtilisateur = usersList.reduce((acc, user) => {
-    acc[user.email] = sortCards(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), user.email, sortUtilisateurs);
+    acc[user.email] = applyColumnOrder(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), `user-${user.email}`);
     return acc;
   }, {});
 
@@ -299,145 +306,97 @@ export default function GestionDeMandat() {
 
   const handleDrop = useCallback((card, targetColumn, dropIndex) => {
     if (!card) return;
-    
-    // Obtenir le groupe lié
+
     const group = linkedGroups.find(g => g.cardIds.includes(card.id));
     const linkedCardIds = group ? group.cardIds : [card.id];
-    
-    // Regrouper les mises à jour par dossier pour éviter les conflits
+
+    // Déterminer la colonne source et cible selon la vue
+    let sourceColumnKey, targetColumnKey;
+    if (activeView === "taches") {
+      sourceColumnKey = `tache-${card.tache}`;
+      targetColumnKey = `tache-${targetColumn}`;
+    } else if (activeView === "utilisateurs") {
+      sourceColumnKey = `user-${card.utilisateur}`;
+      targetColumnKey = `user-${targetColumn}`;
+    } else if (activeView === "calendrier") {
+      const srcDate = card.mandat.date_livraison || "";
+      sourceColumnKey = `cal-${srcDate}`;
+      targetColumnKey = `cal-${targetColumn.replace("day-", "")}`;
+    }
+
+    const isSameColumn = sourceColumnKey === targetColumnKey;
+
+    if (isSameColumn && dropIndex !== null) {
+      // Réordonnement local uniquement — pas de mutation DB
+      const currentCards = (() => {
+        if (activeView === "taches") return applyColumnOrder(filteredCards.filter(c => c.tache === card.tache), sourceColumnKey);
+        if (activeView === "utilisateurs") return applyColumnOrder(filteredCards.filter(c => c.utilisateur === card.utilisateur || (c.utilisateur === "non-assigne" && card.utilisateur === "non-assigne")), sourceColumnKey);
+        if (activeView === "calendrier") return applyColumnOrder(filteredCards.filter(c => c.mandat.date_livraison === card.mandat.date_livraison), sourceColumnKey);
+        return [];
+      })();
+
+      // Retirer les cartes du groupe de la liste
+      const withoutCard = currentCards.filter(c => !linkedCardIds.includes(c.id));
+      const targetIdx = Math.min(dropIndex, withoutCard.length);
+      withoutCard.splice(targetIdx, 0, ...linkedCardIds.map(id => currentCards.find(c => c.id === id)).filter(Boolean));
+
+      saveColumnOrder({ ...columnOrder, [sourceColumnKey]: withoutCard.map(c => c.id) });
+      return;
+    }
+
+    // Changement de colonne — mise à jour DB
     const dossierUpdates = {};
-    
+
     linkedCardIds.forEach((cardId) => {
       const linkedCard = allCards.find(c => c.id === cardId);
       if (!linkedCard) return;
-      
+
       const dossierId = linkedCard.dossier.id;
-      
-      // Initialiser la copie complète du dossier si nécessaire
       if (!dossierUpdates[dossierId]) {
         dossierUpdates[dossierId] = JSON.parse(JSON.stringify(linkedCard.dossier));
       }
-      
-      const dossierData = dossierUpdates[dossierId];
-      
-      // Trouver le mandat par son index direct dans le dossier (plus fiable)
-      const actualMandatIndex = linkedCard.mandatIndex;
-      
-      if (actualMandatIndex === undefined || actualMandatIndex === null || actualMandatIndex >= dossierData.mandats.length) return;
-      
-      // Mettre à jour le mandat dans cette copie du dossier
-      if (activeView === "taches") {
-        if (linkedCard.tache !== targetColumn) {
-          // Changement de colonne (tâche)
-          const updated = { ...dossierData.mandats[actualMandatIndex], tache_actuelle: targetColumn };
-          if (targetColumn === "Cédule") {
-            updated.statut_terrain = "en_verification";
-            if (!updated.terrains_list) {
-              updated.terrains_list = [];
-            }
-            updated.terrains_list.push({
-              date_limite_leve: null,
-              instruments_requis: "",
-              a_rendez_vous: false,
-              date_rendez_vous: null,
-              heure_rendez_vous: "",
-              donneur: "",
-              technicien: "",
-              dossier_simultane: "",
-              temps_prevu: "",
-              notes: "",
-              date_cedulee: new Date().toISOString().split('T')[0],
-              equipe_assignee: ""
-            });
-          }
-          dossierData.mandats[actualMandatIndex] = updated;
-        } else if (dropIndex !== null) {
-          // Réordonnement dans la même colonne
-          // Construire la liste ordonnée des mandats de cette colonne dans tout le kanban
-          const allCardsInColumn = allCards.filter(c => c.tache === targetColumn);
-          const cardPositionInColumn = allCardsInColumn.findIndex(c => c.id === linkedCard.id);
-          
-          if (cardPositionInColumn === dropIndex || cardPositionInColumn === dropIndex - 1) return; // Pas de changement
 
-          // On réorganise les mandats du dossier : extraire et réinsérer
-          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          
-          // Calculer le nombre de mandats dans cette colonne avant l'index actuel dans ce dossier
-          let insertIndex = dossierData.mandats.length;
-          let countInColumn = 0;
-          
-          // dropIndex est relatif à toutes les cartes de la colonne (tous dossiers confondus)
-          // On doit trouver la position équivalente dans ce dossier
-          // Approche simplifiée : compter les mandats de cette colonne dans le dossier
-          const targetInColumn = dropIndex;
-          let seen = 0;
-          for (let i = 0; i < dossierData.mandats.length; i++) {
-            if (dossierData.mandats[i].tache_actuelle === targetColumn) {
-              if (seen === targetInColumn) {
-                insertIndex = i;
-                break;
-              }
-              seen++;
-            }
-          }
-          dossierData.mandats.splice(insertIndex, 0, mandat);
+      const dossierData = dossierUpdates[dossierId];
+      const actualMandatIndex = linkedCard.mandatIndex;
+      if (actualMandatIndex === undefined || actualMandatIndex === null || actualMandatIndex >= dossierData.mandats.length) return;
+
+      if (activeView === "taches") {
+        const updated = { ...dossierData.mandats[actualMandatIndex], tache_actuelle: targetColumn };
+        if (targetColumn === "Cédule") {
+          updated.statut_terrain = "en_verification";
+          if (!updated.terrains_list) updated.terrains_list = [];
+          updated.terrains_list.push({ date_limite_leve: null, instruments_requis: "", a_rendez_vous: false, date_rendez_vous: null, heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "", date_cedulee: new Date().toISOString().split('T')[0], equipe_assignee: "" });
         }
+        dossierData.mandats[actualMandatIndex] = updated;
       } else if (activeView === "utilisateurs") {
-        if (linkedCard.utilisateur !== targetColumn) {
-          const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
-          dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
-        } else if (dropIndex !== null) {
-          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          let insertIndex = dossierData.mandats.length;
-          let seen = 0;
-          const targetInColumn = dropIndex;
-          for (let i = 0; i < dossierData.mandats.length; i++) {
-            if ((dossierData.mandats[i].utilisateur_assigne || "") === (targetColumn === "non-assigne" ? "" : targetColumn)) {
-              if (seen === targetInColumn) {
-                insertIndex = i;
-                break;
-              }
-              seen++;
-            }
-          }
-          dossierData.mandats.splice(insertIndex, 0, mandat);
-        }
+        const nouvelUtilisateur = targetColumn === "non-assigne" ? "" : targetColumn;
+        dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], utilisateur_assigne: nouvelUtilisateur };
       } else if (activeView === "calendrier") {
         const newDateStr = targetColumn.replace("day-", "");
-        if (linkedCard.mandat.date_livraison !== newDateStr) {
-          dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
-        } else if (dropIndex !== null) {
-          const mandat = dossierData.mandats.splice(actualMandatIndex, 1)[0];
-          let insertIndex = dossierData.mandats.length;
-          let seen = 0;
-          for (let i = 0; i < dossierData.mandats.length; i++) {
-            if (dossierData.mandats[i].date_livraison === newDateStr) {
-              if (seen === dropIndex) {
-                insertIndex = i;
-                break;
-              }
-              seen++;
-            }
-          }
-          dossierData.mandats.splice(insertIndex, 0, mandat);
-        }
+        dossierData.mandats[actualMandatIndex] = { ...dossierData.mandats[actualMandatIndex], date_livraison: newDateStr };
       }
     });
-    
-    // Envoyer une mutation par dossier unique
+
+    // Mettre à jour l'ordre de la colonne cible pour insérer au bon endroit
+    if (dropIndex !== null) {
+      const targetCards = (() => {
+        if (activeView === "taches") return applyColumnOrder(filteredCards.filter(c => c.tache === targetColumn && !linkedCardIds.includes(c.id)), targetColumnKey);
+        if (activeView === "utilisateurs") return applyColumnOrder(filteredCards.filter(c => (c.utilisateur === targetColumn || (targetColumn === "non-assigne" && c.utilisateur === "non-assigne")) && !linkedCardIds.includes(c.id)), targetColumnKey);
+        if (activeView === "calendrier") { const d = targetColumn.replace("day-", ""); return applyColumnOrder(filteredCards.filter(c => c.mandat.date_livraison === d && !linkedCardIds.includes(c.id)), targetColumnKey); }
+        return [];
+      })();
+      const targetIdx = Math.min(dropIndex, targetCards.length);
+      targetCards.splice(targetIdx, 0, ...linkedCardIds);
+      saveColumnOrder({ ...columnOrder, [targetColumnKey]: targetCards.map(c => typeof c === 'string' ? c : c.id) });
+    }
+
     Object.values(dossierUpdates).forEach((updatedDossier, idx, arr) => {
       updateDossierMutation.mutate(
         { id: updatedDossier.id, dossierData: updatedDossier },
-        {
-          onSuccess: () => {
-            if (idx === arr.length - 1) {
-              queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-            }
-          }
-        }
+        { onSuccess: () => { if (idx === arr.length - 1) queryClient.invalidateQueries({ queryKey: ['dossiers'] }); } }
       );
     });
-  }, [activeView, updateDossierMutation, linkedGroups, allCards, queryClient]);
+  }, [activeView, updateDossierMutation, linkedGroups, allCards, queryClient, columnOrder, filteredCards]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
 
@@ -793,24 +752,7 @@ export default function GestionDeMandat() {
     );
   };
 
-  const renderSortButton = (key, sortMap, setSortMap) => (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => { e.stopPropagation(); setSortMap(prev => ({ ...prev, [key]: prev[key] === "asc" ? "desc" : prev[key] === "desc" ? null : "asc" })); }}
-            className={`h-7 px-2 text-xs font-medium ${sortMap[key] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
-          >
-            {sortMap[key] === "asc" ? <><ArrowUp className="w-3 h-3 mr-1" />Anciens</> : sortMap[key] === "desc" ? <><ArrowDown className="w-3 h-3 mr-1" />Récents</> : <><Calendar className="w-3 h-3 mr-1" />Trier</>}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Trier par date de livraison</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -953,7 +895,6 @@ export default function GestionDeMandat() {
                     <div className="flex items-center justify-between w-full">
                       <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByTache[tache] || []).length}</Badge>
                       <span className="text-sm font-bold text-white">{tache}</span>
-                      {renderSortButton(tache, sortTaches, setSortTaches)}
                     </div>
                   ))}
                 </div>
@@ -1002,7 +943,6 @@ export default function GestionDeMandat() {
                         ) : <User className="w-4 h-4 text-white" />}
                         <span className="text-sm font-bold text-white truncate max-w-[110px]">{user.prenom} {user.nom}</span>
                       </div>
-                      {renderSortButton(user.email, sortUtilisateurs, setSortUtilisateurs)}
                     </div>
                   ))}
                 </div>
