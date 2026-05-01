@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Landmark, Clock, ChevronUp, ChevronDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
+import { Landmark, Clock, ChevronUp, ChevronDown, ChevronsUpDown, Users, TrendingUp, List, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SoldesCongesSection from "@/components/comptabilite/SoldesCongesSection";
@@ -86,6 +86,10 @@ export default function Comptabilite() {
   const [userSortOrder, setUserSortOrder] = useState('asc');
   const [selectedNoteUser, setSelectedNoteUser] = useState(null);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+
+  // Tri mandats
+  const [mandatSortField, setMandatSortField] = useState(null);
+  const [mandatSortDirection, setMandatSortDirection] = useState('asc');
 
   // Notes/Factures dialog (feuille de temps comptabilité)
   const [isNotesFacturesOpen, setIsNotesFacturesOpen] = useState(false);
@@ -238,6 +242,54 @@ export default function Comptabilite() {
     return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(Boolean).join(", ");
   };
 
+  const handleMandatSort = (field) => {
+    if (mandatSortField === field) {
+      setMandatSortDirection(mandatSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setMandatSortField(field);
+      setMandatSortDirection('asc');
+    }
+  };
+
+  const sortMandats = (mandats) => {
+    if (!mandatSortField) return mandats;
+    return [...mandats].sort((a, b) => {
+      let aVal, bVal;
+      switch (mandatSortField) {
+        case 'numero':
+          aVal = parseInt(a.dossier.numero_dossier) || 0;
+          bVal = parseInt(b.dossier.numero_dossier) || 0;
+          break;
+        case 'client':
+          aVal = getClientsNames(a.dossier.clients_ids).toLowerCase();
+          bVal = getClientsNames(b.dossier.clients_ids).toLowerCase();
+          break;
+        case 'type':
+          aVal = (a.mandat.type_mandat || '').toLowerCase();
+          bVal = (b.mandat.type_mandat || '').toLowerCase();
+          break;
+        case 'adresse':
+          aVal = formatAdresse(a.mandat.adresse_travaux).toLowerCase();
+          bVal = formatAdresse(b.mandat.adresse_travaux).toLowerCase();
+          break;
+        case 'prix':
+          aVal = (a.mandat.prix_estime || 0) - (a.mandat.rabais || 0);
+          bVal = (b.mandat.prix_estime || 0) - (b.mandat.rabais || 0);
+          break;
+        case 'progression':
+          aVal = getMandatValeurProgression(a.mandat);
+          bVal = getMandatValeurProgression(b.mandat);
+          break;
+        default:
+          return 0;
+      }
+      if (typeof aVal === 'string') {
+        return mandatSortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return mandatSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+  };
+
   const activeAgendaUser = selectedAgendaUser || users[0];
 
   // Utilisateurs triés
@@ -247,12 +299,8 @@ export default function Comptabilite() {
     return userSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
   });
 
-  // Mandats triés par numéro de dossier croissant
-  const mandatsItems = getMandatsOuverts(selectedArpenteur).sort((a, b) => {
-    const numA = parseInt(a.dossier.numero_dossier) || 0;
-    const numB = parseInt(b.dossier.numero_dossier) || 0;
-    return numA - numB;
-  });
+  // Mandats triés
+  const mandatsItems = sortMandats(getMandatsOuverts(selectedArpenteur));
   const totalTarif = mandatsItems.reduce((sum, { mandat }) => sum + (mandat.prix_estime || 0) - (mandat.rabais || 0), 0);
   const totalValeurProgression = mandatsItems.reduce((sum, { mandat }) => sum + getMandatValeurProgression(mandat), 0);
 
@@ -819,12 +867,12 @@ export default function Comptabilite() {
                 {mandatsItems.length > 0 ? (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <div className="grid grid-cols-[1.2fr,2fr,1.5fr,2fr,1fr,1.8fr] bg-slate-800/50 px-3 py-2 border-b border-slate-700">
-                      <div className="text-xs font-semibold text-slate-400">N° Dossier</div>
-                      <div className="text-xs font-semibold text-slate-400">Client</div>
-                      <div className="text-xs font-semibold text-slate-400">Type</div>
-                      <div className="text-xs font-semibold text-slate-400">Adresse travaux</div>
-                      <div className="text-xs font-semibold text-slate-400 text-right">Prix net</div>
-                      <div className="text-xs font-semibold text-slate-400 text-center">Progression / Valeur</div>
+                      <button onClick={() => handleMandatSort('numero')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors">N° Dossier {mandatSortField === 'numero' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
+                      <button onClick={() => handleMandatSort('client')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors">Client {mandatSortField === 'client' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
+                      <button onClick={() => handleMandatSort('type')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors">Type {mandatSortField === 'type' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
+                      <button onClick={() => handleMandatSort('adresse')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors">Adresse travaux {mandatSortField === 'adresse' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
+                      <button onClick={() => handleMandatSort('prix')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors text-right">Prix net {mandatSortField === 'prix' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
+                      <button onClick={() => handleMandatSort('progression')} className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition-colors text-center">Progression {mandatSortField === 'progression' ? (mandatSortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</button>
                     </div>
                     {mandatsItems.map(({ dossier, mandat }, idx) => {
                       const progress = getMandatProgress(mandat.tache_actuelle);
