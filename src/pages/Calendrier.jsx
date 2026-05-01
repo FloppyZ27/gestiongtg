@@ -346,10 +346,22 @@ export default function Calendrier() {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <div className="text-white font-semibold text-lg min-w-[250px] text-center">
-                    {viewMode === "week" 
-                      ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
-                      : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                    <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">
+                      {viewMode === "week" 
+                        ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
+                        : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                    </div>
+                    <CalendarIcon className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                    <input 
+                      type="date" 
+                      value={format(currentDate, "yyyy-MM-dd")} 
+                      onChange={(e) => {
+                        if(e.target.value) setCurrentDate(new Date(e.target.value + 'T00:00:00'));
+                      }} 
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
+                      style={{zIndex: 1}} 
+                    />
                   </div>
                   <Button
                     size="sm"
@@ -366,12 +378,6 @@ export default function Calendrier() {
                   >
                     Aujourd'hui
                   </Button>
-                  <Input
-                    type="date"
-                    value={format(currentDate, "yyyy-MM-dd")}
-                    onChange={(e) => setCurrentDate(new Date(e.target.value))}
-                    className="bg-slate-800 border-slate-700 text-white h-8 px-3 text-sm w-40"
-                  />
                 </div>
                 <div className="flex gap-1">
                   <Button
