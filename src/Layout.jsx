@@ -819,6 +819,16 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
+        /* Boutons navigation sidebar - hover visible */
+        .sidebar-nav-btn {
+          background-color: rgba(71, 85, 105, 0.3) !important;
+        }
+
+        .sidebar-nav-btn:hover {
+          background-color: rgba(71, 85, 105, 0.6) !important;
+          box-shadow: 0 8px 16px rgba(71, 85, 105, 0.4) !important;
+        }
+
         /* Scrollbar personnalisée globale */
         *::-webkit-scrollbar,
         *::-webkit-scrollbar:vertical,
