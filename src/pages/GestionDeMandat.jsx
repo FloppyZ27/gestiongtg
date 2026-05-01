@@ -312,7 +312,7 @@ export default function GestionDeMandat() {
 
   const getUserTeam = (user) => {
     if (user.email === "non-assigne") return null;
-    return USER_TEAM_MAP[user.email] || (user.full_name && EQUIPES.find(equipe => user.full_name.includes(equipe)));
+    return user.equipe || USER_TEAM_MAP[user.email] || null;
   };
 
   const filteredUsersList = filterEquipe === "Toutes" 
