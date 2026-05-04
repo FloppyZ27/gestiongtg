@@ -17,9 +17,9 @@ export default function LotHistoriqueEntry({ log, users }) {
           <div key={idx} className="flex flex-col gap-0.5">
             <span className="text-slate-400 font-medium">{field}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="bg-red-500/15 text-white px-1.5 py-0.5 rounded text-[10px] line-through">{before}</span>
+              <span className="text-white text-xs">{before}</span>
                                              <span className="text-white flex-shrink-0">→</span>
-                                             <span className="bg-emerald-500/15 text-white px-1.5 py-0.5 rounded text-[10px]">{after}</span>
+                                             <span className="text-white text-xs">{after}</span>
             </div>
           </div>
         );
