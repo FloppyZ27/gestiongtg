@@ -20,6 +20,7 @@ import ClientFormDialog from "../clients/ClientFormDialog";
 import ClientDetailView from "../clients/ClientDetailView";
 import MandatTabs from "./MandatTabs";
 import EditDossierForm from "./EditDossierForm";
+import EditDossierFormContainer from "./EditDossierFormContainer";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -571,8 +572,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
-         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 shadow-2xl shadow-black/50 flex flex-col overflow-hidden" style={{ marginTop: '20px', maxHeight: '90vh' }} hideClose>
-          <EditDossierForm
+         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 shadow-2xl shadow-black/50 flex flex-col" style={{ marginTop: '20px', maxHeight: '90vh', height: 'auto', overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }} hideClose>
+         <EditDossierFormContainer
             formData={formData}
             setFormData={setFormData}
             clients={clients}
