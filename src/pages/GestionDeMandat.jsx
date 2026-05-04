@@ -967,25 +967,6 @@ export default function GestionDeMandat() {
 
             {/* Vue par Utilisateur */}
             <TabsContent value="utilisateurs" className="mt-0">
-              {/* Filtre Équipe */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
-                <div className="flex gap-1">
-                  {["Toutes", ...EQUIPES].map(equipe => {
-                    const count = equipe === "Toutes"
-                      ? usersList.filter(u => u.email !== "non-assigne").length
-                      : usersList.filter(u => u.email !== "non-assigne" && getUserTeam(u) === equipe).length;
-                    const isActive = filterEquipe === equipe;
-                    return (
-                      <button key={equipe} onClick={() => setFilterEquipe(equipe)}
-                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                        {equipe}
-                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {filteredUsersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
