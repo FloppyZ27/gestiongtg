@@ -99,9 +99,9 @@ export default function NotificationBanner({ user }) {
                       e.stopPropagation();
                       handleDismiss(visibleNotification.id);
                     }}
-                    className="flex-shrink-0 text-slate-400 hover:text-white transition-colors"
+                    className="flex-shrink-0 text-slate-600 hover:text-slate-400 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
                 {(() => {
