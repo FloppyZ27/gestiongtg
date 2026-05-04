@@ -571,8 +571,15 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
-         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }} hideClose>
-         <EditDossierForm
+        <DialogContent
+          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+          style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Modifier le dossier</DialogTitle>
+          </DialogHeader>
+
+          <EditDossierForm
             formData={formData}
             setFormData={setFormData}
             clients={clients}
@@ -602,8 +609,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             setLotActionLogs={() => {}}
             allDossiers={allDossiers}
           />
-         </DialogContent>
-       </Dialog>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
