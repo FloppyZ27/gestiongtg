@@ -565,8 +565,8 @@ function LayoutContent({ children, currentPageName }) {
             font-family: 'JetBrains Mono', monospace !important;
           }
 
-          /* Page titles - couleur bleu professionnel */
-          h1 {
+          /* Page titles - couleur bleu professionnel (sauf topbar) */
+          h1:not(.topbar-title) {
             color: hsl(207, 85%, 55%) !important;
           }
 
@@ -1080,7 +1080,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="GTG Logo"
                   className="w-14 h-auto"
                 />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-[gradientShift_3s_linear_infinite] bg-clip-text text-transparent">GestionGTG</h1>
+              <h1 className="topbar-title text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-[gradientShift_3s_linear_infinite] bg-clip-text text-transparent" style={{color: 'transparent'}}>GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}
