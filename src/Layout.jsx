@@ -1139,24 +1139,21 @@ function LayoutContent({ children, currentPageName }) {
 
                       {/* Bouton Punch In/Out */}
                       {!pointageEnCours ? (
-                       <Button
+                       <button
                          onClick={handlePunchIn}
-                         size="sm"
-                         style={{background: 'hsl(207, 85%, 55%)', color: '#0f1923', border: 'none'}}
-                         className="shadow-lg h-8 font-semibold hover:opacity-90"
+                         style={{background: 'hsl(207, 85%, 55%)', color: '#0a1628', border: 'none', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(59,130,246,0.4)'}}
                        >
-                         <Play className="w-4 h-4 mr-1" />
+                         <Play style={{width: '14px', height: '14px'}} />
                          Punch In
-                       </Button>
+                       </button>
                       ) : (
-                       <Button
+                       <button
                          onClick={handlePunchOut}
-                         size="sm"
-                         className="bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 shadow-lg h-8"
+                         style={{background: 'hsl(0, 84%, 60%)', color: 'white', border: 'none', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(239,68,68,0.4)'}}
                        >
-                         <Square className="w-4 h-4 mr-1" />
+                         <Square style={{width: '14px', height: '14px'}} />
                          Punch Out
-                       </Button>
+                       </button>
                       )}
                     </div>
                   </motion.div>
