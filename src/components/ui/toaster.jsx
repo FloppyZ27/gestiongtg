@@ -1,4 +1,5 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast, ToastContext } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
 import {
   Toast,
   ToastClose,
@@ -9,7 +10,24 @@ import {
 } from "@/components/ui/toast";
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const [state, setState] = useState({ toasts: [] });
+
+  useEffect(() => {
+    const listeners = [];
+    let memoryState = { toasts: [] };
+
+    const listener = (newState) => setState(newState);
+    listeners.push(listener);
+
+    return () => {
+      const index = listeners.indexOf(listener);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    };
+  }, []);
+
+  const { toasts } = state;
 
   return (
     <ToastProvider>
@@ -30,4 +48,4 @@ export function Toaster() {
       <ToastViewport />
     </ToastProvider>
   );
-} 
+}

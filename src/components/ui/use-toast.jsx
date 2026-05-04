@@ -11,6 +11,8 @@ const actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 };
 
+const ToastContext = createContext(null);
+
 let count = 0;
 
 function genId() {
@@ -161,4 +163,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast }; 
+export { useToast, toast, ToastContext };
