@@ -1176,7 +1176,7 @@ export default function GestionDeMandat() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => { setIsEntreeTempsDialogOpen(false); setEntreeTempsCardInfo(null); }}>Annuler</Button>
               <Button className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={async () => {
                 if (!entreeTempsForm.heures || !entreeTempsForm.tache) { alert("Veuillez remplir tous les champs obligatoires"); return; }
