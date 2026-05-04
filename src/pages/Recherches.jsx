@@ -26,8 +26,8 @@ export default function Recherches() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md bg-transparent border-0 p-0 gap-1">
             <TabsTrigger value="lots">Lots</TabsTrigger>
-            <TabsTrigger value="actes">Actes</TabsTrigger>
-            <TabsTrigger value="chaine">Chaîne de titre</TabsTrigger>
+            <TabsTrigger value="actes" disabled className="opacity-40 cursor-not-allowed">À venir...</TabsTrigger>
+            <TabsTrigger value="chaine" disabled className="opacity-40 cursor-not-allowed">À venir...</TabsTrigger>
           </TabsList>
           <TabsContent value="lots" className="mt-0">
             <Lots />
