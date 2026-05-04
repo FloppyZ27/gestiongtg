@@ -266,7 +266,7 @@ export default function Administration() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="w-full">
         <div className="flex items-center gap-3 mb-8">
           <Shield className="w-8 h-8 text-emerald-400" />
