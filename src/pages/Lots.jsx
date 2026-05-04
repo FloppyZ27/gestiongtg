@@ -1135,13 +1135,7 @@ export default function Lots() {
                     <h2 className="text-2xl font-bold text-white">
                       {editingLot ? "Modifier lot" : "Nouveau lot"}
                     </h2>
-                    {editingLot && (
-                      <div className="text-right">
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                          Lot {editingLot.numero_lot}
-                        </Badge>
-                      </div>
-                    )}
+
                   </div>
                 </div>
 
