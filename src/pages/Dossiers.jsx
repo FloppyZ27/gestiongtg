@@ -2188,7 +2188,7 @@ export default function Dossiers() {
                   Nouveau dossier
                 </Button>
               </DialogTrigger>
-              <DialogContent className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '40px', maxHeight: 'calc(85vh)' }} hideClose>
+              <DialogContent className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '20px', maxHeight: 'calc(95vh - 40px)' }} hideClose>
                 <EditDossierForm
                   formData={formData}
                   setFormData={setFormData}
