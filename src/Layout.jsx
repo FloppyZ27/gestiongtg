@@ -1142,7 +1142,8 @@ function LayoutContent({ children, currentPageName }) {
                        <Button
                          onClick={handlePunchIn}
                          size="sm"
-                         className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg h-8"
+                         style={{background: 'hsl(207, 85%, 55%)', color: '#0f1923', border: 'none'}}
+                         className="shadow-lg h-8 font-semibold hover:opacity-90"
                        >
                          <Play className="w-4 h-4 mr-1" />
                          Punch In
