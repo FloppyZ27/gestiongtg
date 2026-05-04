@@ -262,6 +262,36 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dossiers'] }),
   });
 
+  const deleteRetourAppelMutation = useMutation({
+    mutationFn: async (retourId) => {
+      const retour = retoursAppels.find(r => r.id === retourId);
+      if (!retour) throw new Error("Retour d'appel non trouvé");
+
+      // Enregistrer l'action dans ActionLog
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "Suppression",
+        entite: "RetourAppel",
+        entite_id: retourId,
+        details: `Retour d'appel du ${retour.date_appel}${retour.client_nom ? ` pour ${retour.client_nom}` : ''}`,
+        metadata: {
+          dossier_id: retour.dossier_id,
+          client_nom: retour.client_nom,
+          client_telephone: retour.client_telephone,
+          raison: retour.raison
+        }
+      });
+
+      // Supprimer le retour d'appel
+      await base44.entities.RetourAppel.delete(retourId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+    },
+  });
+
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
@@ -641,9 +671,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                 onClick={() => {
                   if (retourIdToDelete) {
-                    base44.entities.RetourAppel.delete(retourIdToDelete).then(() => {
-                      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
-                    });
+                    deleteRetourAppelMutation.mutate(retourIdToDelete);
                   }
                   setShowDeleteRetourConfirm(false);
                   setRetourIdToDelete(null);
