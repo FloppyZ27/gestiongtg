@@ -246,6 +246,7 @@ export default function Clients() {
   ];
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="w-full">
         <div className="pb-4 pt-4">
@@ -652,5 +653,6 @@ export default function Clients() {
         </Dialog>
       </div>
     </div>
+    </>
   );
 }
