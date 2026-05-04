@@ -438,7 +438,7 @@ export default function EntreeTempsDialog({
           </form>
         </div>
 
-        <div className="flex justify-end gap-3 py-4 px-6 bg-slate-900 border-t border-slate-800">
+        <div className="flex justify-end gap-3 py-4 px-6">
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10"
             onClick={() => { if (hasChanges) { onShowWarning(); } else { onOpenChange(false); } }}>
             Annuler
