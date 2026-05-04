@@ -945,7 +945,7 @@ export default function LeveTerrain() {
           </div>
 
           {/* ===== ZONE PRINCIPALE DROITE ===== */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-5">
+           <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-5">
             {!selectedItem ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <Mountain className="w-16 h-16 text-slate-700 mb-4" />
