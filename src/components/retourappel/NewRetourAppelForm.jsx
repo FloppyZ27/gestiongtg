@@ -572,8 +572,12 @@ export default function NewRetourAppelForm({
             Annuler
           </Button>
           <Button 
-            type="submit" 
-            form="retour-appel-form" 
+            type="button" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (editingRetourAppel) return;
+              onSubmit(e);
+            }}
             className="bg-gradient-to-r from-blue-500 to-cyan-600"
             disabled={!aucunDossier && !dossierFound}
           >
