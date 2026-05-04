@@ -215,7 +215,7 @@ export default function NewRetourAppelForm({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
         <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
       </div>
 
