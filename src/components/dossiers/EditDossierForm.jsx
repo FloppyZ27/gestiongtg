@@ -2452,7 +2452,7 @@ export default function EditDossierForm({
         </div>
 
         {/* Sidebar - 25% (ajusté pour la largeur) */}
-        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden">
+        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden min-h-0">
           {/* Section Carte */}
           {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
             formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
@@ -2510,7 +2510,7 @@ export default function EditDossierForm({
           </div>
 
           {!sidebarCollapsed && (
-            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
               <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
                 <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                   <MessageSquare className="w-4 h-4 mr-1" />
@@ -2522,7 +2522,7 @@ export default function EditDossierForm({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0 flex flex-col">
                 <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={!editingDossier} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} />
               </TabsContent>
               
