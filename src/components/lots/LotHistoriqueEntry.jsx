@@ -5,6 +5,16 @@ import { fr } from "date-fns/locale";
 export default function LotHistoriqueEntry({ log, users }) {
   const logUser = users.find(u => u.email === log.utilisateur_email);
 
+  const getActionTitle = () => {
+    if (log.action !== 'Modification' || !log.details) return log.action;
+    const fields = log.details.split(' • ').map(change => {
+      const colonIdx = change.indexOf(':');
+      return colonIdx !== -1 ? change.substring(0, colonIdx).trim() : null;
+    }).filter(Boolean);
+    if (fields.length === 0) return log.action;
+    return `Modification du ${fields.join(', ').toLowerCase()}`;
+  };
+
   const renderDetails = (details) => {
     return details.split(' • ').map((change, idx) => {
       const colonIdx = change.indexOf(':');
@@ -38,7 +48,7 @@ export default function LotHistoriqueEntry({ log, users }) {
       <div className="flex items-start gap-3">
         <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium">{log.action}</p>
+          <p className="text-white text-sm font-medium">{getActionTitle()}</p>
           {log.details && (
             <div className="text-slate-400 text-xs mt-2 space-y-1.5">
               {renderDetails(log.details)}
