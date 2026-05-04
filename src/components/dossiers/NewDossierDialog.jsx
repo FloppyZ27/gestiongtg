@@ -47,40 +47,42 @@ export default function NewDossierDialog({
         </DialogTrigger>
       )}
       <DialogContent 
-        className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+        className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 flex flex-col"
         style={{ marginTop: '19px', height: 'calc(90vh - 5px)', maxHeight: 'calc(90vh - 5px)' }}
         hideClose
       >
         <DialogHeader className="sr-only">
           <DialogTitle>Nouveau dossier</DialogTitle>
         </DialogHeader>
-        <EditDossierForm
-          formData={formData}
-          setFormData={setFormData}
-          clients={clients}
-          lots={lots}
-          users={users}
-          onSubmit={onSubmit}
-          onCancel={onCancel}
-          updateMandat={updateMandat}
-          addMandat={addMandat}
-          removeMandat={removeMandat}
-          openLotSelector={openLotSelector}
-          removeLotFromMandat={removeLotFromMandat}
-          openAddMinuteDialog={openAddMinuteDialog}
-          removeMinuteFromMandat={removeMinuteFromMandat}
-          getLotById={getLotById}
-          setIsClientFormDialogOpen={setIsClientFormDialogOpen}
-          setClientTypeForForm={setClientTypeForForm}
-          setViewingClientDetails={setViewingClientDetails}
-          calculerProchainNumeroDossier={calculerProchainNumeroDossier}
-          editingDossier={editingDossier}
-          onOpenNewLotDialog={onOpenNewLotDialog}
-          setEditingClient={setEditingClient}
-          setEditingLot={setEditingLot}
-          setNewLotForm={setNewLotForm}
-          setLotActionLogs={setLotActionLogs}
-        />
+        <div style={{ height: 'calc(90vh - 5px)' }} className="flex flex-col min-h-0 overflow-hidden">
+          <EditDossierForm
+            formData={formData}
+            setFormData={setFormData}
+            clients={clients}
+            lots={lots}
+            users={users}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            updateMandat={updateMandat}
+            addMandat={addMandat}
+            removeMandat={removeMandat}
+            openLotSelector={openLotSelector}
+            removeLotFromMandat={removeLotFromMandat}
+            openAddMinuteDialog={openAddMinuteDialog}
+            removeMinuteFromMandat={removeMinuteFromMandat}
+            getLotById={getLotById}
+            setIsClientFormDialogOpen={setIsClientFormDialogOpen}
+            setClientTypeForForm={setClientTypeForForm}
+            setViewingClientDetails={setViewingClientDetails}
+            calculerProchainNumeroDossier={calculerProchainNumeroDossier}
+            editingDossier={editingDossier}
+            onOpenNewLotDialog={onOpenNewLotDialog}
+            setEditingClient={setEditingClient}
+            setEditingLot={setEditingLot}
+            setNewLotForm={setNewLotForm}
+            setLotActionLogs={setLotActionLogs}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

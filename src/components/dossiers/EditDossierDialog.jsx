@@ -572,43 +572,45 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
         <DialogContent
-          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 flex flex-col"
           style={{ marginTop: '19px', height: 'calc(90vh - 5px)', maxHeight: 'calc(90vh - 5px)' }}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Modifier le dossier</DialogTitle>
           </DialogHeader>
 
-          <EditDossierForm
-            formData={formData}
-            setFormData={setFormData}
-            clients={clients}
-            lots={lots}
-            users={users}
-            onSubmit={handleSubmit}
-            onCancel={handleCloseAttempt}
-            updateMandat={updateMandat}
-            addMandat={addMandat}
-            removeMandat={removeMandat}
-            openLotSelector={openLotSelector}
-            removeLotFromMandat={removeLotFromMandat}
-            openAddMinuteDialog={openAddMinuteDialog}
-            removeMinuteFromMandat={removeMinuteFromMandat}
-            getLotById={getLotById}
-            setIsClientFormDialogOpen={setIsClientFormDialogOpen}
-            setClientTypeForForm={setClientTypeForForm}
-            setViewingClientDetails={setViewingClientDetails}
-            calculerProchainNumeroDossier={() => ""}
-            editingDossier={dossier}
-            onOpenNewLotDialog={(mandatIndex) => {
-              setCurrentMandatIndex(mandatIndex);
-            }}
-            setEditingClient={setEditingClientForForm}
-            setEditingLot={() => {}}
-            setNewLotForm={() => {}}
-            setLotActionLogs={() => {}}
-            allDossiers={allDossiers}
-          />
+          <div style={{ height: 'calc(90vh - 5px)' }} className="flex flex-col min-h-0 overflow-hidden">
+            <EditDossierForm
+              formData={formData}
+              setFormData={setFormData}
+              clients={clients}
+              lots={lots}
+              users={users}
+              onSubmit={handleSubmit}
+              onCancel={handleCloseAttempt}
+              updateMandat={updateMandat}
+              addMandat={addMandat}
+              removeMandat={removeMandat}
+              openLotSelector={openLotSelector}
+              removeLotFromMandat={removeLotFromMandat}
+              openAddMinuteDialog={openAddMinuteDialog}
+              removeMinuteFromMandat={removeMinuteFromMandat}
+              getLotById={getLotById}
+              setIsClientFormDialogOpen={setIsClientFormDialogOpen}
+              setClientTypeForForm={setClientTypeForForm}
+              setViewingClientDetails={setViewingClientDetails}
+              calculerProchainNumeroDossier={() => ""}
+              editingDossier={dossier}
+              onOpenNewLotDialog={(mandatIndex) => {
+                setCurrentMandatIndex(mandatIndex);
+              }}
+              setEditingClient={setEditingClientForForm}
+              setEditingLot={() => {}}
+              setNewLotForm={() => {}}
+              setLotActionLogs={() => {}}
+              allDossiers={allDossiers}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
