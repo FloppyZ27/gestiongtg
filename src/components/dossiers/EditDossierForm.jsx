@@ -2743,7 +2743,7 @@ export default function EditDossierForm({
       />
 
       {!editingDossier && (
-        <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+        <div className="sticky bottom-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
             Annuler
           </Button>
