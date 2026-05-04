@@ -28,15 +28,19 @@ export default function NotificationBanner({ user }) {
         (!visibleNotification || visibleNotification.id !== notifications[0].id) &&
         !dismissedIds.has(notifications[0].id)) {
       setVisibleNotification(notifications[0]);
-      
-      // Supprimer la notification après 5 secondes à partir de son apparition
+    }
+  }, [notifications, dismissedIds, visibleNotification]);
+
+  // Timer de 5 secondes pour la bannière
+  useEffect(() => {
+    if (visibleNotification) {
       const timer = setTimeout(() => {
         setVisibleNotification(null);
       }, 5000);
       
       return () => clearTimeout(timer);
     }
-  }, [notifications, dismissedIds, visibleNotification]);
+  }, [visibleNotification?.id]);
 
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
