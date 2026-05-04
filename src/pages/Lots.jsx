@@ -171,6 +171,7 @@ export default function Lots() {
   const [initialFormData, setInitialFormData] = useState(null);
   const [dossiersAssociesFormCollapsed, setDossiersAssociesFormCollapsed] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [commentairesCount, setCommentairesCount] = useState(0);
 
   // New state for View Dialog filters and sorting
   const [viewDossierSearchTerm, setViewDossierSearchTerm] = useState("");
@@ -1538,8 +1539,17 @@ export default function Lots() {
                     <div className="flex items-center gap-2">
                       {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
                       <h3 className="text-slate-300 text-base font-semibold">
-                        {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
-                      </h3>
+                        {sidebarTab === "commentaires" ? (
+                          <span className="flex items-center gap-2">
+                            Commentaires
+                            {commentairesCount > 0 && (
+                              <Badge className="bg-emerald-500/30 text-emerald-300 border-emerald-500/50 px-1.5 py-0 text-xs">
+                                {commentairesCount}
+                              </Badge>
+                            )}
+                          </span>
+                        ) : "Historique"}
+                        </h3>
                     </div>
                     {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
@@ -1562,6 +1572,7 @@ export default function Lots() {
                           lotId={editingLot?.id}
                           lotTemporaire={!editingLot}
                           onCommentairesTempChange={setCommentairesTemporaires}
+                          onCommentairesCountChange={setCommentairesCount}
                         />
                       </TabsContent>
 
