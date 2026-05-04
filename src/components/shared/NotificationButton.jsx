@@ -100,7 +100,7 @@ export default function NotificationButton({ user }) {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 bg-slate-900 border-slate-700" align="end" side="top" sideOffset={8}>
+      <PopoverContent className="w-80 p-0 bg-slate-900 border-slate-700" align="end" side="top" sideOffset={8}>
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <h3 className="font-semibold text-white">Notifications</h3>
           {notifications.length > 0 && (
