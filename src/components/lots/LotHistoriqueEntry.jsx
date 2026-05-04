@@ -25,7 +25,6 @@ export default function LotHistoriqueEntry({ log, users }) {
         const after = change.substring(arrowIdx + 3).trim();
         return (
           <div key={idx} className="flex flex-col gap-0.5">
-            <span className="text-slate-400 font-medium">{field}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-white text-xs">{before}</span>
                                              <span className="text-white flex-shrink-0">→</span>
