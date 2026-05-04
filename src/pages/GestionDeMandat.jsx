@@ -905,7 +905,7 @@ export default function GestionDeMandat() {
             {/* Vue par Tâches */}
              <TabsContent value="taches" className="mt-0">
                {/* Filtres Place d'affaire + Équipe */}
-               <div className="flex items-center gap-6 mb-4 flex-wrap">
+               <div className="space-y-3 mb-4">
                  <div className="flex items-center gap-3">
                    <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
                    <div className="flex gap-1">
@@ -1009,7 +1009,7 @@ export default function GestionDeMandat() {
             {/* Vue Calendrier */}
             <TabsContent value="calendrier" className="mt-0">
               {/* Filtres Place d'affaire + Équipe */}
-              <div className="flex items-center gap-6 mb-4 flex-wrap">
+              <div className="space-y-3 mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
                   <div className="flex gap-1">
