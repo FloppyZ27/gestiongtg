@@ -2510,7 +2510,7 @@ export default function EditDossierForm({
           </div>
 
           {!sidebarCollapsed && (
-            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
                 <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                   <MessageSquare className="w-4 h-4 mr-1" />
@@ -2522,7 +2522,7 @@ export default function EditDossierForm({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="commentaires" className="flex-1 min-h-0 p-0 mt-0 overflow-hidden">
+              <TabsContent value="commentaires" className="flex-1 min-h-0 p-0 mt-0">
                 <CommentairesSectionWrapper dossierId={editingDossier?.id} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} onAddHistoriqueEntry={addActionLog} />
               </TabsContent>
               
