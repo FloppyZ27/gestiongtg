@@ -172,7 +172,7 @@ export default function TarificationStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="p-4">
+        <CardContent className="p-4 mb-1.5" style={{ marginBottom: '5px' }}>
           {mandatsWithType.length > 0 ? (
             <div>
               {/* Tableau de tarification */}
