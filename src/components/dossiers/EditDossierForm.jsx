@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import PlaceAffaireSelect from "./PlaceAffaireSelect";
 import ContactsTabsSection from "./ContactsTabsSection";
 import TerrainEditDialog from "./TerrainEditDialog";
-import CommentairesSection from "./CommentairesSection";
+import CommentairesSectionWrapper from "./CommentairesSectionWrapper";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
@@ -2522,8 +2522,8 @@ export default function EditDossierForm({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0 flex flex-col">
-                <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={!editingDossier} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} />
+              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-0 mt-0">
+                <CommentairesSectionWrapper dossierId={editingDossier?.id} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} onAddHistoriqueEntry={addActionLog} />
               </TabsContent>
               
               <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
