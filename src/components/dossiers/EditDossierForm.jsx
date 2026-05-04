@@ -495,7 +495,7 @@ export default function EditDossierForm({
 
         {/* Main content - 75% */}
         <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 pb-24">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
               if (!editingDossier) {
