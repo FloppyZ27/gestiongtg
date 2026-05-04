@@ -1126,7 +1126,7 @@ export default function GestionDeMandat() {
                 const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
                 const arpColor = getArpenteurColor(dossier?.arpenteur_geometre);
                 return (
-                  <div className={`text-base font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${arpColor.split(' ')[1]}`}>
+                  <div className={`text-base font-semibold flex items-center gap-2 flex-wrap mt-2 ${arpColor.split(' ')[1]}`}>
                     <span>{getArpenteurInitials(dossier?.arpenteur_geometre)}{dossier?.numero_dossier}{dossier?.clients_ids?.length > 0 && ` - ${getClientsNames(dossier.clients_ids)}`}</span>
                     <Badge className={`${getMandatColor(entreeTempsCardInfo.mandatType)} border text-xs`}>{getAbbreviatedMandatType(entreeTempsCardInfo.mandatType)}</Badge>
                   </div>
