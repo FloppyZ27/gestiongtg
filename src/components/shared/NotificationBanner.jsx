@@ -86,10 +86,7 @@ export default function NotificationBanner({ user }) {
             exit={{ opacity: 0, x: 300, scale: 0.8 }}
             transition={{ duration: 0.3 }}
             className={`w-full bg-gradient-to-r ${getColor(visibleNotification.type)} backdrop-blur-xl border rounded-lg shadow-2xl p-4 cursor-pointer`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setVisibleNotification(null);
-            }}
+            onClick={() => handleDismiss(visibleNotification.id)}
           >
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
