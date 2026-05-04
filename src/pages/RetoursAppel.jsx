@@ -732,7 +732,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
         }
         setIsNewRetourDialogOpen(open);
       }}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[50vw] w-[50vw] p-0 gap-0 shadow-2xl shadow-black/50" hideClose>
+        <DialogContent className="border-2 border-white/30 text-white max-w-[50vw] w-[50vw] p-0 gap-0 shadow-2xl shadow-black/50" hideClose>
           <DialogHeader className="sr-only">
             <DialogTitle>{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</DialogTitle>
           </DialogHeader>
