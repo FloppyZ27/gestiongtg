@@ -888,6 +888,54 @@ export default function GestionDeMandat() {
             </CardContent>
           </Card>
 
+          {/* Filtres globaux Place d'affaire + Équipe */}
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
+              <div className="flex gap-1">
+                {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
+                  const baseFiltered = allCards.filter(c => {
+                    const s = searchTerm.toLowerCase();
+                    const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
+                    const cn = getClientsNames(c.dossier.clients_ids);
+                    return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
+                      (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
+                      (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
+                      (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
+                      (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
+                  });
+                  const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
+                  const isActive = filterPlaceAffaire === val;
+                  return (
+                    <button key={val} onClick={() => setFilterPlaceAffaire(val)}
+                      className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                      {label}
+                      <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
+              <div className="flex gap-1">
+                {["Toutes", ...EQUIPES].map(equipe => {
+                  const count = equipe === "Toutes"
+                    ? filteredCards.length
+                    : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
+                  const isActive = filterEquipeTaches === equipe;
+                  return (
+                    <button key={equipe} onClick={() => { setFilterEquipeTaches(equipe); setFilterEquipeCalendrier(equipe); }}
+                      className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                      {equipe}
+                      <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* Vues */}
           <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
             <TabsList className="bg-slate-800/50 h-12 w-full grid grid-cols-3 mb-6">
@@ -904,54 +952,7 @@ export default function GestionDeMandat() {
 
             {/* Vue par Tâches */}
              <TabsContent value="taches" className="mt-0">
-               {/* Filtres Place d'affaire + Équipe */}
-               <div className="space-y-3 mb-4">
-                 <div className="flex items-center gap-3">
-                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
-                   <div className="flex gap-1">
-                     {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
-                       const baseFiltered = allCards.filter(c => {
-                         const s = searchTerm.toLowerCase();
-                         const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
-                         const cn = getClientsNames(c.dossier.clients_ids);
-                         return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
-                           (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
-                           (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
-                           (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
-                           (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
-                       });
-                       const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
-                       const isActive = filterPlaceAffaire === val;
-                       return (
-                         <button key={val} onClick={() => setFilterPlaceAffaire(val)}
-                           className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                           {label}
-                           <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                         </button>
-                       );
-                     })}
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
-                   <div className="flex gap-1">
-                     {["Toutes", ...EQUIPES].map(equipe => {
-                       const count = equipe === "Toutes"
-                         ? filteredCards.length
-                         : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
-                       const isActive = filterEquipeTaches === equipe;
-                       return (
-                         <button key={equipe} onClick={() => setFilterEquipeTaches(equipe)}
-                           className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                           {equipe}
-                           <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                         </button>
-                       );
-                     })}
-                   </div>
-                 </div>
-               </div>
-              <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
+               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
                     <div className="flex items-center justify-between w-full">
@@ -1008,43 +1009,6 @@ export default function GestionDeMandat() {
 
             {/* Vue Calendrier */}
             <TabsContent value="calendrier" className="mt-0">
-              {/* Filtres Place d'affaire + Équipe */}
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
-                  <div className="flex gap-1">
-                    {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
-                      const count = val === "Toutes" ? filteredCards.length : filteredCards.filter(c => c.dossier.place_affaire === val).length;
-                      const isActive = filterPlaceAffaireCalendrier === val;
-                      return (
-                        <button key={val} onClick={() => setFilterPlaceAffaireCalendrier(val)}
-                          className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                          {label}
-                          <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
-                  <div className="flex gap-1">
-                    {["Toutes", ...EQUIPES].map(equipe => {
-                      const count = equipe === "Toutes"
-                        ? filteredCards.length
-                        : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
-                      const isActive = filterEquipeCalendrier === equipe;
-                      return (
-                        <button key={equipe} onClick={() => setFilterEquipeCalendrier(equipe)}
-                          className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                          {equipe}
-                          <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
               <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
                 <CardHeader className="border-b border-slate-800">
                   <div className="flex justify-between items-center gap-2">
