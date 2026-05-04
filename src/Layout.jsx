@@ -892,6 +892,7 @@ function LayoutContent({ children, currentPageName }) {
         onSubmit={handleSubmit}
         onReset={resetForm}
         solde={soldeUtilisateur}
+        onDossierSelect={handleDossierSelect}
       />
       
       

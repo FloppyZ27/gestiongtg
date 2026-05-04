@@ -32,6 +32,7 @@ export default function EntreeTempsDialog({
   users,
   onSubmit,
   onReset,
+  onDossierSelect,
 }) {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [detailsCollapsed, setDetailsCollapsed] = useState(false);
@@ -112,10 +113,14 @@ export default function EntreeTempsDialog({
   };
 
   const handleDossierSelect = (dossierId) => {
-    const dossier = dossiers.find(d => d.id === dossierId);
-    const mandatType = dossier?.mandats?.[0]?.type_mandat || "";
-    setEntreeForm({ ...entreeForm, dossier_id: dossierId, mandat: mandatType, tache_suivante: "", utilisateur_assigne: "" });
-    setDossierSearchTerm("");
+    if (onDossierSelect) {
+      onDossierSelect(dossierId);
+    } else {
+      const dossier = dossiers.find(d => d.id === dossierId);
+      const mandatType = dossier?.mandats?.[0]?.type_mandat || "";
+      setEntreeForm({ ...entreeForm, dossier_id: dossierId, mandat: mandatType, tache_suivante: "", utilisateur_assigne: "" });
+      setDossierSearchTerm("");
+    }
   };
 
   const activeFiltersCount = filterArpenteur.length + filterMandat.length + filterTache.length + filterVille.length;
