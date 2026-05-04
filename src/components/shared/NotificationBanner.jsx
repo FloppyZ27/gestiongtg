@@ -35,7 +35,7 @@ export default function NotificationBanner({ user }) {
   useEffect(() => {
     if (visibleNotification) {
       const timer = setTimeout(() => {
-        setVisibleNotification(null);
+        handleDismiss(visibleNotification.id);
       }, 5000);
       
       return () => clearTimeout(timer);
