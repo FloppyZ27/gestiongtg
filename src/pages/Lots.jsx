@@ -225,6 +225,15 @@ export default function Lots() {
     initialData: [],
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      try { return await base44.entities.User.list(); } catch { return []; }
+    },
+    initialData: [],
+    retry: false,
+  });
+
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
       // Validation moved to handleSubmit
@@ -1562,14 +1571,12 @@ export default function Lots() {
                       <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                         {actionLogs.length > 0 ? (
                           <div className="space-y-2">
-                            {actionLogs.map((log) => (
+                            {actionLogs.map((log) => {
+                              const logUser = users.find(u => u.email === log.utilisateur_email);
+                              return (
                               <div key={log.id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <span className="text-emerald-400 text-xs font-bold">
-                                      {(log.utilisateur_nom || '?').charAt(0).toUpperCase()}
-                                    </span>
-                                  </div>
+                                  <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-white text-sm font-medium">{log.action}</p>
                                     {log.details && (
@@ -1582,15 +1589,23 @@ export default function Lots() {
                                         ))}
                                       </div>
                                     )}
-                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
-                                      <span className="text-emerald-400 font-medium">{log.utilisateur_nom}</span>
-                                      <span>•</span>
-                                      <span>{log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      {logUser?.photo_url ? (
+                                        <img src={logUser.photo_url} alt={log.utilisateur_nom} className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                                      ) : (
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                          <span className="text-emerald-400 text-[9px] font-bold">{(log.utilisateur_nom || '?').charAt(0).toUpperCase()}</span>
+                                        </div>
+                                      )}
+                                      <span className="text-emerald-400 text-xs font-medium">{log.utilisateur_nom}</span>
+                                      <span className="text-slate-600 text-xs">•</span>
+                                      <span className="text-slate-500 text-xs">{log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         ) : (
                           <div className="flex items-center justify-center h-full text-center">
