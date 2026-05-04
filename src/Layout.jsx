@@ -1141,7 +1141,7 @@ function LayoutContent({ children, currentPageName }) {
                       {!pointageEnCours ? (
                        <button
                          onClick={handlePunchIn}
-                         style={{background: 'hsl(207, 85%, 55%)', color: '#0a1628', border: 'none', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(59,130,246,0.4)'}}
+                         style={{background: 'hsl(207, 85%, 55%)', color: 'white', border: 'none', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(59,130,246,0.4)'}}
                        >
                          <Play style={{width: '14px', height: '14px'}} />
                          Punch In
