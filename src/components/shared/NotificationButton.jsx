@@ -100,6 +100,13 @@ export default function NotificationButton({ user }) {
     }
   };
 
+  // Auto-fermeture après 5 secondes
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => setIsOpen(false), 5000);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
   // Fonction pour extraire le commentaire du message
   const extractComment = (message) => {
     const lines = message.split('\n\n');
@@ -135,7 +142,7 @@ export default function NotificationButton({ user }) {
           style={{
             top: `${popoverPos.top}px`,
             left: `${popoverPos.left}px`,
-            zIndex: 9999,
+            zIndex: 99999,
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -191,13 +198,10 @@ export default function NotificationButton({ user }) {
                         </div>
                         <p className="text-sm text-slate-300 mb-2">{mainMessage}</p>
                         {comment && (
-                          <div className="bg-slate-800/50 border border-slate-700 rounded-md p-2 mb-2">
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-md p-2">
                             <p className="text-xs text-slate-400 italic">{comment}</p>
                           </div>
                         )}
-                        <p className="text-xs text-slate-500">
-                          {format(new Date(notification.created_date), "dd MMM à HH:mm", { locale: fr })}
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -213,7 +217,7 @@ export default function NotificationButton({ user }) {
       {isOpen && createPortal(
         <div
           className="fixed inset-0"
-          style={{ zIndex: 9998 }}
+          style={{ zIndex: 99998 }}
           onClick={() => setIsOpen(false)}
         />,
         document.body
