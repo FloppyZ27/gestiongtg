@@ -253,6 +253,11 @@ export default function GestionDeMandat() {
     return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
   };
 
+  const getUserTeam = (user) => {
+    if (user.email === "non-assigne") return null;
+    return user.equipe || USER_TEAM_MAP[user.email] || null;
+  };
+
   const getMandatsCards = () => {
     const cards = [];
     dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé").forEach(dossier => {
@@ -314,11 +319,6 @@ export default function GestionDeMandat() {
     acc[user.email] = applyColumnOrder(filteredCards.filter(c => c.utilisateur === user.email || (c.utilisateur === "non-assigne" && user.email === "non-assigne")), `user-${user.email}`);
     return acc;
   }, {});
-
-  const getUserTeam = (user) => {
-    if (user.email === "non-assigne") return null;
-    return user.equipe || USER_TEAM_MAP[user.email] || null;
-  };
 
   const filteredUsersList = filterEquipe === "Toutes" 
     ? usersList 
