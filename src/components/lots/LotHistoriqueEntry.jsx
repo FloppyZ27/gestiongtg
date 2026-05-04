@@ -62,7 +62,7 @@ export default function LotHistoriqueEntry({ log, users }) {
             )}
             <span className="text-emerald-400 text-xs font-medium">{log.utilisateur_nom}</span>
             <span className="text-slate-600 text-xs">•</span>
-            <span className="text-slate-500 text-xs">{log.created_date && format(new Date(new Date(log.created_date).toLocaleString('en-US', { timeZone: 'America/Toronto' })), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+            <span className="text-slate-500 text-xs">{log.created_date && new Intl.DateTimeFormat('fr-CA', { timeZone: 'America/Toronto', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(log.created_date)).replace(',', ' à')}</span>
           </div>
         </div>
       </div>
