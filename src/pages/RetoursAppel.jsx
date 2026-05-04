@@ -744,25 +744,29 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
             editingRetourAppel={editingRetourAppel}
             onSubmit={async (e) => {
               e.preventDefault();
-              await createRetourAppelMutation.mutateAsync({
-                dossier_reference_id: newRetourForm.dossier_reference_id,
-                utilisateur_assigne: newRetourForm.utilisateur_assigne,
-                date_appel: newRetourForm.date_appel,
-                notes: newRetourForm.notes,
-                client_nom: newRetourForm.client_nom,
-                client_telephone: newRetourForm.client_telephone
-              });
-              setIsNewRetourDialogOpen(false);
-              setEditingRetourAppel(null);
-              setNewRetourForm({
-                dossier_reference_id: null,
-                date_appel: new Date().toISOString().split('T')[0],
-                utilisateur_assigne: "",
-                notes: "",
-                statut: "Retour d'appel",
-                client_nom: "",
-                client_telephone: ""
-              });
+              try {
+                await createRetourAppelMutation.mutateAsync({
+                  dossier_reference_id: newRetourForm.dossier_reference_id,
+                  utilisateur_assigne: newRetourForm.utilisateur_assigne,
+                  date_appel: newRetourForm.date_appel,
+                  notes: newRetourForm.notes,
+                  client_nom: newRetourForm.client_nom,
+                  client_telephone: newRetourForm.client_telephone
+                });
+                setIsNewRetourDialogOpen(false);
+                setEditingRetourAppel(null);
+                setNewRetourForm({
+                  dossier_reference_id: null,
+                  date_appel: new Date().toISOString().split('T')[0],
+                  utilisateur_assigne: "",
+                  notes: "",
+                  statut: "Retour d'appel",
+                  client_nom: "",
+                  client_telephone: ""
+                });
+              } catch (error) {
+                console.error("Erreur lors de la création du retour d'appel:", error);
+              }
             }}
             onCancel={() => {
               setIsNewRetourDialogOpen(false);
