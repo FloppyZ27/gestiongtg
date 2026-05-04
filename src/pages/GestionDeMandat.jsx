@@ -411,6 +411,22 @@ export default function GestionDeMandat() {
         { onSuccess: () => { if (idx === arr.length - 1) queryClient.invalidateQueries({ queryKey: ['dossiers'] }); } }
       );
     });
+
+    // Ouvrir automatiquement le dialog d'entrée de temps lors d'un déplacement de tâche
+    if (activeView === "taches" && !isSameColumn) {
+      const firstLinkedCard = allCards.find(c => c.id === linkedCardIds[0]);
+      if (firstLinkedCard) {
+        setEntreeTempsCardInfo({ dossierId: firstLinkedCard.dossier.id, mandatType: firstLinkedCard.mandat.type_mandat });
+        setEntreeTempsForm({
+          date: new Date().toISOString().split('T')[0],
+          heures: "",
+          tache: card.tache, // tâche source = tâche accomplie
+          tache_suivante: targetColumn, // tâche cible = tâche suivante
+          utilisateur_assigne: firstLinkedCard.mandat.utilisateur_assigne || ""
+        });
+        setIsEntreeTempsDialogOpen(true);
+      }
+    }
   }, [activeView, updateDossierMutation, linkedGroups, allCards, queryClient, columnOrder, filteredCards]);
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: handleDrop });
