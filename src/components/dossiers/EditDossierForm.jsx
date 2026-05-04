@@ -471,7 +471,7 @@ export default function EditDossierForm({
       </div>
 
       {/* Division avec sidebar de navigation */}
-      <div className="flex-1 flex overflow-hidden min-h-0 max-h-0">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Sidebar de navigation - Icons only */}
         <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
           <TooltipProvider>
