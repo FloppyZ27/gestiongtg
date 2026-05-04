@@ -287,6 +287,7 @@ export default function Clients() {
             />
           </div>
         </div>
+        </div>
 
         {/* Stats Cards - HIDDEN
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -649,7 +650,6 @@ export default function Clients() {
             )}
           </DialogContent>
         </Dialog>
-        </div>
       </div>
     </div>
   );
