@@ -917,7 +917,7 @@ export default function GestionDeMandat() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
+              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
               <div className="flex gap-1">
                 {["Toutes", ...EQUIPES].map(equipe => {
                   const count = equipe === "Toutes"
