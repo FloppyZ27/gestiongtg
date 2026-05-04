@@ -2164,13 +2164,6 @@ export default function Dossiers() {
           </div>
 
           <div className="flex gap-3">
-            <Button
-              onClick={handleExportCSV}
-              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
-              <Download className="w-5 h-5 mr-2" />
-              Extraction CSV
-            </Button>
-
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open) {
