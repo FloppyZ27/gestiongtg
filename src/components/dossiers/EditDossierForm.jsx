@@ -471,7 +471,7 @@ export default function EditDossierForm({
       </div>
 
       {/* Division avec sidebar de navigation */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar de navigation - Icons only */}
         <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
           <TooltipProvider>
@@ -494,7 +494,7 @@ export default function EditDossierForm({
         </div>
 
         {/* Main content - 75% */}
-        <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
+        <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800 min-h-0">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
