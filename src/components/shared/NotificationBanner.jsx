@@ -29,10 +29,12 @@ export default function NotificationBanner({ user }) {
         !dismissedIds.has(notifications[0].id)) {
       setVisibleNotification(notifications[0]);
       
-      // Supprimer la notification après 5 secondes
-      setTimeout(() => {
+      // Supprimer la notification après 5 secondes à partir de son apparition
+      const timer = setTimeout(() => {
         setVisibleNotification(null);
       }, 5000);
+      
+      return () => clearTimeout(timer);
     }
   }, [notifications, dismissedIds, visibleNotification]);
 
@@ -43,9 +45,6 @@ export default function NotificationBanner({ user }) {
   };
 
   const handleClick = (notification) => {
-    if (notification.dossier_id) {
-      navigate(createPageUrl("Dossiers") + `?dossier_id=${notification.dossier_id}`);
-    }
     handleDismiss(notification.id);
   };
 
