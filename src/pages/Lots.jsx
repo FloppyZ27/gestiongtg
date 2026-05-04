@@ -1132,7 +1132,7 @@ export default function Lots() {
                 {/* Header pleine largeur */}
                 <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-bold text-white">
+                    <h2 className="text-2xl font-bold text-white">
                       {editingLot ? "Modifier lot" : "Nouveau lot"}
                     </h2>
                     {editingLot && (
