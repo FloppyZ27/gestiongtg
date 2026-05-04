@@ -1136,7 +1136,7 @@ export default function Lots() {
                       {editingLot ? "Modifier lot" : "Nouveau lot"}
                     </h2>
                     {editingLot && (
-                      <span className="text-slate-400 text-sm font-mono">— {editingLot.numero_lot}</span>
+                      <span className="text-slate-400 text-2xl font-mono">— {editingLot.numero_lot}</span>
                     )}
                   </div>
                 </div>
