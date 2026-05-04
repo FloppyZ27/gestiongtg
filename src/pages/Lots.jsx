@@ -1539,16 +1539,7 @@ export default function Lots() {
                     <div className="flex items-center gap-2">
                       {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
                       <h3 className="text-slate-300 text-base font-semibold">
-                        {sidebarTab === "commentaires" ? (
-                          <span className="flex items-center gap-2">
-                            Commentaires
-                            {commentairesCount > 0 && (
-                              <Badge className="bg-emerald-500/30 text-emerald-300 border-emerald-500/50 px-1.5 py-0 text-xs">
-                                {commentairesCount}
-                              </Badge>
-                            )}
-                          </span>
-                        ) : "Historique"}
+                        {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
                         </h3>
                     </div>
                     {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -1560,6 +1551,11 @@ export default function Lots() {
                         <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
+                          {commentairesCount > 0 && (
+                            <div className="ml-1.5 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                              {commentairesCount}
+                            </div>
+                          )}
                         </TabsTrigger>
                         <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                           <Clock className="w-4 h-4 mr-1" />
