@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, X, Phone, FolderOpen, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -15,6 +15,8 @@ export default function NotificationButton({ user }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = useRef(null);
+  const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
@@ -72,6 +74,32 @@ export default function NotificationButton({ user }) {
     }
   };
 
+  const handleOpenChange = (open) => {
+    setIsOpen(open);
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const popoverWidth = 320;
+      const popoverHeight = 500;
+      let left = rect.right - popoverWidth;
+      let top = rect.bottom + 8;
+
+      // Ajuster si dépasse à droite
+      if (left + popoverWidth > window.innerWidth - 16) {
+        left = window.innerWidth - popoverWidth - 16;
+      }
+      if (left < 16) {
+        left = 16;
+      }
+
+      // Ajuster si dépasse en bas
+      if (top + popoverHeight > window.innerHeight - 16) {
+        top = rect.top - popoverHeight - 8;
+      }
+
+      setPopoverPos({ top, left });
+    }
+  };
+
   // Fonction pour extraire le commentaire du message
   const extractComment = (message) => {
     const lines = message.split('\n\n');
@@ -85,22 +113,32 @@ export default function NotificationButton({ user }) {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
+    <>
+      <Button
+        ref={buttonRef}
+        variant="ghost"
+        size="icon"
+        onClick={() => handleOpenChange(!isOpen)}
+        className="relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
+      >
+        <Bell className="w-5 h-5 text-white" />
+        {notifications.length > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
+            {notifications.length > 9 ? '9+' : notifications.length}
+          </Badge>
+        )}
+      </Button>
+
+      {isOpen && createPortal(
+        <div
+          className="fixed bg-card border border-border rounded-md shadow-2xl p-0 w-80"
+          style={{
+            top: `${popoverPos.top}px`,
+            left: `${popoverPos.left}px`,
+            zIndex: 9999,
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <Bell className="w-5 h-5 text-white" />
-          {notifications.length > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
-              {notifications.length > 9 ? '9+' : notifications.length}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-72 p-0 bg-card border border-border shadow-2xl" style={{zIndex: 9999, right: '1rem'}} align="end" side="bottom" sideOffset={8}>
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <h3 className="font-semibold text-white">Notifications</h3>
           {notifications.length > 0 && (
@@ -168,7 +206,18 @@ export default function NotificationButton({ user }) {
             </div>
           )}
         </ScrollArea>
-      </PopoverContent>
-    </Popover>
+        </div>,
+        document.body
+      )}
+
+      {isOpen && createPortal(
+        <div
+          className="fixed inset-0"
+          style={{ zIndex: 9998 }}
+          onClick={() => setIsOpen(false)}
+        />,
+        document.body
+      )}
+    </>
   );
 }
