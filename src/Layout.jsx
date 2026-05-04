@@ -1102,7 +1102,7 @@ function LayoutContent({ children, currentPageName }) {
                 <Button
                   onClick={() => setShowPunchControls(!showPunchControls)}
                   variant="ghost"
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/40 relative"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/40 relative transition-transform duration-200 hover:scale-110 active:scale-95"
                 >
                   <div className="relative w-4 h-4 flex items-center justify-center">
                     {pointageEnCours ? (
@@ -1170,7 +1170,7 @@ function LayoutContent({ children, currentPageName }) {
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
                 size="icon"
-                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg"
+                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
               >
                 <Timer className="w-5 h-5" style={{color: 'white'}} />
               </Button>

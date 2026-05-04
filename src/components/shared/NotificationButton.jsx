@@ -90,7 +90,7 @@ export default function NotificationButton({ user }) {
         <Button
           variant="ghost"
           size="icon"
-          className="relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg"
+          className="relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
         >
           <Bell className="w-5 h-5 text-white" />
           {notifications.length > 0 && (
