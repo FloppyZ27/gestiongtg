@@ -26,9 +26,9 @@ export default function LotHistoriqueEntry({ log, users }) {
         return (
           <div key={idx} className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-white text-xs">{before}</span>
-                                             <span className="text-white flex-shrink-0">→</span>
-                                             <span className="text-white text-xs">{after}</span>
+              <span className="text-slate-400 text-xs">{before}</span>
+                                             <span className="text-slate-400 flex-shrink-0">→</span>
+                                             <span className="text-slate-400 text-xs">{after}</span>
             </div>
           </div>
         );
@@ -63,7 +63,7 @@ export default function LotHistoriqueEntry({ log, users }) {
             )}
             <span className="text-emerald-400 text-xs font-medium">{log.utilisateur_nom}</span>
             <span className="text-slate-600 text-xs">•</span>
-            <span className="text-slate-500 text-xs">{log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+            <span className="text-slate-500 text-xs">{log.created_date && format(new Date(new Date(log.created_date).toLocaleString('en-US', { timeZone: 'America/Toronto' })), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
           </div>
         </div>
       </div>
