@@ -432,7 +432,7 @@ export default function EditDossierForm({
 
   return (
     <motion.div 
-      className="flex flex-col h-full overflow-hidden"
+      className="flex flex-col h-full overflow-hidden min-h-0"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
