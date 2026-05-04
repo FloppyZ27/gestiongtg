@@ -1080,7 +1080,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="GTG Logo"
                 className="w-10 h-auto"
               />
-              <h1 className="text-xl font-bold text-foreground">GestionGTG</h1>
+              <h1 className="text-2xl font-bold text-foreground">GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}
