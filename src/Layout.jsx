@@ -1078,8 +1078,8 @@ function LayoutContent({ children, currentPageName }) {
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                 alt="GTG Logo"
-                className="w-10 h-auto"
-              />
+                  className="w-14 h-auto"
+                />
               <h1 className="text-3xl font-bold text-foreground">GestionGTG</h1>
             </div>
 
