@@ -1552,9 +1552,9 @@ export default function Lots() {
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
                           {commentairesCount > 0 && (
-                            <div className="ml-1.5 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                            <span className="ml-1.5 inline-flex items-center justify-center bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 leading-none">
                               {commentairesCount}
-                            </div>
+                            </span>
                           )}
                         </TabsTrigger>
                         <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
