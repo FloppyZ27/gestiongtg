@@ -176,6 +176,8 @@ export default function GestionDeMandat() {
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("Toutes");
   const [filterPlaceAffaireCalendrier, setFilterPlaceAffaireCalendrier] = useState("Toutes");
   const [filterEquipe, setFilterEquipe] = useState("Toutes");
+  const [filterEquipeTaches, setFilterEquipeTaches] = useState("Toutes");
+  const [filterEquipeCalendrier, setFilterEquipeCalendrier] = useState("Toutes");
   const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
   const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
   const [entreeTempsForm, setEntreeTempsForm] = useState({
@@ -279,13 +281,16 @@ export default function GestionDeMandat() {
     const clientsNames = getClientsNames(card.dossier.clients_ids);
     const addressFormatted = formatAdresse(card.mandat.adresse_travaux);
     const ville = card.mandat.adresse_travaux?.ville || "";
+    const cardUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+    const cardTeam = cardUser ? getUserTeam(cardUser) : null;
     return (
       (fullNumber.toLowerCase().includes(searchLower) || card.dossier.numero_dossier?.toLowerCase().includes(searchLower) || clientsNames.toLowerCase().includes(searchLower) || card.mandat.type_mandat?.toLowerCase().includes(searchLower) || addressFormatted.toLowerCase().includes(searchLower) || ville.toLowerCase().includes(searchLower)) &&
       (filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre)) &&
       (filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat)) &&
       (filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne)) &&
       (filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville)) &&
-      (filterPlaceAffaire === "Toutes" || card.dossier.place_affaire === filterPlaceAffaire)
+      (filterPlaceAffaire === "Toutes" || card.dossier.place_affaire === filterPlaceAffaire) &&
+      (filterEquipeTaches === "Toutes" || cardTeam === filterEquipeTaches)
     );
   });
 
@@ -898,34 +903,54 @@ export default function GestionDeMandat() {
             </TabsList>
 
             {/* Vue par Tâches */}
-            <TabsContent value="taches" className="mt-0">
-              {/* Filtre Place d'affaire */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
-                <div className="flex gap-1">
-                  {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
-                    const baseFiltered = allCards.filter(c => {
-                      const s = searchTerm.toLowerCase();
-                      const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
-                      const cn = getClientsNames(c.dossier.clients_ids);
-                      return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
-                        (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
-                        (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
-                        (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
-                        (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
-                    });
-                    const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
-                    const isActive = filterPlaceAffaire === val;
-                    return (
-                      <button key={val} onClick={() => setFilterPlaceAffaire(val)}
-                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                        {label}
-                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+             <TabsContent value="taches" className="mt-0">
+               {/* Filtres Place d'affaire + Équipe */}
+               <div className="flex items-center gap-6 mb-4 flex-wrap">
+                 <div className="flex items-center gap-3">
+                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
+                   <div className="flex gap-1">
+                     {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
+                       const baseFiltered = allCards.filter(c => {
+                         const s = searchTerm.toLowerCase();
+                         const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
+                         const cn = getClientsNames(c.dossier.clients_ids);
+                         return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
+                           (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
+                           (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
+                           (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
+                           (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
+                       });
+                       const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
+                       const isActive = filterPlaceAffaire === val;
+                       return (
+                         <button key={val} onClick={() => setFilterPlaceAffaire(val)}
+                           className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                           {label}
+                           <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                         </button>
+                       );
+                     })}
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
+                   <div className="flex gap-1">
+                     {["Toutes", ...EQUIPES].map(equipe => {
+                       const count = equipe === "Toutes"
+                         ? filteredCards.length
+                         : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
+                       const isActive = filterEquipeTaches === equipe;
+                       return (
+                         <button key={equipe} onClick={() => setFilterEquipeTaches(equipe)}
+                           className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                           {equipe}
+                           <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                         </button>
+                       );
+                     })}
+                   </div>
+                 </div>
+               </div>
               <div data-kanban-scroll className="overflow-x-auto pb-4" style={{ cursor: dragging ? 'grabbing' : 'default' }}>
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
@@ -983,21 +1008,41 @@ export default function GestionDeMandat() {
 
             {/* Vue Calendrier */}
             <TabsContent value="calendrier" className="mt-0">
-              {/* Filtre Place d'affaire */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
-                <div className="flex gap-1">
-                  {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
-                    const count = val === "Toutes" ? filteredCards.length : filteredCards.filter(c => c.dossier.place_affaire === val).length;
-                    const isActive = filterPlaceAffaireCalendrier === val;
-                    return (
-                      <button key={val} onClick={() => setFilterPlaceAffaireCalendrier(val)}
-                        className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                        {label}
-                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                      </button>
-                    );
-                  })}
+              {/* Filtres Place d'affaire + Équipe */}
+              <div className="flex items-center gap-6 mb-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
+                  <div className="flex gap-1">
+                    {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
+                      const count = val === "Toutes" ? filteredCards.length : filteredCards.filter(c => c.dossier.place_affaire === val).length;
+                      const isActive = filterPlaceAffaireCalendrier === val;
+                      return (
+                        <button key={val} onClick={() => setFilterPlaceAffaireCalendrier(val)}
+                          className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                          {label}
+                          <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe</span>
+                  <div className="flex gap-1">
+                    {["Toutes", ...EQUIPES].map(equipe => {
+                      const count = equipe === "Toutes"
+                        ? filteredCards.length
+                        : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
+                      const isActive = filterEquipeCalendrier === equipe;
+                      return (
+                        <button key={equipe} onClick={() => setFilterEquipeCalendrier(equipe)}
+                          className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
+                          {equipe}
+                          <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
@@ -1053,7 +1098,11 @@ export default function GestionDeMandat() {
                       {[0,1,2,3,4].map(dayOffset => {
                         const day = addDays(currentMonthStart, dayOffset);
                         const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                        const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier));
+                        const cardsForDay = filteredCards.filter(c => {
+                          const cardUser = users.find(u => u.email === c.mandat.utilisateur_assigne);
+                          const cardTeam = cardUser ? getUserTeam(cardUser) : null;
+                          return c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier) && (filterEquipeCalendrier === "Toutes" || cardTeam === filterEquipeCalendrier);
+                        });
                         const isOver = overColumn === dayId && dragging;
                         return (
                           <div key={dayOffset} data-kanban-column={dayId} className={`rounded-lg border min-h-[400px] p-2 transition-all ${isOver ? 'border-emerald-400/80 bg-emerald-500/10' : 'border-slate-700/50'}`}>
@@ -1082,7 +1131,11 @@ export default function GestionDeMandat() {
                               <div className="grid grid-cols-5 divide-x divide-slate-700">
                                 {daysOfWeek.map((day, dayIndex) => {
                                   const dayId = `day-${format(day, "yyyy-MM-dd")}`;
-                                  const cardsForDay = filteredCards.filter(c => c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier));
+                                  const cardsForDay = filteredCards.filter(c => {
+                                    const cardUser = users.find(u => u.email === c.mandat.utilisateur_assigne);
+                                    const cardTeam = cardUser ? getUserTeam(cardUser) : null;
+                                    return c.mandat.date_livraison && isSameDay(new Date(c.mandat.date_livraison + "T00:00:00"), day) && (filterPlaceAffaireCalendrier === "Toutes" || c.dossier.place_affaire === filterPlaceAffaireCalendrier) && (filterEquipeCalendrier === "Toutes" || cardTeam === filterEquipeCalendrier);
+                                  });
                                   const isOver = overColumn === dayId && dragging;
                                   return (
                                     <div key={dayIndex} data-kanban-column={dayId} className={`p-3 min-h-[200px] transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
