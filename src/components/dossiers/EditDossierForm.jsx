@@ -2522,11 +2522,11 @@ export default function EditDossierForm({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="commentaires" className="flex-1 overflow-y-auto overflow-x-hidden p-0 mt-0 min-h-0">
+              <TabsContent value="commentaires" className="flex-1 min-h-0 p-0 mt-0 overflow-hidden">
                 <CommentairesSectionWrapper dossierId={editingDossier?.id} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} onAddHistoriqueEntry={addActionLog} />
               </TabsContent>
               
-              <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+              <TabsContent value="historique" className="flex-1 min-h-0 p-4 pr-6 mt-0 overflow-y-auto">
                 {actionLogs.length > 0 ? (
                   <div className="space-y-3">
                     {actionLogs.map((log) => {
