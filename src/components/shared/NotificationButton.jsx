@@ -100,12 +100,7 @@ export default function NotificationButton({ user }) {
     }
   };
 
-  // Auto-fermeture après 5 secondes
-  useEffect(() => {
-    if (!isOpen) return;
-    const timer = setTimeout(() => setIsOpen(false), 5000);
-    return () => clearTimeout(timer);
-  }, [isOpen]);
+
 
   // Fonction pour extraire le commentaire du message
   const extractComment = (message) => {
