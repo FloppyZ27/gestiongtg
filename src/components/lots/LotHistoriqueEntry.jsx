@@ -45,8 +45,7 @@ export default function LotHistoriqueEntry({ log, users }) {
   return (
     <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
       <div className="flex items-start gap-3">
-        <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
-        <div className="flex-1 min-w-0">
+<div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium">{getActionTitle()}</p>
           {log.details && (
             <div className="text-slate-400 text-xs mt-2 space-y-1.5">
