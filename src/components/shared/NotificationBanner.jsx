@@ -45,7 +45,7 @@ export default function NotificationBanner({ user }) {
   };
 
   const handleClick = (notification) => {
-    handleDismiss(notification.id);
+    setVisibleNotification(null);
   };
 
   const getColor = (type) => {
