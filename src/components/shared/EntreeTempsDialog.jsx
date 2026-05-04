@@ -364,7 +364,7 @@ export default function EntreeTempsDialog({
 
                 {!detailsCollapsed && (
                   <div className="p-3">
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="grid grid-cols-6 gap-3">
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
                         <Input type="date" value={entreeForm.date}
@@ -417,20 +417,19 @@ export default function EntreeTempsDialog({
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-
-                    <div className="mt-3 space-y-1">
-                      <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                      <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({ ...entreeForm, utilisateur_assigne: value })}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {(users || []).map((usr) => (
-                            <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">{usr.full_name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                        <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({ ...entreeForm, utilisateur_assigne: value })}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {(users || []).map((usr) => (
+                              <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">{usr.full_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 )}
