@@ -364,7 +364,7 @@ export default function EntreeTempsDialog({
 
                 {!detailsCollapsed && (
                   <div className="p-3">
-                    <div className="grid grid-cols-6 gap-3">
+                    <div className="grid grid-cols-5 gap-3">
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
                         <Input type="date" value={entreeForm.date}
@@ -381,15 +381,15 @@ export default function EntreeTempsDialog({
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Multiplicateur <span className="text-red-400">*</span></Label>
-                        <Select value={entreeForm.multiplicateur || "1"} onValueChange={(value) => setEntreeForm({ ...entreeForm, multiplicateur: value })}>
+                        <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
+                        <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({ ...entreeForm, mandat: value })}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
                             <SelectValue placeholder="Sélectionner" />
                           </SelectTrigger>
                           <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="1" className="text-white text-xs">1</SelectItem>
-                            <SelectItem value="1.5" className="text-white text-xs">1.5</SelectItem>
-                            <SelectItem value="2" className="text-white text-xs">2</SelectItem>
+                            {(selectedDossier?.mandats || []).map((m, idx) => (
+                              <SelectItem key={idx} value={m.type_mandat} className="text-white text-xs">{m.type_mandat}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -417,28 +417,20 @@ export default function EntreeTempsDialog({
                           </SelectContent>
                         </Select>
                       </div>
-
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                        <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({ ...entreeForm, utilisateur_assigne: value })}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {(users || []).map((usr) => (
-                              <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">{usr.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
                     </div>
 
                     <div className="mt-3 space-y-1">
-                      <Label className="text-slate-400 text-xs">Description</Label>
-                      <Input value={entreeForm.description || ""}
-                        onChange={(e) => setEntreeForm({ ...entreeForm, description: e.target.value })}
-                        placeholder="Description optionnelle..."
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
+                      <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                      <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({ ...entreeForm, utilisateur_assigne: value })}>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {(users || []).map((usr) => (
+                            <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">{usr.full_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
