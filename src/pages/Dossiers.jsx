@@ -2142,7 +2142,7 @@ export default function Dossiers() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 pt-6">
       {/* Dialog de confirmation de suppression */}
       <ConfirmDeleteDialog
         open={showDeleteDossierConfirm}
