@@ -1079,7 +1079,7 @@ function LayoutContent({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
+          <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-card/95 backdrop-blur-sm border-b border-border px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="lg:hidden text-muted-foreground hover:text-foreground" />
               <img 
@@ -1179,7 +1179,7 @@ function LayoutContent({ children, currentPageName }) {
           </header>
 
           <div
-            className="flex-1 overflow-y-auto overflow-x-hidden pt-[73px]"
+            className="flex-1 overflow-y-auto overflow-x-hidden pt-[63px]"
             id="main-scroll-container"
           >
             <AnimatePresence mode="wait">
