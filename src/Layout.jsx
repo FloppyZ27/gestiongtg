@@ -537,17 +537,23 @@ function LayoutContent({ children, currentPageName }) {
   };
 
   const handleDossierSelect = (dossierId) => {
+    if (!dossierId) {
+      setSelectedDossierId(null);
+      setEntreeForm(prev => ({ ...prev, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: "" }));
+      setDossierSearchTerm("");
+      return;
+    }
     const dossier = dossiers.find(d => d.id === dossierId);
     const mandatType = dossier?.mandats?.[0]?.type_mandat || "";
     
     setSelectedDossierId(dossierId);
-    setEntreeForm({
-      ...entreeForm,
+    setEntreeForm(prev => ({
+      ...prev,
       dossier_id: dossierId,
       mandat: mandatType,
       tache_suivante: "",
       utilisateur_assigne: ""
-    });
+    }));
     setDossierSearchTerm("");
     setHasEntreeChanges(true);
   };

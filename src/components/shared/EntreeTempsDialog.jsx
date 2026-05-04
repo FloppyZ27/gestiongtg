@@ -330,7 +330,10 @@ export default function EntreeTempsDialog({
                             </TableCell>
                             <TableCell className="text-right p-2">
                               <Button type="button" size="sm" variant="ghost"
-                                onClick={() => setEntreeForm({ ...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: "" })}
+                                onClick={() => {
+                                  if (onDossierSelect) onDossierSelect(null);
+                                  setEntreeForm({ ...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: "" });
+                                }}
                                 className="text-slate-400 text-xs h-6 hover:text-white">
                                 Changer
                               </Button>
