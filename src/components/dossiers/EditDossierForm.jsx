@@ -439,7 +439,7 @@ export default function EditDossierForm({
       transition={{ duration: 0.2 }}
     >
       {/* Header sur toute la largeur */}
-      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex items-center gap-4">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
         <div className="flex items-center gap-3 ml-auto">
@@ -471,7 +471,7 @@ export default function EditDossierForm({
       </div>
 
       {/* Division avec sidebar de navigation */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 max-h-0">
         {/* Sidebar de navigation - Icons only */}
         <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
           <TooltipProvider>
@@ -495,7 +495,7 @@ export default function EditDossierForm({
 
         {/* Main content - 75% */}
         <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800 min-h-0">
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 box-border">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
               if (!editingDossier) {
@@ -2452,7 +2452,7 @@ export default function EditDossierForm({
         </div>
 
         {/* Sidebar - 25% (ajusté pour la largeur) */}
-        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden min-h-0 h-full">
+        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden min-h-0">
           {/* Section Carte */}
           {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
             formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville

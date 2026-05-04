@@ -571,7 +571,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
-         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 shadow-2xl shadow-black/50 pt-0 flex flex-col min-h-0" style={{ marginTop: '20px', height: 'calc(100vh - 80px)' }} hideClose>
+         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 shadow-2xl shadow-black/50 flex flex-col overflow-hidden" style={{ marginTop: '20px', maxHeight: '90vh' }} hideClose>
           <EditDossierForm
             formData={formData}
             setFormData={setFormData}
