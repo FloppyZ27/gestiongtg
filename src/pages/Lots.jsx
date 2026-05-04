@@ -1109,7 +1109,7 @@ export default function Lots() {
               </span>
             </label>
             <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
-              if (!open && hasFormChanges) {
+              if (!open && hasFormChanges && !editingLot) {
                 setShowCancelConfirm(true);
                 return;
               }
