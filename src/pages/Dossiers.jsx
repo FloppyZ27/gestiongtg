@@ -2158,7 +2158,7 @@ export default function Dossiers() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Dossiers
               </h1>
-              <FolderOpen className="w-6 h-6 text-emerald-400" />
+              <FolderOpen className="w-6 h-6 text-blue-400" />
             </div>
             <p className="text-slate-400">Gestion de vos dossiers d'arpentage</p>
           </div>
