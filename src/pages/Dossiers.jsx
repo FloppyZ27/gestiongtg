@@ -34,9 +34,15 @@ const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjami
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
-import { CADASTRE_CODES, CADASTRES_PAR_CIRCONSCRIPTION } from "../lib/cadastreCodes";
-import NewDossierDialog from "../components/dossiers/NewDossierDialog";
-import ContactSelectorDialogs from "../components/dossiers/ContactSelectorDialogs";
+const CADASTRE_CODES = {
+  "010010": "Île-du-Havre-Aubert", "010020": "Île-d'Entrée", "010030": "Île-du-Cap-aux-Meules", "010040": "Île-du-Havre-aux-Maisons", "010050": "Grosse-Île", "010060": "Île-Brion", "010070": "Île-Coffin", "010080": "Île-au-Loup", "010090": "Île-du-Corps-Mort", "010100": "Rochers-aux-Oiseaux", "020010": "Île-Bonaventure", "020020": "Canton de Percé", "020040": "Municipalité de Grande-Rivière", "020060": "Municipalité de Pabos", "020080": "Canton de Newport", "020100": "Canton de Raudin", "020110": "Canton de Pellegrin", "020120": "Canton de Rameau", "020140": "Canton de Malbaie", "020160": "Canton de Douglas", "020180": "Canton de York", "020200": "Village de Gaspé", "020210": "Canton de Baie-de-Gaspé-Sud", "020220": "Canton de Larocque", "020230": "Canton de Galt", "020240": "Canton de Baie-de-Gaspé-Nord", "020260": "Canton de Cap-des-Rosiers", "020280": "Canton de Fox", "020300": "Canton de Sydenham", "020310": "Canton de Cloridorme", "020320": "Seigneurie de la Grande-Vallée-des-Monts-Notre-Dame", "020340": "Canton de Port-Daniel", "020360": "Canton de Hope", "020380": "Canton de Cox", "020400": "Canton de Garin", "020410": "Canton de Hamilton", "020420": "Canton de New Richmond", "020430": "Canton de Marcil", "020440": "Canton de Robidoux", "020460": "Canton de Maria", "020480": "Canton de Carleton", "020500": "Municipalité de Shoolbred", "020510": "Canton de Dugal", "020520": "Canton de Mann", "020540": "Canton de Ristigouche", "020560": "Canton de Matapédia", "020580": "Canton de Patapédia", "020600": "Canton de Biencourt", "020610": "Canton de Laroche", "020620": "Canton de Varin", "020640": "Canton de Flynn", "020660": "Canton de Ouimet", "020680": "Canton de Massé", "020700": "Paroisse de Sainte-Angèle-de-Mérici", "020710": "Canton de Fleuriau", "020720": "Canton de Neigette", "020740": "Canton de Macpès", "020760": "Canton de Duquesne", "020780": "Canton de Chénier", "020800": "Canton de Bédard", "020810": "Paroisse de Saint-Mathieu", "020820": "Paroisse de Saint-Simon", "020840": "Paroisse de Saint-Fabien", "020860": "Paroisse de Sainte-Cécile-du-Bic", "020880": "Paroisse de Notre-Dame-du-Sacré-Coeur", "020900": "Ville de Saint-Germain-de-Rimouski", "020910": "Paroisse de Saint-Germain-de-Rimouski", "020920": "Paroisse de Saint-Anaclet", "020940": "Paroisse de Sainte-Luce", "020960": "Paroisse de Saint-Donat", "020980": "Paroisse de Saint-Joseph-de-Lepage", "021000": "Paroisse de Sainte-Flavie", "021010": "Canton d'Assemetquagan", "021020": "Canton de Milnikek", "021040": "Canton de Jetté", "021060": "Canton de Matalik", "021080": "Canton de Casupscull", "021100": "Canton de La Vérendrye", "021110": "Canton de Casault", "021120": "Canton de Lepage", "021140": "Canton de Humqui", "021160": "Canton de Pinault", "021180": "Canton de Nemtayé", "021200": "Paroisse de Saint-Benoît-Joseph-Labre", "021210": "Canton de Blais", "021220": "Canton de Langis", "021240": "Paroisse de Saint-Pierre-du-Lac", "021260": "Canton d'Awantjish", "021280": "Augmentation du canton d'Awantjish", "021300": "Paroisse de Sainte-Marie-de-Sayabec", "021310": "Canton de Matane", "021320": "Augmentation du canton de MacNider", "021340": "Canton de MacNider", "021360": "Canton de Cabot", "021380": "Paroisse de Saint-Octave-de-Métis", "021390": "Canton de Faribault", "021400": "Paroisse de Notre-Dame-de-L'Assomption-de-MacNider", "021410": "Paroisse de Saint-Ulric", "021420": "Paroisse de Saint-Jérôme-de-Matane", "021440": "Canton de Tessier", "021460": "Canton de Saint-Denis", "021480": "Paroisse de Sainte-Félicité", "021500": "Canton de Cherbourg", "021510": "Canton de Dalibaire", "021520": "Canton de Romieu", "021530": "Canton de La Potardière", "021540": "Canton de Cap-Chat", "021560": "Fief de Sainte-Anne-des-Monts", "021580": "Canton de Tourelle", "021600": "Canton de Christie", "021610": "Canton de Boisbuisson", "021620": "Canton de Duchesnay", "021630": "Canton de La Rivière", "021640": "Municipalité de Saint-Maxime-du-Mont-Louis", "021650": "Canton de Bonnécamp", "021660": "Canton de Taschereau", "021680": "Canton de Denoue", "021700": "Canton de Holland", "021710": "Canton d'Asselin", "021720": "Canton de Baillargeon", "021730": "Canton d'Angers", "021740": "Canton de Lemieux", "021750": "Brochu", "021760": "Canton de Lesseps", "021770": "Canton de Champou", "021780": "Canton de Flahault", "080620": "Village d'Hébertville", "080630": "Canton de Saint-Hilaire", "080640": "Canton de Caron", "080660": "Canton de Métabetchouan", "080700": "Canton de Signay", "080710": "Canton de De l'Île", "080720": "Canton de Taillon", "080740": "Canton de Garnier", "080760": "Canton de Crespieul", "080780": "Canton de Malherbe", "080800": "Augmentation du canton de Dequen", "080810": "Canton de Dablon", "080820": "Canton de Dequen", "080840": "Canton de Charlevoix", "080860": "Canton de Roberval", "080880": "Village de Roberval", "080900": "Canton de Ross", "080910": "Canton de Déchêne", "080920": "Canton de Ouiatchouan", "080940": "Canton d'Ashuapmouchouan", "080960": "Canton de Demeulles", "080980": "Canton de Parent", "081000": "Canton de Racine", "081010": "Canton de Dolbeau", "081020": "Canton de Dalmas", "081040": "Canton de Jogues", "081060": "Canton de Maltais", "081080": "Canton de Constantin", "081100": "Canton de Saint-Onge", "081110": "Canton de Milot", "081120": "Canton de Proulx", "081140": "Canton de Hudon", "081160": "Canton de La Trappe", "081180": "Canton de Pelletier", "081200": "Canton d'Albanel", "081210": "Canton de Normandin", "081240": "Canton de Dufferin", "081260": "Canton de Dumais", "081280": "Canton de Girard", "080010": "Canton de Boilleau", "080020": "Canton de Périgny", "080040": "Canton de Dumas", "080050": "Canton de Labrosse", "080060": "Canton de Saint-Jean", "080080": "Canton de Hébert", "080100": "Canton d'Otis", "080110": "Canton de Ferland", "080120": "Paroisse de Saint-Alexis", "080130": "Paroisse de Saint-Alphonse", "080140": "Village de Grande-Baie", "080160": "Village de Bagotville", "080180": "Canton de Bagot", "080200": "Canton de Laterrière", "080210": "Paroisse de Chicoutimi", "080220": "Ville de Chicoutimi", "080240": "Canton de Chicoutimi", "080260": "Cité d'Arvida", "080280": "Canton de Jonquière", "080300": "Canton de Kénogami", "080310": "Canton de Labarre", "080320": "Canton de Taché", "080340": "Canton de Bourget", "080360": "Canton de Simard", "080380": "Canton de Tremblay", "080400": "Village de Sainte-Anne-de-Chicoutimi", "080410": "Canton de Harvey", "080420": "Canton de Saint-Germains", "080430": "Canton de Chardon", "080440": "Canton de Durocher", "080460": "Canton de Falardeau", "080470": "Canton de Gagné", "080480": "Canton de Bégin", "080500": "Canton de Labrecque", "080510": "Canton de Rouleau", "080520": "Canton d'Aulneau"
+};
+
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Lac-Saint-Jean-Est": ["Québec", "Canton de Caron", "Canton de de l'Île", "Canton de Garnier", "Village d'Héberville", "Canton d'Hébertville-Station", "Canton de Labarre", "Canton de Mésy", "Canton de Métabetchouan", "Canton de Signay", "Canton de Taillon"],
+  "Lac-Saint-Jean-Ouest": ["Québec", "Canton d'Albanel", "Canton de Charlevoix", "Canton de Dablon", "Canton de Dalmas", "Canton de Demeules", "Canton de Dequen", "Canton de Dolbeau", "Canton de Girard", "Canton de Jogues", "Canton de Malherbe", "Canton de Métabetchouan", "Canton de Milot", "Canton de Normandin", "Canton de Ouiatchouan", "Canton de Racine", "Canton de Roberval", "Canton de Saint-Hilaire"],
+  "Chicoutimi": ["Québec", "Cité d'Arvida", "Canton de Bagot", "Village de Bagotville", "Canton de Bégin", "Canton de Boileau", "Canton de Bourget", "Canton de Chicoutimi", "Paroisse de Chicoutimi", "Ville de Chicoutimi", "Canton de Dumas", "Canton de Durocher", "Canton de Falardau", "Canton de Ferland", "Ville de Grande-Baie", "Canton de Harvey", "Canton de Hébert", "Canton de Jonquière", "Canton de Kénogami", "Canton de Labrecque", "Canton de Laterrière", "Canton d'Otis", "Canton de Périgny", "Canton de Rouleau", "Canton de Simard", "Paroisse de Saint-Alexis", "Paroisse de Saint-Alphonse", "Ville de Sainte-Anne-de-Chicoutimi", "Canton de Saint-Germains", "Canton de Saint-Jean", "Canton de Taché", "Canton de Tremblay"]
+};
 
 const getArpenteurColor = (arpenteur) => {
   const colors = {
@@ -2165,26 +2171,59 @@ export default function Dossiers() {
               Extraction CSV
             </Button>
 
-            <NewDossierDialog
-              isOpen={isDialogOpen}
-              onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}
-              formData={formData} setFormData={setFormData}
-              clients={clients} lots={lots} users={users}
-              onSubmit={handleSubmit}
-              onCancel={() => { setIsDialogOpen(false); resetForm(); }}
-              updateMandat={updateMandat} addMandat={addMandat} removeMandat={removeMandat}
-              openLotSelector={openLotSelector} removeLotFromMandat={removeLotFromMandat}
-              openAddMinuteDialog={openAddMinuteDialog} removeMinuteFromMandat={removeMinuteFromMandat}
-              getLotById={getLotById}
-              setIsClientFormDialogOpen={setIsClientFormDialogOpen}
-              setClientTypeForForm={setClientTypeForForm}
-              setViewingClientDetails={setViewingClientDetails}
-              calculerProchainNumeroDossier={calculerProchainNumeroDossier}
-              editingDossier={editingDossier}
-              onOpenNewLotDialog={(mandatIndex) => { setCurrentMandatIndex(mandatIndex); setIsNewLotDialogOpen(true); }}
-              setEditingClient={setEditingClientForForm}
-              setEditingLot={setEditingLot} setNewLotForm={setNewLotForm} setLotActionLogs={setLotActionLogs}
-            />
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) {
+                resetForm();
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => {
+                    resetForm();
+                    setIsDialogOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Nouveau dossier
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }} hideClose>
+                <EditDossierForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  clients={clients}
+                  lots={lots}
+                  users={users}
+                  onSubmit={handleSubmit}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    resetForm();
+                  }}
+                  updateMandat={updateMandat}
+                  addMandat={addMandat}
+                  removeMandat={removeMandat}
+                  openLotSelector={openLotSelector}
+                  removeLotFromMandat={removeLotFromMandat}
+                  openAddMinuteDialog={openAddMinuteDialog}
+                  removeMinuteFromMandat={removeMinuteFromMandat}
+                  getLotById={getLotById}
+                  setIsClientFormDialogOpen={setIsClientFormDialogOpen}
+                  setClientTypeForForm={setClientTypeForForm}
+                  setViewingClientDetails={setViewingClientDetails}
+                  calculerProchainNumeroDossier={calculerProchainNumeroDossier}
+                  editingDossier={editingDossier}
+                  onOpenNewLotDialog={(mandatIndex) => {
+                    setCurrentMandatIndex(mandatIndex);
+                    setIsNewLotDialogOpen(true);
+                  }}
+                  setEditingClient={setEditingClientForForm}
+                  setEditingLot={setEditingLot}
+                  setNewLotForm={setNewLotForm}
+                  setLotActionLogs={setLotActionLogs}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -2741,21 +2780,248 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <ContactSelectorDialogs
-          isClientSelectorOpen={isClientSelectorOpen} setIsClientSelectorOpen={setIsClientSelectorOpen}
-          isNotaireSelectorOpen={isNotaireSelectorOpen} setIsNotaireSelectorOpen={setIsNotaireSelectorOpen}
-          isCourtierSelectorOpen={isCourtierSelectorOpen} setIsCourtierSelectorOpen={setIsCourtierSelectorOpen}
-          clientSearchTerm={clientSearchTerm} setClientSearchTerm={setClientSearchTerm}
-          notaireSearchTerm={notaireSearchTerm} setNotaireSearchTerm={setNotaireSearchTerm}
-          courtierSearchTerm={courtierSearchTerm} setCourtierSearchTerm={setCourtierSearchTerm}
-          filteredClientsForSelector={filteredClientsForSelector}
-          filteredNotairesForSelector={filteredNotairesForSelector}
-          filteredCourtiersForSelector={filteredCourtiersForSelector}
-          formData={formData} toggleClient={toggleClient}
-          setIsClientFormDialogOpen={setIsClientFormDialogOpen}
-          setClientTypeForForm={setClientTypeForForm}
-          handleEdit={handleEdit}
-        />
+        {/* Dialog de sélection des clients */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Client");setIsClientSelectorOpen(false);}}
+                  className="bg-blue-500 hover:bg-blue-600 border-0 text-white">
+
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
+                {filteredClientsForSelector.length > 0 ?
+                filteredClientsForSelector.map((client) =>
+                <div
+                  key={client.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.clients_ids.includes(client.id) ?
+                  'bg-blue-500/20 border border-blue-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(client.id, 'clients')}>
+
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {client.adresses?.find((a) => a.actuelle) && formatAdresse(client.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(client.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {client.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {client.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {client.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>
+                      📞 <a 
+                        href={`tel:${client.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                      >
+                        {client.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
+                    }
+                      </div>
+                      <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent toggling selection
+                      setIsClientSelectorOpen(false);
+                      handleEdit(client);
+                    }}
+                    className="text-emerald-400 hover:text-emerald-300 mt-2 w-full">
+
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun client trouvé</p>
+                  </div>
+                }
+              </div>
+            </div>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de sélection des notaires */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Notaire");setIsNotaireSelectorOpen(false);}}
+                  className="bg-purple-500 hover:bg-purple-600 border-0 text-white">
+
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
+                {filteredNotairesForSelector.length > 0 ?
+                filteredNotairesForSelector.map((notaire) =>
+                <div
+                  key={notaire.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.notaires_ids.includes(notaire.id) ?
+                  'bg-purple-500/20 border border-purple-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(notaire.id, 'notaires')}>
+
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {notaire.adresses?.find((a) => a.actuelle) && formatAdresse(notaire.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(notaire.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {notaire.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {notaire.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {notaire.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>
+                      📞 <a 
+                        href={`tel:${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                      >
+                        {notaire.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
+                    }
+                      </div>
+                      <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsNotaireSelectorOpen(false);
+                      handleEdit(notaire);
+                    }}
+                    className="text-purple-400 hover:text-purple-300 mt-2 w-full">
+
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun notaire trouvé</p>
+                  </div>
+                }
+              </div>
+            </div>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de sélection des courtiers */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Courtier immobilier");setIsCourtierSelectorOpen(false);}}
+                  className="bg-orange-500 hover:bg-orange-600 border-0 text-white">
+
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
+                {filteredCourtiersForSelector.length > 0 ?
+                filteredCourtiersForSelector.map((courtier) =>
+                <div
+                  key={courtier.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.courtiers_ids.includes(courtier.id) ?
+                  'bg-orange-500/20 border border-orange-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(courtier.id, 'courtiers')}>
+
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {courtier.adresses?.find((a) => a.actuelle) && formatAdresse(courtier.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(courtier.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {courtier.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {courtier.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {courtier.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>
+                      📞 <a 
+                        href={`tel:${courtier.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                      >
+                        {courtier.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
+                    }
+                      </div>
+                      <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsCourtierSelectorOpen(false);
+                      handleEdit(courtier);
+                    }}
+                    className="text-orange-400 hover:text-orange-300 mt-2 w-full">
+
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun courtier trouvé</p>
+                  </div>
+                }
+              </div>
+            </div>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => {setIsClientFormDialogOpen(open);if (!open) setEditingClientForForm(null);}} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => {queryClient.invalidateQueries({ queryKey: ['clients'] });if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);}} />
 

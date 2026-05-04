@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import PlaceAffaireSelect from "./PlaceAffaireSelect";
 import ContactsTabsSection from "./ContactsTabsSection";
 import TerrainEditDialog from "./TerrainEditDialog";
-import CommentairesSectionWrapper from "./CommentairesSectionWrapper";
+import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
@@ -432,14 +432,14 @@ export default function EditDossierForm({
 
   return (
     <motion.div 
-      className="flex flex-col h-full overflow-hidden min-h-0"
+      className="flex flex-col h-[90vh]"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       {/* Header sur toute la largeur */}
-      <div className="flex-shrink-0 sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex items-center gap-4">
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
         <div className="flex items-center gap-3 ml-auto">
@@ -471,7 +471,7 @@ export default function EditDossierForm({
       </div>
 
       {/* Division avec sidebar de navigation */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
         {/* Sidebar de navigation - Icons only */}
         <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
           <TooltipProvider>
@@ -494,8 +494,8 @@ export default function EditDossierForm({
         </div>
 
         {/* Main content - 75% */}
-        <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800 min-h-0">
-          <div className="flex-1 overflow-y-auto p-6 box-border">
+        <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
+          <div className="flex-1 overflow-y-auto p-6">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
               if (!editingDossier) {
@@ -2452,7 +2452,7 @@ export default function EditDossierForm({
         </div>
 
         {/* Sidebar - 25% (ajusté pour la largeur) */}
-        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden min-h-0">
+        <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden">
           {/* Section Carte */}
           {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
             formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
@@ -2510,7 +2510,7 @@ export default function EditDossierForm({
           </div>
 
           {!sidebarCollapsed && (
-            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col min-h-0">
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
               <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
                 <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                   <MessageSquare className="w-4 h-4 mr-1" />
@@ -2522,11 +2522,11 @@ export default function EditDossierForm({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="commentaires" className="flex-1 min-h-0 overflow-y-auto p-0 mt-0">
-                <CommentairesSectionWrapper dossierId={editingDossier?.id} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} onAddHistoriqueEntry={addActionLog} />
+              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={!editingDossier} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={onCommentairesTemporairesChange} />
               </TabsContent>
               
-              <TabsContent value="historique" className="flex-1 min-h-0 p-4 pr-6 mt-0 overflow-y-auto">
+              <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                 {actionLogs.length > 0 ? (
                   <div className="space-y-3">
                     {actionLogs.map((log) => {

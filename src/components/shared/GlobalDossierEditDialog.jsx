@@ -94,8 +94,8 @@ export default function GlobalDossierEditDialog() {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
       <DialogContent
-        className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
-        style={{ marginTop: '50px', maxHeight: 'calc(88vh - 50px)' }}
+        className="backdrop-blur-lg border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+        style={{ marginTop: '19px', maxHeight: 'calc(90vh - 5px)' }}
         hideClose
       >
         <DialogHeader className="sr-only">
