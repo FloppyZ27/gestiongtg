@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -74,7 +73,7 @@ export default function NotificationBanner({ user }) {
   };
 
   return (
-    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[99999] w-full max-w-md px-4">
       <AnimatePresence>
         {visibleNotification && (
           <motion.div
@@ -118,14 +117,7 @@ export default function NotificationBanner({ user }) {
                     </>
                   );
                 })()}
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
-                    {visibleNotification.type === 'retour_appel' ? 'Retour d\'appel' : visibleNotification.type === 'dossier' ? 'Dossier' : 'Général'}
-                  </Badge>
-                  <span className="text-xs text-slate-400">
-                    {format(new Date(visibleNotification.created_date), "HH:mm", { locale: fr })}
-                  </span>
-                </div>
+
               </div>
             </div>
           </motion.div>
