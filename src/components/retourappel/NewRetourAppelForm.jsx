@@ -556,7 +556,7 @@ export default function NewRetourAppelForm({
 
       {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
       {!editingRetourAppel && (
-        <div className="flex justify-end gap-3 p-4 bg-slate-900">
+        <div className="flex justify-end gap-3 p-4">
           <Button 
             type="button" 
             variant="outline" 
