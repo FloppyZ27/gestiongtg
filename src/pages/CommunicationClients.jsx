@@ -175,18 +175,18 @@ export default function CommunicationClients() {
           <div className="flex gap-3">
             <button
               onClick={handleNewMandat}
-              onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #c2410c)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(to right, #10b981, #0d9488)'}
-              style={{ background: 'linear-gradient(to right, #10b981, #0d9488)', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #b91c1c, #c2410c)'; e.currentTarget.style.backgroundColor = '#b91c1c'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #10b981, #0d9488)'; e.currentTarget.style.backgroundColor = '#10b981'; }}
+              style={{ backgroundImage: 'linear-gradient(to right, #10b981, #0d9488)', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background-image 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau mandat
             </button>
             <button
               onClick={handleNewRetourAppel}
-              onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #c2410c)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(to right, #3b82f6, #0891b2)'}
-              style={{ background: 'linear-gradient(to right, #3b82f6, #0891b2)', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #b91c1c, #c2410c)'; e.currentTarget.style.backgroundColor = '#b91c1c'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #3b82f6, #0891b2)'; e.currentTarget.style.backgroundColor = '#3b82f6'; }}
+              style={{ backgroundImage: 'linear-gradient(to right, #3b82f6, #0891b2)', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background-image 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau retour d'appel
