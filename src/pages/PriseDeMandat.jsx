@@ -3878,7 +3878,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
             <div className="flex flex-col gap-2">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
-              <div className="flex w-full border-b border-slate-700">
+              <div className="flex w-full">
                <button
                  role="tab"
                  onClick={() => setActiveListTab("nouveau")}
