@@ -1094,7 +1094,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
-                    placeholder="Rechercher par client, téléphone, dossier..."
+                    placeholder="Rechercher..."
                     value={searchRetoursAppel}
                     onChange={(e) => setSearchRetoursAppel(e.target.value)}
                     className="pl-10 bg-slate-800/50 border-slate-700 text-white"
