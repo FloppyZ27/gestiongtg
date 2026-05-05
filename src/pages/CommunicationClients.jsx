@@ -173,22 +173,24 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <Button
+            <button
               onClick={handleNewMandat}
-              size="lg"
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-red-600 hover:to-orange-500 text-white transition-all duration-300"
+              onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #c2410c)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(to right, #10b981, #0d9488)'}
+              style={{ background: 'linear-gradient(to right, #10b981, #0d9488)', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4" />
               Nouveau mandat
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={handleNewRetourAppel}
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-red-600 hover:to-orange-500 text-white transition-all duration-300"
+              onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #c2410c)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(to right, #3b82f6, #0891b2)'}
+              style={{ background: 'linear-gradient(to right, #3b82f6, #0891b2)', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4" />
               Nouveau retour d'appel
-            </Button>
+            </button>
           </div>
         </div>
 
