@@ -39,7 +39,7 @@ import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
-import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -3973,229 +3973,40 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
             </div>
           </div>
           <div className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    {[['arpenteur_geometre', activeListTab === 'ouvrir' ? 'Dossier' : 'Arpenteur-Géomètre'], ['clients', 'Clients'], ['adresse_travaux', 'Adresse des travaux'], ['ville', 'Ville'], [null, 'N° de téléphone'], ['types_mandats', 'Types de mandats'], ['created_date', 'Date'], ['urgence_percue', 'Urgence']].map(([field, label]) => (
-                      <TableHead
-                        key={label}
-                        className={`text-slate-300 text-xs ${field ? 'cursor-pointer hover:text-white select-none' : ''}`}
-                        onClick={field ? () => handleSort(field) : undefined}
-                      >
-                        <div className="flex items-center gap-1">
-                          {label}
-                          {field && (sortField === field
-                            ? sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-red-400" /> : <ChevronDown className="w-3 h-3 text-red-400" />
-                            : <ChevronsUpDown className="w-3 h-3 text-slate-500" />)}
-                        </div>
-                      </TableHead>
-                    ))}
-                    <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {priseMandats
-                    .filter(pm => {
-                      // Filtre par tab actif
-                      const tabStatut = activeListTab === "nouveau" 
-                        ? "Nouveau mandat/Demande d'information"
-                        : activeListTab === "ouvrir"
-                        ? "Mandats à ouvrir"
-                        : "Mandat non octroyé";
-                      return pm.statut === tabStatut;
-                    })
-                    .filter(pm => {
-                      const searchLower = searchTerm.toLowerCase();
-                      const clientName = pm.client_info?.prenom || pm.client_info?.nom 
-                        ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
-                        : getClientsNames(pm.clients_ids).toLowerCase();
-                      const matchesSearch = (
-                        pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-                        clientName.includes(searchLower) ||
-                        formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
-                        pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
-                      );
-                      const matchesArpenteur = (filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre)) && (filterEquipeExternal === "Toutes" || pm.arpenteur_geometre?.includes(filterEquipeExternal));
-                      const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
-                      const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
-                      const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
-                      
-                      const pmDate = new Date(pm.created_date);
-                      const matchesDateStart = filterDateStart === "" || pmDate >= new Date(filterDateStart);
-                      const matchesDateEnd = filterDateEnd === "" || pmDate <= new Date(filterDateEnd + "T23:59:59");
-                      
-                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence && matchesDateStart && matchesDateEnd && (filterPlaceAffaire === "tous" || pm.place_affaire === filterPlaceAffaire);
-                    })
-                    .sort((a, b) => {
-                      if (!sortField) return 0;
-                      let aValue, bValue;
-                      switch (sortField) {
-                        case 'arpenteur_geometre':
-                          aValue = (a.arpenteur_geometre || '').toLowerCase();
-                          bValue = (b.arpenteur_geometre || '').toLowerCase();
-                          break;
-                        case 'created_date':
-                          aValue = new Date(a.created_date || 0).getTime();
-                          bValue = new Date(b.created_date || 0).getTime();
-                          break;
-                        case 'clients':
-                          const aClientName = a.client_info?.prenom || a.client_info?.nom 
-                            ? `${a.client_info.prenom || ''} ${a.client_info.nom || ''}`.trim()
-                            : getClientsNames(a.clients_ids);
-                          const bClientName = b.client_info?.prenom || b.client_info?.nom 
-                            ? `${b.client_info.prenom || ''} ${b.client_info.nom || ''}`.trim()
-                            : getClientsNames(b.clients_ids);
-                          aValue = aClientName.toLowerCase();
-                          bValue = bClientName.toLowerCase();
-                          break;
-                        case 'adresse_travaux':
-                          aValue = `${a.adresse_travaux?.numeros_civiques?.[0] || ''} ${a.adresse_travaux?.rue || ''}`.toLowerCase();
-                          bValue = `${b.adresse_travaux?.numeros_civiques?.[0] || ''} ${b.adresse_travaux?.rue || ''}`.toLowerCase();
-                          break;
-                        case 'ville':
-                          aValue = (a.adresse_travaux?.ville || '').toLowerCase();
-                          bValue = (b.adresse_travaux?.ville || '').toLowerCase();
-                          break;
-                        case 'types_mandats':
-                          aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
-                          bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
-                          break;
-                        case 'urgence_percue':
-                          const urgenceOrder = { 'Rapide': 1, 'Normal': 2, 'Pas pressé': 3 };
-                          aValue = urgenceOrder[a.urgence_percue] || 4;
-                          bValue = urgenceOrder[b.urgence_percue] || 4;
-                          break;
-                        default:
-                          aValue = '';
-                          bValue = '';
-                      }
-                      if (typeof aValue === 'string' && typeof bValue === 'string') {
-                        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-                      }
-                      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-                    })
-                    .map((pm) => {
-                      const getUrgenceColor = (u) => (u === "Rapide" || u === "Urgent") ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30";
-
-                      return (
-                        <TableRow 
-                          key={pm.id} 
-                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                          onClick={() => handleEditPriseMandat(pm)}
-                        >
-                          <TableCell className="font-medium">
-                            {activeListTab === "ouvrir" ? (
-                              <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
-                                {getArpenteurInitials(pm.arpenteur_geometre)}{pm.numero_dossier || "N/A"}
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
-                                {pm.arpenteur_geometre}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                            {pm.client_info?.prenom || pm.client_info?.nom 
-                              ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
-                              : getClientsNames(pm.clients_ids)}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                            {pm.adresse_travaux?.numeros_civiques?.[0] || pm.adresse_travaux?.rue
-                              ? `${pm.adresse_travaux.numeros_civiques?.[0] || ''} ${pm.adresse_travaux.rue || ''}`.trim()
-                              : '-'}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-xs">
-                            {pm.adresse_travaux?.ville || '-'}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-xs">
-                            {(() => {
-                              const telephone = pm.client_info?.telephone || 
-                                (pm.clients_ids?.length > 0 && (() => {
-                                  const client = getClientById(pm.clients_ids[0]);
-                                  return client?.telephones?.find(t => t.actuel)?.telephone || client?.telephones?.[0]?.telephone || null;
-                                })());
-                              
-                              if (telephone) {
-                                return (
-                                  <a 
-                                    href={`tel:${telephone.replace(/\D/g, '')}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer hover:underline"
-                                  >
-                                    {telephone}
-                                  </a>
-                                );
-                              }
-                              return '-';
-                            })()}
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {pm.mandats && pm.mandats.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {pm.mandats.slice(0, 2).map((m, idx) => (
-                                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs pointer-events-none select-none cursor-default`}>
-                                    {getAbbreviatedMandatType(m.type_mandat)}
-                                  </Badge>
-                                ))}
-                                {pm.mandats.length > 2 && (
-                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                    +{pm.mandats.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-600 text-xs">Aucun</span>
-                            )}
-                          </TableCell>
-
-                          <TableCell className="text-slate-300 text-xs">
-                            {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            {pm.urgence_percue ? (
-                              <Badge className={`${getUrgenceColor(pm.urgence_percue)} border text-xs pointer-events-none select-none cursor-default`}>
-                                {pm.urgence_percue === "Rapide" ? "Urgent" : pm.urgence_percue}
-                              </Badge>
-                            ) : (
-                              <span className="text-slate-600 text-xs">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setPriseMandatIdToDelete(pm.id);
-                                  setShowDeletePriseMandatConfirm(true);
-                                }}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  {priseMandats.filter(pm => {
-                    const tabStatut = activeListTab === "nouveau" 
-                      ? "Nouveau mandat/Demande d'information"
-                      : activeListTab === "ouvrir"
-                      ? "Mandats à ouvrir"
-                      : "Mandat non octroyé";
-                    return pm.statut === tabStatut;
-                  }).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-12 text-slate-500">
-                        Aucune prise de mandat dans cette catégorie
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+           <PriseMandatTable
+             activeListTab={activeListTab}
+             priseMandats={priseMandats}
+             searchTerm={searchTerm}
+             filterArpenteur={filterArpenteur}
+             filterVille={filterVille}
+             filterTypeMandat={filterTypeMandat}
+             filterUrgence={filterUrgence}
+             filterDateStart={filterDateStart}
+             filterDateEnd={filterDateEnd}
+             filterPlaceAffaire={filterPlaceAffaire}
+             sortField={sortField}
+             sortDirection={sortDirection}
+             onSort={handleSort}
+             onEdit={handleEditPriseMandat}
+             onDelete={(id) => {
+               setPriseMandatIdToDelete(id);
+               setShowDeletePriseMandatConfirm(true);
+             }}
+             getArpenteurColor={getArpenteurColor}
+             getArpenteurInitials={getArpenteurInitials}
+             getClientsNames={getClientsNames}
+             formatAdresse={formatAdresse}
+             getMandatColor={getMandatColor}
+             getAbbreviatedMandatType={getAbbreviatedMandatType}
+             getClientById={getClientById}
+             onOpenDossier={(pm) => {
+               const commentsForDossier = pm.commentaires || [];
+               const dossierFormData = {numero_dossier: pm.numero_dossier, arpenteur_geometre: pm.arpenteur_geometre, place_affaire: pm.place_affaire, date_ouverture: new Date().toISOString().split('T')[0], statut: "Ouvert", ttl: "Non", clients_ids: pm.clients_ids, notaires_ids: pm.notaires_ids || [], courtiers_ids: pm.courtiers_ids || [], compagnies_ids: pm.compagnies_ids || [], mandats: pm.mandats.filter(m => m.type_mandat).map(m => ({type_mandat: m.type_mandat, adresse_travaux: pm.adresse_travaux, prix_estime: m.prix_estime || 0, rabais: m.rabais || 0, taxes_incluses: m.taxes_incluses || false, date_signature: m.date_signature || "", date_debut_travaux: m.date_debut_travaux || "", date_livraison: m.date_livraison || "", lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "", minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [], terrain: {date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: ""}, factures: [], notes: ""}))};
+               setNouveauDossierForm(dossierFormData);
+               setCommentairesTemporairesDossier(commentsForDossier);
+               setIsOuvrirDossierDialogOpen(true);
+             }}
+           />
           </div>
         </div>
       </div>
