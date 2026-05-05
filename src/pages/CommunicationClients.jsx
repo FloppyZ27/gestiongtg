@@ -79,11 +79,11 @@ export default function CommunicationClients() {
   const retourAppelCountsByPlace = React.useMemo(() => {
     const dossierMap = Object.fromEntries(dossiers.map(d => [d.id, d]));
     return {
-      tous: retoursAppels.length,
-      alma: retoursAppels.filter(r => dossierMap[r.dossier_id]?.place_affaire === "Alma").length,
-      saguenay: retoursAppels.filter(r => dossierMap[r.dossier_id]?.place_affaire === "Saguenay").length,
+      tous: retoursAppels.filter(r => filterEquipe === "Toutes" || dossierMap[r.dossier_id]?.arpenteur_geometre?.includes(filterEquipe)).length,
+      alma: retoursAppels.filter(r => (filterEquipe === "Toutes" || dossierMap[r.dossier_id]?.arpenteur_geometre?.includes(filterEquipe)) && dossierMap[r.dossier_id]?.place_affaire === "Alma").length,
+      saguenay: retoursAppels.filter(r => (filterEquipe === "Toutes" || dossierMap[r.dossier_id]?.arpenteur_geometre?.includes(filterEquipe)) && dossierMap[r.dossier_id]?.place_affaire === "Saguenay").length,
     };
-  }, [retoursAppels, dossiers]);
+  }, [retoursAppels, dossiers, filterEquipe]);
 
   // Comptes par équipe pour PriseDeMandat
   const equipeCountsPriseMandat = React.useMemo(() => {
