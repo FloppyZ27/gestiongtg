@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, X, FolderOpen, User, MapPin, Building2, CalendarDays, FileText } from "lucide-react";
+import { Search, X, FolderOpen, User, MapPin, Building2, CalendarDays, FileText, Users } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -34,10 +34,6 @@ const getMandatColor = (typeMandat) => {
 const EMPTY_FILTERS = {
   // Dossier
   numeroDossier: "",
-  nom: "",
-  prenom: "",
-  notaire: "",
-  courtier: "",
   arpenteur: "",
   typeMandat: "",
   tacheActuelle: "",
@@ -45,6 +41,12 @@ const EMPTY_FILTERS = {
   placeAffaire: "",
   lot: "",
   minute: "",
+  // Contacts
+  nom: "",
+  prenom: "",
+  notaire: "",
+  courtier: "",
+  compagnie: "",
   // Adresse
   numeroCivique: "",
   rue: "",
@@ -93,6 +95,7 @@ export default function RechercheAvancee() {
       const allPrenoms = allClients.map(c => c.prenom || '').join(' ').toLowerCase();
       const allNotaires = (dossier.notaires_ids || []).map(id => getClientById(id)).filter(Boolean).map(c => `${c.prenom} ${c.nom}`).join(' ').toLowerCase();
       const allCourtiers = (dossier.courtiers_ids || []).map(id => getClientById(id)).filter(Boolean).map(c => `${c.prenom} ${c.nom}`).join(' ').toLowerCase();
+      const allCompagnies = (dossier.courtiers_ids || []).map(id => getClientById(id)).filter(c => c && c.type_client === 'Compagnie').map(c => `${c.prenom} ${c.nom}`).join(' ').toLowerCase();
       const mandats = dossier.mandats || [];
       const allAdresses = mandats.map(m => getAdresse(m)).join(' ').toLowerCase();
       const allVilles = mandats.map(m => m.adresse_travaux?.ville || '').join(' ').toLowerCase();
@@ -119,6 +122,7 @@ export default function RechercheAvancee() {
       if (f.placeAffaire && f.placeAffaire !== "all" && dossier.place_affaire !== f.placeAffaire) return false;
       if (f.notaire && !allNotaires.includes(f.notaire.toLowerCase())) return false;
       if (f.courtier && !allCourtiers.includes(f.courtier.toLowerCase())) return false;
+      if (f.compagnie && !allCompagnies.includes(f.compagnie.toLowerCase())) return false;
       if (f.dateOuvertureDebut && dossier.date_ouverture < f.dateOuvertureDebut) return false;
       if (f.dateOuvertureFin && dossier.date_ouverture > f.dateOuvertureFin) return false;
       if (f.dateTerrainDebut) {
@@ -163,10 +167,6 @@ export default function RechercheAvancee() {
           {/* Groupe Dossier */}
           <FilterGroup icon={<FileText className="w-4 h-4" />} label="Dossier">
             <FilterField label="Numéro de dossier" value={filters.numeroDossier} onChange={v => setFilter('numeroDossier', v)} onClear={() => clearFilter('numeroDossier')} placeholder="ex: 1234" />
-            <FilterField label="Nom" value={filters.nom} onChange={v => setFilter('nom', v)} onClear={() => clearFilter('nom')} placeholder="ex: Tremblay" />
-            <FilterField label="Prénom" value={filters.prenom} onChange={v => setFilter('prenom', v)} onClear={() => clearFilter('prenom')} placeholder="ex: Jean" />
-            <FilterField label="Notaire" value={filters.notaire} onChange={v => setFilter('notaire', v)} onClear={() => clearFilter('notaire')} placeholder="ex: Gagnon" />
-            <FilterField label="Courtier immobilier" value={filters.courtier} onChange={v => setFilter('courtier', v)} onClear={() => clearFilter('courtier')} placeholder="ex: Bouchard" />
             <FilterField label="Numéro de lot" value={filters.lot} onChange={v => setFilter('lot', v)} onClear={() => clearFilter('lot')} placeholder="ex: 1234567" />
             <FilterField label="Numéro de minute" value={filters.minute} onChange={v => setFilter('minute', v)} onClear={() => clearFilter('minute')} placeholder="ex: 12345" />
             <div className="flex flex-col gap-1.5">
@@ -234,6 +234,15 @@ export default function RechercheAvancee() {
                 {filters.placeAffaire && filters.placeAffaire !== "all" && <ClearBtn onClick={() => clearFilter('placeAffaire')} />}
               </div>
             </div>
+          </FilterGroup>
+
+          {/* Groupe Contacts */}
+          <FilterGroup icon={<Users className="w-4 h-4" />} label="Contacts">
+            <FilterField label="Nom (client)" value={filters.nom} onChange={v => setFilter('nom', v)} onClear={() => clearFilter('nom')} placeholder="ex: Tremblay" />
+            <FilterField label="Prénom (client)" value={filters.prenom} onChange={v => setFilter('prenom', v)} onClear={() => clearFilter('prenom')} placeholder="ex: Jean" />
+            <FilterField label="Notaire" value={filters.notaire} onChange={v => setFilter('notaire', v)} onClear={() => clearFilter('notaire')} placeholder="ex: Gagnon" />
+            <FilterField label="Courtier immobilier" value={filters.courtier} onChange={v => setFilter('courtier', v)} onClear={() => clearFilter('courtier')} placeholder="ex: Bouchard" />
+            <FilterField label="Compagnie" value={filters.compagnie} onChange={v => setFilter('compagnie', v)} onClear={() => clearFilter('compagnie')} placeholder="ex: Construction ABC" />
           </FilterGroup>
 
           {/* Groupe Adresse */}
