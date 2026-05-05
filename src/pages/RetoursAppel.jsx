@@ -622,6 +622,45 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
 
   const sortedAllRetoursAppels = getFilteredRetoursAppels();
 
+  const getTabCounts = () => {
+    const allFiltered = allRetoursAppelsWithDossier.filter(retour => {
+      const words = searchRetoursAppel.toLowerCase().split(/\s+/).filter(Boolean);
+      const dossier = retour.dossier;
+      const clientsNames = retour.client_nom || (dossier ? getClientsNames(dossier.clients_ids) : '');
+      const firstClient = dossier?.clients_ids?.[0] ? clients.find(c => c.id === dossier.clients_ids[0]) : null;
+      const phoneNumber = retour.client_telephone || firstClient?.telephones?.find(t => t.actuel)?.telephone || firstClient?.telephones?.[0]?.telephone || '';
+      const dossierNumber = dossier ? (getArpenteurInitials(dossier.arpenteur_geometre) + (dossier.numero_dossier || '')) : '';
+      const matchesSearch = words.length === 0 || words.every(word =>
+        retour.raison?.toLowerCase().includes(word) ||
+        dossierNumber.toLowerCase().includes(word) ||
+        clientsNames.toLowerCase().includes(word) ||
+        phoneNumber.toLowerCase().includes(word)
+      );
+      
+      const matchesArpenteur = (filterArpenteurs.length === 0 || (retour.dossier && filterArpenteurs.includes(retour.dossier.arpenteur_geometre))) &&
+        (filterEquipeExternal === "Toutes" || (retour.dossier && retour.dossier.arpenteur_geometre?.includes(filterEquipeExternal)));
+      
+      const matchesUtilisateur = filterUtilisateurs.length === 0 || 
+        filterUtilisateurs.includes(retour.utilisateur_assigne);
+      
+      const retourDate = new Date(retour.date_appel);
+      const matchesDateStart = filterDateStart === "" || retourDate >= new Date(filterDateStart);
+      const matchesDateEnd = filterDateEnd === "" || retourDate <= new Date(filterDateEnd + "T23:59:59");
+      
+      const dossierForPlace = retour.dossier;
+      const matchesPlaceAffaire = filterPlaceAffaire === "tous" || !dossierForPlace || dossierForPlace.place_affaire === filterPlaceAffaire;
+      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesDateStart && matchesDateEnd && matchesPlaceAffaire;
+    });
+    
+    return {
+      retour_appel: allFiltered.filter(r => r.statut === "Retour d'appel").length,
+      message_laisse: allFiltered.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length,
+      termine: allFiltered.filter(r => r.statut === "Terminé").length
+    };
+  };
+
+  const tabCounts = getTabCounts();
+
   const getCurrentValue = (items, key) => {
     const current = items?.find(item => item.actuel || item.actuelle);
     return current?.[key] || "";
@@ -1015,7 +1054,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <Phone className="w-4 h-4" />
                   Retour d'appel
                   <Badge className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                    {sortedAllRetoursAppels.filter(r => r.statut === "Retour d'appel").length}
+                    {tabCounts.retour_appel}
                   </Badge>
                 </button>
                 <button
@@ -1030,7 +1069,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <MessageSquare className="w-4 h-4" />
                   Message laissé / Aucune réponse
                   <Badge className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30">
-                    {sortedAllRetoursAppels.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length}
+                    {tabCounts.message_laisse}
                   </Badge>
                 </button>
                 <button
@@ -1045,7 +1084,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <Check className="w-4 h-4" />
                   Terminé
                   <Badge className="ml-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
-                    {sortedAllRetoursAppels.filter(r => r.statut === "Terminé").length}
+                    {tabCounts.termine}
                   </Badge>
                 </button>
               </div>
