@@ -150,50 +150,7 @@ export default function CommunicationClients() {
   return (
     <div className="min-h-screen bg-slate-800/30 p-4 md:p-8">
       <style>{`
-        .btn-nouveau-mandat {
-          background: #10b981 !important;
-          background-image: none !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 0.5rem;
-          padding: 0 1.25rem;
-          height: 44px;
-          font-weight: 600;
-          font-size: 15px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          transition: background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-        }
-        .btn-nouveau-mandat:hover {
-          background: transparent !important;
-          background-image: linear-gradient(135deg, #8B0000, #CC5500) !important;
-          box-shadow: 0 6px 22px rgba(139,0,0,0.55) !important;
-        }
-        .btn-nouveau-retour {
-          background: #3b82f6 !important;
-          background-image: none !important;
-          color: white !important;
-          border: none !important;
-          border-radius: 0.5rem;
-          padding: 0 1.25rem;
-          height: 44px;
-          font-weight: 600;
-          font-size: 15px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          transition: background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-        }
-        .btn-nouveau-retour:hover {
-          background: transparent !important;
-          background-image: linear-gradient(135deg, #8B0000, #CC5500) !important;
-          box-shadow: 0 6px 22px rgba(139,0,0,0.55) !important;
-        }
+        
       `}</style>
       <div className="w-full">
         <div className="flex items-start justify-between gap-3 mb-8">
@@ -219,11 +176,41 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <button onClick={handleNewMandat} className="btn-nouveau-mandat">
+            <button
+              onClick={handleNewMandat}
+              onMouseEnter={e => {
+                e.currentTarget.style.setProperty('background', 'none', 'important');
+                e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
+                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
+                e.currentTarget.style.boxShadow = '0 6px 22px rgba(139,0,0,0.55)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.setProperty('background', '#10b981', 'important');
+                e.currentTarget.style.setProperty('background-image', 'none', 'important');
+                e.currentTarget.style.setProperty('background-color', '#10b981', 'important');
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
+              }}
+              style={{ background: '#10b981', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+            >
               <Plus className="w-4 h-4" />
               Nouveau mandat
             </button>
-            <button onClick={handleNewRetourAppel} className="btn-nouveau-retour">
+            <button
+              onClick={handleNewRetourAppel}
+              onMouseEnter={e => {
+                e.currentTarget.style.setProperty('background', 'none', 'important');
+                e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
+                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
+                e.currentTarget.style.boxShadow = '0 6px 22px rgba(139,0,0,0.55)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.setProperty('background', '#3b82f6', 'important');
+                e.currentTarget.style.setProperty('background-image', 'none', 'important');
+                e.currentTarget.style.setProperty('background-color', '#3b82f6', 'important');
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
+              }}
+              style={{ background: '#3b82f6', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+            >
               <Plus className="w-4 h-4" />
               Nouveau retour d'appel
             </button>
