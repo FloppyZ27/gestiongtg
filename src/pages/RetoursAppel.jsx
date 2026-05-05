@@ -1192,7 +1192,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
         </Card>
 
         {/* Table des retours d'appel */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+        <Card className="bg-slate-900/50 backdrop-blur-xl shadow-xl border-0">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
