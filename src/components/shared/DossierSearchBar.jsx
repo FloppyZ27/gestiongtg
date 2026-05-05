@@ -17,6 +17,35 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+};
+
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 const getArpenteurColor = (arpenteur) => {
   const colors = {
     "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
@@ -137,15 +166,27 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
                     className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
                           {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                         </Badge>
                         {clientsNames && (
-                          <span className="text-sm text-slate-300 truncate flex items-center gap-1">
+                          <span className="text-sm text-slate-300 flex items-center gap-1 flex-shrink-0">
                             <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
                             {clientsNames}
                           </span>
+                        )}
+                        {dossier.mandats && dossier.mandats.length > 0 && (
+                          <div className="flex gap-1 flex-shrink-0">
+                            {dossier.mandats.slice(0, 3).map((mandat, idx) => mandat.type_mandat && (
+                              <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>
+                                {getAbbreviatedMandatType(mandat.type_mandat)}
+                              </Badge>
+                            ))}
+                            {dossier.mandats.length > 3 && (
+                              <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">+{dossier.mandats.length - 3}</Badge>
+                            )}
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -159,26 +200,14 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
                         </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      {adresse && (
+                    {adresse && (
+                      <div className="mt-1">
                         <span className="text-[11px] text-slate-500 flex items-center gap-1 truncate">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
                           {adresse}
                         </span>
-                      )}
-                      {dossier.mandats && dossier.mandats.length > 0 && (
-                        <div className="flex gap-1 flex-shrink-0">
-                          {dossier.mandats.slice(0, 3).map((mandat, idx) => mandat.type_mandat && (
-                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0">
-                              {mandat.type_mandat.length > 20 ? mandat.type_mandat.substring(0, 20) + '…' : mandat.type_mandat}
-                            </Badge>
-                          ))}
-                          {dossier.mandats.length > 3 && (
-                            <Badge className="bg-slate-700 text-slate-400 text-[10px] px-1.5 py-0">+{dossier.mandats.length - 3}</Badge>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
