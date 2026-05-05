@@ -109,29 +109,26 @@ export default function CommunicationClients() {
   const equipeCounts = activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel;
 
   const EquipeButtons = ({ counts }) => (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-slate-400 text-xs font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
-      {EQUIPES.map(e => {
-        const isActive = filterEquipe === e.value;
-        return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
+      <div className="flex gap-1">
+        {EQUIPES.map(e => (
           <button
             key={e.value}
             onClick={() => setFilterEquipe(e.value)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all border ${
-              isActive
-                ? "bg-primary/20 border-primary/50 text-primary"
-                : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300"
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${
+              filterEquipe === e.value
+                ? "bg-orange-500/20 text-orange-400 border-b-2 border-orange-400"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
             }`}
           >
             {e.label}
-            <span className={`inline-flex items-center justify-center rounded-full w-4 h-4 text-[10px] font-bold ${
-              isActive ? "bg-primary text-white" : "bg-slate-700 text-slate-300"
-            }`}>
-              {counts[e.value] ?? 0}
-            </span>
+            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+              filterEquipe === e.value ? "bg-red-500/30 text-orange-300" : "bg-slate-700 text-slate-400"
+            }`}>{counts[e.value] ?? 0}</span>
           </button>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 
