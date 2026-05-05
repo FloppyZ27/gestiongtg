@@ -592,7 +592,7 @@ export default function EditDossierForm({
             {/* Section Mandats */}
             <div className="mt-3" data-section="mandats">
               <div 
-                className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
+                className="cursor-pointer hover:bg-orange-900/20 bg-orange-900/10 border border-orange-500/20 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
                 onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
               >
                 <div className="flex items-center gap-2 flex-1">
