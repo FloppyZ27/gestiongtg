@@ -1145,14 +1145,14 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-end gap-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
+                            <Button variant="outline" className="flex-1 border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                               <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
-                            </DropdownMenuTrigger>
+                          </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
                             {ARPENTEURS.map((arp) => (
                               <DropdownMenuCheckboxItem
@@ -1175,11 +1175,11 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
+                            <Button variant="outline" className="flex-1 border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                               <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
-                            </DropdownMenuTrigger>
+                          </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
                             {users.map((user) => (
                               <DropdownMenuCheckboxItem
@@ -1199,27 +1199,22 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                             ))}
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </div>
 
-                      <div className="space-y-1 pt-1 border-t border-red-500/30">
-                        <Label className="text-xs text-red-500">Période</Label>
-                        <div className="flex items-center gap-1.5">
-                          <Input
-                            type="date"
-                            value={filterDateStart}
-                            onChange={(e) => setFilterDateStart(e.target.value)}
-                            placeholder="Du"
-                            className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent"
-                            />
-                            <span className="text-red-500 text-xs">→</span>
-                            <Input
-                            type="date"
-                            value={filterDateEnd}
-                            onChange={(e) => setFilterDateEnd(e.target.value)}
-                            placeholder="Au"
-                            className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent"
-                          />
-                        </div>
+                        <Input
+                          type="date"
+                          value={filterDateStart}
+                          onChange={(e) => setFilterDateStart(e.target.value)}
+                          placeholder="Du"
+                          className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                        />
+                        <span className="text-red-500 text-xs">→</span>
+                        <Input
+                          type="date"
+                          value={filterDateEnd}
+                          onChange={(e) => setFilterDateEnd(e.target.value)}
+                          placeholder="Au"
+                          className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                        />
                       </div>
                     </div>
                   </div>
