@@ -1015,7 +1015,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <Phone className="w-4 h-4" />
                   Retour d'appel
                   <Badge className={`ml-1 ${activeListTab === "retour_appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-slate-700 text-slate-300"}`}>
-                    {retoursAppels.filter(r => r.statut === "Retour d'appel").length}
+                    {sortedAllRetoursAppels.filter(r => r.statut === "Retour d'appel").length}
                   </Badge>
                 </button>
                 <button
@@ -1030,7 +1030,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <MessageSquare className="w-4 h-4" />
                   Message laissé / Aucune réponse
                   <Badge className={`ml-1 ${activeListTab === "message_laisse" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" : "bg-slate-700 text-slate-300"}`}>
-                    {retoursAppels.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length}
+                    {sortedAllRetoursAppels.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length}
                   </Badge>
                 </button>
                 <button
@@ -1045,7 +1045,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                   <Check className="w-4 h-4" />
                   Terminé
                   <Badge className={`ml-1 ${activeListTab === "termine" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-slate-700 text-slate-300"}`}>
-                    {retoursAppels.filter(r => r.statut === "Terminé").length}
+                    {sortedAllRetoursAppels.filter(r => r.statut === "Terminé").length}
                   </Badge>
                 </button>
               </div>
