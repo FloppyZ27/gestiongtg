@@ -16,7 +16,7 @@ const BUTTON_BASE = {
   alignItems: 'center',
   gap: '6px',
   cursor: 'pointer',
-  transition: 'background 0.25s ease, box-shadow 0.25s ease',
+  transition: 'background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease',
   boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
 };
 
@@ -26,6 +26,7 @@ export default function PremiumButton({ label, onClick }) {
   const handleMouseEnter = () => {
     if (buttonRef.current) {
       buttonRef.current.style.background = GRADIENT;
+      buttonRef.current.style.opacity = '1';
       buttonRef.current.style.border = 'none';
       buttonRef.current.style.boxShadow = '0 6px 22px rgba(139, 0, 0, 0.55)';
     }
