@@ -172,6 +172,24 @@ export default function CommunicationClients() {
             />
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={handleNewMandat}
+              size="lg"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau mandat
+            </Button>
+            <Button
+              onClick={handleNewRetourAppel}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau retour d'appel
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -200,30 +218,10 @@ export default function CommunicationClients() {
           </div>
 
           <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
-            <div className="flex justify-end mb-4">
-              <Button
-                onClick={handleNewMandat}
-                size="lg"
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nouveau mandat
-              </Button>
-            </div>
             <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipe} onActiveTabChange={setActivePriseMandatTab} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-6">
-            <div className="flex justify-end mb-4">
-              <Button
-                onClick={handleNewRetourAppel}
-                size="lg"
-                className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nouveau retour d'appel
-              </Button>
-            </div>
             <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipe} />
           </TabsContent>
         </Tabs>
