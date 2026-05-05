@@ -191,7 +191,7 @@ export default function CommunicationClients() {
                 e.currentTarget.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
               }}
-              style={{ background: '#252525', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              style={{ background: '#1a1a1a', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau mandat
@@ -206,12 +206,12 @@ export default function CommunicationClients() {
                 e.currentTarget.style.boxShadow = '0 6px 22px rgba(139,0,0,0.55)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.setProperty('background', '#252525', 'important');
+                e.currentTarget.style.setProperty('background', '#1a1a1a', 'important');
                 e.currentTarget.style.setProperty('background-image', 'none', 'important');
                 e.currentTarget.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
               }}
-              style={{ background: '#252525', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              style={{ background: '#1a1a1a', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau retour d'appel
