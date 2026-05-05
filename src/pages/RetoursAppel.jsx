@@ -1146,79 +1146,83 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                       </div>
                       
                       <div className="flex items-end gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex-1 border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
-                              <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {ARPENTEURS.map((arp) => (
-                              <DropdownMenuCheckboxItem
-                                key={arp}
-                                checked={filterArpenteurs.includes(arp)}
-                                onCheckedChange={(checked) => {
-                                  setFilterArpenteurs(
-                                    checked
-                                      ? [...filterArpenteurs, arp]
-                                      : filterArpenteurs.filter((a) => a !== arp)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {arp}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
+                                <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
+                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                              {ARPENTEURS.map((arp) => (
+                                <DropdownMenuCheckboxItem
+                                  key={arp}
+                                  checked={filterArpenteurs.includes(arp)}
+                                  onCheckedChange={(checked) => {
+                                    setFilterArpenteurs(
+                                      checked
+                                        ? [...filterArpenteurs, arp]
+                                        : filterArpenteurs.filter((a) => a !== arp)
+                                    );
+                                  }}
+                                  className="text-white"
+                                >
+                                  {arp}
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex-1 border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
-                              <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {users.map((user) => (
-                              <DropdownMenuCheckboxItem
-                                key={user.email}
-                                checked={filterUtilisateurs.includes(user.email)}
-                                onCheckedChange={(checked) => {
-                                  setFilterUtilisateurs(
-                                    checked
-                                      ? [...filterUtilisateurs, user.email]
-                                      : filterUtilisateurs.filter((u) => u !== user.email)
-                                  );
-                                }}
-                                className="text-white"
-                              >
-                                {user.full_name}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
+                                <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
+                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                              {users.map((user) => (
+                                <DropdownMenuCheckboxItem
+                                  key={user.email}
+                                  checked={filterUtilisateurs.includes(user.email)}
+                                  onCheckedChange={(checked) => {
+                                    setFilterUtilisateurs(
+                                      checked
+                                        ? [...filterUtilisateurs, user.email]
+                                        : filterUtilisateurs.filter((u) => u !== user.email)
+                                    );
+                                  }}
+                                  className="text-white"
+                                >
+                                  {user.full_name}
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
 
-                        <div className="flex flex-col gap-1">
+                        <div className="flex-1 flex flex-col gap-1">
                           <Label className="text-xs text-red-500">Du</Label>
                           <Input
                             type="date"
                             value={filterDateStart}
                             onChange={(e) => setFilterDateStart(e.target.value)}
                             placeholder="Du"
-                            className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                            className="w-full text-red-500 h-8 text-xs px-2 border-red-500/30"
                           />
                         </div>
                         <span className="text-red-500 text-xs mt-6">→</span>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex-1 flex flex-col gap-1">
                           <Label className="text-xs text-red-500">Au</Label>
                           <Input
                             type="date"
                             value={filterDateEnd}
                             onChange={(e) => setFilterDateEnd(e.target.value)}
                             placeholder="Au"
-                            className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                            className="w-full text-red-500 h-8 text-xs px-2 border-red-500/30"
                           />
                         </div>
                       </div>
