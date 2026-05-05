@@ -55,11 +55,11 @@ export default function NotificationBanner({ user }) {
   const getColor = (type) => {
     switch (type) {
       case 'retour_appel':
-        return 'from-blue-500/20 to-blue-600/20 border-blue-500/30';
+        return 'from-red-500/20 to-orange-600/20 border-orange-500/30';
       case 'dossier':
-        return 'from-emerald-500/20 to-emerald-600/20 border-emerald-500/30';
+        return 'from-orange-500/20 to-red-500/20 border-red-400/30';
       default:
-        return 'from-purple-500/20 to-purple-600/20 border-purple-500/30';
+        return 'from-red-500/15 to-orange-500/15 border-orange-400/25';
     }
   };
 
@@ -90,7 +90,7 @@ export default function NotificationBanner({ user }) {
           >
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -102,8 +102,8 @@ export default function NotificationBanner({ user }) {
                     <>
                       <p className="text-sm text-slate-300 mb-2 whitespace-pre-wrap">{mainMessage}</p>
                       {comment && (
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-md p-2 mb-2">
-                          <p className="text-xs text-slate-400 italic whitespace-pre-wrap">{comment}</p>
+                        <div className="bg-orange-950/30 border border-orange-900/40 rounded-md p-2 mb-2">
+                          <p className="text-xs text-orange-200/70 italic whitespace-pre-wrap">{comment}</p>
                         </div>
                       )}
                     </>
