@@ -56,6 +56,8 @@ const EMPTY_FILTERS = {
   dateOuvertureFin: "",
   dateTerrainDebut: "",
   dateTerrainFin: "",
+  dateMinuteDebut: "",
+  dateMinuteFin: "",
 };
 
 export default function RechercheAvancee() {
@@ -133,6 +135,10 @@ export default function RechercheAvancee() {
         const hasTerrainInRange = allDatesTerrains.some(d => d <= f.dateTerrainFin);
         if (!hasTerrainInRange) return false;
       }
+
+      const allDatesMinutes = mandats.flatMap(m => [m.date_minute, ...(m.minutes_list || []).map(ml => ml.date_minute)]).filter(Boolean);
+      if (f.dateMinuteDebut && !allDatesMinutes.some(d => d >= f.dateMinuteDebut)) return false;
+      if (f.dateMinuteFin && !allDatesMinutes.some(d => d <= f.dateMinuteFin)) return false;
 
       return true;
     }).sort((a, b) => new Date(b.date_ouverture || 0) - new Date(a.date_ouverture || 0));
@@ -257,6 +263,8 @@ export default function RechercheAvancee() {
             <FilterField label="Ouverture — au" value={filters.dateOuvertureFin} onChange={v => setFilter('dateOuvertureFin', v)} onClear={() => clearFilter('dateOuvertureFin')} type="date" />
             <FilterField label="Terrain — du" value={filters.dateTerrainDebut} onChange={v => setFilter('dateTerrainDebut', v)} onClear={() => clearFilter('dateTerrainDebut')} type="date" />
             <FilterField label="Terrain — au" value={filters.dateTerrainFin} onChange={v => setFilter('dateTerrainFin', v)} onClear={() => clearFilter('dateTerrainFin')} type="date" />
+            <FilterField label="Minute — du" value={filters.dateMinuteDebut} onChange={v => setFilter('dateMinuteDebut', v)} onClear={() => clearFilter('dateMinuteDebut')} type="date" />
+            <FilterField label="Minute — au" value={filters.dateMinuteFin} onChange={v => setFilter('dateMinuteFin', v)} onClear={() => clearFilter('dateMinuteFin')} type="date" />
           </FilterGroup>
 
           {/* Actions */}
