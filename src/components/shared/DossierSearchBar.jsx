@@ -170,12 +170,17 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                     onClick={() => handleDossierClick(dossier)}
                     className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
                   >
-                    {/* Ligne principale : numéro dossier + client + statut + date */}
+                    {/* Ligne principale : numéro dossier + client + date */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </Badge>
+                        <div className="flex flex-col gap-0.5">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0 w-fit`}>
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                          </Badge>
+                          <Badge className={`text-[10px] px-1.5 py-0 w-fit ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {dossier.statut}
+                          </Badge>
+                        </div>
                         {clientsNames && (
                           <span className="text-sm text-slate-300 flex items-center gap-1 flex-shrink-0">
                             <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
@@ -183,16 +188,11 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {dossier.date_ouverture && (
-                          <span className="text-[10px] text-slate-500">
-                            {format(new Date(dossier.date_ouverture), "d MMM yyyy", { locale: fr })}
-                          </span>
-                        )}
-                        <Badge className={`text-[10px] px-1.5 py-0 ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                          {dossier.statut}
-                        </Badge>
-                      </div>
+                      {dossier.date_ouverture && (
+                        <span className="text-[10px] text-slate-500 flex-shrink-0">
+                          {format(new Date(dossier.date_ouverture), "d MMM yyyy", { locale: fr })}
+                        </span>
+                      )}
                     </div>
 
                     {/* Une ligne par mandat */}
@@ -210,24 +210,27 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                                   {mandat.tache_actuelle}
                                 </Badge>
                               )}
-                              {mandat.utilisateur_assigne && (
-                                <div className="flex items-center gap-1 flex-shrink-0" title={getUserByEmail(mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}>
-                                  {getUserByEmail(mandat.utilisateur_assigne)?.profile_picture ? (
-                                    <img
-                                      src={getUserByEmail(mandat.utilisateur_assigne).profile_picture}
-                                      alt=""
-                                      className="w-4 h-4 rounded-full object-cover border border-slate-600"
-                                    />
-                                  ) : (
-                                    <div className="w-4 h-4 rounded-full bg-primary/30 border border-primary/50 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
-                                      {getUserInitials(mandat.utilisateur_assigne)}
-                                    </div>
-                                  )}
-                                  <span className="text-[10px] text-slate-400 max-w-[80px] truncate">
-                                    {getUserByEmail(mandat.utilisateur_assigne)?.full_name?.split(' ')[0] || mandat.utilisateur_assigne.split('@')[0]}
-                                  </span>
-                                </div>
-                              )}
+                              {mandat.utilisateur_assigne && (() => {
+                                const u = getUserByEmail(mandat.utilisateur_assigne);
+                                return (
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    {u?.profile_picture ? (
+                                      <img
+                                        src={u.profile_picture}
+                                        alt=""
+                                        className="w-5 h-5 rounded-full object-cover border border-slate-600"
+                                      />
+                                    ) : (
+                                      <div className="w-5 h-5 rounded-full bg-primary/30 border border-primary/50 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                                        {getUserInitials(mandat.utilisateur_assigne)}
+                                      </div>
+                                    )}
+                                    <span className="text-[10px] text-slate-300">
+                                      {u?.full_name || mandat.utilisateur_assigne.split('@')[0]}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
                               {adresse && (
                                 <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
                                   <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
