@@ -142,49 +142,67 @@ export default function EntreeTempsSection({ editingDossier, formData, users, en
           </div>
 
           {entreesTemps.length > 0 ? (
-            <div className="border border-slate-700 rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300 text-xs">Date</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Heures</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
-                    <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {entreesTemps.map((entree) => (
-                    <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
-                      <TableCell className="text-slate-300 text-xs">{entree.date ? format(new Date(entree.date + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-xs font-medium">{entree.heures}h</TableCell>
-                      <TableCell className="text-slate-300 text-xs">
-                        <Badge className={`${getMandatColor(entree.mandat)} border text-xs`}>{getAbbreviatedMandatType(entree.mandat) || "-"}</Badge>
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-xs">
-                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{entree.tache || "-"}</Badge>
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <span>{getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name) || "-"}</span>
-                          <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
-                            <AvatarImage src={(users || []).find(u => u?.email === entree.utilisateur_email)?.photo_url} />
-                            <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                              {getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <button type="button" onClick={() => onDeleteRequest({ entreeTempsId: entree.id })} className="text-slate-400 hover:text-red-400 transition-colors">
-                          <Trash className="w-4 h-4" />
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="space-y-3">
+              {(() => {
+                // Grouper par mandat
+                const mandatTypes = [...new Set(entreesTemps.map(e => e.mandat).filter(Boolean))];
+                // Garder l'ordre des mandats du dossier, puis les entrées sans mandat connu
+                const orderedMandats = [
+                  ...(formData.mandats || []).map(m => m.type_mandat).filter(t => mandatTypes.includes(t)),
+                  ...mandatTypes.filter(t => !(formData.mandats || []).some(m => m.type_mandat === t))
+                ];
+                return orderedMandats.map((mandatType) => {
+                  const entries = entreesTemps.filter(e => e.mandat === mandatType);
+                  if (entries.length === 0) return null;
+                  const totalHeures = entries.reduce((sum, e) => sum + (e.heures || 0), 0);
+                  return (
+                    <div key={mandatType} className="border border-slate-700 rounded-lg overflow-hidden">
+                      <div className={`px-3 py-1.5 flex items-center justify-between ${getMandatColor(mandatType).replace('text-', 'bg-').split(' ')[0].replace('/20', '/10')} border-b border-slate-700`}>
+                        <Badge className={`${getMandatColor(mandatType)} border text-xs`}>{mandatType}</Badge>
+                        <span className="text-xs text-slate-400 font-medium">Total : <span className="text-lime-400 font-semibold">{totalHeures}h</span></span>
+                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300 text-xs">Date</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Heures</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
+                            <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {entries.map((entree) => (
+                            <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
+                              <TableCell className="text-slate-300 text-xs">{entree.date ? format(new Date(entree.date + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                              <TableCell className="text-slate-300 text-xs font-medium">{entree.heures}h</TableCell>
+                              <TableCell className="text-slate-300 text-xs">
+                                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{entree.tache || "-"}</Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span>{getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name) || "-"}</span>
+                                  <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
+                                    <AvatarImage src={(users || []).find(u => u?.email === entree.utilisateur_email)?.photo_url} />
+                                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                      {getUserInitials((users || []).find(u => u?.email === entree.utilisateur_email)?.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <button type="button" onClick={() => onDeleteRequest({ entreeTempsId: entree.id })} className="text-slate-400 hover:text-red-400 transition-colors">
+                                  <Trash className="w-4 h-4" />
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           ) : (
             <div className="text-center py-6 text-slate-500">
