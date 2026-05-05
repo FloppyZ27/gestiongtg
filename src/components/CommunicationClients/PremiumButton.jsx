@@ -18,6 +18,17 @@ const BUTTON_BASE = {
   cursor: 'pointer',
   transition: 'background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease',
   boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
+  outline: 'none',
+};
+
+const resetToBase = (el) => {
+  if (!el) return;
+  el.style.setProperty('background', '#1a1a1a', 'important');
+  el.style.setProperty('background-color', '#1a1a1a', 'important');
+  el.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
+  el.style.setProperty('box-shadow', '0 4px 14px rgba(0, 0, 0, 0.3)', 'important');
+  el.style.setProperty('filter', 'none', 'important');
+  el.style.setProperty('opacity', '1', 'important');
 };
 
 export default function PremiumButton({ label, onClick }) {
@@ -35,13 +46,15 @@ export default function PremiumButton({ label, onClick }) {
   };
 
   const handleMouseLeave = () => {
-    if (buttonRef.current) {
-      buttonRef.current.style.setProperty('background', '#1a1a1a', 'important');
-      buttonRef.current.style.setProperty('background-color', '#1a1a1a', 'important');
-      buttonRef.current.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
-      buttonRef.current.style.setProperty('box-shadow', '0 4px 14px rgba(0, 0, 0, 0.3)', 'important');
-      buttonRef.current.style.setProperty('filter', 'none', 'important');
-    }
+    resetToBase(buttonRef.current);
+  };
+
+  const handleMouseUp = () => {
+    resetToBase(buttonRef.current);
+  };
+
+  const handleBlur = () => {
+    resetToBase(buttonRef.current);
   };
 
   return (
@@ -51,6 +64,8 @@ export default function PremiumButton({ label, onClick }) {
       data-custom-hover
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onMouseUp={handleMouseUp}
+      onBlur={handleBlur}
       style={BUTTON_BASE}
     >
       <Plus className="w-4 h-4" />
