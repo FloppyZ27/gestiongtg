@@ -145,9 +145,16 @@ export default function RechercheAvancee() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-primary mb-1">Recherche avancée</h1>
-          <p className="text-sm text-muted-foreground">Filtrez tous les dossiers selon plusieurs critères combinés</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                Recherche avancée
+              </h1>
+              <Search className="w-6 h-6 text-blue-400" />
+            </div>
+            <p className="text-slate-400">Filtrez tous les dossiers selon plusieurs critères combinés</p>
+          </div>
         </div>
 
         {/* Filtres */}
