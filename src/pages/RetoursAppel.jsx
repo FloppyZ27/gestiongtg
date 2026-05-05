@@ -1241,7 +1241,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
             <div className="overflow-x-auto">
               <Table className="bg-gray-800/40">
                 <TableHeader>
-                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                  <TableRow className="bg-gray-800/50 hover:bg-gray-800/50 border-gray-700">
                     {[{key:'dossier',label:'Dossier'},{key:'clients',label:'Clients'},{key:null,label:'N° de téléphone'},{key:'utilisateur',label:'Utilisateur assigné'},{key:'date_appel',label:"Date de l'appel"},{key:null,label:'Raison'},{key:'statut',label:'Statut'}].map(col => (
                       <TableHead
                         key={col.label}
