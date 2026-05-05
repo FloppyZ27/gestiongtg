@@ -217,11 +217,11 @@ export default function CommunicationClients() {
             </TabsList>
           </div>
 
-          <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
+          <TabsContent value="prise-mandat" className="mt-0 overflow-visible">
             <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipe} onActiveTabChange={setActivePriseMandatTab} />
           </TabsContent>
 
-          <TabsContent value="retours-appel" className="mt-6">
+          <TabsContent value="retours-appel" className="mt-0">
             <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipe} />
           </TabsContent>
         </Tabs>
