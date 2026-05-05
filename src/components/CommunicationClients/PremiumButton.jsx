@@ -1,11 +1,12 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 
-const BUTTON_BASE_STYLE = {
-  background: '#1a1a1a',
-  backgroundImage: 'none',
+const GRADIENT = 'linear-gradient(135deg, #8B0000, #CC5500)';
+
+const BUTTON_STYLE = {
+  background: GRADIENT,
   color: 'white',
-  border: '1px solid rgba(139, 0, 0, 0.5)',
+  border: 'none',
   borderRadius: '0.5rem',
   padding: '0 1.25rem',
   height: '44px',
@@ -15,15 +16,8 @@ const BUTTON_BASE_STYLE = {
   alignItems: 'center',
   gap: '6px',
   cursor: 'pointer',
-  transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease',
-  boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
-};
-
-const BUTTON_HOVER_STYLE = {
-  background: 'none',
-  backgroundImage: 'linear-gradient(135deg, #8B0000, #CC5500)',
-  backgroundColor: 'transparent',
-  boxShadow: '0 6px 22px rgba(139,0,0,0.55)',
+  transition: 'box-shadow 0.25s ease, transform 0.25s ease',
+  boxShadow: '0 4px 14px rgba(139, 0, 0, 0.3)',
 };
 
 export default function PremiumButton({ label, onClick }) {
@@ -31,17 +25,15 @@ export default function PremiumButton({ label, onClick }) {
 
   const handleMouseEnter = () => {
     if (buttonRef.current) {
-      Object.entries(BUTTON_HOVER_STYLE).forEach(([key, value]) => {
-        buttonRef.current.style.setProperty(key.replace(/([A-Z])/g, '-$1').toLowerCase(), value, 'important');
-      });
+      buttonRef.current.style.boxShadow = '0 8px 24px rgba(139, 0, 0, 0.5)';
+      buttonRef.current.style.transform = 'scale(1.02)';
     }
   };
 
   const handleMouseLeave = () => {
     if (buttonRef.current) {
-      Object.entries(BUTTON_BASE_STYLE).forEach(([key, value]) => {
-        buttonRef.current.style.setProperty(key.replace(/([A-Z])/g, '-$1').toLowerCase(), value, 'important');
-      });
+      buttonRef.current.style.boxShadow = '0 4px 14px rgba(139, 0, 0, 0.3)';
+      buttonRef.current.style.transform = 'scale(1)';
     }
   };
 
@@ -52,7 +44,7 @@ export default function PremiumButton({ label, onClick }) {
       data-custom-hover
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={BUTTON_BASE_STYLE}
+      style={BUTTON_STYLE}
     >
       <Plus className="w-4 h-4" />
       {label}
