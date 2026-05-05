@@ -1037,8 +1037,8 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
         </Dialog>
 
         {/* Card avec filtres comme page Dossiers */}
-        <Card className="bg-gray-900/50 backdrop-blur-xl shadow-xl mb-2 border-0">
-          <CardHeader className="pb-2 px-0 bg-gray-800/40">
+        <Card className="bg-transparent backdrop-blur-xl shadow-xl mb-2 border-0">
+          <CardHeader className="pb-2 px-0 bg-transparent">
             <div className="flex flex-col gap-2">
               {/* Tabs pour les statuts */}
               <div className="flex w-full">
@@ -1236,12 +1236,12 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
         </Card>
 
         {/* Table des retours d'appel */}
-        <Card className="bg-gray-900/50 backdrop-blur-xl shadow-xl border-0">
+        <Card className="bg-transparent backdrop-blur-xl shadow-xl border-0">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table className="bg-gray-800/40">
+              <Table className="bg-transparent">
                 <TableHeader>
-                  <TableRow className="bg-gray-800/50 hover:bg-gray-800/50 border-gray-700">
+                  <TableRow className="bg-transparent hover:bg-transparent border-gray-700">
                     {[{key:'dossier',label:'Dossier'},{key:'clients',label:'Clients'},{key:null,label:'N° de téléphone'},{key:'utilisateur',label:'Utilisateur assigné'},{key:'date_appel',label:"Date de l'appel"},{key:null,label:'Raison'},{key:'statut',label:'Statut'}].map(col => (
                       <TableHead
                         key={col.label}
