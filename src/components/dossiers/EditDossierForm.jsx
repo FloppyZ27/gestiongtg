@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -501,25 +501,29 @@ export default function EditDossierForm({
                 e.preventDefault();
               }
             }}>
-              <div className="mb-3" data-section="infos">
-                  <div 
-                    className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
+              <Card className="border-slate-700 bg-slate-800/30 mb-3" data-section="infos">
+                  <CardHeader 
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                     onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
                   >
-                    <div className="flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4 text-blue-400" />
-                      <span className="text-blue-300 text-sm font-semibold">Informations du dossier</span>
-                      {formData.numero_dossier && (
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                          {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                        </Badge>
-                      )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                          <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                        </div>
+                        <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+                        {formData.numero_dossier && (
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                            {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                          </Badge>
+                        )}
+                      </div>
+                      {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                     </div>
-                    {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
-                  </div>
+                  </CardHeader>
 
                   {!infoDossierCollapsed && (
-                    <div className="pt-2 pb-3 px-1">
+                    <CardContent className="pt-2 pb-3">
                       <div className="grid grid-cols-[33%_67%] gap-4">
                         {/* Colonne gauche - Informations de base */}
                         <div className="space-y-2 border-r border-slate-700 pr-4">
@@ -584,20 +588,23 @@ export default function EditDossierForm({
                           />
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
                   )}
-                </div>
+                </Card>
             </form>
 
             {/* Section Mandats */}
-            <div className="mt-3" data-section="mandats">
-              <div 
-                className="cursor-pointer hover:bg-orange-900/20 bg-orange-900/10 border border-orange-500/20 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
+            <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="mandats">
+              <CardHeader 
+                className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
                 onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
               >
-                <div className="flex items-center gap-2 flex-1">
-                  <FileText className="w-4 h-4 text-orange-400" />
-                  <span className="text-orange-300 text-sm font-semibold">Mandats</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                      <FileText className="w-3.5 h-3.5 text-orange-400" />
+                    </div>
+                    <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
                     {formData.mandats.length > 0 && (
                       <div className="flex gap-1 flex-wrap">
                         {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
@@ -649,11 +656,12 @@ export default function EditDossierForm({
                       </div>
                     )}
                   </div>
-                  {mandatStepCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
+                  {mandatStepCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
+              </CardHeader>
 
               {!mandatStepCollapsed && (
-                <div className="pt-2 pb-3 px-1">
+                <CardContent className="pt-2 pb-3">
                   {formData.mandats.length > 0 ? (
                     <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
                       <div className="flex justify-between items-center mb-2 gap-3">
@@ -1233,9 +1241,9 @@ export default function EditDossierForm({
                       </Button>
                     </div>
                   )}
-                </div>
+                </CardContent>
               )}
-            </div>
+            </Card>
 
             {/* Section Tarification */}
             <div className="mt-3" data-section="tarification">
@@ -1255,20 +1263,27 @@ export default function EditDossierForm({
 
             {/* Section Terrain */}
             {formData.mandats.length > 0 && !hideSections.includes('terrain') && (
-              <div className="mt-3" data-section="terrain">
-                <div 
-                  className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
-                  onClick={() => setTerrainCollapsed(!terrainCollapsed)}
+              <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="terrain">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
+                  onClick={() => {
+                    const newState = !terrainCollapsed;
+                    setTerrainCollapsed(newState);
+                  }}
                 >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-amber-400" />
-                    <span className="text-amber-300 text-sm font-semibold">Terrain</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center">
+                        <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                      </div>
+                      <CardTitle className="text-amber-300 text-base">Terrain</CardTitle>
+                    </div>
+                    {terrainCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  {terrainCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
-                </div>
+                </CardHeader>
 
                 {!terrainCollapsed && (
-                  <div className="pt-2 pb-3 px-1">
+                  <CardContent className="pt-2 pb-3">
                     {/* Formulaire d'ajout de terrain - en haut et collapsable */}
                     <div className="border-2 border-amber-500/30 rounded-lg mb-4 bg-amber-900/10">
                       <div 
@@ -1622,32 +1637,36 @@ export default function EditDossierForm({
                         </Table>
                       </div>
                     )}
-                  </div>
+                  </CardContent>
                 )}
-              </div>
+              </Card>
             )}
 
             {/* Section Minutes */}
             {formData.mandats.length > 0 && !hideSections.includes('minutes') && (
-              <div className="mt-3" data-section="minutes">
-                <div 
-                  className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
+              <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="minutes">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
                   onClick={() => setMinutesCollapsed(!minutesCollapsed)}
                 >
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-cyan-400" />
-                    <span className="text-cyan-300 text-sm font-semibold">Minutes</span>
-                    {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0) > 0 && (
-                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
-                        {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0)} minute(s)
-                      </Badge>
-                    )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                        <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                      </div>
+                      <CardTitle className="text-cyan-300 text-base">Minutes</CardTitle>
+                      {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0) > 0 && (
+                        <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
+                          {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0)} minute(s)
+                        </Badge>
+                      )}
+                    </div>
+                    {minutesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  {minutesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
-                </div>
+                </CardHeader>
 
                 {!minutesCollapsed && (
-                   <div className="pt-2 pb-3 px-1">
+                   <CardContent className="pt-2 pb-3">
                      {/* Formulaire d'ajout des minutes - en haut et collapsable */}
                      <div className="border-2 border-cyan-500/30 rounded-lg mb-4 bg-cyan-900/10">
                        <div 
@@ -1928,44 +1947,48 @@ export default function EditDossierForm({
                         </div>
                       </div>
                       )}
-                  </div>
-                  )}
-                  </div>
-                  )}
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
-                  {/* Section Entrée de temps */}
-                  {editingDossier && (
-                  <div className="mt-3" data-section="entree-temps">
-                  <div 
-                  className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
-                  onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
-                  >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-lime-400" />
-                    <span className="text-lime-300 text-sm font-semibold">Entrée de temps</span>
-                    {entreesTemps.length > 0 && (
-                      <>
-                        {formData.mandats.map((mandat, idx) => {
-                          const totalHeures = entreesTemps
-                            .filter(e => e.mandat === mandat.type_mandat)
-                            .reduce((sum, e) => sum + (e.heures || 0), 0);
-                          return totalHeures > 0 && (
-                            <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                              {getAbbreviatedMandatType(mandat.type_mandat)}: {totalHeures}h
-                            </Badge>
-                          );
-                        })}
-                        <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs font-semibold">
-                          Total: {entreesTemps.reduce((sum, e) => sum + (e.heures || 0), 0)}h
-                        </Badge>
-                      </>
-                    )}
-                  </div>
-                  {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
-                  </div>
+            {/* Section Entrée de temps */}
+              {editingDossier && (
+                <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="entree-temps">
+                 <CardHeader 
+                   className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
+                   onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
+                 >
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                       <div className="w-6 h-6 rounded-full bg-lime-500/30 flex items-center justify-center">
+                         <Clock className="w-3.5 h-3.5 text-lime-400" />
+                       </div>
+                       <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
+                       {entreesTemps.length > 0 && (
+                         <>
+                           {formData.mandats.map((mandat, idx) => {
+                             const totalHeures = entreesTemps
+                               .filter(e => e.mandat === mandat.type_mandat)
+                               .reduce((sum, e) => sum + (e.heures || 0), 0);
+                             return totalHeures > 0 && (
+                               <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                 {getAbbreviatedMandatType(mandat.type_mandat)}: {totalHeures}h
+                               </Badge>
+                             );
+                           })}
+                           <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs font-semibold">
+                             Total: {entreesTemps.reduce((sum, e) => sum + (e.heures || 0), 0)}h
+                           </Badge>
+                         </>
+                       )}
+                     </div>
+                     {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                   </div>
+                 </CardHeader>
 
-                  {!entreeTempsCollapsed && (
-                  <div className="pt-2 pb-3 px-1 space-y-4">
+                 {!entreeTempsCollapsed && (
+                   <CardContent className="pt-2 pb-3 space-y-4">
                      {/* Formulaire d'ajout des entrées de temps - en haut et collapsable */}
                      <div className="border-2 border-lime-500/30 rounded-lg mb-4 bg-lime-900/10">
                        <div 
@@ -2150,32 +2173,36 @@ export default function EditDossierForm({
                         <p className="text-sm">Aucune entrée de temps</p>
                       </div>
                     )}
-                  </div>
-                  )}
-                  </div>
-                  )}
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
-                  {/* Section Retour d'appel */}
-                  {editingDossier && (
-                  <div className="mt-3" data-section="retour-appel">
-                  <div 
-                  className="cursor-pointer hover:bg-slate-800/40 transition-colors rounded-lg py-1.5 px-2 flex items-center justify-between"
+            {/* Section Retour d'appel */}
+             {editingDossier && (
+               <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="retour-appel">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                   onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
-                  >
-                  <div className="flex items-center gap-2">
-                   <Phone className="w-4 h-4 text-blue-400" />
-                   <span className="text-blue-300 text-sm font-semibold">Retour d'appel</span>
-                   {retoursAppel.length > 0 && (
-                     <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                       {retoursAppel.length} appel{retoursAppel.length > 1 ? 's' : ''}
-                     </Badge>
-                   )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                        <Phone className="w-3.5 h-3.5 text-blue-400" />
+                      </div>
+                      <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
+                      {retoursAppel.length > 0 && (
+                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                          {retoursAppel.length} appel{retoursAppel.length > 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
+                    {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
-                  </div>
+                </CardHeader>
 
-                  {!retourAppelCollapsed && (
-                  <div className="pt-2 pb-3 px-1 space-y-4">
+                {!retourAppelCollapsed && (
+                   <CardContent className="pt-4 pb-3 space-y-4">
                      {/* Formulaire d'ajout des retours d'appel - en haut et collapsable */}
                      <div className="border-2 border-blue-500/30 rounded-lg mb-4 bg-blue-900/10">
                        <div 
@@ -2401,12 +2428,12 @@ export default function EditDossierForm({
                                   </Table>
                       </div>
                       )}
-                  </div>
-                  )}
-                  </div>
-                  )}
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
-                  {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
+            {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {formData.numero_dossier && formData.arpenteur_geometre && (
               <div className="mt-3" data-section="documents">
                 <DocumentsStepForm
