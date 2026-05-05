@@ -56,14 +56,28 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-export default function DossierSearchBar({ dossiers, clients, users = [], onDossierSelect }) {
+export default function DossierSearchBar({ dossiers, clients, users = [], employes = [], onDossierSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
 
   const getClientById = (id) => clients?.find(c => c.id === id);
   const getUserByEmail = (email) => users?.find(u => u.email === email);
+
+  // Retrouver l'employé par son compte_utilisateur (email)
+  const getEmployeByEmail = (email) => employes?.find(e => e.compte_utilisateur === email);
+
+  const getEmployeNomComplet = (email) => {
+    const emp = getEmployeByEmail(email);
+    if (emp) return `${emp.prenom} ${emp.nom}`;
+    const u = getUserByEmail(email);
+    if (u) return u.full_name || email.split('@')[0];
+    return email.split('@')[0];
+  };
+
   const getUserInitials = (email) => {
+    const emp = getEmployeByEmail(email);
+    if (emp) return `${emp.prenom[0] || ''}${emp.nom[0] || ''}`.toUpperCase();
     const u = getUserByEmail(email);
     if (!u) return email?.split('@')[0]?.substring(0, 2).toUpperCase() || '?';
     return (u.full_name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -226,7 +240,7 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                                       </div>
                                     )}
                                     <span className="text-[10px] text-slate-300">
-                                      {u?.full_name || mandat.utilisateur_assigne.split('@')[0]}
+                                      {getEmployeNomComplet(mandat.utilisateur_assigne)}
                                     </span>
                                   </div>
                                 );
