@@ -391,10 +391,9 @@ export default function EditDossierForm({
     setTarificationStepCollapsed(sectionId !== "tarification");
     setTerrainCollapsed(sectionId !== "terrain");
     setDocumentsCollapsed(sectionId !== "documents");
-    // Ouvrir les sections qui gèrent leur propre état collapsed
-    if (sectionId === "minutes") setMinutesCollapsed(false);
-    if (sectionId === "entree-temps") setEntreeTempsCollapsed(false);
-    if (sectionId === "retour-appel") setRetourAppelCollapsed(false);
+    setMinutesCollapsed(sectionId !== "minutes");
+    setEntreeTempsCollapsed(sectionId !== "entree-temps");
+    setRetourAppelCollapsed(sectionId !== "retour-appel");
     setTimeout(() => {
       const element = document.querySelector(`[data-section="${sectionId}"]`);
       if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
