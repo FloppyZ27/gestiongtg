@@ -1002,7 +1002,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
           <CardHeader className="pb-2">
             <div className="flex flex-col gap-2">
               {/* Tabs pour les statuts */}
-              <div className="flex w-full border-b border-slate-700">
+              <div className="flex w-full">
                 <button
                   role="tab"
                   onClick={() => setActiveListTab("retour_appel")}
