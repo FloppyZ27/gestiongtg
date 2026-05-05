@@ -78,7 +78,7 @@ export default function CommunicationClients() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-slate-800/30 p-4 md:p-8">
       <div className="w-full">
         <div className="flex items-start justify-between gap-3 mb-8">
           <div className="flex-1">
