@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    /* ─── Backgrounds chauds ─── */
-    --background: 0 14% 6%;          /* #0D0B0B */
-    --foreground: 0 11% 95%;         /* #F4EEEE */
-    --card: 0 17% 11%;               /* #221616 */
-    --card-foreground: 0 11% 95%;
-    --popover: 0 17% 8%;             /* #181212 */
-    --popover-foreground: 0 11% 95%;
+    /* ─── Backgrounds gris sombre ─── */
+    --background: 220 13% 9%;        /* #131519 */
+    --foreground: 210 11% 93%;       /* #EAECEF */
+    --card: 220 13% 13%;             /* #1C1F24 */
+    --card-foreground: 210 11% 93%;
+    --popover: 220 13% 10%;          /* #161820 */
+    --popover-foreground: 210 11% 93%;
 
     /* ─── Primary — rouge profond ─── */
     --primary: 0 68% 34%;            /* #8F1D1D */
     --primary-foreground: 0 11% 95%;
 
-    /* ─── Secondary — brun sombre ─── */
-    --secondary: 0 17% 14%;
-    --secondary-foreground: 0 14% 77%; /* #C5AFAF */
+    /* ─── Secondary — gris foncé ─── */
+    --secondary: 220 10% 17%;
+    --secondary-foreground: 210 11% 78%;
 
     /* ─── Muted ─── */
-    --muted: 0 14% 18%;
-    --muted-foreground: 0 14% 48%;   /* #7A5C5C */
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 8% 50%;
 
     /* ─── Accent — orangé brûlé ─── */
     --accent: 22 76% 44%;            /* #C75B1A */
@@ -35,8 +35,8 @@
     --destructive-foreground: 0 11% 95%;
 
     /* ─── Borders & inputs ─── */
-    --border: 0 23% 19%;             /* #3A2424 */
-    --input: 0 17% 14%;
+    --border: 220 10% 22%;
+    --input: 220 10% 17%;
     --ring: 0 68% 34%;               /* rouge profond */
 
     /* ─── Charts ─── */
@@ -48,49 +48,49 @@
 
     --radius: 0.75rem;
 
-    /* ─── Sidebar — noir chaud ─── */
-    --sidebar-background: 0 14% 5%;
-    --sidebar-foreground: 0 11% 95%;
+    /* ─── Sidebar — gris très sombre ─── */
+    --sidebar-background: 220 13% 7%;
+    --sidebar-foreground: 210 11% 93%;
     --sidebar-primary: 0 68% 34%;
     --sidebar-primary-foreground: 0 11% 95%;
-    --sidebar-accent: 0 17% 12%;
-    --sidebar-accent-foreground: 0 11% 95%;
-    --sidebar-border: 0 23% 14%;
+    --sidebar-accent: 220 13% 11%;
+    --sidebar-accent-foreground: 210 11% 93%;
+    --sidebar-border: 220 10% 16%;
     --sidebar-ring: 0 68% 34%;
   }
 
   .dark {
-    --background: 0 14% 6%;
-    --foreground: 0 11% 95%;
-    --card: 0 17% 11%;
-    --card-foreground: 0 11% 95%;
-    --popover: 0 17% 8%;
-    --popover-foreground: 0 11% 95%;
+    --background: 220 13% 9%;
+    --foreground: 210 11% 93%;
+    --card: 220 13% 13%;
+    --card-foreground: 210 11% 93%;
+    --popover: 220 13% 10%;
+    --popover-foreground: 210 11% 93%;
     --primary: 0 68% 34%;
     --primary-foreground: 0 11% 95%;
-    --secondary: 0 17% 14%;
-    --secondary-foreground: 0 14% 77%;
-    --muted: 0 14% 18%;
-    --muted-foreground: 0 14% 48%;
+    --secondary: 220 10% 17%;
+    --secondary-foreground: 210 11% 78%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 8% 50%;
     --accent: 22 76% 44%;
     --accent-foreground: 0 11% 95%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 11% 95%;
-    --border: 0 23% 19%;
-    --input: 0 17% 14%;
+    --border: 220 10% 22%;
+    --input: 220 10% 17%;
     --ring: 0 68% 34%;
     --chart-1: 0 68% 34%;
     --chart-2: 22 76% 44%;
     --chart-3: 0 55% 45%;
     --chart-4: 22 60% 38%;
     --chart-5: 0 40% 55%;
-    --sidebar-background: 0 14% 5%;
-    --sidebar-foreground: 0 11% 95%;
+    --sidebar-background: 220 13% 7%;
+    --sidebar-foreground: 210 11% 93%;
     --sidebar-primary: 0 68% 34%;
     --sidebar-primary-foreground: 0 11% 95%;
-    --sidebar-accent: 0 17% 12%;
-    --sidebar-accent-foreground: 0 11% 95%;
-    --sidebar-border: 0 23% 14%;
+    --sidebar-accent: 220 13% 11%;
+    --sidebar-accent-foreground: 210 11% 93%;
+    --sidebar-border: 220 10% 16%;
     --sidebar-ring: 0 68% 34%;
   }
 }
@@ -148,10 +148,10 @@ div[data-radix-dialog-overlay],
   opacity: 1 !important;
 }
 
-/* ─── Dialog glassmorphique chaud ─── */
+/* ─── Dialog glassmorphique ─── */
 [role="dialog"] {
-  background: hsl(0, 17%, 9%, 0.97) !important;
-  border: 1px solid hsl(0, 23%, 19%) !important;
+  background: hsl(220, 13%, 10%, 0.97) !important;
+  border: 1px solid hsl(220, 10%, 22%) !important;
   box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(199, 91, 26, 0.08) !important;
   position: fixed !important;
   left: 50% !important;
@@ -170,25 +170,25 @@ div[data-radix-dialog-overlay],
 
 /* ─── Cards / surfaces ─── */
 .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-  background: hsl(0, 17%, 11%) !important;
-  border: 1px solid hsl(0, 23%, 19%) !important;
+  background: hsl(220, 13%, 12%) !important;
+  border: 1px solid hsl(220, 10%, 20%) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.35) !important;
 }
 
 /* ─── Inputs ─── */
 input, textarea, select {
-  background-color: hsl(0, 17%, 12%, 0.85) !important;
-  border: 1px solid hsl(0, 23%, 19%) !important;
+  background-color: hsl(220, 13%, 11%) !important;
+  border: 1px solid hsl(220, 10%, 22%) !important;
   transition: all 0.2s ease !important;
   border-radius: 10px !important;
 }
 input:hover, textarea:hover, select:hover {
-  background-color: hsl(0, 17%, 14%, 0.95) !important;
-  border-color: hsl(0, 50%, 32%) !important;
+  background-color: hsl(220, 13%, 14%) !important;
+  border-color: hsl(220, 10%, 30%) !important;
 }
 input:focus, textarea:focus, select:focus {
   outline: none !important;
-  background-color: hsl(0, 17%, 14%) !important;
+  background-color: hsl(220, 13%, 14%) !important;
   border-color: hsl(0, 68%, 38%) !important;
   box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.18) !important;
 }
@@ -198,7 +198,7 @@ button[role="combobox"],
 button[aria-haspopup="listbox"],
 button[data-radix-select-trigger],
 [data-radix-select-trigger] {
-  background-color: hsl(0, 17%, 12%) !important;
+  background-color: hsl(220, 13%, 11%) !important;
   background-image: none !important;
   border-radius: 10px !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3) !important;
@@ -206,8 +206,8 @@ button[data-radix-select-trigger],
 button[role="combobox"]:hover,
 button[aria-haspopup="listbox"]:hover,
 [data-radix-select-trigger]:hover {
-  background-color: hsl(0, 17%, 15%) !important;
-  border-color: hsl(0, 55%, 32%) !important;
+  background-color: hsl(220, 13%, 15%) !important;
+  border-color: hsl(220, 10%, 30%) !important;
 }
 
 /* ─── Dropdown menus & select content ─── */
@@ -215,8 +215,8 @@ button[aria-haspopup="listbox"]:hover,
 [role="menu"],
 [data-radix-select-content],
 [data-radix-popper-content-wrapper] > div {
-  background-color: hsl(0, 17%, 10%) !important;
-  border: 1px solid hsl(0, 23%, 19%) !important;
+  background-color: hsl(220, 13%, 10%) !important;
+  border: 1px solid hsl(220, 10%, 20%) !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
 }
@@ -233,7 +233,7 @@ button[aria-haspopup="listbox"]:hover,
 
 /* ─── Borders générales ─── */
 .border-slate-700, .border-slate-800 {
-  border: 1px solid hsl(0, 23%, 19%) !important;
+  border: 1px solid hsl(220, 10%, 22%) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 }
 
@@ -308,8 +308,8 @@ button[role="tab"][data-state="active"],
 
 /* ─── Navbar topbar ─── */
 header {
-  background: hsl(0, 14%, 5%, 0.97) !important;
-  border-bottom: 1px solid hsl(0, 23%, 16%) !important;
+  background: hsl(220, 13%, 7%, 0.97) !important;
+  border-bottom: 1px solid hsl(220, 10%, 18%) !important;
   box-shadow: 0 2px 16px rgba(0,0,0,0.45) !important;
 }
 

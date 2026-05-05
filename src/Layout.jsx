@@ -585,7 +585,7 @@ function LayoutContent({ children, currentPageName }) {
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
-        background-color: hsl(210, 17%, 9.8%, 0.5) !important;
+        background-color: hsl(220, 13%, 5%, 0.65) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         opacity: 1 !important;
@@ -593,8 +593,8 @@ function LayoutContent({ children, currentPageName }) {
 
         /* Dialog glassmorphique professionnel */
         [role="dialog"] {
-        background: hsl(210, 16%, 13%, 0.95) !important;
-        border: 1px solid hsl(210, 10%, 19%, 0.8) !important;
+        background: hsl(220, 13%, 10%, 0.97) !important;
+        border: 1px solid hsl(220, 10%, 22%) !important;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
         position: fixed !important;
         left: 50% !important;
@@ -612,10 +612,10 @@ function LayoutContent({ children, currentPageName }) {
         letter-spacing: 0.2px !important;
         }
 
-        /* Surfaces / cartes — brun chaud */
+        /* Surfaces / cartes — gris sombre */
         .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-        background: hsl(0, 17%, 11%) !important;
-        border: 1px solid hsl(0, 23%, 19%) !important;
+        background: hsl(220, 13%, 12%) !important;
+        border: 1px solid hsl(220, 10%, 20%) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
 
@@ -770,36 +770,36 @@ function LayoutContent({ children, currentPageName }) {
 
 
         .border-slate-700, .border-slate-800 {
-          border: 1px solid hsl(0, 23%, 19%) !important;
+          border: 1px solid hsl(220, 10%, 22%) !important;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
         }
 
         input, textarea, select {
-          background-color: hsl(0, 17%, 12%, 0.85) !important;
-          border: 1px solid hsl(0, 23%, 19%) !important;
+          background-color: hsl(220, 13%, 11%) !important;
+          border: 1px solid hsl(220, 10%, 22%) !important;
           transition: all 0.2s ease !important;
           border-radius: 10px !important;
         }
 
         input:hover, textarea:hover, select:hover {
-          background-color: hsl(0, 17%, 14%, 0.95) !important;
-          border-color: hsl(0, 50%, 32%) !important;
+          background-color: hsl(220, 13%, 14%) !important;
+          border-color: hsl(220, 10%, 30%) !important;
         }
 
         input:focus, textarea:focus, select:focus {
           outline: none !important;
-          background-color: hsl(0, 17%, 14%) !important;
+          background-color: hsl(220, 13%, 14%) !important;
           border-color: hsl(0, 68%, 38%) !important;
           box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.18) !important;
         }
 
-        /* Menus déroulants — fond chaud */
+        /* Menus déroulants — fond gris */
         [role="listbox"],
         [role="menu"],
         [data-radix-select-content],
         [data-radix-popper-content-wrapper] > div {
-          background-color: hsl(0, 17%, 10%) !important;
-          border: 1px solid hsl(0, 23%, 19%) !important;
+          background-color: hsl(220, 13%, 10%) !important;
+          border: 1px solid hsl(220, 10%, 20%) !important;
           border-radius: 12px !important;
           box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
         }
@@ -809,7 +809,7 @@ function LayoutContent({ children, currentPageName }) {
         button[aria-haspopup="listbox"],
         button[data-radix-select-trigger],
         [data-radix-select-trigger] {
-          background-color: hsl(0, 17%, 12%) !important;
+          background-color: hsl(220, 13%, 11%) !important;
           background-image: none !important;
           border-radius: 10px !important;
           box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3) !important;
@@ -818,8 +818,8 @@ function LayoutContent({ children, currentPageName }) {
         button[role="combobox"]:hover,
         button[aria-haspopup="listbox"]:hover,
         button[data-radix-select-trigger]:hover {
-          background-color: hsl(0, 17%, 15%) !important;
-          border-color: hsl(0, 55%, 32%) !important;
+          background-color: hsl(220, 13%, 15%) !important;
+          border-color: hsl(220, 10%, 30%) !important;
         }
 
 
