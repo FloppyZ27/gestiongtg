@@ -235,12 +235,6 @@ function LayoutContent({ children, currentPageName }) {
     initialData: [],
   });
 
-  const { data: employes = [] } = useQuery({
-    queryKey: ['employes'],
-    queryFn: () => base44.entities.Employe.list(),
-    initialData: [],
-  });
-
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
     queryFn: () => base44.entities.Lot.list(),
@@ -1102,7 +1096,7 @@ function LayoutContent({ children, currentPageName }) {
 
             {/* Barre de recherche de dossiers au centre */}
             <div className="hidden md:flex flex-1 justify-center max-w-2xl mx-auto">
-              <DossierSearchBar dossiers={dossiers} clients={clients} users={users} employes={employes} />
+              <DossierSearchBar dossiers={dossiers} clients={clients} users={users} />
             </div>
 
             {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
