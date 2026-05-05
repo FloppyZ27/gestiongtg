@@ -163,7 +163,7 @@ export default function CommunicationClients() {
         </div>
 
         {/* Filtres globaux — au-dessus des onglets */}
-        <div className="flex items-center justify-between gap-6 mb-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+        <div className="flex items-center justify-between gap-6 mb-4">
           <div className="flex flex-col gap-2">
             <PlaceAffaireTabs
               value={filterPlaceAffaire}
