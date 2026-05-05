@@ -3947,7 +3947,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                     <Filter className="w-4 h-4 mr-2" />
                     <span className="text-sm">Filtres</span>
                     {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0 || filterDateStart || filterDateEnd) && (
-                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500/20 text-red-400 border-red-500/30 text-xs">
                         {filterArpenteur.length + filterVille.length + filterTypeMandat.length + filterUrgence.length + (filterDateStart ? 1 : 0) + (filterDateEnd ? 1 : 0)}
                       </Badge>
                     )}
@@ -3957,12 +3957,12 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
 
                 <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                   <CollapsibleContent>
-                    <div className="p-2 border border-emerald-500/30 rounded-lg">
+                    <div className="p-2 border border-red-500/30 rounded-lg">
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                        <div className="flex items-center justify-between pb-2 border-b border-red-500/30">
                           <div className="flex items-center gap-2">
-                            <Filter className="w-3 h-3 text-emerald-500" />
-                            <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                            <Filter className="w-3 h-3 text-red-500" />
+                            <h4 className="text-xs font-semibold text-red-500">Filtrer</h4>
                           </div>
                           {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0 || filterDateStart || filterDateEnd) && (
                             <Button
@@ -3976,7 +3976,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                                 setFilterDateStart("");
                                 setFilterDateEnd("");
                               }}
-                              className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                              className="h-6 text-xs text-red-500 hover:text-red-400 px-2"
                             >
                               <X className="w-2.5 h-2.5 mr-1" />
                               Réinitialiser
@@ -3988,7 +3988,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                           <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                                <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                                   <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
@@ -4017,7 +4017,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                           <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                                <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                                   <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
@@ -4046,7 +4046,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                           <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                                <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                                   <span className="truncate">Types ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
@@ -4075,7 +4075,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                           <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                                <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                                   <span className="truncate">Urgence ({filterUrgence.length > 0 ? `${filterUrgence.length}` : 'Toutes'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
@@ -4102,23 +4102,23 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                           </div>
                         </div>
 
-                        <div className="space-y-1 pt-1 border-t border-emerald-500/30">
-                          <Label className="text-xs text-emerald-500">Période</Label>
+                        <div className="space-y-1 pt-1 border-t border-red-500/30">
+                          <Label className="text-xs text-red-500">Période</Label>
                           <div className="flex items-center gap-1.5">
                             <Input
                               type="date"
                               value={filterDateStart}
                               onChange={(e) => setFilterDateStart(e.target.value)}
                               placeholder="Du"
-                              className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2"
+                              className="flex-1 border-red-500/30 text-red-500 h-8 text-xs px-2"
                             />
-                            <span className="text-emerald-500 text-xs">→</span>
+                            <span className="text-red-500 text-xs">→</span>
                             <Input
                               type="date"
                               value={filterDateEnd}
                               onChange={(e) => setFilterDateEnd(e.target.value)}
                               placeholder="Au"
-                              className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2"
+                              className="flex-1 border-red-500/30 text-red-500 h-8 text-xs px-2"
                             />
                           </div>
                         </div>
@@ -4143,7 +4143,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                         <div className="flex items-center gap-1">
                           {label}
                           {field && (sortField === field
-                            ? sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />
+                            ? sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-red-400" /> : <ChevronDown className="w-3 h-3 text-red-400" />
                             : <ChevronsUpDown className="w-3 h-3 text-slate-500" />)}
                         </div>
                       </TableHead>

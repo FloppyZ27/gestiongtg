@@ -34,7 +34,7 @@ export default function DossiersFilterBar({
       {items.map(item => (
         <div key={item} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-slate-700/50"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggle(item); }}>
-          <input type="checkbox" readOnly checked={selected.includes(item)} className="accent-emerald-500 w-3 h-3 pointer-events-none" />
+          <input type="checkbox" readOnly checked={selected.includes(item)} className="accent-red-500 w-3 h-3 pointer-events-none" />
           <span className="text-white text-xs">{item}</span>
         </div>
       ))}
@@ -44,7 +44,7 @@ export default function DossiersFilterBar({
   const FilterDropdown = ({ label, items, selected, onToggle }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+        <Button variant="ghost" className="w-full text-red-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-red-500/10">
           <span className="truncate">{label} ({selected.length > 0 ? selected.length : 'Tous'})</span>
           <ChevronDown className="w-3 h-3 flex-shrink-0" />
         </Button>
@@ -74,10 +74,10 @@ export default function DossiersFilterBar({
               <button
                 key={equipe}
                 onClick={() => setFilterEquipe(equipe)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "bg-emerald-500/20 text-emerald-400 border-b-2 border-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "bg-red-500/20 text-red-400 border-b-2 border-red-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}
               >
                 {equipe}
-                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterEquipe === equipe ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>
+                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterEquipe === equipe ? "bg-red-500/30 text-red-300" : "bg-slate-700 text-slate-400"}`}>
                   {equipe === "Toutes"
                     ? dossiersWithMandats.length
                     : dossiersWithMandats.filter(d => d.mandatInfo?.equipe_assignee === equipe || d.mandatInfo?.utilisateur_assigne?.includes(equipe)).length}
@@ -99,7 +99,7 @@ export default function DossiersFilterBar({
               <Filter className="w-4 h-4 mr-2" />
               <span className="text-sm">Filtres</span>
               {hasFilters && (
-                <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500/20 text-red-400 border-red-500/30 text-xs">
                   {filterArpenteur.length + filterStatut.length + filterMandat.length + filterTache.length + filterVille.length + (filterDateDebut ? 1 : 0) + (filterDateFin ? 1 : 0)}
                 </Badge>
               )}
@@ -109,15 +109,15 @@ export default function DossiersFilterBar({
 
           <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
             <CollapsibleContent>
-              <div className="p-2 border border-emerald-500/30 rounded-lg">
+              <div className="p-2 border border-red-500/30 rounded-lg">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                  <div className="flex items-center justify-between pb-2 border-b border-red-500/30">
                     <div className="flex items-center gap-2">
-                      <Filter className="w-3 h-3 text-emerald-500" />
-                      <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                      <Filter className="w-3 h-3 text-red-500" />
+                      <h4 className="text-xs font-semibold text-red-500">Filtrer</h4>
                     </div>
                     {hasFilters && (
-                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterStatut([]); setFilterMandat([]); setFilterTache([]); setFilterVille([]); setFilterDateDebut(""); setFilterDateFin(""); setFilterEquipe("Toutes"); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterStatut([]); setFilterMandat([]); setFilterTache([]); setFilterVille([]); setFilterDateDebut(""); setFilterDateFin(""); setFilterEquipe("Toutes"); }} className="h-6 text-xs text-red-500 hover:text-red-400 px-2">
                         <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
                       </Button>
                     )}
@@ -129,12 +129,12 @@ export default function DossiersFilterBar({
                     <FilterDropdown label="Tâches" items={TACHES} selected={filterTache} onToggle={setFilterTache} />
                     <FilterDropdown label="Villes" items={uniqueVilles} selected={filterVille} onToggle={setFilterVille} />
                   </div>
-                  <div className="space-y-1 pt-1 border-t border-emerald-500/30">
-                    <Label className="text-xs text-emerald-500">Période d'ouverture</Label>
+                  <div className="space-y-1 pt-1 border-t border-red-500/30">
+                    <Label className="text-xs text-red-500">Période d'ouverture</Label>
                     <div className="flex items-center gap-1.5">
-                      <Input type="date" value={filterDateDebut} onChange={(e) => setFilterDateDebut(e.target.value)} className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent" />
-                      <span className="text-emerald-500 text-xs">→</span>
-                      <Input type="date" value={filterDateFin} onChange={(e) => setFilterDateFin(e.target.value)} className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent" />
+                      <Input type="date" value={filterDateDebut} onChange={(e) => setFilterDateDebut(e.target.value)} className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent" />
+                      <span className="text-red-500 text-xs">→</span>
+                      <Input type="date" value={filterDateFin} onChange={(e) => setFilterDateFin(e.target.value)} className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent" />
                     </div>
                   </div>
                 </div>
