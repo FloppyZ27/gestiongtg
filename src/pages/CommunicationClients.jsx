@@ -177,8 +177,8 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <PremiumButton label="Nouveau mandat" onClick={handleNewMandat} variant="default" />
-            <PremiumButton label="Nouveau retour d'appel" onClick={handleNewRetourAppel} variant="blue" />
+            <PremiumButton label="Nouveau mandat" onClick={handleNewMandat} />
+            <PremiumButton label="Nouveau retour d'appel" onClick={handleNewRetourAppel} />
           </div>
         </div>
 
