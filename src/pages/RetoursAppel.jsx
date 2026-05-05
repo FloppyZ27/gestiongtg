@@ -1388,9 +1388,9 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleDelete(retour.id)} 
-                            className="text-red-400 h-6 w-6 p-0"
+                            className="text-red-400 h-6 w-6 p-0 hover:text-red-400 hover:bg-transparent"
                           >
-                            <Trash className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </motion.div>
                       </TableCell>

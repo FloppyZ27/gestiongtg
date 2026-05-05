@@ -258,7 +258,7 @@ export default function PriseMandatTable({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenDossier(pm)}
-                        className="text-emerald-400"
+                        className="text-emerald-400 hover:text-emerald-400 hover:bg-transparent"
                       >
                         <FolderOpen className="w-4 h-4" />
                       </Button>
@@ -269,7 +269,7 @@ export default function PriseMandatTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(pm.id)}
-                      className="text-red-400"
+                      className="text-red-400 hover:text-red-400 hover:bg-transparent"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
