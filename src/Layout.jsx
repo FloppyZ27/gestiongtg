@@ -1090,7 +1090,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="GTG Logo"
                   className="w-14 h-auto"
                 />
-              <h1 className="topbar-title text-3xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,68%,52%), hsl(22,76%,60%), hsl(0,68%,52%))', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', animation: 'gradientShift 3s linear infinite'}}>GestionGTG</h1>
+              <h1 className="topbar-title text-3xl font-bold">GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}
