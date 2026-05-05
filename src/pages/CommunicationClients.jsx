@@ -144,8 +144,8 @@ export default function CommunicationClients() {
             }`}
           >
             {e.label}
-            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full pointer-events-none ${
-              filterEquipe === e.value ? "bg-red-500/30 text-orange-300" : "bg-slate-700 text-slate-400"
+            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full pointer-events-none select-none cursor-default ${
+              filterEquipe === e.value ? "bg-red-500/30 text-orange-300 hover:bg-red-500/30 hover:text-orange-300" : "bg-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-400"
             }`}>{counts[e.value] ?? 0}</span>
           </button>
         ))}
