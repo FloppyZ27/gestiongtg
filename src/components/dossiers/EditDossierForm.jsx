@@ -25,9 +25,9 @@ import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
 import TarificationStepForm from "../mandat/TarificationStepForm";
 import FicheMandatButton from "./FicheMandatButton";
-import RetourAppelSection from "./RetourAppelSection.jsx";
-import MinutesSection from "./MinutesSection.jsx";
-import EntreeTempsSection from "./EntreeTempsSection.jsx";
+import RetourAppelSection from "./RetourAppelSection";
+import MinutesSection from "./MinutesSection";
+import EntreeTempsSection from "./EntreeTempsSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
