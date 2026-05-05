@@ -445,9 +445,9 @@ export default function EditDossierForm({
             {sections.map((section) => (
               <Tooltip key={section.id}>
                 <TooltipTrigger asChild>
-                  <motion.button onClick={() => scrollToSection(section.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors group relative" whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                  <button type="button" onClick={() => scrollToSection(section.id)} title={section.label} className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800/30 hover:bg-slate-600 transition-colors duration-200 hover:scale-110 hover:shadow-lg hover:shadow-slate-600 sidebar-nav-btn">
                     <section.icon className={`w-5 h-5 ${section.color}`} />
-                  </motion.button>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white text-sm">
                   {section.label}
