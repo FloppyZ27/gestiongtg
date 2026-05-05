@@ -31,16 +31,7 @@ export default function NotificationBanner({ user }) {
     }
   }, [notifications, dismissedIds, visibleNotification]);
 
-  // Timer de 5 secondes pour la bannière
-  useEffect(() => {
-    if (visibleNotification) {
-      const timer = setTimeout(() => {
-        handleDismiss(visibleNotification.id);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [visibleNotification?.id]);
+
 
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
