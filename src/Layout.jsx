@@ -571,14 +571,14 @@ function LayoutContent({ children, currentPageName }) {
             font-family: 'JetBrains Mono', monospace !important;
           }
 
-          /* Page titles - couleur bleu professionnel (sauf topbar) */
+          /* Page titles - or premium (sauf topbar) */
           h1:not(.topbar-title) {
-            color: hsl(207, 85%, 55%) !important;
+            color: hsl(38, 47%, 57%) !important;
           }
 
-          /* Logos en bleu */
+          /* Logos - teinte rouge vin */
           img[src*="GTG-ETOILE"] {
-            filter: hue-rotate(200deg) saturate(1.2) brightness(1.1) !important;
+            filter: hue-rotate(320deg) saturate(1.4) brightness(0.95) !important;
           }
 
         /* Overlay avec flou doux */
@@ -644,34 +644,35 @@ function LayoutContent({ children, currentPageName }) {
 
         button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
         [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-        background: hsl(207, 85%, 55%, 0.08) !important;
-        border: 1px solid hsl(207, 85%, 55%, 0.2) !important;
-        color: hsl(207, 85%, 55%);
-        border-radius: 0.5rem;
+        background: rgba(110, 15, 26, 0.10) !important;
+        border: 1px solid rgba(110, 15, 26, 0.25) !important;
+        color: hsl(0, 0%, 88%);
+        border-radius: 10px;
         transition: all 0.2s ease !important;
         padding: 0.5rem 1rem;
         }
 
         /* Boutons primaires dégradé discret */
         button[class*="agenda-add-button"] {
-          background: linear-gradient(135deg, hsl(207, 85%, 55%) 0%, hsl(207, 85%, 50%) 100%) !important;
-          color: hsl(210, 17%, 9.8%) !important;
+          background: linear-gradient(135deg, hsl(352, 82%, 28%) 0%, hsl(352, 82%, 22%) 100%) !important;
+          color: hsl(0, 0%, 96%) !important;
           border: none !important;
-          box-shadow: 0 8px 16px hsla(207, 85%, 55%, 0.2) !important;
+          box-shadow: 0 8px 16px rgba(110, 15, 26, 0.3) !important;
           font-weight: 600;
         }
 
         button[class*="agenda-add-button"]:hover {
-          background: linear-gradient(135deg, hsl(207, 85%, 60%) 0%, hsl(207, 85%, 55%) 100%) !important;
-          box-shadow: 0 12px 24px hsla(207, 85%, 55%, 0.25) !important;
+          background: linear-gradient(135deg, hsl(352, 82%, 36%) 0%, hsl(352, 82%, 28%) 100%) !important;
+          box-shadow: 0 12px 24px rgba(110, 15, 26, 0.4) !important;
           transform: translateY(-2px);
         }
 
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
         [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
-          background: rgba(264, 85%, 63%, 0.15) !important;
-          border-color: rgba(264, 85%, 63%, 0.4) !important;
-          transform: translateY(-2px);
+          background: rgba(110, 15, 26, 0.22) !important;
+          border-color: rgba(110, 15, 26, 0.45) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(110, 15, 26, 0.25) !important;
         }
 
         /* Retirer complètement l'encadré des TabsTrigger */
@@ -695,14 +696,14 @@ function LayoutContent({ children, currentPageName }) {
           filter: brightness(0) !important;
         }
 
-        /* Override vert opaque des dropdown menus et select */
+        /* Override dropdown menus et select - teinte rouge vin */
         [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
         [data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
         [data-radix-dropdown-menu-content] [role="menuitemradio"]:hover,
         [data-radix-select-content] [role="option"]:hover,
         [data-radix-select-content] [role="option"]:focus,
         [data-radix-select-content] [role="option"][data-highlighted] {
-          background-color: rgba(100, 116, 139, 0.15) !important;
+          background-color: rgba(110, 15, 26, 0.18) !important;
           color: white !important;
         }
 
@@ -739,22 +740,22 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
-        /* Tabs par défaut avec couleur primary */
+        /* Tabs — accent or premium */
         button[role="tab"]:hover,
         [role="tab"]:hover {
-          background: hsla(207, 85%, 55%, 0.15) !important;
-          background-color: hsla(207, 85%, 55%, 0.15) !important;
+          background: rgba(110, 15, 26, 0.15) !important;
+          background-color: rgba(110, 15, 26, 0.15) !important;
           background-image: none !important;
-          color: hsl(207, 85%, 55%) !important;
+          color: hsl(38, 47%, 65%) !important;
         }
 
         button[role="tab"][data-state="active"],
         [role="tab"][data-state="active"] {
-          background: hsla(207, 85%, 55%, 0.2) !important;
-          background-color: hsla(207, 85%, 55%, 0.2) !important;
+          background: rgba(110, 15, 26, 0.2) !important;
+          background-color: rgba(110, 15, 26, 0.2) !important;
           background-image: none !important;
-          color: hsl(207, 85%, 55%) !important;
-          border-bottom: 2px solid hsl(207, 85%, 55%) !important;
+          color: hsl(38, 47%, 65%) !important;
+          border-bottom: 2px solid hsl(38, 47%, 57%) !important;
         }
 
         button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
@@ -850,13 +851,13 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         *::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166)) !important;
+          background: linear-gradient(to bottom, hsl(352, 82%, 30%), hsl(352, 60%, 22%)) !important;
           border-radius: 10px !important;
           border: none !important;
         }
 
         *::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136)) !important;
+          background: linear-gradient(to bottom, hsl(352, 82%, 40%), hsl(352, 60%, 30%)) !important;
         }
 
         *::-webkit-scrollbar-button {
@@ -1091,7 +1092,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="GTG Logo"
                   className="w-14 h-auto"
                 />
-              <h1 className="topbar-title text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-[gradientShift_3s_linear_infinite] bg-clip-text text-transparent" style={{color: 'transparent'}}>GestionGTG</h1>
+              <h1 className="topbar-title text-3xl font-bold" style={{background: 'linear-gradient(90deg, hsl(38,47%,50%), hsl(38,65%,72%), hsl(38,47%,50%))', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', animation: 'gradientShift 3s linear infinite'}}>GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}

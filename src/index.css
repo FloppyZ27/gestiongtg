@@ -4,151 +4,96 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-
-
 @layer base {
   :root {
-    --background: 220 13% 13%;
-    --foreground: 210 14% 95%;
-    --card: 220 24% 11%;
-    --card-foreground: 210 14% 95%;
-    --popover: 220 24% 11%;
-    --popover-foreground: 210 14% 95%;
-    --primary: 207 85% 55%;
-    --primary-foreground: 210 17% 9.8%;
-    --secondary: 200 60% 50%;
-    --secondary-foreground: 210 17% 9.8%;
-    --muted: 210 12% 28%;
-    --muted-foreground: 210 8% 62%;
-    --accent: 172 76% 48%;
-    --accent-foreground: 210 17% 9.8%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 17% 9.8%;
-    --border: 210 10% 19%;
-    --input: 210 14% 18%;
-    --ring: 207 85% 55%;
-    --chart-1: 207 85% 55%;
-    --chart-2: 200 60% 50%;
-    --chart-3: 172 76% 48%;
-    --chart-4: 30 85% 60%;
-    --chart-5: 290 70% 58%;
-    --radius: 0.625rem;
-    --sidebar-background: 222 30% 9%;
-    --sidebar-foreground: 210 14% 95%;
-    --sidebar-primary: 207 85% 55%;
-    --sidebar-primary-foreground: 222 28% 7%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 14% 95%;
-    --sidebar-border: 220 18% 16%;
-    --sidebar-ring: 207 85% 55%;
+    /* Backgrounds */
+    --background: 240 5% 6%;        /* #0B0B0C */
+    --foreground: 0 0% 96%;         /* #F5F5F5 */
+    --card: 240 4% 11%;             /* #1C1C1F */
+    --card-foreground: 0 0% 96%;
+    --popover: 240 4% 8%;           /* #141416 */
+    --popover-foreground: 0 0% 96%;
+
+    /* Primary — rouge vin */
+    --primary: 352 82% 24%;         /* #6E0F1A */
+    --primary-foreground: 0 0% 96%;
+
+    /* Secondary — sombre */
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 0 0% 73%;
+
+    /* Muted */
+    --muted: 240 4% 18%;
+    --muted-foreground: 0 0% 43%;   /* #6E6E6E */
+
+    /* Accent — or premium */
+    --accent: 38 47% 57%;           /* #C6A75E */
+    --accent-foreground: 240 5% 6%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 96%;
+
+    /* Borders & inputs */
+    --border: 240 4% 17%;           /* #2A2A2E */
+    --input: 240 4% 14%;
+    --ring: 352 82% 24%;            /* rouge vin */
+
+    /* Charts */
+    --chart-1: 352 82% 24%;
+    --chart-2: 38 47% 57%;
+    --chart-3: 352 60% 40%;
+    --chart-4: 38 60% 45%;
+    --chart-5: 352 40% 55%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar — noir profond */
+    --sidebar-background: 240 5% 5%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 352 82% 24%;
+    --sidebar-primary-foreground: 0 0% 96%;
+    --sidebar-accent: 240 4% 12%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 4% 14%;
+    --sidebar-ring: 352 82% 24%;
   }
+
   .dark {
-    --background: 220 13% 13%;
-    --foreground: 210 14% 95%;
-    --card: 220 24% 11%;
-    --card-foreground: 210 14% 95%;
-    --popover: 220 24% 11%;
-    --popover-foreground: 210 14% 95%;
-    --primary: 207 85% 55%;
-    --primary-foreground: 210 17% 9.8%;
-    --secondary: 200 60% 50%;
-    --secondary-foreground: 210 17% 9.8%;
-    --muted: 210 12% 28%;
-    --muted-foreground: 210 8% 62%;
-    --accent: 172 76% 48%;
-    --accent-foreground: 210 17% 9.8%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 17% 9.8%;
-    --border: 210 10% 19%;
-    --input: 210 14% 18%;
-    --ring: 207 85% 55%;
-    --chart-1: 207 85% 55%;
-    --chart-2: 200 60% 50%;
-    --chart-3: 172 76% 48%;
-    --chart-4: 30 85% 60%;
-    --chart-5: 290 70% 58%;
-    --sidebar-background: 222 30% 9%;
-    --sidebar-foreground: 210 14% 95%;
-    --sidebar-primary: 207 85% 55%;
-    --sidebar-primary-foreground: 222 28% 7%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 14% 95%;
-    --sidebar-border: 220 18% 16%;
-    --sidebar-ring: 207 85% 55%;
+    --background: 240 5% 6%;
+    --foreground: 0 0% 96%;
+    --card: 240 4% 11%;
+    --card-foreground: 0 0% 96%;
+    --popover: 240 4% 8%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 352 82% 24%;
+    --primary-foreground: 0 0% 96%;
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 0 0% 73%;
+    --muted: 240 4% 18%;
+    --muted-foreground: 0 0% 43%;
+    --accent: 38 47% 57%;
+    --accent-foreground: 240 5% 6%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 240 4% 17%;
+    --input: 240 4% 14%;
+    --ring: 352 82% 24%;
+    --chart-1: 352 82% 24%;
+    --chart-2: 38 47% 57%;
+    --chart-3: 352 60% 40%;
+    --chart-4: 38 60% 45%;
+    --chart-5: 352 40% 55%;
+    --sidebar-background: 240 5% 5%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 352 82% 24%;
+    --sidebar-primary-foreground: 0 0% 96%;
+    --sidebar-accent: 240 4% 12%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 4% 14%;
+    --sidebar-ring: 352 82% 24%;
   }
 }
-
-
 
 @layer base {
   * {
@@ -159,21 +104,249 @@ button:focus-visible {
   }
 }
 
-/* Scrollbar personnalisée globale */
+/* ─── Global font ─── */
+* {
+  font-family: 'Poppins', sans-serif !important;
+}
+code, pre {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* ─── Page titles ─── */
+h1:not(.topbar-title) {
+  color: hsl(38, 47%, 57%) !important; /* or premium */
+}
+
+/* ─── Scrollbars fines — thumb rouge vin ─── */
 *::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
-
 *::-webkit-scrollbar-track {
   background: transparent;
 }
-
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
+  background: linear-gradient(to bottom, hsl(352, 82%, 30%), hsl(352, 60%, 22%));
   border-radius: 10px;
 }
-
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+  background: linear-gradient(to bottom, hsl(352, 82%, 40%), hsl(352, 60%, 30%));
+}
+*::-webkit-scrollbar-button {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* ─── Dialog overlay ─── */
+[data-state="open"] > div[data-radix-dialog-overlay],
+div[data-radix-dialog-overlay],
+[data-radix-dialog-overlay] {
+  background-color: rgba(11, 11, 12, 0.65) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  opacity: 1 !important;
+}
+
+/* ─── Dialog glassmorphique luxe ─── */
+[role="dialog"] {
+  background: hsl(240, 4%, 9%, 0.97) !important;
+  border: 1px solid hsl(240, 4%, 17%) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(198, 167, 94, 0.08) !important;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 14px !important;
+}
+
+[role="dialog"] h2,
+[role="dialog"] [class*="DialogTitle"],
+.DialogTitle {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* ─── Cards / surfaces ─── */
+.bg-slate-900, .bg-slate-800, .bg-slate-950 {
+  background: hsl(240, 4%, 11%) !important;
+  border: 1px solid hsl(240, 4%, 17%) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35) !important;
+}
+
+/* ─── Inputs ─── */
+input, textarea, select {
+  background-color: hsl(240, 4%, 12%, 0.8) !important;
+  border: 1px solid hsl(240, 4%, 17%) !important;
+  transition: all 0.2s ease !important;
+  border-radius: 10px !important;
+}
+input:hover, textarea:hover, select:hover {
+  background-color: hsl(240, 4%, 14%, 0.9) !important;
+  border-color: hsl(352, 40%, 30%) !important;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  background-color: hsl(240, 4%, 14%) !important;
+  border-color: hsl(352, 82%, 35%) !important;
+  box-shadow: 0 0 0 3px rgba(110, 15, 26, 0.18) !important;
+}
+
+/* ─── Select triggers ─── */
+button[role="combobox"],
+button[aria-haspopup="listbox"],
+button[data-radix-select-trigger],
+[data-radix-select-trigger] {
+  background-color: hsl(240, 4%, 12%) !important;
+  background-image: none !important;
+  border-radius: 10px !important;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3) !important;
+}
+button[role="combobox"]:hover,
+button[aria-haspopup="listbox"]:hover,
+[data-radix-select-trigger]:hover {
+  background-color: hsl(240, 4%, 14%) !important;
+  border-color: hsl(352, 60%, 30%) !important;
+}
+
+/* ─── Dropdown menus & select content ─── */
+[role="listbox"],
+[role="menu"],
+[data-radix-select-content],
+[data-radix-popper-content-wrapper] > div {
+  background-color: hsl(240, 4%, 10%) !important;
+  border: 1px solid hsl(240, 4%, 17%) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+
+[data-radix-dropdown-menu-content] [role="menuitem"]:hover,
+[data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
+[data-radix-dropdown-menu-content] [role="menuitemradio"]:hover,
+[data-radix-select-content] [role="option"]:hover,
+[data-radix-select-content] [role="option"]:focus,
+[data-radix-select-content] [role="option"][data-highlighted] {
+  background-color: rgba(110, 15, 26, 0.18) !important;
+  color: white !important;
+}
+
+/* ─── Borders générales ─── */
+.border-slate-700, .border-slate-800 {
+  border: 1px solid hsl(240, 4%, 17%) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+/* ─── Boutons généraux ─── */
+button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
+[role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
+  background: rgba(110, 15, 26, 0.1) !important;
+  border: 1px solid rgba(110, 15, 26, 0.25) !important;
+  color: hsl(0, 0%, 88%);
+  border-radius: 10px;
+  transition: all 0.2s ease !important;
+  padding: 0.5rem 1rem;
+}
+
+button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):hover,
+[role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):hover {
+  background: rgba(110, 15, 26, 0.22) !important;
+  border-color: rgba(110, 15, 26, 0.45) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(110, 15, 26, 0.25) !important;
+}
+
+button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):active {
+  transform: translateY(0px);
+  background: rgba(79, 10, 18, 0.25) !important;
+  box-shadow: none !important;
+}
+
+/* ─── Boutons ghost (tables, icônes) ─── */
+button[class*="size-icon"],
+button.h-10.w-10,
+button.h-9.w-9,
+button.h-8.w-8,
+table button,
+[role="row"] button,
+[role="cell"] button,
+td button,
+th button,
+.text-right button,
+button[data-variant="ghost"],
+button[class*="ghost"],
+button[class*="variant-ghost"],
+button[class*="border-b-"],
+.border-b button {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+/* ─── Tabs ─── */
+button[role="tab"],
+[role="tab"] {
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+}
+
+button[role="tab"]:hover,
+[role="tab"]:hover {
+  background: rgba(110, 15, 26, 0.15) !important;
+  color: hsl(38, 47%, 65%) !important;
+}
+
+button[role="tab"][data-state="active"],
+[role="tab"][data-state="active"] {
+  background: rgba(110, 15, 26, 0.2) !important;
+  color: hsl(38, 47%, 65%) !important;
+  border-bottom: 2px solid hsl(38, 47%, 57%) !important; /* or */
+}
+
+/* ─── Navbar topbar ─── */
+header {
+  background: hsl(240, 5%, 5%, 0.97) !important;
+  border-bottom: 1px solid hsl(240, 4%, 14%) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4) !important;
+}
+
+/* ─── Sidebar nav items actifs ─── */
+[class*="SidebarMenuButton"] {
+  border-radius: 10px !important;
+}
+
+/* ─── Gradient topbar title ─── */
+.topbar-title {
+  background: linear-gradient(90deg, hsl(38, 47%, 57%), hsl(38, 60%, 70%), hsl(38, 47%, 57%)) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* ─── Boutons Punch In/Out (inline styles — override via CSS var) ─── */
+/* Pas touché : ils utilisent style= inline */
+
+/* ─── Timesheet tab buttons ─── */
+button.timesheet-tab-button {
+  background: hsl(352, 82%, 28%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+button.timesheet-tab-button[data-state="inactive"] {
+  background: hsl(240, 4%, 22%) !important;
+  color: hsl(0, 0%, 65%) !important;
+}
+button.timesheet-tab-button:hover {
+  background: hsl(352, 82%, 36%) !important;
+}
+
+/* ─── Sidebar nav item active highlight rouge vin ─── */
+a.flex.items-center.gap-3 {
+  border-radius: 10px !important;
 }
