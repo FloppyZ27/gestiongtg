@@ -25,40 +25,24 @@ export default function CommunicationClients() {
   const priseMandatRef = useRef();
   const retoursAppelRef = useRef();
 
-  const { data: employes = [] } = useQuery({
-    queryKey: ['employes'],
-    queryFn: () => base44.entities.Employe.list(),
-    initialData: [],
-  });
-
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  // Appliquer les filtres par défaut selon le profil de l'utilisateur connecté
+  // Appliquer les filtres par défaut depuis user.place_affaire et user.equipe
   React.useEffect(() => {
-    if (!user || employes.length === 0 || defaultsApplied) return;
+    if (!user || defaultsApplied) return;
 
-    const employe = employes.find(e => e.compte_utilisateur === user.email);
-    if (!employe) { setDefaultsApplied(true); return; }
+    const place = user.place_affaire;
+    const equipe = user.equipe;
 
-    // Place d'affaire
-    if (employe.place_affaire === "Alma") setFilterPlaceAffaire("Alma");
-    else if (employe.place_affaire === "Saguenay") setFilterPlaceAffaire("Saguenay");
-
-    // Équipe (basé sur le prénom de l'arpenteur)
-    const EQUIPE_MAP = {
-      "Samuel Guay": "Samuel",
-      "Pierre-Luc Pilote": "Pierre-Luc",
-      "Dany Gaboury": "Dany",
-    };
-    // Chercher si l'employé est lui-même arpenteur
-    const equipe = EQUIPE_MAP[`${employe.prenom} ${employe.nom}`];
-    if (equipe) setFilterEquipe(equipe);
+    if (place === "Alma" || place === "Saguenay") setFilterPlaceAffaire(place);
+    const validEquipes = ["Samuel", "Pierre-Luc", "Dany"];
+    if (equipe && validEquipes.includes(equipe)) setFilterEquipe(equipe);
 
     setDefaultsApplied(true);
-  }, [user, employes, defaultsApplied]);
+  }, [user, defaultsApplied]);
 
   const { data: retoursAppels = [] } = useQuery({
     queryKey: ['retoursAppels'],
