@@ -144,7 +144,7 @@ export default function CommunicationClients() {
             }`}
           >
             {e.label}
-            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full pointer-events-none ${
               filterEquipe === e.value ? "bg-red-500/30 text-orange-300" : "bg-slate-700 text-slate-400"
             }`}>{counts[e.value] ?? 0}</span>
           </button>
