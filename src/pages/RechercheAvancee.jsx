@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, X, FolderOpen, User, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, X, FolderOpen, User, MapPin, Building2, CalendarDays, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -32,25 +32,28 @@ const getMandatColor = (typeMandat) => {
 };
 
 const EMPTY_FILTERS = {
+  // Dossier
   numeroDossier: "",
   nom: "",
   prenom: "",
-  rue: "",
-  ville: "",
-  codePostal: "",
-  lot: "",
-  minute: "",
+  notaire: "",
+  courtier: "",
   arpenteur: "",
   typeMandat: "",
   tacheActuelle: "",
   statut: "",
   placeAffaire: "",
+  lot: "",
+  minute: "",
+  // Adresse
+  numeroCivique: "",
+  rue: "",
+  ville: "",
+  // Dates
   dateOuvertureDebut: "",
   dateOuvertureFin: "",
   dateTerrainDebut: "",
   dateTerrainFin: "",
-  notaire: "",
-  courtier: "",
 };
 
 export default function RechercheAvancee() {
@@ -94,6 +97,7 @@ export default function RechercheAvancee() {
       const allAdresses = mandats.map(m => getAdresse(m)).join(' ').toLowerCase();
       const allVilles = mandats.map(m => m.adresse_travaux?.ville || '').join(' ').toLowerCase();
       const allRues = mandats.map(m => m.adresse_travaux?.rue || '').join(' ').toLowerCase();
+      const allNumerosCiviques = mandats.flatMap(m => m.adresse_travaux?.numeros_civiques || []).join(' ').toLowerCase();
       const allLots = mandats.flatMap(m => m.lots || []).join(' ').toLowerCase();
       const allMinutes = mandats.flatMap(m => [m.minute, ...(m.minutes_list || []).map(ml => ml.minute)]).filter(Boolean).join(' ').toLowerCase();
       const allDatesTerrains = mandats.flatMap(m => [m.date_terrain, ...(m.terrains_list || []).map(t => t.date_cedulee || t.date_rendez_vous)]).filter(Boolean);
@@ -103,12 +107,9 @@ export default function RechercheAvancee() {
       if (f.numeroDossier && !dossier.numero_dossier?.toLowerCase().includes(f.numeroDossier.toLowerCase())) return false;
       if (f.nom && !allNoms.includes(f.nom.toLowerCase())) return false;
       if (f.prenom && !allPrenoms.includes(f.prenom.toLowerCase())) return false;
+      if (f.numeroCivique && !allNumerosCiviques.includes(f.numeroCivique.toLowerCase())) return false;
       if (f.rue && !allRues.includes(f.rue.toLowerCase())) return false;
       if (f.ville && !allVilles.includes(f.ville.toLowerCase())) return false;
-      if (f.codePostal) {
-        const cp = mandats.some(m => m.adresse_travaux?.code_postal?.toLowerCase().includes(f.codePostal.toLowerCase()));
-        if (!cp) return false;
-      }
       if (f.lot && !allLots.includes(f.lot.toLowerCase())) return false;
       if (f.minute && !allMinutes.includes(f.minute.toLowerCase())) return false;
       if (f.arpenteur && f.arpenteur !== "all" && dossier.arpenteur_geometre !== f.arpenteur) return false;
@@ -150,47 +151,22 @@ export default function RechercheAvancee() {
         </div>
 
         {/* Filtres */}
-        <div className="bg-card border border-border rounded-xl p-5 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="bg-card border border-border rounded-xl p-5 mb-6 space-y-5">
 
-            {/* Numéro dossier */}
+          {/* Groupe Dossier */}
+          <FilterGroup icon={<FileText className="w-4 h-4" />} label="Dossier">
             <FilterField label="Numéro de dossier" value={filters.numeroDossier} onChange={v => setFilter('numeroDossier', v)} onClear={() => clearFilter('numeroDossier')} placeholder="ex: 1234" />
-
-            {/* Nom client */}
             <FilterField label="Nom" value={filters.nom} onChange={v => setFilter('nom', v)} onClear={() => clearFilter('nom')} placeholder="ex: Tremblay" />
-
-            {/* Prénom client */}
             <FilterField label="Prénom" value={filters.prenom} onChange={v => setFilter('prenom', v)} onClear={() => clearFilter('prenom')} placeholder="ex: Jean" />
-
-            {/* Rue */}
-            <FilterField label="Rue" value={filters.rue} onChange={v => setFilter('rue', v)} onClear={() => clearFilter('rue')} placeholder="ex: Boulevard des Cascades" />
-
-            {/* Ville */}
-            <FilterField label="Ville" value={filters.ville} onChange={v => setFilter('ville', v)} onClear={() => clearFilter('ville')} placeholder="ex: Alma" />
-
-            {/* Code postal */}
-            <FilterField label="Code postal" value={filters.codePostal} onChange={v => setFilter('codePostal', v)} onClear={() => clearFilter('codePostal')} placeholder="ex: G8B" />
-
-            {/* Lot */}
-            <FilterField label="Numéro de lot" value={filters.lot} onChange={v => setFilter('lot', v)} onClear={() => clearFilter('lot')} placeholder="ex: 1234567" />
-
-            {/* Minute */}
-            <FilterField label="Numéro de minute" value={filters.minute} onChange={v => setFilter('minute', v)} onClear={() => clearFilter('minute')} placeholder="ex: 12345" />
-
-            {/* Notaire */}
             <FilterField label="Notaire" value={filters.notaire} onChange={v => setFilter('notaire', v)} onClear={() => clearFilter('notaire')} placeholder="ex: Gagnon" />
-
-            {/* Courtier */}
             <FilterField label="Courtier immobilier" value={filters.courtier} onChange={v => setFilter('courtier', v)} onClear={() => clearFilter('courtier')} placeholder="ex: Bouchard" />
-
-            {/* Arpenteur */}
+            <FilterField label="Numéro de lot" value={filters.lot} onChange={v => setFilter('lot', v)} onClear={() => clearFilter('lot')} placeholder="ex: 1234567" />
+            <FilterField label="Numéro de minute" value={filters.minute} onChange={v => setFilter('minute', v)} onClear={() => clearFilter('minute')} placeholder="ex: 12345" />
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Arpenteur-géomètre</Label>
               <div className="relative">
                 <Select value={filters.arpenteur} onValueChange={v => setFilter('arpenteur', v)}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Tous" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous</SelectItem>
                     {ARPENTEURS.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
@@ -199,15 +175,11 @@ export default function RechercheAvancee() {
                 {filters.arpenteur && filters.arpenteur !== "all" && <ClearBtn onClick={() => clearFilter('arpenteur')} />}
               </div>
             </div>
-
-            {/* Type mandat */}
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Type de mandat</Label>
               <div className="relative">
                 <Select value={filters.typeMandat} onValueChange={v => setFilter('typeMandat', v)}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Tous" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous</SelectItem>
                     {TYPES_MANDATS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -216,15 +188,11 @@ export default function RechercheAvancee() {
                 {filters.typeMandat && filters.typeMandat !== "all" && <ClearBtn onClick={() => clearFilter('typeMandat')} />}
               </div>
             </div>
-
-            {/* Tâche actuelle */}
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Tâche actuelle</Label>
               <div className="relative">
                 <Select value={filters.tacheActuelle} onValueChange={v => setFilter('tacheActuelle', v)}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Toutes" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Toutes" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes</SelectItem>
                     {TACHES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -233,15 +201,11 @@ export default function RechercheAvancee() {
                 {filters.tacheActuelle && filters.tacheActuelle !== "all" && <ClearBtn onClick={() => clearFilter('tacheActuelle')} />}
               </div>
             </div>
-
-            {/* Statut */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs text-muted-foreground">Statut du dossier</Label>
+              <Label className="text-xs text-muted-foreground">Statut</Label>
               <div className="relative">
                 <Select value={filters.statut} onValueChange={v => setFilter('statut', v)}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Tous" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous</SelectItem>
                     {STATUTS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -250,15 +214,11 @@ export default function RechercheAvancee() {
                 {filters.statut && filters.statut !== "all" && <ClearBtn onClick={() => clearFilter('statut')} />}
               </div>
             </div>
-
-            {/* Place d'affaire */}
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Place d'affaire</Label>
               <div className="relative">
                 <Select value={filters.placeAffaire} onValueChange={v => setFilter('placeAffaire', v)}>
-                  <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Toutes" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Toutes" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes</SelectItem>
                     {PLACES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
@@ -267,19 +227,22 @@ export default function RechercheAvancee() {
                 {filters.placeAffaire && filters.placeAffaire !== "all" && <ClearBtn onClick={() => clearFilter('placeAffaire')} />}
               </div>
             </div>
+          </FilterGroup>
 
-            {/* Date ouverture début */}
-            <FilterField label="Date ouverture (début)" value={filters.dateOuvertureDebut} onChange={v => setFilter('dateOuvertureDebut', v)} onClear={() => clearFilter('dateOuvertureDebut')} type="date" />
+          {/* Groupe Adresse */}
+          <FilterGroup icon={<MapPin className="w-4 h-4" />} label="Adresse des travaux">
+            <FilterField label="Numéro civique" value={filters.numeroCivique} onChange={v => setFilter('numeroCivique', v)} onClear={() => clearFilter('numeroCivique')} placeholder="ex: 255" />
+            <FilterField label="Rue" value={filters.rue} onChange={v => setFilter('rue', v)} onClear={() => clearFilter('rue')} placeholder="ex: Boulevard des Cascades" />
+            <FilterField label="Ville" value={filters.ville} onChange={v => setFilter('ville', v)} onClear={() => clearFilter('ville')} placeholder="ex: Alma" />
+          </FilterGroup>
 
-            {/* Date ouverture fin */}
-            <FilterField label="Date ouverture (fin)" value={filters.dateOuvertureFin} onChange={v => setFilter('dateOuvertureFin', v)} onClear={() => clearFilter('dateOuvertureFin')} type="date" />
-
-            {/* Date terrain début */}
-            <FilterField label="Date terrain (début)" value={filters.dateTerrainDebut} onChange={v => setFilter('dateTerrainDebut', v)} onClear={() => clearFilter('dateTerrainDebut')} type="date" />
-
-            {/* Date terrain fin */}
-            <FilterField label="Date terrain (fin)" value={filters.dateTerrainFin} onChange={v => setFilter('dateTerrainFin', v)} onClear={() => clearFilter('dateTerrainFin')} type="date" />
-          </div>
+          {/* Groupe Dates */}
+          <FilterGroup icon={<CalendarDays className="w-4 h-4" />} label="Dates">
+            <FilterField label="Ouverture — du" value={filters.dateOuvertureDebut} onChange={v => setFilter('dateOuvertureDebut', v)} onClear={() => clearFilter('dateOuvertureDebut')} type="date" />
+            <FilterField label="Ouverture — au" value={filters.dateOuvertureFin} onChange={v => setFilter('dateOuvertureFin', v)} onClear={() => clearFilter('dateOuvertureFin')} type="date" />
+            <FilterField label="Terrain — du" value={filters.dateTerrainDebut} onChange={v => setFilter('dateTerrainDebut', v)} onClear={() => clearFilter('dateTerrainDebut')} type="date" />
+            <FilterField label="Terrain — au" value={filters.dateTerrainFin} onChange={v => setFilter('dateTerrainFin', v)} onClear={() => clearFilter('dateTerrainFin')} type="date" />
+          </FilterGroup>
 
           {/* Actions */}
           <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
@@ -429,6 +392,21 @@ function FilterField({ label, value, onChange, onClear, placeholder, type = "tex
             <X className="w-3.5 h-3.5" />
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function FilterGroup({ icon, label, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-primary">{icon}</span>
+        <span className="text-xs font-semibold text-primary uppercase tracking-wider">{label}</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {children}
       </div>
     </div>
   );
