@@ -1120,12 +1120,12 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
 
               <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <CollapsibleContent>
-                  <div className="p-2 border border-emerald-500/30 rounded-lg">
+                  <div className="p-2 border border-red-500/30 rounded-lg">
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                      <div className="flex items-center justify-between pb-2 border-b border-red-500/30">
                         <div className="flex items-center gap-2">
-                          <Filter className="w-3 h-3 text-emerald-500" />
-                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                          <Filter className="w-3 h-3 text-red-500" />
+                          <h4 className="text-xs font-semibold text-red-500">Filtrer</h4>
                         </div>
                         {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterDateStart || filterDateEnd) && (
                           <Button
@@ -1137,7 +1137,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                               setFilterDateStart("");
                               setFilterDateEnd("");
                             }}
-                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                            className="h-6 text-xs text-red-500 hover:text-red-400 px-2"
                           >
                             <X className="w-2.5 h-2.5 mr-1" />
                             Réinitialiser
@@ -1148,11 +1148,11 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                       <div className="grid grid-cols-2 gap-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                            <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                               <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
-                          </DropdownMenuTrigger>
+                            </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
                             {ARPENTEURS.map((arp) => (
                               <DropdownMenuCheckboxItem
@@ -1175,11 +1175,11 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                            <Button variant="outline" className="w-full border-red-500/30 text-red-500 justify-between h-8 text-xs px-2">
                               <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
-                          </DropdownMenuTrigger>
+                            </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
                             {users.map((user) => (
                               <DropdownMenuCheckboxItem
@@ -1201,23 +1201,23 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                         </DropdownMenu>
                       </div>
 
-                      <div className="space-y-1 pt-1 border-t border-emerald-500/30">
-                        <Label className="text-xs text-emerald-500">Période</Label>
+                      <div className="space-y-1 pt-1 border-t border-red-500/30">
+                        <Label className="text-xs text-red-500">Période</Label>
                         <div className="flex items-center gap-1.5">
                           <Input
                             type="date"
                             value={filterDateStart}
                             onChange={(e) => setFilterDateStart(e.target.value)}
                             placeholder="Du"
-                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
-                          />
-                          <span className="text-emerald-500 text-xs">→</span>
-                          <Input
+                            className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent"
+                            />
+                            <span className="text-red-500 text-xs">→</span>
+                            <Input
                             type="date"
                             value={filterDateEnd}
                             onChange={(e) => setFilterDateEnd(e.target.value)}
                             placeholder="Au"
-                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
+                            className="flex-1 text-red-500 h-8 text-xs px-2 border-none bg-transparent"
                           />
                         </div>
                       </div>
