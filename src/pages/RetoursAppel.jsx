@@ -58,7 +58,7 @@ const formatPhoneNumber = (phone) => {
   return phone;
 };
 
-const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => {
+const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterArpenteurExternal = [] }, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
       setEditingRetourAppel(null);
@@ -563,8 +563,9 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous" }, ref) => 
         phoneNumber.toLowerCase().includes(word)
       );
       
-      const matchesArpenteur = filterArpenteurs.length === 0 || 
-        (retour.dossier && filterArpenteurs.includes(retour.dossier.arpenteur_geometre));
+      const activeArpFilt = filterArpenteurExternal.length > 0 ? filterArpenteurExternal : filterArpenteurs;
+      const matchesArpenteur = activeArpFilt.length === 0 || 
+        (retour.dossier && activeArpFilt.includes(retour.dossier.arpenteur_geometre));
       
       const matchesUtilisateur = filterUtilisateurs.length === 0 || 
         filterUtilisateurs.includes(retour.utilisateur_assigne);

@@ -1,17 +1,21 @@
 import React, { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FilePlus, Phone, Plus, MessageCircle } from "lucide-react";
+import { FilePlus, Phone, Plus, MessageCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PlaceAffaireTabs from "@/components/dossiers/PlaceAffaireTabs";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import PriseDeMandat from "./PriseDeMandat";
 import RetoursAppel from "./RetoursAppel";
 
 export default function CommunicationClients() {
   const [activeTab, setActiveTab] = useState("prise-mandat");
   const [filterPlaceAffaire, setFilterPlaceAffaire] = useState("tous");
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
   const [activePriseMandatTab, setActivePriseMandatTab] = useState("nouveau");
+
+  const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
   const priseMandatRef = useRef();
   const retoursAppelRef = useRef();
 
@@ -122,11 +126,33 @@ export default function CommunicationClients() {
 
           <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
             <div className="flex items-center justify-between gap-6 mb-0">
-              <PlaceAffaireTabs
-                value={filterPlaceAffaire}
-                onChange={setFilterPlaceAffaire}
-                counts={placeAffaireCounts}
-              />
+              <div className="flex flex-col gap-2">
+                <PlaceAffaireTabs
+                  value={filterPlaceAffaire}
+                  onChange={setFilterPlaceAffaire}
+                  counts={placeAffaireCounts}
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 text-xs self-start">
+                      Arpenteur: {filterArpenteur.length === 0 ? "Tous" : filterArpenteur.length === 1 ? filterArpenteur[0] : `${filterArpenteur.length} sélectionnés`}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-52">
+                    {ARPENTEURS.map((arp) => (
+                      <DropdownMenuCheckboxItem
+                        key={arp}
+                        checked={filterArpenteur.includes(arp)}
+                        onCheckedChange={(checked) => setFilterArpenteur(checked ? [...filterArpenteur, arp] : filterArpenteur.filter(a => a !== arp))}
+                        className="text-white text-xs"
+                      >
+                        {arp}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <Button 
                 onClick={handleNewMandat}
                 size="lg"
@@ -136,16 +162,38 @@ export default function CommunicationClients() {
                 Nouveau mandat
               </Button>
             </div>
-            <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} onActiveTabChange={setActivePriseMandatTab} />
+            <PriseDeMandat ref={priseMandatRef} filterPlaceAffaire={filterPlaceAffaire} filterArpenteurExternal={filterArpenteur} onActiveTabChange={setActivePriseMandatTab} />
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-6">
             <div className="flex items-center justify-between gap-6 mb-3">
-              <PlaceAffaireTabs
-                value={filterPlaceAffaire}
-                onChange={setFilterPlaceAffaire}
-                counts={retourAppelCountsByPlace}
-              />
+              <div className="flex flex-col gap-2">
+                <PlaceAffaireTabs
+                  value={filterPlaceAffaire}
+                  onChange={setFilterPlaceAffaire}
+                  counts={retourAppelCountsByPlace}
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 text-xs self-start">
+                      Arpenteur: {filterArpenteur.length === 0 ? "Tous" : filterArpenteur.length === 1 ? filterArpenteur[0] : `${filterArpenteur.length} sélectionnés`}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-52">
+                    {ARPENTEURS.map((arp) => (
+                      <DropdownMenuCheckboxItem
+                        key={arp}
+                        checked={filterArpenteur.includes(arp)}
+                        onCheckedChange={(checked) => setFilterArpenteur(checked ? [...filterArpenteur, arp] : filterArpenteur.filter(a => a !== arp))}
+                        className="text-white text-xs"
+                      >
+                        {arp}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <Button 
                 onClick={handleNewRetourAppel}
                 size="lg"
@@ -155,7 +203,7 @@ export default function CommunicationClients() {
                 Nouveau retour d'appel
               </Button>
             </div>
-            <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} />
+            <RetoursAppel ref={retoursAppelRef} filterPlaceAffaire={filterPlaceAffaire} filterArpenteurExternal={filterArpenteur} />
           </TabsContent>
         </Tabs>
       </div>

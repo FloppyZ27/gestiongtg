@@ -103,7 +103,7 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
-const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveTabChange }, ref) => {
+const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterArpenteurExternal = [], onActiveTabChange }, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
       resetFullForm();
@@ -1298,7 +1298,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
         pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
       );
 
-      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre);
+      const matchesArpenteur = (filterArpenteurExternal.length > 0 ? filterArpenteurExternal : filterArpenteur).length === 0 || (filterArpenteurExternal.length > 0 ? filterArpenteurExternal : filterArpenteur).includes(pm.arpenteur_geometre);
       const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
       const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
       const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
