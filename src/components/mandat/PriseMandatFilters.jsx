@@ -172,8 +172,7 @@ export default function PriseMandatFilters({
         </div>
 
         <div className="space-y-1 pt-1 border-t border-red-500/30">
-          <Label className="text-xs text-red-500">Période</Label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-end gap-2">
             <div className="flex-1 flex flex-col gap-1">
               <Label className="text-xs text-red-500">Du</Label>
               <Input
@@ -184,7 +183,7 @@ export default function PriseMandatFilters({
                 className="w-full border-red-500/30 text-red-500 h-8 text-xs px-2"
               />
             </div>
-            <span className="text-red-500 text-xs mt-6">→</span>
+            <span className="text-red-500 text-xs mb-2">→</span>
             <div className="flex-1 flex flex-col gap-1">
               <Label className="text-xs text-red-500">Au</Label>
               <Input
