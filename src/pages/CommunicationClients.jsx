@@ -164,15 +164,13 @@ export default function CommunicationClients() {
           align-items: center;
           gap: 6px;
           cursor: pointer;
-          transition: background 0.2s ease, box-shadow 0.2s ease;
+          transition: background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease;
           box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-          transform: none !important;
         }
         .btn-nouveau-mandat:hover {
-          background: #dc2626 !important;
-          background-image: none !important;
-          box-shadow: 0 6px 20px rgba(220,38,38,0.5) !important;
-          transform: translateY(-1px) !important;
+          background: transparent !important;
+          background-image: linear-gradient(135deg, #8B0000, #CC5500) !important;
+          box-shadow: 0 6px 22px rgba(139,0,0,0.55) !important;
         }
         .btn-nouveau-retour {
           background: #3b82f6 !important;
@@ -188,15 +186,13 @@ export default function CommunicationClients() {
           align-items: center;
           gap: 6px;
           cursor: pointer;
-          transition: background 0.2s ease, box-shadow 0.2s ease;
+          transition: background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease;
           box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-          transform: none !important;
         }
         .btn-nouveau-retour:hover {
-          background: #dc2626 !important;
-          background-image: none !important;
-          box-shadow: 0 6px 20px rgba(220,38,38,0.5) !important;
-          transform: translateY(-1px) !important;
+          background: transparent !important;
+          background-image: linear-gradient(135deg, #8B0000, #CC5500) !important;
+          box-shadow: 0 6px 22px rgba(139,0,0,0.55) !important;
         }
       `}</style>
       <div className="w-full">
