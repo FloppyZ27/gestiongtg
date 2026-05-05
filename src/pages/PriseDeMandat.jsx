@@ -3890,8 +3890,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                >
                  <FileQuestion className="w-4 h-4" />
                  Nouveau mandat / Demande d'informations
-                 <Badge className={`ml-1 ${activeListTab === "nouveau" ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
+                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "nouveau" ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {applyFilters(priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information")).length}
                  </Badge>
                </button>
                <button
@@ -3905,8 +3905,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                >
                  <FolderOpen className="w-4 h-4" />
                  Mandat à ouvrir
-                 <Badge className={`ml-1 ${activeListTab === "ouvrir" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
+                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "ouvrir" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {applyFilters(priseMandats.filter(pm => pm.statut === "Mandats à ouvrir")).length}
                  </Badge>
                </button>
                <button
@@ -3920,8 +3920,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                >
                  <XCircle className="w-4 h-4" />
                  Mandat non-octroyé
-                 <Badge className={`ml-1 ${activeListTab === "non-octroye" ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
+                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "non-octroye" ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
+                   {applyFilters(priseMandats.filter(pm => pm.statut === "Mandat non octroyé")).length}
                  </Badge>
                </button>
               </div>
