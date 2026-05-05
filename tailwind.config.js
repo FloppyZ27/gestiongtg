@@ -21,6 +21,8 @@ module.exports = {
       'bg-indigo-500/20', 'text-indigo-400', 'border-indigo-500/30',
       'bg-teal-500/20', 'text-teal-400', 'border-teal-500/30',
       'bg-purple-500/20', 'text-purple-400', 'border-purple-500/30',
+      // Gray backgrounds
+      'bg-gray-800/40', 'bg-slate-800/40',
     ],
   theme: {
   	extend: {
