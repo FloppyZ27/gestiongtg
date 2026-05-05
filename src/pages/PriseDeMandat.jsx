@@ -3873,8 +3873,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
 
 
         {/* Table des prises de mandat */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800 pb-1 pt-0">
+        <div>
+          <div className="pb-1 pt-0">
             <div className="flex flex-col gap-2">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
@@ -4128,8 +4128,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                 </Collapsible>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
+          </div>
+          <div className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -4353,8 +4353,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", onActiveT
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </>
   );
