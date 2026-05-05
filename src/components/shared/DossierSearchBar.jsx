@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, User, Clock } from "lucide-react";
+import { Search, MapPin, User, Clock, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -60,6 +61,7 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   const getClientById = (id) => clients?.find(c => c.id === id);
   const getUserByEmail = (email) => users?.find(u => u.email === email);
@@ -163,6 +165,14 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
 
       {showResults && (
         <div className="absolute top-full mt-2 w-full min-w-[520px] bg-slate-900 border-2 border-emerald-500/30 rounded-lg shadow-2xl overflow-hidden z-50">
+          {/* Bouton recherche avancée */}
+          <button
+            onClick={() => { setShowResults(false); navigate('/RechercheAvancee'); }}
+            className="w-full px-3 py-2 flex items-center gap-2 text-primary hover:bg-primary/10 border-b border-slate-800 transition-colors"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="text-[12px] font-medium">Recherche avancée</span>
+          </button>
           {!searchTerm.trim() && (
             <div className="px-3 py-1.5 border-b border-slate-800 flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-slate-500" />

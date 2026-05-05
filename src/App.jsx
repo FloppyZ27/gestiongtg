@@ -16,6 +16,7 @@ const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
 import CompteInactif from './pages/CompteInactif';
+import RechercheAvancee from './pages/RechercheAvancee';
 
 setupIframeMessaging();
 
@@ -51,6 +52,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<LayoutWrapper currentPageName={mainPageKey}><MainPage /></LayoutWrapper>} />
       <Route path="/CompteInactif" element={<LayoutWrapper currentPageName="CompteInactif"><CompteInactif /></LayoutWrapper>} />
+      <Route path="/RechercheAvancee" element={<LayoutWrapper currentPageName="RechercheAvancee"><RechercheAvancee /></LayoutWrapper>} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route key={path} path={`/${path}`} element={<LayoutWrapper currentPageName={path}><Page /></LayoutWrapper>} />
       ))}
