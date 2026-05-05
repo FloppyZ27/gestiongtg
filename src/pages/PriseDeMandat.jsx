@@ -2312,7 +2312,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
   return (
     <>
-      <div className="w-full mt-[2px]">
+      <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
           </div>
