@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
@@ -1382,14 +1383,16 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                         </Select>
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleDelete(retour.id)} 
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
-                        >
-                          <Trash className="w-4 h-4" />
-                        </Button>
+                        <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} style={{ display: 'inline-flex' }}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDelete(retour.id)} 
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </motion.div>
                       </TableCell>
                     </TableRow>
                     );

@@ -6,6 +6,7 @@ import { Trash2, FolderOpen, ChevronUp, ChevronDown, ChevronsUpDown } from "luci
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
+import { motion } from "framer-motion";
 
 export default function PriseMandatTable({
   activeListTab,
@@ -252,23 +253,27 @@ export default function PriseMandatTable({
               <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-end gap-2">
                   {activeListTab === "ouvrir" && (
+                    <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenDossier(pm)}
+                        className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                      >
+                        <FolderOpen className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                  <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleOpenDossier(pm)}
-                      className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                      onClick={() => onDelete(pm.id)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     >
-                      <FolderOpen className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(pm.id)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  </motion.div>
                 </div>
               </TableCell>
             </TableRow>
