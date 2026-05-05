@@ -1239,7 +1239,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
         <Card className="bg-slate-900/50 backdrop-blur-xl shadow-xl border-0">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="bg-slate-800/40">
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     {[{key:'dossier',label:'Dossier'},{key:'clients',label:'Clients'},{key:null,label:'N° de téléphone'},{key:'utilisateur',label:'Utilisateur assigné'},{key:'date_appel',label:"Date de l'appel"},{key:null,label:'Raison'},{key:'statut',label:'Statut'}].map(col => (
