@@ -1038,7 +1038,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
 
         {/* Card avec filtres comme page Dossiers */}
         <Card className="bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2 border-0">
-          <CardHeader className="pb-2 px-0">
+          <CardHeader className="pb-2 px-0 bg-gray-800/40">
             <div className="flex flex-col gap-2">
               {/* Tabs pour les statuts */}
               <div className="flex w-full">
