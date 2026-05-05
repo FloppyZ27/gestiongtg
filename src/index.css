@@ -112,9 +112,13 @@ code, pre {
   font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* ─── Page titles (hors topbar) — orangé brûlé ─── */
+/* ─── Page titles — dégradé rouge → orangé brûlé ─── */
 h1:not(.topbar-title) {
-  color: hsl(22, 76%, 55%) !important;
+  background: linear-gradient(90deg, hsl(0, 68%, 55%), hsl(22, 76%, 60%)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
 }
 
 /* ─── Scrollbars fines — thumb rouge profond ─── */
