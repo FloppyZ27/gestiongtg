@@ -190,7 +190,7 @@ export default function CommunicationClients() {
                 e.currentTarget.style.setProperty('background-color', '#10b981', 'important');
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
               }}
-              style={{ background: '#10b981', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              style={{ background: '#10b981', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau mandat
@@ -209,7 +209,7 @@ export default function CommunicationClients() {
                 e.currentTarget.style.setProperty('background-color', '#3b82f6', 'important');
                 e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
               }}
-              style={{ background: '#3b82f6', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
+              style={{ background: '#3b82f6', backgroundImage: 'none', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
             >
               <Plus className="w-4 h-4" />
               Nouveau retour d'appel
