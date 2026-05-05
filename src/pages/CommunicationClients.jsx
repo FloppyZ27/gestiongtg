@@ -110,7 +110,7 @@ export default function CommunicationClients() {
                   <Phone className="w-4 h-4" />
                   Retours d'appel
                   {retourAppelCount > 0 && (
-                    <div className="ml-2 bg-red-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    <div className="ml-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                       {retourAppelCount}
                     </div>
                   )}
