@@ -155,16 +155,17 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
             </div>
           )}
           {filteredDossiers.length > 0 ? (
-            <div className="max-h-[420px] overflow-y-auto">
+            <div className="max-h-[480px] overflow-y-auto">
               {filteredDossiers.map((dossier) => {
                 const clientsNames = getClientsNames(dossier.clients_ids);
-                const adresse = dossier.mandats?.[0] ? getAdresse(dossier.mandats[0]) : (dossier.adresse_texte || "");
+                const mandats = (dossier.mandats || []).filter(m => m.type_mandat);
                 return (
                   <div
                     key={dossier.id}
                     onClick={() => handleDossierClick(dossier)}
                     className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
                   >
+                    {/* Ligne principale : numéro dossier + client + statut + date */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
@@ -175,18 +176,6 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
                             <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
                             {clientsNames}
                           </span>
-                        )}
-                        {dossier.mandats && dossier.mandats.length > 0 && (
-                          <div className="flex gap-1 flex-shrink-0">
-                            {dossier.mandats.slice(0, 3).map((mandat, idx) => mandat.type_mandat && (
-                              <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>
-                                {getAbbreviatedMandatType(mandat.type_mandat)}
-                              </Badge>
-                            ))}
-                            {dossier.mandats.length > 3 && (
-                              <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">+{dossier.mandats.length - 3}</Badge>
-                            )}
-                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -200,11 +189,41 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
                         </Badge>
                       </div>
                     </div>
-                    {adresse && (
+
+                    {/* Une ligne par mandat */}
+                    {mandats.length > 0 && (
+                      <div className="mt-1.5 space-y-1 pl-1">
+                        {mandats.map((mandat, idx) => {
+                          const adresse = getAdresse(mandat);
+                          return (
+                            <div key={idx} className="flex items-center gap-2 flex-wrap">
+                              <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0 flex-shrink-0`}>
+                                {getAbbreviatedMandatType(mandat.type_mandat)}
+                              </Badge>
+                              {mandat.tache_actuelle && (
+                                <span className="text-[10px] text-slate-400 flex items-center gap-1 flex-shrink-0">
+                                  <Clock className="w-2.5 h-2.5" />
+                                  {mandat.tache_actuelle}
+                                </span>
+                              )}
+                              {adresse && (
+                                <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
+                                  <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                                  {adresse}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Fallback adresse si pas de mandats */}
+                    {mandats.length === 0 && dossier.adresse_texte && (
                       <div className="mt-1">
                         <span className="text-[11px] text-slate-500 flex items-center gap-1 truncate">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          {adresse}
+                          {dossier.adresse_texte}
                         </span>
                       </div>
                     )}
