@@ -6,92 +6,92 @@
 
 @layer base {
   :root {
-    /* Backgrounds */
-    --background: 240 5% 6%;        /* #0B0B0C */
-    --foreground: 0 0% 96%;         /* #F5F5F5 */
-    --card: 240 4% 11%;             /* #1C1C1F */
-    --card-foreground: 0 0% 96%;
-    --popover: 240 4% 8%;           /* #141416 */
-    --popover-foreground: 0 0% 96%;
+    /* ─── Backgrounds chauds ─── */
+    --background: 0 14% 6%;          /* #0D0B0B */
+    --foreground: 0 11% 95%;         /* #F4EEEE */
+    --card: 0 17% 11%;               /* #221616 */
+    --card-foreground: 0 11% 95%;
+    --popover: 0 17% 8%;             /* #181212 */
+    --popover-foreground: 0 11% 95%;
 
-    /* Primary — rouge vin */
-    --primary: 352 82% 24%;         /* #6E0F1A */
-    --primary-foreground: 0 0% 96%;
+    /* ─── Primary — rouge profond ─── */
+    --primary: 0 68% 34%;            /* #8F1D1D */
+    --primary-foreground: 0 11% 95%;
 
-    /* Secondary — sombre */
-    --secondary: 240 4% 14%;
-    --secondary-foreground: 0 0% 73%;
+    /* ─── Secondary — brun sombre ─── */
+    --secondary: 0 17% 14%;
+    --secondary-foreground: 0 14% 77%; /* #C5AFAF */
 
-    /* Muted */
-    --muted: 240 4% 18%;
-    --muted-foreground: 0 0% 43%;   /* #6E6E6E */
+    /* ─── Muted ─── */
+    --muted: 0 14% 18%;
+    --muted-foreground: 0 14% 48%;   /* #7A5C5C */
 
-    /* Accent — or premium */
-    --accent: 38 47% 57%;           /* #C6A75E */
-    --accent-foreground: 240 5% 6%;
+    /* ─── Accent — orangé brûlé ─── */
+    --accent: 22 76% 44%;            /* #C75B1A */
+    --accent-foreground: 0 11% 95%;
 
-    /* Destructive */
+    /* ─── Destructive ─── */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 96%;
+    --destructive-foreground: 0 11% 95%;
 
-    /* Borders & inputs */
-    --border: 240 4% 17%;           /* #2A2A2E */
-    --input: 240 4% 14%;
-    --ring: 352 82% 24%;            /* rouge vin */
+    /* ─── Borders & inputs ─── */
+    --border: 0 23% 19%;             /* #3A2424 */
+    --input: 0 17% 14%;
+    --ring: 0 68% 34%;               /* rouge profond */
 
-    /* Charts */
-    --chart-1: 352 82% 24%;
-    --chart-2: 38 47% 57%;
-    --chart-3: 352 60% 40%;
-    --chart-4: 38 60% 45%;
-    --chart-5: 352 40% 55%;
+    /* ─── Charts ─── */
+    --chart-1: 0 68% 34%;
+    --chart-2: 22 76% 44%;
+    --chart-3: 0 55% 45%;
+    --chart-4: 22 60% 38%;
+    --chart-5: 0 40% 55%;
 
     --radius: 0.75rem;
 
-    /* Sidebar — noir profond */
-    --sidebar-background: 240 5% 5%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 352 82% 24%;
-    --sidebar-primary-foreground: 0 0% 96%;
-    --sidebar-accent: 240 4% 12%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 240 4% 14%;
-    --sidebar-ring: 352 82% 24%;
+    /* ─── Sidebar — noir chaud ─── */
+    --sidebar-background: 0 14% 5%;
+    --sidebar-foreground: 0 11% 95%;
+    --sidebar-primary: 0 68% 34%;
+    --sidebar-primary-foreground: 0 11% 95%;
+    --sidebar-accent: 0 17% 12%;
+    --sidebar-accent-foreground: 0 11% 95%;
+    --sidebar-border: 0 23% 14%;
+    --sidebar-ring: 0 68% 34%;
   }
 
   .dark {
-    --background: 240 5% 6%;
-    --foreground: 0 0% 96%;
-    --card: 240 4% 11%;
-    --card-foreground: 0 0% 96%;
-    --popover: 240 4% 8%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 352 82% 24%;
-    --primary-foreground: 0 0% 96%;
-    --secondary: 240 4% 14%;
-    --secondary-foreground: 0 0% 73%;
-    --muted: 240 4% 18%;
-    --muted-foreground: 0 0% 43%;
-    --accent: 38 47% 57%;
-    --accent-foreground: 240 5% 6%;
+    --background: 0 14% 6%;
+    --foreground: 0 11% 95%;
+    --card: 0 17% 11%;
+    --card-foreground: 0 11% 95%;
+    --popover: 0 17% 8%;
+    --popover-foreground: 0 11% 95%;
+    --primary: 0 68% 34%;
+    --primary-foreground: 0 11% 95%;
+    --secondary: 0 17% 14%;
+    --secondary-foreground: 0 14% 77%;
+    --muted: 0 14% 18%;
+    --muted-foreground: 0 14% 48%;
+    --accent: 22 76% 44%;
+    --accent-foreground: 0 11% 95%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 96%;
-    --border: 240 4% 17%;
-    --input: 240 4% 14%;
-    --ring: 352 82% 24%;
-    --chart-1: 352 82% 24%;
-    --chart-2: 38 47% 57%;
-    --chart-3: 352 60% 40%;
-    --chart-4: 38 60% 45%;
-    --chart-5: 352 40% 55%;
-    --sidebar-background: 240 5% 5%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 352 82% 24%;
-    --sidebar-primary-foreground: 0 0% 96%;
-    --sidebar-accent: 240 4% 12%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 240 4% 14%;
-    --sidebar-ring: 352 82% 24%;
+    --destructive-foreground: 0 11% 95%;
+    --border: 0 23% 19%;
+    --input: 0 17% 14%;
+    --ring: 0 68% 34%;
+    --chart-1: 0 68% 34%;
+    --chart-2: 22 76% 44%;
+    --chart-3: 0 55% 45%;
+    --chart-4: 22 60% 38%;
+    --chart-5: 0 40% 55%;
+    --sidebar-background: 0 14% 5%;
+    --sidebar-foreground: 0 11% 95%;
+    --sidebar-primary: 0 68% 34%;
+    --sidebar-primary-foreground: 0 11% 95%;
+    --sidebar-accent: 0 17% 12%;
+    --sidebar-accent-foreground: 0 11% 95%;
+    --sidebar-border: 0 23% 14%;
+    --sidebar-ring: 0 68% 34%;
   }
 }
 
@@ -112,12 +112,12 @@ code, pre {
   font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* ─── Page titles ─── */
+/* ─── Page titles (hors topbar) — orangé brûlé ─── */
 h1:not(.topbar-title) {
-  color: hsl(38, 47%, 57%) !important; /* or premium */
+  color: hsl(22, 76%, 55%) !important;
 }
 
-/* ─── Scrollbars fines — thumb rouge vin ─── */
+/* ─── Scrollbars fines — thumb rouge profond ─── */
 *::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -126,11 +126,11 @@ h1:not(.topbar-title) {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, hsl(352, 82%, 30%), hsl(352, 60%, 22%));
+  background: linear-gradient(to bottom, hsl(0, 68%, 38%), hsl(22, 76%, 30%));
   border-radius: 10px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, hsl(352, 82%, 40%), hsl(352, 60%, 30%));
+  background: linear-gradient(to bottom, hsl(0, 68%, 50%), hsl(22, 76%, 42%));
 }
 *::-webkit-scrollbar-button {
   display: none !important;
@@ -142,17 +142,17 @@ h1:not(.topbar-title) {
 [data-state="open"] > div[data-radix-dialog-overlay],
 div[data-radix-dialog-overlay],
 [data-radix-dialog-overlay] {
-  background-color: rgba(11, 11, 12, 0.65) !important;
+  background-color: rgba(13, 11, 11, 0.70) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
   opacity: 1 !important;
 }
 
-/* ─── Dialog glassmorphique luxe ─── */
+/* ─── Dialog glassmorphique chaud ─── */
 [role="dialog"] {
-  background: hsl(240, 4%, 9%, 0.97) !important;
-  border: 1px solid hsl(240, 4%, 17%) !important;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(198, 167, 94, 0.08) !important;
+  background: hsl(0, 17%, 9%, 0.97) !important;
+  border: 1px solid hsl(0, 23%, 19%) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(199, 91, 26, 0.08) !important;
   position: fixed !important;
   left: 50% !important;
   top: 50% !important;
@@ -170,27 +170,27 @@ div[data-radix-dialog-overlay],
 
 /* ─── Cards / surfaces ─── */
 .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-  background: hsl(240, 4%, 11%) !important;
-  border: 1px solid hsl(240, 4%, 17%) !important;
+  background: hsl(0, 17%, 11%) !important;
+  border: 1px solid hsl(0, 23%, 19%) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.35) !important;
 }
 
 /* ─── Inputs ─── */
 input, textarea, select {
-  background-color: hsl(240, 4%, 12%, 0.8) !important;
-  border: 1px solid hsl(240, 4%, 17%) !important;
+  background-color: hsl(0, 17%, 12%, 0.85) !important;
+  border: 1px solid hsl(0, 23%, 19%) !important;
   transition: all 0.2s ease !important;
   border-radius: 10px !important;
 }
 input:hover, textarea:hover, select:hover {
-  background-color: hsl(240, 4%, 14%, 0.9) !important;
-  border-color: hsl(352, 40%, 30%) !important;
+  background-color: hsl(0, 17%, 14%, 0.95) !important;
+  border-color: hsl(0, 50%, 32%) !important;
 }
 input:focus, textarea:focus, select:focus {
   outline: none !important;
-  background-color: hsl(240, 4%, 14%) !important;
-  border-color: hsl(352, 82%, 35%) !important;
-  box-shadow: 0 0 0 3px rgba(110, 15, 26, 0.18) !important;
+  background-color: hsl(0, 17%, 14%) !important;
+  border-color: hsl(0, 68%, 38%) !important;
+  box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.18) !important;
 }
 
 /* ─── Select triggers ─── */
@@ -198,7 +198,7 @@ button[role="combobox"],
 button[aria-haspopup="listbox"],
 button[data-radix-select-trigger],
 [data-radix-select-trigger] {
-  background-color: hsl(240, 4%, 12%) !important;
+  background-color: hsl(0, 17%, 12%) !important;
   background-image: none !important;
   border-radius: 10px !important;
   box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3) !important;
@@ -206,8 +206,8 @@ button[data-radix-select-trigger],
 button[role="combobox"]:hover,
 button[aria-haspopup="listbox"]:hover,
 [data-radix-select-trigger]:hover {
-  background-color: hsl(240, 4%, 14%) !important;
-  border-color: hsl(352, 60%, 30%) !important;
+  background-color: hsl(0, 17%, 15%) !important;
+  border-color: hsl(0, 55%, 32%) !important;
 }
 
 /* ─── Dropdown menus & select content ─── */
@@ -215,10 +215,10 @@ button[aria-haspopup="listbox"]:hover,
 [role="menu"],
 [data-radix-select-content],
 [data-radix-popper-content-wrapper] > div {
-  background-color: hsl(240, 4%, 10%) !important;
-  border: 1px solid hsl(240, 4%, 17%) !important;
+  background-color: hsl(0, 17%, 10%) !important;
+  border: 1px solid hsl(0, 23%, 19%) !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
 }
 
 [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
@@ -227,22 +227,22 @@ button[aria-haspopup="listbox"]:hover,
 [data-radix-select-content] [role="option"]:hover,
 [data-radix-select-content] [role="option"]:focus,
 [data-radix-select-content] [role="option"][data-highlighted] {
-  background-color: rgba(110, 15, 26, 0.18) !important;
-  color: white !important;
+  background-color: rgba(143, 29, 29, 0.20) !important;
+  color: hsl(22, 76%, 70%) !important;
 }
 
 /* ─── Borders générales ─── */
 .border-slate-700, .border-slate-800 {
-  border: 1px solid hsl(240, 4%, 17%) !important;
+  border: 1px solid hsl(0, 23%, 19%) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 }
 
 /* ─── Boutons généraux ─── */
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
 [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-  background: rgba(110, 15, 26, 0.1) !important;
-  border: 1px solid rgba(110, 15, 26, 0.25) !important;
-  color: hsl(0, 0%, 88%);
+  background: rgba(143, 29, 29, 0.10) !important;
+  border: 1px solid rgba(143, 29, 29, 0.28) !important;
+  color: hsl(0, 11%, 90%);
   border-radius: 10px;
   transition: all 0.2s ease !important;
   padding: 0.5rem 1rem;
@@ -250,15 +250,15 @@ button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-
 
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):hover,
 [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):hover {
-  background: rgba(110, 15, 26, 0.22) !important;
-  border-color: rgba(110, 15, 26, 0.45) !important;
+  background: rgba(143, 29, 29, 0.22) !important;
+  border-color: rgba(199, 91, 26, 0.50) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(110, 15, 26, 0.25) !important;
+  box-shadow: 0 6px 18px rgba(143, 29, 29, 0.28) !important;
 }
 
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):active {
   transform: translateY(0px);
-  background: rgba(79, 10, 18, 0.25) !important;
+  background: rgba(106, 20, 20, 0.28) !important;
   box-shadow: none !important;
 }
 
@@ -295,32 +295,32 @@ button[role="tab"],
 
 button[role="tab"]:hover,
 [role="tab"]:hover {
-  background: rgba(110, 15, 26, 0.15) !important;
-  color: hsl(38, 47%, 65%) !important;
+  background: rgba(199, 91, 26, 0.14) !important;
+  color: hsl(22, 76%, 65%) !important;
 }
 
 button[role="tab"][data-state="active"],
 [role="tab"][data-state="active"] {
-  background: rgba(110, 15, 26, 0.2) !important;
-  color: hsl(38, 47%, 65%) !important;
-  border-bottom: 2px solid hsl(38, 47%, 57%) !important; /* or */
+  background: rgba(143, 29, 29, 0.20) !important;
+  color: hsl(22, 76%, 65%) !important;
+  border-bottom: 2px solid hsl(22, 76%, 44%) !important;
 }
 
 /* ─── Navbar topbar ─── */
 header {
-  background: hsl(240, 5%, 5%, 0.97) !important;
-  border-bottom: 1px solid hsl(240, 4%, 14%) !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4) !important;
+  background: hsl(0, 14%, 5%, 0.97) !important;
+  border-bottom: 1px solid hsl(0, 23%, 16%) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.45) !important;
 }
 
-/* ─── Sidebar nav items actifs ─── */
+/* ─── Sidebar nav items ─── */
 [class*="SidebarMenuButton"] {
   border-radius: 10px !important;
 }
 
-/* ─── Gradient topbar title ─── */
+/* ─── Gradient topbar title — rouge → orangé ─── */
 .topbar-title {
-  background: linear-gradient(90deg, hsl(38, 47%, 57%), hsl(38, 60%, 70%), hsl(38, 47%, 57%)) !important;
+  background: linear-gradient(90deg, hsl(0, 68%, 55%), hsl(22, 76%, 60%), hsl(0, 68%, 55%)) !important;
   background-size: 200% auto !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -328,25 +328,22 @@ header {
   color: transparent !important;
 }
 
-/* ─── Boutons Punch In/Out (inline styles — override via CSS var) ─── */
-/* Pas touché : ils utilisent style= inline */
-
 /* ─── Timesheet tab buttons ─── */
 button.timesheet-tab-button {
-  background: hsl(352, 82%, 28%) !important;
+  background: hsl(0, 68%, 30%) !important;
   color: white !important;
   border: none !important;
   box-shadow: none !important;
 }
 button.timesheet-tab-button[data-state="inactive"] {
-  background: hsl(240, 4%, 22%) !important;
-  color: hsl(0, 0%, 65%) !important;
+  background: hsl(0, 14%, 22%) !important;
+  color: hsl(0, 11%, 65%) !important;
 }
 button.timesheet-tab-button:hover {
-  background: hsl(352, 82%, 36%) !important;
+  background: hsl(0, 68%, 40%) !important;
 }
 
-/* ─── Sidebar nav item active highlight rouge vin ─── */
+/* ─── Sidebar nav item active highlight ─── */
 a.flex.items-center.gap-3 {
   border-radius: 10px !important;
 }

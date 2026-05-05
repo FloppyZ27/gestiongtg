@@ -571,14 +571,14 @@ function LayoutContent({ children, currentPageName }) {
             font-family: 'JetBrains Mono', monospace !important;
           }
 
-          /* Page titles - or premium (sauf topbar) */
+          /* Page titles — orangé brûlé */
           h1:not(.topbar-title) {
-            color: hsl(38, 47%, 57%) !important;
+            color: hsl(22, 76%, 55%) !important;
           }
 
-          /* Logos - teinte rouge vin */
+          /* Logos — teinte rouge */
           img[src*="GTG-ETOILE"] {
-            filter: hue-rotate(320deg) saturate(1.4) brightness(0.95) !important;
+            filter: hue-rotate(300deg) saturate(1.5) brightness(0.9) !important;
           }
 
         /* Overlay avec flou doux */
@@ -612,11 +612,11 @@ function LayoutContent({ children, currentPageName }) {
         letter-spacing: 0.2px !important;
         }
 
-        /* Design professionnel et neutre */
+        /* Surfaces / cartes — brun chaud */
         .bg-slate-900, .bg-slate-800, .bg-slate-950 {
-        background: hsl(210, 16%, 13%) !important;
-        border: 1px solid hsl(210, 10%, 19%) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        background: hsl(0, 17%, 11%) !important;
+        border: 1px solid hsl(0, 23%, 19%) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
 
         /* Boutons minimalistes neutre */
@@ -644,35 +644,35 @@ function LayoutContent({ children, currentPageName }) {
 
         button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
         [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-        background: rgba(110, 15, 26, 0.10) !important;
-        border: 1px solid rgba(110, 15, 26, 0.25) !important;
-        color: hsl(0, 0%, 88%);
+        background: rgba(143, 29, 29, 0.10) !important;
+        border: 1px solid rgba(143, 29, 29, 0.28) !important;
+        color: hsl(0, 11%, 90%);
         border-radius: 10px;
         transition: all 0.2s ease !important;
         padding: 0.5rem 1rem;
         }
 
-        /* Boutons primaires dégradé discret */
+        /* Boutons primaires — rouge profond */
         button[class*="agenda-add-button"] {
-          background: linear-gradient(135deg, hsl(352, 82%, 28%) 0%, hsl(352, 82%, 22%) 100%) !important;
-          color: hsl(0, 0%, 96%) !important;
+          background: linear-gradient(135deg, hsl(0, 68%, 34%) 0%, hsl(0, 68%, 26%) 100%) !important;
+          color: hsl(0, 11%, 95%) !important;
           border: none !important;
-          box-shadow: 0 8px 16px rgba(110, 15, 26, 0.3) !important;
+          box-shadow: 0 8px 16px rgba(143, 29, 29, 0.35) !important;
           font-weight: 600;
         }
 
         button[class*="agenda-add-button"]:hover {
-          background: linear-gradient(135deg, hsl(352, 82%, 36%) 0%, hsl(352, 82%, 28%) 100%) !important;
-          box-shadow: 0 12px 24px rgba(110, 15, 26, 0.4) !important;
+          background: linear-gradient(135deg, hsl(0, 68%, 44%) 0%, hsl(0, 68%, 34%) 100%) !important;
+          box-shadow: 0 12px 24px rgba(143, 29, 29, 0.45) !important;
           transform: translateY(-2px);
         }
 
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
         [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
-          background: rgba(110, 15, 26, 0.22) !important;
-          border-color: rgba(110, 15, 26, 0.45) !important;
+          background: rgba(143, 29, 29, 0.22) !important;
+          border-color: rgba(199, 91, 26, 0.50) !important;
           transform: translateY(-1px);
-          box-shadow: 0 4px 14px rgba(110, 15, 26, 0.25) !important;
+          box-shadow: 0 6px 18px rgba(143, 29, 29, 0.28) !important;
         }
 
         /* Retirer complètement l'encadré des TabsTrigger */
@@ -696,22 +696,22 @@ function LayoutContent({ children, currentPageName }) {
           filter: brightness(0) !important;
         }
 
-        /* Override dropdown menus et select - teinte rouge vin */
+        /* Override dropdown menus et select — rouge/orangé */
         [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
         [data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
         [data-radix-dropdown-menu-content] [role="menuitemradio"]:hover,
         [data-radix-select-content] [role="option"]:hover,
         [data-radix-select-content] [role="option"]:focus,
         [data-radix-select-content] [role="option"][data-highlighted] {
-          background-color: rgba(110, 15, 26, 0.18) !important;
-          color: white !important;
+          background-color: rgba(143, 29, 29, 0.20) !important;
+          color: hsl(22, 76%, 70%) !important;
         }
 
 
 
-        /* Boutons "Semaine" et "Mois" dans la section feuille de temps */
+        /* Boutons "Semaine" et "Mois" — rouge profond */
         button.timesheet-tab-button {
-          background: rgb(0, 184, 212) !important;
+          background: hsl(0, 68%, 30%) !important;
           background-image: none !important;
           color: white !important;
           border: none !important;
@@ -719,18 +719,19 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         button.timesheet-tab-button[data-state="inactive"] {
-          background: rgb(100, 116, 139) !important;
+          background: hsl(0, 14%, 22%) !important;
           background-image: none !important;
+          color: hsl(0, 11%, 65%) !important;
           box-shadow: none !important;
         }
 
         button.timesheet-tab-button:hover {
-          background: rgb(0, 160, 187) !important;
+          background: hsl(0, 68%, 40%) !important;
           box-shadow: none !important;
         }
 
         button.timesheet-tab-button[data-state="inactive"]:hover {
-          background: rgb(115, 127, 144) !important;
+          background: hsl(0, 14%, 28%) !important;
           box-shadow: none !important;
         }
 
@@ -740,22 +741,22 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
-        /* Tabs — accent or premium */
+        /* Tabs — rouge/orangé */
         button[role="tab"]:hover,
         [role="tab"]:hover {
-          background: rgba(110, 15, 26, 0.15) !important;
-          background-color: rgba(110, 15, 26, 0.15) !important;
+          background: rgba(199, 91, 26, 0.14) !important;
+          background-color: rgba(199, 91, 26, 0.14) !important;
           background-image: none !important;
-          color: hsl(38, 47%, 65%) !important;
+          color: hsl(22, 76%, 65%) !important;
         }
 
         button[role="tab"][data-state="active"],
         [role="tab"][data-state="active"] {
-          background: rgba(110, 15, 26, 0.2) !important;
-          background-color: rgba(110, 15, 26, 0.2) !important;
+          background: rgba(143, 29, 29, 0.20) !important;
+          background-color: rgba(143, 29, 29, 0.20) !important;
           background-image: none !important;
-          color: hsl(38, 47%, 65%) !important;
-          border-bottom: 2px solid hsl(38, 47%, 57%) !important;
+          color: hsl(22, 76%, 65%) !important;
+          border-bottom: 2px solid hsl(22, 76%, 44%) !important;
         }
 
         button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
@@ -769,35 +770,38 @@ function LayoutContent({ children, currentPageName }) {
 
 
         .border-slate-700, .border-slate-800 {
-          border: 1px solid rgba(255, 255, 255, 0.06) !important;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+          border: 1px solid hsl(0, 23%, 19%) !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
         }
 
         input, textarea, select {
-          background-color: rgba(30, 41, 59, 0.5) !important;
-          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          background-color: hsl(0, 17%, 12%, 0.85) !important;
+          border: 1px solid hsl(0, 23%, 19%) !important;
           transition: all 0.2s ease !important;
-          backdrop-filter: blur(4px);
+          border-radius: 10px !important;
         }
 
         input:hover, textarea:hover, select:hover {
-          background-color: rgba(30, 41, 59, 0.7) !important;
-          border-color: rgba(196, 110, 255, 0.2) !important;
+          background-color: hsl(0, 17%, 14%, 0.95) !important;
+          border-color: hsl(0, 50%, 32%) !important;
         }
 
         input:focus, textarea:focus, select:focus {
           outline: none !important;
-          background-color: rgba(30, 41, 59, 0.8) !important;
-          border-color: rgb(196, 110, 255) !important;
-          box-shadow: 0 0 0 3px rgba(196, 110, 255, 0.15) !important;
+          background-color: hsl(0, 17%, 14%) !important;
+          border-color: hsl(0, 68%, 38%) !important;
+          box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.18) !important;
         }
 
-        /* Fond gris pour les menus déroulants et leurs déclencheurs */
+        /* Menus déroulants — fond chaud */
         [role="listbox"],
         [role="menu"],
         [data-radix-select-content],
         [data-radix-popper-content-wrapper] > div {
-          background-color: rgb(30, 41, 59) !important;
+          background-color: hsl(0, 17%, 10%) !important;
+          border: 1px solid hsl(0, 23%, 19%) !important;
+          border-radius: 12px !important;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
         }
 
         /* Boutons de sélection (Select triggers) */
@@ -805,35 +809,29 @@ function LayoutContent({ children, currentPageName }) {
         button[aria-haspopup="listbox"],
         button[data-radix-select-trigger],
         [data-radix-select-trigger] {
-          background-color: rgb(30, 41, 59) !important;
+          background-color: hsl(0, 17%, 12%) !important;
           background-image: none !important;
-          box-shadow: 
-            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-            inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
+          border-radius: 10px !important;
+          box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3) !important;
         }
 
         button[role="combobox"]:hover,
         button[aria-haspopup="listbox"]:hover,
         button[data-radix-select-trigger]:hover {
-          background-color: rgb(30, 41, 59) !important;
-          box-shadow: 
-            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
-            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
-            0 0 0 2px rgba(100, 116, 139, 0.3) !important;
+          background-color: hsl(0, 17%, 15%) !important;
+          border-color: hsl(0, 55%, 32%) !important;
         }
 
 
 
-
-
-        /* Boutons navigation sidebar - hover visible */
+        /* Boutons navigation sidebar */
         .sidebar-nav-btn {
-          background-color: rgba(71, 85, 105, 0.3) !important;
+          background-color: rgba(143, 29, 29, 0.15) !important;
         }
 
         .sidebar-nav-btn:hover {
-          background-color: rgba(71, 85, 105, 0.6) !important;
-          box-shadow: 0 8px 16px rgba(71, 85, 105, 0.4) !important;
+          background-color: rgba(199, 91, 26, 0.25) !important;
+          box-shadow: 0 8px 16px rgba(143, 29, 29, 0.3) !important;
         }
 
         /* Scrollbar personnalisée globale */
@@ -851,13 +849,13 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         *::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, hsl(352, 82%, 30%), hsl(352, 60%, 22%)) !important;
+          background: linear-gradient(to bottom, hsl(0, 68%, 38%), hsl(22, 76%, 30%)) !important;
           border-radius: 10px !important;
           border: none !important;
         }
 
         *::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, hsl(352, 82%, 40%), hsl(352, 60%, 30%)) !important;
+          background: linear-gradient(to bottom, hsl(0, 68%, 50%), hsl(22, 76%, 42%)) !important;
         }
 
         *::-webkit-scrollbar-button {
@@ -1092,7 +1090,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="GTG Logo"
                   className="w-14 h-auto"
                 />
-              <h1 className="topbar-title text-3xl font-bold" style={{background: 'linear-gradient(90deg, hsl(38,47%,50%), hsl(38,65%,72%), hsl(38,47%,50%))', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', animation: 'gradientShift 3s linear infinite'}}>GestionGTG</h1>
+              <h1 className="topbar-title text-3xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,68%,52%), hsl(22,76%,60%), hsl(0,68%,52%))', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', animation: 'gradientShift 3s linear infinite'}}>GestionGTG</h1>
             </div>
 
             {/* Barre de recherche de dossiers au centre */}

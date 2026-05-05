@@ -93,6 +93,10 @@ module.exports = {
   			'gradientShift': {
   				'0%': { backgroundPosition: '0% center' },
   				'100%': { backgroundPosition: '200% center' }
+  			},
+  			'warmPulse': {
+  				'0%, 100%': { boxShadow: '0 0 0 0 rgba(143, 29, 29, 0.4)' },
+  				'50%': { boxShadow: '0 0 0 8px rgba(143, 29, 29, 0)' }
   			}
   		},
   		animation: {
