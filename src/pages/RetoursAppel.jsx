@@ -1200,21 +1200,27 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                           </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Input
-                          type="date"
-                          value={filterDateStart}
-                          onChange={(e) => setFilterDateStart(e.target.value)}
-                          placeholder="Du"
-                          className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
-                        />
-                        <span className="text-red-500 text-xs">→</span>
-                        <Input
-                          type="date"
-                          value={filterDateEnd}
-                          onChange={(e) => setFilterDateEnd(e.target.value)}
-                          placeholder="Au"
-                          className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
-                        />
+                        <div className="flex flex-col gap-1">
+                          <Label className="text-xs text-red-500">Du</Label>
+                          <Input
+                            type="date"
+                            value={filterDateStart}
+                            onChange={(e) => setFilterDateStart(e.target.value)}
+                            placeholder="Du"
+                            className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                          />
+                        </div>
+                        <span className="text-red-500 text-xs mt-6">→</span>
+                        <div className="flex flex-col gap-1">
+                          <Label className="text-xs text-red-500">Au</Label>
+                          <Input
+                            type="date"
+                            value={filterDateEnd}
+                            onChange={(e) => setFilterDateEnd(e.target.value)}
+                            placeholder="Au"
+                            className="flex-1 text-red-500 h-8 text-xs px-2 border-red-500/30"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
