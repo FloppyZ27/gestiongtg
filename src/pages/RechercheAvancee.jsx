@@ -166,9 +166,6 @@ export default function RechercheAvancee() {
 
           {/* Groupe Dossier */}
           <FilterGroup icon={<FileText className="w-4 h-4" />} label="Dossier">
-            <FilterField label="Numéro de dossier" value={filters.numeroDossier} onChange={v => setFilter('numeroDossier', v)} onClear={() => clearFilter('numeroDossier')} placeholder="ex: 1234" />
-            <FilterField label="Numéro de lot" value={filters.lot} onChange={v => setFilter('lot', v)} onClear={() => clearFilter('lot')} placeholder="ex: 1234567" />
-            <FilterField label="Numéro de minute" value={filters.minute} onChange={v => setFilter('minute', v)} onClear={() => clearFilter('minute')} placeholder="ex: 12345" />
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Arpenteur-géomètre</Label>
               <div className="relative">
@@ -182,6 +179,7 @@ export default function RechercheAvancee() {
                 {filters.arpenteur && filters.arpenteur !== "all" && <ClearBtn onClick={() => clearFilter('arpenteur')} />}
               </div>
             </div>
+            <FilterField label="Numéro de dossier" value={filters.numeroDossier} onChange={v => setFilter('numeroDossier', v)} onClear={() => clearFilter('numeroDossier')} placeholder="ex: 1234" />
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs text-muted-foreground">Type de mandat</Label>
               <div className="relative">
@@ -193,19 +191,6 @@ export default function RechercheAvancee() {
                   </SelectContent>
                 </Select>
                 {filters.typeMandat && filters.typeMandat !== "all" && <ClearBtn onClick={() => clearFilter('typeMandat')} />}
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-xs text-muted-foreground">Tâche actuelle</Label>
-              <div className="relative">
-                <Select value={filters.tacheActuelle} onValueChange={v => setFilter('tacheActuelle', v)}>
-                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Toutes" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toutes</SelectItem>
-                    {TACHES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {filters.tacheActuelle && filters.tacheActuelle !== "all" && <ClearBtn onClick={() => clearFilter('tacheActuelle')} />}
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -234,6 +219,20 @@ export default function RechercheAvancee() {
                 {filters.placeAffaire && filters.placeAffaire !== "all" && <ClearBtn onClick={() => clearFilter('placeAffaire')} />}
               </div>
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs text-muted-foreground">Tâche actuelle</Label>
+              <div className="relative">
+                <Select value={filters.tacheActuelle} onValueChange={v => setFilter('tacheActuelle', v)}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Toutes" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    {TACHES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                {filters.tacheActuelle && filters.tacheActuelle !== "all" && <ClearBtn onClick={() => clearFilter('tacheActuelle')} />}
+              </div>
+            </div>
+            <FilterField label="Numéro de minute" value={filters.minute} onChange={v => setFilter('minute', v)} onClear={() => clearFilter('minute')} placeholder="ex: 12345" />
           </FilterGroup>
 
           {/* Groupe Contacts */}
