@@ -178,6 +178,7 @@ export default function CommunicationClients() {
           <div className="flex gap-3">
             <button
               onClick={handleNewMandat}
+              data-custom-hover
               onMouseEnter={e => {
                 e.currentTarget.style.setProperty('background', 'none', 'important');
                 e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
@@ -197,6 +198,7 @@ export default function CommunicationClients() {
             </button>
             <button
               onClick={handleNewRetourAppel}
+              data-custom-hover
               onMouseEnter={e => {
                 e.currentTarget.style.setProperty('background', 'none', 'important');
                 e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
