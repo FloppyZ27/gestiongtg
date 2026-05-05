@@ -172,7 +172,7 @@ export default function PriseMandatFilters({
         </div>
 
         <div className="space-y-1 pt-1 border-t border-red-500/30">
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-2 w-1/2">
             <div className="flex-1 flex flex-col gap-1">
               <Label className="text-xs text-red-500">Du</Label>
               <Input
