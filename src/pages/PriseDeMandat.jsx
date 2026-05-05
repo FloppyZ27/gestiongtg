@@ -4291,7 +4291,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                             {pm.mandats && pm.mandats.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {pm.mandats.slice(0, 2).map((m, idx) => (
-                                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs pointer-events-none select-none cursor-default`}>
                                     {getAbbreviatedMandatType(m.type_mandat)}
                                   </Badge>
                                 ))}
@@ -4311,7 +4311,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                           </TableCell>
                           <TableCell>
                             {pm.urgence_percue ? (
-                              <Badge className={`${getUrgenceColor(pm.urgence_percue)} border text-xs`}>
+                              <Badge className={`${getUrgenceColor(pm.urgence_percue)} border text-xs pointer-events-none select-none cursor-default`}>
                                 {pm.urgence_percue === "Rapide" ? "Urgent" : pm.urgence_percue}
                               </Badge>
                             ) : (
