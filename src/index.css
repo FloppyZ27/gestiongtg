@@ -231,7 +231,7 @@ button[aria-haspopup="listbox"]:hover,
 [data-radix-select-content] [role="option"]:hover,
 [data-radix-select-content] [role="option"]:focus,
 [data-radix-select-content] [role="option"][data-highlighted] {
-  background-color: rgba(220, 60, 60, 0.18) !important;
+  background-color: rgba(199, 91, 26, 0.20) !important;
   color: hsl(22, 90%, 72%) !important;
 }
 
