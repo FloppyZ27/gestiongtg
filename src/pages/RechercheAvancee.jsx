@@ -161,7 +161,7 @@ export default function RechercheAvancee() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Recherche avancée
               </h1>
-              <Search className="w-6 h-6 text-blue-400" />
+              <Search className="w-6 h-6 text-orange-500" />
             </div>
             <p className="text-slate-400">Filtrez tous les dossiers selon plusieurs critères combinés</p>
           </div>
