@@ -14,8 +14,8 @@
     --popover: 220 13% 10%;          /* #161820 */
     --popover-foreground: 210 11% 93%;
 
-    /* ─── Primary — rouge profond ─── */
-    --primary: 0 68% 44%;            /* #B82424 */
+    /* ─── Primary — rouge vif/pâle ─── */
+    --primary: 0 80% 58%;            /* rouge vif */
     --primary-foreground: 0 11% 95%;
 
     /* ─── Secondary — gris foncé ─── */
@@ -37,26 +37,26 @@
     /* ─── Borders & inputs ─── */
     --border: 220 10% 22%;
     --input: 220 10% 17%;
-    --ring: 0 68% 44%;               /* rouge plus clair */
+    --ring: 0 80% 58%;               /* rouge vif */
 
     /* ─── Charts ─── */
-    --chart-1: 0 68% 34%;
-    --chart-2: 22 76% 44%;
-    --chart-3: 0 55% 45%;
-    --chart-4: 22 60% 38%;
-    --chart-5: 0 40% 55%;
+    --chart-1: 0 80% 58%;
+    --chart-2: 22 76% 55%;
+    --chart-3: 0 70% 62%;
+    --chart-4: 22 65% 50%;
+    --chart-5: 0 60% 65%;
 
     --radius: 0.75rem;
 
     /* ─── Sidebar — gris très sombre ─── */
     --sidebar-background: 220 13% 7%;
     --sidebar-foreground: 210 11% 93%;
-    --sidebar-primary: 0 68% 44%;
+    --sidebar-primary: 0 80% 58%;
     --sidebar-primary-foreground: 0 11% 95%;
     --sidebar-accent: 220 13% 11%;
     --sidebar-accent-foreground: 210 11% 93%;
     --sidebar-border: 220 10% 16%;
-    --sidebar-ring: 0 68% 44%;
+    --sidebar-ring: 0 80% 58%;
   }
 
   .dark {
@@ -66,27 +66,27 @@
     --card-foreground: 210 11% 93%;
     --popover: 220 13% 10%;
     --popover-foreground: 210 11% 93%;
-    --primary: 0 68% 44%;
+    --primary: 0 80% 58%;
     --primary-foreground: 0 11% 95%;
     --secondary: 220 10% 17%;
     --secondary-foreground: 210 11% 78%;
     --muted: 220 10% 20%;
     --muted-foreground: 220 8% 50%;
-    --accent: 22 76% 44%;
+    --accent: 22 76% 55%;
     --accent-foreground: 0 11% 95%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 11% 95%;
     --border: 220 10% 22%;
     --input: 220 10% 17%;
-    --ring: 0 68% 44%;
-    --chart-1: 0 68% 34%;
-    --chart-2: 22 76% 44%;
-    --chart-3: 0 55% 45%;
-    --chart-4: 22 60% 38%;
-    --chart-5: 0 40% 55%;
+    --ring: 0 80% 58%;
+    --chart-1: 0 80% 58%;
+    --chart-2: 22 76% 55%;
+    --chart-3: 0 70% 62%;
+    --chart-4: 22 65% 50%;
+    --chart-5: 0 60% 65%;
     --sidebar-background: 220 13% 7%;
     --sidebar-foreground: 210 11% 93%;
-    --sidebar-primary: 0 68% 34%;
+    --sidebar-primary: 0 80% 58%;
     --sidebar-primary-foreground: 0 11% 95%;
     --sidebar-accent: 220 13% 11%;
     --sidebar-accent-foreground: 210 11% 93%;
@@ -114,7 +114,7 @@ code, pre {
 
 /* ─── Page titles — dégradé rouge → orangé brûlé ─── */
 h1:not(.topbar-title) {
-  background: linear-gradient(90deg, hsl(0, 68%, 55%), hsl(22, 76%, 60%)) !important;
+  background: linear-gradient(90deg, hsl(0, 80%, 62%), hsl(22, 90%, 65%)) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -130,11 +130,11 @@ h1:not(.topbar-title) {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, hsl(0, 68%, 38%), hsl(22, 76%, 30%));
+  background: linear-gradient(to bottom, hsl(0, 80%, 55%), hsl(22, 85%, 50%));
   border-radius: 10px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, hsl(0, 68%, 50%), hsl(22, 76%, 42%));
+  background: linear-gradient(to bottom, hsl(0, 85%, 65%), hsl(22, 90%, 60%));
 }
 *::-webkit-scrollbar-button {
   display: none !important;
@@ -193,8 +193,8 @@ input:hover, textarea:hover, select:hover {
 input:focus, textarea:focus, select:focus {
   outline: none !important;
   background-color: hsl(220, 13%, 14%) !important;
-  border-color: hsl(0, 68%, 38%) !important;
-  box-shadow: 0 0 0 3px rgba(143, 29, 29, 0.18) !important;
+  border-color: hsl(0, 80%, 58%) !important;
+  box-shadow: 0 0 0 3px rgba(220, 60, 60, 0.22) !important;
 }
 
 /* ─── Select triggers ─── */
@@ -231,8 +231,8 @@ button[aria-haspopup="listbox"]:hover,
 [data-radix-select-content] [role="option"]:hover,
 [data-radix-select-content] [role="option"]:focus,
 [data-radix-select-content] [role="option"][data-highlighted] {
-  background-color: rgba(143, 29, 29, 0.20) !important;
-  color: hsl(22, 76%, 70%) !important;
+  background-color: rgba(220, 60, 60, 0.18) !important;
+  color: hsl(22, 90%, 72%) !important;
 }
 
 /* ─── Borders générales ─── */
@@ -244,8 +244,8 @@ button[aria-haspopup="listbox"]:hover,
 /* ─── Boutons généraux ─── */
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
 [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
-  background: rgba(143, 29, 29, 0.10) !important;
-  border: 1px solid rgba(143, 29, 29, 0.28) !important;
+  background: rgba(220, 60, 60, 0.10) !important;
+  border: 1px solid rgba(220, 60, 60, 0.30) !important;
   color: hsl(0, 11%, 90%);
   border-radius: 10px;
   transition: all 0.2s ease !important;
@@ -254,15 +254,15 @@ button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-
 
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):hover,
 [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):hover {
-  background: rgba(143, 29, 29, 0.22) !important;
-  border-color: rgba(199, 91, 26, 0.50) !important;
+  background: rgba(220, 60, 60, 0.22) !important;
+  border-color: rgba(220, 100, 60, 0.55) !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(143, 29, 29, 0.28) !important;
+  box-shadow: 0 6px 18px rgba(220, 60, 60, 0.25) !important;
 }
 
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):active {
   transform: translateY(0px);
-  background: rgba(106, 20, 20, 0.28) !important;
+  background: rgba(220, 60, 60, 0.30) !important;
   box-shadow: none !important;
 }
 
@@ -305,9 +305,9 @@ button[role="tab"]:hover,
 
 button[role="tab"][data-state="active"],
 [role="tab"][data-state="active"] {
-  background: rgba(143, 29, 29, 0.20) !important;
-  color: hsl(22, 76%, 65%) !important;
-  border-bottom: 2px solid hsl(22, 76%, 44%) !important;
+  background: rgba(220, 60, 60, 0.18) !important;
+  color: hsl(22, 90%, 68%) !important;
+  border-bottom: 2px solid hsl(22, 90%, 58%) !important;
 }
 
 /* ─── Navbar topbar ─── */
@@ -324,7 +324,7 @@ header {
 
 /* ─── Gradient topbar title — rouge → orangé animé ─── */
 .topbar-title {
-  background: linear-gradient(90deg, hsl(0, 68%, 55%), hsl(22, 76%, 65%), hsl(0, 68%, 55%)) !important;
+  background: linear-gradient(90deg, hsl(0, 85%, 62%), hsl(22, 90%, 68%), hsl(0, 85%, 62%)) !important;
   background-size: 200% auto !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -340,7 +340,7 @@ header {
 
 /* ─── Timesheet tab buttons ─── */
 button.timesheet-tab-button {
-  background: hsl(0, 68%, 30%) !important;
+  background: hsl(0, 75%, 50%) !important;
   color: white !important;
   border: none !important;
   box-shadow: none !important;
@@ -350,7 +350,7 @@ button.timesheet-tab-button[data-state="inactive"] {
   color: hsl(0, 11%, 65%) !important;
 }
 button.timesheet-tab-button:hover {
-  background: hsl(0, 68%, 40%) !important;
+  background: hsl(0, 80%, 58%) !important;
 }
 
 /* ─── Sidebar nav item active highlight ─── */
