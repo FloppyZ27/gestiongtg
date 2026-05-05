@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FilePlus, Phone, Plus, MessageCircle } from "lucide-react";
+import { FilePlus, Phone, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -182,8 +182,8 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <PremiumButton label="Nouveau mandat" onClick={handleNewMandat} />
-            <PremiumButton label="Nouveau retour d'appel" onClick={handleNewRetourAppel} />
+            <PremiumButton label="Nouveau mandat" onClick={handleNewMandat} icon={FilePlus} />
+            <PremiumButton label="Nouveau retour d'appel" onClick={handleNewRetourAppel} icon={Phone} />
           </div>
         </div>
 

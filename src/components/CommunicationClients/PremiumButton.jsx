@@ -31,7 +31,7 @@ const resetToBase = (el) => {
   el.style.setProperty('opacity', '1', 'important');
 };
 
-export default function PremiumButton({ label, onClick }) {
+export default function PremiumButton({ label, onClick, icon: Icon = Plus }) {
   const buttonRef = React.useRef(null);
 
   const handleMouseEnter = () => {
@@ -68,7 +68,7 @@ export default function PremiumButton({ label, onClick }) {
       onBlur={handleBlur}
       style={BUTTON_BASE}
     >
-      <Plus className="w-4 h-4" />
+      <Icon className="w-4 h-4" />
       {label}
     </button>
   );
