@@ -100,13 +100,18 @@ export default function CommunicationClients() {
   const equipeCountsRetoursAppel = React.useMemo(() => {
     const dossierMap = Object.fromEntries(dossiers.map(d => [d.id, d]));
     const counts = {};
+    const placeFilter = filterPlaceAffaire === "tous" ? null : filterPlaceAffaire;
     EQUIPES.forEach(e => {
-      counts[e.value] = e.value === "Toutes"
-        ? retoursAppels.length
-        : retoursAppels.filter(r => dossierMap[r.dossier_id]?.arpenteur_geometre?.includes(e.value)).length;
+      const filtered = retoursAppels.filter(r => {
+        const dossier = dossierMap[r.dossier_id];
+        const matchesPlace = !placeFilter || dossier?.place_affaire === placeFilter;
+        const matchesEquipe = e.value === "Toutes" || dossier?.arpenteur_geometre?.includes(e.value);
+        return matchesPlace && matchesEquipe;
+      });
+      counts[e.value] = filtered.length;
     });
     return counts;
-  }, [retoursAppels, dossiers]);
+  }, [retoursAppels, dossiers, filterPlaceAffaire]);
 
   const handleNewMandat = () => {
     setActiveTab("prise-mandat");
