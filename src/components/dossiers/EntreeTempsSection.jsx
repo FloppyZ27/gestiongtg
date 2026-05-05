@@ -32,8 +32,10 @@ const getAbbreviatedMandatType = (type) => {
 
 const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
-export default function EntreeTempsSection({ editingDossier, formData, users, entreesTemps, setEntreesTemps, addActionLog, onDeleteRequest, user }) {
-  const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
+export default function EntreeTempsSection({ editingDossier, formData, users, entreesTemps, setEntreesTemps, addActionLog, onDeleteRequest, user, collapsed, onToggleCollapse }) {
+  const [entreeTempsCollapsedInternal, setEntreeTempsCollapsedInternal] = useState(true);
+  const entreeTempsCollapsed = collapsed !== undefined ? collapsed : entreeTempsCollapsedInternal;
+  const setEntreeTempsCollapsed = onToggleCollapse || setEntreeTempsCollapsedInternal;
   const [newEntreeTempsFormCollapsed, setNewEntreeTempsFormCollapsed] = useState(true);
   const [newEntreeTempsForm, setNewEntreeTempsForm] = useState({
     date: new Date().toISOString().split('T')[0], mandat: "", heures: "", tache: ""

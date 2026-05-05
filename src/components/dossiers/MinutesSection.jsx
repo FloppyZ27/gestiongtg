@@ -35,8 +35,10 @@ const getAbbreviatedMandatType = (type) => {
 
 const TYPE_MINUTES = ["Initiale", "Remplace", "Corrige"];
 
-export default function MinutesSection({ formData, setFormData, addActionLog, onDeleteRequest }) {
-  const [minutesCollapsed, setMinutesCollapsed] = useState(true);
+export default function MinutesSection({ formData, setFormData, addActionLog, onDeleteRequest, collapsed, onToggleCollapse }) {
+  const [minutesCollapsedInternal, setMinutesCollapsedInternal] = useState(true);
+  const minutesCollapsed = collapsed !== undefined ? collapsed : minutesCollapsedInternal;
+  const setMinutesCollapsed = onToggleCollapse || setMinutesCollapsedInternal;
   const [newMinuteFormCollapsed, setNewMinuteFormCollapsed] = useState(true);
   const [newMinuteForm, setNewMinuteForm] = useState({});
 

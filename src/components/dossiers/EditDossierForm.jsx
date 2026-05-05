@@ -391,10 +391,14 @@ export default function EditDossierForm({
     setTarificationStepCollapsed(sectionId !== "tarification");
     setTerrainCollapsed(sectionId !== "terrain");
     setDocumentsCollapsed(sectionId !== "documents");
+    // Ouvrir les sections qui gèrent leur propre état collapsed
+    if (sectionId === "minutes") setMinutesCollapsed(false);
+    if (sectionId === "entree-temps") setEntreeTempsCollapsed(false);
+    if (sectionId === "retour-appel") setRetourAppelCollapsed(false);
     setTimeout(() => {
       const element = document.querySelector(`[data-section="${sectionId}"]`);
       if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
+    }, 50);
   };
 
   return (
@@ -1622,6 +1626,8 @@ export default function EditDossierForm({
                 setFormData={setFormData}
                 addActionLog={addActionLog}
                 onDeleteRequest={(info) => { setMinuteToDeleteInfo(info); setShowDeleteMinuteConfirm(true); }}
+                collapsed={minutesCollapsed}
+                onToggleCollapse={(val) => setMinutesCollapsed(typeof val === 'boolean' ? val : !minutesCollapsed)}
               />
             )}
 
@@ -1636,6 +1642,8 @@ export default function EditDossierForm({
                 addActionLog={addActionLog}
                 user={user}
                 onDeleteRequest={(info) => { setMinuteToDeleteInfo(info); setShowDeleteMinuteConfirm(true); }}
+                collapsed={entreeTempsCollapsed}
+                onToggleCollapse={(val) => setEntreeTempsCollapsed(typeof val === 'boolean' ? val : !entreeTempsCollapsed)}
               />
             )}
 
@@ -1650,6 +1658,8 @@ export default function EditDossierForm({
                 setRetoursAppel={setRetoursAppel}
                 addActionLog={addActionLog}
                 onDeleteRequest={(info) => { setMinuteToDeleteInfo(info); setShowDeleteMinuteConfirm(true); }}
+                collapsed={retourAppelCollapsed}
+                onToggleCollapse={(val) => setRetourAppelCollapsed(typeof val === 'boolean' ? val : !retourAppelCollapsed)}
               />
             )}
 

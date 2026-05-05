@@ -23,8 +23,10 @@ const getStatutColor = (statut) => {
   return colors[statut] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
-export default function RetourAppelSection({ editingDossier, formData, setFormData, users, retoursAppel, setRetoursAppel, addActionLog, onDeleteRequest }) {
-  const [retourAppelCollapsed, setRetourAppelCollapsed] = useState(true);
+export default function RetourAppelSection({ editingDossier, formData, setFormData, users, retoursAppel, setRetoursAppel, addActionLog, onDeleteRequest, collapsed, onToggleCollapse }) {
+  const [retourAppelCollapsedInternal, setRetourAppelCollapsedInternal] = useState(true);
+  const retourAppelCollapsed = collapsed !== undefined ? collapsed : retourAppelCollapsedInternal;
+  const setRetourAppelCollapsed = onToggleCollapse || setRetourAppelCollapsedInternal;
   const [newRetourAppelFormCollapsed, setNewRetourAppelFormCollapsed] = useState(true);
   const [newRetourAppel, setNewRetourAppel] = useState({
     date_appel: new Date().toISOString().split('T')[0],
