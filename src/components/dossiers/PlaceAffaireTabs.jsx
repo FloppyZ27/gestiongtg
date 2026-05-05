@@ -15,13 +15,13 @@ export default function PlaceAffaireTabs({ value, onChange, counts, label = "Fil
             onClick={() => onChange(tab.value)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${
               value === tab.value
-                ? "bg-emerald-500/20 text-emerald-400 border-b-2 border-emerald-400"
+                ? "bg-orange-500/20 text-orange-400 border-b-2 border-orange-400"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
             }`}
           >
             {tab.label}
             <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
-              value === tab.value ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"
+              value === tab.value ? "bg-red-500/30 text-orange-300" : "bg-slate-700 text-slate-400"
             }`}>{tab.count}</span>
           </button>
         ))}
