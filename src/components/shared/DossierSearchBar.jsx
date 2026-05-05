@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, User, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -57,12 +56,18 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-export default function DossierSearchBar({ dossiers, clients, onDossierSelect }) {
+export default function DossierSearchBar({ dossiers, clients, users = [], onDossierSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
 
   const getClientById = (id) => clients?.find(c => c.id === id);
+  const getUserByEmail = (email) => users?.find(u => u.email === email);
+  const getUserInitials = (email) => {
+    const u = getUserByEmail(email);
+    if (!u) return email?.split('@')[0]?.substring(0, 2).toUpperCase() || '?';
+    return (u.full_name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "";
@@ -201,10 +206,27 @@ export default function DossierSearchBar({ dossiers, clients, onDossierSelect })
                                 {getAbbreviatedMandatType(mandat.type_mandat)}
                               </Badge>
                               {mandat.tache_actuelle && (
-                                <span className="text-[10px] text-slate-400 flex items-center gap-1 flex-shrink-0">
-                                  <Clock className="w-2.5 h-2.5" />
+                                <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[10px] px-1.5 py-0 flex-shrink-0">
                                   {mandat.tache_actuelle}
-                                </span>
+                                </Badge>
+                              )}
+                              {mandat.utilisateur_assigne && (
+                                <div className="flex items-center gap-1 flex-shrink-0" title={getUserByEmail(mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}>
+                                  {getUserByEmail(mandat.utilisateur_assigne)?.profile_picture ? (
+                                    <img
+                                      src={getUserByEmail(mandat.utilisateur_assigne).profile_picture}
+                                      alt=""
+                                      className="w-4 h-4 rounded-full object-cover border border-slate-600"
+                                    />
+                                  ) : (
+                                    <div className="w-4 h-4 rounded-full bg-primary/30 border border-primary/50 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                                      {getUserInitials(mandat.utilisateur_assigne)}
+                                    </div>
+                                  )}
+                                  <span className="text-[10px] text-slate-400 max-w-[80px] truncate">
+                                    {getUserByEmail(mandat.utilisateur_assigne)?.full_name?.split(' ')[0] || mandat.utilisateur_assigne.split('@')[0]}
+                                  </span>
+                                </div>
                               )}
                               {adresse && (
                                 <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
