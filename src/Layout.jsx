@@ -964,7 +964,9 @@ function LayoutContent({ children, currentPageName }) {
                                 }`}
                               >
                                 <Link to={item.url} className="flex items-center justify-center p-2.5">
-                                  <item.icon className="w-5 h-5" />
+                                  <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
+                                    <item.icon className="w-5 h-5" />
+                                  </motion.span>
                                 </Link>
                               </SidebarMenuButton>
                             </TooltipTrigger>
@@ -982,7 +984,9 @@ function LayoutContent({ children, currentPageName }) {
                             }`}
                           >
                             <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                              <item.icon className="w-5 h-5" />
+                              <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
+                                <item.icon className="w-5 h-5" />
+                              </motion.span>
                               <span className="font-medium">{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
