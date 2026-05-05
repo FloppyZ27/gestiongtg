@@ -162,6 +162,18 @@ export default function CommunicationClients() {
           </div>
         </div>
 
+        {/* Filtres globaux — au-dessus des onglets */}
+        <div className="flex items-center justify-between gap-6 mb-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+          <div className="flex flex-col gap-2">
+            <PlaceAffaireTabs
+              value={filterPlaceAffaire}
+              onChange={setFilterPlaceAffaire}
+              counts={activeTab === "prise-mandat" ? placeAffaireCounts : retourAppelCountsByPlace}
+            />
+            <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center mb-0">
             <TabsList className="bg-slate-800/50 h-14 w-full">
@@ -188,15 +200,7 @@ export default function CommunicationClients() {
           </div>
 
           <TabsContent value="prise-mandat" className="mt-6 overflow-visible">
-            <div className="flex items-start justify-between gap-6 mb-0">
-              <div className="flex flex-col gap-2">
-                <PlaceAffaireTabs
-                  value={filterPlaceAffaire}
-                  onChange={setFilterPlaceAffaire}
-                  counts={placeAffaireCounts}
-                />
-                <EquipeButtons counts={equipeCountsPriseMandat} />
-              </div>
+            <div className="flex justify-end mb-4">
               <Button
                 onClick={handleNewMandat}
                 size="lg"
@@ -210,15 +214,7 @@ export default function CommunicationClients() {
           </TabsContent>
 
           <TabsContent value="retours-appel" className="mt-6">
-            <div className="flex items-start justify-between gap-6 mb-3">
-              <div className="flex flex-col gap-2">
-                <PlaceAffaireTabs
-                  value={filterPlaceAffaire}
-                  onChange={setFilterPlaceAffaire}
-                  counts={retourAppelCountsByPlace}
-                />
-                <EquipeButtons counts={equipeCountsRetoursAppel} />
-              </div>
+            <div className="flex justify-end mb-4">
               <Button
                 onClick={handleNewRetourAppel}
                 size="lg"
