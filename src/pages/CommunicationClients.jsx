@@ -149,6 +149,56 @@ export default function CommunicationClients() {
 
   return (
     <div className="min-h-screen bg-slate-800/30 p-4 md:p-8">
+      <style>{`
+        .btn-nouveau-mandat {
+          background: #10b981 !important;
+          background-image: none !important;
+          color: white !important;
+          border: none !important;
+          border-radius: 0.5rem;
+          padding: 0 1.25rem;
+          height: 44px;
+          font-weight: 600;
+          font-size: 15px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: background 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+          transform: none !important;
+        }
+        .btn-nouveau-mandat:hover {
+          background: #dc2626 !important;
+          background-image: none !important;
+          box-shadow: 0 6px 20px rgba(220,38,38,0.5) !important;
+          transform: translateY(-1px) !important;
+        }
+        .btn-nouveau-retour {
+          background: #3b82f6 !important;
+          background-image: none !important;
+          color: white !important;
+          border: none !important;
+          border-radius: 0.5rem;
+          padding: 0 1.25rem;
+          height: 44px;
+          font-weight: 600;
+          font-size: 15px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: background 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+          transform: none !important;
+        }
+        .btn-nouveau-retour:hover {
+          background: #dc2626 !important;
+          background-image: none !important;
+          box-shadow: 0 6px 20px rgba(220,38,38,0.5) !important;
+          transform: translateY(-1px) !important;
+        }
+      `}</style>
       <div className="w-full">
         <div className="flex items-start justify-between gap-3 mb-8">
           <div className="flex-1">
@@ -173,21 +223,11 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleNewMandat}
-              onMouseEnter={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #b91c1c, #c2410c)'; e.currentTarget.style.backgroundColor = '#b91c1c'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #10b981, #0d9488)'; e.currentTarget.style.backgroundColor = '#10b981'; }}
-              style={{ backgroundImage: 'linear-gradient(to right, #10b981, #0d9488)', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background-image 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
-            >
+            <button onClick={handleNewMandat} className="btn-nouveau-mandat">
               <Plus className="w-4 h-4" />
               Nouveau mandat
             </button>
-            <button
-              onClick={handleNewRetourAppel}
-              onMouseEnter={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #b91c1c, #c2410c)'; e.currentTarget.style.backgroundColor = '#b91c1c'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundImage = 'linear-gradient(to right, #3b82f6, #0891b2)'; e.currentTarget.style.backgroundColor = '#3b82f6'; }}
-              style={{ backgroundImage: 'linear-gradient(to right, #3b82f6, #0891b2)', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background-image 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
-            >
+            <button onClick={handleNewRetourAppel} className="btn-nouveau-retour">
               <Plus className="w-4 h-4" />
               Nouveau retour d'appel
             </button>
