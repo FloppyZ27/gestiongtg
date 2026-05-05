@@ -3942,7 +3942,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     variant="ghost" 
                     size="sm"
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
+                    className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     <span className="text-sm">Filtres</span>
