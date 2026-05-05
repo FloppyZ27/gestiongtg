@@ -7,6 +7,7 @@ import { base44 } from "@/api/base44Client";
 import PlaceAffaireTabs from "@/components/dossiers/PlaceAffaireTabs";
 import PriseDeMandat from "./PriseDeMandat";
 import RetoursAppel from "./RetoursAppel";
+import PremiumButton from "@/components/CommunicationClients/PremiumButton";
 
 const EQUIPES = [
   { label: "Toutes", value: "Toutes" },
@@ -176,46 +177,8 @@ export default function CommunicationClients() {
             <EquipeButtons counts={activeTab === "prise-mandat" ? equipeCountsPriseMandat : equipeCountsRetoursAppel} />
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleNewMandat}
-              data-custom-hover
-              onMouseEnter={e => {
-                e.currentTarget.style.setProperty('background', 'none', 'important');
-                e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
-                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
-                e.currentTarget.style.boxShadow = '0 6px 22px rgba(139,0,0,0.55)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.setProperty('background', '#1a1a1a', 'important');
-                e.currentTarget.style.setProperty('background-image', 'none', 'important');
-                e.currentTarget.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
-                e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
-              }}
-              style={{ background: '#1a1a1a', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
-            >
-              <Plus className="w-4 h-4" />
-              Nouveau mandat
-            </button>
-            <button
-              onClick={handleNewRetourAppel}
-              data-custom-hover
-              onMouseEnter={e => {
-                e.currentTarget.style.setProperty('background', 'none', 'important');
-                e.currentTarget.style.setProperty('background-image', 'linear-gradient(135deg, #8B0000, #CC5500)', 'important');
-                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
-                e.currentTarget.style.boxShadow = '0 6px 22px rgba(139,0,0,0.55)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.setProperty('background', '#1a1a1a', 'important');
-                e.currentTarget.style.setProperty('background-image', 'none', 'important');
-                e.currentTarget.style.setProperty('border', '1px solid rgba(139, 0, 0, 0.5)', 'important');
-                e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.3)';
-              }}
-              style={{ background: '#1a1a1a', backgroundImage: 'none', color: 'white', border: '1px solid rgba(139, 0, 0, 0.5)', borderRadius: '0.5rem', padding: '0 1.25rem', height: '44px', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'background 0.25s ease, background-image 0.25s ease, box-shadow 0.25s ease, border 0.25s ease', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}
-            >
-              <Plus className="w-4 h-4" />
-              Nouveau retour d'appel
-            </button>
+            <PremiumButton label="Nouveau mandat" onClick={handleNewMandat} />
+            <PremiumButton label="Nouveau retour d'appel" onClick={handleNewRetourAppel} />
           </div>
         </div>
 
