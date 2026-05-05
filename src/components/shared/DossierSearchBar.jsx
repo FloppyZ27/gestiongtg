@@ -180,17 +180,12 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                     onClick={() => handleDossierClick(dossier)}
                     className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
                   >
-                    {/* Ligne principale : numéro dossier + client + date */}
+                    {/* Ligne principale : numéro dossier + client + date + statut */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
-                        <div className="flex flex-col gap-0.5">
-                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0 w-fit`}>
-                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                          </Badge>
-                          <Badge className={`text-[10px] px-1.5 py-0 w-fit ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                            {dossier.statut}
-                          </Badge>
-                        </div>
+                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0 w-fit`}>
+                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                        </Badge>
                         {clientsNames && (
                           <span className="text-sm text-slate-300 flex items-center gap-1 flex-shrink-0">
                             <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
@@ -198,11 +193,16 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                           </span>
                         )}
                       </div>
-                      {dossier.date_ouverture && (
-                        <span className="text-[10px] text-slate-500 flex-shrink-0">
-                          {format(new Date(dossier.date_ouverture), "d MMM yyyy", { locale: fr })}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {dossier.date_ouverture && (
+                          <span className="text-[10px] text-slate-500">
+                            {format(new Date(dossier.date_ouverture), "d MMM yyyy", { locale: fr })}
+                          </span>
+                        )}
+                        <Badge className={`text-[10px] px-1.5 py-0 ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {dossier.statut}
+                        </Badge>
+                      </div>
                     </div>
 
                     {/* Une ligne par mandat */}
