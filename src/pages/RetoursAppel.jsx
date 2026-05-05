@@ -1388,7 +1388,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleDelete(retour.id)} 
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                            className="text-red-400 h-6 w-6 p-0"
                           >
                             <Trash className="w-4 h-4" />
                           </Button>
