@@ -44,11 +44,16 @@ export default function OuvrirDossierDialog({
   // Sync formData when dossierForm changes or dialog opens
   useEffect(() => {
     if (dossierForm && open && currentUser) {
-      setFormData({ ...dossierForm });
+      // Enrichir dossierForm avec les infos de la prise de mandat pour le récapitulatif
+      const enrichedForm = {
+        ...dossierForm,
+        _priseMandat: editingPriseMandat || null
+      };
+      setFormData(enrichedForm);
       // Créer automatiquement le commentaire récapitulatif en passant les données directement
-      createAutoRecapFromData(dossierForm, commentaires || []);
+      createAutoRecapFromData(enrichedForm, commentaires || []);
     }
-  }, [dossierForm, open, currentUser]);
+  }, [dossierForm, open, currentUser, editingPriseMandat]);
 
   const createAutoRecapFromData = (data, existingCommentaires) => {
     if (!data || !currentUser) return;
@@ -76,86 +81,91 @@ export default function OuvrirDossierDialog({
   const buildRecapComment = (data, user) => {
     if (!data) return null;
     
-    const recapLines = ['=== RÉCAPITULATIF DES MANDATS ===', ''];
+    const recapLines = ['=== RÉCAPITULATIF DE LA PRISE DE MANDAT ===', ''];
+
+    // Informations générales
+    if (data.arpenteur_geometre) recapLines.push(`👷 Arpenteur-géomètre: ${data.arpenteur_geometre}`);
+    if (data.place_affaire) recapLines.push(`🏢 Place d'affaire: ${data.place_affaire}`);
+    recapLines.push('');
+
+    // Clients
+    const clientNames = (data.clients_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
+    }).filter(Boolean);
+    if (clientNames.length > 0) recapLines.push(`👤 Client(s): ${clientNames.join(', ')}`);
+
+    // Informations du client saisies manuellement
+    if (data._priseMandat?.client_info) {
+      const ci = data._priseMandat.client_info;
+      const fullName = `${ci.prenom || ''} ${ci.nom || ''}`.trim();
+      if (fullName) recapLines.push(`👤 Client: ${fullName}`);
+      if (ci.telephone) recapLines.push(`📞 Téléphone: ${ci.telephone}${ci.type_telephone ? ` (${ci.type_telephone})` : ''}`);
+      if (ci.courriel) recapLines.push(`✉️ Courriel: ${ci.courriel}`);
+    }
+
+    // Professionnels
+    if (data._priseMandat?.professionnel_info) {
+      const pi = data._priseMandat.professionnel_info;
+      if (pi.notaire) recapLines.push(`⚖️ Notaire: ${pi.notaire}`);
+      if (pi.courtier) recapLines.push(`🏡 Courtier immobilier: ${pi.courtier}`);
+      if (pi.compagnie) recapLines.push(`🏗️ Compagnie: ${pi.compagnie}`);
+    }
+
+    // Notaires et courtiers via IDs
+    const notaireNames = (data.notaires_ids || []).map(id => {
+      const n = (clients || []).find(cl => cl.id === id);
+      return n ? `${n.prenom || ''} ${n.nom || ''}`.trim() : null;
+    }).filter(Boolean);
+    if (notaireNames.length > 0) recapLines.push(`⚖️ Notaire(s): ${notaireNames.join(', ')}`);
+
+    const courtierNames = (data.courtiers_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
+    }).filter(Boolean);
+    if (courtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${courtierNames.join(', ')}`);
+
+    recapLines.push('');
+    recapLines.push(`📋 MANDATS (${(data.mandats || []).length}):`);
+    recapLines.push('─'.repeat(40));
+
     (data.mandats || []).forEach((m, i) => {
-      recapLines.push(`📋 MANDAT ${i + 1}: ${m.type_mandat || 'N/A'}`);
-      recapLines.push('─'.repeat(40));
+      recapLines.push(`• Mandat ${i + 1}: ${m.type_mandat || 'N/A'}`);
       
-      // Informations de localisation
+      // Adresse des travaux
       if (m.adresse_travaux?.rue || m.adresse_travaux?.ville) {
         const parts = [m.adresse_travaux?.numeros_civiques?.[0], m.adresse_travaux?.rue, m.adresse_travaux?.ville].filter(Boolean);
-        recapLines.push(`📍 Adresse: ${parts.join(', ')}`);
+        recapLines.push(`  📍 Adresse: ${parts.join(', ')}`);
       }
-      if (m.adresse_travaux?.code_postal) recapLines.push(`   Code postal: ${m.adresse_travaux.code_postal}`);
-      if (m.adresse_travaux?.province) recapLines.push(`   Province: ${m.adresse_travaux.province}`);
       
       // Lots
-      if (m.lots_texte) recapLines.push(`🗂️ Lots (texte): ${m.lots_texte}`);
       if (m.lots?.length > 0) {
         const lotNumbers = m.lots.map(lotId => {
-          const lot = lots?.find(l => l.id === lotId);
-          return lot ? `${lot.cadastre} - Lot ${lot.numero_lot}` : lotId;
+          const lot = (lots || []).find(l => l.id === lotId);
+          return lot ? `${lot.numero_lot}` : lotId;
         }).join(', ');
-        recapLines.push(`🗂️ Lots: ${lotNumbers}`);
+        recapLines.push(`  🗂️ Lots: ${lotNumbers}`);
       }
       
-      // Dates importantes
-      if (m.date_ouverture || m.date_signature || m.date_debut_travaux || m.date_livraison) {
-        recapLines.push('📅 Dates:');
-        if (m.date_ouverture) recapLines.push(`   Ouverture: ${m.date_ouverture}`);
-        if (m.date_signature) recapLines.push(`   Signature: ${m.date_signature}`);
-        if (m.date_debut_travaux) recapLines.push(`   Début travaux: ${m.date_debut_travaux}`);
-        if (m.date_livraison) recapLines.push(`   Livraison: ${m.date_livraison}`);
-      }
-      
-      // Minutes
-      if (m.minute || m.date_minute || m.type_minute) {
-        recapLines.push('📄 Minutes:');
-        if (m.minute) recapLines.push(`   Numéro: ${m.minute}`);
-        if (m.date_minute) recapLines.push(`   Date: ${m.date_minute}`);
-        if (m.type_minute) recapLines.push(`   Type: ${m.type_minute}`);
-      }
+      // Dates
+      if (m.date_signature) recapLines.push(`  📅 Signature: ${m.date_signature}`);
+      if (m.date_debut_travaux) recapLines.push(`  📅 Début travaux: ${m.date_debut_travaux}`);
+      if (m.date_livraison) recapLines.push(`  📅 Livraison: ${m.date_livraison}`);
       
       // Tarification
-      if (m.prix_estime || m.prix_premier_lot || m.prix_autres_lots || m.rabais) {
-        recapLines.push('💰 Tarification:');
-        if (m.prix_estime) recapLines.push(`   Prix estimé: ${m.prix_estime} $`);
-        if (m.prix_premier_lot) recapLines.push(`   Prix 1er lot: ${m.prix_premier_lot} $`);
-        if (m.prix_autres_lots) recapLines.push(`   Prix autres lots: ${m.prix_autres_lots} $`);
-        if (m.rabais) recapLines.push(`   Rabais: ${m.rabais} $`);
-        if (m.taxes_incluses) recapLines.push(`   ✅ Taxes incluses`);
-        if (m.prix_convenu) recapLines.push(`   ✅ Prix convenu`);
-      }
-      
-      // Assignation
-      if (m.utilisateur_assigne || m.tache_actuelle || m.equipe_assignee) {
-        recapLines.push('👤 Assignation:');
-        if (m.utilisateur_assigne) {
-          const assignedUser = (users || []).find(u => u.email === m.utilisateur_assigne);
-          recapLines.push(`   Responsable: ${assignedUser?.full_name || m.utilisateur_assigne}`);
-        }
-        if (m.tache_actuelle) recapLines.push(`   Tâche actuelle: ${m.tache_actuelle}`);
-        if (m.equipe_assignee) recapLines.push(`   Équipe: ${m.equipe_assignee}`);
+      if (m.prix_estime || m.prix_premier_lot || m.prix_autres_lots) {
+        const total = (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0);
+        recapLines.push(`  💰 Prix estimé: ${total.toFixed(2)} $${m.taxes_incluses ? ' (taxes incluses)' : ''}`);
+        if (m.rabais) recapLines.push(`  💸 Rabais: ${m.rabais} $`);
       }
       
       // Notes
-      if (m.notes) recapLines.push(`📝 Notes: ${m.notes}`);
-      
-      recapLines.push('');
+      if (m.notes) recapLines.push(`  📝 Notes: ${m.notes}`);
     });
 
     if (recapLines.length > 2) {
       return {
         contenu: recapLines.join('\n'),
-        utilisateur_email: user?.email || '',
-        utilisateur_nom: user?.full_name || 'Système',
-        _isRecap: true
-      };
-    }
-    // Créer un recap minimal si au moins un mandat existe
-    if (data.mandats && data.mandats.length > 0) {
-      return {
-        contenu: 'Nouveau dossier ouvert - ' + data.numero_dossier + ' - ' + (data.arpenteur_geometre || 'N/A'),
         utilisateur_email: user?.email || '',
         utilisateur_nom: user?.full_name || 'Système',
         _isRecap: true

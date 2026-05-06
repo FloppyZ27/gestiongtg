@@ -83,6 +83,7 @@ export default function PriseMandatTable({
       console.error("Erreur lors du déplacement SharePoint:", error);
     }
 
+    // Générer et passer le résumé du mandat au parent
     onOpenDossier(pm);
   };
 
