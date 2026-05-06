@@ -41,7 +41,11 @@ export default function NotificationBanner({ user }) {
       }
 
       // Définir un nouveau timer pour fermer après 7 secondes
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
+        if (visibleNotification) {
+          await base44.entities.Notification.update(visibleNotification.id, { lue: true });
+          setDismissedIds(prev => new Set([...prev, visibleNotification.id]));
+        }
         setVisibleNotification(null);
       }, 7000);
 
@@ -58,8 +62,12 @@ export default function NotificationBanner({ user }) {
 
 
 
-  const handleClose = () => {
-    // Ferme juste la banner sans la marquer comme lue
+  const handleClose = async () => {
+    // Marque comme lue pour éviter qu'elle réapparaisse immédiatement
+    if (visibleNotification) {
+      await base44.entities.Notification.update(visibleNotification.id, { lue: true });
+      setDismissedIds(prev => new Set([...prev, visibleNotification.id]));
+    }
     setVisibleNotification(null);
     if (autoCloseTimer) {
       clearTimeout(autoCloseTimer);
