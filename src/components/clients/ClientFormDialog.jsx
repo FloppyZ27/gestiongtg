@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -865,8 +865,9 @@ export default function ClientFormDialog({
       setCommentairesTemporaires([]);
       setHasChanges(false);
     } else if (open && !editingClient) {
-      // Pré-remplir avec initialData si fourni (données du mandat)
+      // Pré-remplir avec initialData si fourni (données du hook ou mandat)
       const initial = initialData || {};
+      
       const adresses = initial.adresse_travaux ? [{ 
         numeros_civiques: initial.adresse_travaux.numeros_civiques || [""],
         rue: initial.adresse_travaux.rue || "",
@@ -890,14 +891,6 @@ export default function ClientFormDialog({
       setInitialFormData(JSON.parse(JSON.stringify(data)));
       setCommentairesTemporaires([]);
       setHasChanges(false);
-      
-      // Pré-remplir les champs du formulaire en bas pour l'adresse si besoin
-      if (initial.courriel && !initial.courriel.trim()) {
-        setTimeout(() => {
-          const courrielInput = document.getElementById('new-courriel');
-          if (courrielInput) courrielInput.value = "";
-        }, 100);
-      }
     }
   }, [open, editingClient, defaultType, initialData]);
 
