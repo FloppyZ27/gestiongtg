@@ -194,7 +194,7 @@ export default function ClientStepForm({
               </div>
             </div>
 
-            <div className="border-l border-slate-700 pl-3">
+            <div className="pl-3">
               <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClients.length})</p>
               <div className="max-h-[100px] overflow-y-auto space-y-1">
                 {filteredClients.length > 0 ? (
