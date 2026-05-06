@@ -36,7 +36,7 @@ export default function DossierInfoStepForm({
   disabled = false
 }) {
   return (
-    <Card className="border-0 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30" style={{border: 'none', boxShadow: 'none'}}>
       <CardHeader 
         className="cursor-pointer hover:bg-teal-900/40 transition-colors rounded-t-lg py-1.5 bg-teal-900/20"
         onClick={onToggleCollapse}

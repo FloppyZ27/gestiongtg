@@ -132,7 +132,7 @@ export default function AddressStepForm({
   const hasAddress = addressForm.rue || addressForm.ville;
 
   return (
-    <Card className="border-0 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30" style={{border: 'none', boxShadow: 'none'}}>
       <CardHeader 
                     className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
         onClick={onToggleCollapse}

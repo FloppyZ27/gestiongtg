@@ -180,7 +180,7 @@ export default function ProfessionnelStepForm({
   const activeListData = getActiveList();
 
   return (
-    <Card className="border-0 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30" style={{border: 'none', boxShadow: 'none'}}>
       <CardHeader 
         className="cursor-pointer hover:bg-pink-900/40 transition-colors rounded-t-lg py-1.5 bg-pink-900/20"
         onClick={onToggleCollapse}
