@@ -83,11 +83,6 @@ export default function OuvrirDossierDialog({
     
     const recapLines = ['=== RÉCAPITULATIF DE LA PRISE DE MANDAT ===', ''];
 
-    // Informations générales
-    if (data.arpenteur_geometre) recapLines.push(`👷 Arpenteur-géomètre: ${data.arpenteur_geometre}`);
-    if (data.place_affaire) recapLines.push(`🏢 Place d'affaire: ${data.place_affaire}`);
-    recapLines.push('');
-
     // Clients
     const clientNames = (data.clients_ids || []).map(id => {
       const c = (clients || []).find(cl => cl.id === id);
