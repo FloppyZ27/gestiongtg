@@ -198,6 +198,7 @@ export default function MandatStepForm({
               <div className="space-y-1 relative" ref={dropdownRef}>
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
                 <button
+                  type="button"
                   disabled={disabled}
                   onClick={() => setDropdownOpen(o => !o)}
                   className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
