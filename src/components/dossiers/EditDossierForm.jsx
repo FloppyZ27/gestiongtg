@@ -663,7 +663,7 @@ export default function EditDossierForm({
                                      isActive ? `${mandatColor} border-b-2` : 'text-slate-400'
                                    }`}
                                  >
-                                  <Badge className={`${mandatColor} border text-xs`}>
+                                  <Badge className={`${isActive ? mandatColor : 'bg-slate-700 text-slate-400 border-slate-600'} border text-xs`}>
                                     {mandat.type_mandat ? getAbbreviatedMandatType(mandat.type_mandat) : `Mandat ${index + 1}`}
                                   </Badge>
                                 </TabsTrigger>
