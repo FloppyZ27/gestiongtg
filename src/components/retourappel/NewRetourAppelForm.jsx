@@ -335,8 +335,8 @@ export default function NewRetourAppelForm({
                 ) : (
                   <div className="space-y-3">
                     {/* Ligne de filtres */}
-                     <div className="flex flex-col lg:flex-row lg:items-end lg:gap-3 gap-2">
-                       <div className="flex items-center gap-1.5 shrink-0">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                       <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center gap-1.5 py-2">
                          <Checkbox
                            id="aucunDossier"
                            checked={aucunDossier}
@@ -357,8 +357,8 @@ export default function NewRetourAppelForm({
                          <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                        </div>
 
-                       <div className="flex-1 space-y-1">
-                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
+                       <div className="space-y-1">
+                         <Label className="text-slate-400 text-xs">Arpenteur</Label>
                          <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
                              <SelectValue placeholder="Tous" />
@@ -372,8 +372,8 @@ export default function NewRetourAppelForm({
                          </Select>
                        </div>
 
-                       <div className="flex-1 lg:w-32 space-y-1">
-                         <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                       <div className="space-y-1">
+                         <Label className="text-slate-400 text-xs">N° dossier</Label>
                          <Input
                            placeholder="Rechercher..."
                            value={selectedNumeroDossier}
@@ -382,7 +382,7 @@ export default function NewRetourAppelForm({
                          />
                        </div>
 
-                       <div className="flex-1 space-y-1">
+                       <div className="space-y-1">
                          <Label className="text-slate-400 text-xs">Client</Label>
                          <Input
                            placeholder="Rechercher..."
