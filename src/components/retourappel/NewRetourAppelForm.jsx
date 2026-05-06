@@ -133,6 +133,16 @@ export default function NewRetourAppelForm({
           setSelectedClient(getClientsNames(dossier.clients_ids));
         }
       }
+      
+      // Initialiser le formulaire avec les données du retour d'appel
+      setFormData({
+        date_appel: editingRetourAppel.date_appel || "",
+        utilisateur_assigne: editingRetourAppel.utilisateur_assigne || "",
+        notes: editingRetourAppel.raison || "",
+        client_nom: editingRetourAppel.client_nom || "",
+        client_telephone: editingRetourAppel.client_telephone || "",
+        dossier_reference_id: editingRetourAppel.dossier_id || null
+      });
     }
   }, [editingRetourAppel, dossiers]);
 
