@@ -28,16 +28,14 @@ export function useClientFormInitialData(viewingDossier, clients) {
       if (primaryClient.nom) initialData.nom = primaryClient.nom;
 
       // Email courant
-      const currentEmail = primaryClient.courriels?.find(e => e.actuel)?.courriel;
+      const currentEmail = primaryClient.courriels?.find(e => e.actuel || e.actuelle)?.courriel;
       if (currentEmail) initialData.courriel = currentEmail;
 
       // Téléphone courant
-      const currentPhone = primaryClient.telephones?.find(t => t.actuel)?.telephone;
-      if (currentPhone) {
-        initialData.telephone = currentPhone;
-        // Récupérer le type du téléphone actuel
-        const currentPhoneType = primaryClient.telephones?.find(t => t.actuel)?.type;
-        if (currentPhoneType) initialData.type_telephone = currentPhoneType;
+      const currentPhoneObj = primaryClient.telephones?.find(t => t.actuel || t.actuelle);
+      if (currentPhoneObj) {
+        initialData.telephone = currentPhoneObj.telephone;
+        if (currentPhoneObj.type) initialData.type_telephone = currentPhoneObj.type;
       }
 
       // Adresse courante
