@@ -941,9 +941,7 @@ export default function ClientFormDialog({
                     </div>
                     {(client.courriels?.length > 0 || client.telephones?.length > 0 || client.adresses?.length > 0) && (
                       <div className="mt-2 pt-2 border-t border-slate-700 text-xs space-y-1">
-                        {client.courriels?.find(c => c.actuel)?.courriel && (
-                          <p className="text-slate-400">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                        )}
+                        {(() => { const courriel = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel; return courriel ? <p className="text-slate-400">✉️ {courriel}</p> : null; })()}
                         {client.telephones?.find(t => t.actuel)?.telephone && (
                           <p className="text-slate-400">📞 {client.telephones.find(t => t.actuel).telephone}</p>
                         )}
