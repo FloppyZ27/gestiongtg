@@ -335,63 +335,63 @@ export default function NewRetourAppelForm({
                 ) : (
                   <div className="space-y-3">
                     {/* Ligne de filtres */}
-                    <div className="flex items-end gap-3">
-                      <div className="flex items-center gap-1.5">
-                        <Checkbox
-                          id="aucunDossier"
-                          checked={aucunDossier}
-                          onCheckedChange={(checked) => {
-                            setAucunDossier(checked);
-                            if (!checked) {
-                              setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
-                              setDossierFound(false);
-                            } else {
-                              setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
-                              setDossierFound(true);
-                              setSelectedArpenteur("");
-                              setSelectedNumeroDossier("");
-                              setSelectedClient("");
-                            }
-                          }}
-                        />
-                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
-                      </div>
+                     <div className="flex flex-col lg:flex-row lg:items-end lg:gap-3 gap-2">
+                       <div className="flex items-center gap-1.5 shrink-0">
+                         <Checkbox
+                           id="aucunDossier"
+                           checked={aucunDossier}
+                           onCheckedChange={(checked) => {
+                             setAucunDossier(checked);
+                             if (!checked) {
+                               setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
+                               setDossierFound(false);
+                             } else {
+                               setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
+                               setDossierFound(true);
+                               setSelectedArpenteur("");
+                               setSelectedNumeroDossier("");
+                               setSelectedClient("");
+                             }
+                           }}
+                         />
+                         <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
+                       </div>
 
-                      <div className="flex-1 space-y-1">
-                        <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
-                        <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                            <SelectValue placeholder="Tous" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value={null} className="text-white text-xs">Tous</SelectItem>
-                            {ARPENTEURS.map((arpenteur) => (
-                              <SelectItem key={arpenteur} value={arpenteur} className="text-white text-xs">{arpenteur}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                       <div className="flex-1 space-y-1">
+                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
+                         <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
+                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                             <SelectValue placeholder="Tous" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-slate-800 border-slate-700">
+                             <SelectItem value={null} className="text-white text-xs">Tous</SelectItem>
+                             {ARPENTEURS.map((arpenteur) => (
+                               <SelectItem key={arpenteur} value={arpenteur} className="text-white text-xs">{arpenteur}</SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
 
-                      <div className="w-32 space-y-1">
-                        <Label className="text-slate-400 text-xs">N° de dossier</Label>
-                        <Input
-                          placeholder="Rechercher..."
-                          value={selectedNumeroDossier}
-                          onChange={(e) => setSelectedNumeroDossier(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                        />
-                      </div>
+                       <div className="flex-1 lg:w-32 space-y-1">
+                         <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                         <Input
+                           placeholder="Rechercher..."
+                           value={selectedNumeroDossier}
+                           onChange={(e) => setSelectedNumeroDossier(e.target.value)}
+                           className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                         />
+                       </div>
 
-                      <div className="flex-1 space-y-1">
-                        <Label className="text-slate-400 text-xs">Client</Label>
-                        <Input
-                          placeholder="Rechercher..."
-                          value={selectedClient}
-                          onChange={(e) => setSelectedClient(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                        />
-                      </div>
-                    </div>
+                       <div className="flex-1 space-y-1">
+                         <Label className="text-slate-400 text-xs">Client</Label>
+                         <Input
+                           placeholder="Rechercher..."
+                           value={selectedClient}
+                           onChange={(e) => setSelectedClient(e.target.value)}
+                           className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                         />
+                       </div>
+                     </div>
 
                     {/* Liste des dossiers */}
                     <div className="overflow-hidden flex flex-col">
@@ -596,7 +596,7 @@ export default function NewRetourAppelForm({
 
               {!retourAppelCollapsed && (
                 <CardContent className="pt-2 pb-3">
-                  <div className="grid grid-cols-[1fr_1fr] gap-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-3">
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
