@@ -651,7 +651,7 @@ export default function EditDossierForm({
                     <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
                       <div className="flex justify-between items-center mb-2 gap-3">
                         <div className="flex-1">
-                          <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
+                          <TabsList className="bg-transparent border-0 h-auto justify-start p-1 rounded-lg inline-flex">
                             {formData.mandats.map((mandat, index) => {
                               const mandatColor = getMandatColor(mandat.type_mandat);
                               const isActive = activeTabMandat === index.toString();
