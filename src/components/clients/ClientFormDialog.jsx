@@ -991,9 +991,9 @@ export default function ClientFormDialog({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
         >
-          <div className="w-full sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
-            <h2 className="text-xl font-bold" style={{
-              background: 'linear-gradient(90deg, hsl(0, 85%, 62%), hsl(22, 90%, 68%))',
+          <div className="w-full sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex items-center">
+            <h2 className="text-2xl font-bold" style={{
+              background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
