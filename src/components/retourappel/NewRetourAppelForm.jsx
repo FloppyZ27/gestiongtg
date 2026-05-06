@@ -258,7 +258,7 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                   <div className="flex items-center gap-3">
+                   <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
                      <div className="flex items-center gap-1.5 shrink-0">
                        <Checkbox
                          id="aucunDossier"
@@ -279,14 +279,14 @@ export default function NewRetourAppelForm({
                        />
                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                      </div>
-                     <Input
+                     <input
                        placeholder="Nom du client *"
                        value={formData.client_nom || ""}
                        onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
                        required
-                       className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1"
+                       style={{flex: 1, minWidth: 0, background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
                      />
-                     <Input
+                     <input
                        id="new-telephone-retour"
                        placeholder="(000) 000-0000 *"
                        value={formData.client_telephone || ""}
@@ -305,7 +305,7 @@ export default function NewRetourAppelForm({
                          setFormData({...formData, client_telephone: formatted});
                        }}
                        required
-                       className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-36"
+                       style={{width: '140px', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
                      />
                   </div>
                 ) : (
