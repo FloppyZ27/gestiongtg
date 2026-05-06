@@ -188,20 +188,19 @@ export default function MandatStepForm({
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
+                    <button
                       disabled={disabled}
-                      className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-sm px-3"
+                      className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {selectedTypes.length > 0 ? (
-                        <span className="text-white truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
+                        <span className="truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
                       ) : (
-                        <span className="text-slate-400">Sélectionner...</span>
+                        <span className="text-muted-foreground">Sélectionner...</span>
                       )}
-                      <ChevronDown className="w-4 h-4 ml-2 opacity-50 flex-shrink-0" />
-                    </Button>
+                      <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+                    </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0" style={{background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="bottom" align="start">
+                  <PopoverContent className="p-0" style={{width: 'var(--radix-popover-trigger-width)', background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="bottom" align="start">
                     <div 
                       className="max-h-[200px] overflow-y-auto p-2 space-y-0.5"
                       onWheelCapture={(e) => e.stopPropagation()}
