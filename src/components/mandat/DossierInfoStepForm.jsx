@@ -15,9 +15,9 @@ const ARPENTEURS = [
 ];
 
 const STATUTS = [
-  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-  { value: "Mandat non octroyé", label: "Non octroyé", color: "bg-red-500/20 text-red-400 border-red-500/30" }
+  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", activeStyle: { background: 'rgba(59,130,246,0.25)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.5)', boxShadow: '0 0 10px rgba(59,130,246,0.3)' } },
+  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", activeStyle: { background: 'rgba(16,185,129,0.25)', color: '#34d399', border: '1px solid rgba(16,185,129,0.5)', boxShadow: '0 0 10px rgba(16,185,129,0.3)' } },
+  { value: "Mandat non octroyé", label: "Non octroyé", activeStyle: { background: 'rgba(239,68,68,0.25)', color: '#f87171', border: '1px solid rgba(239,68,68,0.5)', boxShadow: '0 0 10px rgba(239,68,68,0.3)' } }
 ];
 
 export default function DossierInfoStepForm({
@@ -95,17 +95,15 @@ export default function DossierInfoStepForm({
                       onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
                       disabled={!arpenteurGeometre || disabled}
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        boxShadow: 'none',
                         padding: '2px 8px',
                         borderRadius: '4px',
                         fontSize: '12px',
                         cursor: !arpenteurGeometre || disabled ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
                         opacity: !arpenteurGeometre || disabled ? 0.4 : 1,
+                        fontWeight: statut === s.value ? 600 : 400,
+                        ...(statut === s.value ? s.activeStyle : { background: 'transparent', border: '1px solid transparent', color: '#94a3b8' })
                       }}
-                      className={statut === s.value ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" : "text-slate-400 hover:text-slate-200"}
                     >
                       {s.label}
                     </button>
