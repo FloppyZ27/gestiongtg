@@ -598,32 +598,34 @@ export default function NewRetourAppelForm({
 
               {!retourAppelCollapsed && (
                 <CardContent className="pt-2 pb-3">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="date"
-                        value={formData.date_appel}
-                        onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
-                        required
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                      <Select
-                        value={formData.utilisateur_assigne || ""}
-                        onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {users.map((user) => (
-                            <SelectItem key={user.email} value={user.email} className="text-white text-xs">{user.full_name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-3">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
+                        <Input
+                          type="date"
+                          value={formData.date_appel}
+                          onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
+                          required
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                        <Select
+                          value={formData.utilisateur_assigne || ""}
+                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {users.map((user) => (
+                              <SelectItem key={user.email} value={user.email} className="text-white text-xs">{user.full_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <Label className="text-slate-400 text-xs mb-1">Raison de l'appel <span className="text-red-400">*</span></Label>
