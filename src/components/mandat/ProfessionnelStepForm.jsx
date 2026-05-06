@@ -331,7 +331,18 @@ export default function ProfessionnelStepForm({
                                 </a>
                               </p>
                             )}
-                          </div>
+                            {getCurrentValue(item.courriels, 'courriel') && (
+                              <p className="mt-0.5">
+                                ✉️ <a 
+                                  href={`mailto:${getCurrentValue(item.courriels, 'courriel')}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                >
+                                  {getCurrentValue(item.courriels, 'courriel')}
+                                </a>
+                              </p>
+                            )}
+                            </div>
                         );
                       })
                     ) : (
