@@ -164,6 +164,21 @@ export default function NewRetourAppelForm({
         client_telephone: retourData.client_telephone || ""
       });
       
+      // Créer une notification si un utilisateur est assigné et que c'est différent de l'ancien
+      if (retourData.utilisateur_assigne && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne) {
+        const dossier = oldRetour.dossier_id ? dossiers.find(d => d.id === oldRetour.dossier_id) : null;
+        const clientsNames = dossier ? getClientsNames(dossier.clients_ids) : (oldRetour.client_nom || "");
+        
+        await base44.entities.Notification.create({
+          utilisateur_email: retourData.utilisateur_assigne,
+          titre: "Retour d'appel assigné",
+          message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+          type: "retour_appel",
+          dossier_id: oldRetour.dossier_id || null,
+          lue: false
+        });
+      }
+      
       // Mettre à jour le dossier si applicable
       if (oldRetour.dossier_id) {
         const dossier = dossiers.find(d => d.id === oldRetour.dossier_id);
@@ -172,18 +187,6 @@ export default function NewRetourAppelForm({
             ...dossier,
             utilisateur_assigne: retourData.utilisateur_assigne
           });
-          
-          if (retourData.utilisateur_assigne) {
-            const clientsNames = getClientsNames(dossier.clients_ids);
-            await base44.entities.Notification.create({
-              utilisateur_email: retourData.utilisateur_assigne,
-              titre: "Retour d'appel réassigné",
-              message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
-              type: "retour_appel",
-              dossier_id: oldRetour.dossier_id,
-              lue: false
-            });
-          }
         }
       }
     },
