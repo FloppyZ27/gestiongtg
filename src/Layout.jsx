@@ -163,7 +163,10 @@ const getAbbreviatedMandatType = (type) => {
     "Description Technique": "DT",
     "Implantation": "Imp",
     "Levé topographique": "Levé Topo",
-    "Piquetage": "Piq"
+    "Piquetage": "Piq",
+    "Bornage": "Born",
+    "Dérogation mineure": "Dérog",
+    "Projet de lotissement": "Lotis"
   };
   return abbreviations[type] || type;
 };
