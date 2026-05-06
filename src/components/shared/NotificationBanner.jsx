@@ -58,19 +58,23 @@ export default function NotificationBanner({ user }) {
 
 
 
-  const handleDismiss = async (notificationId) => {
-    await base44.entities.Notification.update(notificationId, { lue: true });
-    setDismissedIds(prev => new Set([...prev, notificationId]));
+  const handleClose = () => {
+    // Ferme juste la banner sans la marquer comme lue
     setVisibleNotification(null);
-    // Nettoyer le timer si l'utilisateur ferme manuellement
     if (autoCloseTimer) {
       clearTimeout(autoCloseTimer);
       setAutoCloseTimer(null);
     }
   };
 
-  const handleClick = (notification) => {
+  const handleDismiss = async (notificationId) => {
+    await base44.entities.Notification.update(notificationId, { lue: true });
+    setDismissedIds(prev => new Set([...prev, notificationId]));
     setVisibleNotification(null);
+    if (autoCloseTimer) {
+      clearTimeout(autoCloseTimer);
+      setAutoCloseTimer(null);
+    }
   };
 
   const getColor = (type) => {
@@ -107,7 +111,7 @@ export default function NotificationBanner({ user }) {
             exit={{ opacity: 0, x: 300, scale: 0.8 }}
             transition={{ duration: 0.3 }}
             className={`w-full bg-gradient-to-r ${getColor(visibleNotification.type)} backdrop-blur-xl border rounded-lg shadow-2xl p-4 cursor-pointer`}
-            onClick={() => handleDismiss(visibleNotification.id)}
+            onClick={handleClose}
           >
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
