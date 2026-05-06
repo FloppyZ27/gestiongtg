@@ -258,8 +258,8 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                   <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                     <div className="flex items-center gap-1.5 shrink-0">
+                   <div style={{display: 'flex', alignItems: 'flex-end', gap: '12px'}}>
+                     <div className="flex items-center gap-1.5 shrink-0 pb-1">
                        <Checkbox
                          id="aucunDossier"
                          checked={aucunDossier}
@@ -279,34 +279,40 @@ export default function NewRetourAppelForm({
                        />
                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                      </div>
-                     <input
-                       placeholder="Nom du client *"
-                       value={formData.client_nom || ""}
-                       onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
-                       required
-                       style={{flex: 1, minWidth: 0, background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
-                     />
-                     <input
-                       id="new-telephone-retour"
-                       placeholder="(000) 000-0000 *"
-                       value={formData.client_telephone || ""}
-                       onChange={(e) => {
-                         const input = e.target.value.replace(/\D/g, '');
-                         let formatted = input;
-                         if (input.length > 0) {
-                           if (input.length <= 3) {
-                             formatted = `(${input}`;
-                           } else if (input.length <= 6) {
-                             formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
-                           } else {
-                             formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>Client <span style={{color:'#f87171'}}>*</span></label>
+                       <input
+                         placeholder="Nom du client"
+                         value={formData.client_nom || ""}
+                         onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
+                         required
+                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
+                       />
+                     </div>
+                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>N° de téléphone <span style={{color:'#f87171'}}>*</span></label>
+                       <input
+                         id="new-telephone-retour"
+                         placeholder="(000) 000-0000"
+                         value={formData.client_telephone || ""}
+                         onChange={(e) => {
+                           const input = e.target.value.replace(/\D/g, '');
+                           let formatted = input;
+                           if (input.length > 0) {
+                             if (input.length <= 3) {
+                               formatted = `(${input}`;
+                             } else if (input.length <= 6) {
+                               formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+                             } else {
+                               formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+                             }
                            }
-                         }
-                         setFormData({...formData, client_telephone: formatted});
-                       }}
-                       required
-                       style={{width: '140px', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
-                     />
+                           setFormData({...formData, client_telephone: formatted});
+                         }}
+                         required
+                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
+                       />
+                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
