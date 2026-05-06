@@ -85,7 +85,7 @@ export default function OuvrirDossierDialog({
     if (!data) return null;
     
     const recapLines = [
-      '**📋 RÉCAPITULATIF DE LA PRISE DE MANDAT**',
+      '<b>📋 RÉCAPITULATIF DE LA PRISE DE MANDAT</b>',
       ''
     ];
 
@@ -127,7 +127,8 @@ export default function OuvrirDossierDialog({
     if (courtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${courtierNames.join(', ')}`);
 
     recapLines.push('');
-    recapLines.push(`**📋 MANDATS (${(data.mandats || []).length})**`);
+    recapLines.push(`<b>📋 MANDATS (${(data.mandats || []).length})</b>`);
+    recapLines.push('');
 
     (data.mandats || []).forEach((m, i) => {
       recapLines.push(`• Mandat ${i + 1}: ${m.type_mandat || 'N/A'}`);
