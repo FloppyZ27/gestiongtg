@@ -23,7 +23,8 @@ export default function ContactsTabsSection({
   setClientTypeForForm,
   setIsClientFormDialogOpen,
   onClientCardClick,
-  setEditingClient
+  setEditingClient,
+  onNewClientClick
 }) {
   const clientsReguliers = (clients || []).filter(c => c?.type_client === 'Client' || !c?.type_client);
   const notaires = (clients || []).filter(c => c?.type_client === 'Notaire');
@@ -141,7 +142,7 @@ export default function ContactsTabsSection({
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                 <Input placeholder="Rechercher..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
               </div>
-              <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Client"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+              <Button type="button" size="sm" onClick={() => { onNewClientClick?.("Client"); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
                 <Plus className="w-3 h-3" />
               </Button>
             </div>
@@ -231,7 +232,7 @@ export default function ContactsTabsSection({
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                 <Input placeholder="Rechercher..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
               </div>
-              <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Notaire"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+              <Button type="button" size="sm" onClick={() => { onNewClientClick?.("Notaire"); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
                 <Plus className="w-3 h-3" />
               </Button>
             </div>
@@ -317,7 +318,7 @@ export default function ContactsTabsSection({
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                 <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
               </div>
-              <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Courtier immobilier"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+              <Button type="button" size="sm" onClick={() => { onNewClientClick?.("Courtier immobilier"); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
                 <Plus className="w-3 h-3" />
               </Button>
             </div>
@@ -403,7 +404,7 @@ export default function ContactsTabsSection({
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                 <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
               </div>
-              <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Compagnie"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+              <Button type="button" size="sm" onClick={() => { onNewClientClick?.("Compagnie"); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
                 <Plus className="w-3 h-3" />
               </Button>
             </div>

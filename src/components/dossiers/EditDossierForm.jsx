@@ -108,6 +108,7 @@ export default function EditDossierForm({
   setLotActionLogs,
   clientSelectionCardComponent,
   onClientCardClick,
+  onNewClientClick,
   allDossiers, hideSections = [], commentairesTemporaires = [], onCommentairesTemporairesChange
 }) {
   // Initialiser activeTabMandat avec l'index du mandat choisi
@@ -570,6 +571,7 @@ export default function EditDossierForm({
                             setClientTypeForForm={setClientTypeForForm}
                             setIsClientFormDialogOpen={setIsClientFormDialogOpen}
                             setEditingClient={setEditingClient}
+                            onNewClientClick={onNewClientClick}
                           />
                         </div>
                       </div>
