@@ -33,28 +33,36 @@ export function useClientFormInitialData(viewingDossier, clients) {
 
       // Téléphone courant
       const currentPhone = primaryClient.telephones?.find(t => t.actuel)?.telephone;
-      if (currentPhone) initialData.telephone = currentPhone;
+      if (currentPhone) {
+        initialData.telephone = currentPhone;
+        // Récupérer le type du téléphone actuel
+        const currentPhoneType = primaryClient.telephones?.find(t => t.actuel)?.type;
+        if (currentPhoneType) initialData.type_telephone = currentPhoneType;
+      }
 
       // Adresse courante
       const currentAddress = primaryClient.adresses?.find(a => a.actuelle || a.actuel);
       if (currentAddress) {
-        if (currentAddress.numeros_civiques?.[0]) initialData.numero_civique = currentAddress.numeros_civiques[0];
-        if (currentAddress.rue) initialData.rue = currentAddress.rue;
-        if (currentAddress.ville) initialData.ville = currentAddress.ville;
-        if (currentAddress.province) initialData.province = currentAddress.province;
-        if (currentAddress.code_postal) initialData.code_postal = currentAddress.code_postal;
+        // Stocker la structure complète pour adresse_travaux
+        initialData.adresse_travaux = {
+          numeros_civiques: currentAddress.numeros_civiques || [""],
+          rue: currentAddress.rue || "",
+          ville: currentAddress.ville || "",
+          province: currentAddress.province || "QC",
+          code_postal: currentAddress.code_postal || ""
+        };
       }
     }
 
-    // Ajouter les infos d'adresse de travaux du dossier si disponibles
-    if (workAddress) {
-      if (workAddress.numeros_civiques?.[0] && !initialData.numero_civique) {
-        initialData.numero_civique = workAddress.numeros_civiques[0];
-      }
-      if (workAddress.rue && !initialData.rue) initialData.rue = workAddress.rue;
-      if (workAddress.ville && !initialData.ville) initialData.ville = workAddress.ville;
-      if (workAddress.province && !initialData.province) initialData.province = workAddress.province;
-      if (workAddress.code_postal && !initialData.code_postal) initialData.code_postal = workAddress.code_postal;
+    // Ajouter les infos d'adresse de travaux du dossier si disponibles (priorité à l'adresse client si existante)
+    if (workAddress && !initialData.adresse_travaux) {
+      initialData.adresse_travaux = {
+        numeros_civiques: workAddress.numeros_civiques || [""],
+        rue: workAddress.rue || "",
+        ville: workAddress.ville || "",
+        province: workAddress.province || "QC",
+        code_postal: workAddress.code_postal || ""
+      };
     }
 
     // Retourner null si aucune donnée n'a été trouvée
