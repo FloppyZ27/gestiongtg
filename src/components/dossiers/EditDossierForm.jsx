@@ -396,7 +396,16 @@ export default function EditDossierForm({
     setRetourAppelCollapsed(sectionId !== "retour-appel");
     setTimeout(() => {
       const element = document.querySelector(`[data-section="${sectionId}"]`);
-      if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (element) {
+        const scrollContainer = element.closest('.flex-1.overflow-y-auto');
+        if (scrollContainer) {
+          const offset = 70; // Header height
+          const elementTop = element.getBoundingClientRect().top + scrollContainer.scrollTop - scrollContainer.getBoundingClientRect().top;
+          scrollContainer.scrollTo({ top: Math.max(0, elementTop - offset), behavior: "smooth" });
+        } else {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
     }, 50);
   };
 
