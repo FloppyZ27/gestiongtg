@@ -281,7 +281,7 @@ export default function AddressStepForm({
               </div>
 
               {/* Colonne droite - Mandats existants du client */}
-              <div className="border-l border-emerald-500/30 pl-3">
+              <div className="pl-3">
               <p className="text-slate-400 text-xs mb-1.5">Mandats existants du client</p>
               <div className="max-h-[85px] overflow-y-auto space-y-1">
                 {clientDossiers.length > 0 ? (
