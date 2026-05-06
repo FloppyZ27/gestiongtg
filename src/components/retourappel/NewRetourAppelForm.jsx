@@ -118,23 +118,20 @@ export default function NewRetourAppelForm({
     return sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-red-400" /> : <ChevronDown className="w-3 h-3 text-red-400" />;
   };
 
-  // Initialiser l'état en mode édition
+  // Initialiser l'état en mode édition (une seule fois au montage)
   useEffect(() => {
     if (editingRetourAppel) {
+      const dossier = dossiers.find(d => d.id === editingRetourAppel.dossier_id);
+      
       setDossierFound(true);
       setAucunDossier(!editingRetourAppel.dossier_id);
       
-      // Pré-remplir les filtres de recherche si un dossier existe
-      if (editingRetourAppel.dossier_id) {
-        const dossier = dossiers.find(d => d.id === editingRetourAppel.dossier_id);
-        if (dossier) {
-          setSelectedArpenteur(dossier.arpenteur_geometre);
-          setSelectedNumeroDossier(dossier.numero_dossier);
-          setSelectedClient(getClientsNames(dossier.clients_ids));
-        }
+      if (dossier) {
+        setSelectedArpenteur(dossier.arpenteur_geometre);
+        setSelectedNumeroDossier(dossier.numero_dossier);
+        setSelectedClient(getClientsNames(dossier.clients_ids));
       }
       
-      // Initialiser le formulaire avec les données du retour d'appel
       setFormData({
         date_appel: editingRetourAppel.date_appel || "",
         utilisateur_assigne: editingRetourAppel.utilisateur_assigne || "",
@@ -144,7 +141,7 @@ export default function NewRetourAppelForm({
         dossier_reference_id: editingRetourAppel.dossier_id || null
       });
     }
-  }, [editingRetourAppel, dossiers]);
+  }, [editingRetourAppel?.id]);
 
   // Mutation pour sauvegarder automatiquement
   const saveRetourAppelMutation = useMutation({
