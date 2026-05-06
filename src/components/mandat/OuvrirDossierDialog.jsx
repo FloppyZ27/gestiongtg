@@ -47,7 +47,10 @@ export default function OuvrirDossierDialog({
       // Enrichir dossierForm avec les infos de la prise de mandat pour le récapitulatif
       const enrichedForm = {
         ...dossierForm,
-        _priseMandat: editingPriseMandat || null
+        _priseMandat: editingPriseMandat || null,
+        // Ajouter les infos client, notaire, courtier, compagnie pour le récapitulatif
+        _clientInfo: editingPriseMandat?.client_info || null,
+        _professionnelInfo: editingPriseMandat?.professionnel_info || null
       };
       setFormData(enrichedForm);
       // Créer automatiquement le commentaire récapitulatif en passant les données directement
@@ -90,21 +93,21 @@ export default function OuvrirDossierDialog({
     }).filter(Boolean);
     if (clientNames.length > 0) recapLines.push(`👤 Client(s): ${clientNames.join(', ')}`);
 
-    // Informations du client saisies manuellement
-    if (data._priseMandat?.client_info) {
-      const ci = data._priseMandat.client_info;
-      const fullName = `${ci.prenom || ''} ${ci.nom || ''}`.trim();
-      if (fullName) recapLines.push(`👤 Client: ${fullName}`);
-      if (ci.telephone) recapLines.push(`📞 Téléphone: ${ci.telephone}${ci.type_telephone ? ` (${ci.type_telephone})` : ''}`);
-      if (ci.courriel) recapLines.push(`✉️ Courriel: ${ci.courriel}`);
+    // Informations du client saisies manuellement (depuis data._clientInfo ou _priseMandat)
+    const clientInfo = data._clientInfo || data._priseMandat?.client_info;
+    if (clientInfo) {
+     const fullName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+     if (fullName) recapLines.push(`👤 Client: ${fullName}`);
+     if (clientInfo.telephone) recapLines.push(`📞 Téléphone: ${clientInfo.telephone}${clientInfo.type_telephone ? ` (${clientInfo.type_telephone})` : ''}`);
+     if (clientInfo.courriel) recapLines.push(`✉️ Courriel: ${clientInfo.courriel}`);
     }
 
-    // Professionnels
-    if (data._priseMandat?.professionnel_info) {
-      const pi = data._priseMandat.professionnel_info;
-      if (pi.notaire) recapLines.push(`⚖️ Notaire: ${pi.notaire}`);
-      if (pi.courtier) recapLines.push(`🏡 Courtier immobilier: ${pi.courtier}`);
-      if (pi.compagnie) recapLines.push(`🏗️ Compagnie: ${pi.compagnie}`);
+    // Professionnels (depuis data._professionnelInfo ou _priseMandat)
+    const professionnelInfo = data._professionnelInfo || data._priseMandat?.professionnel_info;
+    if (professionnelInfo) {
+     if (professionnelInfo.notaire) recapLines.push(`⚖️ Notaire: ${professionnelInfo.notaire}`);
+     if (professionnelInfo.courtier) recapLines.push(`🏡 Courtier immobilier: ${professionnelInfo.courtier}`);
+     if (professionnelInfo.compagnie) recapLines.push(`🏗️ Compagnie: ${professionnelInfo.compagnie}`);
     }
 
     // Notaires et courtiers via IDs
