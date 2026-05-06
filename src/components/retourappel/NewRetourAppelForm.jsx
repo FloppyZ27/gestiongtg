@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -513,7 +514,16 @@ export default function NewRetourAppelForm({
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs whitespace-nowrap py-1 px-1">
-                                      {getClientsNames(dossier.clients_ids).substring(0, 15)}...
+                                      {getClientsNames(dossier.clients_ids).length > 15 ? (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span>{getClientsNames(dossier.clients_ids).substring(0, 15)}...</span>
+                                          </TooltipTrigger>
+                                          <TooltipContent>{getClientsNames(dossier.clients_ids)}</TooltipContent>
+                                        </Tooltip>
+                                      ) : (
+                                        getClientsNames(dossier.clients_ids)
+                                      )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 py-1 px-1">
                                       {dossier.mandats && dossier.mandats.length > 0 ? (
@@ -533,15 +543,35 @@ export default function NewRetourAppelForm({
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs py-1 px-1">
                                       {tacheActuelle !== "-" ? (
-                                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs pointer-events-none">
-                                          {tacheActuelle.substring(0, 10)}
-                                        </Badge>
+                                        tacheActuelle.length > 10 ? (
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs pointer-events-auto cursor-help">
+                                                {tacheActuelle.substring(0, 10)}
+                                              </Badge>
+                                            </TooltipTrigger>
+                                            <TooltipContent>{tacheActuelle}</TooltipContent>
+                                          </Tooltip>
+                                        ) : (
+                                          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs pointer-events-none">
+                                            {tacheActuelle}
+                                          </Badge>
+                                        )
                                       ) : (
                                         <span className="text-slate-600">-</span>
                                       )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs whitespace-nowrap py-1 px-1 max-w-[80px]">
-                                      {firstAdresse.substring(0, 12)}...
+                                      {firstAdresse.length > 12 ? (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span>{firstAdresse.substring(0, 12)}...</span>
+                                          </TooltipTrigger>
+                                          <TooltipContent>{firstAdresse}</TooltipContent>
+                                        </Tooltip>
+                                      ) : (
+                                        firstAdresse
+                                      )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs py-1 px-1 whitespace-nowrap">
                                       {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM", { locale: fr }) : "-"}
