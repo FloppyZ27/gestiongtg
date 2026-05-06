@@ -511,7 +511,7 @@ export default function NewRetourAppelForm({
 
               {!retourAppelCollapsed && (
                 <CardContent className="pt-4 pb-3 space-y-4">
-                  <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
+                  <div className="rounded-lg p-4">
                     <div className="grid grid-cols-[1fr_1fr] gap-3">
                       <div className="space-y-3">
                         <div className="space-y-1">
