@@ -278,7 +278,7 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                   <div style={{display: 'flex', alignItems: 'flex-end', gap: '12px'}}>
+                   <div className="flex flex-col sm:flex-row items-end gap-3">
                      <div className="flex items-center gap-1.5 shrink-0 pb-1">
                        <Checkbox
                          id="aucunDossier"
@@ -299,18 +299,18 @@ export default function NewRetourAppelForm({
                        />
                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                      </div>
-                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>Client <span style={{color:'#f87171'}}>*</span></label>
+                     <div className="flex-1 min-w-0 space-y-1">
+                       <label className="text-slate-400 text-[11px]">Client <span className="text-red-400">*</span></label>
                        <input
                          placeholder="Nom du client"
                          value={formData.client_nom || ""}
                          onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
                          required
-                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
+                         className="w-full bg-slate-700 border border-slate-600 text-white h-7 text-xs rounded-lg px-2.5"
                        />
                      </div>
-                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>N° de téléphone <span style={{color:'#f87171'}}>*</span></label>
+                     <div className="flex-1 min-w-0 space-y-1">
+                       <label className="text-slate-400 text-[11px]">N° de téléphone <span className="text-red-400">*</span></label>
                        <input
                          id="new-telephone-retour"
                          placeholder="(000) 000-0000"
@@ -330,14 +330,14 @@ export default function NewRetourAppelForm({
                            setFormData({...formData, client_telephone: formatted});
                          }}
                          required
-                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
+                         className="w-full bg-slate-700 border border-slate-600 text-white h-7 text-xs rounded-lg px-2.5"
                        />
                      </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {/* Ligne de filtres */}
-                    <div className="flex items-end gap-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-3">
                       <div className="flex items-center gap-1.5">
                         <Checkbox
                           id="aucunDossier"
@@ -359,7 +359,7 @@ export default function NewRetourAppelForm({
                         <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                       </div>
 
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1">
                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                         <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
@@ -374,23 +374,23 @@ export default function NewRetourAppelForm({
                         </Select>
                       </div>
 
-                      <div className="w-32 space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1 sm:w-32 sm:flex-none">
                         <Label className="text-slate-400 text-xs">N° de dossier</Label>
                         <Input
                           placeholder="Rechercher..."
                           value={selectedNumeroDossier}
                           onChange={(e) => setSelectedNumeroDossier(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-full"
                         />
                       </div>
 
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1">
                         <Label className="text-slate-400 text-xs">Client</Label>
                         <Input
                           placeholder="Rechercher..."
                           value={selectedClient}
                           onChange={(e) => setSelectedClient(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-full"
                         />
                       </div>
                     </div>
