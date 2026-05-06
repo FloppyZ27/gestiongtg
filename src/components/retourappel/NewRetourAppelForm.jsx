@@ -405,33 +405,34 @@ export default function NewRetourAppelForm({
                           return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                         }).length})
                       </p>
-                      <div className="flex-1 overflow-y-auto max-h-[300px]">
-                        <Table>
-                          <TableHeader className="sticky top-0 bg-slate-900 z-10">
-                            <TableRow className="hover:bg-transparent border-slate-700">
-                              {[
-                                ['numero_dossier', 'N° Dossier'],
-                                ['clients', 'Clients'],
-                                ['mandats', 'Mandats'],
-                                ['tache_actuelle', 'Tâche actuelle'],
-                                ['adresse', 'Adresse'],
-                                ['date_ouverture', 'Date ouverture'],
-                                ['statut', 'Statut'],
-                              ].map(([field, label]) => (
-                                <TableHead
-                                  key={field}
-                                  className="text-slate-300 text-xs cursor-pointer hover:text-white select-none"
-                                  onClick={() => handleSort(field)}
-                                >
-                                  <div className="flex items-center gap-1">
-                                    {label}
-                                    <SortIcon field={field} />
-                                  </div>
-                                </TableHead>
-                              ))}
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                      <div className="flex-1 overflow-y-auto max-h-[300px] overflow-x-auto">
+                        <div className="min-w-max lg:min-w-0">
+                          <Table>
+                            <TableHeader className="sticky top-0 bg-slate-900 z-10">
+                              <TableRow className="hover:bg-transparent border-slate-700">
+                                {[
+                                  ['numero_dossier', 'N° Dossier'],
+                                  ['clients', 'Clients'],
+                                  ['mandats', 'Mandats'],
+                                  ['tache_actuelle', 'Tâche actuelle'],
+                                  ['adresse', 'Adresse'],
+                                  ['date_ouverture', 'Date ouverture'],
+                                  ['statut', 'Statut'],
+                                ].map(([field, label]) => (
+                                  <TableHead
+                                    key={field}
+                                    className="text-slate-300 text-xs cursor-pointer hover:text-white select-none"
+                                    onClick={() => handleSort(field)}
+                                  >
+                                    <div className="flex items-center gap-1">
+                                      {label}
+                                      <SortIcon field={field} />
+                                    </div>
+                                  </TableHead>
+                                ))}
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
                             {dossiers
                               .filter(d => {
                                 const matchesStatut = d.statut === "Ouvert" || d.statut === "Fermé";
@@ -567,9 +568,10 @@ export default function NewRetourAppelForm({
                               </TableRow>
                             )}
                           </TableBody>
-                        </Table>
-                      </div>
-                    </div>
+                          </Table>
+                          </div>
+                          </div>
+                          </div>
                   </div>
                 )}
               </CardContent>
