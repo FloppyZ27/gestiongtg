@@ -1370,6 +1370,7 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
                             retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
                             retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
                             retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
+                            retour.statut === "Terminé" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
                             "bg-slate-700 text-white"
                           } ${user?.email !== retour.utilisateur_assigne && user?.role !== 'admin' ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             <SelectValue />
