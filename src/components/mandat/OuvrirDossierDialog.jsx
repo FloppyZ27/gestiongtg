@@ -208,22 +208,25 @@ export default function OuvrirDossierDialog({
 
       const currentAddress = primaryClient.adresses?.find(a => a.actuelle || a.actuel);
       if (currentAddress) {
-        initialData.adresse_travaux = { ...currentAddress };
+        initialData.adresse_travaux = { 
+          numeros_civiques: currentAddress.numeros_civiques || [""],
+          rue: currentAddress.rue || "",
+          ville: currentAddress.ville || "",
+          province: currentAddress.province || "QC",
+          code_postal: currentAddress.code_postal || ""
+        };
       }
     }
 
-    // Ajouter les infos d'adresse de travaux du dossier si disponibles
-    if (workAddress) {
-      if (!initialData.adresse_travaux) {
-        initialData.adresse_travaux = {};
-      }
-      if (workAddress.numeros_civiques?.[0] && !initialData.adresse_travaux.numeros_civiques) {
-        initialData.adresse_travaux.numeros_civiques = workAddress.numeros_civiques;
-      }
-      if (workAddress.rue && !initialData.adresse_travaux.rue) initialData.adresse_travaux.rue = workAddress.rue;
-      if (workAddress.ville && !initialData.adresse_travaux.ville) initialData.adresse_travaux.ville = workAddress.ville;
-      if (workAddress.province && !initialData.adresse_travaux.province) initialData.adresse_travaux.province = workAddress.province;
-      if (workAddress.code_postal && !initialData.adresse_travaux.code_postal) initialData.adresse_travaux.code_postal = workAddress.code_postal;
+    // Ajouter les infos d'adresse de travaux du dossier si disponibles (et pas d'adresse client)
+    if (workAddress && !initialData.adresse_travaux) {
+      initialData.adresse_travaux = {
+        numeros_civiques: workAddress.numeros_civiques || [""],
+        rue: workAddress.rue || "",
+        ville: workAddress.ville || "",
+        province: workAddress.province || "QC",
+        code_postal: workAddress.code_postal || ""
+      };
     }
 
     // Retourner null si aucune donnée n'a été trouvée
