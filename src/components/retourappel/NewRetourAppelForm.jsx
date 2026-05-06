@@ -405,26 +405,26 @@ export default function NewRetourAppelForm({
                           return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                         }).length})
                       </p>
-                      <div className="flex-1 overflow-y-auto max-h-[300px] overflow-x-auto">
-                        <div className="min-w-max lg:min-w-0">
-                          <Table>
+                      <div className="flex-1 overflow-y-auto max-h-[300px] overflow-x-auto -mx-2 px-2">
+                        <div className="min-w-full">
+                          <Table className="text-xs">
                             <TableHeader className="sticky top-0 bg-slate-900 z-10">
                               <TableRow className="hover:bg-transparent border-slate-700">
                                 {[
-                                  ['numero_dossier', 'N° Dossier'],
-                                  ['clients', 'Clients'],
+                                  ['numero_dossier', 'N°'],
+                                  ['clients', 'Client'],
                                   ['mandats', 'Mandats'],
-                                  ['tache_actuelle', 'Tâche actuelle'],
+                                  ['tache_actuelle', 'Tâche'],
                                   ['adresse', 'Adresse'],
-                                  ['date_ouverture', 'Date ouverture'],
+                                  ['date_ouverture', 'Date'],
                                   ['statut', 'Statut'],
                                 ].map(([field, label]) => (
                                   <TableHead
                                     key={field}
-                                    className="text-slate-300 text-xs cursor-pointer hover:text-white select-none"
+                                    className="text-slate-300 text-xs cursor-pointer hover:text-white select-none py-1 px-1"
                                     onClick={() => handleSort(field)}
                                   >
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 whitespace-nowrap">
                                       {label}
                                       <SortIcon field={field} />
                                     </div>
@@ -507,46 +507,46 @@ export default function NewRetourAppelForm({
                                       setSelectedClient(getClientsNames(dossier.clients_ids));
                                     }}
                                   >
-                                    <TableCell className="text-slate-300">
-                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    <TableCell className="text-slate-300 py-1 px-1">
+                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
                                         {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs whitespace-normal">
-                                      {getClientsNames(dossier.clients_ids)}
+                                    <TableCell className="text-slate-300 text-xs whitespace-nowrap py-1 px-1">
+                                      {getClientsNames(dossier.clients_ids).substring(0, 15)}...
                                     </TableCell>
-                                    <TableCell className="text-slate-300">
+                                    <TableCell className="text-slate-300 py-1 px-1">
                                       {dossier.mandats && dossier.mandats.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1">
-                                          {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                        <div className="flex flex-wrap gap-0.5">
+                                          {dossier.mandats.slice(0, 1).map((mandat, idx) => (
                                             <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs pointer-events-none`}>
                                               {getAbbreviatedMandatType(mandat.type_mandat)}
                                             </Badge>
                                           ))}
-                                          {dossier.mandats.length > 2 && (
-                                            <Badge className="bg-slate-700 text-slate-300 text-xs">+{dossier.mandats.length - 2}</Badge>
+                                          {dossier.mandats.length > 1 && (
+                                            <Badge className="bg-slate-700 text-slate-300 text-xs">+{dossier.mandats.length - 1}</Badge>
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="text-slate-600 text-xs">Aucun</span>
+                                        <span className="text-slate-600 text-xs">-</span>
                                       )}
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs">
+                                    <TableCell className="text-slate-300 text-xs py-1 px-1">
                                       {tacheActuelle !== "-" ? (
                                         <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs pointer-events-none">
-                                          {tacheActuelle}
+                                          {tacheActuelle.substring(0, 10)}
                                         </Badge>
                                       ) : (
                                         <span className="text-slate-600">-</span>
                                       )}
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs whitespace-normal max-w-[150px]">
-                                      {firstAdresse}
+                                    <TableCell className="text-slate-300 text-xs whitespace-nowrap py-1 px-1 max-w-[80px]">
+                                      {firstAdresse.substring(0, 12)}...
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs">
-                                      {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    <TableCell className="text-slate-300 text-xs py-1 px-1 whitespace-nowrap">
+                                      {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM", { locale: fr }) : "-"}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-1 px-1">
                                       <Badge className={`text-xs pointer-events-none ${dossier.statut === 'Ouvert' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30'} border`}>
                                         {dossier.statut}
                                       </Badge>
