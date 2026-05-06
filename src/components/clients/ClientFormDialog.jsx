@@ -1009,7 +1009,7 @@ export default function ClientFormDialog({
             <div className="flex-1 overflow-y-auto p-6 pt-3">
             <form id="client-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations Client */}
-              <Card className="border-slate-700 bg-transparent">
+              <Card className="border-none bg-transparent">
                 <CardHeader 
                   className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
                   onClick={() => setInfoCollapsed(!infoCollapsed)}
@@ -1102,7 +1102,7 @@ export default function ClientFormDialog({
               {/* Sections Adresses et Communication côte-à-côte */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Section Adresses */}
-                <Card className="border-slate-700 bg-transparent">
+                <Card className="border-none bg-transparent">
                   <CardHeader 
                     className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
                     onClick={() => setAdressesCollapsed(!adressesCollapsed)}
@@ -1279,7 +1279,7 @@ export default function ClientFormDialog({
                                       </Card>
 
                   {/* Section Communication */}
-                  <Card className="border-slate-700 bg-transparent">
+                  <Card className="border-none bg-transparent">
                 <CardHeader 
                   className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
                   onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
