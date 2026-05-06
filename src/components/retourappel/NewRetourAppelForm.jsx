@@ -258,8 +258,8 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                   <div className="space-y-3">
-                     <div className="flex items-center gap-1.5 mb-1">
+                   <div className="flex items-center gap-3">
+                     <div className="flex items-center gap-1.5 shrink-0">
                        <Checkbox
                          id="aucunDossier"
                          checked={aucunDossier}
@@ -279,41 +279,34 @@ export default function NewRetourAppelForm({
                        />
                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                      </div>
-                     <div className="space-y-1">
-                       <Label className="text-slate-400 text-xs">Client <span className="text-red-400">*</span></Label>
-                      <Input
-                        placeholder="Nom du client"
-                        value={formData.client_nom || ""}
-                        onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
-                        required
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">N° de téléphone <span className="text-red-400">*</span></Label>
-                      <Input
-                        id="new-telephone-retour"
-                        placeholder="(000) 000-0000"
-                        value={formData.client_telephone || ""}
-                        onChange={(e) => {
-                          const input = e.target.value.replace(/\D/g, '');
-                          let formatted = input;
-                          if (input.length > 0) {
-                            if (input.length <= 3) {
-                              formatted = `(${input}`;
-                            } else if (input.length <= 6) {
-                              formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
-                            } else {
-                              formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
-                            }
-                          }
-                          setFormData({...formData, client_telephone: formatted});
-                        }}
-                        required
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                      />
-                    </div>
+                     <Input
+                       placeholder="Nom du client *"
+                       value={formData.client_nom || ""}
+                       onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
+                       required
+                       className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1"
+                     />
+                     <Input
+                       id="new-telephone-retour"
+                       placeholder="(000) 000-0000 *"
+                       value={formData.client_telephone || ""}
+                       onChange={(e) => {
+                         const input = e.target.value.replace(/\D/g, '');
+                         let formatted = input;
+                         if (input.length > 0) {
+                           if (input.length <= 3) {
+                             formatted = `(${input}`;
+                           } else if (input.length <= 6) {
+                             formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+                           } else {
+                             formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+                           }
+                         }
+                         setFormData({...formData, client_telephone: formatted});
+                       }}
+                       required
+                       className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-36"
+                     />
                   </div>
                 ) : (
                   <div className="space-y-3">
