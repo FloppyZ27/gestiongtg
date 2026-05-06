@@ -84,7 +84,12 @@ export default function OuvrirDossierDialog({
   const buildRecapComment = (data, user) => {
     if (!data) return null;
     
-    const recapLines = ['=== RÉCAPITULATIF DE LA PRISE DE MANDAT ===', ''];
+    const recapLines = [
+      '╔════════════════════════════════════════════════════╗',
+      '║     📋 RÉCAPITULATIF DE LA PRISE DE MANDAT      ║',
+      '╚════════════════════════════════════════════════════╝',
+      ''
+    ];
 
     // Clients
     const clientNames = (data.clients_ids || []).map(id => {
@@ -125,7 +130,7 @@ export default function OuvrirDossierDialog({
 
     recapLines.push('');
     recapLines.push(`📋 MANDATS (${(data.mandats || []).length}):`);
-    recapLines.push('─'.repeat(40));
+    recapLines.push('═'.repeat(50));
 
     (data.mandats || []).forEach((m, i) => {
       recapLines.push(`• Mandat ${i + 1}: ${m.type_mandat || 'N/A'}`);
