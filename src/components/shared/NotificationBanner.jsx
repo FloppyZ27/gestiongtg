@@ -13,6 +13,7 @@ export default function NotificationBanner({ user }) {
   const navigate = useNavigate();
   const [visibleNotification, setVisibleNotification] = useState(null);
   const [dismissedIds, setDismissedIds] = useState(new Set());
+  const [autoCloseTimer, setAutoCloseTimer] = useState(null);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
@@ -31,12 +32,41 @@ export default function NotificationBanner({ user }) {
     }
   }, [notifications, dismissedIds, visibleNotification]);
 
+  useEffect(() => {
+    // Auto-fermer la banner après 7 secondes si elle est visible
+    if (visibleNotification) {
+      // Effacer le timer précédent s'il existe
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+      }
+
+      // Définir un nouveau timer pour fermer après 7 secondes
+      const timer = setTimeout(() => {
+        setVisibleNotification(null);
+      }, 7000);
+
+      setAutoCloseTimer(timer);
+
+      // Nettoyer le timer lors du démontage ou changement
+      return () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+      };
+    }
+  }, [visibleNotification]);
+
 
 
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
     setDismissedIds(prev => new Set([...prev, notificationId]));
     setVisibleNotification(null);
+    // Nettoyer le timer si l'utilisateur ferme manuellement
+    if (autoCloseTimer) {
+      clearTimeout(autoCloseTimer);
+      setAutoCloseTimer(null);
+    }
   };
 
   const handleClick = (notification) => {
