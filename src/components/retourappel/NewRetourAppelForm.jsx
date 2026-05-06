@@ -103,6 +103,7 @@ export default function NewRetourAppelForm({
   const [sortField, setSortField] = useState('date_ouverture');
   const [sortDirection, setSortDirection] = useState('desc');
   const saveTimeoutRef = useRef(null);
+  const editingDataRef = useRef(null);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -132,14 +133,17 @@ export default function NewRetourAppelForm({
         setSelectedClient(getClientsNames(dossier.clients_ids));
       }
       
-      setFormData({
+      const initialData = {
         date_appel: editingRetourAppel.date_appel || "",
         utilisateur_assigne: editingRetourAppel.utilisateur_assigne || "",
         notes: editingRetourAppel.raison || "",
         client_nom: editingRetourAppel.client_nom || "",
         client_telephone: editingRetourAppel.client_telephone || "",
         dossier_reference_id: editingRetourAppel.dossier_id || null
-      });
+      };
+      
+      editingDataRef.current = { ...initialData };
+      setFormData(initialData);
     }
   }, [editingRetourAppel?.id]);
 
@@ -184,6 +188,10 @@ export default function NewRetourAppelForm({
       }
     },
     onSuccess: () => {
+      // Restaurer les données avant l'invalidation pour éviter la réinitialisation
+      if (editingDataRef.current) {
+        setFormData(editingDataRef.current);
+      }
       queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -196,6 +204,9 @@ export default function NewRetourAppelForm({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+
+      // Mettre à jour la référence des données actuelles
+      editingDataRef.current = { ...formData };
 
       saveTimeoutRef.current = setTimeout(() => {
         saveRetourAppelMutation.mutate(formData);
