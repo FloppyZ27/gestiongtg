@@ -865,14 +865,23 @@ export default function ClientFormDialog({
       setCommentairesTemporaires([]);
       setHasChanges(false);
     } else if (open && !editingClient) {
-      // Pré-remplir avec initialData si fourni
+      // Pré-remplir avec initialData si fourni (données du mandat)
       const initial = initialData || {};
+      const adresses = initial.adresse_travaux ? [{ 
+        numeros_civiques: initial.adresse_travaux.numeros_civiques || [""],
+        rue: initial.adresse_travaux.rue || "",
+        ville: initial.adresse_travaux.ville || "",
+        province: initial.adresse_travaux.province || "QC",
+        code_postal: initial.adresse_travaux.code_postal || "",
+        actuelle: true
+      }] : [];
+      
       const data = {
         prenom: initial.prenom || "",
         nom: initial.nom || "",
         type_client: defaultType,
         preferences_livraison: [],
-        adresses: [],
+        adresses: adresses,
         courriels: initial.courriel ? [{ courriel: initial.courriel, actuel: true }] : [],
         telephones: initial.telephone ? [{ telephone: initial.telephone, type: initial.type_telephone || "Cellulaire", actuel: true }] : [],
         notes: ""

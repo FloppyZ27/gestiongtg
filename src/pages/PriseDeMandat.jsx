@@ -3122,21 +3122,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           }}
           editingClient={editingClientForForm}
           defaultType={clientTypeForForm}
-          initialData={
-            clientTypeForForm === "Client" ? clientInfo :
-            clientTypeForForm === "Notaire" ? {
-              prenom: professionnelInfo.notaire || "",
-              nom: "",
-              telephone: professionnelInfo.notaire_telephone || "",
-              courriel: professionnelInfo.notaire_courriel || ""
-            } :
-            clientTypeForForm === "Courtier immobilier" ? {
-              prenom: professionnelInfo.courtier || "",
-              nom: "",
-              telephone: professionnelInfo.courtier_telephone || "",
-              courriel: professionnelInfo.courtier_courriel || ""
-            } : null
-          }
+          initialData={editingClientForForm ? null : (() => { const sp=(s)=>{const p=(s||"").trim().split(" ");return{prenom:p.length>1?p.slice(0,-1).join(" "):p[0]||"",nom:p.length>1?p[p.length-1]:""};};if(clientTypeForForm==="Client")return{...clientInfo,adresse_travaux:(workAddress.rue||workAddress.ville)?workAddress:null};if(clientTypeForForm==="Notaire")return{...sp(professionnelInfo.notaire),telephone:professionnelInfo.notaire_telephone||"",courriel:professionnelInfo.notaire_courriel||""};if(clientTypeForForm==="Courtier immobilier")return{...sp(professionnelInfo.courtier),telephone:professionnelInfo.courtier_telephone||"",courriel:professionnelInfo.courtier_courriel||""};if(clientTypeForForm==="Compagnie")return{prenom:professionnelInfo.compagnie||"",nom:"",telephone:"",courriel:""};return null;})()}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
             // Optionally re-open the selector if creating from there
