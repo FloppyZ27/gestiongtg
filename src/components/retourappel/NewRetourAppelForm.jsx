@@ -531,7 +531,13 @@ export default function NewRetourAppelForm({
                                       )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
-                                      {tacheActuelle}
+                                      {tacheActuelle !== "-" ? (
+                                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs pointer-events-none">
+                                          {tacheActuelle}
+                                        </Badge>
+                                      ) : (
+                                        <span className="text-slate-600">-</span>
+                                      )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs max-w-[150px] truncate">
                                       {firstAdresse}
