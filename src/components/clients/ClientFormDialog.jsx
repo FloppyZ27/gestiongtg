@@ -1123,7 +1123,7 @@ export default function ClientFormDialog({
                     <AddressSearchInput onAddressSelect={handleAddressSelect} />
 
                     {/* Formulaire pour nouvelle adresse */}
-                    <div className="p-2 bg-slate-800/30 rounded-lg space-y-2">
+                     <div className="p-2 bg-transparent rounded-lg space-y-2">
                   <div className="grid grid-cols-[150px_1fr] gap-2">
                     <div className="space-y-1">
                       <Label className="text-xs">Numéro(s) civique(s)</Label>
