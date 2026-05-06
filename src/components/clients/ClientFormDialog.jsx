@@ -1222,9 +1222,9 @@ export default function ClientFormDialog({
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                          <TableHead className="text-slate-300">Adresse complète</TableHead>
-                          <TableHead className="text-slate-300">Statut</TableHead>
-                          <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
+                          <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                          <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1355,9 +1355,9 @@ export default function ClientFormDialog({
                             <Table>
                           <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Courriel</TableHead>
-                            <TableHead className="text-slate-300">Statut</TableHead>
-                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Courriel</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                            <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                           </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1488,10 +1488,10 @@ export default function ClientFormDialog({
                             <Table>
                               <TableHeader>
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                  <TableHead className="text-slate-300">Téléphone</TableHead>
-                                  <TableHead className="text-slate-300">Type</TableHead>
-                                  <TableHead className="text-slate-300">Statut</TableHead>
-                                  <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                  <TableHead className="text-slate-300 text-xs">Téléphone</TableHead>
+                                  <TableHead className="text-slate-300 text-xs">Type</TableHead>
+                                  <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                                  <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
