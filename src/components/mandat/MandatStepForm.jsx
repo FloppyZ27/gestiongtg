@@ -229,7 +229,7 @@ export default function MandatStepForm({
                         >
                           <Checkbox
                             checked={isSelected}
-                            onCheckedChange={() => toggleMandatType(type)}
+                            onCheckedChange={() => {}}
                             onClick={(e) => e.stopPropagation()}
                             className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                           />
