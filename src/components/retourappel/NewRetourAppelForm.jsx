@@ -215,8 +215,14 @@ export default function NewRetourAppelForm({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
-        <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2">
+        <h2 className="text-2xl font-bold" style={{
+          background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          display: 'inline-block'
+        }}>{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 pt-3">
@@ -228,17 +234,23 @@ export default function NewRetourAppelForm({
           }
         }} className="space-y-3">
           {/* Section Informations du dossier */}
-          <Card className="border-slate-700 bg-slate-800/30">
+          <Card className="border-0 bg-slate-800/30">
             <CardHeader 
-              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+              className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-1.5 bg-primary/5"
               onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                    <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                    <FolderOpen className="w-3.5 h-3.5 text-primary" />
                   </div>
-                  <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+                  <CardTitle className="text-base" style={{
+                    background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    display: 'inline-block'
+                  }}>Informations du dossier</CardTitle>
                   {selectedDossier && (
                     <span className="text-slate-300 text-xs">
                       {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
@@ -488,17 +500,23 @@ export default function NewRetourAppelForm({
 
           {/* Section Retour d'appel */}
           {(dossierFound || aucunDossier) && (
-            <Card className="border-slate-700 bg-slate-800/30">
+            <Card className="border-0 bg-slate-800/30">
               <CardHeader 
-                className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-1.5 bg-primary/5"
                 onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                      <Phone className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-primary" />
                     </div>
-                    <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
+                    <CardTitle className="text-base" style={{
+                      background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block'
+                    }}>Retour d'appel</CardTitle>
                   </div>
                   {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
@@ -506,7 +524,7 @@ export default function NewRetourAppelForm({
 
               {!retourAppelCollapsed && (
                 <CardContent className="pt-4 pb-3 space-y-4">
-                  <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
+                  <div className="rounded-lg p-4 bg-primary/5">
                     <div className="grid grid-cols-[1fr_1fr] gap-3">
                       <div className="space-y-3">
                         <div className="space-y-1">
