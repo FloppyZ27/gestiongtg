@@ -178,18 +178,19 @@ export default function NotificationButton({ user }) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className="font-medium text-white text-sm">{notification.titre}</h4>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsReadMutation.mutate(notification.id);
-                            }}
-                            className="h-6 w-6 text-slate-400 hover:text-white flex-shrink-0"
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
+                          <h4 className="font-medium text-red-400 text-sm">{notification.titre}</h4>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               e.preventDefault();
+                               markAsReadMutation.mutate(notification.id);
+                             }}
+                             className="h-6 w-6 text-slate-400 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0 transition-colors"
+                           >
+                             <X className="w-3 h-3" />
+                           </Button>
                         </div>
                         <p className="text-sm text-slate-300 mb-2">{mainMessage}</p>
                         {comment && (
