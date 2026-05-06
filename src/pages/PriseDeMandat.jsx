@@ -2361,26 +2361,10 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* Header sur toute la largeur */}
-                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 flex-shrink-0 flex items-center justify-between">
-                  {/* Bandeau de verrouillage */}
-                  {isLocked && (
-                    <div className="absolute top-0 left-0 right-0 p-3 bg-red-500/10 border-b border-red-500/30 flex items-center gap-3 z-20">
-                      <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-red-400 font-semibold text-sm">Mandat verrouillé par <span className="font-bold">{lockedBy}</span></p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>
-                    {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
-                  </h2>
-                  
+                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                  {isLocked&&<div className="absolute top-0 left-0 right-0 p-3 bg-red-500/10 border-b border-red-500/30 flex items-center gap-3 z-20"><div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center"><svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg></div><div className="flex-1"><p className="text-red-400 font-semibold text-sm">Mandat verrouillé par <span className="font-bold">{lockedBy}</span></p></div></div>}
+                  <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}</h2>
                   <div className="flex items-center gap-3">
                     {formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre && formData.numero_dossier && (
                       <div className={`text-lg font-semibold ${
@@ -2400,10 +2384,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                       </div>
                     )}
                     {formData.statut === "Mandats à ouvrir" && (<div><button type="button" data-custom-hover ref={el => { if (el) { const base = {background:'#1a1a1a',border:'1px solid rgba(139,0,0,0.5)',borderRadius:'0.5rem',padding:'0 1.25rem',height:'36px',fontWeight:600,fontSize:'14px',color:'white',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',transition:'background 0.2s ease,border 0.2s ease,box-shadow 0.2s ease',boxShadow:'0 4px 14px rgba(0,0,0,0.3)',outline:'none'}; Object.assign(el.style,base); el.onmouseenter=()=>{el.style.setProperty('background','linear-gradient(135deg,#8B0000,#CC5500)','important');el.style.setProperty('border','none','important');el.style.setProperty('box-shadow','0 6px 22px rgba(139,0,0,0.55)','important');}; el.onmouseleave=()=>{el.style.setProperty('background','#1a1a1a','important');el.style.setProperty('border','1px solid rgba(139,0,0,0.5)','important');el.style.setProperty('box-shadow','0 4px 14px rgba(0,0,0,0.3)','important');}; } }} onClick={async () => {const prochainNumero = formData.numero_dossier || calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');try {await base44.functions.invoke('createSharePointFolder', {arpenteur_geometre: formData.arpenteur_geometre,numero_dossier: prochainNumero});const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");const checkResponse = await base44.functions.invoke('sharepoint', { action: 'list', folderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS` });if (checkResponse.data?.files?.length > 0) {await base44.functions.invoke('moveSharePointFiles', { sourceFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`, destinationFolderPath: `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS` });}} catch (error) {console.error("[OUVRIR DOSSIER] Erreur SharePoint:", error);}const commentsForDossier = commentairesTemporaires;const dossierFormData = {numero_dossier: prochainNumero,arpenteur_geometre: formData.arpenteur_geometre,place_affaire: formData.placeAffaire,date_ouverture: new Date().toISOString().split('T')[0],statut: "Ouvert",ttl: "Non",clients_ids: formData.clients_ids,notaires_ids: formData.notaires_ids || [],courtiers_ids: formData.courtiers_ids || [],compagnies_ids: formData.compagnies_ids || [],mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({type_mandat: m.type_mandat,adresse_travaux: workAddress,prix_estime: m.prix_estime || 0,rabais: m.rabais || 0,taxes_incluses: m.taxes_incluses || false,date_signature: m.date_signature || "",date_debut_travaux: m.date_debut_travaux || "",date_livraison: m.date_livraison || "",lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "",minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [],terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },factures: [], notes: ""}))};setNouveauDossierForm(dossierFormData);setCommentairesTemporairesDossier(commentsForDossier);setIsOuvrirDossierDialogOpen(true);}}><FolderOpen style={{width:'16px',height:'16px'}} />Ouvrir dossier</button></div>)}
-                  </div>
-                </div>
-
-                <div className="flex-1 flex overflow-hidden">
+                  </div></div></div>
+                  <div className="flex-1 flex overflow-hidden">
                   <div className="w-12 bg-slate-950 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},...(editingPriseMandat?[{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}]:[])].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800/30 hover:bg-slate-600 transition-colors duration-200 hover:scale-110 hover:shadow-lg hover:shadow-slate-600 sidebar-nav-btn"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
                   <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
@@ -2861,18 +2843,10 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           </DialogContent>
         </Dialog>
 
-        {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle>Sélectionner des clients</DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <DialogHeader><DialogTitle>Sélectionner des clients</DialogTitle></DialogHeader>
+            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2951,18 +2925,10 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           </DialogContent>
         </Dialog>
 
-        {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle>Sélectionner des notaires</DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <DialogHeader><DialogTitle>Sélectionner des notaires</DialogTitle></DialogHeader>
+            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -3041,18 +3007,10 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           </DialogContent>
         </Dialog>
 
-        {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle>Sélectionner des courtiers</DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <DialogHeader><DialogTitle>Sélectionner des courtiers</DialogTitle></DialogHeader>
+            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />

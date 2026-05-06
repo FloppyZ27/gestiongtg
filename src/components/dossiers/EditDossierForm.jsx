@@ -410,7 +410,7 @@ export default function EditDossierForm({
     >
       {/* Header sur toute la largeur */}
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
-        <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+        <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
@@ -471,7 +471,7 @@ export default function EditDossierForm({
                 e.preventDefault();
               }
             }}>
-              <Card className="border-slate-700 bg-slate-800/30 mb-3" data-section="infos">
+              <Card className="border-0 bg-transparent mb-3" data-section="infos">
                   <CardHeader 
                     className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                     onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
@@ -570,7 +570,7 @@ export default function EditDossierForm({
             </form>
 
             {/* Section Mandats */}
-            <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="mandats">
+            <Card className="border-0 bg-transparent mt-3" data-section="mandats">
               <CardHeader 
                 className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
                 onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
@@ -1239,7 +1239,7 @@ export default function EditDossierForm({
 
             {/* Section Terrain */}
             {formData.mandats.length > 0 && !hideSections.includes('terrain') && (
-              <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="terrain">
+              <Card className="border-0 bg-transparent mt-3" data-section="terrain">
                 <CardHeader 
                   className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
                   onClick={() => {
