@@ -91,15 +91,21 @@ export default function DossierInfoStepForm({
                     <button
                       key={s.value}
                       type="button"
+                      data-custom-hover
                       onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
                       disabled={!arpenteurGeometre || disabled}
-                      className={`px-2 py-0.5 rounded text-xs border transition-all ${
-                        !arpenteurGeometre || disabled
-                          ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
-                          : statut === s.value 
-                            ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
-                            : "bg-transparent text-slate-400 border-transparent hover:border-slate-600 hover:bg-slate-700/50"
-                      }`}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        boxShadow: 'none',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        cursor: !arpenteurGeometre || disabled ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s',
+                        opacity: !arpenteurGeometre || disabled ? 0.4 : 1,
+                      }}
+                      className={statut === s.value ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" : "text-slate-400 hover:text-slate-200"}
                     >
                       {s.label}
                     </button>
