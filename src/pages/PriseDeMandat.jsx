@@ -2387,7 +2387,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                   </div></div></div>
                   <div className="flex-1 flex overflow-hidden">
                   <div className="w-12 bg-slate-950 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},...(editingPriseMandat?[{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}]:[])].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800/30 hover:bg-slate-600 transition-colors duration-200 hover:scale-110 hover:shadow-lg hover:shadow-slate-600 sidebar-nav-btn"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
-                  <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden">
+                  <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onBlur={handleAutoSave} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
@@ -2546,7 +2546,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     </div>
 
                     {/* Sidebar - 30% */}
-                     <div className="flex-[0_0_30%] flex flex-col overflow-hidden overflow-x-hidden min-w-0 w-full">
+                     <div className="flex-[0_0_calc(25%-12px)] flex flex-col overflow-hidden overflow-x-hidden min-w-0 w-full">
                     {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 flex-shrink-0 flex items-center justify-between"
