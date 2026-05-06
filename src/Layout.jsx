@@ -615,8 +615,6 @@ function LayoutContent({ children, currentPageName }) {
         /* Surfaces / cartes — gris sombre */
         .bg-slate-900, .bg-slate-800, .bg-slate-950 {
         background: hsl(220, 13%, 12%) !important;
-        border: 1px solid hsl(220, 10%, 20%) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
         }
 
         /* Boutons minimalistes neutre */
@@ -769,10 +767,7 @@ function LayoutContent({ children, currentPageName }) {
 
 
 
-        .border-slate-700, .border-slate-800 {
-          border: 1px solid hsl(220, 10%, 22%) !important;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-        }
+
 
         input, textarea, select {
           background-color: hsl(220, 13%, 11%) !important;

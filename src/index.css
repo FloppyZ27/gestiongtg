@@ -175,8 +175,6 @@ div[data-radix-dialog-overlay],
 /* ─── Cards / surfaces ─── */
 .bg-slate-900, .bg-slate-800, .bg-slate-950 {
   background: hsl(220, 13%, 12%) !important;
-  border: 1px solid hsl(220, 10%, 20%) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.35) !important;
 }
 
 /* ─── Inputs ─── */
@@ -236,10 +234,6 @@ button[aria-haspopup="listbox"]:hover,
 }
 
 /* ─── Borders générales ─── */
-.border-slate-700, .border-slate-800 {
-  border: 1px solid hsl(220, 10%, 22%) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
-}
 
 /* ─── Boutons généraux ─── */
 button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
