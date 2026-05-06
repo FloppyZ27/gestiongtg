@@ -150,6 +150,8 @@ export default function ContactsTabsSection({
               {filteredClientsForSelector.length > 0 ? (
                 filteredClientsForSelector.slice(0, 15).map((client) => {
                   const isSelected = formData.clients_ids.includes(client.id);
+                  const clientPhone = client.telephones?.[0]?.telephone || '';
+                  const clientEmail = client.courriels?.[0]?.courriel || '';
                   return (
                     <div key={client.id} onClick={() => {
                       setFormData(prev => ({
@@ -160,8 +162,16 @@ export default function ContactsTabsSection({
                       }));
                     }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium truncate">{client.prenom} {client.nom}</span>
-                        {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium">{client.prenom} {client.nom}</span>
+                          {(clientPhone || clientEmail) && (
+                            <div className="text-slate-500 text-[11px] space-y-0.5">
+                              {clientPhone && <div>☎️ {clientPhone}</div>}
+                              {clientEmail && <div>✉️ {clientEmail}</div>}
+                            </div>
+                          )}
+                        </div>
+                        {isSelected && <Check className="w-3 h-3 flex-shrink-0 ml-2" />}
                       </div>
                     </div>
                   );
@@ -221,6 +231,8 @@ export default function ContactsTabsSection({
             <div className="max-h-[200px] overflow-y-auto space-y-1">
               {filteredNotairesForSelector.slice(0, 15).map((notaire) => {
                 const isSelected = formData.notaires_ids.includes(notaire.id);
+                const notairePhone = notaire.telephones?.[0]?.telephone || '';
+                const notaireEmail = notaire.courriels?.[0]?.courriel || '';
                 return (
                   <div key={notaire.id} onClick={() => {
                     setFormData(prev => ({
@@ -231,8 +243,16 @@ export default function ContactsTabsSection({
                     }));
                   }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium truncate">{notaire.prenom} {notaire.nom}</span>
-                      {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{notaire.prenom} {notaire.nom}</span>
+                        {(notairePhone || notaireEmail) && (
+                          <div className="text-slate-500 text-[11px] space-y-0.5">
+                            {notairePhone && <div>☎️ {notairePhone}</div>}
+                            {notaireEmail && <div>✉️ {notaireEmail}</div>}
+                          </div>
+                        )}
+                      </div>
+                      {isSelected && <Check className="w-3 h-3 flex-shrink-0 ml-2" />}
                     </div>
                   </div>
                 );
@@ -289,6 +309,8 @@ export default function ContactsTabsSection({
             <div className="max-h-[200px] overflow-y-auto space-y-1">
               {filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
                 const isSelected = formData.courtiers_ids.includes(courtier.id);
+                const courtierPhone = courtier.telephones?.[0]?.telephone || '';
+                const courtierEmail = courtier.courriels?.[0]?.courriel || '';
                 return (
                   <div key={courtier.id} onClick={() => {
                     setFormData(prev => ({
@@ -299,8 +321,16 @@ export default function ContactsTabsSection({
                     }));
                   }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium truncate">{courtier.prenom} {courtier.nom}</span>
-                      {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{courtier.prenom} {courtier.nom}</span>
+                        {(courtierPhone || courtierEmail) && (
+                          <div className="text-slate-500 text-[11px] space-y-0.5">
+                            {courtierPhone && <div>☎️ {courtierPhone}</div>}
+                            {courtierEmail && <div>✉️ {courtierEmail}</div>}
+                          </div>
+                        )}
+                      </div>
+                      {isSelected && <Check className="w-3 h-3 flex-shrink-0 ml-2" />}
                     </div>
                   </div>
                 );
@@ -357,6 +387,8 @@ export default function ContactsTabsSection({
             <div className="max-h-[200px] overflow-y-auto space-y-1">
               {filteredCompagniesForSelector.slice(0, 15).map((compagnie) => {
                 const isSelected = (formData.compagnies_ids || []).includes(compagnie.id);
+                const compagniePhone = compagnie.telephones?.[0]?.telephone || '';
+                const compagnieEmail = compagnie.courriels?.[0]?.courriel || '';
                 return (
                   <div key={compagnie.id} onClick={() => {
                     setFormData(prev => ({
@@ -367,8 +399,16 @@ export default function ContactsTabsSection({
                     }));
                   }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium truncate">{compagnie.prenom} {compagnie.nom}</span>
-                      {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{compagnie.prenom} {compagnie.nom}</span>
+                        {(compagniePhone || compagnieEmail) && (
+                          <div className="text-slate-500 text-[11px] space-y-0.5">
+                            {compagniePhone && <div>☎️ {compagniePhone}</div>}
+                            {compagnieEmail && <div>✉️ {compagnieEmail}</div>}
+                          </div>
+                        )}
+                      </div>
+                      {isSelected && <Check className="w-3 h-3 flex-shrink-0 ml-2" />}
                     </div>
                   </div>
                 );
