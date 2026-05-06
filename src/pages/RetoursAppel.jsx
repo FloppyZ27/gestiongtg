@@ -24,6 +24,7 @@ import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
 import NewRetourAppelForm from "../components/retourappel/NewRetourAppelForm";
+import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -682,47 +683,12 @@ const RetoursAppel = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqui
   return (
     <>
       {/* Dialog de confirmation de suppression */}
-      <Dialog open={showDeleteRetourConfirm} onOpenChange={setShowDeleteRetourConfirm}>
-        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              Attention
-              <span className="text-2xl">⚠️</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-slate-300 text-center">
-              Êtes-vous sûr de vouloir supprimer ce retour d'appel ? Cette action est irréversible.
-            </p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button 
-                type="button" 
-                onClick={() => {
-                  setShowDeleteRetourConfirm(false);
-                  setRetourIdToDelete(null);
-                }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="button"
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                onClick={() => {
-                  if (retourIdToDelete) {
-                    deleteRetourAppelMutation.mutate(retourIdToDelete);
-                  }
-                  setShowDeleteRetourConfirm(false);
-                  setRetourIdToDelete(null);
-                }}
-              >
-                Supprimer
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDeleteDialog
+        open={showDeleteRetourConfirm}
+        onOpenChange={(open) => { setShowDeleteRetourConfirm(open); if (!open) setRetourIdToDelete(null); }}
+        onConfirm={() => { if (retourIdToDelete) deleteRetourAppelMutation.mutate(retourIdToDelete); }}
+        message="Êtes-vous sûr de vouloir supprimer ce retour d'appel ? Cette action est irréversible."
+      />
 
       {/* Dialog de confirmation d'annulation */}
       <Dialog open={showCancelRetourConfirm} onOpenChange={setShowCancelRetourConfirm}>
