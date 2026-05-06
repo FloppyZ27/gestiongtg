@@ -1218,7 +1218,7 @@ export default function ClientFormDialog({
                     </div>
 
                     {/* Liste des adresses */}
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <div className="border-none rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
