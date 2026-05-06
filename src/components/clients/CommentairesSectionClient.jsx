@@ -537,7 +537,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditCommentaire(commentaire)}
-                              className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                              className="h-6 w-6 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
                             >
                               <Edit className="w-3 h-3" />
                             </Button>
@@ -546,7 +546,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteCommentaire(commentaire)}
-                            className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
