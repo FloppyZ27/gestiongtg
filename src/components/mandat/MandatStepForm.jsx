@@ -5,7 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
+const Popover = PopoverPrimitive.Root;
+const PopoverTrigger = PopoverPrimitive.Trigger;
+const PopoverContent = React.forwardRef(({ className, style, side, align, sideOffset = 4, avoidCollisions, children, ...props }, ref) => (
+  <PopoverPrimitive.Content
+    ref={ref}
+    side={side}
+    align={align}
+    sideOffset={sideOffset}
+    avoidCollisions={avoidCollisions}
+    className={className}
+    style={style}
+    {...props}
+  >
+    {children}
+  </PopoverPrimitive.Content>
+));
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -200,7 +216,7 @@ export default function MandatStepForm({
                       <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="p-0" style={{width: 'var(--radix-popover-trigger-width)', background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="bottom" align="start">
+                  <PopoverContent className="p-0" style={{width: 'var(--radix-popover-trigger-width)', background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
                     <div 
                       className="max-h-[200px] overflow-y-auto p-2 space-y-0.5"
                       onWheelCapture={(e) => e.stopPropagation()}
