@@ -670,9 +670,10 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditCommentaire(commentaire)}
-                              className="h-6 w-6 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
+                              className="h-6 w-6 p-0 hover:bg-blue-500/20"
+                              style={{color: 'hsl(210, 100%, 66%)'}}
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit className="w-3 h-3" style={{color: 'inherit'}} />
                             </Button>
                           )}
                           <Button
