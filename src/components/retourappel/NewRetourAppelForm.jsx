@@ -104,6 +104,7 @@ export default function NewRetourAppelForm({
   const [sortDirection, setSortDirection] = useState('desc');
   const saveTimeoutRef = useRef(null);
   const editingDataRef = useRef(null);
+  const notifiedUserRef = useRef(null);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -143,6 +144,7 @@ export default function NewRetourAppelForm({
       };
       
       editingDataRef.current = { ...initialData };
+      notifiedUserRef.current = null;
       setFormData(initialData);
     }
   }, [editingRetourAppel?.id]);
@@ -164,8 +166,8 @@ export default function NewRetourAppelForm({
         client_telephone: retourData.client_telephone || ""
       });
       
-      // Créer une notification si un utilisateur est assigné et que c'est différent de l'ancien
-      if (retourData.utilisateur_assigne && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne) {
+      // Créer une notification si un utilisateur est assigné et que c'est différent de l'ancien et qu'on n'a pas déjà notifié
+      if (retourData.utilisateur_assigne && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne && notifiedUserRef.current !== retourData.utilisateur_assigne) {
         const dossier = oldRetour.dossier_id ? dossiers.find(d => d.id === oldRetour.dossier_id) : null;
         const clientsNames = dossier ? getClientsNames(dossier.clients_ids) : (oldRetour.client_nom || "");
         
@@ -177,6 +179,8 @@ export default function NewRetourAppelForm({
           dossier_id: oldRetour.dossier_id || null,
           lue: false
         });
+        
+        notifiedUserRef.current = retourData.utilisateur_assigne;
       }
       
       // Mettre à jour le dossier si applicable
