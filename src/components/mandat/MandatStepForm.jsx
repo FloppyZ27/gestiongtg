@@ -1,27 +1,9 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
-const Popover = PopoverPrimitive.Root;
-const PopoverTrigger = PopoverPrimitive.Trigger;
-const PopoverContent = React.forwardRef(({ className, style, side, align, sideOffset = 4, avoidCollisions, children, ...props }, ref) => (
-  <PopoverPrimitive.Content
-    ref={ref}
-    side={side}
-    align={align}
-    sideOffset={sideOffset}
-    avoidCollisions={avoidCollisions}
-    className={className}
-    style={style}
-    {...props}
-  >
-    {children}
-  </PopoverPrimitive.Content>
-));
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -68,6 +50,19 @@ export default function MandatStepForm({
   statut = "",
   disabled = false
 }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Extraire les types sélectionnés directement des props
   const selectedTypes = mandats.map(m => m.type_mandat).filter(t => t);
   
@@ -200,53 +195,47 @@ export default function MandatStepForm({
           <div className="space-y-3">
             {/* Première ligne: Types de mandats, Échéance souhaitée et Urgence perçue */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
+              <div className="space-y-1 relative" ref={dropdownRef}>
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      disabled={disabled}
-                      className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {selectedTypes.length > 0 ? (
-                        <span className="truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
-                      ) : (
-                        <span className="text-muted-foreground">Sélectionner...</span>
-                      )}
-                      <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-0" style={{width: 'var(--radix-popover-trigger-width)', background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-                    <div 
-                      className="max-h-[200px] overflow-y-auto p-2 space-y-0.5"
-                      onWheelCapture={(e) => e.stopPropagation()}
-                    >
-                      {TYPES_MANDATS.map((type) => {
-                        const isSelected = selectedTypes.includes(type);
-                        return (
-                          <div
-                            key={type}
-                            onClick={() => toggleMandatType(type)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-all text-sm ${
-                              isSelected 
-                                ? 'text-orange-400' 
-                                : 'text-slate-300'
-                            }`}
-                            style={isSelected ? {background: 'rgba(199, 91, 26, 0.18)'} : {}}
-                            onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(199, 91, 26, 0.10)'; }}
-                            onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}
-                          >
-                            <Checkbox
-                              checked={isSelected}
-                              className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                            />
-                            <span>{type}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <button
+                  disabled={disabled}
+                  onClick={() => setDropdownOpen(o => !o)}
+                  className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {selectedTypes.length > 0 ? (
+                    <span className="truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
+                  ) : (
+                    <span className="text-muted-foreground">Sélectionner...</span>
+                  )}
+                  <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+                </button>
+                {dropdownOpen && (
+                  <div
+                    className="absolute left-0 top-full mt-1 w-full z-50 max-h-[200px] overflow-y-auto p-2 space-y-0.5"
+                    style={{background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}}
+                    onWheelCapture={(e) => e.stopPropagation()}
+                  >
+                    {TYPES_MANDATS.map((type) => {
+                      const isSelected = selectedTypes.includes(type);
+                      return (
+                        <div
+                          key={type}
+                          onClick={() => toggleMandatType(type)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-all text-sm ${isSelected ? 'text-orange-400' : 'text-slate-300'}`}
+                          style={isSelected ? {background: 'rgba(199, 91, 26, 0.18)'} : {}}
+                          onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(199, 91, 26, 0.10)'; }}
+                          onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          />
+                          <span>{type}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
