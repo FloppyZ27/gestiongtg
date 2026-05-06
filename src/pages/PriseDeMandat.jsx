@@ -3983,7 +3983,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
              filterUrgence={filterUrgence}
              filterDateStart={filterDateStart}
              filterDateEnd={filterDateEnd}
-             filterPlaceAffaire={filterPlaceAffaire}
+             filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipeExternal}
              sortField={sortField}
              sortDirection={sortDirection}
              onSort={handleSort}

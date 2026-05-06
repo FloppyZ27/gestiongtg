@@ -19,6 +19,7 @@ export default function PriseMandatTable({
   filterDateStart,
   filterDateEnd,
   filterPlaceAffaire,
+  filterEquipeExternal = "Toutes",
   sortField,
   sortDirection,
   onSort,
@@ -46,7 +47,8 @@ export default function PriseMandatTable({
         pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
       );
 
-      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre);
+      const matchesArpenteur = (filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre)) &&
+        (filterEquipeExternal === "Toutes" || pm.arpenteur_geometre?.includes(filterEquipeExternal));
       const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
       const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
       const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
