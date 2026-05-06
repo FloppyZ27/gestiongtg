@@ -141,8 +141,8 @@ export default function NotificationButton({ user }) {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h3 className="font-semibold text-red-400">Notifications</h3>
+        <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-gradient-to-r from-red-500/10 to-orange-500/10">
+          <h3 className="font-semibold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">Notifications</h3>
           {notifications.length > 0 && (
             <Button
               variant="ghost"
