@@ -657,12 +657,12 @@ export default function EditDossierForm({
                               const isActive = activeTabMandat === index.toString();
                               return (
                                 <TabsTrigger
-                                  key={index}
-                                  value={index.toString()}
-                                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                                    isActive ? mandatColor : 'text-slate-400'
-                                  }`}
-                                >
+                                   key={index}
+                                   value={index.toString()}
+                                   className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                                     isActive ? `${mandatColor} border-b-2` : 'text-slate-400'
+                                   }`}
+                                 >
                                   <Badge className={`${mandatColor} border text-xs`}>
                                     {mandat.type_mandat ? getAbbreviatedMandatType(mandat.type_mandat) : `Mandat ${index + 1}`}
                                   </Badge>
