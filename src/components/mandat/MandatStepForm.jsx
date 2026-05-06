@@ -223,8 +223,8 @@ export default function MandatStepForm({
                         <div
                           key={type}
                           onClick={() => toggleMandatType(type)}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-all text-sm ${isSelected ? 'text-orange-400' : 'text-slate-300'}`}
-                          style={isSelected ? {background: 'rgba(199, 91, 26, 0.18)'} : {}}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-all text-sm border ${isSelected ? 'text-orange-400 border-orange-500/50' : 'text-slate-300 border-transparent'}`}
+                          style={isSelected ? {background: 'rgba(199, 91, 26, 0.25)', boxShadow: '0 0 12px rgba(199, 91, 26, 0.3)'} : {}}
                           onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(199, 91, 26, 0.10)'; }}
                           onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}
                         >
