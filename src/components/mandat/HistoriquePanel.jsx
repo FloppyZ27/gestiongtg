@@ -50,7 +50,7 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
             variant="ghost"
             size="sm"
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 border border-red-500/30 relative"
+            className="h-7 px-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
           >
             <Filter className="w-3 h-3 mr-1" />
             <span className="text-xs">Filtres</span>
