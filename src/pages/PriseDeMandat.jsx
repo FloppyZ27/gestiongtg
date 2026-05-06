@@ -2377,7 +2377,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     </div>
                   )}
                   
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>
                     {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
                   </h2>
                   
