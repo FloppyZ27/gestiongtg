@@ -939,18 +939,15 @@ export default function ClientFormDialog({
                         Existant
                       </Badge>
                     </div>
-                    {(client.courriels?.length > 0 || client.telephones?.length > 0) && (
+                    {(client.courriels?.length > 0 || client.telephones?.length > 0 || client.adresses?.length > 0) && (
                       <div className="mt-2 pt-2 border-t border-slate-700 text-xs space-y-1">
                         {client.courriels?.find(c => c.actuel)?.courriel && (
-                          <p className="text-slate-400">
-                            ✉️ {client.courriels.find(c => c.actuel).courriel}
-                          </p>
+                          <p className="text-slate-400">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
                         )}
                         {client.telephones?.find(t => t.actuel)?.telephone && (
-                          <p className="text-slate-400">
-                            📞 {client.telephones.find(t => t.actuel).telephone}
-                          </p>
+                          <p className="text-slate-400">📞 {client.telephones.find(t => t.actuel).telephone}</p>
                         )}
+                        {(() => { const adresse = client.adresses?.find(a => a.actuelle) || client.adresses?.[0]; const fmt = formatAdresse(adresse); return fmt ? <p className="text-slate-400">📍 {fmt}</p> : null; })()}
                       </div>
                     )}
                   </div>
