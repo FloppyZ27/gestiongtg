@@ -511,9 +511,11 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     <Dialog open={!!commentToDelete} onOpenChange={(open) => !open && setCommentToDelete(null)}>
       <DialogContent className="text-white max-w-sm shadow-2xl shadow-black/50" style={{background:'hsl(220,13%,10%)', border:'1px solid hsl(220,10%,22%)'}}>
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold flex items-center gap-2" style={{color:'hsl(0,80%,58%)', WebkitTextFillColor:'hsl(0,80%,58%)'}}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Confirmer la suppression
+          <DialogTitle className="text-lg font-bold" style={{background:'none', WebkitTextFillColor:'unset', color:'hsl(0,80%,58%)'}}>
+            <span className="flex items-center gap-2" style={{color:'hsl(0,80%,58%)'}}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Confirmer la suppression
+            </span>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
