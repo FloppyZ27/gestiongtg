@@ -166,8 +166,16 @@ export default function ContactsTabsSection({
                           <span className="font-medium">{client.prenom} {client.nom}</span>
                           {(clientPhone || clientEmail) && (
                             <div className="text-slate-500 text-[11px] space-y-0.5">
-                              {clientPhone && <div>☎️ {clientPhone}</div>}
-                              {clientEmail && <div>✉️ {clientEmail}</div>}
+                              {clientPhone && (
+                                <div>
+                                  📞 <a href={`tel:${clientPhone.replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{clientPhone}</a>
+                                </div>
+                              )}
+                              {clientEmail && (
+                                <div>
+                                  ✉️ <a href={`mailto:${clientEmail}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{clientEmail}</a>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -247,8 +255,16 @@ export default function ContactsTabsSection({
                         <span className="font-medium">{notaire.prenom} {notaire.nom}</span>
                         {(notairePhone || notaireEmail) && (
                           <div className="text-slate-500 text-[11px] space-y-0.5">
-                            {notairePhone && <div>☎️ {notairePhone}</div>}
-                            {notaireEmail && <div>✉️ {notaireEmail}</div>}
+                            {notairePhone && (
+                              <div>
+                                📞 <a href={`tel:${notairePhone.replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{notairePhone}</a>
+                              </div>
+                            )}
+                            {notaireEmail && (
+                              <div>
+                                ✉️ <a href={`mailto:${notaireEmail}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{notaireEmail}</a>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -325,8 +341,16 @@ export default function ContactsTabsSection({
                         <span className="font-medium">{courtier.prenom} {courtier.nom}</span>
                         {(courtierPhone || courtierEmail) && (
                           <div className="text-slate-500 text-[11px] space-y-0.5">
-                            {courtierPhone && <div>☎️ {courtierPhone}</div>}
-                            {courtierEmail && <div>✉️ {courtierEmail}</div>}
+                            {courtierPhone && (
+                              <div>
+                                📞 <a href={`tel:${courtierPhone.replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{courtierPhone}</a>
+                              </div>
+                            )}
+                            {courtierEmail && (
+                              <div>
+                                ✉️ <a href={`mailto:${courtierEmail}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{courtierEmail}</a>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -403,8 +427,16 @@ export default function ContactsTabsSection({
                         <span className="font-medium">{compagnie.prenom} {compagnie.nom}</span>
                         {(compagniePhone || compagnieEmail) && (
                           <div className="text-slate-500 text-[11px] space-y-0.5">
-                            {compagniePhone && <div>☎️ {compagniePhone}</div>}
-                            {compagnieEmail && <div>✉️ {compagnieEmail}</div>}
+                            {compagniePhone && (
+                              <div>
+                                📞 <a href={`tel:${compagniePhone.replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{compagniePhone}</a>
+                              </div>
+                            )}
+                            {compagnieEmail && (
+                              <div>
+                                ✉️ <a href={`mailto:${compagnieEmail}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300 transition-colors">{compagnieEmail}</a>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
