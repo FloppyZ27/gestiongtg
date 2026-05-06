@@ -298,7 +298,7 @@ export default function OuvrirDossierDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[65vw] w-[65vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
+          className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
           style={{ marginTop: '19px', maxHeight: 'calc(85vh - 5px)' }}
         >
           <DialogHeader className="sr-only">
