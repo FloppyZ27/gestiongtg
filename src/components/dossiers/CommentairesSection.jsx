@@ -858,13 +858,18 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
 
     {/* Dialog de confirmation de suppression */}
     <Dialog open={!!commentToDelete} onOpenChange={(open) => !open && setCommentToDelete(null)}>
-      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-        <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+      <DialogContent className="text-white max-w-sm shadow-2xl shadow-black/50" style={{background:'hsl(220,13%,10%)', border:'1px solid hsl(220,10%,22%)'}}>
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold flex items-center gap-2" style={{color:'hsl(0,80%,58%)', WebkitTextFillColor:'hsl(0,80%,58%)'}}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Confirmer la suppression
+          </DialogTitle>
+        </DialogHeader>
         <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-          <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.</p>
-          <div className="flex justify-center gap-3 pt-4">
-            <Button type="button" onClick={() => setCommentToDelete(null)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Annuler</Button>
-            <Button type="button" onClick={confirmDelete} className="bg-gradient-to-r from-red-500 to-red-600 border-none">Supprimer</Button>
+          <p className="text-slate-300 text-sm">Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.</p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setCommentToDelete(null)} className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">Annuler</Button>
+            <Button type="button" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white border-none">Supprimer</Button>
           </div>
         </motion.div>
       </DialogContent>
