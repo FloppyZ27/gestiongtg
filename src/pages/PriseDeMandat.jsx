@@ -119,11 +119,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
   // Expose function to child components via window object
   React.useEffect(() => {
-    window.openClientForEdit = (client) => {
-      setEditingClientForForm(client);
-      setClientTypeForForm(client.type_client);
-      setIsClientFormDialogOpen(true);
-    };
+    window.openClientForEdit = (client) => { openClientFormDialog(client.type_client, client); };
     return () => {
       delete window.openClientForEdit;
     };
@@ -131,10 +127,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
   // Replaced individual new client dialog states with a single one controlling the ClientFormDialog
   const [isClientFormDialogOpen, setIsClientFormDialogOpen] = useState(false);
-  const [clientTypeForForm, setClientTypeForForm] = useState('Client'); // 'Client', 'Notaire', 'Courtier immobilier'
-  const [editingClientForForm, setEditingClientForForm] = useState(null); // Holds client object for editing
-
-
+  const [clientTypeForForm, setClientTypeForForm] = useState('Client');
+  const [editingClientForForm, setEditingClientForForm] = useState(null);
+  const [clientFormInitialData, setClientFormInitialData] = useState(null);
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingDossier, setViewingDossier] = useState(null);
@@ -1828,16 +1823,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
   const handleEdit = (entity) => { // Renamed from 'dossier' to 'entity'
     // Check if the entity is a client (based on type_client property presence)
     if (entity && entity.type_client) {
-      // It's a client. Open client editing form using ClientFormDialog.
-      setEditingClientForForm(entity);
-      setClientTypeForForm(entity.type_client);
-      setIsClientFormDialogOpen(true);
-
-      // Close the selector dialog first
       setIsClientSelectorOpen(false);
       setIsNotaireSelectorOpen(false);
       setIsCourtierSelectorOpen(false);
-      return; // Exit early as it's a client
+      openClientFormDialog(entity.type_client, entity);
+      return;
     }
 
     // Original dossier editing logic
@@ -2216,10 +2206,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
   };
   // END NEW FUNCTIONS
 
-  const getCurrentValue = (items, key) => {
-    const current = items?.find(item => item.actuel || item.actuelle);
-    return current?.[key] || "";
-  };
+  const buildClientInitialData=(type)=>{const sp=(s)=>{const p=(s||"").trim().split(" ");return{prenom:p.length>1?p.slice(0,-1).join(" "):p[0]||"",nom:p.length>1?p[p.length-1]:""};};if(type==="Client")return{...clientInfo,adresse_travaux:(workAddress.rue||workAddress.ville)?workAddress:null};if(type==="Notaire")return{...sp(professionnelInfo.notaire),telephone:professionnelInfo.notaire_telephone||"",courriel:professionnelInfo.notaire_courriel||""};if(type==="Courtier immobilier")return{...sp(professionnelInfo.courtier),telephone:professionnelInfo.courtier_telephone||"",courriel:professionnelInfo.courtier_courriel||""};if(type==="Compagnie")return{prenom:professionnelInfo.compagnie||"",nom:"",telephone:"",courriel:""};return null;};
+  const openClientFormDialog=(type,editing=null)=>{setEditingClientForForm(editing);setClientTypeForForm(type);setClientFormInitialData(editing?null:buildClientInitialData(type));setIsClientFormDialogOpen(true);};
+  const getCurrentValue=(items,key)=>{const c=items?.find(i=>i.actuel||i.actuelle);return c?.[key]||"";};
 
   const getStatutBadgeColor = (statut) => {
     const colors = {
@@ -2857,22 +2846,14 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     className="pl-10 bg-slate-800 border-slate-700"
                   />
                 </div>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setEditingClientForForm(null);
-                    setClientTypeForForm("Client");
-                    setIsClientFormDialogOpen(true);
-                  }}
-                  className="bg-emerald-500 hover:bg-emerald-600"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau
+                <Button type="button" onClick={() => openClientFormDialog("Client")} className="bg-emerald-500 hover:bg-emerald-600">
+                 <Plus className="w-4 h-4 mr-2" />
+                 Nouveau
                 </Button>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
+                </div>
+                <div className="max-h-96 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
-                  {filteredClientsForSelector.map((client) => (
+                 {filteredClientsForSelector.map((client) => (
                     <div
                       key={client.id}
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
@@ -2939,15 +2920,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     className="pl-10 bg-slate-800 border-slate-700"
                   />
                 </div>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setEditingClientForForm(null);
-                    setClientTypeForForm("Notaire");
-                    setIsClientFormDialogOpen(true);
-                  }}
-                  className="bg-purple-500 hover:bg-purple-600"
-                >
+                <Button type="button" onClick={() => openClientFormDialog("Notaire")} className="bg-purple-500 hover:bg-purple-600">
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau
                 </Button>
@@ -3021,15 +2994,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     className="pl-10 bg-slate-800 border-slate-700"
                   />
                 </div>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setEditingClientForForm(null);
-                    setClientTypeForForm("Courtier immobilier");
-                    setIsClientFormDialogOpen(true);
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
+                <Button type="button" onClick={() => openClientFormDialog("Courtier immobilier")} className="bg-orange-500 hover:bg-orange-600">
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau
                 </Button>
@@ -3118,11 +3083,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           open={isClientFormDialogOpen}
           onOpenChange={(open) => {
             setIsClientFormDialogOpen(open);
-            if (!open) setEditingClientForForm(null);
+            if (!open) { setEditingClientForForm(null); setClientFormInitialData(null); }
           }}
           editingClient={editingClientForForm}
           defaultType={clientTypeForForm}
-          initialData={editingClientForForm ? null : (() => { const sp=(s)=>{const p=(s||"").trim().split(" ");return{prenom:p.length>1?p.slice(0,-1).join(" "):p[0]||"",nom:p.length>1?p[p.length-1]:""};};if(clientTypeForForm==="Client")return{...clientInfo,adresse_travaux:(workAddress.rue||workAddress.ville)?workAddress:null};if(clientTypeForForm==="Notaire")return{...sp(professionnelInfo.notaire),telephone:professionnelInfo.notaire_telephone||"",courriel:professionnelInfo.notaire_courriel||""};if(clientTypeForForm==="Courtier immobilier")return{...sp(professionnelInfo.courtier),telephone:professionnelInfo.courtier_telephone||"",courriel:professionnelInfo.courtier_courriel||""};if(clientTypeForForm==="Compagnie")return{prenom:professionnelInfo.compagnie||"",nom:"",telephone:"",courriel:""};return null;})()}
+          initialData={clientFormInitialData}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
             // Optionally re-open the selector if creating from there
