@@ -143,16 +143,18 @@ export default function AddressStepForm({
                 <Home className="w-3.5 h-3.5 text-emerald-400" />
               </div>
               <CardTitle className="text-emerald-300 text-base">Adresse des travaux</CardTitle>
-            {hasAddress && (
-              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}
-              </Badge>
-            )}
-            {addressForm.numero_lot && (
-              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                Lot: {addressForm.numero_lot.split('\n').filter(l => l.trim()).join(', ')}
-              </Badge>
-            )}
+            <span onClick={(e) => e.stopPropagation()} className="flex gap-1 flex-wrap">
+              {hasAddress && (
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                  {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}
+                </Badge>
+              )}
+              {addressForm.numero_lot && (
+                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                  Lot: {addressForm.numero_lot.split('\n').filter(l => l.trim()).join(', ')}
+                </Badge>
+              )}
+            </span>
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>

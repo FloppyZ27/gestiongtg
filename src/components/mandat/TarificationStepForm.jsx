@@ -165,9 +165,11 @@ export default function TarificationStepForm({
               </div>
               <CardTitle className="text-purple-300 text-base">Tarification</CardTitle>
             {(totalEstime > 0 || totalRabais > 0) && (
-              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                Net: {(totalEstime - totalRabais).toFixed(2)} $
-              </Badge>
+              <span onClick={(e) => e.stopPropagation()}>
+                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                  Net: {(totalEstime - totalRabais).toFixed(2)} $
+                </Badge>
+              </span>
             )}
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}

@@ -174,20 +174,18 @@ export default function MandatStepForm({
                 <ClipboardList className="w-3.5 h-3.5 text-orange-400" />
               </div>
               <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
-            {selectedTypes.length > 0 && (
-              <div className="flex gap-1 flex-wrap">
-                {selectedTypes.map((type, idx) => (
-                  <Badge key={idx} className={`${getMandatColor(type)} border text-xs`}>
-                    {getAbbreviatedMandatType(type)}
-                  </Badge>
-                ))}
-              </div>
-            )}
-            {sharedInfo.urgence_percue && (
-              <Badge className={`${getUrgenceColor(sharedInfo.urgence_percue)} text-xs`}>
-                {sharedInfo.urgence_percue}
-              </Badge>
-            )}
+            <span onClick={(e) => e.stopPropagation()} className="flex gap-1 flex-wrap items-center">
+              {selectedTypes.length > 0 && selectedTypes.map((type, idx) => (
+                <Badge key={idx} className={`${getMandatColor(type)} border text-xs`}>
+                  {getAbbreviatedMandatType(type)}
+                </Badge>
+              ))}
+              {sharedInfo.urgence_percue && (
+                <Badge className={`${getUrgenceColor(sharedInfo.urgence_percue)} text-xs`}>
+                  {sharedInfo.urgence_percue}
+                </Badge>
+              )}
+            </span>
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
