@@ -98,7 +98,7 @@ export default function DossierInfoStepForm({
                           ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
                           : statut === s.value 
                             ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
-                            : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
+                            : "bg-transparent text-slate-400 border-transparent hover:border-slate-600 hover:bg-slate-700/50"
                       }`}
                     >
                       {s.label}
