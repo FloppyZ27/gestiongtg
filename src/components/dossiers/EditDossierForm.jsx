@@ -660,7 +660,7 @@ export default function EditDossierForm({
                                    key={index}
                                    value={index.toString()}
                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                                     isActive ? `${mandatColor} border-b-2` : 'text-slate-400'
+                                     isActive ? `${mandatColor} border-b-2` : 'bg-slate-700/30 text-slate-400'
                                    }`}
                                  >
                                   <Badge className={`${isActive ? mandatColor : 'bg-slate-700 text-slate-400 border-slate-600'} border text-xs`}>
