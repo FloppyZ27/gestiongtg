@@ -227,12 +227,12 @@ export default function TarificationStepForm({
                          </td>
                          <td className="p-2 text-center">
                            <button type="button" onClick={() => handleCheckboxChange(index, 'taxes_incluses', !mandat.taxes_incluses)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
-                             {mandat.taxes_incluses ? <ToggleRight className="w-5 h-5 text-purple-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                             {mandat.taxes_incluses ? <ToggleRight className="w-5 h-5 text-red-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
                            </button>
                          </td>
                          <td className="p-2 text-center">
                            <button type="button" onClick={() => handleCheckboxChange(index, 'prix_convenu', !mandat.prix_convenu)} disabled={disabled} className="border-0 bg-transparent shadow-none p-0 hover:bg-transparent">
-                             {mandat.prix_convenu ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                             {mandat.prix_convenu ? <ToggleRight className="w-5 h-5 text-red-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
                            </button>
                          </td>
                          <td className="p-2 text-center">
