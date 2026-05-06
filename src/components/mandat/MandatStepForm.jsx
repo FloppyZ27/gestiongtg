@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const OBJECTIFS = ["Vente", "Refinancement", "Projet de construction", "Litige"];
@@ -227,11 +227,12 @@ export default function MandatStepForm({
                           onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(199, 91, 26, 0.10)'; }}
                           onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}
                         >
-                          <Checkbox
+                          <input
+                            type="checkbox"
                             checked={isSelected}
-                            onCheckedChange={() => {}}
+                            onChange={() => {}}
                             onClick={(e) => e.stopPropagation()}
-                            className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                            className="w-4 h-4 accent-orange-500 cursor-pointer flex-shrink-0"
                           />
                           <span>{type}</span>
                         </div>
