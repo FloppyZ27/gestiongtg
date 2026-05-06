@@ -629,7 +629,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                     </div>
                   </div>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-3">
+                <div className="px-1">
                   {isEditing ? (
                     <div className="space-y-2">
                       <Textarea
