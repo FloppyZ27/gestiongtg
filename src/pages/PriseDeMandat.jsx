@@ -2362,7 +2362,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 transition={{ duration: 0.2 }}
               >
                 {/* Header sur toute la largeur */}
-                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between">
+                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 flex-shrink-0 flex items-center justify-between">
                   {/* Bandeau de verrouillage */}
                   {isLocked && (
                     <div className="absolute top-0 left-0 right-0 p-3 bg-red-500/10 border-b border-red-500/30 flex items-center gap-3 z-20">
@@ -2404,8 +2404,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 </div>
 
                 <div className="flex-1 flex overflow-hidden">
-                  <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},...(editingPriseMandat?[{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}]:[])].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800/30 hover:bg-slate-600 transition-colors duration-200 hover:scale-110 hover:shadow-lg hover:shadow-slate-600 sidebar-nav-btn"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
-                  <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="w-12 bg-slate-950 flex flex-col items-center py-4 gap-2 flex-shrink-0">{[{id:"section-dossier-info",t:"Informations",I:FolderOpen,c:"text-teal-400"},{id:"section-client",t:"Client",I:Users,c:"text-blue-400"},{id:"section-professionnel",t:"Professionnel",I:Briefcase,c:"text-pink-400"},{id:"section-adresse",t:"Adresse",I:Home,c:"text-emerald-400"},{id:"section-mandats",t:"Mandats",I:ClipboardList,c:"text-orange-400"},{id:"section-tarification",t:"Tarification",I:Receipt,c:"text-purple-400"},...(editingPriseMandat?[{id:"section-documents",t:"Documents",I:FolderOpen,c:"text-yellow-400"}]:[])].map(s=>(<button key={s.id} type="button" title={s.t} onClick={()=>h(s.id)} className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-800/30 hover:bg-slate-600 transition-colors duration-200 hover:scale-110 hover:shadow-lg hover:shadow-slate-600 sidebar-nav-btn"><s.I className={`w-5 h-5 ${s.c}`}/></button>))}</div>
+                  <div className="flex-[0_0_calc(70%-48px)] flex flex-col overflow-hidden">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onBlur={handleAutoSave} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
@@ -2567,7 +2567,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                      <div className="flex-[0_0_30%] flex flex-col overflow-hidden overflow-x-hidden min-w-0 w-full">
                     {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
-                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 flex-shrink-0 flex items-center justify-between"
                     onClick={() => setMapCollapsedDossier(!mapCollapsedDossier)}
                   >
                     <div className="flex items-center gap-2">
@@ -2577,7 +2577,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     {mapCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
                   {!mapCollapsedDossier && (workAddress.rue || workAddress.ville) && (
-                    <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
+                    <div className="p-4 flex-shrink-0 max-h-[25%]">
                       <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
                         <div className="aspect-square w-full max-h-[calc(100%-28px)]">
                           <iframe
@@ -2603,7 +2603,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                   
                   {/* Header Tabs Commentaires/Historique - Collapsible */}
                   <div 
-                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 flex-shrink-0 flex items-center justify-between"
                     onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
                   >
                     <div className="flex items-center gap-2">
@@ -2636,7 +2636,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                       )}
                       </div>
                       </div>
-                      {!editingPriseMandat && <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                      {!editingPriseMandat && <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 flex-shrink-0">
                         <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
                         <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button>
                        </div>}
