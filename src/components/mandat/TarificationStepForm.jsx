@@ -150,7 +150,7 @@ export default function TarificationStepForm({
   const totalAutresLots = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.prix_autres_lots) || 0), 0);
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30">
       <CardHeader 
                     className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
         onClick={onToggleCollapse}

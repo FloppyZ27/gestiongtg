@@ -149,7 +149,7 @@ export default function MandatStepForm({
   };
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30">
       <CardHeader 
                     className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
         onClick={onToggleCollapse}
