@@ -9,6 +9,7 @@ import ClientSelectionCard from "./ClientSelectionCard";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewLotDialog from "../lots/NewLotDialog";
+import { useClientFormInitialData } from "@/hooks/useClientFormInitialData";
 
 export default function OuvrirDossierDialog({
   open,
@@ -178,61 +179,6 @@ export default function OuvrirDossierDialog({
 
   const getLotById = (id) => (lots || []).find(l => l.id === id);
 
-  // Générer les données préremplies basées sur le dossier actuellement ouvert
-  const buildClientInitialData = () => {
-    if (!formData) return null;
-
-    const initialData = {};
-
-    // Récupérer le premier client du dossier si disponible
-    const primaryClientId = formData.clients_ids?.[0];
-    const primaryClient = primaryClientId ? (clients || []).find(c => c.id === primaryClientId) : null;
-
-    // Adresse des travaux du premier mandat
-    const workAddress = formData.mandats?.[0]?.adresse_travaux;
-
-    // Préremplir à partir du client principal
-    if (primaryClient) {
-      if (primaryClient.prenom) initialData.prenom = primaryClient.prenom;
-      if (primaryClient.nom) initialData.nom = primaryClient.nom;
-
-      const currentEmail = primaryClient.courriels?.find(e => e.actuel)?.courriel;
-      if (currentEmail) initialData.courriel = currentEmail;
-
-      const currentPhone = primaryClient.telephones?.find(t => t.actuel)?.telephone;
-      if (currentPhone) {
-        initialData.telephone = currentPhone;
-        const phoneObj = primaryClient.telephones.find(t => t.actuel);
-        if (phoneObj?.type) initialData.type_telephone = phoneObj.type;
-      }
-
-      const currentAddress = primaryClient.adresses?.find(a => a.actuelle || a.actuel);
-      if (currentAddress) {
-        initialData.adresse_travaux = { 
-          numeros_civiques: currentAddress.numeros_civiques || [""],
-          rue: currentAddress.rue || "",
-          ville: currentAddress.ville || "",
-          province: currentAddress.province || "QC",
-          code_postal: currentAddress.code_postal || ""
-        };
-      }
-    }
-
-    // Ajouter les infos d'adresse de travaux du dossier si disponibles (et pas d'adresse client)
-    if (workAddress && !initialData.adresse_travaux) {
-      initialData.adresse_travaux = {
-        numeros_civiques: workAddress.numeros_civiques || [""],
-        rue: workAddress.rue || "",
-        ville: workAddress.ville || "",
-        province: workAddress.province || "QC",
-        code_postal: workAddress.code_postal || ""
-      };
-    }
-
-    // Retourner null si aucune donnée n'a été trouvée
-    return Object.keys(initialData).length > 0 ? initialData : null;
-  };
-
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -359,6 +305,9 @@ export default function OuvrirDossierDialog({
     }
   };
 
+  // Utiliser le hook pour les données préremplies du client
+  const clientInitialData = useClientFormInitialData(formData, clients);
+
   if (!formData) return null;
 
   return (
@@ -402,7 +351,7 @@ export default function OuvrirDossierDialog({
             onNewClientClick={(clientType) => {
               setEditingClientForForm(null);
               setClientTypeForForm(clientType || "Client");
-              setClientFormInitialData(buildClientInitialData());
+              setClientFormInitialData(clientInitialData);
               setIsClientFormOpen(true);
             }}
             calculerProchainNumeroDossier={(arpenteur) => {
