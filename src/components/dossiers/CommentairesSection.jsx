@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 
 export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange, onAddHistoriqueEntry }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
@@ -857,35 +858,15 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
 
     {/* Dialog de confirmation de suppression */}
     <Dialog open={!!commentToDelete} onOpenChange={(open) => !open && setCommentToDelete(null)}>
-      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-        <DialogHeader>
-          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            Attention
-            <span className="text-2xl">⚠️</span>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-slate-300 text-center">
-            Êtes-vous sûr de vouloir supprimer ce commentaire ?
-          </p>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
+        <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
+        <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
+          <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.</p>
           <div className="flex justify-center gap-3 pt-4">
-            <Button 
-              type="button" 
-              onClick={() => setCommentToDelete(null)}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-            >
-              Annuler
-            </Button>
-            <Button
-              type="button"
-              onClick={confirmDelete}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-            >
-              Confirmer
-            </Button>
+            <Button type="button" onClick={() => setCommentToDelete(null)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Annuler</Button>
+            <Button type="button" onClick={confirmDelete} className="bg-gradient-to-r from-red-500 to-red-600 border-none">Supprimer</Button>
           </div>
-        </div>
+        </motion.div>
       </DialogContent>
     </Dialog>
 
