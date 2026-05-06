@@ -50,12 +50,12 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
             variant="ghost"
             size="sm"
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className="h-7 px-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
+            className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 border border-red-500/30 relative"
           >
             <Filter className="w-3 h-3 mr-1" />
             <span className="text-xs">Filtres</span>
             {hasFilters && (
-              <Badge className="ml-1.5 h-4 w-4 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
+              <Badge className="ml-1.5 h-4 w-4 p-0 flex items-center justify-center bg-red-500/20 text-red-400 border-red-500/30 text-[10px]">
                 {filterCount}
               </Badge>
             )}
@@ -65,19 +65,19 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
 
         <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
           <CollapsibleContent>
-            <div className="mt-2 p-2 border border-emerald-500/30 rounded-lg">
+            <div className="mt-2 p-2 border border-red-500/30 rounded-lg">
               <div className="space-y-2">
-                <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                <div className="flex items-center justify-between pb-2 border-b border-red-500/30">
                   <div className="flex items-center gap-2">
-                    <Filter className="w-3 h-3 text-emerald-500" />
-                    <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                    <Filter className="w-3 h-3 text-red-500" />
+                    <h4 className="text-xs font-semibold text-red-500">Filtrer</h4>
                   </div>
                   {hasFilters && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => { setFilterUsers([]); setFilterTypes([]); setFilterDateStart(""); setFilterDateEnd(""); }}
-                      className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                      className="h-6 text-xs text-red-500 hover:text-red-400 px-2"
                     >
                       <X className="w-2.5 h-2.5 mr-1" />
                       Réinitialiser
@@ -88,7 +88,7 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
                 <div className="grid grid-cols-2 gap-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                      <Button variant="outline" className="w-full border-red-500/30 text-red-400 justify-between h-8 text-xs px-2">
                         <span className="truncate">Utilisateurs ({filterUsers.length > 0 ? filterUsers.length : 'Tous'})</span>
                         <ChevronDown className="w-3 h-3 flex-shrink-0" />
                       </Button>
@@ -109,7 +109,7 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                      <Button variant="outline" className="w-full border-red-500/30 text-red-400 justify-between h-8 text-xs px-2">
                         <span className="truncate">Types ({filterTypes.length > 0 ? filterTypes.length : 'Tous'})</span>
                         <ChevronDown className="w-3 h-3 flex-shrink-0" />
                       </Button>
@@ -129,12 +129,12 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
                   </DropdownMenu>
                 </div>
 
-                <div className="space-y-1 pt-1 border-t border-emerald-500/30">
-                  <Label className="text-xs text-emerald-500">Période</Label>
+                <div className="space-y-1 pt-1 border-t border-red-500/30">
+                  <Label className="text-xs text-red-400">Période</Label>
                   <div className="flex items-center gap-1.5">
-                    <Input type="date" value={filterDateStart} onChange={e => setFilterDateStart(e.target.value)} className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2" />
-                    <span className="text-emerald-500 text-xs">→</span>
-                    <Input type="date" value={filterDateEnd} onChange={e => setFilterDateEnd(e.target.value)} className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2" />
+                    <Input type="date" value={filterDateStart} onChange={e => setFilterDateStart(e.target.value)} className="flex-1 border-red-500/30 text-red-400 h-8 text-xs px-2" />
+                    <span className="text-red-400 text-xs">→</span>
+                    <Input type="date" value={filterDateEnd} onChange={e => setFilterDateEnd(e.target.value)} className="flex-1 border-red-500/30 text-red-400 h-8 text-xs px-2" />
                   </div>
                 </div>
               </div>
