@@ -394,8 +394,8 @@ export default function NewRetourAppelForm({
                      </div>
 
                     {/* Liste des dossiers */}
-                    <div className="overflow-hidden flex flex-col">
-                      <p className="text-slate-400 text-xs mb-1">
+                    <div className="overflow-hidden flex flex-col max-h-[350px]">
+                      <p className="text-slate-400 text-xs mb-1 flex-shrink-0">
                         Sélectionner un dossier ({dossiers.filter(d => {
                           const matchesStatut = d.statut === "Ouvert" || d.statut === "Fermé";
                           const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
@@ -405,7 +405,7 @@ export default function NewRetourAppelForm({
                           return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                         }).length})
                       </p>
-                      <div className="flex-1 overflow-y-auto max-h-[300px] overflow-x-auto -mx-2 px-2">
+                      <div className="flex-1 overflow-y-auto overflow-x-auto -mx-2 px-2 min-h-0">
                         <div className="min-w-full">
                           <Table className="text-xs">
                             <TableHeader className="sticky top-0 bg-slate-900 z-10">
