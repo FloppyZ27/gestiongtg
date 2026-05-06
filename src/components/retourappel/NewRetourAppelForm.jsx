@@ -234,7 +234,7 @@ export default function NewRetourAppelForm({
           }
         }} className="space-y-3">
           {/* Section Informations du dossier */}
-          <Card className="border-slate-700 bg-slate-800/30">
+          <Card className="border-0 bg-transparent">
             <CardHeader 
               className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
               onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
@@ -494,7 +494,7 @@ export default function NewRetourAppelForm({
 
           {/* Section Retour d'appel */}
           {(dossierFound || aucunDossier) && (
-            <Card className="border-slate-700 bg-slate-800/30">
+            <Card className="border-0 bg-transparent">
               <CardHeader 
                 className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                 onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
