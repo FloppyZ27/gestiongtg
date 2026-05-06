@@ -201,9 +201,9 @@ export default function MandatStepForm({
                       <ChevronDown className="w-4 h-4 ml-2 opacity-50 flex-shrink-0" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" side="top" align="start">
+                  <PopoverContent className="w-80 p-0" style={{background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}} side="top" align="start">
                     <div 
-                      className="max-h-[200px] overflow-y-auto p-2 space-y-1"
+                      className="max-h-[200px] overflow-y-auto p-2 space-y-0.5"
                       onWheelCapture={(e) => e.stopPropagation()}
                     >
                       {TYPES_MANDATS.map((type) => {
@@ -212,11 +212,14 @@ export default function MandatStepForm({
                           <div
                             key={type}
                             onClick={() => toggleMandatType(type)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all text-sm ${
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-all text-sm ${
                               isSelected 
-                                ? 'bg-orange-500/20 text-orange-400' 
-                                : 'text-slate-300 hover:bg-slate-700'
+                                ? 'text-orange-400' 
+                                : 'text-slate-300'
                             }`}
+                            style={isSelected ? {background: 'rgba(199, 91, 26, 0.18)'} : {}}
+                            onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(199, 91, 26, 0.10)'; }}
+                            onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}
                           >
                             <Checkbox
                               checked={isSelected}
