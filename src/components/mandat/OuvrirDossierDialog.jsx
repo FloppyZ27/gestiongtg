@@ -111,20 +111,20 @@ export default function OuvrirDossierDialog({
      if (professionnelInfo.notaire) recapLines.push(`⚖️ Notaire: ${professionnelInfo.notaire}`);
      if (professionnelInfo.courtier) recapLines.push(`🏡 Courtier immobilier: ${professionnelInfo.courtier}`);
      if (professionnelInfo.compagnie) recapLines.push(`🏗️ Compagnie: ${professionnelInfo.compagnie}`);
+    } else {
+      // Afficher notaires et courtiers via IDs seulement si pas d'infos manuelles
+      const notaireNames = (data.notaires_ids || []).map(id => {
+        const n = (clients || []).find(cl => cl.id === id);
+        return n ? `${n.prenom || ''} ${n.nom || ''}`.trim() : null;
+      }).filter(Boolean);
+      if (notaireNames.length > 0) recapLines.push(`⚖️ Notaire(s): ${notaireNames.join(', ')}`);
+
+      const courtierNames = (data.courtiers_ids || []).map(id => {
+        const c = (clients || []).find(cl => cl.id === id);
+        return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
+      }).filter(Boolean);
+      if (courtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${courtierNames.join(', ')}`);
     }
-
-    // Notaires et courtiers via IDs
-    const notaireNames = (data.notaires_ids || []).map(id => {
-      const n = (clients || []).find(cl => cl.id === id);
-      return n ? `${n.prenom || ''} ${n.nom || ''}`.trim() : null;
-    }).filter(Boolean);
-    if (notaireNames.length > 0) recapLines.push(`⚖️ Notaire(s): ${notaireNames.join(', ')}`);
-
-    const courtierNames = (data.courtiers_ids || []).map(id => {
-      const c = (clients || []).find(cl => cl.id === id);
-      return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
-    }).filter(Boolean);
-    if (courtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${courtierNames.join(', ')}`);
 
     recapLines.push('');
     recapLines.push(`<b>📋 MANDATS (${(data.mandats || []).length})</b>`);
