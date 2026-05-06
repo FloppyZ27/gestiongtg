@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -102,6 +103,7 @@ export default function NewRetourAppelForm({
   const [sortField, setSortField] = useState('date_ouverture');
   const [sortDirection, setSortDirection] = useState('desc');
   const saveTimeoutRef = useRef(null);
+  const [hoveredCell, setHoveredCell] = useState(null);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -512,7 +514,18 @@ export default function NewRetourAppelForm({
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
-                                      {getClientsNames(dossier.clients_ids)}
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="truncate cursor-help">
+                                              {getClientsNames(dossier.clients_ids)}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-slate-100 text-xs max-w-xs">
+                                            {getClientsNames(dossier.clients_ids)}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     </TableCell>
                                     <TableCell className="text-slate-300">
                                       {dossier.mandats && dossier.mandats.length > 0 ? (
@@ -540,7 +553,18 @@ export default function NewRetourAppelForm({
                                       )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs max-w-[150px] truncate">
-                                      {firstAdresse}
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="truncate cursor-help">
+                                              {firstAdresse}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-slate-100 text-xs max-w-xs">
+                                            {firstAdresse}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
                                       {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
