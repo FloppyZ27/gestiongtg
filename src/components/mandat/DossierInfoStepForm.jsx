@@ -15,8 +15,8 @@ const ARPENTEURS = [
 ];
 
 const STATUTS = [
-  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", activeStyle: { background: 'rgba(59,130,246,0.25)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.5)', boxShadow: '0 0 10px rgba(59,130,246,0.3)' } },
-  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", activeStyle: { background: 'rgba(16,185,129,0.25)', color: '#10b981', border: '1px solid rgba(16,185,129,0.5)', boxShadow: '0 0 10px rgba(16,185,129,0.3)' } },
+  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", activeStyle: { background: 'rgba(6,182,212,0.25)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.5)', boxShadow: '0 0 10px rgba(6,182,212,0.3)' } },
+  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", activeStyle: { background: 'rgba(168,85,247,0.25)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.5)', boxShadow: '0 0 10px rgba(168,85,247,0.3)' } },
   { value: "Mandat non octroyé", label: "Non octroyé", activeStyle: { background: 'rgba(239,68,68,0.25)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.5)', boxShadow: '0 0 10px rgba(239,68,68,0.3)' } }
 ];
 
