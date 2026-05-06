@@ -991,20 +991,21 @@ export default function ClientFormDialog({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
         >
+          <div className="w-full sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
+            <h2 className="text-xl font-bold" style={{
+              background: 'linear-gradient(90deg, hsl(0, 85%, 62%), hsl(22, 90%, 68%))',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              color: 'transparent'
+            }}>
+              {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
+            </h2>
+          </div>
+
           <div className="flex-1 flex overflow-hidden">
             {/* Main form content - 70% */}
             <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
-            <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
-              <h2 className="text-xl font-bold" style={{
-                background: 'linear-gradient(90deg, hsl(0, 85%, 62%), hsl(22, 90%, 68%))',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent'
-              }}>
-                {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
-              </h2>
-            </div>
 
             <div className="flex-1 overflow-y-auto p-6 pt-3">
             <form id="client-form" onSubmit={handleSubmit} className="space-y-3">
