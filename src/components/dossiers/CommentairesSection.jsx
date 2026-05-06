@@ -676,12 +676,13 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                             </Button>
                           )}
                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => handleDeleteCommentaire(commentaire)}
-                             className="h-6 w-6 p-0 hover:bg-red-500/20"
-                           >
-                             <Trash2 className="w-3 h-3" style={{color: 'hsl(0, 84%, 60%)'}} />
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteCommentaire(commentaire)}
+                            className="h-6 w-6 p-0 hover:bg-red-500/20"
+                            style={{color: 'hsl(0, 84%, 60%)'}}
+                          >
+                            <Trash2 className="w-3 h-3" style={{color: 'inherit'}} />
                           </Button>
                         </div>
                       )}
