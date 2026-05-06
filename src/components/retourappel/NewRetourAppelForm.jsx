@@ -502,20 +502,26 @@ export default function NewRetourAppelForm({
                                 return (
                                   <TableRow
                                     key={dossier.id}
-                                    className={`cursor-pointer border-slate-800 ${
+                                    className={`border-slate-800 ${
+                                      editingRetourAppel 
+                                        ? 'opacity-60 cursor-not-allowed' 
+                                        : 'cursor-pointer'
+                                    } ${
                                       isSelected 
                                         ? 'bg-blue-500/20 hover:bg-blue-500/30' 
                                         : 'hover:bg-slate-800/30'
                                     }`}
                                     onClick={() => {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        dossier_reference_id: dossier.id
-                                      }));
-                                      setDossierFound(true);
-                                      setSelectedArpenteur(dossier.arpenteur_geometre);
-                                      setSelectedNumeroDossier(dossier.numero_dossier);
-                                      setSelectedClient(getClientsNames(dossier.clients_ids));
+                                      if (!editingRetourAppel) {
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          dossier_reference_id: dossier.id
+                                        }));
+                                        setDossierFound(true);
+                                        setSelectedArpenteur(dossier.arpenteur_geometre);
+                                        setSelectedNumeroDossier(dossier.numero_dossier);
+                                        setSelectedClient(getClientsNames(dossier.clients_ids));
+                                      }
                                     }}
                                   >
                                     <TableCell className="text-slate-300 py-1 px-1">
