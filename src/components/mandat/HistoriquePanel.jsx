@@ -151,7 +151,7 @@ export default function HistoriquePanel({ historique = [], users = [] }) {
               const photo = getUserPhoto(entry.utilisateur_email);
               const initials = getInitials(entry.utilisateur_nom);
               return (
-                <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                <div key={idx} className="p-3 border-b border-slate-800/60 last:border-b-0">
                   <div className="flex flex-col gap-1.5">
                     <p className="text-white text-sm font-medium">{entry.action}</p>
                     {entry.details && (
