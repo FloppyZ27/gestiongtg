@@ -154,7 +154,7 @@ export default function CommunicationClients() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-800/30 p-4 md:p-8">
+    <div className="min-h-screen bg-transparent p-4 md:p-8">
       <style>{`
         
       `}</style>
