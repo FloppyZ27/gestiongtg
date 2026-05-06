@@ -135,7 +135,7 @@ export default function ContactsTabsSection({
             </div>
           </div>
 
-          <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+          <div className={`pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
             <div className="mb-2 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -207,7 +207,7 @@ export default function ContactsTabsSection({
               )}
             </div>
           </div>
-          <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+          <div className={`pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
             <div className="mb-2 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -275,7 +275,7 @@ export default function ContactsTabsSection({
               )}
             </div>
           </div>
-          <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+          <div className={`pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
             <div className="mb-2 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -343,7 +343,7 @@ export default function ContactsTabsSection({
               )}
             </div>
           </div>
-          <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+          <div className={`pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
             <div className="mb-2 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
