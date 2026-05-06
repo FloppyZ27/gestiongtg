@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, FolderOpen, Phone, Search } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, FolderOpen, Phone, Search } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
@@ -97,7 +99,23 @@ export default function NewRetourAppelForm({
   const [selectedClient, setSelectedClient] = useState("");
   const [dossierFound, setDossierFound] = useState(false);
   const [aucunDossier, setAucunDossier] = useState(false);
+  const [sortField, setSortField] = useState('date_ouverture');
+  const [sortDirection, setSortDirection] = useState('desc');
   const saveTimeoutRef = useRef(null);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-500" />;
+    return sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-red-400" /> : <ChevronDown className="w-3 h-3 text-red-400" />;
+  };
 
   // Initialiser l'état en mode édition
   useEffect(() => {
@@ -387,14 +405,30 @@ export default function NewRetourAppelForm({
                           return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                         }).length})
                       </p>
-                      <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
+                      <div className="flex-1 overflow-y-auto max-h-[300px]">
                         <Table>
-                          <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300">N° Dossier</TableHead>
-                              <TableHead className="text-slate-300">Clients</TableHead>
-                              <TableHead className="text-slate-300">Mandats</TableHead>
-                              <TableHead className="text-slate-300">Adresse</TableHead>
+                          <TableHeader className="sticky top-0 bg-slate-900 z-10">
+                            <TableRow className="hover:bg-transparent border-slate-700">
+                              {[
+                                ['numero_dossier', 'N° Dossier'],
+                                ['clients', 'Clients'],
+                                ['mandats', 'Mandats'],
+                                ['tache_actuelle', 'Tâche actuelle'],
+                                ['adresse', 'Adresse'],
+                                ['date_ouverture', 'Date ouverture'],
+                                ['statut', 'Statut'],
+                              ].map(([field, label]) => (
+                                <TableHead
+                                  key={field}
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white select-none"
+                                  onClick={() => handleSort(field)}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {label}
+                                    <SortIcon field={field} />
+                                  </div>
+                                </TableHead>
+                              ))}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -408,15 +442,51 @@ export default function NewRetourAppelForm({
                                 return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                               })
                               .sort((a, b) => {
-                                const dateA = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
-                                const dateB = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
-                                return dateB - dateA;
+                                let aValue, bValue;
+                                switch (sortField) {
+                                  case 'numero_dossier':
+                                    aValue = (a.numero_dossier || '').toLowerCase();
+                                    bValue = (b.numero_dossier || '').toLowerCase();
+                                    break;
+                                  case 'clients':
+                                    aValue = getClientsNames(a.clients_ids).toLowerCase();
+                                    bValue = getClientsNames(b.clients_ids).toLowerCase();
+                                    break;
+                                  case 'mandats':
+                                    aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
+                                    bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
+                                    break;
+                                  case 'tache_actuelle':
+                                    aValue = (a.mandats?.[0]?.tache_actuelle || '').toLowerCase();
+                                    bValue = (b.mandats?.[0]?.tache_actuelle || '').toLowerCase();
+                                    break;
+                                  case 'adresse':
+                                    aValue = formatAdresse(a.mandats?.[0]?.adresse_travaux).toLowerCase();
+                                    bValue = formatAdresse(b.mandats?.[0]?.adresse_travaux).toLowerCase();
+                                    break;
+                                  case 'statut':
+                                    aValue = (a.statut || '').toLowerCase();
+                                    bValue = (b.statut || '').toLowerCase();
+                                    break;
+                                  case 'date_ouverture':
+                                  default:
+                                    aValue = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
+                                    bValue = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
+                                    if (typeof aValue === 'number') {
+                                      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                                    }
+                                }
+                                if (typeof aValue === 'string') {
+                                  return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                                }
+                                return 0;
                               })
                               .map((dossier) => {
                                 const isSelected = formData.dossier_reference_id === dossier.id;
                                 const firstAdresse = dossier.mandats?.[0]?.adresse_travaux 
                                   ? formatAdresse(dossier.mandats[0].adresse_travaux) 
                                   : "-";
+                                const tacheActuelle = dossier.mandats?.[0]?.tache_actuelle || "-";
                                 return (
                                   <TableRow
                                     key={dossier.id}
@@ -441,29 +511,38 @@ export default function NewRetourAppelForm({
                                         {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-sm">
+                                    <TableCell className="text-slate-300 text-xs">
                                       {getClientsNames(dossier.clients_ids)}
                                     </TableCell>
                                     <TableCell className="text-slate-300">
                                       {dossier.mandats && dossier.mandats.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
                                           {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                            <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                            <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs pointer-events-none`}>
                                               {getAbbreviatedMandatType(mandat.type_mandat)}
                                             </Badge>
                                           ))}
                                           {dossier.mandats.length > 2 && (
-                                            <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                              +{dossier.mandats.length - 2}
-                                            </Badge>
+                                            <Badge className="bg-slate-700 text-slate-300 text-xs">+{dossier.mandats.length - 2}</Badge>
                                           )}
                                         </div>
                                       ) : (
                                         <span className="text-slate-600 text-xs">Aucun</span>
                                       )}
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {tacheActuelle}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs max-w-[150px] truncate">
                                       {firstAdresse}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge className={`text-xs pointer-events-none ${dossier.statut === 'Ouvert' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30'} border`}>
+                                        {dossier.statut}
+                                      </Badge>
                                     </TableCell>
                                   </TableRow>
                                 );
@@ -476,7 +555,7 @@ export default function NewRetourAppelForm({
                               return matchesArpenteur && matchesNumero && matchesClient;
                             }).length === 0 && (
                               <TableRow>
-                                <TableCell colSpan={4} className="text-center py-12 text-slate-500">
+                                <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                                   Aucun dossier trouvé
                                 </TableCell>
                               </TableRow>
