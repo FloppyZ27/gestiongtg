@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -103,7 +102,6 @@ export default function NewRetourAppelForm({
   const [sortField, setSortField] = useState('date_ouverture');
   const [sortDirection, setSortDirection] = useState('desc');
   const saveTimeoutRef = useRef(null);
-  const [hoveredCell, setHoveredCell] = useState(null);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -278,7 +276,7 @@ export default function NewRetourAppelForm({
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
                 {aucunDossier ? (
-                   <div className="flex flex-col sm:flex-row items-end gap-3">
+                   <div style={{display: 'flex', alignItems: 'flex-end', gap: '12px'}}>
                      <div className="flex items-center gap-1.5 shrink-0 pb-1">
                        <Checkbox
                          id="aucunDossier"
@@ -299,18 +297,18 @@ export default function NewRetourAppelForm({
                        />
                        <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                      </div>
-                     <div className="flex-1 min-w-0 space-y-1">
-                       <label className="text-slate-400 text-[11px]">Client <span className="text-red-400">*</span></label>
+                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>Client <span style={{color:'#f87171'}}>*</span></label>
                        <input
                          placeholder="Nom du client"
                          value={formData.client_nom || ""}
                          onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
                          required
-                         className="w-full bg-slate-700 border border-slate-600 text-white h-7 text-xs rounded-lg px-2.5"
+                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
                        />
                      </div>
-                     <div className="flex-1 min-w-0 space-y-1">
-                       <label className="text-slate-400 text-[11px]">N° de téléphone <span className="text-red-400">*</span></label>
+                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                       <label style={{color: 'hsl(220,8%,50%)', fontSize: '11px'}}>N° de téléphone <span style={{color:'#f87171'}}>*</span></label>
                        <input
                          id="new-telephone-retour"
                          placeholder="(000) 000-0000"
@@ -330,14 +328,14 @@ export default function NewRetourAppelForm({
                            setFormData({...formData, client_telephone: formatted});
                          }}
                          required
-                         className="w-full bg-slate-700 border border-slate-600 text-white h-7 text-xs rounded-lg px-2.5"
+                         style={{width: '100%', background: 'hsl(220,13%,11%)', border: '1px solid hsl(220,10%,22%)', color: 'white', height: '28px', fontSize: '13px', borderRadius: '10px', padding: '0 10px'}}
                        />
                      </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {/* Ligne de filtres */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-3">
+                    <div className="flex items-end gap-3">
                       <div className="flex items-center gap-1.5">
                         <Checkbox
                           id="aucunDossier"
@@ -359,7 +357,7 @@ export default function NewRetourAppelForm({
                         <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer whitespace-nowrap">Aucun dossier</Label>
                       </div>
 
-                      <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex-1 space-y-1">
                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                         <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
@@ -374,23 +372,23 @@ export default function NewRetourAppelForm({
                         </Select>
                       </div>
 
-                      <div className="flex-1 min-w-0 space-y-1 sm:w-32 sm:flex-none">
+                      <div className="w-32 space-y-1">
                         <Label className="text-slate-400 text-xs">N° de dossier</Label>
                         <Input
                           placeholder="Rechercher..."
                           value={selectedNumeroDossier}
                           onChange={(e) => setSelectedNumeroDossier(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-full"
+                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                         />
                       </div>
 
-                      <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex-1 space-y-1">
                         <Label className="text-slate-400 text-xs">Client</Label>
                         <Input
                           placeholder="Rechercher..."
                           value={selectedClient}
                           onChange={(e) => setSelectedClient(e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-full"
+                          className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                         />
                       </div>
                     </div>
@@ -514,18 +512,7 @@ export default function NewRetourAppelForm({
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <div className="truncate cursor-help">
-                                              {getClientsNames(dossier.clients_ids)}
-                                            </div>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-slate-100 text-xs max-w-xs">
-                                            {getClientsNames(dossier.clients_ids)}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
+                                      {getClientsNames(dossier.clients_ids)}
                                     </TableCell>
                                     <TableCell className="text-slate-300">
                                       {dossier.mandats && dossier.mandats.length > 0 ? (
@@ -553,18 +540,7 @@ export default function NewRetourAppelForm({
                                       )}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs max-w-[150px] truncate">
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <div className="truncate cursor-help">
-                                              {firstAdresse}
-                                            </div>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="bottom" className="bg-slate-800 border-slate-700 text-slate-100 text-xs max-w-xs">
-                                            {firstAdresse}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
+                                      {firstAdresse}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
                                       {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
