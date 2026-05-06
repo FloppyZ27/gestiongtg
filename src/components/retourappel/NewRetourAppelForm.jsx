@@ -511,7 +511,7 @@ export default function NewRetourAppelForm({
                                         {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs">
+                                    <TableCell className="text-slate-300 text-xs whitespace-normal">
                                       {getClientsNames(dossier.clients_ids)}
                                     </TableCell>
                                     <TableCell className="text-slate-300">
@@ -539,7 +539,7 @@ export default function NewRetourAppelForm({
                                         <span className="text-slate-600">-</span>
                                       )}
                                     </TableCell>
-                                    <TableCell className="text-slate-300 text-xs max-w-[150px] truncate">
+                                    <TableCell className="text-slate-300 text-xs whitespace-normal max-w-[150px]">
                                       {firstAdresse}
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs">
