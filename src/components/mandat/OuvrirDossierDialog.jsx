@@ -48,9 +48,9 @@ export default function OuvrirDossierDialog({
       const enrichedForm = {
         ...dossierForm,
         _priseMandat: editingPriseMandat || null,
-        // Ajouter les infos client, notaire, courtier, compagnie pour le récapitulatif
-        _clientInfo: editingPriseMandat?.client_info || null,
-        _professionnelInfo: editingPriseMandat?.professionnel_info || null
+        // _clientInfo et _professionnelInfo sont déjà dans dossierForm s'ils ont été passés
+        _clientInfo: dossierForm._clientInfo || editingPriseMandat?.client_info || null,
+        _professionnelInfo: dossierForm._professionnelInfo || editingPriseMandat?.professionnel_info || null
       };
       setFormData(enrichedForm);
       // Créer automatiquement le commentaire récapitulatif en passant les données directement
