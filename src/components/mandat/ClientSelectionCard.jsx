@@ -28,9 +28,16 @@ export default function ClientSelectionCard({
           e.stopPropagation();
           onRemove(clientId);
         }} 
-        className="absolute right-1 top-1 hover:text-red-400"
+        style={{
+          position: 'absolute', right: '3px', top: '3px',
+          background: 'none', border: 'none', padding: '1px',
+          cursor: 'pointer', opacity: 0.5, lineHeight: 1,
+          color: 'inherit', display: 'flex', alignItems: 'center'
+        }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
       >
-        <X className="w-3 h-3" />
+        <X style={{width: '10px', height: '10px'}} />
       </button>
       <div className="space-y-1 pr-4">
         <div className="font-semibold">{clientData.prenom} {clientData.nom}</div>
