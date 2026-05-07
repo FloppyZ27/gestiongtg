@@ -200,7 +200,8 @@ export default function MandatTabContent({
           )}
         </div>
 
-        <div className="grid grid-cols-[120px_1fr_120px_100px_80px] gap-2">
+        {/* Ligne 1: N° civique + Rue */}
+        <div className="grid grid-cols-[1fr_2fr] gap-2">
           <div className="space-y-0.5">
             <Label className="text-slate-500 text-[10px]">N° civique</Label>
             <Input 
@@ -235,6 +236,9 @@ export default function MandatTabContent({
               className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
             />
           </div>
+        </div>
+        {/* Ligne 2: Ville + Code postal + Province */}
+        <div className="grid grid-cols-[1fr_120px_80px] gap-2">
           <div className="space-y-0.5">
             <Label className="text-slate-500 text-[10px]">Ville</Label>
             <Input 
@@ -283,7 +287,7 @@ export default function MandatTabContent({
                 }
               }}
             >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
