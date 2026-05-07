@@ -278,15 +278,21 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" zIndex={1100} hideClose>
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
-            <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
-                {editingLot && (
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                    Lot {editingLot.numero_lot}
-                  </Badge>
-                )}
-              </div>
+            <div className="sticky top-0 z-10 bg-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+              <h2 className="text-2xl font-bold" style={{
+                background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent',
+              }}>
+                {editingLot ? `Modifier lot — ${editingLot.numero_lot}` : "Nouveau lot"}
+              </h2>
+              {editingLot && (
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                  {editingLot.circonscription_fonciere}
+                </Badge>
+              )}
             </div>
 
             <div className="flex flex-1 overflow-hidden">
