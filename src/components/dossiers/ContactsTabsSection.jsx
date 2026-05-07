@@ -56,6 +56,10 @@ export default function ContactsTabsSection({
   );
 
   const handleClientCardClick = (client, type) => {
+    if (onClientCardClick) {
+      onClientCardClick(client);
+      return;
+    }
     if (setEditingClient) {
       setEditingClient(client);
     }
