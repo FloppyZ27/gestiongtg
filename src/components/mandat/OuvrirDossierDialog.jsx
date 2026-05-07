@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import ClientSelectionCard from "./ClientSelectionCard";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewLotDialog from "../lots/NewLotDialog";
-import { useClientFormInitialData } from "@/hooks/useClientFormInitialData";
+
 
 export default function OuvrirDossierDialog({
   open,
@@ -24,16 +24,16 @@ export default function OuvrirDossierDialog({
   clientInfo,
   workAddress
 }) {
-  const [formData, setFormData] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [internalCommentaires, setInternalCommentaires] = useState([]);
-  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
-  const [clientTypeForForm, setClientTypeForForm] = useState(null);
-  const [editingClientForForm, setEditingClientForForm] = useState(null);
-  const [clientFormInitialData, setClientFormInitialData] = useState(null);
-  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
-  const [newLotMandatIndex, setNewLotMandatIndex] = useState(null);
-  const [editingLotForDialog, setEditingLotForDialog] = useState(null);
+  const [formData, setFormData] = React.useState(null);
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [internalCommentaires, setInternalCommentaires] = React.useState([]);
+  const [isClientFormOpen, setIsClientFormOpen] = React.useState(false);
+  const [clientTypeForForm, setClientTypeForForm] = React.useState(null);
+  const [editingClientForForm, setEditingClientForForm] = React.useState(null);
+  const [clientFormKey, setClientFormKey] = React.useState(0);
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = React.useState(false);
+  const [newLotMandatIndex, setNewLotMandatIndex] = React.useState(null);
+  const [editingLotForDialog, setEditingLotForDialog] = React.useState(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
@@ -44,7 +44,7 @@ export default function OuvrirDossierDialog({
 
 
   // Sync formData when dossierForm changes or dialog opens
-  useEffect(() => {
+  React.useEffect(() => {
     if (dossierForm && open && currentUser) {
       // Enrichir dossierForm avec les infos de la prise de mandat pour le récapitulatif
       const enrichedForm = {
@@ -217,7 +217,7 @@ export default function OuvrirDossierDialog({
     }));
   };
 
-  const [showMissingUserError, setShowMissingUserError] = useState(false);
+  const [showMissingUserError, setShowMissingUserError] = React.useState(false);
 
   const handleCreate = async (e) => {
     e?.preventDefault();
@@ -305,9 +305,31 @@ export default function OuvrirDossierDialog({
     }
   };
 
-  // Utiliser le hook pour les données préremplies du client
-  // On passe editingPriseMandat (qui a client_info) plutôt que formData (qui a _clientInfo)
-  const clientInitialData = useClientFormInitialData(editingPriseMandat || formData, clients);
+  // Construire les données préremplies directement depuis client_info de la prise de mandat
+  // (même source que le commentaire récapitulatif)
+  const clientInitialData = useMemo(() => {
+    const ci = editingPriseMandat?.client_info;
+    if (!ci && !editingPriseMandat?.adresse_travaux && !formData?.mandats?.[0]?.adresse_travaux) return null;
+    
+    const data = {};
+    if (ci?.prenom) data.prenom = ci.prenom;
+    if (ci?.nom) data.nom = ci.nom;
+    if (ci?.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
+    if (ci?.courriel) data.courriel = ci.courriel;
+    
+    const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux || formData?.mandats?.[0]?.adresse_travaux;
+    if (workAddr) {
+      data.adresse_travaux = {
+        numeros_civiques: workAddr.numeros_civiques || [""],
+        rue: workAddr.rue || "",
+        ville: workAddr.ville || "",
+        province: workAddr.province || "QC",
+        code_postal: workAddr.code_postal || ""
+      };
+    }
+    
+    return Object.keys(data).length > 0 ? data : null;
+  }, [editingPriseMandat, formData]);
 
   if (!formData) return null;
 
@@ -346,13 +368,13 @@ export default function OuvrirDossierDialog({
             onClientCardClick={(client) => {
               setEditingClientForForm(client);
               setClientTypeForForm(client.type_client);
-              setClientFormInitialData(null);
+              setClientFormKey(k => k + 1);
               setIsClientFormOpen(true);
             }}
             onNewClientClick={(clientType) => {
               setEditingClientForForm(null);
               setClientTypeForForm(clientType || "Client");
-              setClientFormInitialData(clientInitialData);
+              setClientFormKey(k => k + 1);
               setIsClientFormOpen(true);
             }}
             calculerProchainNumeroDossier={(arpenteur) => {
@@ -385,11 +407,12 @@ export default function OuvrirDossierDialog({
       </Dialog>
 
       <ClientFormDialog 
+        key={clientFormKey}
         open={isClientFormOpen} 
-        onOpenChange={(open) => {setIsClientFormOpen(open); if (!open) {setEditingClientForForm(null); setClientFormInitialData(null);}}} 
+        onOpenChange={(open) => {setIsClientFormOpen(open); if (!open) setEditingClientForForm(null);}} 
         editingClient={editingClientForForm} 
         defaultType={clientTypeForForm} 
-        initialData={clientFormInitialData}
+        initialData={editingClientForForm ? null : clientInitialData}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['clients'] });
           setIsClientFormOpen(false);
