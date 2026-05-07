@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Upload, Loader2, MessageSquare, Clock } from "lucide-react";
 import { CADASTRE_CODES, CADASTRES_PAR_CIRCONSCRIPTION } from "../../lib/cadastreCodes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import LotInfoStepForm from "./LotInfoStepForm";
 import TypesOperationStepForm from "./TypesOperationStepForm";
 import DocumentsStepFormLot from "./DocumentsStepFormLot";
@@ -539,5 +540,10 @@ export default function NewLotModal({
     </div>
   );
 
-  return ReactDOM.createPortal(modalContent, document.body);
+  return ReactDOM.createPortal(
+    <TooltipProvider>
+      {modalContent}
+    </TooltipProvider>,
+    document.body
+  );
 }
