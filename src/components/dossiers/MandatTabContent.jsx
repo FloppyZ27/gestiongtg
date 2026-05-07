@@ -51,138 +51,57 @@ export default function MandatTabContent({
 }) {
   return (
     <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
-      {/* Ligne principale: Type+Utilisateur+Tâche à gauche, Dates à droite */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Colonne gauche: Type, Utilisateur, Tâche */}
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <Label className="text-slate-400 text-xs">Type de mandat</Label>
-            <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                <SelectValue placeholder="Sélectionner" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {TYPES_MANDATS.map((type) => (
-                  <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
-              <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {(users || []).map((u) => (
-                    <SelectItem key={u?.email} value={u?.email} className="text-white text-xs">{u?.full_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-slate-400 text-xs">Tâche</Label>
-              <Select value={mandat.tache_actuelle || "Ouverture"} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {TACHES.map((tache) => (
-                    <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
 
-        {/* Colonne droite: Dates */}
-        <div className="space-y-2 border-l border-slate-700 pl-4">
-          <div className="flex items-center justify-between mb-1">
-            <Label className="text-slate-400 text-xs">Dates</Label>
-            <div className="flex items-center gap-1.5">
-              <Checkbox
-                id={`sameDatesForAllMandats-${index}`}
-                checked={sameDatesForAllMandats}
-                onCheckedChange={(checked) => {
-                  setSameDatesForAllMandats(checked);
-                  if (checked) {
-                    const currentDates = {
-                      date_signature: mandat.date_signature,
-                      date_debut_travaux: mandat.date_debut_travaux,
-                      date_livraison: mandat.date_livraison
-                    };
-                    setFormData(prev => ({
-                      ...prev,
-                      mandats: prev.mandats.map(m => ({ 
-                        ...m, 
-                        date_signature: currentDates.date_signature,
-                        date_debut_travaux: currentDates.date_debut_travaux,
-                        date_livraison: currentDates.date_livraison
-                      }))
-                    }));
-                  }
-                }}
-              />
-              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-1">
-              <Label className="text-slate-400 text-xs">Date de signature</Label>
-              <Input 
-                type="date" 
-                value={mandat.date_signature || ""} 
-                onChange={(e) => {
-                  if (sameDatesForAllMandats) {
-                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_signature: e.target.value })) }));
-                  } else {
-                    updateMandat(index, 'date_signature', e.target.value);
-                  }
-                }}
-                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-slate-400 text-xs">Début travaux</Label>
-              <Input 
-                type="date" 
-                value={mandat.date_debut_travaux || ""} 
-                onChange={(e) => {
-                  if (sameDatesForAllMandats) {
-                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_debut_travaux: e.target.value })) }));
-                  } else {
-                    updateMandat(index, 'date_debut_travaux', e.target.value);
-                  }
-                }}
-                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-slate-400 text-xs">Date livraison</Label>
-              <Input 
-                type="date" 
-                value={mandat.date_livraison || ""} 
-                onChange={(e) => {
-                  if (sameDatesForAllMandats) {
-                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_livraison: e.target.value })) }));
-                  } else {
-                    updateMandat(index, 'date_livraison', e.target.value);
-                  }
-                }}
-                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-              />
-            </div>
-          </div>
+      {/* Ligne 1: Type de mandat | Utilisateur assigné | Tâche — 3 colonnes égales */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-1">
+          <Label className="text-slate-400 text-xs">Type de mandat</Label>
+          <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
+            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+              <SelectValue placeholder="Sélectionner" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {TYPES_MANDATS.map((type) => (
+                <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
+          <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
+            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+              <SelectValue placeholder="Sélectionner" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {(users || []).map((u) => (
+                <SelectItem key={u?.email} value={u?.email} className="text-white text-xs">{u?.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-slate-400 text-xs">Tâche</Label>
+          <Select value={mandat.tache_actuelle || "Ouverture"} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+              <SelectValue placeholder="Sélectionner" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700">
+              {TACHES.map((tache) => (
+                <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="border-t border-slate-600 my-2"></div>
 
-      {/* Adresse des travaux - pleine largeur */}
-      <div className="space-y-2">
+      {/* Ligne 2: Adresse (2/3) | Dates (1/3) */}
+      <div className="grid grid-cols-[2fr_1fr] gap-4">
+
+        {/* Colonne gauche: Adresse des travaux */}
+        <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
           <div className="flex items-center gap-1.5">
@@ -373,6 +292,87 @@ export default function MandatTabContent({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </div>
+        </div>
+
+        {/* Colonne droite: Dates */}
+        <div className="space-y-2 border-l border-slate-700 pl-4">
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-slate-400 text-xs font-medium">Dates</Label>
+            <div className="flex items-center gap-1.5">
+              <Checkbox
+                id={`sameDatesForAllMandats-${index}`}
+                checked={sameDatesForAllMandats}
+                onCheckedChange={(checked) => {
+                  setSameDatesForAllMandats(checked);
+                  if (checked) {
+                    const currentDates = {
+                      date_signature: mandat.date_signature,
+                      date_debut_travaux: mandat.date_debut_travaux,
+                      date_livraison: mandat.date_livraison
+                    };
+                    setFormData(prev => ({
+                      ...prev,
+                      mandats: prev.mandats.map(m => ({ 
+                        ...m, 
+                        date_signature: currentDates.date_signature,
+                        date_debut_travaux: currentDates.date_debut_travaux,
+                        date_livraison: currentDates.date_livraison
+                      }))
+                    }));
+                  }
+                }}
+              />
+              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Tous</Label>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Date de signature</Label>
+              <Input 
+                type="date" 
+                value={mandat.date_signature || ""} 
+                onChange={(e) => {
+                  if (sameDatesForAllMandats) {
+                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_signature: e.target.value })) }));
+                  } else {
+                    updateMandat(index, 'date_signature', e.target.value);
+                  }
+                }}
+                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Début des travaux</Label>
+              <Input 
+                type="date" 
+                value={mandat.date_debut_travaux || ""} 
+                onChange={(e) => {
+                  if (sameDatesForAllMandats) {
+                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_debut_travaux: e.target.value })) }));
+                  } else {
+                    updateMandat(index, 'date_debut_travaux', e.target.value);
+                  }
+                }}
+                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-400 text-xs">Date de livraison</Label>
+              <Input 
+                type="date" 
+                value={mandat.date_livraison || ""} 
+                onChange={(e) => {
+                  if (sameDatesForAllMandats) {
+                    setFormData(prev => ({ ...prev, mandats: prev.mandats.map(m => ({ ...m, date_livraison: e.target.value })) }));
+                  } else {
+                    updateMandat(index, 'date_livraison', e.target.value);
+                  }
+                }}
+                className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+              />
+            </div>
           </div>
         </div>
       </div>
