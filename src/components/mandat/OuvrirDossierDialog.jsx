@@ -306,7 +306,8 @@ export default function OuvrirDossierDialog({
   };
 
   // Utiliser le hook pour les données préremplies du client
-  const clientInitialData = useClientFormInitialData(formData, clients);
+  // On passe editingPriseMandat (qui a client_info) plutôt que formData (qui a _clientInfo)
+  const clientInitialData = useClientFormInitialData(editingPriseMandat || formData, clients);
 
   if (!formData) return null;
 
