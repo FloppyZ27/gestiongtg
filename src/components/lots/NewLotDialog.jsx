@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -263,21 +264,27 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
     } finally { setIsImportingD01(false); }
   };
 
-  return (
-    <>
-      <Dialog open={open} modal={false} onOpenChange={(o) => {
-        if (!o) {
-          if (!editingLot && hasFormChanges) {
-            setShowCancelConfirm(true);
-            return;
-          }
-          resetAndClose();
-        }
-        onOpenChange(o);
-      }}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" zIndex={1100} hideClose hideOverlay modal={false}>
-          <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
-          <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
+  if (!open) return null;
+
+  const handleBackdropClick = () => {
+    if (!editingLot && hasFormChanges) {
+      setShowCancelConfirm(true);
+    } else {
+      resetAndClose();
+    }
+  };
+
+  const mainModal = (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) handleBackdropClick(); }}
+    >
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,18,0.75)', backdropFilter: 'blur(10px)' }} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}
+        style={{ position: 'relative', width: '75vw', maxWidth: '75vw', height: '90vh', maxHeight: '90vh', background: 'hsl(220,13%,10%)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '0.75rem', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 60px rgba(0,0,0,0.7)' }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
             <div className="sticky top-0 z-10 bg-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
               <h2 className="text-2xl font-bold" style={{
                 background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
@@ -513,11 +520,19 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
             </div>
 
+        {/* Footer */}
+        {!editingLot && (
+          <div style={{ padding: '12px 20px', borderTop: '1px solid hsl(220,10%,20%)', display: 'flex', justifyContent: 'flex-end', gap: '10px', flexShrink: 0, background: 'hsl(220,13%,8%)' }}>
+            <button type="button" onClick={handleBackdropClick} style={{ padding: '8px 18px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'hsl(0,80%,65%)', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+            <button type="submit" form="new-lot-form" disabled={createLotMutation.isPending} style={{ padding: '8px 18px', borderRadius: '8px', background: 'linear-gradient(135deg, hsl(152,60%,35%), hsl(175,60%,30%))', border: 'none', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}>{createLotMutation.isPending ? 'Création...' : 'Créer le lot'}</button>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
 
-          </motion.div>
-        </DialogContent>
-      </Dialog>
-
+  const warningModals = (
+    <>
       {/* Dialogs d'avertissement */}
       <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
         <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
@@ -555,6 +570,13 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
           </div>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  return (
+    <>
+      {ReactDOM.createPortal(mainModal, document.body)}
+      {warningModals}
     </>
   );
 }
