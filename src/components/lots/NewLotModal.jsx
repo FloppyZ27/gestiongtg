@@ -237,28 +237,19 @@ export default function NewLotModal({
 
   const isPending = createLotMutation.isPending || updateLotMutation.isPending;
 
-  // Force pointer-events sur tous les menus déroulants, peu importe la profondeur des Dialogs
+  // Fix global pour tous les portals Radix — fonctionne sur tous les niveaux de Dialog
   React.useEffect(() => {
     if (!open) return;
+    
     const style = document.createElement('style');
     style.id = 'new-lot-modal-fix';
     style.textContent = `
-      /* Tous les éléments de Radix UI (menus, select, popover, etc.) doivent être cliquables */
+      /* Radix UI portals — pointer-events auto peu importe le parent Dialog */
+      [data-radix-portal],
       [data-radix-popper-content-wrapper],
       [data-radix-select-content],
-      [data-radix-select-viewport],
       [data-radix-dropdown-menu-content],
-      [data-radix-popover-content],
-      [role="listbox"],
-      [role="menu"],
-      [role="option"],
-      [role="menuitem"] {
-        pointer-events: auto !important;
-        z-index: 99999 !important;
-      }
-      
-      /* Forcer la visibilité et les interactions sur le contenu du portal */
-      [data-radix-portal] {
+      [data-radix-popover-content] {
         pointer-events: auto !important;
         z-index: 99999 !important;
       }
