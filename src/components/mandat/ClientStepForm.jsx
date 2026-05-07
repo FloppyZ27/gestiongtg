@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,17 @@ export default function ClientStepForm({
     type_telephone: clientInfo.type_telephone || "Cellulaire",
     courriel: clientInfo.courriel || ""
   });
+
+  // Synchroniser l'état local quand clientInfo change depuis le parent
+  React.useEffect(() => {
+    setClientForm({
+      prenom: clientInfo.prenom || "",
+      nom: clientInfo.nom || "",
+      telephone: clientInfo.telephone || "",
+      type_telephone: clientInfo.type_telephone || "Cellulaire",
+      courriel: clientInfo.courriel || ""
+    });
+  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone]);
 
   // Mettre à jour le parent quand le formulaire change
   const updateClientForm = (newForm) => {
