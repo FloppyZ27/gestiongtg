@@ -288,7 +288,10 @@ export default function NewLotModal({
       }}
       onMouseDown={(e) => {
         // Fermer uniquement si clic sur le fond (pas sur le modal lui-même)
-        if (e.target === e.currentTarget) onClose();
+        // et pas sur un Radix portal/dropdown
+        if (e.target === e.currentTarget && !e.target.closest('[data-radix-popper-content-wrapper], [data-radix-select-content], [data-radix-dropdown-menu-content]')) {
+          onClose();
+        }
       }}
     >
       {/* Overlay */}
