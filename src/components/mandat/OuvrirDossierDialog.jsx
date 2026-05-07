@@ -318,6 +318,16 @@ export default function OuvrirDossierDialog({
       if (ci.nom) data.nom = ci.nom;
       if (ci.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
       if (ci.courriel) data.courriel = ci.courriel;
+      const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux;
+      if (workAddr) {
+        data.adresse_travaux = {
+          numeros_civiques: workAddr.numeros_civiques || [""],
+          rue: workAddr.rue || "",
+          ville: workAddr.ville || "",
+          province: workAddr.province || "QC",
+          code_postal: workAddr.code_postal || ""
+        };
+      }
       return Object.keys(data).length > 0 ? data : null;
     }
 
