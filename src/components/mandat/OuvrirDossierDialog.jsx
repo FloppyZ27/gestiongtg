@@ -331,6 +331,45 @@ export default function OuvrirDossierDialog({
     return Object.keys(data).length > 0 ? data : null;
   }, [editingPriseMandat, formData]);
 
+  // Construire les données préremplies pour le notaire depuis professionnel_info
+  const notaireInitialData = useMemo(() => {
+    const pi = editingPriseMandat?.professionnel_info;
+    if (!pi?.notaire) return null;
+    // Le nom du notaire peut être "Prénom Nom" — on tente de le séparer
+    const parts = pi.notaire.trim().split(' ');
+    const data = {};
+    if (parts.length >= 2) {
+      data.prenom = parts[0];
+      data.nom = parts.slice(1).join(' ');
+    } else {
+      data.nom = pi.notaire;
+    }
+    return data;
+  }, [editingPriseMandat]);
+
+  // Construire les données préremplies pour le courtier depuis professionnel_info
+  const courtierInitialData = useMemo(() => {
+    const pi = editingPriseMandat?.professionnel_info;
+    if (!pi?.courtier) return null;
+    const parts = pi.courtier.trim().split(' ');
+    const data = {};
+    if (parts.length >= 2) {
+      data.prenom = parts[0];
+      data.nom = parts.slice(1).join(' ');
+    } else {
+      data.nom = pi.courtier;
+    }
+    return data;
+  }, [editingPriseMandat]);
+
+  // Choisir le bon initialData selon le type de formulaire ouvert
+  const resolvedInitialData = useMemo(() => {
+    if (editingClientForForm) return null; // édition d'un existant, pas de préremplissage
+    if (clientTypeForForm === 'Notaire') return notaireInitialData;
+    if (clientTypeForForm === 'Courtier immobilier') return courtierInitialData;
+    return clientInitialData;
+  }, [editingClientForForm, clientTypeForForm, clientInitialData, notaireInitialData, courtierInitialData]);
+
   if (!formData) return null;
 
   return (
@@ -412,7 +451,7 @@ export default function OuvrirDossierDialog({
         onOpenChange={(open) => {setIsClientFormOpen(open); if (!open) setEditingClientForForm(null);}} 
         editingClient={editingClientForForm} 
         defaultType={clientTypeForForm} 
-        initialData={editingClientForForm ? null : clientInitialData}
+        initialData={resolvedInitialData}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['clients'] });
           setIsClientFormOpen(false);
