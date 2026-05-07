@@ -9,7 +9,7 @@ import ClientSelectionCard from "./ClientSelectionCard";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewLotDialog from "../lots/NewLotDialog";
-import { useClientFormInitialData } from "@/hooks/useClientFormInitialData";
+
 
 export default function OuvrirDossierDialog({
   open,
@@ -305,10 +305,6 @@ export default function OuvrirDossierDialog({
     }
   };
 
-  // Utiliser le hook pour les données préremplies du client
-  // On passe editingPriseMandat (qui a client_info) plutôt que formData (qui a _clientInfo)
-  const clientInitialData = useClientFormInitialData(editingPriseMandat || formData, clients);
-
   // Données préremplies pour notaire/courtier/compagnie (depuis professionnel_info)
   const getProfessionnelInitialData = (type) => {
     const pi = editingPriseMandat?.professionnel_info || formData?._professionnelInfo || {};
@@ -316,6 +312,36 @@ export default function OuvrirDossierDialog({
     if (type === "Courtier immobilier" && pi.courtier) return { prenom: pi.courtier, nom: "", telephone: pi.courtier_telephone || "", courriel: pi.courtier_courriel || "" };
     if (type === "Compagnie" && pi.compagnie) return { prenom: "", nom: pi.compagnie, telephone: "", courriel: "" };
     return null;
+  };
+
+  // Calculer les données client manuellement (sans hook) pour avoir la valeur fraîche au clic
+  const getClientInitialData = () => {
+    const source = editingPriseMandat || formData;
+    if (!source) return null;
+    const initialData = {};
+    if (source.client_info) {
+      const ci = source.client_info;
+      if (ci.prenom) initialData.prenom = ci.prenom;
+      if (ci.nom) initialData.nom = ci.nom;
+      if (ci.telephone) { initialData.telephone = ci.telephone; if (ci.type_telephone) initialData.type_telephone = ci.type_telephone; }
+      if (ci.courriel) initialData.courriel = ci.courriel;
+    }
+    if (!initialData.prenom && !initialData.nom) {
+      const primaryClient = source.clients_ids?.[0] ? (clients || []).find(c => c.id === source.clients_ids[0]) : null;
+      if (primaryClient) {
+        if (primaryClient.prenom) initialData.prenom = primaryClient.prenom;
+        if (primaryClient.nom) initialData.nom = primaryClient.nom;
+        const currentEmail = primaryClient.courriels?.find(e => e.actuel || e.actuelle)?.courriel || primaryClient.courriels?.[0]?.courriel;
+        if (currentEmail) initialData.courriel = currentEmail;
+        const currentPhoneObj = primaryClient.telephones?.find(t => t.actuel || t.actuelle) || primaryClient.telephones?.[0];
+        if (currentPhoneObj) { initialData.telephone = currentPhoneObj.telephone; if (currentPhoneObj.type) initialData.type_telephone = currentPhoneObj.type; }
+      }
+    }
+    const workAddress = source.mandats?.[0]?.adresse_travaux || source.adresse_travaux;
+    if (workAddress && !initialData.adresse_travaux) {
+      initialData.adresse_travaux = { numeros_civiques: workAddress.numeros_civiques || [""], rue: workAddress.rue || "", ville: workAddress.ville || "", province: workAddress.province || "QC", code_postal: workAddress.code_postal || "" };
+    }
+    return Object.keys(initialData).length > 0 ? initialData : null;
   };
 
   if (!formData) return null;
@@ -362,7 +388,7 @@ export default function OuvrirDossierDialog({
               setEditingClientForForm(null);
               setClientTypeForForm(clientType || "Client");
               const isPro = clientType === "Notaire" || clientType === "Courtier immobilier" || clientType === "Compagnie";
-              setClientFormInitialData(isPro ? getProfessionnelInitialData(clientType) : clientInitialData);
+              setClientFormInitialData(isPro ? getProfessionnelInitialData(clientType) : getClientInitialData());
               setIsClientFormOpen(true);
             }}
             calculerProchainNumeroDossier={(arpenteur) => {
