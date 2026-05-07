@@ -237,41 +237,51 @@ export default function NewLotModal({
 
   const isPending = createLotMutation.isPending || updateLotMutation.isPending;
 
-  // Force pointer-events on Radix portals spawned from inside this modal
+  // Force pointer-events — neutralise le FocusScope du Dialog Radix parent
   React.useEffect(() => {
     if (!open) return;
     const style = document.createElement('style');
     style.id = 'new-lot-modal-fix';
     style.textContent = `
-      [data-radix-popper-content-wrapper] {
+      body > [data-radix-popper-content-wrapper],
+      body > * > [data-radix-popper-content-wrapper] {
         pointer-events: auto !important;
         z-index: 99999 !important;
       }
-      [data-radix-select-content] {
+      [data-radix-select-content],
+      [data-radix-select-viewport],
+      [data-radix-select-item],
+      [data-radix-dropdown-menu-content],
+      [data-radix-dropdown-menu-item],
+      [data-radix-popover-content],
+      [role="listbox"],
+      [role="option"],
+      [role="menu"],
+      [role="menuitem"] {
         pointer-events: auto !important;
         z-index: 99999 !important;
-      }
-      [data-radix-select-viewport] {
-        pointer-events: auto !important;
-      }
-      [data-radix-dropdown-menu-content] {
-        pointer-events: auto !important;
-        z-index: 99999 !important;
-      }
-      [data-radix-popover-content] {
-        pointer-events: auto !important;
-        z-index: 99999 !important;
-      }
-      [role="listbox"] {
-        pointer-events: auto !important;
-        z-index: 99999 !important;
-      }
-      [role="option"] {
-        pointer-events: auto !important;
       }
     `;
     document.head.appendChild(style);
-    return () => { document.getElementById('new-lot-modal-fix')?.remove(); };
+
+    // Désactiver le FocusScope du Dialog parent pendant que le modal est ouvert
+    const removeFocusBlock = () => {
+      document.querySelectorAll('[data-aria-hidden="true"]').forEach(el => {
+        el.removeAttribute('aria-hidden');
+        el.removeAttribute('data-aria-hidden');
+      });
+      document.querySelectorAll('[inert]').forEach(el => {
+        el.removeAttribute('inert');
+      });
+    };
+    removeFocusBlock();
+    const observer = new MutationObserver(removeFocusBlock);
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['aria-hidden', 'inert'] });
+
+    return () => {
+      document.getElementById('new-lot-modal-fix')?.remove();
+      observer.disconnect();
+    };
   }, [open]);
 
   if (!open) return null;
