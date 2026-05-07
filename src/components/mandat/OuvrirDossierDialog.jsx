@@ -308,8 +308,8 @@ export default function OuvrirDossierDialog({
 
   // Construire les données préremplies selon le type de client et la source de la prise de mandat
   const buildClientInitialData = (clientType) => {
-    const ci = editingPriseMandat?.client_info;
-    const pi = editingPriseMandat?.professionnel_info;
+    const ci = editingPriseMandat?.client_info || dossierForm?._clientInfo;
+    const pi = editingPriseMandat?.professionnel_info || dossierForm?._professionnelInfo;
 
     if (clientType === "Client") {
       if (!ci) return null;
@@ -318,7 +318,7 @@ export default function OuvrirDossierDialog({
       if (ci.nom) data.nom = ci.nom;
       if (ci.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
       if (ci.courriel) data.courriel = ci.courriel;
-      const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux;
+      const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux || dossierForm?.mandats?.[0]?.adresse_travaux;
       if (workAddr && (workAddr.rue || workAddr.ville)) {
         data.adresse_travaux = {
           numeros_civiques: Array.isArray(workAddr.numeros_civiques) && workAddr.numeros_civiques.length > 0 ? workAddr.numeros_civiques : [""],
