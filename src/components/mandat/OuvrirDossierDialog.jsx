@@ -314,7 +314,7 @@ export default function OuvrirDossierDialog({
     const pi = editingPriseMandat?.professionnel_info || formData?._professionnelInfo || {};
     if (type === "Notaire" && pi.notaire) return { prenom: pi.notaire, nom: "", telephone: pi.notaire_telephone || "", courriel: pi.notaire_courriel || "" };
     if (type === "Courtier immobilier" && pi.courtier) return { prenom: pi.courtier, nom: "", telephone: pi.courtier_telephone || "", courriel: pi.courtier_courriel || "" };
-    if (type === "Compagnie" && pi.compagnie) return { prenom: pi.compagnie, nom: "", telephone: "", courriel: "" };
+    if (type === "Compagnie" && pi.compagnie) return { prenom: "", nom: pi.compagnie, telephone: "", courriel: "" };
     return null;
   };
 
