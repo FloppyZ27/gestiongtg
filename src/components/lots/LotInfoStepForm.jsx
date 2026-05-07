@@ -17,12 +17,14 @@ export default function LotInfoStepForm({
   return (
     <div>
       <div 
-        className="cursor-pointer flex items-center justify-between py-2 border-b border-slate-700/50"
+        className="cursor-pointer flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-blue-900/20 hover:bg-blue-900/40 transition-colors"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center gap-2">
-          <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-blue-300 text-sm font-semibold">Informations du lot</span>
+          <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+            <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
+          </div>
+          <span className="text-blue-300 text-base font-semibold">Informations du lot</span>
         </div>
         {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
       </div>

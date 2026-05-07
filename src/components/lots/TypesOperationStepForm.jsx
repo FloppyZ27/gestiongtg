@@ -203,12 +203,14 @@ export default function TypesOperationStepForm({
   return (
     <div>
       <div 
-        className="cursor-pointer flex items-center justify-between py-2 border-b border-slate-700/50"
+        className="cursor-pointer flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-purple-900/20 hover:bg-purple-900/40 transition-colors"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-purple-400" />
-          <span className="text-purple-300 text-sm font-semibold">Types d'opération</span>
+          <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+          </div>
+          <span className="text-purple-300 text-base font-semibold">Types d'opération</span>
           {typesOperation.length > 0 && (
             <Badge className="bg-purple-500/30 text-purple-300 border-purple-500/50 px-2 py-0.5 text-xs pointer-events-none select-none">
               {typesOperation.length}

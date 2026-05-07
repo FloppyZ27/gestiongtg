@@ -296,12 +296,14 @@ export default function DocumentsStepFormLot({
       onDrop={handleDrop}
     >
       <div 
-        className="cursor-pointer flex items-center justify-between py-2 border-b border-slate-700/50"
+        className="cursor-pointer flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-yellow-900/20 hover:bg-yellow-900/40 transition-colors"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center gap-2">
-          <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
-          <span className="text-yellow-300 text-sm font-semibold">Documents</span>
+          <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
+            <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
+          </div>
+          <span className="text-yellow-300 text-base font-semibold">Documents</span>
           {files.length > 0 && (
             <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs pointer-events-none select-none">
               {files.length} fichier{files.length > 1 ? 's' : ''}
