@@ -262,7 +262,7 @@ export default function TypesOperationStepForm({
                      onValueChange={(value) => setNewTypeOperation({...newTypeOperation, type_operation: value})}
                      disabled={disabled}
                    >
-                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs">
+                     <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs">
                        <SelectValue placeholder="Sélectionner un type" />
                      </SelectTrigger>
                      <SelectContent className="bg-slate-800 border-slate-700">
@@ -281,7 +281,7 @@ export default function TypesOperationStepForm({
                      type="date"
                      value={newTypeOperation.date_bpd}
                      onChange={(e) => setNewTypeOperation({...newTypeOperation, date_bpd: e.target.value})}
-                     className="bg-slate-800 border-slate-700 text-white text-xs"
+                     className="bg-slate-800/50 border-slate-700 text-white text-xs"
                      disabled={disabled}
                    />
                  </div>
@@ -390,7 +390,7 @@ export default function TypesOperationStepForm({
                             value={newConcordance.numero_lot}
                             onChange={(e) => setNewConcordance({...newConcordance, numero_lot: e.target.value})}
                             placeholder="Ex: 123"
-                            className="bg-slate-800 border-slate-700 text-white text-xs h-7"
+                            className="bg-slate-800/50 border-slate-700 text-white text-xs h-7"
                             disabled={disabled}
                           />
                         </div>
@@ -410,7 +410,7 @@ export default function TypesOperationStepForm({
                             value={newConcordance.rang}
                             onChange={(e) => setNewConcordance({...newConcordance, rang: e.target.value})}
                             placeholder="Ex: Rang 4"
-                            className="bg-slate-800 border-slate-700 text-white text-xs h-7"
+                            className="bg-slate-800/50 border-slate-700 text-white text-xs h-7"
                             disabled={disabled}
                           />
                         </div>
@@ -424,7 +424,7 @@ export default function TypesOperationStepForm({
                             onValueChange={(value) => setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""})}
                             disabled={disabled}
                           >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
+                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -444,7 +444,7 @@ export default function TypesOperationStepForm({
                             onValueChange={(value) => setNewConcordance({...newConcordance, cadastre: value})}
                             disabled={disabled || !newConcordance.circonscription_fonciere}
                           >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
+                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder={newConcordance.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700 max-h-48">

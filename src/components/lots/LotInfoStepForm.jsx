@@ -39,17 +39,17 @@ export default function LotInfoStepForm({
                 onChange={(e) => onLotFormChange({...lotForm, numero_lot: e.target.value})}
                 required
                 placeholder="Ex: 1234-5678"
-                className="bg-slate-700 border-slate-600 h-6 text-xs"
-                disabled={disabled}
-              />
-            </div>
-            <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Rang</Label>
-              <Input
+                className="bg-slate-800/50 border-slate-700 h-6 text-xs"
+                 disabled={disabled}
+                />
+                </div>
+                <div className="space-y-0.5">
+                <Label className="text-slate-400 text-xs">Rang</Label>
+                <Input
                 value={lotForm.rang}
                 onChange={(e) => onLotFormChange({...lotForm, rang: e.target.value})}
                 placeholder="Ex: Rang 4"
-                className="bg-slate-700 border-slate-600 h-6 text-xs"
+                className="bg-slate-800/50 border-slate-700 h-6 text-xs"
                 disabled={disabled}
               />
             </div>
@@ -63,7 +63,7 @@ export default function LotInfoStepForm({
                 onValueChange={onCirconscriptionChange}
                 disabled={disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white h-6 text-xs">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -82,7 +82,7 @@ export default function LotInfoStepForm({
                 onValueChange={(value) => onLotFormChange({...lotForm, cadastre: value})}
                 disabled={!lotForm.circonscription_fonciere || disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white h-6 text-xs">
                   <SelectValue placeholder={lotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
