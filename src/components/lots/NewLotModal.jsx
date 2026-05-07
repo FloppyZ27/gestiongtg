@@ -242,14 +242,32 @@ export default function NewLotModal({
     const style = document.createElement('style');
     style.id = 'new-lot-modal-fix';
     style.textContent = `
-      [data-radix-popper-content-wrapper],
-      [data-radix-select-viewport],
-      [data-radix-dropdown-menu-content],
+      [data-radix-popper-content-wrapper] {
+        pointer-events: auto !important;
+        z-index: 99999 !important;
+      }
+      [data-radix-select-content] {
+        pointer-events: auto !important;
+        z-index: 99999 !important;
+      }
+      [data-radix-select-viewport] {
+        pointer-events: auto !important;
+      }
+      [data-radix-dropdown-menu-content] {
+        pointer-events: auto !important;
+        z-index: 99999 !important;
+      }
       [data-radix-popover-content] {
         pointer-events: auto !important;
         z-index: 99999 !important;
       }
-      body { pointer-events: auto !important; }
+      [role="listbox"] {
+        pointer-events: auto !important;
+        z-index: 99999 !important;
+      }
+      [role="option"] {
+        pointer-events: auto !important;
+      }
     `;
     document.head.appendChild(style);
     return () => { document.getElementById('new-lot-modal-fix')?.remove(); };
