@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,24 +15,20 @@ export default function LotInfoStepForm({
   CADASTRES_PAR_CIRCONSCRIPTION
 }) {
   return (
-    <Card className="border-slate-700 bg-slate-800/30">
-      <CardHeader 
-        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
+    <div>
+      <div 
+        className="cursor-pointer flex items-center justify-between py-2 border-b border-slate-700/50"
         onClick={onToggleCollapse}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-              <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
-            </div>
-            <CardTitle className="text-blue-300 text-base">Informations du lot</CardTitle>
-          </div>
-          {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+        <div className="flex items-center gap-2">
+          <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-blue-300 text-sm font-semibold">Informations du lot</span>
         </div>
-      </CardHeader>
+        {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+      </div>
 
       {!isCollapsed && (
-        <CardContent className="pt-1 pb-2">
+        <div className="pt-2 pb-1">
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
@@ -98,10 +93,8 @@ export default function LotInfoStepForm({
               </Select>
             </div>
           </div>
-
-
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
