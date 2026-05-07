@@ -193,9 +193,9 @@ export default function MandatStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <div className="space-y-3">
-            {/* Première ligne: Types de mandats, Échéance souhaitée et Urgence perçue */}
-            <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Colonne gauche: Types de mandats, Échéance souhaitée et Urgence perçue */}
+            <div className="space-y-2">
               <div className="space-y-1 relative" ref={dropdownRef}>
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
                 <button
@@ -242,36 +242,38 @@ export default function MandatStepForm({
                   </div>
                 )}
               </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)} disabled={disabled}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {ECHEANCES.map((echeance) => (
-                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Délais de rappel</Label>
-                <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)} disabled={disabled}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {DELAIS_RAPPEL.map((delai) => (
-                      <SelectItem key={delai} value={delai} className="text-white">{delai}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                  <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)} disabled={disabled}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {ECHEANCES.map((echeance) => (
+                        <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Délais de rappel</Label>
+                  <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)} disabled={disabled}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {DELAIS_RAPPEL.map((delai) => (
+                        <SelectItem key={delai} value={delai} className="text-white">{delai}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            {/* Deuxième ligne: Dates sur la même ligne */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Colonne droite: Dates */}
+            <div className="space-y-2 border-l border-slate-700 pl-4">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Date de signature</Label>
                 <Input
