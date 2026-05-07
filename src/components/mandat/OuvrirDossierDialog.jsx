@@ -309,6 +309,15 @@ export default function OuvrirDossierDialog({
   // On passe editingPriseMandat (qui a client_info) plutôt que formData (qui a _clientInfo)
   const clientInitialData = useClientFormInitialData(editingPriseMandat || formData, clients);
 
+  // Données préremplies pour notaire/courtier/compagnie (depuis professionnel_info)
+  const getProfessionnelInitialData = (type) => {
+    const pi = editingPriseMandat?.professionnel_info || formData?._professionnelInfo || {};
+    if (type === "Notaire" && pi.notaire) return { prenom: pi.notaire, nom: "", telephone: pi.notaire_telephone || "", courriel: pi.notaire_courriel || "" };
+    if (type === "Courtier immobilier" && pi.courtier) return { prenom: pi.courtier, nom: "", telephone: pi.courtier_telephone || "", courriel: pi.courtier_courriel || "" };
+    if (type === "Compagnie" && pi.compagnie) return { prenom: pi.compagnie, nom: "", telephone: "", courriel: "" };
+    return null;
+  };
+
   if (!formData) return null;
 
   return (
@@ -352,7 +361,8 @@ export default function OuvrirDossierDialog({
             onNewClientClick={(clientType) => {
               setEditingClientForForm(null);
               setClientTypeForForm(clientType || "Client");
-              setClientFormInitialData(clientInitialData);
+              const isPro = clientType === "Notaire" || clientType === "Courtier immobilier" || clientType === "Compagnie";
+              setClientFormInitialData(isPro ? getProfessionnelInitialData(clientType) : clientInitialData);
               setIsClientFormOpen(true);
             }}
             calculerProchainNumeroDossier={(arpenteur) => {
