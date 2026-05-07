@@ -401,7 +401,7 @@ export default function MandatTabContent({
                   }
                 }}
               />
-              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
             </div>
           </div>
           <div className="flex items-center justify-between mb-2">
