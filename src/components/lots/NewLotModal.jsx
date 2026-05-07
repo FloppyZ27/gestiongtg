@@ -236,6 +236,25 @@ export default function NewLotModal({
 
   const isPending = createLotMutation.isPending || updateLotMutation.isPending;
 
+  // Force pointer-events on Radix portals spawned from inside this modal
+  React.useEffect(() => {
+    if (!open) return;
+    const style = document.createElement('style');
+    style.id = 'new-lot-modal-fix';
+    style.textContent = `
+      [data-radix-popper-content-wrapper],
+      [data-radix-select-viewport],
+      [data-radix-dropdown-menu-content],
+      [data-radix-popover-content] {
+        pointer-events: auto !important;
+        z-index: 99999 !important;
+      }
+      body { pointer-events: auto !important; }
+    `;
+    document.head.appendChild(style);
+    return () => { document.getElementById('new-lot-modal-fix')?.remove(); };
+  }, [open]);
+
   if (!open) return null;
 
   const modalContent = (
@@ -247,6 +266,7 @@ export default function NewLotModal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        pointerEvents: 'auto',
       }}
       onMouseDown={(e) => {
         // Fermer uniquement si clic sur le fond (pas sur le modal lui-même)
