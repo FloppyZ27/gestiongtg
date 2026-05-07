@@ -840,10 +840,6 @@ export default function ClientFormDialog({
     }));
   };
 
-  // Ref to always have the latest initialData without it being a useEffect dependency
-  const initialDataRef = React.useRef(initialData);
-  React.useEffect(() => { initialDataRef.current = initialData; }, [initialData]);
-
   // Update form when editingClient changes or when dialog opens
   React.useEffect(() => {
     if (!open) return;
@@ -871,9 +867,8 @@ export default function ClientFormDialog({
       setCommentairesTemporaires([]);
       setHasChanges(false);
     } else {
-      // Mode création — lire initialData via ref pour avoir la valeur la plus récente
-      const initial = initialDataRef.current || {};
-      console.log("PREFILL CLIENT DATA (via ref)", initial);
+      // Mode création — lire initialData directement (le remount par key garantit qu'il est frais)
+      const initial = initialData || {};
 
       const adresses = initial.adresse_travaux ? [{ 
         numeros_civiques: initial.adresse_travaux.numeros_civiques || [""],
@@ -899,7 +894,7 @@ export default function ClientFormDialog({
       setCommentairesTemporaires([]);
       setHasChanges(false);
     }
-  }, [open, editingClient, defaultType]);
+  }, [open, editingClient, defaultType, initialData]);
 
   return (
     <>
