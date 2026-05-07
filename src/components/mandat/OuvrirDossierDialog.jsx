@@ -34,6 +34,7 @@ export default function OuvrirDossierDialog({
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = React.useState(false);
   const [newLotMandatIndex, setNewLotMandatIndex] = React.useState(null);
   const [editingLotForDialog, setEditingLotForDialog] = React.useState(null);
+  const [clientInitialDataForForm, setClientInitialDataForForm] = React.useState(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: currentUser } = useQuery({
@@ -305,31 +306,44 @@ export default function OuvrirDossierDialog({
     }
   };
 
-  // Construire les données préremplies directement depuis client_info de la prise de mandat
-  // (même source que le commentaire récapitulatif)
-  const clientInitialData = useMemo(() => {
+  // Construire les données préremplies selon le type de client et la source de la prise de mandat
+  const buildClientInitialData = (clientType) => {
     const ci = editingPriseMandat?.client_info;
-    if (!ci && !editingPriseMandat?.adresse_travaux && !formData?.mandats?.[0]?.adresse_travaux) return null;
-    
-    const data = {};
-    if (ci?.prenom) data.prenom = ci.prenom;
-    if (ci?.nom) data.nom = ci.nom;
-    if (ci?.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
-    if (ci?.courriel) data.courriel = ci.courriel;
-    
-    const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux || formData?.mandats?.[0]?.adresse_travaux;
-    if (workAddr) {
-      data.adresse_travaux = {
-        numeros_civiques: workAddr.numeros_civiques || [""],
-        rue: workAddr.rue || "",
-        ville: workAddr.ville || "",
-        province: workAddr.province || "QC",
-        code_postal: workAddr.code_postal || ""
-      };
+    const pi = editingPriseMandat?.professionnel_info;
+
+    if (clientType === "Client") {
+      if (!ci) return null;
+      const data = {};
+      if (ci.prenom) data.prenom = ci.prenom;
+      if (ci.nom) data.nom = ci.nom;
+      if (ci.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
+      if (ci.courriel) data.courriel = ci.courriel;
+      return Object.keys(data).length > 0 ? data : null;
     }
-    
-    return Object.keys(data).length > 0 ? data : null;
-  }, [editingPriseMandat, formData]);
+
+    if (clientType === "Notaire") {
+      const notaire = pi?.notaire || "";
+      if (!notaire) return null;
+      // Séparer prénom/nom : on met tout dans prenom pour simplifier
+      const parts = notaire.trim().split(" ");
+      return { prenom: parts[0] || "", nom: parts.slice(1).join(" ") || "" };
+    }
+
+    if (clientType === "Courtier immobilier") {
+      const courtier = pi?.courtier || "";
+      if (!courtier) return null;
+      const parts = courtier.trim().split(" ");
+      return { prenom: parts[0] || "", nom: parts.slice(1).join(" ") || "" };
+    }
+
+    if (clientType === "Compagnie") {
+      const compagnie = pi?.compagnie || "";
+      if (!compagnie) return null;
+      return { nom: compagnie };
+    }
+
+    return null;
+  };
 
   if (!formData) return null;
 
@@ -368,12 +382,15 @@ export default function OuvrirDossierDialog({
             onClientCardClick={(client) => {
               setEditingClientForForm(client);
               setClientTypeForForm(client.type_client);
+              setClientInitialDataForForm(null);
               setClientFormKey(k => k + 1);
               setIsClientFormOpen(true);
             }}
             onNewClientClick={(clientType) => {
+              const type = clientType || "Client";
               setEditingClientForForm(null);
-              setClientTypeForForm(clientType || "Client");
+              setClientTypeForForm(type);
+              setClientInitialDataForForm(buildClientInitialData(type));
               setClientFormKey(k => k + 1);
               setIsClientFormOpen(true);
             }}
@@ -412,7 +429,7 @@ export default function OuvrirDossierDialog({
         onOpenChange={(open) => {setIsClientFormOpen(open); if (!open) setEditingClientForForm(null);}} 
         editingClient={editingClientForForm} 
         defaultType={clientTypeForForm} 
-        initialData={editingClientForForm ? null : clientInitialData}
+        initialData={editingClientForForm ? null : clientInitialDataForForm}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['clients'] });
           setIsClientFormOpen(false);
