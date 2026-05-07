@@ -328,7 +328,7 @@ export default function MandatTabContent({
                   }
                 }}
               />
-              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Tous</Label>
+              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
             </div>
           </div>
           <div className="space-y-2">
