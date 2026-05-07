@@ -119,7 +119,7 @@ export default function MandatTabContent({
                 }
               }}
             />
-            <Label htmlFor={`sameAddressForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
+            <Label htmlFor={`sameAddressForAllMandats-${index}`} className="text-slate-600 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
           </div>
         </div>
         
@@ -328,7 +328,7 @@ export default function MandatTabContent({
                   }
                 }}
               />
-              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
+              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-600 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
             </div>
           </div>
           <div className="space-y-2">
@@ -401,7 +401,7 @@ export default function MandatTabContent({
                   }
                 }}
               />
-              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
+              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-600 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
             </div>
           </div>
           <div className="flex items-center justify-between mb-2">
