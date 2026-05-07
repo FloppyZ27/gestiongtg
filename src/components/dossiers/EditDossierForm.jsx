@@ -1272,7 +1272,7 @@ export default function EditDossierForm({
                   <MessageSquare className="w-4 h-4 mr-1" />
                   Commentaires
                   {commentairesTemporaires.length > 0 && (
-                    <span className="ml-1.5 bg-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                    <span className="ml-1.5 bg-orange-500/30 text-orange-400 text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none pointer-events-none select-none">
                       {commentairesTemporaires.length}
                     </span>
                   )}
