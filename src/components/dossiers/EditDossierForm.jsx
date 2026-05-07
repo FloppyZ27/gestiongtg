@@ -571,7 +571,6 @@ export default function EditDossierForm({
                             setClientTypeForForm={setClientTypeForForm}
                             setIsClientFormDialogOpen={setIsClientFormDialogOpen}
                             setEditingClient={setEditingClient}
-                            onClientCardClick={onClientCardClick}
                             onNewClientClick={onNewClientClick}
                             />
                         </div>

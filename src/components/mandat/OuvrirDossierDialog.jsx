@@ -319,9 +319,9 @@ export default function OuvrirDossierDialog({
       if (ci.telephone) { data.telephone = ci.telephone; if (ci.type_telephone) data.type_telephone = ci.type_telephone; }
       if (ci.courriel) data.courriel = ci.courriel;
       const workAddr = editingPriseMandat?.mandats?.[0]?.adresse_travaux || editingPriseMandat?.adresse_travaux;
-      if (workAddr) {
+      if (workAddr && (workAddr.rue || workAddr.ville)) {
         data.adresse_travaux = {
-          numeros_civiques: workAddr.numeros_civiques || [""],
+          numeros_civiques: Array.isArray(workAddr.numeros_civiques) && workAddr.numeros_civiques.length > 0 ? workAddr.numeros_civiques : [""],
           rue: workAddr.rue || "",
           ville: workAddr.ville || "",
           province: workAddr.province || "QC",
