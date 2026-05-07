@@ -237,50 +237,36 @@ export default function NewLotModal({
 
   const isPending = createLotMutation.isPending || updateLotMutation.isPending;
 
-  // Force pointer-events — neutralise le FocusScope du Dialog Radix parent
+  // Force pointer-events sur tous les menus déroulants, peu importe la profondeur des Dialogs
   React.useEffect(() => {
     if (!open) return;
     const style = document.createElement('style');
     style.id = 'new-lot-modal-fix';
     style.textContent = `
-      body > [data-radix-popper-content-wrapper],
-      body > * > [data-radix-popper-content-wrapper] {
+      /* Tous les éléments de Radix UI (menus, select, popover, etc.) doivent être cliquables */
+      [data-radix-popper-content-wrapper],
+      [data-radix-select-content],
+      [data-radix-select-viewport],
+      [data-radix-dropdown-menu-content],
+      [data-radix-popover-content],
+      [role="listbox"],
+      [role="menu"],
+      [role="option"],
+      [role="menuitem"] {
         pointer-events: auto !important;
         z-index: 99999 !important;
       }
-      [data-radix-select-content],
-      [data-radix-select-viewport],
-      [data-radix-select-item],
-      [data-radix-dropdown-menu-content],
-      [data-radix-dropdown-menu-item],
-      [data-radix-popover-content],
-      [role="listbox"],
-      [role="option"],
-      [role="menu"],
-      [role="menuitem"] {
+      
+      /* Forcer la visibilité et les interactions sur le contenu du portal */
+      [data-radix-portal] {
         pointer-events: auto !important;
         z-index: 99999 !important;
       }
     `;
     document.head.appendChild(style);
 
-    // Désactiver le FocusScope du Dialog parent pendant que le modal est ouvert
-    const removeFocusBlock = () => {
-      document.querySelectorAll('[data-aria-hidden="true"]').forEach(el => {
-        el.removeAttribute('aria-hidden');
-        el.removeAttribute('data-aria-hidden');
-      });
-      document.querySelectorAll('[inert]').forEach(el => {
-        el.removeAttribute('inert');
-      });
-    };
-    removeFocusBlock();
-    const observer = new MutationObserver(removeFocusBlock);
-    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['aria-hidden', 'inert'] });
-
     return () => {
       document.getElementById('new-lot-modal-fix')?.remove();
-      observer.disconnect();
     };
   }, [open]);
 
