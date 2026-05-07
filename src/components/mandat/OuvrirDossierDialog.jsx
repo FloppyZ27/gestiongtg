@@ -305,10 +305,30 @@ export default function OuvrirDossierDialog({
     }
   };
 
-  // Construire les données préremplies directement depuis client_info de la prise de mandat
-  // (même source que le commentaire récapitulatif)
+  // Construire les données préremplies selon le type de client
   const clientInitialData = useMemo(() => {
     const ci = editingPriseMandat?.client_info;
+    const pi = editingPriseMandat?.professionnel_info;
+
+    // Pour notaire : seulement le nom (dans le champ prénom)
+    if (clientTypeForForm === 'Notaire') {
+      const nom = pi?.notaire || '';
+      return nom ? { prenom: nom, nom: '' } : null;
+    }
+
+    // Pour courtier : seulement le nom (dans le champ prénom)
+    if (clientTypeForForm === 'Courtier immobilier') {
+      const nom = pi?.courtier || '';
+      return nom ? { prenom: nom, nom: '' } : null;
+    }
+
+    // Pour compagnie : seulement le nom de la compagnie (dans le champ nom)
+    if (clientTypeForForm === 'Compagnie') {
+      const nom = pi?.compagnie || '';
+      return nom ? { prenom: '', nom: nom } : null;
+    }
+
+    // Pour client : préremplissage complet
     if (!ci && !editingPriseMandat?.adresse_travaux && !formData?.mandats?.[0]?.adresse_travaux) return null;
     
     const data = {};
@@ -329,7 +349,7 @@ export default function OuvrirDossierDialog({
     }
     
     return Object.keys(data).length > 0 ? data : null;
-  }, [editingPriseMandat, formData]);
+  }, [editingPriseMandat, formData, clientTypeForForm]);
 
   if (!formData) return null;
 
