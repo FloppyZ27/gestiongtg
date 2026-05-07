@@ -1271,6 +1271,11 @@ export default function EditDossierForm({
                 <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                   <MessageSquare className="w-4 h-4 mr-1" />
                   Commentaires
+                  {commentairesTemporaires.length > 0 && (
+                    <span className="ml-1.5 bg-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                      {commentairesTemporaires.length}
+                    </span>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                   <Clock className="w-4 h-4 mr-1" />
