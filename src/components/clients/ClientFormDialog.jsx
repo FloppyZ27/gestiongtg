@@ -842,7 +842,9 @@ export default function ClientFormDialog({
 
   // Update form when editingClient changes or when dialog opens
   React.useEffect(() => {
-    if (open && editingClient) {
+    if (!open) return;
+
+    if (editingClient) {
       const data = {
         prenom: editingClient.prenom || "",
         nom: editingClient.nom || "",
@@ -864,10 +866,11 @@ export default function ClientFormDialog({
       lastSavedDataRef.current = JSON.parse(JSON.stringify(data));
       setCommentairesTemporaires([]);
       setHasChanges(false);
-    } else if (open && !editingClient) {
-      // Pré-remplir avec initialData si fourni (données du hook ou mandat)
+    } else {
+      // Mode création — pré-remplir avec initialData
       const initial = initialData || {};
-      
+      console.log("PREFILL CLIENT DATA", initial);
+
       const adresses = initial.adresse_travaux ? [{ 
         numeros_civiques: initial.adresse_travaux.numeros_civiques || [""],
         rue: initial.adresse_travaux.rue || "",

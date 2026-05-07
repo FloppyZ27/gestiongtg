@@ -3080,11 +3080,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
         {/* ClientFormDialog (replaces previous New Client Dialogs) */}
         <ClientFormDialog
+          key={`cf-${isClientFormDialogOpen}-${clientFormInitialData?.prenom}-${clientFormInitialData?.nom}`}
           open={isClientFormDialogOpen}
-          onOpenChange={(open) => {
-            setIsClientFormDialogOpen(open);
-            if (!open) { setEditingClientForForm(null); setClientFormInitialData(null); }
-          }}
+          onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) { setEditingClientForForm(null); setClientFormInitialData(null); } }}
           editingClient={editingClientForForm}
           defaultType={clientTypeForForm}
           initialData={clientFormInitialData}
