@@ -1121,19 +1121,23 @@ export default function Lots() {
             </Button>
 
             <NewLotModal
-              isOpen={isFormDialogOpen}
+              open={isFormDialogOpen}
               onClose={() => {
                 setIsFormDialogOpen(false);
-                if (!hasFormChanges) resetForm();
+                resetForm();
               }}
               editingLot={editingLot}
-              onSave={() => {
+              onLotCreated={() => {
+                queryClient.invalidateQueries({ queryKey: ['lots'] });
+                setIsFormDialogOpen(false);
+                resetForm();
+              }}
+              onLotUpdated={() => {
                 queryClient.invalidateQueries({ queryKey: ['lots'] });
                 setIsFormDialogOpen(false);
                 resetForm();
               }}
               lots={lots}
-              users={users}
             />
               </div>
         </div>
