@@ -241,6 +241,7 @@ export default function NewLotModal({
             background: 'rgba(30, 41, 59, 0.9)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
           }}
+          zIndex={500}
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => { e.preventDefault(); onClose(); }}
           hideClose
