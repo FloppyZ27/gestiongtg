@@ -1,18 +1,12 @@
 /**
- * NewLotModal — Modal "Nouveau lot" rendu via ReactDOM.createPortal
- * directement dans document.body, sans aucun Radix Dialog.
- * Cela évite tous les conflits de FocusScope / pointer-events
- * lorsque ce modal est déclenché depuis l'intérieur d'un autre Dialog Radix.
+ * NewLotModal — utilise le même principe que ClientFormDialog:
+ * un Dialog Radix standard avec les mêmes styles.
  */
-import React from "react";
-import ReactDOM from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Loader2, MessageSquare, Clock } from "lucide-react";
 import { CADASTRE_CODES, CADASTRES_PAR_CIRCONSCRIPTION } from "../../lib/cadastreCodes";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -72,7 +66,6 @@ export default function NewLotModal({
       if (editingLot.circonscription_fonciere) {
         setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[editingLot.circonscription_fonciere] || []);
       }
-      // Charger l'historique
       base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: editingLot.id }, '-created_date')
         .then(logs => setActionLogs(logs));
     } else {
@@ -237,300 +230,264 @@ export default function NewLotModal({
 
   const isPending = createLotMutation.isPending || updateLotMutation.isPending;
 
-  // Fix global pour tous les portals Radix — fonctionne sur tous les niveaux de Dialog
-  React.useEffect(() => {
-    if (!open) return;
-    
-    const style = document.createElement('style');
-    style.id = 'new-lot-modal-fix';
-    style.textContent = `
-      /* Radix UI portals — pointer-events auto peu importe le parent Dialog */
-      [data-radix-portal],
-      [data-radix-popper-content-wrapper],
-      [data-radix-select-content],
-      [data-radix-dropdown-menu-content],
-      [data-radix-popover-content] {
-        pointer-events: auto !important;
-        z-index: 99999 !important;
-      }
-    `;
-    document.head.appendChild(style);
+  return (
+    <TooltipProvider>
+      <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+        <DialogContent
+          className="border border-white/20 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden"
+          style={{
+            marginTop: '35px',
+            maxHeight: 'calc(100vh - 43px)',
+            background: 'rgba(30, 41, 59, 0.9)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+          }}
+          hideClose
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>{editingLot ? "Modifier lot" : "Nouveau lot"}</DialogTitle>
+          </DialogHeader>
 
-    return () => {
-      document.getElementById('new-lot-modal-fix')?.remove();
-    };
-  }, [open]);
-
-  if (!open) return null;
-
-  const modalContent = (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        pointerEvents: 'auto',
-      }}
-      onMouseDown={(e) => {
-        // Fermer uniquement si clic sur le fond (pas sur le modal lui-même)
-        // et pas sur un Radix portal/dropdown
-        if (e.target === e.currentTarget && !e.target.closest('[data-radix-popper-content-wrapper], [data-radix-select-content], [data-radix-dropdown-menu-content]')) {
-          onClose();
-        }
-      }}
-    >
-      {/* Overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(10, 10, 18, 0.75)',
-          backdropFilter: 'blur(10px)',
-        }}
-      />
-
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        transition={{ duration: 0.18 }}
-        style={{
-          position: 'relative',
-          width: '75vw',
-          maxWidth: '75vw',
-          height: '90vh',
-          maxHeight: '90vh',
-          background: 'hsl(220, 13%, 10%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: '0.75rem',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.7)',
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid hsl(220,10%,20%)', flexShrink: 0, background: 'hsl(220,13%,8%)' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {editingLot ? "Modifier lot" : "Nouveau lot"}
-          </h2>
-        </div>
-
-        {/* Body */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-
-          {/* Formulaire - 70% */}
-          <div style={{ flex: '0 0 70%', overflowY: 'auto', padding: '16px', borderRight: '1px solid hsl(220,10%,20%)' }}>
-            <form id="new-lot-modal-form" onSubmit={handleSubmit}>
-
-              {/* Import .d01 */}
-              {!editingLot && (
-                <div
-                  style={{
-                    border: `1px dashed ${isDragOverD01 ? 'hsl(152,76%,40%)' : 'hsl(220,10%,35%)'}`,
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    marginBottom: '12px',
-                    background: isDragOverD01 ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.02)',
-                    transition: 'all 0.2s'
-                  }}
-                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(true); }}
-                  onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false); }}
-                  onDrop={(e) => {
-                    e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false);
-                    const file = e.dataTransfer.files[0];
-                    if (file?.name.endsWith('.d01')) handleD01Import(file);
-                    else alert("Veuillez déposer un fichier .d01");
-                  }}
-                >
-                  {isImportingD01 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'hsl(152,76%,50%)' }}>
-                      <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} />
-                      <span style={{ fontSize: '12px' }}>Importation...</span>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Upload style={{ width: 14, height: 14, color: 'hsl(220,8%,55%)' }} />
-                        <span style={{ fontSize: '12px', color: 'hsl(220,8%,55%)' }}>Importer depuis un fichier .d01</span>
-                      </div>
-                      <label style={{ cursor: 'pointer' }}>
-                        <input type="file" accept=".d01" style={{ display: 'none' }} onChange={(e) => { const file = e.target.files[0]; if (file) handleD01Import(file); }} />
-                        <span style={{ padding: '4px 12px', background: 'hsl(152,60%,32%)', color: 'white', fontSize: '12px', borderRadius: '4px', display: 'inline-block', transition: 'background 0.2s' }}>
-                          Parcourir
-                        </span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Info lot */}
-              <LotInfoStepForm
-                lotForm={lotForm}
-                onLotFormChange={setLotForm}
-                availableCadastres={availableCadastres}
-                onCirconscriptionChange={handleCirconscriptionChange}
-                isCollapsed={lotInfoCollapsed}
-                onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
-              />
-
-              {/* Types d'opération */}
-              <TypesOperationStepForm
-                lotForm={lotForm}
-                onLotFormChange={setLotForm}
-                lots={lots || []}
-                isCollapsed={typesOperationCollapsed}
-                onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
-              />
-
-              {/* Documents */}
-              {editingLot && (
-                <DocumentsStepFormLot
-                  lot={editingLot}
-                  isCollapsed={lotDocumentsCollapsed}
-                  onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
-                />
-              )}
-
-            </form>
-          </div>
-
-          {/* Sidebar - 30% */}
-          <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Toggle sidebar */}
-            <div
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ padding: '10px 16px', borderBottom: '1px solid hsl(220,10%,20%)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', userSelect: 'none' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {sidebarTab === "commentaires"
-                  ? <MessageSquare style={{ width: 16, height: 16, color: 'hsl(220,8%,55%)' }} />
-                  : <Clock style={{ width: 16, height: 16, color: 'hsl(220,8%,55%)' }} />}
-                <span style={{ color: 'hsl(210,11%,80%)', fontWeight: 600, fontSize: '14px' }}>
-                  {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
-                </span>
-              </div>
-              <span style={{ color: 'hsl(220,8%,55%)', fontSize: '12px' }}>{sidebarCollapsed ? '▼' : '▲'}</span>
+          <motion.div
+            className="flex flex-col h-[calc(100vh-160px)]"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0">
+              <h2 className="text-2xl font-bold" style={{
+                background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent'
+              }}>
+                {editingLot ? "Modifier lot" : "Nouveau lot"}
+              </h2>
             </div>
 
-            {!sidebarCollapsed && (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid hsl(220,10%,20%)', padding: '0 12px', gap: '4px', flexShrink: 0 }}>
-                  {['commentaires', 'historique'].map(tab => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setSidebarTab(tab)}
-                      style={{
-                        padding: '8px 12px',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        background: 'none',
-                        border: 'none',
-                        borderBottom: sidebarTab === tab ? '2px solid hsl(152,76%,40%)' : '2px solid transparent',
-                        color: sidebarTab === tab ? 'hsl(152,76%,50%)' : 'hsl(220,8%,55%)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        marginBottom: '-1px'
-                      }}
-                    >
-                      {tab === 'commentaires' ? 'Commentaires' : 'Historique'}
-                    </button>
-                  ))}
+            {/* Body */}
+            <div className="flex-1 flex overflow-hidden">
+
+              {/* Formulaire - 70% */}
+              <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                <div className="flex-1 overflow-y-auto p-6 pt-3">
+                  <form id="new-lot-modal-form" onSubmit={handleSubmit} className="space-y-3">
+
+                    {/* Import .d01 */}
+                    {!editingLot && (
+                      <div
+                        style={{
+                          border: `1px dashed ${isDragOverD01 ? 'hsl(152,76%,40%)' : 'hsl(220,10%,35%)'}`,
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          marginBottom: '12px',
+                          background: isDragOverD01 ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.02)',
+                          transition: 'all 0.2s'
+                        }}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(true); }}
+                        onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false); }}
+                        onDrop={(e) => {
+                          e.preventDefault(); e.stopPropagation(); setIsDragOverD01(false);
+                          const file = e.dataTransfer.files[0];
+                          if (file?.name.endsWith('.d01')) handleD01Import(file);
+                          else alert("Veuillez déposer un fichier .d01");
+                        }}
+                      >
+                        {isImportingD01 ? (
+                          <div className="flex items-center gap-2 text-emerald-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-xs">Importation...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-slate-400" />
+                              <span className="text-xs text-slate-400">Importer depuis un fichier .d01</span>
+                            </div>
+                            <label className="cursor-pointer">
+                              <input type="file" accept=".d01" className="hidden" onChange={(e) => { const file = e.target.files[0]; if (file) handleD01Import(file); }} />
+                              <span className="px-3 py-1 bg-emerald-600/60 hover:bg-emerald-600/80 text-white text-xs rounded cursor-pointer transition-colors">
+                                Parcourir
+                              </span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Info lot */}
+                    <LotInfoStepForm
+                      lotForm={lotForm}
+                      onLotFormChange={setLotForm}
+                      availableCadastres={availableCadastres}
+                      onCirconscriptionChange={handleCirconscriptionChange}
+                      isCollapsed={lotInfoCollapsed}
+                      onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
+                    />
+
+                    {/* Types d'opération */}
+                    <TypesOperationStepForm
+                      lotForm={lotForm}
+                      onLotFormChange={setLotForm}
+                      lots={lots || []}
+                      isCollapsed={typesOperationCollapsed}
+                      onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
+                    />
+
+                    {/* Documents */}
+                    {editingLot && (
+                      <DocumentsStepFormLot
+                        lot={editingLot}
+                        isCollapsed={lotDocumentsCollapsed}
+                        onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
+                      />
+                    )}
+
+                  </form>
+                </div>
+              </div>
+
+              {/* Sidebar - 30% */}
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                {/* Toggle sidebar */}
+                <div
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    {sidebarTab === "commentaires"
+                      ? <MessageSquare className="w-5 h-5 text-slate-400" />
+                      : <Clock className="w-5 h-5 text-slate-400" />}
+                    <h3 className="text-slate-300 text-base font-semibold">
+                      {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
+                    </h3>
+                  </div>
+                  <span className="text-slate-400 text-xs">{sidebarCollapsed ? '▼' : '▲'}</span>
                 </div>
 
-                <div style={{ flex: 1, overflow: 'hidden', padding: '8px' }}>
-                  {sidebarTab === 'commentaires' && (
-                    <CommentairesSectionLot
-                      lotId={editingLot?.id || null}
-                      dossierTemporaire={!editingLot}
-                      commentairesTemp={commentairesTemp}
-                      onCommentairesTempChange={setCommentairesTemp}
-                    />
-                  )}
-                  {sidebarTab === 'historique' && (
-                    <div style={{ overflowY: 'auto', height: '100%' }}>
-                      {actionLogs.length === 0 ? (
-                        <p style={{ color: 'hsl(220,8%,55%)', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>Aucun historique</p>
-                      ) : (
-                        actionLogs.map((log, idx) => (
-                          <div key={idx} style={{ padding: '8px', borderBottom: '1px solid hsl(220,10%,20%)', fontSize: '12px' }}>
-                            <p style={{ color: 'hsl(210,11%,80%)', fontWeight: 600 }}>{log.action}</p>
-                            {log.details && <p style={{ color: 'hsl(220,8%,55%)' }}>{log.details}</p>}
-                            <p style={{ color: 'hsl(220,8%,45%)', fontSize: '11px' }}>{log.utilisateur_nom} — {new Date(log.created_date).toLocaleString('fr-CA')}</p>
-                          </div>
-                        ))
+                {!sidebarCollapsed && (
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Tabs */}
+                    <div className="flex border-b border-slate-800 px-3 gap-1 flex-shrink-0">
+                      {['commentaires', 'historique'].map(tab => (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => setSidebarTab(tab)}
+                          className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                            sidebarTab === tab
+                              ? 'border-emerald-400 text-emerald-400'
+                              : 'border-transparent text-slate-400 hover:text-slate-200'
+                          }`}
+                          style={{ marginBottom: '-1px' }}
+                        >
+                          {tab === 'commentaires' ? 'Commentaires' : 'Historique'}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex-1 overflow-hidden p-3">
+                      {sidebarTab === 'commentaires' && (
+                        <CommentairesSectionLot
+                          lotId={editingLot?.id || null}
+                          dossierTemporaire={!editingLot}
+                          commentairesTemp={commentairesTemp}
+                          onCommentairesTempChange={setCommentairesTemp}
+                        />
+                      )}
+                      {sidebarTab === 'historique' && (
+                        <div className="overflow-y-auto h-full">
+                          {actionLogs.length === 0 ? (
+                            <p className="text-slate-500 text-sm text-center mt-8">Aucun historique</p>
+                          ) : (
+                            actionLogs.map((log, idx) => (
+                              <div key={idx} className="p-3 mb-2 bg-slate-800/50 rounded-lg border border-slate-700 text-xs">
+                                <p className="text-white font-semibold">{log.action}</p>
+                                {log.details && <p className="text-slate-400 mt-0.5">{log.details}</p>}
+                                <p className="text-slate-500 mt-1">{log.utilisateur_nom} — {new Date(log.created_date).toLocaleString('fr-CA')}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Footer */}
-        <div style={{ padding: '12px 20px', borderTop: '1px solid hsl(220,10%,20%)', display: 'flex', justifyContent: 'flex-end', gap: '10px', flexShrink: 0, background: 'hsl(220,13%,8%)' }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ padding: '8px 18px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: 'hsl(0,80%,65%)', fontWeight: 600, cursor: 'pointer', fontSize: '14px' }}
-          >
-            Annuler
-          </button>
-          <button
-            type="submit"
-            form="new-lot-modal-form"
-            disabled={isPending}
-            style={{ padding: '8px 18px', borderRadius: '8px', background: 'linear-gradient(135deg, hsl(152,60%,35%), hsl(175,60%,30%))', border: 'none', color: 'white', fontWeight: 600, cursor: isPending ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: isPending ? 0.7 : 1 }}
-          >
-            {isPending ? 'Sauvegarde...' : editingLot ? 'Enregistrer' : 'Créer le lot'}
-          </button>
-        </div>
-
-        {/* Avertissements inline */}
-        {(showLotExistsWarning || showMissingFieldsWarning || showD01ImportSuccess) && (
-          <div
-            style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', zIndex: 10 }}
-            onClick={() => { setShowLotExistsWarning(false); setShowMissingFieldsWarning(false); setShowD01ImportSuccess(false); }}
-          >
-            <div
-              style={{ background: 'hsl(220,13%,12%)', border: '1px solid hsl(220,10%,25%)', borderRadius: '12px', padding: '24px', maxWidth: '420px', textAlign: 'center' }}
-              onClick={e => e.stopPropagation()}
-            >
-              <p style={{ fontSize: '24px', marginBottom: '8px' }}>
-                {showD01ImportSuccess ? '✅' : '⚠️'}
-              </p>
-              <p style={{ color: 'hsl(210,11%,85%)', marginBottom: '16px', fontSize: '14px' }}>
-                {showLotExistsWarning && `Le lot ${lotForm.numero_lot} existe déjà dans ${lotForm.circonscription_fonciere}.`}
-                {showMissingFieldsWarning && "Veuillez remplir le Numéro de lot et la Circonscription foncière."}
-                {showD01ImportSuccess && "Données importées avec succès depuis le fichier .d01"}
-              </p>
+            {/* Footer */}
+            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
               <button
                 type="button"
-                onClick={() => { setShowLotExistsWarning(false); setShowMissingFieldsWarning(false); setShowD01ImportSuccess(false); }}
-                style={{ padding: '8px 20px', borderRadius: '8px', background: 'hsl(152,60%,35%)', border: 'none', color: 'white', fontWeight: 600, cursor: 'pointer' }}
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-red-400 border border-red-500/50 bg-red-500/10 hover:bg-red-500/20 transition-colors"
               >
-                OK
+                Annuler
+              </button>
+              <button
+                type="submit"
+                form="new-lot-modal-form"
+                disabled={isPending}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-60 transition-colors"
+              >
+                {isPending ? 'Sauvegarde...' : editingLot ? 'Enregistrer' : 'Créer le lot'}
               </button>
             </div>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
+          </motion.div>
+        </DialogContent>
+      </Dialog>
 
-  return ReactDOM.createPortal(
-    <TooltipProvider>
-      {modalContent}
-    </TooltipProvider>,
-    document.body
+      {/* Dialogs d'avertissement inline */}
+      <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Le lot <span className="text-emerald-400 font-semibold">{lotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{lotForm.circonscription_fonciere}</span>.</p>
+            <div className="flex justify-center pt-4">
+              <button onClick={() => setShowLotExistsWarning(false)} className="px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm">Compris</button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMissingFieldsWarning} onOpenChange={setShowMissingFieldsWarning}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Veuillez remplir les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.</p>
+            <div className="flex justify-center pt-4">
+              <button onClick={() => setShowMissingFieldsWarning(false)} className="px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm">Compris</button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">✅</span>Succès<span className="text-2xl">✅</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">Données importées avec succès depuis le fichier .d01</p>
+            <div className="flex justify-center pt-4">
+              <button onClick={() => setShowD01ImportSuccess(false)} className="px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm">OK</button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>
   );
 }
