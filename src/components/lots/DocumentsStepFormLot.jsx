@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -289,32 +290,34 @@ export default function DocumentsStepFormLot({
   };
 
   return (
-    <div
-      className={`transition-all ${isDragOver ? 'ring-2 ring-yellow-500/50 rounded-lg' : ''}`}
+    <Card 
+      className={`border-slate-700 bg-slate-800/30 transition-all ${isDragOver ? 'ring-2 ring-yellow-500 bg-yellow-500/10' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div 
-        className="cursor-pointer flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-yellow-900/20 hover:bg-yellow-900/40 transition-colors"
+      <CardHeader 
+        className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20"
         onClick={onToggleCollapse}
       >
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
-            <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
+              <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
+            </div>
+            <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
+            {files.length > 0 && (
+              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                {files.length} fichier{files.length > 1 ? 's' : ''}
+              </Badge>
+            )}
           </div>
-          <span className="text-yellow-300 text-base font-semibold">Documents</span>
-          {files.length > 0 && (
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs pointer-events-none select-none">
-              {files.length} fichier{files.length > 1 ? 's' : ''}
-            </Badge>
-          )}
+          {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
-        {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-      </div>
+      </CardHeader>
 
       {!isCollapsed && (
-        <div className="pt-1 pb-2">
+        <CardContent className="pt-1 pb-2">
           {/* Message si champs requis manquants */}
           {!lotNumero && (
             <div className="flex items-center justify-center py-4 text-yellow-400 text-sm">
@@ -464,7 +467,7 @@ export default function DocumentsStepFormLot({
           )}
             </>
           )}
-        </div>
+        </CardContent>
       )}
 
         {/* Dialog de prévisualisation */}
@@ -556,6 +559,6 @@ export default function DocumentsStepFormLot({
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+      </Card>
   );
 }

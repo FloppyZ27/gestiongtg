@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -201,27 +202,33 @@ export default function TypesOperationStepForm({
     : [];
 
   return (
-    <div>
-      <div 
-        className="cursor-pointer flex items-center justify-between px-3 py-1.5 rounded-t-lg bg-purple-900/20 hover:bg-purple-900/40 transition-colors"
+    <Card className="border-slate-700 bg-slate-800/30">
+      <CardHeader 
+        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
         onClick={onToggleCollapse}
       >
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-            <Layers className="w-3.5 h-3.5 text-purple-400" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
+            </div>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-purple-300 text-base">
+                Types d'opération
+              </CardTitle>
+              {typesOperation.length > 0 && (
+                <Badge className="bg-purple-500/30 text-purple-300 border-purple-500/50 px-2 py-0.5 text-xs">
+                  {typesOperation.length}
+                </Badge>
+              )}
+            </div>
           </div>
-          <span className="text-purple-300 text-base font-semibold">Types d'opération</span>
-          {typesOperation.length > 0 && (
-            <Badge className="bg-purple-500/30 text-purple-300 border-purple-500/50 px-2 py-0.5 text-xs pointer-events-none select-none">
-              {typesOperation.length}
-            </Badge>
-          )}
+          {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
-        {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-      </div>
+      </CardHeader>
 
       {!isCollapsed && (
-        <div className="pt-3 pb-2">
+        <CardContent className="pt-3 pb-2">
           {/* Types d'opération ajoutés */}
           {typesOperation.length > 0 && (
             <div className="mb-3 flex gap-1">
@@ -262,7 +269,7 @@ export default function TypesOperationStepForm({
                      onValueChange={(value) => setNewTypeOperation({...newTypeOperation, type_operation: value})}
                      disabled={disabled}
                    >
-                     <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs">
+                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs">
                        <SelectValue placeholder="Sélectionner un type" />
                      </SelectTrigger>
                      <SelectContent className="bg-slate-800 border-slate-700">
@@ -281,7 +288,7 @@ export default function TypesOperationStepForm({
                      type="date"
                      value={newTypeOperation.date_bpd}
                      onChange={(e) => setNewTypeOperation({...newTypeOperation, date_bpd: e.target.value})}
-                     className="bg-slate-800/50 border-slate-700 text-white text-xs"
+                     className="bg-slate-800 border-slate-700 text-white text-xs"
                      disabled={disabled}
                    />
                  </div>
@@ -390,7 +397,7 @@ export default function TypesOperationStepForm({
                             value={newConcordance.numero_lot}
                             onChange={(e) => setNewConcordance({...newConcordance, numero_lot: e.target.value})}
                             placeholder="Ex: 123"
-                            className="bg-slate-800/50 border-slate-700 text-white text-xs h-7"
+                            className="bg-slate-800 border-slate-700 text-white text-xs h-7"
                             disabled={disabled}
                           />
                         </div>
@@ -410,7 +417,7 @@ export default function TypesOperationStepForm({
                             value={newConcordance.rang}
                             onChange={(e) => setNewConcordance({...newConcordance, rang: e.target.value})}
                             placeholder="Ex: Rang 4"
-                            className="bg-slate-800/50 border-slate-700 text-white text-xs h-7"
+                            className="bg-slate-800 border-slate-700 text-white text-xs h-7"
                             disabled={disabled}
                           />
                         </div>
@@ -424,7 +431,7 @@ export default function TypesOperationStepForm({
                             onValueChange={(value) => setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""})}
                             disabled={disabled}
                           >
-                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs h-7">
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -444,7 +451,7 @@ export default function TypesOperationStepForm({
                             onValueChange={(value) => setNewConcordance({...newConcordance, cadastre: value})}
                             disabled={disabled || !newConcordance.circonscription_fonciere}
                           >
-                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-xs h-7">
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder={newConcordance.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700 max-h-48">
@@ -549,8 +556,8 @@ export default function TypesOperationStepForm({
 
 
           </div>
-        </div>
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 }
