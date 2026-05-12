@@ -412,6 +412,7 @@ export default function EditDossierForm({
   };
 
   return (
+    <>
     <motion.div 
       className="flex flex-col h-[90vh]"
       initial={{ opacity: 0, scale: 0.95 }}
@@ -1371,7 +1372,20 @@ export default function EditDossierForm({
         </div>
       </div>
 
-      {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
+      {/* Footer - Seulement en mode création */}
+      {!editingDossier && (
+        <div className="flex-shrink-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800" style={{ marginBottom: '3px', marginLeft: '3px', marginRight: '3px' }}>
+          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+            Créer
+          </Button>
+        </div>
+      )}
+
+    </motion.div>
+    <>
       {/* Dialog de confirmation suppression minute/entrée temps/retour appel */}
       <Dialog open={showDeleteMinuteConfirm} onOpenChange={setShowDeleteMinuteConfirm}>
         <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
@@ -1502,18 +1516,7 @@ export default function EditDossierForm({
           }
         }}
       />
-
-      {!editingDossier && (
-        <div className="flex-shrink-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800" style={{ marginTop: '5px', marginBottom: '3px', marginLeft: '3px', marginRight: '3px' }}>
-          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
-            Annuler
-          </Button>
-          <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-            Créer
-          </Button>
-        </div>
-      )}
-
-    </motion.div>
+    </>
+    </>
   );
 }
