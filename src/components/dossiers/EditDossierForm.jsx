@@ -1379,7 +1379,7 @@ export default function EditDossierForm({
         </Button>
         {!editingDossier && (
           <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none text-white font-semibold">
-            Créer le dossier
+            Créer
           </Button>
         )}
       </div>
