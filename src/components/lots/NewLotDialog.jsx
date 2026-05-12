@@ -362,20 +362,12 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
               {/* Sidebar - 30% */}
               <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                <div className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-                  <div className="flex items-center gap-2">
-                    {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
-                    <h3 className="text-slate-300 text-base font-semibold">{sidebarTab === "commentaires" ? "Commentaires" : "Historique"}</h3>
-                  </div>
-                  {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                </div>
-                {!sidebarCollapsed && (
-                  <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
-                    <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
-                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporaires.length}</Badge>}</TabsTrigger>
-                      <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                  <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-3 flex-shrink-0 bg-transparent gap-2">
+                    <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporaires.length}</Badge>}</TabsTrigger>
+                    <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
+                  </TabsList>
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-2 h-full">
                       <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
                     </TabsContent>
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0 flex flex-col">
@@ -503,7 +495,6 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                        })()}
                      </TabsContent>
                   </Tabs>
-                )}
               </div>
             </div>
 
