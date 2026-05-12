@@ -3265,7 +3265,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 {/* Colonne gauche - Formulaire - 70% */}
                 <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="sticky top-0 z-10 bg-slate-900 p-4 pb-3 border-b border-slate-800">
-                    <h2 className="text-xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
+                    <h2 className="text-xl font-bold">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
                   </div>
                   
                   <div className="flex-1 overflow-y-auto p-4 pt-2">
