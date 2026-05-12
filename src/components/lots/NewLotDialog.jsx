@@ -265,7 +265,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
   return (
     <>
-      <Dialog modal={false} open={open} onOpenChange={(o) => {
+      <Dialog open={open} onOpenChange={(o) => {
         if (!o) {
           if (!editingLot && hasFormChanges) {
             setShowCancelConfirm(true);
@@ -275,7 +275,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
         }
         onOpenChange(o);
       }}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" zIndex={1100} hideClose>
+        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" zIndex={1100} hideClose onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[90vh]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
             <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
@@ -405,7 +405,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                                 <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
                                   <SelectValue placeholder="Utilisateurs" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
                                   <SelectItem value="all" className="text-xs text-slate-300">Utilisateurs (Tous)</SelectItem>
                                   {uniqueUsers.map(user => (
                                     <SelectItem key={user.email} value={user.email} className="text-xs text-slate-300">{user.nom}</SelectItem>
@@ -419,7 +419,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                                 <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
                                   <SelectValue placeholder="Types" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
                                   <SelectItem value="all" className="text-xs text-slate-300">Types (Tous)</SelectItem>
                                   {uniqueActions.map(action => (
                                     <SelectItem key={action} value={action} className="text-xs text-slate-300">{action}</SelectItem>

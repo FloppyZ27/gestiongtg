@@ -353,6 +353,7 @@ export default function OuvrirDossierDialog({
         <DialogContent
           className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
           style={{ marginTop: '19px', maxHeight: 'calc(85vh - 5px)' }}
+          onInteractOutside={(e) => { if (isNewLotDialogOpen || isClientFormOpen) e.preventDefault(); }}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Ouvrir le dossier</DialogTitle>

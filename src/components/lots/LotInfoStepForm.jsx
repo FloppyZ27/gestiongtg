@@ -69,7 +69,7 @@ export default function LotInfoStepForm({
                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
                   {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                     <SelectItem key={circ} value={circ} className="text-white text-xs">
                       {circ}
@@ -88,7 +88,7 @@ export default function LotInfoStepForm({
                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                   <SelectValue placeholder={lotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                <SelectContent className="bg-slate-800 border-slate-700 max-h-64" style={{zIndex: 1200}}>
                   {availableCadastres.map((cadastre) => (
                     <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
                       {cadastre}

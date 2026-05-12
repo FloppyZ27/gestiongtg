@@ -272,7 +272,7 @@ export default function TypesOperationStepForm({
                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs">
                        <SelectValue placeholder="Sélectionner un type" />
                      </SelectTrigger>
-                     <SelectContent className="bg-slate-800 border-slate-700">
+                     <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
                        {TYPES_OPERATIONS.map((type) => (
                          <SelectItem key={type} value={type} className="text-white text-xs">
                            {type}
@@ -434,7 +434,7 @@ export default function TypesOperationStepForm({
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
                               {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                 <SelectItem key={circ} value={circ} className="text-white text-xs">
                                   {circ}
@@ -454,8 +454,8 @@ export default function TypesOperationStepForm({
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs h-7">
                               <SelectValue placeholder={newConcordance.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700 max-h-48">
-                              {availableCadastres.map((cadastre) => (
+                            <SelectContent className="bg-slate-800 border-slate-700 max-h-48" style={{zIndex: 1200}}>
+                             {availableCadastres.map((cadastre) => (
                                 <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
                                   {cadastre}
                                 </SelectItem>
