@@ -1374,7 +1374,7 @@ export default function EditDossierForm({
 
       {/* Footer - toujours visible */}
       <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-3 bg-slate-900 border-t border-slate-700">
-        <Button type="button" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white" onClick={onCancel}>
+        <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none text-white font-semibold" onClick={onCancel}>
           {editingDossier ? "Fermer" : "Annuler"}
         </Button>
         {!editingDossier && (
