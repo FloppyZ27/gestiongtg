@@ -202,7 +202,7 @@ export default function TypesOperationStepForm({
     : [];
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30">
+    <Card className="border-0 bg-slate-800/30" style={{border: 'none', boxShadow: 'none'}}>
       <CardHeader 
         className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
         onClick={onToggleCollapse}
