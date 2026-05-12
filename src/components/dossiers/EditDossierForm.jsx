@@ -1504,7 +1504,7 @@ export default function EditDossierForm({
       />
 
       {!editingDossier && (
-        <div className="sticky bottom-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800" style={{ marginTop: '5px', marginBottom: '3px', marginLeft: '3px', marginRight: '3px' }}>
+        <div className="flex-shrink-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800" style={{ marginTop: '5px', marginBottom: '3px', marginLeft: '3px', marginRight: '3px' }}>
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
             Annuler
           </Button>
