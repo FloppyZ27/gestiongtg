@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import EditDossierForm from "@/components/dossiers/EditDossierForm";
+import ClientFormDialog from "@/components/clients/ClientFormDialog";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -19,6 +20,9 @@ export default function GlobalDossierEditDialog() {
   const [open, setOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
   const [formData, setFormData] = useState(null);
+  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
+  const [clientTypeForForm, setClientTypeForForm] = useState("Client");
   const queryClient = useQueryClient();
 
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
@@ -92,6 +96,7 @@ export default function GlobalDossierEditDialog() {
   if (!open || !formData) return null;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
       <DialogContent
         className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
@@ -150,19 +155,38 @@ export default function GlobalDossierEditDialog() {
             }));
           }}
           getLotById={(id) => lots.find(l => l.id === id)}
-          setIsClientFormDialogOpen={() => {}}
-          setClientTypeForForm={() => {}}
+          setIsClientFormDialogOpen={(val) => {
+            setIsClientFormOpen(!!val);
+          }}
+          setClientTypeForForm={setClientTypeForForm}
           setViewingClientDetails={() => {}}
           calculerProchainNumeroDossier={() => ""}
           editingDossier={editingDossier}
           onOpenNewLotDialog={() => {}}
-          setEditingClient={() => {}}
+          setEditingClient={setEditingClient}
           setEditingLot={() => {}}
           setNewLotForm={() => {}}
           setLotActionLogs={() => {}}
           allDossiers={dossiers}
+          onNewClientClick={() => {}}
         />
       </DialogContent>
     </Dialog>
+    <ClientFormDialog
+      key={editingClient?.id}
+      open={isClientFormOpen}
+      onOpenChange={(v) => {
+        setIsClientFormOpen(v);
+        if (!v) setEditingClient(null);
+      }}
+      editingClient={editingClient}
+      defaultType={clientTypeForForm}
+      onSuccess={() => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        setIsClientFormOpen(false);
+        setEditingClient(null);
+      }}
+    />
+    </>
   );
 }

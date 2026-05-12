@@ -56,9 +56,11 @@ export default function ContactsTabsSection({
   );
 
   const handleClientCardClick = (client, type) => {
+    if (!client) return;
     if (setEditingClient) setEditingClient(client);
     setClientTypeForForm(type === 'notaires' ? 'Notaire' : type === 'courtiers' ? 'Courtier immobilier' : type === 'compagnies' ? 'Compagnie' : 'Client');
-    setIsClientFormDialogOpen(true);
+    // Petit délai pour laisser setEditingClient se propager
+    setTimeout(() => setIsClientFormDialogOpen(true), 0);
   };
 
   const renderClientCard = (clientId, client, type, colors) => {
