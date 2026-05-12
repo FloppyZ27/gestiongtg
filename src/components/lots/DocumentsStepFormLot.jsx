@@ -291,7 +291,7 @@ export default function DocumentsStepFormLot({
 
   return (
     <Card 
-      className={`border-0 bg-slate-800/30 transition-all ${isDragOver ? 'ring-2 ring-yellow-500 bg-yellow-500/10' : ''}`}
+      className={`border-0 bg-transparent transition-all ${isDragOver ? 'ring-2 ring-yellow-500 bg-yellow-500/10' : ''}`}
       style={isDragOver ? {} : {border: 'none', boxShadow: 'none'}}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
