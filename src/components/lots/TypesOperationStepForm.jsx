@@ -389,7 +389,7 @@ export default function TypesOperationStepForm({
                     )}
 
                     {/* Formulaire d'ajout */}
-                    <div className="p-2 bg-slate-700/30 border border-slate-600 rounded-lg space-y-2">
+                    <div className="space-y-2">
                       <div className="grid grid-cols-[1fr_auto_1fr] gap-2">
                         <div>
                           <Label className="text-slate-400 text-xs">N° Lot <span className="text-red-400">*</span></Label>
