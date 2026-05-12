@@ -361,7 +361,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
 
               {/* Sidebar - 30% */}
-              <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                 <div className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
                   <div className="flex items-center gap-2">
                     {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
