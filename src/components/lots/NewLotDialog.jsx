@@ -362,16 +362,18 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
               {/* Sidebar - 30% */}
               <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
-                  <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-3 flex-shrink-0 bg-transparent gap-2">
-                    <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporaires.length}</Badge>}</TabsTrigger>
-                    <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
-                  </TabsList>
-                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-2 h-full">
-                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
-                    </TabsContent>
-
-                  </Tabs>
+                <div className="flex items-center gap-2 mx-4 mr-6 mt-3 mb-2 flex-shrink-0">
+                  <MessageSquare className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs text-emerald-400 font-medium">Commentaires</span>
+                  {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && (
+                    <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">
+                      {editingLot ? commentairesCount : commentairesTemporaires.length}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex-1 overflow-hidden px-4 pr-6 pb-4">
+                  <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
+                </div>
               </div>
             </div>
 
