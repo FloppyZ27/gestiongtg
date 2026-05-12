@@ -91,8 +91,8 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
   const hasFilters = filterArpenteur.length > 0 || filterMandat.length > 0 || filterVille.length > 0 || filterStatut !== "all";
 
   return (
-    <Card className="border-none">
-      <CardHeader className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20" onClick={() => setCollapsed(!collapsed)}>
+    <div className="bg-transparent">
+      <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20" onClick={() => setCollapsed(!collapsed)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
@@ -105,10 +105,10 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
           </div>
           {collapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
-      </CardHeader>
+      </div>
 
       {!collapsed && (
-        <CardContent className="pt-3 pb-2 bg-transparent">
+        <div className="pt-3 pb-2 bg-transparent">
           <div className="space-y-3 mb-3">
             <div className="flex justify-between items-center gap-2">
               <div className="relative flex-1">
@@ -196,8 +196,8 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
               <p className="text-xs">Aucun dossier associé</p>
             </div>
           )}
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
