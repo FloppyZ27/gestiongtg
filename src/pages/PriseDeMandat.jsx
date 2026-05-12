@@ -39,7 +39,7 @@ import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
-import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";import PriseMandatAlertDialogs from "../components/mandat/PriseMandatAlertDialogs";import LotEditDialog from "../components/lots/LotEditDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2665,39 +2665,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           onSuccess={() => { setIsOuvrirDossierDialogOpen(false); setIsDialogOpen(false); resetFullForm(); }}
         />
 
-        {/* Dialog suppression mandat */}
-        <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.</p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="button" onClick={()=>{setShowDeleteMandatConfirm(false);setMandatIndexToDelete(null);}} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Annuler</Button>
-                <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 border-none" onClick={()=>{if(mandatIndexToDelete!==null){setNouveauDossierForm(prev=>({...prev,mandats:prev.mandats.filter((_,i)=>i!==mandatIndexToDelete)}));setActiveTabMandatDossier(Math.max(0,mandatIndexToDelete-1).toString());}setShowDeleteMandatConfirm(false);setMandatIndexToDelete(null);}}>Supprimer</Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-        {/* Dialog utilisateur manquant */}
-        <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Tous les mandats doivent avoir un utilisateur assigné avant de créer le dossier.</p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowMissingUserWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-        {/* Dialog arpenteur requis */}
-        <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Veuillez sélectionner un arpenteur-géomètre.</p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowArpenteurRequiredDialog(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">OK</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        {/* Alert dialogs groupés */}
 
         {/* Dialog de succès d'import .d01 */}
         <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
@@ -2710,127 +2678,26 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           </DialogContent>
         </Dialog>
 
-        {/* Dialogs simples groupés */}
-        <Dialog open={showDeleteConcordanceConfirm} onOpenChange={setShowDeleteConcordanceConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir supprimer cette concordance ? Cette action est irréversible.</p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="button" onClick={()=>{setShowDeleteConcordanceConfirm(false);setConcordanceIndexToDelete(null);}} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Annuler</Button>
-                <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 border-none" onClick={()=>{if(concordanceIndexToDelete!==null){setNewLotForm(prev=>({...prev,concordances_anterieures:prev.concordances_anterieures.filter((_,i)=>i!==concordanceIndexToDelete)}));}setShowDeleteConcordanceConfirm(false);setConcordanceIndexToDelete(null);}}>Supprimer</Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={showCancelLotConfirm} onOpenChange={setShowCancelLotConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.</p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 border-none" onClick={()=>{setShowCancelLotConfirm(false);setIsNewLotDialogOpen(false);resetLotForm();}}>Abandonner</Button>
-                <Button type="button" onClick={()=>setShowCancelLotConfirm(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Continuer l'édition</Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>.</p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowLotExistsWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={showLotMissingFieldsWarning} onOpenChange={setShowLotMissingFieldsWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.</p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowLotMissingFieldsWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        <PriseMandatAlertDialogs
+          showDeleteMandatConfirm={showDeleteMandatConfirm} setShowDeleteMandatConfirm={setShowDeleteMandatConfirm} mandatIndexToDelete={mandatIndexToDelete} setMandatIndexToDelete={setMandatIndexToDelete} setNouveauDossierForm={setNouveauDossierForm} setActiveTabMandatDossier={setActiveTabMandatDossier}
+          showMissingUserWarning={showMissingUserWarning} setShowMissingUserWarning={setShowMissingUserWarning}
+          showArpenteurRequiredDialog={showArpenteurRequiredDialog} setShowArpenteurRequiredDialog={setShowArpenteurRequiredDialog}
+          showDeleteConcordanceConfirm={showDeleteConcordanceConfirm} setShowDeleteConcordanceConfirm={setShowDeleteConcordanceConfirm} concordanceIndexToDelete={concordanceIndexToDelete} setConcordanceIndexToDelete={setConcordanceIndexToDelete} setNewLotForm={setNewLotForm}
+          showCancelLotConfirm={showCancelLotConfirm} setShowCancelLotConfirm={setShowCancelLotConfirm} setIsNewLotDialogOpen={setIsNewLotDialogOpen} resetLotForm={resetLotForm}
+          showLotExistsWarning={showLotExistsWarning} setShowLotExistsWarning={setShowLotExistsWarning} newLotForm={newLotForm}
+          showLotMissingFieldsWarning={showLotMissingFieldsWarning} setShowLotMissingFieldsWarning={setShowLotMissingFieldsWarning}
+          showConcordanceWarning={showConcordanceWarning} setShowConcordanceWarning={setShowConcordanceWarning}
+        />
         <ConfirmDeleteDialog
           open={showDeletePriseMandatConfirm}
           onOpenChange={(open) => { setShowDeletePriseMandatConfirm(open); if (!open) setPriseMandatIdToDelete(null); }}
           onConfirm={() => { if(priseMandatIdToDelete)deletePriseMandatMutation.mutate(priseMandatIdToDelete); }}
           message="Êtes-vous sûr de vouloir supprimer cette prise de mandat ? Cette action est irréversible."
         />
-        <Dialog open={showConcordanceWarning} onOpenChange={setShowConcordanceWarning}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-            <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-              <p className="text-slate-300 text-center">Veuillez remplir le numéro de lot, la circonscription foncière et le cadastre pour ajouter une concordance.</p>
-              <div className="flex justify-center gap-3 pt-4"><Button type="button" onClick={()=>setShowConcordanceWarning(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Compris</Button></div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
 
-        {/* Dialog pour ajouter une minute */}
-        <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.15 }}
-            >
-              <div className="space-y-2">
-                <Label>Minute <span className="text-red-400">*</span></Label>
-                <Input
-                  value={newMinuteForm.minute}
-                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
-                  placeholder="Ex: 12345"
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Date de minute <span className="text-red-400">*</span></Label>
-                <Input
-                  type="date"
-                  value={newMinuteForm.date_minute}
-                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Type de minute <span className="text-red-400">*</span></Label>
-                <Select
-                  value={newMinuteForm.type_minute}
-                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
-                >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
-                    <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
-                    <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                  Annuler
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleAddMinuteFromDialog}
-                  disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
-                  Ajouter
-                </Button>
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+
+        {/* Dialog pour ajouter une minute - inline compact */}
+        {isAddMinuteDialogOpen && <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}><DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50"><DialogHeader><DialogTitle className="text-xl">Ajouter une minute</DialogTitle></DialogHeader><div className="space-y-4"><div className="space-y-2"><Label>Minute <span className="text-red-400">*</span></Label><Input value={newMinuteForm.minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })} placeholder="Ex: 12345" className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Date de minute <span className="text-red-400">*</span></Label><Input type="date" value={newMinuteForm.date_minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })} className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Type de minute <span className="text-red-400">*</span></Label><Select value={newMinuteForm.type_minute} onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}><SelectTrigger className="bg-slate-800 border-slate-700 text-white"><SelectValue placeholder="Type" /></SelectTrigger><SelectContent className="bg-slate-800 border-slate-700"><SelectItem value="Initiale" className="text-white">Initiale</SelectItem><SelectItem value="Remplace" className="text-white">Remplace</SelectItem><SelectItem value="Corrige" className="text-white">Corrige</SelectItem></SelectContent></Select></div><div className="flex justify-end gap-3 pt-4 border-t border-slate-800"><Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button><Button type="button" onClick={handleAddMinuteFromDialog} disabled={!newMinuteForm.minute || !newMinuteForm.date_minute} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ajouter</Button></div></div></DialogContent></Dialog>}
 
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
@@ -2861,52 +2728,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                           ? 'bg-blue-500/20 border border-blue-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
-                      onClick={() => toggleClient(client.id, 'clients')}
-                    >
-                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
-                      <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {client.adresses?.length > 0 && formatAdresse(client.adresses.find(a => a.actuelle || a.actuel)) && (
-                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle || a.actuel))}</p>
-                        )}
-                        {getCurrentValue(client.courriels, 'courriel') && (
-                          <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
-                        )}
-                        {getCurrentValue(client.telephones, 'telephone') && (
-                          <p>
-                            📞 <a 
-                              href={`tel:${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`}
-                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                            >
-                              {getCurrentValue(client.telephones, 'telephone')}
-                            </a>
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsClientSelectorOpen(false);
-                          handleEdit(client);
-                        }}
-                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Modifier
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
-                Valider
-              </Button>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+                      onClick={() => toggleClient(client.id, 'clients')}>{client.prenom} {client.nom}</div>))}</div></div><Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">Valider</Button></motion.div></DialogContent></Dialog>
+                      <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
             <DialogHeader><DialogTitle>Sélectionner des notaires</DialogTitle></DialogHeader>
             <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
@@ -2935,52 +2758,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                           ? 'bg-purple-500/20 border border-purple-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
-                      onClick={() => toggleClient(notaire.id, 'notaires')}
-                    >
-                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
-                      <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {notaire.adresses?.length > 0 && formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel)) && (
-                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel))}</p>
-                        )}
-                        {getCurrentValue(notaire.courriels, 'courriel') && (
-                          <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
-                        )}
-                        {getCurrentValue(notaire.telephones, 'telephone') && (
-                          <p>
-                            📞 <a 
-                              href={`tel:${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`}
-                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                            >
-                              {getCurrentValue(notaire.telephones, 'telephone')}
-                            </a>
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsNotaireSelectorOpen(false);
-                          handleEdit(notaire);
-                        }}
-                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Modifier
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
-                Valider
-              </Button>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+                      onClick={() => toggleClient(notaire.id, 'notaires')}>{notaire.prenom} {notaire.nom}</div>))}</div></div><Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">Valider</Button></motion.div></DialogContent></Dialog>
+                      <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
             <DialogHeader><DialogTitle>Sélectionner des courtiers</DialogTitle></DialogHeader>
             <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
@@ -3009,76 +2788,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                           ? 'bg-orange-500/20 border border-orange-500/30'
                           : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
-                      onClick={() => toggleClient(courtier.id, 'courtiers')}
-                    >
-                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
-                      <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel)) && (
-                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel))}</p>
-                        )}
-                        {getCurrentValue(courtier.courriels, 'courriel') && (
-                          <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
-                        )}
-                        {getCurrentValue(courtier.telephones, 'telephone') && (
-                          <p>
-                            📞 <a 
-                              href={`tel:${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`}
-                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                            >
-                              {getCurrentValue(courtier.telephones, 'telephone')}
-                            </a>
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsCourtierSelectorOpen(false);
-                          handleEdit(courtier);
-                        }}
-                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Modifier
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
-                Valider
-              </Button>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-
-        {/* PDF Viewer Dialog */}
-        <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
-            <div className="flex items-center px-3 py-1.5 border-b border-slate-800 flex-shrink-0 min-h-0">
-              <div className="flex items-center gap-2 text-sm">
-                <File className="w-4 h-4 text-amber-400" />
-                <span className="truncate max-w-[600px] text-white">{viewingPdfName}</span>
-              </div>
-            </div>
-            <DialogHeader className="sr-only">
-              <DialogTitle>{viewingPdfName}</DialogTitle>
-            </DialogHeader>
-            <div className="flex-1 overflow-hidden bg-slate-950 min-h-0">
-              {viewingPdfUrl && (
-                <iframe
-                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingPdfUrl)}&embedded=true`}
-                  className="w-full h-full border-0"
-                  title={viewingPdfName}
-                />
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ClientFormDialog (replaces previous New Client Dialogs) */}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}>{courtier.prenom} {courtier.nom}</div>))}</div></div><Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">Valider</Button></motion.div></DialogContent></Dialog>
+                      {/* ClientFormDialog */}
         <ClientFormDialog
           key={`cf-${isClientFormDialogOpen}-${clientFormInitialData?.prenom}-${clientFormInitialData?.nom}`}
           open={isClientFormDialogOpen}
@@ -3235,210 +2946,29 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           </DialogContent>
         </Dialog>
 
-        {/* New Lot Dialog */}
-        <Dialog open={isNewLotDialogOpen} onOpenChange={async (open) => {
-          if (open) {
-            // Charger l'historique du lot lors de l'ouverture en mode édition
-            if (open && editingLot) {
-              const loadActionLogs = async () => {
-                const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: editingLot.id }, '-created_date');
-                setLotActionLogs(logs);
-              };
-              loadActionLogs();
-            }
-            setIsNewLotDialogOpen(open);
-          }
-        }}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
-            <DialogHeader className="sr-only">
-              <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
-            </DialogHeader>
-            
-            <motion.div 
-              className="flex flex-col h-[90vh]"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex-1 flex overflow-hidden">
-                {/* Colonne gauche - Formulaire - 70% */}
-                <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
-                  <div className="sticky top-0 z-10 bg-slate-900 p-4 pb-3 border-b border-slate-800">
-                    <h2 className="text-xl font-bold">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
-                  </div>
-                  
-                  <div className="flex-1 overflow-y-auto p-4 pt-2">
-                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
-                    {/* Section Import .d01 - Visible uniquement en mode création */}
-                    {!editingLot && (
-                      <div 
-                        className={`border border-dashed rounded-lg p-2 transition-all ${
-                          isDragOverD01 
-                            ? 'border-emerald-500 bg-emerald-500/10' 
-                            : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
-                        }`}
-                        onDragOver={handleD01DragOver}
-                        onDragLeave={handleD01DragLeave}
-                        onDrop={handleD01Drop}
-                      >
-                        {isImportingD01 ? (
-                          <div className="flex items-center justify-center gap-2 text-teal-400">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-xs">Importation...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <Upload className="w-4 h-4 text-slate-400" />
-                              <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
-                            </div>
-                            <label>
-                              <input
-                                type="file"
-                                accept=".d01"
-                                onChange={handleD01FileSelect}
-                                className="hidden"
-                              />
-                              <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
-                                Parcourir
-                              </span>
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Section Informations du lot */}
-                    <LotInfoStepForm
-                      lotForm={newLotForm}
-                      onLotFormChange={(data) => setNewLotForm(data)}
-                      availableCadastres={availableCadastresForNewLot}
-                      onCirconscriptionChange={handleLotCirconscriptionChange}
-                      isCollapsed={lotInfoCollapsed}
-                      onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
-                      disabled={false}
-                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
-                    />
-
-                    {/* Section Types d'opération */}
-                    <TypesOperationStepForm
-                      typesOperation={newLotForm.types_operation || []}
-                      onTypesOperationChange={(data) => setNewLotForm({...newLotForm, types_operation: data})}
-                      isCollapsed={typesOperationCollapsed}
-                      onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
-                      disabled={false}
-                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
-                      allLots={lots}
-                    />
-
-                    {/* Section Documents */}
-                    <DocumentsStepFormLot
-                      lotNumero={newLotForm.numero_lot || ""}
-                      circonscription={newLotForm.circonscription_fonciere || ""}
-                      isCollapsed={lotDocumentsCollapsed}
-                      onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
-                      disabled={false}
-                    />
-                  </form>
-                  </div>
-                </div>
-
-                {/* Colonne droite - Commentaires et Historique - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                 {/* Header Tabs Commentaires/Historique - Collapsible */}
-                 <div 
-                   className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
-                   onClick={() => setSidebarCollapsedLot(!sidebarCollapsedLot)}
-                 >
-                   <div className="flex items-center gap-2">
-                     {sidebarTabLot === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
-                     <h3 className="text-slate-300 text-base font-semibold">
-                       {sidebarTabLot === "commentaires" ? "Commentaires" : "Historique"}
-                     </h3>
-                   </div>
-                   {sidebarCollapsedLot ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                 </div>
-
-                 {!sidebarCollapsedLot && (
-                   <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
-                     <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
-                       <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {commentairesTemporairesLot.length > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{commentairesTemporairesLot.length}</Badge>}</TabsTrigger>
-                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique {lotActionLogs.length > 0 && <Badge variant="outline" className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30 px-1.5 py-0 h-5 text-[10px]">{lotActionLogs.length}</Badge>}</TabsTrigger>
-                     </TabsList>
-
-                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                       <CommentairesSectionLot
-                         lotId={editingLot?.id}
-                         lotTemporaire={!editingLot}
-                         commentairesTemp={commentairesTemporairesLot}
-                         onCommentairesTempChange={setCommentairesTemporairesLot}
-                       />
-                     </TabsContent>
-
-                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                       {lotActionLogs.length > 0 ? (
-                         <div className="space-y-3">
-                           {lotActionLogs.map((log) => (
-                             <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
-                               <div className="flex items-start justify-between gap-2">
-                                 <div className="flex-1">
-                                   <div className="flex items-center gap-2 mb-1">
-                                     <Badge className={`text-xs ${
-                                       log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                                       log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                       'bg-red-500/20 text-red-400 border-red-500/30'
-                                     }`}>
-                                       {log.action}
-                                     </Badge>
-                                     <span className="text-slate-400 text-xs">
-                                       {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                                     </span>
-                                   </div>
-                                   <p className="text-slate-300 text-sm">{log.details}</p>
-                                   <p className="text-slate-500 text-xs mt-1">Par {log.utilisateur_nom}</p>
-                                 </div>
-                               </div>
-                             </div>
-                           ))}
-                         </div>
-                       ) : (
-                         <div className="flex items-center justify-center h-full text-center">
-                           <div>
-                             <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                             <p className="text-slate-500">Aucune action enregistrée</p>
-                             <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                           </div>
-                         </div>
-                       )}
-                     </TabsContent>
-                   </Tabs>
-                 )}
-                </div>
-              </div>
-
-              {/* Boutons tout en bas - pleine largeur */}
-              {!editingLot && (<div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => {
-                 let hasChanges = false;
-                 hasChanges = newLotForm.numero_lot || 
-                   newLotForm.circonscription_fonciere || 
-                   newLotForm.rang || 
-                   newLotForm.types_operation.length > 0 ||
-                   commentairesTemporairesLot.length > 0;
-
-                  if (hasChanges) {
-                    setShowCancelLotConfirm(true);
-                  } else {
-                    setIsNewLotDialogOpen(false);
-                    resetLotForm();
-                  }
-                }} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
-              </div>)}
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        <LotEditDialog
+          isOpen={isNewLotDialogOpen}
+          onOpenChange={(open) => { if (!open) { setIsNewLotDialogOpen(false); if (!editingLot) resetLotForm(); } else setIsNewLotDialogOpen(true); }}
+          editingLot={editingLot}
+          newLotForm={newLotForm} setNewLotForm={setNewLotForm}
+          availableCadastresForNewLot={availableCadastresForNewLot}
+          handleLotCirconscriptionChange={handleLotCirconscriptionChange}
+          lotInfoCollapsed={lotInfoCollapsed} setLotInfoCollapsed={setLotInfoCollapsed}
+          typesOperationCollapsed={typesOperationCollapsed} setTypesOperationCollapsed={setTypesOperationCollapsed}
+          lotDocumentsCollapsed={lotDocumentsCollapsed} setLotDocumentsCollapsed={setLotDocumentsCollapsed}
+          CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+          allLots={lots}
+          commentairesTemporairesLot={commentairesTemporairesLot} setCommentairesTemporairesLot={setCommentairesTemporairesLot}
+          lotActionLogs={lotActionLogs} setLotActionLogs={setLotActionLogs}
+          sidebarTabLot={sidebarTabLot} setSidebarTabLot={setSidebarTabLot}
+          sidebarCollapsedLot={sidebarCollapsedLot} setSidebarCollapsedLot={setSidebarCollapsedLot}
+          resetLotForm={resetLotForm}
+          showCancelLotConfirm={showCancelLotConfirm} setShowCancelLotConfirm={setShowCancelLotConfirm}
+          handleNewLotSubmit={handleNewLotSubmit}
+          isDragOverD01={isDragOverD01} handleD01DragOver={handleD01DragOver} handleD01DragLeave={handleD01DragLeave} handleD01Drop={handleD01Drop}
+          isImportingD01={isImportingD01} handleD01FileSelect={handleD01FileSelect}
+          lots={lots} user={user} users={users}
+        />
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
@@ -3539,214 +3069,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     {/* Clients, Notaires, Courtiers */}
                     <div className="grid grid-cols-3 gap-4">
                       {/* Clients */}
-                      {viewingDossier.ttl === "Oui" ? (
-                        viewingDossier.clients_texte && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
-                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.clients_texte}</p>
-                          </div>
-                        )
-                      ) : (
-                        viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
-                            <div className="flex flex-col gap-2">
-                              {viewingDossier.clients_ids.map(clientId => {
-                                const client = getClientById(clientId);
-                                return client ? (
-                                  <Badge 
-                                    key={clientId} 
-                                    className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                    onClick={() => {
-                                      setIsViewDialogOpen(false);
-                                      setViewingClientDetails(client);
-                                    }}
-                                  >
-                                    {client.prenom} {client.nom}
-                                  </Badge>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )
-                      )}
-
-                      {/* Notaires */}
-                      {viewingDossier.ttl === "Oui" ? (
-                        viewingDossier.notaires_texte && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
-                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.notaires_texte}</p>
-                          </div>
-                        )
-                      ) : (
-                        viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
-                            <div className="flex flex-col gap-2">
-                              {viewingDossier.notaires_ids.map(notaireId => {
-                                const notaire = getClientById(notaireId);
-                                return notaire ? (
-                                  <Badge 
-                                    key={notaireId} 
-                                    className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
-                                    onClick={() => {
-                                      setIsViewDialogOpen(false);
-                                      setViewingClientDetails(notaire);
-                                    }}
-                                  >
-                                    {notaire.prenom} {notaire.nom}
-                                  </Badge>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )
-                      )}
-
-                      {/* Courtiers */}
-                      {viewingDossier.ttl === "Oui" ? (
-                        viewingDossier.courtiers_texte && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
-                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.courtiers_texte}</p>
-                          </div>
-                        )
-                      ) : (
-                        viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
-                          <div>
-                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
-                            <div className="flex flex-col gap-2">
-                              {viewingDossier.courtiers_ids.map(courtierId => {
-                                const courtier = getClientById(courtierId);
-                                return courtier ? (
-                                  <Badge 
-                                    key={courtierId} 
-                                    className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
-                                    onClick={() => {
-                                      setIsViewDialogOpen(false);
-                                      setViewingClientDetails(courtier);
-                                    }}
-                                  >
-                                    {courtier.prenom} {courtier.nom}
-                                  </Badge>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )
-                      )}
+                      {viewingDossier.clients_ids?.map(id=>{const c=getClientById(id);return c?<Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border cursor-pointer" onClick={()=>{setIsViewDialogOpen(false);setViewingClientDetails(c);}}>{c.prenom} {c.nom}</Badge>:null;})}
+                       {viewingDossier.notaires_ids?.map(id=>{const n=getClientById(id);return n?<Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer" onClick={()=>{setIsViewDialogOpen(false);setViewingClientDetails(n);}}>{n.prenom} {n.nom}</Badge>:null;})}
                     </div>
 
-                    {/* Mandats */}
-                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
-                      <div>
-                        <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
-                        <div className="space-y-3">
-                          {viewingDossier.mandats.map((mandat, index) => (
-                            <Card key={index} className="bg-slate-800/50 border-slate-700">
-                              <CardContent className="p-4 space-y-3">
-                                <div className="flex items-start justify-between">
-                                  <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
-                                  {mandat.prix_estime > 0 && (
-                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
-                                      {mandat.prix_estime.toFixed(2)} $
-                                    </Badge>
-                                  )}
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
-                                      <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {mandat.lots && mandat.lots.length > 0 && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Lots</Label>
-                                      <div className="flex flex-wrap gap-1 mt-1">
-                                        {mandat.lots.map((lotId) => {
-                                          const lot = getLotById(lotId);
-                                          return (
-                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                              {lot?.numero_lot || lotId}
-                                            </Badge>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Utilisateur assigné pour mandat */}
-                                {mandat.utilisateur_assigne && (
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Utilisateur assigné pour le mandat</Label>
-                                    <p className="text-slate-300 text-sm mt-1">
-                                      {users.find(u => u.email === mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}
-                                    </p>
-                                  </div>
-                                )}
-
-                                {/* Dates */}
-                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
-                                  {mandat.date_ouverture && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Ouverture</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_signature && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Signature</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_debut_travaux && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Début travaux</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_livraison && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Livraison</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Tarification */}
-                                {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
-                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
-                                    {mandat.prix_estime > 0 && (
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Prix estimé</Label>
-                                        <p className="text-slate-300 text-sm mt-1">{mandat.prix_estime.toFixed(2)} $</p>
-                                      </div>
-                                    )}
-                                    {mandat.rabais > 0 && (
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Rabais</Label>
-                                        <p className="text-slate-300 text-sm mt-1">{mandat.rabais.toFixed(2)} $</p>
-                                      </div>
-                                    )}
-                                    <div>
-                                        <Label className="text-slate-400 text-xs">Taxes</Label>
-                                        <p className="text-slate-300 text-sm mt-1">
-                                          {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
-                                        </p>
-                                      </div>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {viewingDossier.mandats?.map((m,i)=><div key={i} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg text-sm"><span className="text-emerald-400 font-semibold">{m.type_mandat||`Mandat ${i+1}`}</span>{m.prix_estime>0&&<span className="ml-2 text-green-400">{m.prix_estime.toFixed(2)} $</span>}</div>)}
                   </div>
 
                   {/* Boutons Fermer/Modifier tout en bas */}

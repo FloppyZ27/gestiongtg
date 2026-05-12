@@ -21,6 +21,7 @@ export default function OuvrirDossierDialog({
   users,
   onSuccess,
   editingPriseMandat,
+  priseMandatToDelete,
   clientInfo,
   workAddress
 }) {
@@ -289,8 +290,9 @@ export default function OuvrirDossierDialog({
       }
 
       // Supprimer la prise de mandat associée
-      if (editingPriseMandat?.id) {
-        await base44.entities.PriseMandat.delete(editingPriseMandat.id);
+      const pmToDelete = editingPriseMandat || priseMandatToDelete;
+      if (pmToDelete?.id) {
+        await base44.entities.PriseMandat.delete(pmToDelete.id);
         queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
       }
 
