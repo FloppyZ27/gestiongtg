@@ -1372,17 +1372,17 @@ export default function EditDossierForm({
         </div>
       </div>
 
-      {/* Footer - Seulement en mode création */}
-      {!editingDossier && (
-        <div className="flex-shrink-0 flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800" style={{ marginBottom: '3px', marginLeft: '3px', marginRight: '3px' }}>
-          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
-            Annuler
+      {/* Footer - toujours visible */}
+      <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-3 bg-slate-900 border-t border-slate-700">
+        <Button type="button" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white" onClick={onCancel}>
+          {editingDossier ? "Fermer" : "Annuler"}
+        </Button>
+        {!editingDossier && (
+          <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none text-white font-semibold">
+            Créer le dossier
           </Button>
-          <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-            Créer
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
 
     </motion.div>
     <>
