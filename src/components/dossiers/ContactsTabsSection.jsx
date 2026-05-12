@@ -22,7 +22,7 @@ export default function ContactsTabsSection({
   setCourtierSearchTerm,
   setClientTypeForForm,
   setIsClientFormDialogOpen,
-  onClientCardClick,
+  onClientCardClick: externalOnClientCardClick,
   setEditingClient,
   onNewClientClick
 }) {
@@ -57,9 +57,14 @@ export default function ContactsTabsSection({
 
   const handleClientCardClick = (client, type) => {
     if (!client) return;
+    // Si une callback externe est fournie (ex: depuis OuvrirDossierDialog), l'utiliser
+    if (externalOnClientCardClick) {
+      externalOnClientCardClick(client);
+      return;
+    }
+    // Sinon, comportement par défaut
     if (setEditingClient) setEditingClient(client);
     setClientTypeForForm(type === 'notaires' ? 'Notaire' : type === 'courtiers' ? 'Courtier immobilier' : type === 'compagnies' ? 'Compagnie' : 'Client');
-    // Petit délai pour laisser setEditingClient se propager
     setTimeout(() => setIsClientFormDialogOpen(true), 0);
   };
 
