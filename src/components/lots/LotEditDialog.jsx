@@ -51,6 +51,7 @@ export default function LotEditDialog({
   handleD01FileSelect,
   lots,
   user,
+  users = [],
 }) {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
@@ -249,40 +250,54 @@ export default function LotEditDialog({
                   </TabsContent>
 
                   <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                    {lotActionLogs.length > 0 ? (
-                      <div className="space-y-3">
-                        {lotActionLogs.map((log) => (
-                          <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Badge className={`text-xs ${
-                                    log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                                    log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                                    'bg-red-500/20 text-red-400 border-red-500/30'
-                                  }`}>
-                                    {log.action}
-                                  </Badge>
-                                  <span className="text-slate-400 text-xs">
-                                    {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                                  </span>
-                                </div>
-                                <p className="text-slate-300 text-sm">{log.details}</p>
-                                <p className="text-slate-500 text-xs mt-1">Par {log.utilisateur_nom}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-center">
-                        <div>
-                          <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                          <p className="text-slate-500">Aucune action enregistrée</p>
-                          <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                        </div>
-                      </div>
-                    )}
+                   {lotActionLogs.length > 0 ? (
+                     <div className="space-y-3">
+                       {lotActionLogs.map((log) => {
+                         const userObj = users.find(u => u.email === log.utilisateur_email);
+                         const photo = userObj?.photo_url || null;
+                         const initials = log.utilisateur_nom ? log.utilisateur_nom.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+                         return (
+                           <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
+                             <div className="flex items-start justify-between gap-2">
+                               <div className="flex-1">
+                                 <div className="flex items-center gap-2 mb-1">
+                                   <Badge className={`text-xs ${
+                                     log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                     log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                     'bg-red-500/20 text-red-400 border-red-500/30'
+                                   }`}>
+                                     {log.action}
+                                   </Badge>
+                                   <span className="text-slate-400 text-xs">
+                                     {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                                   </span>
+                                 </div>
+                                 <p className="text-slate-300 text-sm">{log.details}</p>
+                                 <div className="flex items-center gap-2 mt-2">
+                                   <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
+                                     {photo ? (
+                                       <img src={photo} alt={log.utilisateur_nom} className="w-full h-full object-cover" />
+                                     ) : (
+                                       <span className="text-[9px] font-semibold text-emerald-400">{initials}</span>
+                                     )}
+                                   </div>
+                                   <span className="text-emerald-400 text-xs">{log.utilisateur_nom}</span>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   ) : (
+                     <div className="flex items-center justify-center h-full text-center">
+                       <div>
+                         <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                         <p className="text-slate-500">Aucune action enregistrée</p>
+                         <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                       </div>
+                     </div>
+                   )}
                   </TabsContent>
                 </Tabs>
               )}

@@ -375,7 +375,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                         <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300 flex items-center gap-1">
                           <MessageSquare className="w-4 h-4" />
                           Commentaires
-                          {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold pointer-events-none">{editingLot ? commentairesCount : commentairesTemporaires.length}</span>}
+                          {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold pointer-events-none">{editingLot ? commentairesCount : commentairesTemporaires.length}</span>}
                         </TabsTrigger>
                         <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                           <Clock className="w-4 h-4 mr-1" />
