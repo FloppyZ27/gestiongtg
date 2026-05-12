@@ -137,7 +137,7 @@ export default function LotEditDialog({
             {/* Left column - Form - 70% */}
             <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
               <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800">
-                <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
+                <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 pt-2">

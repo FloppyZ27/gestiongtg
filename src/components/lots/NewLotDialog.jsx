@@ -279,7 +279,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[calc(100vh-160px)]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
             <div className="flex-shrink-0 bg-slate-900 px-6 py-3 border-b border-slate-800">
-              <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
+              <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
             </div>
 
             <div className="flex flex-1 overflow-hidden">
