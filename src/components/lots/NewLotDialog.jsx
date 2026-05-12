@@ -3,9 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -279,14 +279,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
           <DialogHeader className="sr-only"><DialogTitle>Nouveau lot</DialogTitle></DialogHeader>
           <motion.div className="flex flex-col h-[calc(100vh-160px)]" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
             <div className="flex-shrink-0 bg-slate-900 px-6 py-3 border-b border-slate-800">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
-                {editingLot && (
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                    Lot {editingLot.numero_lot}
-                  </Badge>
-                )}
-              </div>
+              <h2 className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
             </div>
 
             <div className="flex flex-1 overflow-hidden">
@@ -362,18 +355,70 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
               {/* Sidebar - 30% */}
               <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                <div className="flex items-center gap-2 mx-4 mr-6 mt-3 mb-2 flex-shrink-0">
-                  <MessageSquare className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs text-emerald-400 font-medium">Commentaires</span>
-                  {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && (
-                    <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">
-                      {editingLot ? commentairesCount : commentairesTemporaires.length}
-                    </Badge>
-                  )}
+                <div
+                  className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                >
+                  <div className="flex items-center gap-2">
+                    {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                    <h3 className="text-slate-300 text-base font-semibold">
+                      {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
+                    </h3>
+                  </div>
+                  {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
-                <div className="flex-1 overflow-hidden px-4 pr-6 pb-4">
-                  <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
-                </div>
+
+                {!sidebarCollapsed && (
+                  <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                    <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                      <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300 flex items-center gap-1">
+                          <MessageSquare className="w-4 h-4" />
+                          Commentaires
+                          {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold pointer-events-none">{editingLot ? commentairesCount : commentairesTemporaires.length}</span>}
+                        </TabsTrigger>
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Historique
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
+                    </TabsContent>
+
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                      {historique.length > 0 ? (
+                        <div className="space-y-2">
+                          {historique.map((entry, idx) => (
+                            <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                              <div className="flex flex-col gap-1.5">
+                                <p className="text-white text-sm font-medium">{entry.action}</p>
+                                {entry.details && (
+                                  <p className="text-slate-400 text-xs break-words">{entry.details}</p>
+                                )}
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-emerald-400 text-xs">{entry.utilisateur_nom || 'Système'}</span>
+                                  <span className="text-slate-600 text-xs">•</span>
+                                  <span className="text-slate-500 text-xs">{format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-center">
+                          <div>
+                            <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                            <p className="text-slate-500">Aucune action enregistrée</p>
+                            <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                )}
               </div>
             </div>
 
