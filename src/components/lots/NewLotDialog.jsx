@@ -361,19 +361,140 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
               </div>
 
               {/* Sidebar - 30% */}
-              <div className="flex-[0_0_30%] flex flex-col overflow-hidden p-4 pr-6">
-                <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-                  <MessageSquare className="w-4 h-4 text-slate-400" />
-                  <h3 className="text-slate-300 text-sm font-semibold">Commentaires</h3>
-                  {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && (
-                    <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">
-                      {editingLot ? commentairesCount : commentairesTemporaires.length}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
-                </div>
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                  <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-3 flex-shrink-0 bg-transparent gap-2">
+                    <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><MessageSquare className="w-4 h-4 mr-1" />Commentaires {(editingLot ? commentairesCount : commentairesTemporaires.length) > 0 && <Badge variant="outline" className="ml-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5 py-0 h-5 text-[10px]">{editingLot ? commentairesCount : commentairesTemporaires.length}</Badge>}</TabsTrigger>
+                    <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300"><Clock className="w-4 h-4 mr-1" />Historique</TabsTrigger>
+                  </TabsList>
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-2 h-full">
+                      <CommentairesSectionLot lotId={editingLot?.id} lotTemporaire={!editingLot} commentairesTemp={commentairesTemporaires} onCommentairesTempChange={setCommentairesTemporaires} onCommentairesCountChange={setCommentairesCount} />
+                    </TabsContent>
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0 flex flex-col">
+                       <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                        <div />
+                        <button onClick={() => setShowHistoriqueFilters(!showHistoriqueFilters)} className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1.5 rounded transition-colors">
+                          <Filter className="w-3.5 h-3.5" />
+                          Filtres
+                          {showHistoriqueFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
+                       </div>
+                       {showHistoriqueFilters && (() => {
+                        const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
+                        const uniqueActions = [...new Set(historique.map(e => e.action))];
+                        return (
+                        <div className="mb-3 p-3 bg-slate-900/50 border border-emerald-500/40 rounded-lg flex-shrink-0">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Filter className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Filtre</span>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <Select value={historiqueFilters.users.length === 0 ? "all" : historiqueFilters.users[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                                ...prev,
+                                users: val === "all" ? [] : [val]
+                              }))}>
+                                <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
+                                  <SelectValue placeholder="Utilisateurs" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
+                                  <SelectItem value="all" className="text-xs text-slate-300">Utilisateurs (Tous)</SelectItem>
+                                  {uniqueUsers.map(user => (
+                                    <SelectItem key={user.email} value={user.email} className="text-xs text-slate-300">{user.nom}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select value={historiqueFilters.actions.length === 0 ? "all" : historiqueFilters.actions[0] || "all"} onValueChange={(val) => setHistoriqueFilters(prev => ({
+                                ...prev,
+                                actions: val === "all" ? [] : [val]
+                              }))}>
+                                <SelectTrigger className="flex-1 h-9 text-xs border border-emerald-500/40 bg-slate-800/60 text-emerald-300 rounded-lg hover:border-emerald-500/60">
+                                  <SelectValue placeholder="Types" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700" style={{zIndex: 1200}}>
+                                  <SelectItem value="all" className="text-xs text-slate-300">Types (Tous)</SelectItem>
+                                  {uniqueActions.map(action => (
+                                    <SelectItem key={action} value={action} className="text-xs text-slate-300">{action}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-2">Période</p>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="date"
+                                  value={historiqueFilters.dateRange?.start || ""}
+                                  onChange={(e) => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, start: e.target.value }
+                                  }))}
+                                  className="flex-1 h-9 text-xs bg-slate-800/60 border border-emerald-500/40 rounded-lg text-emerald-300 placeholder-slate-500 hover:border-emerald-500/60 focus:border-emerald-500/60"
+                                />
+                                <span className="text-emerald-500/60">→</span>
+                                <input
+                                  type="date"
+                                  value={historiqueFilters.dateRange?.end || ""}
+                                  onChange={(e) => setHistoriqueFilters(prev => ({
+                                    ...prev,
+                                    dateRange: { ...prev.dateRange, end: e.target.value }
+                                  }))}
+                                  className="flex-1 h-9 text-xs bg-slate-800/60 border border-emerald-500/40 rounded-lg text-emerald-300 placeholder-slate-500 hover:border-emerald-500/60 focus:border-emerald-500/60"
+                                />
+                              </div>
+                            </div>
+                            <button onClick={() => setHistoriqueFilters({ users: [], actions: [], dateRange: null })} className="text-xs text-emerald-400/70 hover:text-emerald-300 transition-colors">Réinitialiser</button>
+                          </div>
+                        </div>
+                        );
+                       })()}
+                       {(() => {
+                        const uniqueUsers = [...new Set(historique.map(e => e.utilisateur_email))].map(email => ({ email, nom: historique.find(h => h.utilisateur_email === email)?.utilisateur_nom }));
+                        const uniqueActions = [...new Set(historique.map(e => e.action))];
+                        const filtered = historique
+                          .filter(e => {
+                            const userMatch = historiqueFilters.users.length === 0 || historiqueFilters.users.includes(e.utilisateur_email);
+                            const actionMatch = historiqueFilters.actions.length === 0 || historiqueFilters.actions.includes(e.action);
+                            let dateMatch = true;
+                            if (historiqueFilters.dateRange?.start || historiqueFilters.dateRange?.end) {
+                              const entryDate = new Date(e.timestamp).toISOString().split('T')[0];
+                              if (historiqueFilters.dateRange.start && entryDate < historiqueFilters.dateRange.start) dateMatch = false;
+                              if (historiqueFilters.dateRange.end && entryDate > historiqueFilters.dateRange.end) dateMatch = false;
+                            }
+                            return userMatch && actionMatch && dateMatch;
+                          })
+                          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        return filtered.length === 0 ? (
+                          <div className="flex items-center justify-center h-full text-center"><div><Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-slate-500">Aucune action</p></div></div>
+                        ) : (
+                          <div className="space-y-2">
+                            {filtered.map((entry, idx) => (
+                              <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <div className="flex flex-col gap-1.5">
+                                  <p className="text-white text-sm font-medium">{entry.action}</p>
+                                  {entry.details && (
+                                    <p className="text-slate-400 text-xs break-words">{entry.details}</p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
+                                      {user?.photo_url ? (
+                                        <img src={user.photo_url} alt={user.full_name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span className="text-[9px] font-semibold text-emerald-400">{getInitials(user?.full_name)}</span>
+                                      )}
+                                    </div>
+                                    <span className="text-emerald-400 text-xs">{user?.full_name}</span>
+                                    <span className="text-slate-600 text-xs">•</span>
+                                    <span className="text-slate-500 text-xs">{entry.timestamp && format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                       })()}
+                     </TabsContent>
+                  </Tabs>
               </div>
             </div>
 
