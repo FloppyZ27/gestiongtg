@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter, ChevronUp as ChevronUpIcon } from "lucide-react";
+import { Upload, Loader2, MessageSquare, Clock, ChevronDown, ChevronUp, Filter, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -281,11 +281,26 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
             <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
-                {editingLot && (
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                    Lot {editingLot.numero_lot}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {editingLot && (
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                      Lot {editingLot.numero_lot}
+                    </Badge>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!editingLot && hasFormChanges) {
+                        setShowCancelConfirm(true);
+                      } else {
+                        resetAndClose();
+                      }
+                    }}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
