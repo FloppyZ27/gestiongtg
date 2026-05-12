@@ -93,10 +93,26 @@ export default function GlobalDossierEditDialog() {
     queryClient.invalidateQueries({ queryKey: ['dossiers'] });
   };
 
-  if (!open || !formData) return null;
-
   return (
     <>
+    {isClientFormOpen !== undefined && (
+    <ClientFormDialog
+      key={editingClient?.id || 'new'}
+      open={isClientFormOpen}
+      onOpenChange={(v) => {
+        setIsClientFormOpen(v);
+        if (!v) setEditingClient(null);
+      }}
+      editingClient={editingClient}
+      defaultType={clientTypeForForm}
+      onSuccess={() => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        setIsClientFormOpen(false);
+        setEditingClient(null);
+      }}
+    />
+    )}
+    {(!open || !formData) ? null : (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
       <DialogContent
         className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50"
@@ -172,21 +188,7 @@ export default function GlobalDossierEditDialog() {
         />
       </DialogContent>
     </Dialog>
-    <ClientFormDialog
-      key={editingClient?.id}
-      open={isClientFormOpen}
-      onOpenChange={(v) => {
-        setIsClientFormOpen(v);
-        if (!v) setEditingClient(null);
-      }}
-      editingClient={editingClient}
-      defaultType={clientTypeForForm}
-      onSuccess={() => {
-        queryClient.invalidateQueries({ queryKey: ['clients'] });
-        setIsClientFormOpen(false);
-        setEditingClient(null);
-      }}
-    />
+    )}
     </>
   );
 }
