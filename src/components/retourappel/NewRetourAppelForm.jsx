@@ -643,15 +643,15 @@ export default function NewRetourAppelForm({
           {(dossierFound || aucunDossier) && (
             <Card className="border-0 bg-transparent">
               <CardHeader 
-                className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                className="cursor-pointer hover:bg-red-900/40 transition-colors rounded-t-lg py-1.5 bg-red-900/20"
                 onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                      <Phone className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="w-6 h-6 rounded-full bg-red-500/30 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-red-400" />
                     </div>
-                    <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
+                    <CardTitle className="text-red-300 text-base">Retour d'appel</CardTitle>
                   </div>
                   {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
