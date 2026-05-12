@@ -265,7 +265,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => {
+      <Dialog modal={false} open={open} onOpenChange={(o) => {
         if (!o) {
           if (!editingLot && hasFormChanges) {
             setShowCancelConfirm(true);
