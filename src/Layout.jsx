@@ -1211,10 +1211,10 @@ function LayoutContent({ children, currentPageName }) {
   );
 }
 
-export default function Layout({ children, currentPageName }) {
-  const [isDesktop, setIsDesktop] = React.useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
+function LayoutWrapper({ children, currentPageName }) {
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
   
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -1226,3 +1226,5 @@ export default function Layout({ children, currentPageName }) {
     </SidebarProvider>
   );
 }
+
+export default LayoutWrapper
