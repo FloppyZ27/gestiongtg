@@ -91,7 +91,7 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
   const hasFilters = filterArpenteur.length > 0 || filterMandat.length > 0 || filterVille.length > 0 || filterStatut !== "all";
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-transparent px-6 py-4">
       <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20" onClick={() => setCollapsed(!collapsed)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
