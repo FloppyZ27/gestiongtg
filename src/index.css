@@ -113,7 +113,8 @@ code, pre {
 }
 
 /* ─── Page titles — dégradé rouge → orangé brûlé ─── */
-h1:not(.topbar-title) {
+h1:not(.topbar-title),
+h2 {
   background: linear-gradient(90deg, hsl(0, 80%, 62%), hsl(22, 90%, 65%)) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
