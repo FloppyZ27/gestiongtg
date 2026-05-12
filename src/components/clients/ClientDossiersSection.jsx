@@ -108,7 +108,7 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
       </CardHeader>
 
       {!collapsed && (
-        <CardContent className="pt-3 pb-2" style={{ backgroundColor: 'rgba(0, 0, 0, 0) !important' }}>
+        <CardContent className="pt-3 pb-2 bg-transparent">
           <div className="space-y-3 mb-3">
             <div className="flex justify-between items-center gap-2">
               <div className="relative flex-1">
