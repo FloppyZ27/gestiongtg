@@ -92,7 +92,7 @@ export default function ClientDossiersSection({ clientDossiers = [] }) {
 
   return (
     <Card className="border-slate-700 bg-slate-800/30">
-      <CardHeader className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2" onClick={() => setCollapsed(!collapsed)}>
+      <CardHeader className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20" onClick={() => setCollapsed(!collapsed)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
