@@ -120,13 +120,13 @@ export default function LotEditDialog({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-      <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+      <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '35px', maxHeight: 'calc(100vh - 43px)' }}>
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">{editingLot ? "Modifier lot" : "Nouveau lot"}</DialogTitle>
         </DialogHeader>
 
         <motion.div
-          className="flex flex-col h-[90vh]"
+          className="flex flex-col h-[calc(100vh-160px)]"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
