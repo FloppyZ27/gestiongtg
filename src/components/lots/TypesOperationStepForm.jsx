@@ -516,7 +516,7 @@ export default function TypesOperationStepForm({
                                 est_partie: false
                               });
                             }}
-                            className="p-1 rounded hover:bg-slate-700/50 hover:border-teal-500 cursor-pointer transition-all"
+                            className="p-1 bg-slate-700/50 rounded hover:bg-slate-700 cursor-pointer transition-all"
                           >
                             <div className="text-xs">
                               <span className="text-white font-semibold">{lot.numero_lot}</span>
