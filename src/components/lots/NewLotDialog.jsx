@@ -389,34 +389,45 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
                     </TabsContent>
 
                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
-                      {historique.length > 0 ? (
-                        <div className="space-y-2">
-                          {historique.map((entry, idx) => (
-                            <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                              <div className="flex flex-col gap-1.5">
-                                <p className="text-white text-sm font-medium">{entry.action}</p>
-                                {entry.details && (
-                                  <p className="text-slate-400 text-xs break-words">{entry.details}</p>
-                                )}
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-emerald-400 text-xs">{entry.utilisateur_nom || 'Système'}</span>
-                                  <span className="text-slate-600 text-xs">•</span>
-                                  <span className="text-slate-500 text-xs">{format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-center">
-                          <div>
-                            <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                            <p className="text-slate-500">Aucune action enregistrée</p>
-                            <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                          </div>
-                        </div>
-                      )}
-                    </TabsContent>
+                       {historique.length > 0 ? (
+                         <div className="space-y-2">
+                           {historique.map((entry, idx) => {
+                             const photo = getUserPhoto(entry.utilisateur_email);
+                             const initials = getInitials(entry.utilisateur_nom);
+                             return (
+                               <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                 <div className="flex flex-col gap-1.5">
+                                   <p className="text-white text-sm font-medium">{entry.action}</p>
+                                   {entry.details && (
+                                     <p className="text-slate-400 text-xs break-words">{entry.details}</p>
+                                   )}
+                                   <div className="flex items-center gap-2 mt-2">
+                                     <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
+                                       {photo ? (
+                                         <img src={photo} alt={entry.utilisateur_nom} className="w-full h-full object-cover" />
+                                       ) : (
+                                         <span className="text-[9px] font-semibold text-emerald-400">{initials}</span>
+                                       )}
+                                     </div>
+                                     <span className="text-emerald-400 text-xs">{entry.utilisateur_nom || 'Système'}</span>
+                                     <span className="text-slate-600 text-xs">•</span>
+                                     <span className="text-slate-500 text-xs">{format(new Date(entry.timestamp), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                   </div>
+                                 </div>
+                               </div>
+                             );
+                           })}
+                         </div>
+                       ) : (
+                         <div className="flex items-center justify-center h-full text-center">
+                           <div>
+                             <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                             <p className="text-slate-500">Aucune action enregistrée</p>
+                             <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                           </div>
+                         </div>
+                       )}
+                     </TabsContent>
                   </Tabs>
                 )}
               </div>
