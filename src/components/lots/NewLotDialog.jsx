@@ -378,7 +378,7 @@ export default function NewLotDialog({ open, onOpenChange, onLotCreated, mandatI
             </div>
 
             {/* Footer avec boutons */}
-            <div className="sticky bottom-0 bg-slate-900 border-t border-slate-800 px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+            <div className="bg-slate-900 border-t border-slate-800 px-6 py-4 flex justify-end gap-3 flex-shrink-0">
               <Button
                 type="button"
                 onClick={() => { if (!editingLot && hasFormChanges) { setShowCancelConfirm(true); } else { resetAndClose(); } }}
