@@ -260,7 +260,7 @@ export default function TypesOperationStepForm({
 
           <div className="space-y-4 w-full">
              {/* Formulaire d'ajout/édition de type d'opération */}
-             <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3 w-full">
+             <div className="space-y-3 w-full">
                <div className={`grid ${editingTypeIndex !== null ? 'grid-cols-[1fr_1fr_auto_auto_auto]' : 'grid-cols-[1fr_1fr_auto]'} gap-3 items-end`}>
                  <div>
                    <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
