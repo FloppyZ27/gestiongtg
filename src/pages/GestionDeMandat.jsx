@@ -1062,7 +1062,7 @@ export default function GestionDeMandat() {
                   ) : (
                     <div className="space-y-4">
                       {getWeeksToDisplay().map((weekStart, weekIndex) => {
-                        const daysOfWeek = eachDayOfInterval({ start: weekStart, end: endOfWeek(weekStart, { locale: fr }) }).filter(d => d.getDay() !== 0 && d.getDay() !== 6);
+                        const daysOfWeek = eachDayOfInterval({ start: weekStart, end: endOfWeek(weekStart, { locale: fr }) });
                         return (
                           <Card key={weekIndex} className="!border-0 !shadow-none bg-slate-800/30">
                             <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
