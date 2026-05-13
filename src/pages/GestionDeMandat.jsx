@@ -1030,8 +1030,8 @@ export default function GestionDeMandat() {
 
                          {/* Droite : toggle Semaine/Mois */}
                          <div className="flex gap-1">
-                         <Button size="sm" variant="outline" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "week" ? "bg-primary/20 text-primary border-primary/30 ring-2 ring-primary/40" : "bg-slate-800 text-white border-slate-700 hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
-                         <Button size="sm" variant="outline" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "month" ? "bg-primary/20 text-primary border-primary/30 ring-2 ring-primary/40" : "bg-slate-800 text-white border-slate-700 hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
+                         <Button size="sm" onClick={() => { setCalendarMode("week"); setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 })); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "week" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
+                         <Button size="sm" onClick={() => { setCalendarMode("month"); setCurrentMonthStart(startOfMonth(new Date())); }} className={`transition-all duration-200 hover:scale-105 ${calendarMode === "month" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
                          </div>
                   </div>
                 </CardHeader>
