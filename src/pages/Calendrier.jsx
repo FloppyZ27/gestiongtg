@@ -418,7 +418,7 @@ export default function Calendrier() {
               </div>
 
               {/* Filters - Collapsible Box */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-sm">
+              <Card className="border-transparent bg-transparent shadow-none">
                 <CardHeader className="pb-3 px-4 py-3">
                   <div className="space-y-3">
                     <div className="flex justify-end items-center">
