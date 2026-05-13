@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CalendarDays, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, Trash2, RefreshCw, Calendar } from "lucide-react";
+import PremiumButton from "@/components/CommunicationClients/PremiumButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -147,14 +148,7 @@ export default function AgendaSection({
                   <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isMsLoading ? 'animate-spin' : ''}`} />
                   Sync MS
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={() => setIsAddingEvent(true)}
-                  className="h-8 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Ajouter
-                </Button>
+                <PremiumButton label="Ajouter" onClick={() => setIsAddingEvent(true)} icon={Plus} />
               </div>
             </div>
           </div>
