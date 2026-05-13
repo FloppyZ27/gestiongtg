@@ -32,6 +32,7 @@ function EditableNumber({ value, onSave, className = "", max = null }) {
         return;
       }
       onSave(parsed);
+      setVal(parsed);
     }
     setEditing(false);
     setError(false);
