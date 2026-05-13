@@ -13,6 +13,7 @@ import SharePointExplorer from "@/components/shared/SharePointExplorer";
 import CameraModal from "@/components/profil/CameraModal";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import PremiumButton from "@/components/CommunicationClients/PremiumButton";
 
 export default function FeuilleTempsSection({ 
   pointageCollapsed, 
@@ -197,14 +198,7 @@ export default function FeuilleTempsSection({
                   <Button size="sm" onClick={() => setViewMode("week")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Semaine</Button>
                   <Button size="sm" onClick={() => setViewMode("month")} className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}>Mois</Button>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => setIsAddingPointage(true)}
-                  className="h-8 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Ajouter
-                </Button>
+                <PremiumButton label="Ajouter" onClick={() => setIsAddingPointage(true)} icon={Plus} />
                 {viewMode === "week" && (
                   <Button
                     size="sm"
