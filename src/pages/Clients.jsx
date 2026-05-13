@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown, ChevronUp, ChevronsUpDown, Filter } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, User, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown, ChevronUp, ChevronsUpDown, Filter } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -253,11 +253,6 @@ export default function Clients() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
-                alt="GTG Logo"
-                className="w-10 h-auto"
-              />
               <h1 className="text-3xl md:text-4xl font-bold" style={{
                 background: 'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))',
                 WebkitBackgroundClip: 'text',
@@ -267,6 +262,7 @@ export default function Clients() {
               }}>
                 Clients
               </h1>
+              <User className="w-8 h-8" style={{ color: 'hsl(22,90%,65%)' }} />
             </div>
             <p className="text-slate-400">Gestion de vos clients</p>
           </div>
