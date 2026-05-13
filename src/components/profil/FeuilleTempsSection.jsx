@@ -123,9 +123,9 @@ export default function FeuilleTempsSection({
   };
 
   return (
-    <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+    <Card className="border-transparent bg-transparent shadow-none mb-6">
       <div 
-        className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800"
+        className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-transparent border-b border-border"
         onClick={() => setPointageCollapsed(!pointageCollapsed)}
       >
         <div className="flex items-center justify-between">
