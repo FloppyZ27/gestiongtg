@@ -338,16 +338,16 @@ export default function Comptabilite() {
                 {/* Contrôles : navigation + toggle vue */}
                 <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() - 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"><ChevronLeft className="w-4 h-4" /></Button>
                     <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
-                      <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors whitespace-nowrap">
+                      <div className="text-white font-bold text-lg group-hover:text-primary transition-colors whitespace-nowrap">
                         Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
                       </div>
-                      <CalendarDays className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                      <CalendarDays className="w-4 h-4 text-slate-500 group-hover:text-primary transition-colors flex-shrink-0" />
                       <input type="date" value={format(currentWeekDate, "yyyy-MM-dd")} onChange={(e) => { if (e.target.value) setCurrentWeekDate(new Date(e.target.value + 'T12:00:00')); }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{ zIndex: 1 }} />
                     </div>
-                    <button onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
-                    <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-emerald-500/20 text-emerald-400 transition-all duration-200 hover:bg-emerald-500/40 hover:text-emerald-300 hover:scale-105">Aujourd'hui</Button>
+                    <Button size="sm" variant="outline" onClick={() => setCurrentWeekDate(new Date(currentWeekDate.getFullYear(), currentWeekDate.getMonth(), currentWeekDate.getDate() + 7))} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"><ChevronRight className="w-4 h-4" /></Button>
+                    <Button size="sm" onClick={() => setCurrentWeekDate(new Date())} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Toggle vue */}
