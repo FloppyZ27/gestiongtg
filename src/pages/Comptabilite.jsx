@@ -898,7 +898,7 @@ export default function Comptabilite() {
                               <span className="text-xs text-emerald-400 font-semibold">{valeurProgressee > 0 ? `${valeurProgressee.toFixed(0)} $` : '-'}</span>
                             </div>
                             <div className="w-full bg-slate-900/50 h-3 rounded-full overflow-hidden border border-slate-700/50 relative">
-                              <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+                              <div className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500" style={{ width: `${progress}%` }} />
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-[9px] font-bold text-white drop-shadow-md">{progress}%</span>
                               </div>
