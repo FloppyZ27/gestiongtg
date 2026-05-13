@@ -264,31 +264,39 @@ export default function OuvrirDossierDialog({
 
       // Notifier chaque utilisateur assigné à un mandat + créer entrée terrain
       const notifiedUsers = new Set();
-      for (const mandat of (formData.mandats || [])) {
-        if (mandat.utilisateur_assigne && mandat.type_mandat) {
-          // Notification par mandat (une seule par utilisateur)
-          if (!notifiedUsers.has(mandat.utilisateur_assigne)) {
-            await base44.entities.Notification.create({
-              utilisateur_email: mandat.utilisateur_assigne,
-              titre: "Nouveau dossier ouvert et assigné",
-              message: `Le dossier ${formData.numero_dossier || ''} vient d'être ouvert et vous a été assigné (${mandat.type_mandat}).`,
-              type: "dossier",
-              dossier_id: newDossier.id,
-              lue: false
-            });
-            notifiedUsers.add(mandat.utilisateur_assigne);
-          }
+      const today = new Date().toISOString().split('T')[0];
+      const dateOuverture = formData.date_ouverture || today;
 
-          // Créer une entrée terrain pour ce mandat
-          await base44.entities.EntreeTemps.create({
-            date: formData.date_ouverture || new Date().toISOString().split('T')[0],
-            heures: 0.01,
+      for (const mandat of (formData.mandats || [])) {
+        // Notification (seulement si utilisateur assigné)
+        if (mandat.utilisateur_assigne && !notifiedUsers.has(mandat.utilisateur_assigne)) {
+          await base44.entities.Notification.create({
+            utilisateur_email: mandat.utilisateur_assigne,
+            titre: "Nouveau dossier ouvert et assigné",
+            message: `Le dossier ${formData.numero_dossier || ''} vient d'être ouvert et vous a été assigné (${mandat.type_mandat || ''}).`,
+            type: "dossier",
             dossier_id: newDossier.id,
-            mandat: mandat.type_mandat,
-            tache: "Ouverture",
-            description: `Ouverture du dossier - ${mandat.type_mandat}`,
-            utilisateur_email: mandat.utilisateur_assigne
+            lue: false
           });
+          notifiedUsers.add(mandat.utilisateur_assigne);
+        }
+
+        // Créer une entrée terrain pour ce mandat (peu importe si utilisateur assigné ou non)
+        if (mandat.type_mandat) {
+          try {
+            const entreeCreee = await base44.entities.EntreeTemps.create({
+              date: dateOuverture,
+              heures: 1,
+              dossier_id: newDossier.id,
+              mandat: mandat.type_mandat,
+              tache: "Ouverture",
+              description: `Ouverture du dossier - ${mandat.type_mandat}`,
+              utilisateur_email: mandat.utilisateur_assigne || currentUser?.email || ''
+            });
+            console.log('Entrée terrain créée:', entreeCreee);
+          } catch (err) {
+            console.error('Erreur création entrée terrain:', err);
+          }
         }
       }
 
