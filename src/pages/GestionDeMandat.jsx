@@ -954,7 +954,7 @@ export default function GestionDeMandat() {
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {TACHES.map(tache => renderColumn(tache, tache, cardsByTache[tache] || [],
                     <div className="flex items-center justify-between w-full">
-                      <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByTache[tache] || []).length}</Badge>
+                      <Badge className="bg-orange-500/30 text-orange-300 font-bold text-xs px-2 py-0.5">{(cardsByTache[tache] || []).length}</Badge>
                       <span className="text-base font-bold text-white flex-1 text-center">{tache}</span>
                       <div className="w-8" />
                     </div>
@@ -969,7 +969,7 @@ export default function GestionDeMandat() {
                 <div className="flex gap-4 p-2" style={{ minWidth: 'max-content' }}>
                   {filteredUsersList.map((user, userIndex) => renderColumn(user.email, user.full_name, cardsByUtilisateur[user.email] || [],
                     <div className="flex items-center justify-between w-full">
-                      <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">{(cardsByUtilisateur[user.email] || []).length}</Badge>
+                      <Badge className="bg-orange-500/30 text-orange-300 font-bold text-xs px-2 py-0.5">{(cardsByUtilisateur[user.email] || []).length}</Badge>
                       <div className="flex items-center gap-2 flex-1 justify-center">
                         {user.email !== "non-assigne" ? (
                           <Avatar className="w-5 h-5 border border-white/20">
