@@ -560,7 +560,7 @@ export default function Calendrier() {
 
             {/* Vue Semaine */}
             {viewMode === "week" && (
-              <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '600px' }}>
+              <div className="rounded-lg overflow-hidden flex flex-col" style={{ height: '600px' }}>
                 <div className="overflow-x-auto flex-1 flex flex-col">
                   <div className="inline-block min-w-full h-full flex flex-col">
                     {/* En-têtes des jours */}
