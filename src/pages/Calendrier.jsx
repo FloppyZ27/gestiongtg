@@ -352,7 +352,7 @@ export default function Calendrier() {
         </div>
 
         {/* Calendar */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+        <Card className="border-transparent bg-transparent shadow-none">
           <CardContent className="p-6">
             {/* Header avec navigation et contrôles */}
             <div className="flex flex-col gap-3 mb-6 pb-4">
