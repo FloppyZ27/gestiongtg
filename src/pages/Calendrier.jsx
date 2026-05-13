@@ -394,7 +394,7 @@ export default function Calendrier() {
                   <Button
                     size="sm"
                     onClick={() => setCurrentDate(new Date())}
-                    className="bg-blue-500/20 text-blue-400 transition-all duration-200 hover:bg-blue-500/40 hover:text-blue-300 hover:scale-105"
+                    className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105"
                   >
                     Aujourd'hui
                   </Button>
@@ -403,14 +403,14 @@ export default function Calendrier() {
                   <Button
                     size="sm"
                     onClick={() => setViewMode("week")}
-                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-blue-500/30 text-blue-300 ring-2 ring-blue-500/60 shadow-lg shadow-blue-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Semaine
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => setViewMode("month")}
-                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-blue-500/30 text-blue-300 ring-2 ring-blue-500/60 shadow-lg shadow-blue-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Mois
                   </Button>
