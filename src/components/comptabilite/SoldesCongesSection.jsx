@@ -319,7 +319,7 @@ export default function SoldesCongesSection() {
         <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
-              <FileText className="w-5 h-5 text-emerald-400" />
+
               Vacances, Mieux-Être & En Banque — {selectedUser?.full_name}
             </DialogTitle>
           </DialogHeader>
