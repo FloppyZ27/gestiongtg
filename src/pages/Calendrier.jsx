@@ -769,7 +769,7 @@ export default function Calendrier() {
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}
+                      className={`bg-slate-800/30 border-transparent p-2 ${isToday ? 'ring-2 ring-primary/50' : ''} w-full`}
                       style={{ minHeight: '210px' }}
                     >
                       <div className="mb-2 w-full">
