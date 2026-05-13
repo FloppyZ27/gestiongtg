@@ -1048,7 +1048,7 @@ export default function GestionDeMandat() {
                         });
                         const isOver = overColumn === dayId && dragging;
                         return (
-                          <div key={dayOffset} data-kanban-column={dayId} className={`rounded-lg border min-h-[400px] p-2 transition-all ${isOver ? 'border-emerald-400/80 bg-emerald-500/10' : 'border-transparent'}`}>
+                          <div key={dayOffset} data-kanban-column={dayId} className={`rounded-lg min-h-[400px] p-2 transition-all ${isOver ? 'border border-emerald-400/80 bg-emerald-500/10' : 'border-0 bg-transparent'}`}>
                             <div className="text-center mb-3 rounded-lg p-2 bg-slate-800/50 border-b border-slate-700">
                               <h3 className="font-semibold text-white text-sm capitalize">{format(day, "EEEE", { locale: fr })}</h3>
                               <p className="text-xs text-slate-400">{format(day, "d MMM", { locale: fr })}</p>
