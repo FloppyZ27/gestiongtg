@@ -521,7 +521,7 @@ export default function FeuilleTempsSection({
                         style={{ minHeight: '210px' }}
                       >
                         <div className="mb-2 w-full">
-                          <div className={`bg-transparent rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
+                          <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
                             <div className="flex items-center justify-center mb-1">
                               <div className="flex-1">
                                 <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
