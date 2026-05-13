@@ -1082,7 +1082,7 @@ export default function GestionDeMandat() {
                                   const isOver = overColumn === dayId && dragging;
                                   return (
                                     <div key={dayIndex} data-kanban-column={dayId} className={`p-3 min-h-[200px] transition-all ${isOver ? 'bg-emerald-500/10' : ''}`}>
-                                      <div className="text-center mb-3">
+                                      <div className="text-center mb-3 bg-transparent">
                                         <p className="text-xs text-slate-500 uppercase">{format(day, "EEE", { locale: fr })}</p>
                                         <p className="text-lg font-bold text-white">{format(day, "d", { locale: fr })}</p>
                                       </div>
