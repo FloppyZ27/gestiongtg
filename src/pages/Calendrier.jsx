@@ -345,7 +345,7 @@ export default function Calendrier() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Calendrier
               </h1>
-              <CalendarIcon className="w-8 h-8 text-blue-400 flex-shrink-0" />
+              <CalendarIcon className="w-8 h-8 flex-shrink-0" style={{color: 'hsl(22, 90%, 65%)', filter: 'drop-shadow(0 0 4px rgba(220,80,30,0.5))'}} />
             </div>
             <p className="text-slate-400">Vue d'ensemble des rendez-vous et absences</p>
           </div>
