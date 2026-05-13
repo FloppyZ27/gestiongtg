@@ -1002,13 +1002,13 @@ export default function GestionDeMandat() {
                            <ChevronLeft className="w-4 h-4" />
                          </Button>
                          <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
-                           <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">
+                           <div className="text-white font-bold text-lg group-hover:text-primary transition-colors">
                              {calendarMode === "week"
                                ? `Semaine du ${format(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), "d MMMM", { locale: fr })} au ${format(addDays(startOfWeek(currentMonthStart, { weekStartsOn: 1 }), 4), "d MMMM yyyy", { locale: fr })}`
                                : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
                              }
                            </div>
-                           <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                           <Calendar className="w-4 h-4 text-slate-500 group-hover:text-primary transition-colors flex-shrink-0" />
                            <input
                              type="date"
                              value={format(currentMonthStart, "yyyy-MM-dd")}
