@@ -1153,13 +1153,13 @@ export default function Profil() {
               {/* Navigation */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <button onClick={goToEntreeTemPrevious} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
+                  <Button size="sm" variant="outline" onClick={goToEntreeTemPrevious} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"><ChevronLeft className="w-4 h-4" /></Button>
                   <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
                     <div className="text-white font-bold text-lg group-hover:text-primary transition-colors">{entreeTempsTab === "semaine" ? `Semaine du ${format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}` : format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}</div>
                     <Calendar className="w-4 h-4 text-slate-500 group-hover:text-primary transition-colors flex-shrink-0" />
                     <input type="date" value={format(entreeTempsCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setEntreeTempsCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                   </div>
-                  <button onClick={goToEntreeTempsNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
+                  <Button size="sm" variant="outline" onClick={goToEntreeTempsNext} className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"><ChevronRight className="w-4 h-4" /></Button>
                   <Button size="sm" onClick={goToEntreeTempsToday} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
                 </div>
                 <div className="flex gap-1">
