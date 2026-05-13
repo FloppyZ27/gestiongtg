@@ -827,7 +827,7 @@ export default function GestionDeMandat() {
           <p className="text-slate-400 mb-6">Vue Kanban de vos mandats</p>
 
           {/* Filtres */}
-          <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl mb-6">
+          <Card className="!border-0 !shadow-none bg-transparent mb-6">
             <CardContent className="p-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center gap-2">
