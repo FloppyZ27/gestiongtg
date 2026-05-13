@@ -441,12 +441,12 @@ export default function Calendrier() {
 
                     <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                       <CollapsibleContent>
-                        <div className="p-3 border border-emerald-500/30 rounded-lg">
+                        <div className="p-3 border border-primary/30 rounded-lg">
                           <div className="space-y-3">
-                            <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                            <div className="flex items-center justify-between pb-2 border-b border-primary/30">
                               <div className="flex items-center gap-2">
-                                <Filter className="w-3 h-3 text-emerald-500" />
-                                <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
+                                <Filter className="w-3 h-3 text-primary" />
+                                <h4 className="text-xs font-semibold text-primary">Filtrer les événements</h4>
                               </div>
                               {(selectedUser.length > 0 || selectedType.length > 0 || filterEquipe !== "Toutes") && (
                                 <Button
@@ -457,7 +457,7 @@ export default function Calendrier() {
                                     setSelectedType([]);
                                     setFilterEquipe("Toutes");
                                   }}
-                                  className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                                  className="h-6 text-xs text-primary hover:text-primary/80 px-2"
                                 >
                                   <X className="w-2.5 h-2.5 mr-1" />
                                   Réinitialiser
@@ -468,7 +468,7 @@ export default function Calendrier() {
                             <div className="grid grid-cols-3 gap-2">
                                <DropdownMenu>
                                  <DropdownMenuTrigger asChild>
-                                   <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                   <Button variant="ghost" className="w-full text-primary justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-primary/10">
                                      <span className="truncate">Équipes ({filterEquipe !== "Toutes" ? '1' : 'Toutes'})</span>
                                      <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                    </Button>
@@ -489,7 +489,7 @@ export default function Calendrier() {
 
                                <DropdownMenu>
                                  <DropdownMenuTrigger asChild>
-                                   <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                   <Button variant="ghost" className="w-full text-primary justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-primary/10">
                                      <span className="truncate">Utilisateurs ({selectedUser.length > 0 ? `${selectedUser.length}` : 'Tous'})</span>
                                      <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                    </Button>
@@ -516,7 +516,7 @@ export default function Calendrier() {
 
                                <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                  <Button variant="ghost" className="w-full text-primary justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-primary/10">
                                     <span className="truncate">Types ({selectedType.length > 0 ? `${selectedType.length}` : 'Tous'})</span>
                                     <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                   </Button>
