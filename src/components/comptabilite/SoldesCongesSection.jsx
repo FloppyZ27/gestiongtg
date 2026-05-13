@@ -215,7 +215,7 @@ export default function SoldesCongesSection() {
         <div className="p-4">
           <div className="overflow-hidden">
             {/* En-tête */}
-            <div className="grid px-3 py-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
+            <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
               <div>
                 <button
                   onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
