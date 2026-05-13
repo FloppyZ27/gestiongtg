@@ -1066,7 +1066,7 @@ export default function GestionDeMandat() {
                         return (
                           <Card key={weekIndex} className="!border-0 !shadow-none bg-transparent">
                             <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
-                              <CardTitle className="text-sm text-slate-300">
+                              <CardTitle className="text-lg text-slate-300">
                                 Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
                               </CardTitle>
                             </CardHeader>
