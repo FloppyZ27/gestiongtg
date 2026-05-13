@@ -846,11 +846,11 @@ export default function GestionDeMandat() {
             </div>
             <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
               <CollapsibleContent>
-                <div className="p-2 border border-emerald-500/30 rounded-lg">
-                  <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30 mb-2">
-                    <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-emerald-500" /><h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4></div>
+                <div className="p-2 border border-red-500/30 rounded-lg">
+                  <div className="flex items-center justify-between pb-2 border-b border-red-500/30 mb-2">
+                    <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-red-500" /><h4 className="text-xs font-semibold text-red-500">Filtrer</h4></div>
                     {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
-                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterTypeMandat([]); setFilterUtilisateur([]); setFilterVille([]); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterTypeMandat([]); setFilterUtilisateur([]); setFilterVille([]); }} className="h-6 text-xs text-red-500 hover:text-red-400 px-2">
                         <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
                       </Button>
                     )}
@@ -864,7 +864,7 @@ export default function GestionDeMandat() {
                     ].map(({ label, items, filter, setFilter, labels }) => (
                       <DropdownMenu key={label}>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                          <Button variant="ghost" className="w-full text-red-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-red-500/10">
                             <span className="truncate">{label} ({filter.length > 0 ? filter.length : 'Tous'})</span>
                             <ChevronDown className="w-3 h-3 flex-shrink-0" />
                           </Button>
