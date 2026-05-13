@@ -356,66 +356,6 @@ export default function Calendrier() {
           <CardContent className="p-6">
             {/* Header avec navigation et contrôles */}
             <div className="flex flex-col gap-3 mb-6 pb-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={previousPeriod}
-                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
-                    <div className="text-white font-bold text-lg group-hover:text-emerald-400 transition-colors">
-                      {viewMode === "week" 
-                        ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
-                        : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-                    </div>
-                    <CalendarIcon className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
-                    <input 
-                      type="date" 
-                      value={format(currentDate, "yyyy-MM-dd")} 
-                      onChange={(e) => {
-                        if(e.target.value) setCurrentDate(new Date(e.target.value + 'T00:00:00'));
-                      }} 
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
-                      style={{zIndex: 1}} 
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={nextPeriod}
-                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setCurrentDate(new Date())}
-                    className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105"
-                  >
-                    Aujourd'hui
-                  </Button>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    onClick={() => setViewMode("week")}
-                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
-                  >
-                    Semaine
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setViewMode("month")}
-                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
-                  >
-                    Mois
-                  </Button>
-                </div>
-              </div>
 
               {/* Filters - Collapsible Box */}
               <Card className="border-transparent bg-transparent shadow-none">
@@ -431,7 +371,7 @@ export default function Calendrier() {
                         <Filter className="w-4 h-4 mr-2" />
                         <span className="text-sm">Filtres</span>
                         {(selectedUser.length > 0 || selectedType.length > 0 || filterEquipe !== "Toutes") && (
-                          <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                          <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-primary/20 text-primary border-primary/30 text-xs">
                             {selectedUser.length + selectedType.length + (filterEquipe !== "Toutes" ? 1 : 0)}
                           </Badge>
                         )}
@@ -551,6 +491,67 @@ export default function Calendrier() {
                   </div>
                 </CardHeader>
               </Card>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={previousPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
+                    <div className="text-white font-bold text-lg group-hover:text-primary transition-colors">
+                      {viewMode === "week" 
+                        ? `Semaine du ${format(daysInView[0], "d MMMM", { locale: fr })} au ${format(daysInView[6], "d MMMM yyyy", { locale: fr })}`
+                        : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                    </div>
+                    <CalendarIcon className="w-4 h-4 text-slate-500 group-hover:text-primary transition-colors flex-shrink-0" />
+                    <input 
+                      type="date" 
+                      value={format(currentDate, "yyyy-MM-dd")} 
+                      onChange={(e) => {
+                        if(e.target.value) setCurrentDate(new Date(e.target.value + 'T00:00:00'));
+                      }} 
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
+                      style={{zIndex: 1}} 
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={nextPeriod}
+                    className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentDate(new Date())}
+                    className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105"
+                  >
+                    Aujourd'hui
+                  </Button>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    onClick={() => setViewMode("week")}
+                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "week" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                  >
+                    Semaine
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setViewMode("month")}
+                    className={`transition-all duration-200 hover:scale-105 ${viewMode === "month" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                  >
+                    Mois
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Vue Semaine */}
