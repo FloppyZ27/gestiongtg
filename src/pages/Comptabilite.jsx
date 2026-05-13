@@ -849,7 +849,7 @@ export default function Comptabilite() {
                 {/* Entête arpenteur sélectionné */}
                 <div className="flex items-center justify-between mb-3 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <span className="text-white font-semibold">{selectedArpenteur} ({mandatsItems.length})</span>
+                    <span className="text-white font-semibold">{selectedArpenteur} ({mandatsItems.length} mandat{mandatsItems.length > 1 ? 's' : ''})</span>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right">
