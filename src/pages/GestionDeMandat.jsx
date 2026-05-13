@@ -578,7 +578,7 @@ export default function GestionDeMandat() {
       onClick={onClick}
       onContextMenu={(e) => e.preventDefault()}
 
-      className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''} ${isMultiMandat ? 'pb-8' : ''}`}
+      className={`${bg} rounded-lg p-2 mb-2 border ${border} cursor-pointer select-none transition-all duration-150 hover:shadow-lg hover:scale-[1.02] ${isDraggingThis ? 'opacity-30 scale-95' : ''} ${selectedCardForLink?.id === card.id ? 'ring-2 ring-violet-400' : ''}`}
         style={{ cursor: dragging ? (isDraggingThis ? 'grabbing' : 'inherit') : 'pointer' }}
         title={selectedCardForLink ? "Cliquez sur une autre carte pour lier" : "Cliquez sur le bouton lien pour lier des cartes"}
       >
@@ -586,7 +586,7 @@ export default function GestionDeMandat() {
           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
           </Badge>
-          <div className={`${isMultiMandat ? 'relative h-8' : 'flex items-center gap-1 flex-shrink-0 flex-wrap justify-end'}`}>
+          <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
             {allMandatsForCard.map((c, idx) => {
             const group = linkedGroups.find(g => g.cardIds.includes(c.id));
             const isInDissociationMode = dissociationMode && group && dissociationMode === group.id;
@@ -595,7 +595,7 @@ export default function GestionDeMandat() {
               <Badge 
                 key={c.id} 
                 className={`${getMandatColor(c.mandat.type_mandat)} border text-xs font-semibold transition-all cursor-pointer hover:opacity-80 ${isInDissociationMode ? 'ring-2 ring-red-400' : (selectedLinkedCard?.id === c.id || (!selectedLinkedCard && c.id === card.id && isMultiMandat)) ? 'ring-2 ring-white/60' : isMultiMandat ? 'ring-1 ring-white/20 opacity-70' : ''}`}
-                style={{ pointerEvents: 'auto', ...(isMultiMandat ? { position: 'absolute', top: 0, right: idx * 20, zIndex: allMandatsForCard.length - idx } : {}) }}
+                style={{ pointerEvents: 'auto' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isInDissociationMode) {
