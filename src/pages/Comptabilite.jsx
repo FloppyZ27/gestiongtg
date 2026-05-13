@@ -495,7 +495,7 @@ export default function Comptabilite() {
 
                 {/* ---- VUE AGENDA ---- */}
                 {feuilleTempsView === 'agenda' && (
-                  <div className="border border-slate-700 rounded-lg overflow-hidden flex" style={{ height: '865px' }}>
+                  <div className="overflow-hidden flex" style={{ height: '865px' }}>
                     {/* Colonne utilisateurs (filtre) */}
                     <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '18%' }}>
                       <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0 px-2 py-3">
