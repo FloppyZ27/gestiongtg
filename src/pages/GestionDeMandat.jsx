@@ -1025,7 +1025,7 @@ export default function GestionDeMandat() {
                          >
                            <ChevronRight className="w-4 h-4" />
                          </Button>
-                         <Button size="sm" variant="outline" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-primary/20 text-primary border-primary/30 transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
+                         <Button size="sm" onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
                          </div>
 
                          {/* Droite : toggle Semaine/Mois */}
