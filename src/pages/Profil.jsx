@@ -1218,7 +1218,7 @@ export default function Profil() {
                     const total = calculateTotalHours(day.toISOString().split('T')[0]);
                     const isToday = day.toDateString() === new Date().toDateString();
                     return (
-                      <div key={day.toISOString()} className="rounded-lg border border-slate-700">
+                      <div key={day.toISOString()} className="rounded-lg border-transparent">
                          {/* En-tête du jour */}
                          <div className="flex items-center justify-between px-4 py-2 rounded-t-lg bg-slate-800/50">
                            <span className="font-semibold text-sm text-slate-300">
