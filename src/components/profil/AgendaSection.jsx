@@ -352,7 +352,7 @@ export default function AgendaSection({
                 return (
                   <Card 
                     key={dateStr}
-                    className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-purple-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
+                    className={`border-transparent bg-transparent shadow-none p-2 ${isToday ? 'ring-2 ring-purple-500' : ''} w-full ${!isCurrentMonth ? 'opacity-50' : ''}`}
                     style={{ minHeight: '210px' }}
                   >
                     <div className="mb-2 w-full">
