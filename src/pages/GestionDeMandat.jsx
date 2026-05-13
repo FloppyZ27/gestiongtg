@@ -719,7 +719,7 @@ export default function GestionDeMandat() {
             <Badge style={{ pointerEvents: 'none' }} className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{displayCard.mandat.tache_actuelle}</Badge>
           </div>
         )}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-gradient-to-r from-red-500/50 via-orange-500/50 to-red-500/50" style={{borderColor: 'transparent', backgroundImage: 'linear-gradient(to right, rgba(239,68,68,0.5), rgba(249,115,22,0.5), rgba(239,68,68,0.5))', backgroundClip: 'padding-box', paddingTop: '1px', backgroundPosition: '0 0', backgroundSize: '100% 1px', backgroundRepeat: 'no-repeat'}}>
           {displayCard.mandat.date_livraison ? (
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
@@ -741,7 +741,7 @@ export default function GestionDeMandat() {
           )}
         </div>
         <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden border border-slate-700/50 relative">
-          <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${progress}%` }} />
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{progress}%</span>
           </div>
