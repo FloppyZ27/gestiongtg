@@ -988,7 +988,7 @@ export default function GestionDeMandat() {
 
             {/* Vue Calendrier */}
             <TabsContent value="calendrier" className="mt-0">
-              <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
+              <Card className="!border-0 !shadow-none bg-transparent">
                 <CardHeader className="border-b border-slate-800 bg-transparent">
                   <div className="flex justify-between items-center gap-2">
                     {/* Gauche : navigation dates */}
