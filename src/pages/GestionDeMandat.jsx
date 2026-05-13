@@ -822,7 +822,7 @@ export default function GestionDeMandat() {
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
               Gestion de Mandat
             </h1>
-            <Kanban className="w-6 h-6 text-red-500" style={{ background: 'linear-gradient(90deg, #ef4444, #f97316)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent', filter: 'drop-shadow(0 0 2px rgba(239, 68, 68, 0.8))' }} />
+            <Kanban className="w-6 h-6" style={{ color: '#ef4444' }} />
           </div>
           <p className="text-slate-400 mb-6">Vue Kanban de vos mandats</p>
 
