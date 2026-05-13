@@ -827,66 +827,62 @@ export default function GestionDeMandat() {
           <p className="text-slate-400 mb-6">Vue Kanban de vos mandats</p>
 
           {/* Filtres */}
-          <Card className="!border-0 !shadow-none bg-transparent mb-6">
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
-                    <Filter className="w-4 h-4 mr-2" />
-                    <span className="text-sm">Filtres</span>
-                    {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
-                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                        {filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length}
-                      </Badge>
-                    )}
-                    {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                  </Button>
-                </div>
-                <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                  <CollapsibleContent>
-                    <div className="p-2 border border-emerald-500/30 rounded-lg">
-                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30 mb-2">
-                        <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-emerald-500" /><h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4></div>
-                        {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
-                          <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterTypeMandat([]); setFilterUtilisateur([]); setFilterVille([]); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
-                            <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
-                          </Button>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        {[
-                          { label: "Arpenteurs", items: ARPENTEURS, filter: filterArpenteur, setFilter: setFilterArpenteur },
-                          { label: "Mandats", items: TYPES_MANDATS, filter: filterTypeMandat, setFilter: setFilterTypeMandat },
-                          { label: "Utilisateurs", items: users.map(u => u.email), filter: filterUtilisateur, setFilter: setFilterUtilisateur, labels: users.reduce((a, u) => ({ ...a, [u.email]: u.full_name }), {}) },
-                          { label: "Villes", items: uniqueVilles, filter: filterVille, setFilter: setFilterVille }
-                        ].map(({ label, items, filter, setFilter, labels }) => (
-                          <DropdownMenu key={label}>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                <span className="truncate">{label} ({filter.length > 0 ? filter.length : 'Tous'})</span>
-                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                              {items.map(item => (
-                                <DropdownMenuCheckboxItem key={item} checked={filter.includes(item)} onCheckedChange={(checked) => setFilter(checked ? [...filter, item] : filter.filter(i => i !== item))} className="text-white">
-                                  {labels ? labels[item] : item}
-                                </DropdownMenuCheckboxItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ))}
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+          <div className="space-y-3 mb-6">
+            <div className="flex justify-between items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
               </div>
-            </CardContent>
-          </Card>
+              <Button variant="ghost" size="sm" onClick={() => setIsFiltersOpen(!isFiltersOpen)} className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
+                <Filter className="w-4 h-4 mr-2" />
+                <span className="text-sm">Filtres</span>
+                {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
+                  <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                    {filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length}
+                  </Badge>
+                )}
+                {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+              </Button>
+            </div>
+            <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+              <CollapsibleContent>
+                <div className="p-2 border border-emerald-500/30 rounded-lg">
+                  <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30 mb-2">
+                    <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-emerald-500" /><h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4></div>
+                    {(filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length) > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => { setFilterArpenteur([]); setFilterTypeMandat([]); setFilterUtilisateur([]); setFilterVille([]); }} className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                        <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: "Arpenteurs", items: ARPENTEURS, filter: filterArpenteur, setFilter: setFilterArpenteur },
+                      { label: "Mandats", items: TYPES_MANDATS, filter: filterTypeMandat, setFilter: setFilterTypeMandat },
+                      { label: "Utilisateurs", items: users.map(u => u.email), filter: filterUtilisateur, setFilter: setFilterUtilisateur, labels: users.reduce((a, u) => ({ ...a, [u.email]: u.full_name }), {}) },
+                      { label: "Villes", items: uniqueVilles, filter: filterVille, setFilter: setFilterVille }
+                    ].map(({ label, items, filter, setFilter, labels }) => (
+                      <DropdownMenu key={label}>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                            <span className="truncate">{label} ({filter.length > 0 ? filter.length : 'Tous'})</span>
+                            <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                          {items.map(item => (
+                            <DropdownMenuCheckboxItem key={item} checked={filter.includes(item)} onCheckedChange={(checked) => setFilter(checked ? [...filter, item] : filter.filter(i => i !== item))} className="text-white">
+                              {labels ? labels[item] : item}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ))}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
 
           {/* Filtres globaux Place d'affaire + Équipe */}
           <div className="space-y-3 mb-6">
