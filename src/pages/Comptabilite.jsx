@@ -334,7 +334,7 @@ export default function Comptabilite() {
             </div>
 
             {!feuilleTempsCollapsed && (
-              <CardContent className="p-4">
+              <CardContent className="p-4 bg-transparent">
                 {/* Contrôles : navigation + toggle vue */}
                 <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
