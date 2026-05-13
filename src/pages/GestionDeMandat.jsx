@@ -889,52 +889,52 @@ export default function GestionDeMandat() {
           </Card>
 
           {/* Filtres globaux Place d'affaire + Équipe */}
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
-              <div className="flex gap-1">
-                {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
-                  const baseFiltered = allCards.filter(c => {
-                    const s = searchTerm.toLowerCase();
-                    const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
-                    const cn = getClientsNames(c.dossier.clients_ids);
-                    return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
-                      (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
-                      (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
-                      (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
-                      (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
-                  });
-                  const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
-                  const isActive = filterPlaceAffaire === val;
-                  return (
-                    <button key={val} onClick={() => setFilterPlaceAffaire(val)}
-                      className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                      {label}
-                      <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
-              <div className="flex gap-1">
-                {["Toutes", ...EQUIPES].map(equipe => {
-                  const count = equipe === "Toutes"
-                    ? filteredCards.length
-                    : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
-                  const isActive = filterEquipeTaches === equipe;
-                  return (
-                    <button key={equipe} onClick={() => { setFilterEquipeTaches(equipe); setFilterEquipeCalendrier(equipe); }}
-                      className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}>
-                      {equipe}
-                      <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-emerald-500/30 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+           <div className="space-y-3 mb-6">
+             <div className="flex items-center gap-3">
+               <span className="text-xs text-red-400 font-medium whitespace-nowrap">Filtrer par place d'affaire</span>
+               <div className="flex gap-1 border-b-2 border-red-500 pb-1 flex-1">
+                 {[{ val: "Toutes", label: "Toutes" }, { val: "Alma", label: "Alma" }, { val: "Saguenay", label: "Saguenay" }].map(({ val, label }) => {
+                   const baseFiltered = allCards.filter(c => {
+                     const s = searchTerm.toLowerCase();
+                     const fn = getArpenteurInitials(c.dossier.arpenteur_geometre) + c.dossier.numero_dossier;
+                     const cn = getClientsNames(c.dossier.clients_ids);
+                     return (fn.toLowerCase().includes(s) || c.dossier.numero_dossier?.toLowerCase().includes(s) || cn.toLowerCase().includes(s) || c.mandat.type_mandat?.toLowerCase().includes(s)) &&
+                       (filterArpenteur.length === 0 || filterArpenteur.includes(c.dossier.arpenteur_geometre)) &&
+                       (filterTypeMandat.length === 0 || filterTypeMandat.includes(c.mandat.type_mandat)) &&
+                       (filterUtilisateur.length === 0 || filterUtilisateur.includes(c.mandat.utilisateur_assigne)) &&
+                       (filterVille.length === 0 || filterVille.includes(c.mandat.adresse_travaux?.ville));
+                   });
+                   const count = val === "Toutes" ? baseFiltered.length : baseFiltered.filter(c => c.dossier.place_affaire === val).length;
+                   const isActive = filterPlaceAffaire === val;
+                   return (
+                     <button key={val} onClick={() => setFilterPlaceAffaire(val)}
+                       className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-red-500/20 text-red-400 border-b-2 border-red-400" : "text-slate-400 hover:text-slate-200"}`}>
+                       {label}
+                       <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-red-500/30 text-red-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                     </button>
+                   );
+                 })}
+               </div>
+             </div>
+             <div className="flex items-center gap-3">
+               <span className="text-xs text-red-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
+               <div className="flex gap-1 border-b-2 border-red-500 pb-1 flex-1">
+                 {["Toutes", ...EQUIPES].map(equipe => {
+                   const count = equipe === "Toutes"
+                     ? filteredCards.length
+                     : filteredCards.filter(c => equipe === "Toutes" || (c.mandat.utilisateur_assigne && users.find(u => u.email === c.mandat.utilisateur_assigne && getUserTeam(u) === equipe))).length;
+                   const isActive = filterEquipeTaches === equipe;
+                   return (
+                     <button key={equipe} onClick={() => { setFilterEquipeTaches(equipe); setFilterEquipeCalendrier(equipe); }}
+                       className={`px-4 py-1.5 text-sm font-medium transition-all border-0 outline-none shadow-none ${isActive ? "bg-red-500/20 text-red-400 border-b-2 border-red-400" : "text-slate-400 hover:text-slate-200"}`}>
+                       {equipe}
+                       <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${isActive ? "bg-red-500/30 text-red-300" : "bg-slate-700 text-slate-400"}`}>{count}</span>
+                     </button>
+                   );
+                 })}
+               </div>
+             </div>
+           </div>
 
           {/* Vues */}
           <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
