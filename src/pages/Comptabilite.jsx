@@ -351,7 +351,7 @@ export default function Comptabilite() {
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Toggle vue */}
-                    <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
+                    <div className="flex items-center bg-slate-800 rounded-lg p-0.5">
                       <button
                         onClick={() => setFeuilleTempsView('liste')}
                         className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${feuilleTempsView === 'liste' ? 'bg-emerald-500/30 text-emerald-300' : 'text-slate-400 hover:text-slate-200'}`}
