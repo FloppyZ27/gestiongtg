@@ -963,7 +963,7 @@ export default function Profil() {
         {/* Personal Information Card */}
         <Card className="border-transparent bg-transparent shadow-none mb-6">
           <div 
-            className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-transparent border-b border-border"
+            className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 px-3 bg-blue-900/20 border-b border-slate-800"
             onClick={() => setInfoPersonnellesCollapsed(!infoPersonnellesCollapsed)}
           >
             <div className="flex items-center justify-between">
@@ -1134,7 +1134,7 @@ export default function Profil() {
         {/* Section Entrée de temps */}
         <Card className="border-transparent bg-transparent shadow-none mb-6">
           <div
-            className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-transparent border-b border-border"
+            className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 px-3 bg-orange-900/20 border-b border-slate-800"
             onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
           >
             <div className="flex items-center justify-between">

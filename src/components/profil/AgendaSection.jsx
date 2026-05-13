@@ -92,7 +92,7 @@ export default function AgendaSection({
     </Dialog>
     <Card className="border-transparent bg-transparent shadow-none mb-6">
       <div 
-        className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-transparent border-b border-border"
+        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/20 border-b border-slate-800"
         onClick={() => setAgendaCollapsed(!agendaCollapsed)}
       >
         <div className="flex items-center justify-between">
