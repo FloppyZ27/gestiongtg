@@ -244,6 +244,9 @@ export default function SoldesCongesSection() {
               const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
               const maxVac = solde.max_vacances ?? 120;
               const maxMe = solde.max_mieux_etre ?? 40;
+              const entreesPourUser = toutesEntrees.filter(e => e.utilisateur_email === u.email && e.date?.startsWith(String(currentYear)));
+              const usedVac = entreesPourUser.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
+              const usedMe = entreesPourUser.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
               const vacPct = Math.min((solde.heures_vacances / maxVac) * 100, 100);
               const mePct = Math.min((solde.heures_mieux_etre / maxMe) * 100, 100);
 
