@@ -215,7 +215,7 @@ export default function SoldesCongesSection() {
         <div className="p-4">
           <div className="overflow-hidden">
             {/* En-tête */}
-            <div className="grid px-3 py-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
+            <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
               <div>
                 <button
                   onClick={() => setUserSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
@@ -340,8 +340,8 @@ export default function SoldesCongesSection() {
               </div>
 
               <UserTotalCards userEmail={selectedUser.email} year={dialogYear} />
-              <div className="overflow-hidden mt-4">
-                <div className="grid px-3 py-2" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
+              <div className="border border-slate-700 rounded-lg overflow-hidden mt-4">
+                <div className="grid bg-slate-800/60 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</span>
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</span>
                   <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Heures</span>
