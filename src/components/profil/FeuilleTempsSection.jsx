@@ -601,8 +601,7 @@ export default function FeuilleTempsSection({
       <Dialog open={isCommentOpen} onOpenChange={setIsCommentOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-amber-400" />
+            <DialogTitle className="text-xl">
               Notes et Factures
             </DialogTitle>
             <p className="text-sm text-slate-400 mt-1">
