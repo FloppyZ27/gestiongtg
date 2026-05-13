@@ -62,7 +62,7 @@ export default function TimeInput12h({ value, onChange, required, className = ""
   };
 
   return (
-    <div className={`flex items-center bg-slate-800 border border-slate-700 rounded-md overflow-hidden h-9 ${className}`}>
+    <div className={`flex items-center bg-slate-800 border-0 rounded-md overflow-hidden h-9 ${className}`}>
       <input
         type="text"
         inputMode="numeric"
