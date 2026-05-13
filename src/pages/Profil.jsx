@@ -946,7 +946,7 @@ export default function Profil() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <div className="min-h-screen p-4 md:p-8">
         <div className="w-full">
         <div className="flex items-start justify-between gap-3 mb-8">
           <div className="flex-1">
