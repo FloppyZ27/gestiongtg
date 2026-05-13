@@ -370,7 +370,7 @@ export default function Comptabilite() {
 
                 {/* ---- VUE LISTE ---- */}
                 {feuilleTempsView === 'liste' && (
-                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                  <div className="rounded-lg overflow-hidden bg-transparent">
                     {/* En-tête : Utilisateur + dim à sam + total + note */}
                      <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr repeat(7, 1fr) 1fr 0.5fr' }}>
                       <div>
