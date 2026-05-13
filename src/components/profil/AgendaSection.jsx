@@ -126,14 +126,14 @@ export default function AgendaSection({
                   <Button
                     size="sm"
                     onClick={() => setAgendaViewMode("semaine")}
-                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "semaine" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60 shadow-lg shadow-purple-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "semaine" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Semaine
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => setAgendaViewMode("mois")}
-                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "mois" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60 shadow-lg shadow-purple-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "mois" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Mois
                   </Button>
