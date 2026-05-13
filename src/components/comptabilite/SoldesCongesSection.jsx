@@ -249,7 +249,7 @@ export default function SoldesCongesSection() {
 
               return (
                 <div key={u.id}>
-                  <div className="grid px-3 py-3 border-b border-slate-800 hover:bg-slate-800/30 transition-colors items-center gap-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
+                  <div className="grid px-3 py-3 transition-colors items-center gap-2" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
                     <div className="flex items-center gap-2">
                       <Avatar className="w-7 h-7">
                         <AvatarImage src={u.photo_url} />
