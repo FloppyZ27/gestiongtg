@@ -228,13 +228,6 @@ export default function OuvrirDossierDialog({
       return;
     }
 
-    // Validation: tous les mandats doivent avoir un utilisateur assigné
-    const mandatsSansUtilisateur = (formData.mandats || []).filter(m => !m.utilisateur_assigne);
-    if (mandatsSansUtilisateur.length > 0) {
-      setShowMissingUserError(true);
-      return;
-    }
-
     setIsCreating(true);
     try {
       // Vérifier si le dossier existe déjà (éviter doublon)
