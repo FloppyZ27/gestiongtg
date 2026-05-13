@@ -497,8 +497,8 @@ export default function Comptabilite() {
                 {feuilleTempsView === 'agenda' && (
                   <div className="overflow-hidden flex" style={{ height: '865px' }}>
                     {/* Colonne utilisateurs (filtre) */}
-                    <div className="flex-shrink-0 border-r border-slate-700 bg-slate-900/60 flex flex-col" style={{ width: '18%' }}>
-                      <div className="border-b border-slate-700 bg-slate-900/50 flex-shrink-0 px-2 py-3">
+                    <div className="flex-shrink-0 border-r border-slate-700 flex flex-col" style={{ width: '18%' }}>
+                      <div className="border-b border-slate-700 flex-shrink-0 px-2 py-3">
                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilisateurs</span>
                       </div>
                       <div className="overflow-y-auto flex-1">
@@ -528,7 +528,7 @@ export default function Comptabilite() {
                     {/* Grille horaire */}
                     <div className="flex-1 flex flex-col overflow-hidden">
                       {/* En-têtes des jours */}
-                      <div className="flex border-b border-slate-700 flex-shrink-0 bg-slate-900/50">
+                      <div className="flex border-b border-slate-700 flex-shrink-0">
                         <div className="w-16 flex-shrink-0 border-r border-slate-700" />
                         {weekDays.map((day, idx) => {
                             const dayTotal = activeAgendaUser ? getUserDayTotalHours(day, activeAgendaUser.email) : 0;
@@ -548,7 +548,7 @@ export default function Comptabilite() {
                       <div className="overflow-y-auto flex-1 relative" ref={agendaScrollRef}>
                         <div className="flex relative" style={{ minHeight: '1440px' }}>
                           {/* Colonne des heures */}
-                          <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                          <div className="w-16 flex-shrink-0 sticky left-0 z-20">
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                               <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
                                 <div className="w-full border-r border-slate-700 px-2 py-1 text-xs text-slate-500 text-right">
@@ -563,7 +563,7 @@ export default function Comptabilite() {
                             const dayPointages = activeAgendaUser ? getPointagesForDateUser(day, activeAgendaUser.email) : [];
 
                             return (
-                              <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/10">
+                              <div key={dayIdx} className="flex-1 border-r border-slate-700 relative">
                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                   <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
                                 ))}
