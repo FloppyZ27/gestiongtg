@@ -200,15 +200,12 @@ export default function FeuilleTempsSection({
                 </div>
                 <PremiumButton label="Ajouter" onClick={() => setIsAddingPointage(true)} icon={Plus} />
                 {viewMode === "week" && (
-                  <Button
-                    size="sm"
-                    onClick={handleOpenComment}
-                    className={`h-8 ${commentaireActuel?.contenu ? 'bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-1" />
-                    Note/Factures
-                    {commentaireActuel?.contenu && <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block"></span>}
-                  </Button>
+                  <PremiumButton 
+                    label="Note/Factures" 
+                    onClick={handleOpenComment} 
+                    icon={MessageSquare}
+                    variant="orange"
+                  />
                 )}
               </div>
             </div>
