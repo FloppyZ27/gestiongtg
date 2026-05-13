@@ -1035,7 +1035,7 @@ export default function GestionDeMandat() {
                          </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-4">
+                <CardContent className="p-4 bg-transparent">
                   {calendarMode === "week" ? (
                     <div className="grid grid-cols-5 gap-3">
                       {[0,1,2,3,4].map(dayOffset => {
