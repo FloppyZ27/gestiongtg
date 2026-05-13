@@ -212,7 +212,7 @@ export default function SoldesCongesSection() {
       </div>
 
       {!collapsed && (
-        <CardContent className="p-4 bg-transparent">
+        <div className="p-4">
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             {/* En-tête */}
             <div className="grid bg-slate-800/50 px-3 py-2 border-b border-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto' }}>
@@ -307,7 +307,7 @@ export default function SoldesCongesSection() {
               <div className="text-center py-8 text-slate-500 text-sm">Aucun utilisateur actif</div>
             )}
           </div>
-        </CardContent>
+        </div>
       )}
 
       {/* Dialog entrées de congé */}
