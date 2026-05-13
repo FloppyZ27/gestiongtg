@@ -517,11 +517,11 @@ export default function FeuilleTempsSection({
                     return (
                       <Card
                         key={dateStr}
-                        className={`border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full ${isCurrentMonth ? 'bg-slate-900/50' : 'bg-slate-950/30 opacity-50'}`}
+                        className={`border-transparent bg-transparent p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}
                         style={{ minHeight: '210px' }}
                       >
                         <div className="mb-2 w-full">
-                          <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
+                          <div className={`bg-transparent rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
                             <div className="flex items-center justify-center mb-1">
                               <div className="flex-1">
                                 <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : isCurrentMonth ? 'text-slate-400' : 'text-slate-600'}`}>
