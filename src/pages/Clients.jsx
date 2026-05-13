@@ -19,6 +19,7 @@ import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSectionClient from "../components/clients/CommentairesSectionClient";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
+import PremiumButton from "../components/CommunicationClients/PremiumButton";
 import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
 
 const getArpenteurInitials = (arpenteur) => {
@@ -268,15 +269,14 @@ export default function Clients() {
           </div>
 
           <div className="flex gap-3">
-            <Button 
+            <PremiumButton
+              label="Nouveau client"
+              icon={Plus}
               onClick={() => {
                 setEditingClient(null);
                 setIsDialogOpen(true);
               }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white">
-              <Plus className="w-5 h-5 mr-2" />
-              Nouveau client
-            </Button>
+            />
 
             <ClientFormDialog
               open={isDialogOpen}
