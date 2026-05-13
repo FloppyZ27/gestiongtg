@@ -205,8 +205,8 @@ export default function Calendrier() {
     if (viewMode === 'month') {
       return format(currentDate, "MMMM yyyy", { locale: fr });
     } else {
-      const weekStart = startOfWeek(currentDate, { locale: fr });
-      const weekEnd = endOfWeek(currentDate, { locale: fr });
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
       return `${format(weekStart, "d MMM", { locale: fr })} - ${format(weekEnd, "d MMM yyyy", { locale: fr })}`;
     }
   };
@@ -313,15 +313,19 @@ export default function Calendrier() {
   // Calendar logic
   let startDate, endDate, daysInView;
 
+  // weekStartsOn: 0 = dimanche
+  const weekOptions = { weekStartsOn: 0 };
+
   if (viewMode === 'month') {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    startDate = monthStart;
-    endDate = monthEnd;
+    // Étendre du dimanche précédent au samedi suivant pour couvrir la semaine complète
+    startDate = startOfWeek(monthStart, weekOptions);
+    endDate = endOfWeek(monthEnd, weekOptions);
     daysInView = eachDayOfInterval({ start: startDate, end: endDate });
   } else {
-    startDate = startOfWeek(currentDate, { locale: fr });
-    endDate = endOfWeek(currentDate, { locale: fr });
+    startDate = startOfWeek(currentDate, weekOptions);
+    endDate = endOfWeek(currentDate, weekOptions);
     daysInView = eachDayOfInterval({ start: startDate, end: endDate });
   }
 
@@ -761,26 +765,31 @@ export default function Calendrier() {
 
             {/* Vue Mois */}
             {viewMode === "month" && (
-              <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
+              <div className="w-full">
+                {/* En-têtes des jours */}
+                <div className="grid grid-cols-7 mb-1" style={{ gap: '2px' }}>
+                  {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map(day => (
+                    <div key={day} className="text-center text-xs font-semibold text-slate-400 uppercase py-1">{day}</div>
+                  ))}
+                </div>
+              <div className="grid grid-cols-7 w-full" style={{ gap: '2px' }}>
                 {daysInView.map((day, index) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+                  const isCurrentMonth = isSameMonth(day, currentDate);
                   const dayEvents = getEventsForDay(day);
 
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-800/30 border-transparent p-2 ${isToday ? 'ring-2 ring-primary/50' : ''} w-full`}
+                      className={`border-transparent p-2 ${isToday ? 'ring-2 ring-primary/50' : ''} w-full ${isCurrentMonth ? 'bg-slate-800/30' : 'bg-slate-900/20 opacity-50'}`}
                       style={{ minHeight: '210px' }}
                     >
                       <div className="mb-2 w-full">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-purple-500' : ''} w-full`}>
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-primary/50' : ''} w-full`}>
                           <div className="flex items-center justify-center mb-1">
                             <div className="flex-1">
-                              <p className={`text-xs uppercase ${isToday ? 'text-purple-400' : 'text-slate-400'}`}>
-                                {format(day, "EEE", { locale: fr })}
-                              </p>
-                              <p className={`text-lg font-bold ${isToday ? 'text-purple-400' : 'text-white'}`}>
+                              <p className={`text-lg font-bold ${isToday ? 'text-primary' : isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
                                 {format(day, "d", { locale: fr })}
                               </p>
                             </div>
@@ -895,6 +904,7 @@ export default function Calendrier() {
                     </Card>
                   );
                 })}
+              </div>
               </div>
             )}
           </CardContent>
