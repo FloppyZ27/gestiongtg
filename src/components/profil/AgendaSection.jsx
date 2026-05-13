@@ -119,21 +119,21 @@ export default function AgendaSection({
                   <input type="date" value={format(agendaCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setAgendaCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
                 <button onClick={goToAgendaNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
-                <Button size="sm" onClick={goToAgendaToday} className="bg-purple-500/20 text-purple-400 transition-all duration-200 hover:bg-purple-500/40 hover:text-purple-300 hover:scale-105">Aujourd'hui</Button>
+                <Button size="sm" onClick={goToAgendaToday} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
               </div>
               <div className="flex gap-2 items-center">
                 <div className="flex gap-1">
                   <Button
                     size="sm"
                     onClick={() => setAgendaViewMode("semaine")}
-                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "semaine" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "semaine" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Semaine
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => setAgendaViewMode("mois")}
-                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "mois" ? "bg-purple-500/30 text-purple-300 ring-2 ring-purple-500/60" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                    className={`transition-all duration-200 hover:scale-105 ${agendaViewMode === "mois" ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                   >
                     Mois
                   </Button>

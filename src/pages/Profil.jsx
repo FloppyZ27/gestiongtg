@@ -1160,7 +1160,7 @@ export default function Profil() {
                     <input type="date" value={format(entreeTempsCurrentDate,"yyyy-MM-dd")} onChange={(e)=>{if(e.target.value)setEntreeTempsCurrentDate(new Date(e.target.value+'T00:00:00'));}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                   </div>
                   <button onClick={goToEntreeTempsNext} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: '#2563eb', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
-                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-orange-500/20 text-orange-400 transition-all duration-200 hover:bg-orange-500/40 hover:text-orange-300 hover:scale-105">Aujourd'hui</Button>
+                  <Button size="sm" onClick={goToEntreeTempsToday} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
                 </div>
                 <div className="flex gap-1">
                   {["semaine", "mois"].map(tab => (
@@ -1168,7 +1168,7 @@ export default function Profil() {
                       key={tab}
                       size="sm"
                       onClick={() => setEntreeTempsTab(tab)}
-                      className={`transition-all duration-200 hover:scale-105 ${entreeTempsTab === tab ? "bg-orange-500/30 text-orange-300 ring-2 ring-orange-500/60 shadow-lg shadow-orange-500/20" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
+                      className={`transition-all duration-200 hover:scale-105 ${entreeTempsTab === tab ? "bg-primary/20 text-primary ring-2 ring-primary/40" : "bg-slate-800 text-white hover:bg-slate-600 hover:text-white"}`}
                     >
                       {tab === "semaine" ? "Semaine" : "Mois"}
                     </Button>
