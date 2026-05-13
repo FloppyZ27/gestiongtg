@@ -262,15 +262,32 @@ export default function OuvrirDossierDialog({
         ));
       }
 
+      // Notifier chaque utilisateur assigné à un mandat + créer entrée terrain
+      const notifiedUsers = new Set();
       for (const mandat of (formData.mandats || [])) {
         if (mandat.utilisateur_assigne && mandat.type_mandat) {
-          await base44.entities.Notification.create({
-            utilisateur_email: mandat.utilisateur_assigne,
-            titre: "Nouveau mandat assigné",
-            message: `Un mandat "${mandat.type_mandat}" vous a été assigné dans le dossier ${formData.numero_dossier}.`,
-            type: "dossier",
+          // Notification par mandat (une seule par utilisateur)
+          if (!notifiedUsers.has(mandat.utilisateur_assigne)) {
+            await base44.entities.Notification.create({
+              utilisateur_email: mandat.utilisateur_assigne,
+              titre: "Nouveau dossier ouvert et assigné",
+              message: `Le dossier ${formData.numero_dossier || ''} vient d'être ouvert et vous a été assigné (${mandat.type_mandat}).`,
+              type: "dossier",
+              dossier_id: newDossier.id,
+              lue: false
+            });
+            notifiedUsers.add(mandat.utilisateur_assigne);
+          }
+
+          // Créer une entrée terrain pour ce mandat
+          await base44.entities.EntreeTemps.create({
+            date: formData.date_ouverture || new Date().toISOString().split('T')[0],
+            heures: 0,
             dossier_id: newDossier.id,
-            lue: false
+            mandat: mandat.type_mandat,
+            tache: "Ouverture",
+            description: `Ouverture du dossier - ${mandat.type_mandat}`,
+            utilisateur_email: mandat.utilisateur_assigne
           });
         }
       }
