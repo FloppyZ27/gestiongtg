@@ -223,7 +223,7 @@ export default function FeuilleTempsSection({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="week" className="space-y-3">
+            <TabsContent value="week" className="space-y-3 bg-transparent border-transparent">
               <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '865px' }}>
                 <div className="overflow-x-auto flex-1 flex flex-col">
                   <div className="inline-block min-w-full h-full flex flex-col">
