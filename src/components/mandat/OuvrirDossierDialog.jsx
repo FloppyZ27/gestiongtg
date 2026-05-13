@@ -282,7 +282,7 @@ export default function OuvrirDossierDialog({
           // Créer une entrée terrain pour ce mandat
           await base44.entities.EntreeTemps.create({
             date: formData.date_ouverture || new Date().toISOString().split('T')[0],
-            heures: 0,
+            heures: 0.01,
             dossier_id: newDossier.id,
             mandat: mandat.type_mandat,
             tache: "Ouverture",
