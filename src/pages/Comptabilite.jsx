@@ -322,7 +322,7 @@ export default function Comptabilite() {
           </div>
 
           {/* ===== SECTION 1 : Feuille de temps (Liste + Agenda fusionnés) ===== */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <Card className="border-0 bg-transparent shadow-none mb-6">
             <div className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800" onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -795,7 +795,7 @@ export default function Comptabilite() {
           <SoldesCongesSection />
 
           {/* ===== SECTION 3 : Mandats ouverts avec tabs arpenteurs ===== */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <Card className="border-0 bg-transparent shadow-none mb-6">
             <div className="cursor-pointer hover:bg-violet-900/40 transition-colors rounded-t-lg py-2 px-3 bg-violet-900/20 border-b border-slate-800" onClick={() => setMandatsCollapsed(!mandatsCollapsed)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
