@@ -149,6 +149,13 @@ export default function SoldesCongesSection() {
   const currentYear = new Date().getFullYear();
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
+  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
+
+  const getUserDisplayName = (user) => {
+    const employe = employes.find(e => e.compte_utilisateur === user.email);
+    if (employe?.prenom || employe?.nom) return `${employe.prenom || ''} ${employe.nom || ''}`.trim();
+    return user.full_name || '';
+  };
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
   const { data: toutesEntrees = [] } = useQuery({
     queryKey: ['entreeTempsCongesAll', currentYear],
@@ -199,8 +206,8 @@ export default function SoldesCongesSection() {
   const activeUsers = users.filter(u => u.statut !== 'Inactif');
   
   const sortedUsers = [...activeUsers].sort((a, b) => {
-    const nameA = (a.full_name || '').toLowerCase();
-    const nameB = (b.full_name || '').toLowerCase();
+    const nameA = getUserDisplayName(a).toLowerCase();
+    const nameB = getUserDisplayName(b).toLowerCase();
     return userSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
   });
 
@@ -269,7 +276,7 @@ export default function SoldesCongesSection() {
                         <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-white font-medium text-sm">{u.full_name}</p>
+                        <p className="text-white font-medium text-sm">{getUserDisplayName(u)}</p>
                         <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                       </div>
                     </div>
@@ -338,7 +345,7 @@ export default function SoldesCongesSection() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
 
-              Vacances, Mieux-Être & En Banque — {selectedUser?.full_name}
+              Vacances, Mieux-Être & En Banque — {selectedUser ? getUserDisplayName(selectedUser) : ''}
             </DialogTitle>
           </DialogHeader>
           {selectedUser && (

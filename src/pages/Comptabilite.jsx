@@ -104,6 +104,13 @@ export default function Comptabilite() {
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
+  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
+
+  const getUserDisplayName = (user) => {
+    const employe = employes.find(e => e.compte_utilisateur === user.email);
+    if (employe?.prenom || employe?.nom) return `${employe.prenom || ''} ${employe.nom || ''}`.trim();
+    return user.full_name || '';
+  };
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
   const { data: allPointages = [] } = useQuery({ queryKey: ['allPointages'], queryFn: () => base44.entities.Pointage.filter({ statut: 'termine' }, '-date', 1000), initialData: [] });
@@ -410,7 +417,7 @@ export default function Comptabilite() {
                                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                              </Avatar>
                              <div>
-                               <p className="text-white font-medium text-sm">{u.full_name}</p>
+                               <p className="text-white font-medium text-sm">{getUserDisplayName(u)}</p>
                                <p className="text-slate-500 text-xs">{u.poste || u.role}</p>
                              </div>
                            </div>
@@ -516,7 +523,7 @@ export default function Comptabilite() {
                                 <AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getInitials(u.full_name)}</AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
-                                <p className={`text-xs truncate leading-tight ${isActive ? 'text-emerald-300 font-semibold' : 'text-slate-200'}`}>{u.full_name}</p>
+                                <p className={`text-xs truncate leading-tight ${isActive ? 'text-emerald-300 font-semibold' : 'text-slate-200'}`}>{getUserDisplayName(u)}</p>
                                 <p className={`text-[10px] ${weekH > 0 ? 'text-emerald-400' : 'text-slate-600'}`}>{weekH.toFixed(1)}h semaine</p>
                               </div>
                             </button>
