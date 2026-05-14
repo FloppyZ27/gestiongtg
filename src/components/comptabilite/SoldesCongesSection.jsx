@@ -157,16 +157,22 @@ export default function SoldesCongesSection() {
   });
 
   const getSolde = (email) => {
-    const base = soldes.find(s => s.utilisateur_email === email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
+    const base = soldes.find(s => s.utilisateur_email === email) || { heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
     const entrees = toutesEntrees.filter(e => e.utilisateur_email === email && e.date?.startsWith(String(currentYear)));
     const usedVac = entrees.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
     const usedMe = entrees.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
     const usedBanque = entrees.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+    const maxVac = base.max_vacances ?? 120;
+    const maxMe = base.max_mieux_etre ?? 40;
     return {
       ...base,
-      heures_vacances: Math.max(0, (base.heures_vacances ?? 0) - usedVac),
-      heures_mieux_etre: Math.max(0, (base.heures_mieux_etre ?? 0) - usedMe),
+      max_vacances: maxVac,
+      max_mieux_etre: maxMe,
+      restant_vacances: Math.max(0, maxVac - usedVac),
+      restant_mieux_etre: Math.max(0, maxMe - usedMe),
       heures_en_banque: Math.max(0, (base.heures_en_banque ?? 0) - usedBanque),
+      used_vacances: usedVac,
+      used_mieux_etre: usedMe,
     };
   };
 
@@ -241,14 +247,11 @@ export default function SoldesCongesSection() {
 
             {/* Lignes */}
             {sortedUsers.map(u => {
-              const solde = getSolde(u.email) || { heures_vacances: 0, heures_mieux_etre: 0, heures_en_banque: 0, max_vacances: 120, max_mieux_etre: 40 };
+              const solde = getSolde(u.email);
               const maxVac = solde.max_vacances ?? 120;
               const maxMe = solde.max_mieux_etre ?? 40;
-              const entreesPourUser = toutesEntrees.filter(e => e.utilisateur_email === u.email && e.date?.startsWith(String(currentYear)));
-              const usedVac = entreesPourUser.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
-              const usedMe = entreesPourUser.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
-              const vacPct = Math.min((solde.heures_vacances / maxVac) * 100, 100);
-              const mePct = Math.min((solde.heures_mieux_etre / maxMe) * 100, 100);
+              const vacPct = Math.min((solde.restant_vacances / maxVac) * 100, 100);
+              const mePct = Math.min((solde.restant_mieux_etre / maxMe) * 100, 100);
 
 
               return (
@@ -265,25 +268,25 @@ export default function SoldesCongesSection() {
                       </div>
                     </div>
 
-                    {/* Vacances */}
+                    {/* Vacances restant */}
                     <div className="space-y-1">
-                      <EditableNumber value={solde.heures_vacances} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_vacances', value: v })} className="text-emerald-400" max={maxVac} />
+                      <span className="text-sm font-semibold text-emerald-400">{solde.restant_vacances % 1 === 0 ? solde.restant_vacances : solde.restant_vacances.toFixed(1)}h</span>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all" style={{ width: `${vacPct}%` }} />
                       </div>
-                      <p className="text-[10px] text-slate-600">/ {maxVac}h</p>
+                      <p className="text-[10px] text-slate-600">Utilisé: {solde.used_vacances}h / {maxVac}h</p>
                     </div>
 
                     {/* Max vacances */}
                     <EditableNumber value={maxVac} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'max_vacances', value: v })} className="text-emerald-700" />
 
-                    {/* Mieux-être */}
+                    {/* Mieux-être restant */}
                     <div className="space-y-1">
-                      <EditableNumber value={solde.heures_mieux_etre} onSave={(v) => upsertMutation.mutate({ email: u.email, field: 'heures_mieux_etre', value: v })} className="text-pink-400" max={maxMe} />
+                      <span className="text-sm font-semibold text-pink-400">{solde.restant_mieux_etre % 1 === 0 ? solde.restant_mieux_etre : solde.restant_mieux_etre.toFixed(1)}h</span>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 transition-all" style={{ width: `${mePct}%` }} />
                       </div>
-                      <p className="text-[10px] text-slate-600">/ {maxMe}h</p>
+                      <p className="text-[10px] text-slate-600">Utilisé: {solde.used_mieux_etre}h / {maxMe}h</p>
                     </div>
 
                     {/* Max mieux-être */}
