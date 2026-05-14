@@ -149,12 +149,9 @@ export default function SoldesCongesSection() {
   const currentYear = new Date().getFullYear();
 
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
-  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
-
   const getUserDisplayName = (user) => {
-    const employe = employes.find(e => e.compte_utilisateur === user.email);
-    if (employe?.prenom || employe?.nom) return `${employe.prenom || ''} ${employe.nom || ''}`.trim();
-    return user.full_name || '';
+    if (user?.prenom || user?.nom) return `${user.prenom || ''} ${user.nom || ''}`.trim();
+    return user?.full_name || '';
   };
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
   const { data: toutesEntrees = [] } = useQuery({

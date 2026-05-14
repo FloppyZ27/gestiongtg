@@ -104,12 +104,10 @@ export default function Comptabilite() {
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
-  const { data: employes = [] } = useQuery({ queryKey: ['employes'], queryFn: () => base44.entities.Employe.list(), initialData: [] });
 
   const getUserDisplayName = (user) => {
-    const employe = employes.find(e => e.compte_utilisateur === user.email);
-    if (employe?.prenom || employe?.nom) return `${employe.prenom || ''} ${employe.nom || ''}`.trim();
-    return user.full_name || '';
+    if (user?.prenom || user?.nom) return `${user.prenom || ''} ${user.nom || ''}`.trim();
+    return user?.full_name || '';
   };
   const { data: dossiers = [] } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list(), initialData: [] });
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
@@ -301,8 +299,8 @@ export default function Comptabilite() {
 
   // Utilisateurs triés
   const sortedUsers = [...users].sort((a, b) => {
-    const nameA = (a.full_name || '').toLowerCase();
-    const nameB = (b.full_name || '').toLowerCase();
+    const nameA = getUserDisplayName(a).toLowerCase();
+    const nameB = getUserDisplayName(b).toLowerCase();
     return userSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
   });
 
@@ -697,7 +695,7 @@ export default function Comptabilite() {
               <DialogHeader>
                 <DialogTitle className="text-xl flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-amber-400" />
-                  Note de {selectedNoteUser?.full_name} - Semaine du {format(weekDays[0], "d MMMM yyyy", { locale: fr })}
+                  Note de {selectedNoteUser ? getUserDisplayName(selectedNoteUser) : ''} - Semaine du {format(weekDays[0], "d MMMM yyyy", { locale: fr })}
                 </DialogTitle>
               </DialogHeader>
               {selectedNoteUser && (() => {
@@ -724,7 +722,7 @@ export default function Comptabilite() {
               <DialogHeader>
                 <DialogTitle className="text-xl flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-amber-400" />
-                  Notes et Factures — {selectedNoteUser?.full_name}
+                  Notes et Factures — {selectedNoteUser ? getUserDisplayName(selectedNoteUser) : ''}
                 </DialogTitle>
                 <p className="text-sm text-slate-400 mt-1">
                   Semaine du {format(weekDays[0], "d MMMM", { locale: fr })} au {format(weekDays[6], "d MMMM yyyy", { locale: fr })}
