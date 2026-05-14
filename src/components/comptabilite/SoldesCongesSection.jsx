@@ -211,7 +211,7 @@ export default function SoldesCongesSection() {
   return (
     <Card className="border-0 bg-transparent shadow-none mb-6">
       <div
-        className="cursor-pointer hover:bg-emerald-900/20 transition-colors rounded-t-lg py-2 px-3 bg-transparent border-b border-slate-800"
+        className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 px-3 bg-emerald-900/20 border-b border-slate-800"
         onClick={() => setCollapsed(!collapsed)}
       >
         <div className="flex items-center justify-between">
