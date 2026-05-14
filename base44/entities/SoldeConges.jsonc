@@ -9,27 +9,32 @@
     "heures_vacances": {
       "type": "number",
       "default": 0,
-      "description": "Heures de vacances disponibles"
+      "description": "Heures de vacances disponibles (legacy)"
     },
     "heures_mieux_etre": {
       "type": "number",
       "default": 0,
-      "description": "Heures de mieux-\u00eatre disponibles"
+      "description": "Heures de mieux-\u00eatre disponibles (legacy)"
     },
     "heures_en_banque": {
       "type": "number",
       "default": 0,
-      "description": "Heures en banque"
+      "description": "Heures en banque (legacy)"
     },
     "max_vacances": {
       "type": "number",
       "default": 120,
-      "description": "Maximum d'heures de vacances (global si utilisateur_email est __global__)"
+      "description": "Maximum d'heures de vacances"
     },
     "max_mieux_etre": {
       "type": "number",
       "default": 40,
-      "description": "Maximum d'heures de mieux-\u00eatre (global si utilisateur_email est __global__)"
+      "description": "Maximum d'heures de mieux-\u00eatre"
+    },
+    "max_en_banque": {
+      "type": "number",
+      "default": 80,
+      "description": "Maximum d'heures en banque"
     }
   },
   "required": [
