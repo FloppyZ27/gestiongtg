@@ -77,8 +77,8 @@ function EditableNumber({ value, onSave, className = "", max = null }) {
 
 function UserTotalCards({ userEmail, year }) {
   const { data: entrees = [], isLoading } = useQuery({
-    queryKey: ['entreeTempsConges', userEmail],
-    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: userEmail }, '-date', 500),
+    queryKey: ['entreeTempsConges', userEmail, year],
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: userEmail }, '-date', 2000),
     initialData: [],
   });
   const filtered = entrees.filter(e => CONGE_TYPES.includes(e.tache) && e.date?.startsWith(String(year)));
@@ -109,8 +109,8 @@ function UserTotalCards({ userEmail, year }) {
 
 function UserEntriesPanel({ userEmail, year }) {
   const { data: entrees = [], isLoading } = useQuery({
-    queryKey: ['entreeTempsConges', userEmail],
-    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: userEmail }, '-date', 500),
+    queryKey: ['entreeTempsConges', userEmail, year],
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: userEmail }, '-date', 2000),
     initialData: [],
   });
 
