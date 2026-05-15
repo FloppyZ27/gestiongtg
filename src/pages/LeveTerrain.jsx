@@ -783,7 +783,7 @@ export default function LeveTerrain() {
                           : null;
                         const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
                         return (
-                          <div className={`${bgColorClass} rounded-lg p-2`}>
+                          <div className={`rounded-lg p-2`}>
                             {/* Entête badges */}
                             <div className="flex items-start justify-between gap-2 mb-2">
                               <div className="flex gap-1 flex-wrap">
