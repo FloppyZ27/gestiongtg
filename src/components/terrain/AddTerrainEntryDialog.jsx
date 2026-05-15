@@ -348,7 +348,7 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
               </div>
 
               {!formCollapsed && (
-            <div className="p-4 border-t border-amber-500/30 space-y-3">
+            <div className="p-4 border-t border-amber-500/30 space-y-3 bg-transparent">
               {/* Ligne 1 : Mandat* | Temps prévu | Donneur | Instruments | Technicien */}
               <div className="grid grid-cols-5 gap-3">
                 <div className="space-y-1">
