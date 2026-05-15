@@ -487,16 +487,7 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                 )}
               </div>
 
-              {/* Bouton Ajouter le terrain */}
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleSave}
-                disabled={!selectedMandat}
-                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-8 text-xs mt-3 w-full border border-amber-500/30"
-              >
-                + Ajouter le terrain
-              </Button>
+
             </div>
               )}
             </div>
@@ -506,6 +497,9 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
         <div className="flex justify-end gap-3 py-4 px-6 border-t border-slate-800">
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={handleClose}>
             Annuler
+          </Button>
+          <Button onClick={handleSave} disabled={!selectedMandat} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+            Créer
           </Button>
         </div>
       </DialogContent>
