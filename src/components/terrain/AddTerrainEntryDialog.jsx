@@ -126,6 +126,7 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
     handleClose();
   };
 
+  const [formCollapsed, setFormCollapsed] = useState(false);
   const mandatsDisponibles = selectedDossier?.mandats || [];
 
   return (
@@ -329,9 +330,21 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
             </div>
           </div>
 
-          {/* Formulaire terrain — layout identique à "Ajouter un terrain" dans EditDossierForm */}
+          {/* Formulaire terrain — section collapsable style amber comme EditDossierForm */}
           {selectedDossier && (
-            <div className="p-4 border-t border-slate-700 space-y-3">
+            <div className="border-2 border-amber-500/30 rounded-lg bg-amber-900/10">
+              <div
+                className="cursor-pointer hover:bg-amber-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                onClick={() => setFormCollapsed(!formCollapsed)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400 text-sm font-semibold">+ Ajouter un terrain</span>
+                </div>
+                {formCollapsed ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronUp className="w-4 h-4 text-amber-400" />}
+              </div>
+
+              {!formCollapsed && (
+            <div className="p-4 border-t border-amber-500/30 space-y-3">
               {/* Ligne 1 : Mandat* | Temps prévu | Donneur | Instruments | Technicien */}
               <div className="grid grid-cols-5 gap-3">
                 <div className="space-y-1">
@@ -469,6 +482,19 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                   </div>
                 )}
               </div>
+
+              {/* Bouton Ajouter le terrain */}
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSave}
+                disabled={!selectedMandat}
+                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-8 text-xs mt-3 w-full border border-amber-500/30"
+              >
+                + Ajouter le terrain
+              </Button>
+            </div>
+              )}
             </div>
           )}
         </div>
@@ -476,9 +502,6 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
         <div className="flex justify-end gap-3 py-4 px-6 border-t border-slate-800">
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={handleClose}>
             Annuler
-          </Button>
-          <Button onClick={handleSave} disabled={!selectedMandat} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
-            Enregistrer
           </Button>
         </div>
       </DialogContent>
