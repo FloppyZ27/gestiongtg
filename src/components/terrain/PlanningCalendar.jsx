@@ -1604,6 +1604,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         onOpenChange={setShowAddTerrainEntry}
         dossiers={dossiers}
         clients={clients}
+        lots={lots}
         users={users}
         onSave={handleAddTerrainEntry}
       />

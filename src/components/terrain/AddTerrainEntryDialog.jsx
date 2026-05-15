@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Search, X, ChevronRight } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+import { Search, X, ChevronDown, ChevronUp, Filter, FolderOpen } from "lucide-react";
 import { motion } from "framer-motion";
+
+const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
+const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -29,6 +35,41 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+};
+
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL", "Description Technique": "DT",
+    "Implantation": "Imp", "Levé topographique": "Levé Topo", "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
+const formatAdresse = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques?.length > 0 && addr.numeros_civiques[0] !== "") parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  return parts.filter(p => p).join(', ');
+};
+
 const EMPTY_FORM = {
   date_limite_leve: "", instruments_requis: "", a_rendez_vous: false,
   date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "",
@@ -36,39 +77,41 @@ const EMPTY_FORM = {
   statut_terrain: "a_ceduler",
 };
 
-export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, clients, users, onSave }) {
-  const [search, setSearch] = useState("");
+export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, clients, lots, users, onSave }) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedDossier, setSelectedDossier] = useState(null);
   const [selectedMandat, setSelectedMandat] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
+  const [filterMandat, setFilterMandat] = useState([]);
+  const [filterVille, setFilterVille] = useState([]);
 
   const getClientsNames = (ids) => {
     if (!ids?.length) return "";
     return ids.map(id => { const c = clients.find(c => c.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
   };
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return [];
-    const s = search.toLowerCase();
-    return dossiers.filter(d => {
-      const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
-      const clients = getClientsNames(d.clients_ids);
-      return num.toLowerCase().includes(s) || (d.numero_dossier || "").toLowerCase().includes(s) || clients.toLowerCase().includes(s);
-    }).slice(0, 10);
-  }, [search, dossiers, clients]);
+  const filteredDossiers = dossiers.filter(d => {
+    const s = searchTerm.toLowerCase();
+    const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
+    const clientNames = getClientsNames(d.clients_ids);
+    return num.toLowerCase().includes(s) || (d.numero_dossier || "").toLowerCase().includes(s) || clientNames.toLowerCase().includes(s);
+  });
+
+  const activeFiltersCount = filterArpenteur.length + filterMandat.length + filterVille.length;
 
   const handleSelectDossier = (dossier) => {
     setSelectedDossier(dossier);
     const firstMandat = dossier.mandats?.[0] || null;
     setSelectedMandat(firstMandat);
-    setSearch("");
     setForm({ ...EMPTY_FORM, technicien: firstMandat?.terrain?.technicien || "", donneur: firstMandat?.terrain?.donneur || "" });
   };
 
   const handleReset = () => {
     setSelectedDossier(null);
     setSelectedMandat(null);
-    setSearch("");
+    setSearchTerm("");
     setForm(EMPTY_FORM);
   };
 
@@ -87,219 +130,368 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nouvelle entrée terrain</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <div className="sticky top-0 z-10 bg-slate-900 py-5 pb-4 border-b border-slate-800 px-6">
+          <h2 className="text-2xl font-bold text-white">Nouvelle entrée terrain</h2>
+        </div>
 
-        {/* Étape 1 : Sélection du dossier */}
-        {!selectedDossier ? (
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                autoFocus
-                placeholder="Rechercher un dossier (numéro, client...)"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            {filtered.length > 0 && (
-              <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
-                {filtered.map(d => (
-                  <button
-                    key={d.id}
-                    onClick={() => handleSelectDossier(d)}
-                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/70 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border flex-shrink-0 text-xs`}>
-                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                      </Badge>
-                      <span className="text-white text-sm truncate">{getClientsNames(d.clients_ids)}</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                  </button>
-                ))}
-              </div>
-            )}
-            {search.trim() && filtered.length === 0 && (
-              <p className="text-slate-500 text-sm text-center py-4">Aucun dossier trouvé</p>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Dossier sélectionné */}
-            <div className="flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2">
+        <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
+
+          {/* Section sélection dossier — identique à EntreeTempsDialog */}
+          <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+            <div className="cursor-default rounded-t-lg py-2 px-3 bg-blue-900/20">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className={`${getArpenteurColor(selectedDossier.arpenteur_geometre)} border text-xs`}>
-                  {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier}
-                </Badge>
-                <span className="text-white text-sm">{getClientsNames(selectedDossier.clients_ids)}</span>
-              </div>
-              <button onClick={handleReset} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Sélection du mandat si plusieurs */}
-            {mandatsDisponibles.length > 1 && (
-              <div className="space-y-1">
-                <Label className="text-xs">Mandat</Label>
-                <Select
-                  value={selectedMandat ? String(mandatsDisponibles.indexOf(selectedMandat)) : ""}
-                  onValueChange={v => setSelectedMandat(mandatsDisponibles[parseInt(v)])}
-                >
-                  <SelectTrigger className="text-sm">
-                    <SelectValue placeholder="Sélectionner un mandat" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mandatsDisponibles.map((m, i) => (
-                      <SelectItem key={i} value={String(i)}>{m.type_mandat || `Mandat ${i + 1}`}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Statut terrain */}
-            <div className="space-y-1">
-              <Label className="text-xs">Statut terrain</Label>
-              <Select value={form.statut_terrain} onValueChange={v => setForm({ ...form, statut_terrain: v })}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en_verification">En vérification</SelectItem>
-                  <SelectItem value="a_ceduler">À cédule</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Formulaire terrain */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-xs">Date limite cédule</Label>
-                <Input type="date" value={form.date_limite_leve} onChange={e => setForm({ ...form, date_limite_leve: e.target.value })} className="text-sm" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Instruments requis</Label>
-                <Select value={form.instruments_requis} onValueChange={v => setForm({ ...form, instruments_requis: v })}>
-                  <SelectTrigger className="text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent>
-                    {["Can-Net","RTK","CONV","3 GPS","Chaine","SX10","NAVIS","Drône"].map(v => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                  <FolderOpen className="w-3 h-3 text-blue-400" />
+                </div>
+                <h3 className="text-blue-300 text-sm font-semibold">Sélection du dossier</h3>
+                {selectedDossier && (
+                  <span className="text-slate-400 text-xs ml-2">
+                    {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} — {getClientsNames(selectedDossier.clients_ids)}
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-xs">Donneur</Label>
-                <Select value={form.donneur} onValueChange={v => setForm({ ...form, donneur: v })}>
-                  <SelectTrigger className="text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent>
-                    {(users || []).filter(u => u?.statut === 'Actif' || !u?.statut).map(u => (
-                      <SelectItem key={u.email} value={u.full_name}>{u.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Technicien</Label>
-                <Select value={form.technicien} onValueChange={v => setForm({ ...form, technicien: v })}>
-                  <SelectTrigger className="text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                  <SelectContent>
-                    {(users || []).map(u => (
-                      <SelectItem key={u.email} value={u.full_name}>{u.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Temps prévu</Label>
-              <Input placeholder="Ex: 2h30" value={form.temps_prevu} onChange={e => setForm({ ...form, temps_prevu: e.target.value })} className="text-sm" />
-            </div>
-
-            {/* Rendez-vous */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, a_rendez_vous: !form.a_rendez_vous })}
-                  className={`relative w-10 h-5 rounded-full transition-all shadow-lg ${form.a_rendez_vous ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-slate-500 to-slate-600"}`}
-                >
-                  <motion.div
-                    className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md"
-                    animate={{ x: form.a_rendez_vous ? 18 : 0 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  />
-                </button>
-                <Label className="text-xs">Rendez-vous requis</Label>
-              </div>
-              {form.a_rendez_vous && (
-                <div className="grid grid-cols-2 gap-4 pl-4">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Date RDV</Label>
-                    <Input type="date" value={form.date_rendez_vous} onChange={e => setForm({ ...form, date_rendez_vous: e.target.value })} className="text-sm" />
+            <div className="pt-2 pb-2 px-3">
+              {!selectedDossier ? (
+                <>
+                  <div className="flex gap-2 mb-3 items-center">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input
+                        autoFocus
+                        placeholder="Rechercher un dossier..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-slate-800 border-slate-700 h-8 text-sm"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                      className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                    >
+                      <Filter className="w-4 h-4 mr-2" />
+                      <span className="text-sm">Filtres</span>
+                      {activeFiltersCount > 0 && (
+                        <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                          {activeFiltersCount}
+                        </Badge>
+                      )}
+                      {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                    </Button>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Heure RDV</Label>
-                    <Input type="time" value={form.heure_rendez_vous} onChange={e => setForm({ ...form, heure_rendez_vous: e.target.value })} className="text-sm" />
+
+                  <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                    <CollapsibleContent>
+                      <div className="p-2 border border-emerald-500/30 rounded-lg mb-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Filter className="w-3 h-3 text-emerald-500" />
+                            <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                          </div>
+                          {activeFiltersCount > 0 && (
+                            <Button type="button" variant="ghost" size="sm"
+                              onClick={() => { setFilterArpenteur([]); setFilterMandat([]); setFilterVille([]); }}
+                              className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2">
+                              <X className="w-2.5 h-2.5 mr-1" />Réinitialiser
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { label: "Arpenteurs", items: ARPENTEURS, state: filterArpenteur, setState: setFilterArpenteur },
+                            { label: "Mandats", items: TYPES_MANDATS, state: filterMandat, setState: setFilterMandat },
+                            { label: "Villes", items: [...new Set(dossiers.flatMap(d => d.mandats?.map(m => m.adresse_travaux?.ville).filter(Boolean) || []))].sort(), state: filterVille, setState: setFilterVille },
+                          ].map(({ label, items, state, setState }) => (
+                            <DropdownMenu key={label}>
+                              <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                  <span className="truncate">{label} ({state.length > 0 ? state.length : 'Tous'})</span>
+                                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                {items.map((item) => (
+                                  <DropdownMenuCheckboxItem key={item} checked={state.includes(item)}
+                                    onCheckedChange={(checked) => setState(checked ? [...state, item] : state.filter(i => i !== item))}
+                                    className="text-white text-xs">{item}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ))}
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <div className="overflow-hidden border border-slate-700 rounded-lg">
+                    <div className="overflow-y-auto max-h-[300px]">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Lot</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Tâche actuelle</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(searchTerm ? filteredDossiers : [...dossiers].sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))).flatMap((dossier) => {
+                            const clientsNames = getClientsNames(dossier.clients_ids);
+                            if (!dossier.mandats || dossier.mandats.length === 0) return null;
+                            return dossier.mandats.filter((mandat) => {
+                              const mA = filterArpenteur.length === 0 || filterArpenteur.includes(dossier.arpenteur_geometre);
+                              const mM = filterMandat.length === 0 || filterMandat.includes(mandat.type_mandat);
+                              const mV = filterVille.length === 0 || filterVille.includes(mandat.adresse_travaux?.ville);
+                              return mA && mM && mV;
+                            }).map((mandat, idx) => {
+                              const lotsDisplay = mandat.lots?.length > 0
+                                ? mandat.lots.map(lotId => { const lot = (lots || []).find(l => l.id === lotId); return lot ? lot.numero_lot : lotId; }).join(', ')
+                                : '-';
+                              return (
+                                <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => handleSelectDossier(dossier)}>
+                                  <TableCell className="font-medium text-xs">
+                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>{getAbbreviatedMandatType(mandat.type_mandat)}</Badge>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{lotsDisplay}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    {mandat.tache_actuelle ? <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge> : '-'}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs max-w-xs truncate">
+                                    {mandat.adresse_travaux ? formatAdresse(mandat.adresse_travaux) : "-"}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            });
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
+                </>
+              ) : (
+                <div className="bg-slate-800/30 rounded-lg border border-slate-700 overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-slate-800/50">
+                      <TableRow className="hover:bg-slate-800/50 border-slate-700">
+                        <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                        <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                        <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                        <TableHead className="text-slate-300 text-xs">Tâche actuelle</TableHead>
+                        <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                        <TableCell className="font-medium text-xs p-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(selectedDossier.arpenteur_geometre)} border`}>
+                            {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-xs p-2">{getClientsNames(selectedDossier.clients_ids) || "-"}</TableCell>
+                        <TableCell className="text-slate-300 text-xs p-2">
+                          <Badge className={`${getMandatColor(selectedDossier.mandats?.[0]?.type_mandat)} border text-xs`}>
+                            {getAbbreviatedMandatType(selectedDossier.mandats?.[0]?.type_mandat) || "-"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-xs p-2">
+                          {selectedDossier.mandats?.[0]?.tache_actuelle
+                            ? <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">{selectedDossier.mandats[0].tache_actuelle}</Badge>
+                            : <span className="text-slate-400 text-xs">-</span>}
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-xs p-2 max-w-xs truncate">
+                          {selectedDossier.mandats?.[0]?.adresse_travaux ? formatAdresse(selectedDossier.mandats[0].adresse_travaux) : "-"}
+                        </TableCell>
+                        <TableCell className="text-right p-2">
+                          <Button type="button" size="sm" variant="ghost" onClick={handleReset} className="text-slate-400 text-xs h-6 hover:text-white">
+                            Changer
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Dossier simultané */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={form.a_dossier_simultane}
-                  onCheckedChange={checked => setForm({ ...form, a_dossier_simultane: checked })}
-                />
-                <Label className="text-xs">Dossier à faire en même temps</Label>
-              </div>
-              {form.a_dossier_simultane && (
-                <div className="space-y-1 pl-6">
-                  <Label className="text-xs">Dossier simultané</Label>
-                  <Select value={form.dossier_simultane} onValueChange={v => setForm({ ...form, dossier_simultane: v })}>
-                    <SelectTrigger className="text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent>
-                      {dossiers.filter(d => d.id !== selectedDossier?.id).map(d => (
-                        <SelectItem key={d.id} value={d.numero_dossier}>
-                          {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                        </SelectItem>
+          {/* Formulaire terrain — affiché après sélection du dossier */}
+          {selectedDossier && (
+            <div className="space-y-4">
+              {/* Sélection du mandat si plusieurs */}
+              {mandatsDisponibles.length > 1 && (
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-400">Mandat</Label>
+                  <Select
+                    value={selectedMandat ? String(mandatsDisponibles.indexOf(selectedMandat)) : ""}
+                    onValueChange={v => setSelectedMandat(mandatsDisponibles[parseInt(v)])}
+                  >
+                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner un mandat" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {mandatsDisponibles.map((m, i) => (
+                        <SelectItem key={i} value={String(i)} className="text-white text-xs">{m.type_mandat || `Mandat ${i + 1}`}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               )}
-            </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">Notes</Label>
-              <Textarea
-                placeholder="Notes additionnelles..."
-                value={form.notes}
-                onChange={e => setForm({ ...form, notes: e.target.value })}
-                className="text-sm resize-none h-20"
-              />
-            </div>
+              {/* Statut terrain */}
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-400">Statut terrain</Label>
+                <Select value={form.statut_terrain} onValueChange={v => setForm({ ...form, statut_terrain: v })}>
+                  <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="en_verification" className="text-white text-xs">En vérification</SelectItem>
+                    <SelectItem value="a_ceduler" className="text-white text-xs">À cédule</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={handleClose}>Annuler</Button>
-              <Button onClick={handleSave} disabled={!selectedMandat} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
-                Enregistrer
-              </Button>
+              {/* Formulaire terrain */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-400">Date limite cédule</Label>
+                  <Input type="date" value={form.date_limite_leve} onChange={e => setForm({ ...form, date_limite_leve: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-400">Instruments requis</Label>
+                  <Select value={form.instruments_requis} onValueChange={v => setForm({ ...form, instruments_requis: v })}>
+                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {["Can-Net","RTK","CONV","3 GPS","Chaine","SX10","NAVIS","Drône"].map(v => (
+                        <SelectItem key={v} value={v} className="text-white text-xs">{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-400">Donneur</Label>
+                  <Select value={form.donneur} onValueChange={v => setForm({ ...form, donneur: v })}>
+                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {(users || []).map(u => (
+                        <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-400">Technicien</Label>
+                  <Select value={form.technicien} onValueChange={v => setForm({ ...form, technicien: v })}>
+                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {(users || []).map(u => (
+                        <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-400">Temps prévu</Label>
+                <Input placeholder="Ex: 2h30" value={form.temps_prevu} onChange={e => setForm({ ...form, temps_prevu: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+              </div>
+
+              {/* Rendez-vous */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, a_rendez_vous: !form.a_rendez_vous })}
+                    className={`relative w-10 h-5 rounded-full transition-all shadow-lg ${form.a_rendez_vous ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-slate-500 to-slate-600"}`}
+                  >
+                    <motion.div
+                      className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md"
+                      animate={{ x: form.a_rendez_vous ? 18 : 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    />
+                  </button>
+                  <Label className="text-xs text-slate-400">Rendez-vous requis</Label>
+                </div>
+                {form.a_rendez_vous && (
+                  <div className="grid grid-cols-2 gap-4 pl-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400">Date RDV</Label>
+                      <Input type="date" value={form.date_rendez_vous} onChange={e => setForm({ ...form, date_rendez_vous: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-400">Heure RDV</Label>
+                      <Input type="time" value={form.heure_rendez_vous} onChange={e => setForm({ ...form, heure_rendez_vous: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Dossier simultané */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.a_dossier_simultane}
+                    onCheckedChange={checked => setForm({ ...form, a_dossier_simultane: checked })}
+                  />
+                  <Label className="text-xs text-slate-400">Dossier à faire en même temps</Label>
+                </div>
+                {form.a_dossier_simultane && (
+                  <div className="space-y-1 pl-6">
+                    <Label className="text-xs text-slate-400">Dossier simultané</Label>
+                    <Select value={form.dossier_simultane} onValueChange={v => setForm({ ...form, dossier_simultane: v })}>
+                      <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {dossiers.filter(d => d.id !== selectedDossier?.id).map(d => (
+                          <SelectItem key={d.id} value={d.numero_dossier} className="text-white text-xs">
+                            {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-400">Notes</Label>
+                <Textarea
+                  placeholder="Notes additionnelles..."
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  className="text-sm bg-slate-800 border-slate-700 text-white resize-none h-20"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="flex justify-end gap-3 py-4 px-6 border-t border-slate-800">
+          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={handleClose}>
+            Annuler
+          </Button>
+          <Button onClick={handleSave} disabled={!selectedMandat} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+            Enregistrer
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
