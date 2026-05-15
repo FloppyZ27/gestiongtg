@@ -332,7 +332,7 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
 
           {/* Formulaire terrain — section collapsable style amber comme EditDossierForm */}
           {selectedDossier && (
-            <div className="border-2 border-amber-500/30 rounded-lg bg-amber-900/10">
+            <div className="border-2 border-amber-500/30 rounded-lg bg-transparent">
               <div
                 className="cursor-pointer hover:bg-amber-950/60 transition-colors px-4 py-2.5 flex items-center justify-between rounded-t-lg"
                 style={{ background: 'linear-gradient(90deg, hsl(30, 30%, 12%), hsl(30, 20%, 10%))' }}
