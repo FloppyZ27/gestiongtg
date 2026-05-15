@@ -1463,7 +1463,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         document.body
       )}
 
-      <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4">
+      <Card className="bg-transparent border-none shadow-none mb-4">
         <CardContent className="p-4">
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
