@@ -531,15 +531,23 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                           return (
                             <div
                               key={d.id}
-                              className="px-3 py-1.5 text-xs text-white cursor-pointer hover:bg-slate-700 flex items-center gap-2"
+                              className="px-3 py-1.5 text-xs text-white cursor-pointer hover:bg-slate-700 flex flex-col gap-0.5"
                               onMouseDown={() => {
                                 setForm({ ...form, dossier_simultane: label });
                                 setSearchSimultane("");
                                 setShowSimultaneDropdown(false);
                               }}
                             >
-                              <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border text-xs`}>{label}</Badge>
-                              {clients && <span className="text-slate-400 truncate">{clients}</span>}
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border text-xs`}>{label}</Badge>
+                                {d.mandats?.[0]?.type_mandat && (
+                                  <Badge className={`${getMandatColor(d.mandats[0].type_mandat)} border text-xs`}>{getAbbreviatedMandatType(d.mandats[0].type_mandat)}</Badge>
+                                )}
+                                {clients && <span className="text-slate-400 truncate">{clients}</span>}
+                              </div>
+                              {d.mandats?.[0]?.adresse_travaux && formatAdresse(d.mandats[0].adresse_travaux) && (
+                                <span className="text-slate-500 text-xs pl-1 truncate">{formatAdresse(d.mandats[0].adresse_travaux)}</span>
+                              )}
                             </div>
                           );
                         })}
