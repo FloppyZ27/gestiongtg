@@ -1389,7 +1389,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const holiday = isHoliday(day);
     const isDayOver = overDayColumn === dateStr && draggingEquipe && draggingEquipe.dateStr !== dateStr;
     return (
-      <Card key={dateStr} data-day-column={dateStr} className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''} w-full ${isDayOver ? 'ring-2 ring-blue-400/80 bg-blue-500/5' : ''}`}>
+      <Card key={dateStr} data-day-column={dateStr} className={`bg-transparent p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20' : ''} w-full ${isDayOver ? 'ring-2 ring-blue-400/80 bg-blue-500/5' : ''}`}>
         <div className="mb-2">
           <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
             <div className="flex items-center justify-between mb-1">
