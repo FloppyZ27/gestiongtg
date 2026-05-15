@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, X, ChevronDown, ChevronUp, Filter, FolderOpen, Compass } from "lucide-react";
+import { Search, X, ChevronDown, ChevronUp, Filter, FolderOpen, Compass, MapPin, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -522,35 +522,79 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                       />
                     </div>
                     {showSimultaneDropdown && !form.dossier_simultane && (
-                      <div className="absolute z-50 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-y-auto" style={{ maxHeight: '112px' }}>
+                      <div className="absolute z-50 w-full bg-slate-900 border-2 border-emerald-500/30 rounded-lg shadow-2xl overflow-y-auto" style={{ maxHeight: '4px' <= 0 ? '0' : '284px' }}>
                         {dossiersSimultaneFiltered.length === 0 ? (
                           <div className="px-3 py-2 text-slate-500 text-xs">Aucun résultat</div>
-                        ) : dossiersSimultaneFiltered.map(d => {
-                          const label = `${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`;
-                          const clients = getClientsNames(d.clients_ids);
-                          return (
-                            <div
-                              key={d.id}
-                              className="px-3 py-1.5 text-xs text-white cursor-pointer hover:bg-slate-700 flex flex-col gap-0.5"
-                              onMouseDown={() => {
-                                setForm({ ...form, dossier_simultane: label });
-                                setSearchSimultane("");
-                                setShowSimultaneDropdown(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border text-xs`}>{label}</Badge>
-                                {d.mandats?.[0]?.type_mandat && (
-                                  <Badge className={`${getMandatColor(d.mandats[0].type_mandat)} border text-xs`}>{getAbbreviatedMandatType(d.mandats[0].type_mandat)}</Badge>
-                                )}
-                                {clients && <span className="text-slate-400 truncate">{clients}</span>}
-                              </div>
-                              {d.mandats?.[0]?.adresse_travaux && formatAdresse(d.mandats[0].adresse_travaux) && (
-                                <span className="text-slate-500 text-xs pl-1 truncate">{formatAdresse(d.mandats[0].adresse_travaux)}</span>
-                              )}
-                            </div>
-                          );
-                        })}
+                        ) : (
+                          <div className="max-h-[280px] overflow-y-auto">
+                            {dossiersSimultaneFiltered.map(d => {
+                              const label = `${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`;
+                              const clientsNames = getClientsNames(d.clients_ids);
+                              const mandats = (d.mandats || []).filter(m => m.type_mandat);
+                              return (
+                                <div
+                                  key={d.id}
+                                  className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
+                                  onMouseDown={() => {
+                                    setForm({ ...form, dossier_simultane: label });
+                                    setSearchSimultane("");
+                                    setShowSimultaneDropdown(false);
+                                  }}
+                                >
+                                  {/* Ligne principale */}
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                                      <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border flex-shrink-0`}>
+                                        {label}
+                                      </Badge>
+                                      {clientsNames && (
+                                        <span className="text-sm text-slate-300 flex items-center gap-1 flex-shrink-0">
+                                          <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                                          {clientsNames}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Badge className={`text-[10px] px-1.5 py-0 flex-shrink-0 ${d.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                      {d.statut}
+                                    </Badge>
+                                  </div>
+                                  {/* Une ligne par mandat */}
+                                  {mandats.length > 0 && (
+                                    <div className="mt-1.5 space-y-1 pl-1">
+                                      {mandats.map((mandat, idx) => {
+                                        const adresse = formatAdresse(mandat.adresse_travaux);
+                                        return (
+                                          <div key={idx} className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                            <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0 flex-shrink-0`}>
+                                              {getAbbreviatedMandatType(mandat.type_mandat)}
+                                            </Badge>
+                                            {mandat.tache_actuelle && (
+                                              <>
+                                                <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
+                                                <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[10px] px-1.5 py-0 flex-shrink-0">
+                                                  {mandat.tache_actuelle}
+                                                </Badge>
+                                              </>
+                                            )}
+                                            {adresse && (
+                                              <>
+                                                <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
+                                                <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
+                                                  <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                                                  {adresse}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
