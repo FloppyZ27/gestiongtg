@@ -119,6 +119,7 @@ export default function Profil() {
     type: "Pointage",
     multiplicateur: "1"
   });
+  const [congeError, setCongeError] = useState("");
   const weekScrollRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -563,6 +564,7 @@ export default function Profil() {
 
   const handleSubmitAddPointage = async (e) => {
     e.preventDefault();
+    setCongeError("");
     
     const [heureD, minD] = addPointageForm.heure_debut.split(':');
     const [heureF, minF] = addPointageForm.heure_fin.split(':');
@@ -574,6 +576,21 @@ export default function Profil() {
     fin.setHours(parseInt(heureF), parseInt(minF), 0);
     
     const dureeHeures = parseFloat(((fin - debut) / (1000 * 60 * 60)).toFixed(2));
+
+    // Validation des soldes de congé
+    const typeConge = addPointageForm.type;
+    if (typeConge === 'Vacance' && dureeHeures > soldeRestant.vacances) {
+      setCongeError(`Impossible d'ajouter ${dureeHeures}h de vacances. Solde restant : ${soldeRestant.vacances.toFixed(1)}h`);
+      return;
+    }
+    if (typeConge === 'Mieux-Être' && dureeHeures > soldeRestant.mieuxEtre) {
+      setCongeError(`Impossible d'ajouter ${dureeHeures}h de Mieux-Être. Solde restant : ${soldeRestant.mieuxEtre.toFixed(1)}h`);
+      return;
+    }
+    if (typeConge === 'En banque' && dureeHeures > soldeRestant.enBanque) {
+      setCongeError(`Impossible d'ajouter ${dureeHeures}h en banque. Solde restant : ${soldeRestant.enBanque.toFixed(1)}h`);
+      return;
+    }
 
     createPointageMutation.mutate({
       date: addPointageForm.date,
@@ -1297,6 +1314,7 @@ export default function Profil() {
         <Dialog open={isAddingPointage} onOpenChange={(open) => {
           setIsAddingPointage(open);
           if (!open) {
+            setCongeError("");
             setAddPointageForm({
               date: new Date().toISOString().split('T')[0],
               heure_debut: "",
@@ -1412,6 +1430,11 @@ export default function Profil() {
                       rows="3"
                     />
                   </div>
+                  {congeError && (
+                    <div className="p-3 bg-red-500/15 border border-red-500/40 rounded-lg text-red-400 text-sm">
+                      ⚠️ {congeError}
+                    </div>
+                  )}
                   <div className="flex justify-end gap-3 pt-4">
                     <Button
                       type="button"
