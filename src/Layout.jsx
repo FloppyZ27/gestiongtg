@@ -275,9 +275,9 @@ function LayoutContent({ children, currentPageName }) {
   const usedEnBanque = entreesConges.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
   const soldeUtilisateur = {
     ...soldeBase,
-    heures_vacances: Math.max(0, (soldeBase.heures_vacances ?? 0) - usedVacances),
-    heures_mieux_etre: Math.max(0, (soldeBase.heures_mieux_etre ?? 0) - usedMieuxEtre),
-    heures_en_banque: Math.max(0, (soldeBase.heures_en_banque ?? 0) - usedEnBanque),
+    heures_vacances: Math.max(0, (soldeBase.max_vacances ?? 120) - usedVacances),
+    heures_mieux_etre: Math.max(0, (soldeBase.max_mieux_etre ?? 40) - usedMieuxEtre),
+    heures_en_banque: Math.max(0, (soldeBase.max_en_banque ?? 80) - usedEnBanque),
   };
 
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');

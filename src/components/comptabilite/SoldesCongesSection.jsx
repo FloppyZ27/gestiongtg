@@ -156,7 +156,7 @@ export default function SoldesCongesSection() {
   const { data: soldes = [] } = useQuery({ queryKey: ['soldesConges'], queryFn: () => base44.entities.SoldeConges.list(), initialData: [] });
   const { data: toutesEntrees = [] } = useQuery({
     queryKey: ['entreeTempsCongesAll', currentYear],
-    queryFn: () => base44.entities.EntreeTemps.filter({}, '-date', 2000),
+    queryFn: () => base44.entities.EntreeTemps.filter({}, '-date', 5000),
     initialData: [],
   });
 
