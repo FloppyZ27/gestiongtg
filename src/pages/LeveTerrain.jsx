@@ -654,7 +654,7 @@ export default function LeveTerrain() {
           {/* Titre + sous-titre */}
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Levé Terrain</h1>
-            <Mountain className="w-8 h-8 text-blue-400" />
+            <Mountain className="w-8 h-8" style={{ color: 'hsl(0, 84%, 60%)' }} />
           </div>
           <p className="text-slate-400">Consultez vos dossiers cédulés et gérez vos levés de terrain</p>
         </div>
