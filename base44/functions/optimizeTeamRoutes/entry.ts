@@ -297,6 +297,9 @@ Deno.serve(async (req) => {
     const sortedDates = [...futureDates].sort();
 
     for (const dateStr of sortedDates) {
+      // Skip holidays - don't schedule any teams on holidays
+      if (isHoliday(dateStr)) continue;
+      
       if (pool.length === 0) break;
 
       const dayEquipes = (equipesCopy[dateStr] || []).filter(eq =>
