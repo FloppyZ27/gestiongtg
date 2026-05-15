@@ -203,7 +203,7 @@ export default function CreateTeamTerrainDialog({
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-3">
             {/* Section Technicien Chef */}
-            <Card className="border-blue-700 bg-slate-800/30">
+            <Card className="border-blue-700 bg-transparent">
               <CardHeader 
                 className="cursor-pointer hover:bg-blue-900/40 transition-colors py-2 px-4 bg-blue-900/20"
                 onClick={() => setChefOpen(!chefOpen)}
@@ -219,7 +219,7 @@ export default function CreateTeamTerrainDialog({
                 </div>
               </CardHeader>
               {!chefOpen ? null : (
-                <CardContent className="pt-2 pb-2 space-y-1">
+                <CardContent className="pt-2 pb-2 space-y-1 bg-transparent">
                   {chefs.length > 0 ? (
                     chefs.map(chef => {
                       const isSelected = selectedChefs.includes(chef.id);
@@ -287,7 +287,7 @@ export default function CreateTeamTerrainDialog({
             </Card>
 
             {/* Section Technicien */}
-            <Card className="border-cyan-700 bg-slate-800/30">
+            <Card className="border-cyan-700 bg-transparent">
               <CardHeader 
                 className="cursor-pointer hover:bg-cyan-900/40 transition-colors py-2 px-4 bg-cyan-900/20"
                 onClick={() => setTechOpen(!techOpen)}
@@ -303,7 +303,7 @@ export default function CreateTeamTerrainDialog({
                 </div>
               </CardHeader>
               {!techOpen ? null : (
-                <CardContent className="pt-2 pb-2 space-y-1">
+                <CardContent className="pt-2 pb-2 space-y-1 bg-transparent">
                   {techs.length > 0 ? (
                     techs.map(tech => {
                       const isSelected = selectedTechs.includes(tech.id);
@@ -371,7 +371,7 @@ export default function CreateTeamTerrainDialog({
             </Card>
 
             {/* Section Véhicules */}
-            <Card className="border-purple-700 bg-slate-800/30">
+            <Card className="border-purple-700 bg-transparent">
               <CardHeader 
                 className="cursor-pointer hover:bg-purple-900/40 transition-colors py-2 px-4 bg-purple-900/20"
                 onClick={() => setVehiculeOpen(!vehiculeOpen)}
@@ -387,7 +387,7 @@ export default function CreateTeamTerrainDialog({
                 </div>
               </CardHeader>
               {!vehiculeOpen ? null : (
-                <CardContent className="pt-2 pb-2 space-y-1">
+                <CardContent className="pt-2 pb-2 space-y-1 bg-transparent">
                   {availableVehicules.length > 0 ? (
                     availableVehicules.map(veh => {
                       const isSelected = selectedVehicules.includes(veh.id);
@@ -416,7 +416,7 @@ export default function CreateTeamTerrainDialog({
             </Card>
 
             {/* Section Équipements */}
-            <Card className="border-orange-700 bg-slate-800/30">
+            <Card className="border-orange-700 bg-transparent">
               <CardHeader 
                 className="cursor-pointer hover:bg-orange-900/40 transition-colors py-2 px-4 bg-orange-900/20"
                 onClick={() => setEquipementOpen(!equipementOpen)}
@@ -432,7 +432,7 @@ export default function CreateTeamTerrainDialog({
                 </div>
               </CardHeader>
               {!equipementOpen ? null : (
-                <CardContent className="pt-2 pb-2 space-y-1">
+                <CardContent className="pt-2 pb-2 space-y-1 bg-transparent">
                   {availableEquipements.length > 0 ? (
                     availableEquipements.map(eq => {
                       const isSelected = selectedEquipements.includes(eq.id);

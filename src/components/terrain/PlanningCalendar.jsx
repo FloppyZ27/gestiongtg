@@ -1535,7 +1535,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   </div>
                 )}
                 <PremiumButton
-                  label="Entrée terrain"
+                  label="Nouveau terrain"
                   onClick={() => setShowAddTerrainEntry(true)}
                   icon={Mountain}
                 />
