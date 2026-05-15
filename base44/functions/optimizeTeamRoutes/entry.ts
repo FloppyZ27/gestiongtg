@@ -4,6 +4,42 @@ const BUREAU_ADDRESS = "11 rue melancon est, Alma, QC";
 const MAX_HOURS = 9;
 const MAX_HOURS_FRIDAY = 5;
 
+// Jours fériés au Québec (dates fixes + variables)
+function getHolidays(year) {
+  // Dates fixes
+  const holidays = [
+    `${year}-01-01`, // Jour de l'an
+    `${year}-06-24`, // Fête nationale
+    `${year}-07-01`, // Canada
+    `${year}-09-07`, // Fête du travail (1er lundi de septembre)
+    `${year}-12-25`, // Noël
+  ];
+  
+  // Vendredi saint (calcul approximatif - 2 jours avant Pâques)
+  // Pour 2025: 18 avril, 2026: 3 avril
+  if (year === 2025) holidays.push(`${year}-04-18`);
+  else if (year === 2026) holidays.push(`${year}-04-03`);
+  else if (year === 2027) holidays.push(`${year}-03-26`);
+  
+  // Lundi de Pâques (1 jour après Pâques)
+  if (year === 2025) holidays.push(`${year}-04-21`);
+  else if (year === 2026) holidays.push(`${year}-04-06`);
+  else if (year === 2027) holidays.push(`${year}-03-29`);
+  
+  // Action de grâce (2e lundi d'octobre)
+  if (year === 2025) holidays.push(`${year}-10-13`);
+  else if (year === 2026) holidays.push(`${year}-10-12`);
+  else if (year === 2027) holidays.push(`${year}-10-11`);
+  
+  return new Set(holidays);
+}
+
+function isHoliday(dateStr) {
+  const year = new Date(dateStr + 'T00:00:00').getFullYear();
+  const holidays = getHolidays(year);
+  return holidays.has(dateStr);
+}
+
 // Retourne { durationSeconds, order } pour une liste d'adresses (round trip depuis le bureau)
 async function getOptimizedRoute(apiKey, addresses) {
   if (!addresses || addresses.length === 0) return { durationSeconds: 0, order: [] };
@@ -248,11 +284,13 @@ Deno.serve(async (req) => {
       }));
     });
 
-    // Tous les jours futurs à traiter: jours avec équipes + 45 jours ouvrables à venir
+    // Tous les jours futurs à traiter: jours avec équipes + 45 jours ouvrables à venir (excluant weekends et jours fériés)
     const futureDates = new Set(Object.keys(equipesCopy).filter(d => d >= today));
     const addDate = new Date(today); addDate.setDate(addDate.getDate() + 1);
     for (let i = 0; i < 45; i++) {
-      while (addDate.getDay() === 0 || addDate.getDay() === 6) addDate.setDate(addDate.getDate() + 1);
+      while (addDate.getDay() === 0 || addDate.getDay() === 6 || isHoliday(addDate.toISOString().split('T')[0])) {
+        addDate.setDate(addDate.getDate() + 1);
+      }
       futureDates.add(addDate.toISOString().split('T')[0]);
       addDate.setDate(addDate.getDate() + 1);
     }
