@@ -649,7 +649,7 @@ export default function LeveTerrain() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col p-4 md:p-8">
+      <div className="min-h-screen bg-transparent flex flex-col p-4 md:p-8">
         <div className="pb-4">
           {/* Titre + sous-titre */}
           <div className="flex items-center gap-3 mb-2">
