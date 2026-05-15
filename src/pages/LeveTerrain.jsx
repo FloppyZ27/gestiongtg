@@ -667,24 +667,17 @@ export default function LeveTerrain() {
             <div className="flex items-center justify-between py-4 px-6 bg-transparent">
               {/* Calendrier avec flèches de navigation */}
               <div className="flex items-center gap-2">
-                <button onClick={goToPrevDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgb(16,185,129)', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
-
+                <Button size="sm" variant="outline" onClick={goToPrevDay} className="bg-slate-800 border-slate-700 text-white hover:bg-primary/30 hover:border-primary/50 hover:text-primary h-8 w-8 p-0"><ChevronLeft className="w-4 h-4" /></Button>
+                
                 <div className="relative flex items-center gap-2 cursor-pointer group" title="Cliquer pour choisir une date">
-                  <span className="text-white font-bold text-lg capitalize group-hover:text-emerald-400 transition-colors">
-                    {format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
-                  </span>
-                  <Calendar className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
-                  <input type="date" value={selectedDate} onChange={(e) => { if (e.target.value) { setSelectedDate(e.target.value); setSelectedItem(null); } }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{ zIndex: 1 }} />
+                  <div className="text-white font-bold text-lg group-hover:text-primary transition-colors">{format(new Date(selectedDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</div>
+                  <Calendar className="w-4 h-4 text-slate-500 group-hover:text-primary transition-colors flex-shrink-0" />
+                  <input type="date" value={selectedDate} onChange={(e)=>{if(e.target.value){setSelectedDate(e.target.value);setSelectedItem(null);}}} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" style={{zIndex:1}} />
                 </div>
-
-                <button onClick={goToNextDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgb(16,185,129)', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronRight className="w-4 h-4" /></button>
-
-                <button
-                  onClick={() => { setSelectedDate(today); setSelectedItem(null); }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.3)'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 10px rgba(59,130,246,0.3)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.1)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
-                  style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid #3b82f6', outline: '1px solid #3b82f6', color: '#60a5fa', padding: '0 8px', height: '26px', borderRadius: '5px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s', boxSizing: 'border-box' }}
-                >Aujourd'hui</button>
+                
+                <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-primary/30 hover:border-primary/50 hover:text-primary h-8 w-8 p-0"><ChevronRight className="w-4 h-4" /></Button>
+                
+                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
               </div>
 
               <div className="flex items-center gap-3">
