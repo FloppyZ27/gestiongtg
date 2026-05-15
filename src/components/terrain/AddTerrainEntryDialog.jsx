@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, X, ChevronDown, ChevronUp, Filter, FolderOpen } from "lucide-react";
+import { Search, X, ChevronDown, ChevronUp, Filter, FolderOpen, Compass } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -334,13 +334,17 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
           {selectedDossier && (
             <div className="border-2 border-amber-500/30 rounded-lg bg-amber-900/10">
               <div
-                className="cursor-pointer hover:bg-amber-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                className="cursor-pointer hover:bg-amber-950/60 transition-colors px-4 py-2.5 flex items-center justify-between rounded-t-lg"
+                style={{ background: 'linear-gradient(90deg, hsl(30, 30%, 12%), hsl(30, 20%, 10%))' }}
                 onClick={() => setFormCollapsed(!formCollapsed)}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-amber-400 text-sm font-semibold">+ Ajouter un terrain</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                    <Compass className="w-3.5 h-3.5 text-amber-400" />
+                  </div>
+                  <span className="text-amber-400 text-sm font-semibold tracking-wide">Terrain</span>
                 </div>
-                {formCollapsed ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronUp className="w-4 h-4 text-amber-400" />}
+                {formCollapsed ? <ChevronDown className="w-4 h-4 text-amber-500/60" /> : <ChevronUp className="w-4 h-4 text-amber-500/60" />}
               </div>
 
               {!formCollapsed && (
