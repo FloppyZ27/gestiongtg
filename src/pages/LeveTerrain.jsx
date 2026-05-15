@@ -754,7 +754,7 @@ export default function LeveTerrain() {
                       animate={isSelected ? { scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } } : { scale: 1, transition: { duration: 0.2 } }}
                       className={`w-full text-left p-2 border-b border-slate-800/50 relative group`}
                       style={{
-                        background: isSelected ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
+                        background: 'transparent',
                       }}
                     >
                       <div className="relative z-10">
