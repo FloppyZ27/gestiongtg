@@ -85,7 +85,7 @@ function UserTotalCards({ userEmail, year }) {
   const filtered = entrees.filter(e => CONGE_TYPES.includes(e.tache) && e.date?.startsWith(String(year)));
   const totals = {
     Vacances: filtered.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0),
-    'Mieux-être': filtered.filter(e => e.tache === 'Mieux-être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0),
+    'Mieux-être': filtered.filter(e => e.tache === 'Mieux-être' || e.tache === 'Mieux-etre' || e.tache === 'Mieux-Être').reduce((s, e) => s + (e.heures || 0), 0),
     'En banque': filtered.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0),
   };
   if (isLoading) return <p className="text-slate-500 text-xs">Chargement...</p>;
