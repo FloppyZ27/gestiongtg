@@ -660,11 +660,11 @@ export default function LeveTerrain() {
         </div>
 
         {/* Header */}
-        <div className="border-b border-slate-800 bg-slate-900/50">
+        <div className="border-b border-slate-800 bg-transparent">
 
           {/* Date/Navigation à gauche + Nom à droite */}
           {user && (
-            <div className="flex items-center justify-between py-4 px-6 bg-slate-900/30">
+            <div className="flex items-center justify-between py-4 px-6 bg-transparent">
               {/* Calendrier avec flèches de navigation */}
               <div className="flex items-center gap-2">
                 <button onClick={goToPrevDay} onMouseEnter={e => { Object.assign(e.currentTarget.style, { background: 'rgb(16,185,129)', color: 'white' }); }} onMouseLeave={e => { Object.assign(e.currentTarget.style, { background: 'rgb(30,41,59)', color: 'white' }); }} style={{ background: 'rgb(30,41,59)', border: '0', outline: 'none', boxShadow: 'none', color: 'white', padding: '0 12px', height: '32px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px', transition: 'background 0.15s' }}><ChevronLeft className="w-4 h-4" /></button>
@@ -708,7 +708,7 @@ export default function LeveTerrain() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* ===== COLONNE GAUCHE : Dossiers du jour ===== */}
-          <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-slate-900/30 flex flex-col overflow-hidden">
+          <div className="w-72 flex-shrink-0 border-r border-slate-800 bg-transparent flex flex-col overflow-hidden">
             <div className="px-3 py-3 border-b border-slate-800 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
