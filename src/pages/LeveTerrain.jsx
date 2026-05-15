@@ -764,14 +764,12 @@ export default function LeveTerrain() {
                               className="absolute inset-0 rounded pointer-events-none"
                               animate={{
                                 boxShadow: [
-                                  'inset 0 0 15px rgba(30, 144, 255, 0.3)',
-                                  'inset 0 0 30px rgba(30, 144, 255, 0.45)',
-                                  'inset 0 0 40px rgba(30, 144, 255, 0.55)',
-                                  'inset 0 0 30px rgba(30, 144, 255, 0.45)',
-                                  'inset 0 0 15px rgba(30, 144, 255, 0.3)',
+                                  '0 0 20px rgba(239, 68, 68, 0.2)',
+                                  '0 0 35px rgba(249, 115, 22, 0.3)',
+                                  '0 0 20px rgba(239, 68, 68, 0.2)',
                                 ]
                               }}
-                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                             />
                           </>
                         )}
