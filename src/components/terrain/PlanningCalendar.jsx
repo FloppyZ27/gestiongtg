@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Users, Truck, Wrench, Plus, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Sparkles, Loader, ChevronLeft, ChevronRight, Map } from "lucide-react";
+import { Users, Truck, Wrench, Plus, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Sparkles, Loader, ChevronLeft, ChevronRight, Map, Search } from "lucide-react";
 import AllTerrainsMapModal from "./AllTerrainsMapModal";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -202,7 +202,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [deleteEquipeWarning, setDeleteEquipeWarning] = useState(null);
   const [conflitTechnicienWarning, setConflitTechnicienWarning] = useState(null); // { equipe, srcDate, targetDate, conflits: [{technicien, equipeNom}] }
   const pendingEquipeMoveRef = useRef(null);
-  const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" });
+  const [terrainForm, setTerrainForm] = useState({ date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "", a_dossier_simultane: false });
+  const [editTerrainSearchSimultane, setEditTerrainSearchSimultane] = useState("");
+  const [editTerrainShowSimultaneDropdown, setEditTerrainShowSimultaneDropdown] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [deleteCardConfirm, setDeleteCardConfirm] = useState(null);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
@@ -658,7 +660,10 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     setEditingTerrainCard(card);
     let def = card.terrain?.date_limite_leve || "";
     if (!def) { const m = card.mandat; let base = null; if (m.date_livraison) base = new Date(m.date_livraison + 'T00:00:00'); else if (m.date_signature) base = new Date(m.date_signature + 'T00:00:00'); else if (m.date_debut_travaux) base = new Date(m.date_debut_travaux + 'T00:00:00'); if (base) { base.setDate(base.getDate() - 14); def = format(base, "yyyy-MM-dd"); } }
-    setTerrainForm({ date_limite_leve: def, instruments_requis: card.terrain?.instruments_requis || "", a_rendez_vous: card.terrain?.a_rendez_vous || false, date_rendez_vous: card.terrain?.date_rendez_vous || "", heure_rendez_vous: card.terrain?.heure_rendez_vous || "", donneur: card.terrain?.donneur || "", technicien: card.terrain?.technicien || "", dossier_simultane: card.terrain?.dossier_simultane || "", temps_prevu: card.terrain?.temps_prevu || "", notes: card.terrain?.notes || "" });
+    const hasDossierSimultane = !!(card.terrain?.dossier_simultane);
+    setTerrainForm({ date_limite_leve: def, instruments_requis: card.terrain?.instruments_requis || "", a_rendez_vous: card.terrain?.a_rendez_vous || false, date_rendez_vous: card.terrain?.date_rendez_vous || "", heure_rendez_vous: card.terrain?.heure_rendez_vous || "", donneur: card.terrain?.donneur || "", technicien: card.terrain?.technicien || "", dossier_simultane: card.terrain?.dossier_simultane || "", temps_prevu: card.terrain?.temps_prevu || "", notes: card.terrain?.notes || "", a_dossier_simultane: hasDossierSimultane });
+    setEditTerrainSearchSimultane("");
+    setEditTerrainShowSimultaneDropdown(false);
     setIsTerrainDialogOpen(true);
   };
 
@@ -719,7 +724,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const updatedMandats = [...dossier.mandats];
     const cur = updatedMandats[editingTerrainCard.mandatIndex];
     let tl = [...(cur.terrains_list || [])];
-    tl[editingTerrainCard.terrainIndex] = terrainForm;
+    const formToSave = { ...terrainForm, dossier_simultane: terrainForm.a_dossier_simultane ? terrainForm.dossier_simultane : "" };
+    tl[editingTerrainCard.terrainIndex] = formToSave;
     updatedMandats[editingTerrainCard.mandatIndex] = { ...cur, terrains_list: tl, statut_terrain: cur.statut_terrain === "en_verification" ? "a_ceduler" : cur.statut_terrain };
     onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
     setIsTerrainDialogOpen(false); setEditingTerrainCard(null);
@@ -1645,6 +1651,61 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
               <div className="space-y-1"><Label className="text-slate-400 text-xs">Date limite cédule</Label><Input type="date" value={terrainForm.date_limite_leve} onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" /></div>
               <div className="flex items-center gap-2 translate-y-[15px]"><button type="button" onClick={() => setTerrainForm({...terrainForm, a_rendez_vous: !terrainForm.a_rendez_vous})} className={`relative w-10 h-5 rounded-full transition-all shadow-lg ${terrainForm.a_rendez_vous ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-slate-500 to-slate-600"}`}><motion.div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md" animate={{x: terrainForm.a_rendez_vous ? 18 : 0}} transition={{type: "spring", stiffness: 400, damping: 25}} /></button><Label className="text-slate-400 text-xs">Rendez-vous</Label></div>
               {terrainForm.a_rendez_vous && <><div className="space-y-1"><Label className="text-slate-400 text-xs">Date RDV</Label><Input type="date" value={terrainForm.date_rendez_vous} onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" /></div><div className="space-y-1"><Label className="text-slate-400 text-xs">Heure RDV</Label><Input type="time" value={terrainForm.heure_rendez_vous} onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" /></div></>}
+            </div>
+            {/* Dossier à faire en même temps */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 h-8">
+                <Switch
+                  checked={terrainForm.a_dossier_simultane || false}
+                  onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_dossier_simultane: checked, dossier_simultane: checked ? terrainForm.dossier_simultane : ""})}
+                  style={{ backgroundColor: terrainForm.a_dossier_simultane ? 'hsl(45, 90%, 55%)' : 'hsl(220, 10%, 30%)', border: 'none', width: '36px', height: '20px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', padding: '2px', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                />
+                <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
+              </div>
+              {terrainForm.a_dossier_simultane && (
+                <div className="space-y-1 relative">
+                  <Label className="text-slate-400 text-xs">Dossier simultané</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 w-3 h-3" />
+                    <Input
+                      placeholder="Rechercher un dossier..."
+                      value={terrainForm.dossier_simultane ? terrainForm.dossier_simultane : editTerrainSearchSimultane}
+                      onChange={e => { setEditTerrainSearchSimultane(e.target.value); setTerrainForm({...terrainForm, dossier_simultane: ""}); setEditTerrainShowSimultaneDropdown(true); }}
+                      onFocus={() => setEditTerrainShowSimultaneDropdown(true)}
+                      onBlur={() => setTimeout(() => setEditTerrainShowSimultaneDropdown(false), 150)}
+                      className="bg-slate-700 border-slate-600 text-white h-8 text-xs pl-7"
+                    />
+                  </div>
+                  {editTerrainShowSimultaneDropdown && !terrainForm.dossier_simultane && (
+                    <div className="absolute z-50 w-full bg-slate-900 border-2 border-emerald-500/30 rounded-lg shadow-2xl overflow-hidden" style={{ maxHeight: '240px', overflowY: 'auto' }}>
+                      {dossiers
+                        .filter(d => d.id !== editingTerrainCard?.dossier?.id)
+                        .filter(d => {
+                          if (!editTerrainSearchSimultane) return true;
+                          const s = editTerrainSearchSimultane.toLowerCase();
+                          const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
+                          return num.toLowerCase().includes(s) || getClientsNames(d.clients_ids).toLowerCase().includes(s);
+                        })
+                        .map(d => {
+                          const label = `${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`;
+                          return (
+                            <div
+                              key={d.id}
+                              className="px-3 py-2 hover:bg-slate-800 cursor-pointer transition-colors border-b border-slate-800/70 last:border-b-0"
+                              onMouseDown={() => { setTerrainForm({...terrainForm, dossier_simultane: label}); setEditTerrainSearchSimultane(""); setEditTerrainShowSimultaneDropdown(false); }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border text-xs`}>{label}</Badge>
+                                <span className="text-xs text-slate-300">{getClientsNames(d.clients_ids)}</span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      }
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
