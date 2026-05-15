@@ -29,10 +29,13 @@ function getHolidays(year) {
   holidays.push(thanksgivingDay.toISOString().split('T')[0]);
   
   // Lundi précédant le 25 mai (Jour de la Reine / Victoria Day)
+  // C'est le dernier lundi avant ou incluant le 25 mai
   const may25 = new Date(year, 4, 25);
   const may25Day = may25.getDay();
   const victoriaDay = new Date(may25);
-  victoriaDay.setDate(may25.getDate() - (may25Day === 0 ? 6 : may25Day - 1));
+  // Si le 25 mai est lundi (1), c'est ce jour. Sinon, reculer jusqu'au lundi précédent
+  const daysToSubtract = may25Day === 1 ? 0 : (may25Day === 0 ? 6 : may25Day - 1);
+  victoriaDay.setDate(may25.getDate() - daysToSubtract);
   holidays.push(victoriaDay.toISOString().split('T')[0]);
   
   // Vendredi saint (calcul approximatif - 2 jours avant Pâques)
@@ -288,14 +291,27 @@ Deno.serve(async (req) => {
     };
 
     // Vider les mandats non-lockés de toutes les équipes futures (on va les réassigner)
+    // Exclure complètement les jours fériés et weekends
     const equipesCopy = {};
     Object.entries(equipes).forEach(([dateStr, dayEqs]) => {
-      equipesCopy[dateStr] = dayEqs.map(eq => ({
-        ...eq,
-        mandats: dateStr < today
-          ? [...eq.mandats] // passé: intouché
-          : eq.mandats.filter(id => lockedSet.has(id)), // futur: garder seulement les lockées
-      }));
+      const dateObj = new Date(dateStr + 'T00:00:00');
+      const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+      const isFerie = isHoliday(dateStr);
+      
+      // Si c'est un weekend ou jour férié, on ne garde que le passé locké
+      if (dateStr >= today && (isWeekend || isFerie)) {
+        equipesCopy[dateStr] = dayEqs.map(eq => ({
+          ...eq,
+          mandats: [], // vider complètement les jours fériés/weekends futurs
+        }));
+      } else {
+        equipesCopy[dateStr] = dayEqs.map(eq => ({
+          ...eq,
+          mandats: dateStr < today
+            ? [...eq.mandats] // passé: intouché
+            : eq.mandats.filter(id => lockedSet.has(id)), // futur normal: garder seulement les lockées
+        }));
+      }
     });
 
     // Tous les jours futurs à traiter: jours avec équipes + 45 jours ouvrables à venir (excluant weekends et jours fériés)
