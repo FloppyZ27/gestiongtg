@@ -92,12 +92,14 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
     return ids.map(id => { const c = clients.find(c => c.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
   };
 
-  const filteredDossiers = dossiers.filter(d => {
-    const s = searchTerm.toLowerCase();
-    const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
-    const clientNames = getClientsNames(d.clients_ids);
-    return num.toLowerCase().includes(s) || (d.numero_dossier || "").toLowerCase().includes(s) || clientNames.toLowerCase().includes(s);
-  });
+  const filteredDossiers = dossiers
+    .filter(d => {
+      const s = searchTerm.toLowerCase();
+      const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
+      const clientNames = getClientsNames(d.clients_ids);
+      return num.toLowerCase().includes(s) || (d.numero_dossier || "").toLowerCase().includes(s) || clientNames.toLowerCase().includes(s);
+    })
+    .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture));
 
   const activeFiltersCount = filterArpenteur.length + filterMandat.length + filterVille.length;
 
@@ -266,7 +268,7 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(searchTerm ? filteredDossiers : [...dossiers].sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))).flatMap((dossier) => {
+                          {filteredDossiers.flatMap((dossier) => {
                             const clientsNames = getClientsNames(dossier.clients_ids);
                             if (!dossier.mandats || dossier.mandats.length === 0) return null;
                             return dossier.mandats.filter((mandat) => {
