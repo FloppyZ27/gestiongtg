@@ -1323,7 +1323,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     return (
       <div key={equipe.id} data-equipe-id={equipe.id} className={`bg-slate-800/50 rounded-lg overflow-hidden transition-all duration-150 ${isOver ? 'ring-2 ring-emerald-400/80 bg-emerald-500/10' : ''} ${isDraggingThisEquipe ? 'opacity-30 scale-95' : ''}`}>
         <div
-          className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50 cursor-grab active:cursor-grabbing select-none"
+          className="px-2 py-2 border-b-2 border-orange-500/50 cursor-grab active:cursor-grabbing select-none" style={{ background: 'linear-gradient(90deg, hsl(0, 75%, 38%), hsl(22, 90%, 45%))' }}
           onMouseDown={onEquipeHeaderMouseDown}
           onMouseUp={onEquipeHeaderMouseUp}
           title="Maintenir pour déplacer l'équipe"
@@ -1741,7 +1741,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   return (
                     <div key={equipe.id} className="bg-slate-800/50 rounded-lg overflow-hidden mb-3" style={{ opacity: routeIdx >= 0 && !isRouteVisible ? 0.5 : 1, transition: 'opacity 0.2s' }}>
                       {/* Header équipe — avec bouton toggle trajet */}
-                      <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
+                      <div className="px-2 py-2 border-b-2 border-orange-500/50" style={{ background: 'linear-gradient(90deg, hsl(0, 75%, 38%), hsl(22, 90%, 45%))' }}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <span className="text-white text-sm font-bold block truncate">{equipeNom}</span>
