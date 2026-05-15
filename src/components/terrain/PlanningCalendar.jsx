@@ -30,6 +30,8 @@ import { OptimizeConfirmDialog, OptimizeResultDialog } from "./OptimizeDialogs";
 import { DossierCard } from "./DossierCard";
 import ConfirmDeleteDialog from "@/components/shared/ConfirmDeleteDialog";
 import PremiumButton from "@/components/CommunicationClients/PremiumButton";
+import AddTerrainEntryDialog from "./AddTerrainEntryDialog";
+import { Mountain } from "lucide-react";
 
 // Congés fériés
 const getHolidays = (year) => {
@@ -223,6 +225,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [showOptimizeConfirm, setShowOptimizeConfirm] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState(null); // null | { totalNew: number }
   const [showAllTerrainsMap, setShowAllTerrainsMap] = useState(false);
+  const [showAddTerrainEntry, setShowAddTerrainEntry] = useState(false);
 
   // Groupes de cartes liées: [{id: string, cardIds: [string, ...]}]
   const [linkedGroups, setLinkedGroups] = useState(() => {
@@ -683,6 +686,30 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       }
     }
     setDeleteCardConfirm(null);
+  };
+
+  const handleAddTerrainEntry = (dossier, mandat, form) => {
+    if (!onUpdateDossier) return;
+    const mandatIndex = dossier.mandats.indexOf(mandat);
+    if (mandatIndex === -1) return;
+    const terrainEntry = {
+      date_limite_leve: form.date_limite_leve,
+      instruments_requis: form.instruments_requis,
+      a_rendez_vous: form.a_rendez_vous,
+      date_rendez_vous: form.date_rendez_vous,
+      heure_rendez_vous: form.heure_rendez_vous,
+      donneur: form.donneur,
+      technicien: form.technicien,
+      dossier_simultane: form.a_dossier_simultane ? form.dossier_simultane : "",
+      temps_prevu: form.temps_prevu,
+      notes: form.notes,
+    };
+    const updatedMandats = dossier.mandats.map((m, idx) => {
+      if (idx !== mandatIndex) return m;
+      const terrains_list = [...(m.terrains_list || []), terrainEntry];
+      return { ...m, statut_terrain: form.statut_terrain, terrains_list };
+    });
+    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
   };
 
   const handleSaveTerrain = () => {
@@ -1501,6 +1528,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                   </div>
                 )}
                 <PremiumButton
+                  label="Entrée terrain"
+                  onClick={() => setShowAddTerrainEntry(true)}
+                  icon={Mountain}
+                />
+                <PremiumButton
                   label="Vue carte"
                   onClick={() => setShowAllTerrainsMap(true)}
                   icon={Map}
@@ -1566,6 +1598,15 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           </div>
         </div>
       </DragDropContext>
+
+      <AddTerrainEntryDialog
+        open={showAddTerrainEntry}
+        onOpenChange={setShowAddTerrainEntry}
+        dossiers={dossiers}
+        clients={clients}
+        users={users}
+        onSave={handleAddTerrainEntry}
+      />
 
       <AllTerrainsMapModal
         open={showAllTerrainsMap}
