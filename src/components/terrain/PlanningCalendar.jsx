@@ -688,10 +688,9 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     setDeleteCardConfirm(null);
   };
 
-  const handleAddTerrainEntry = (dossier, mandat, form) => {
+  const handleAddTerrainEntry = (dossier, mandatIndex, form) => {
     if (!onUpdateDossier) return;
-    const mandatIndex = dossier.mandats.indexOf(mandat);
-    if (mandatIndex === -1) return;
+    if (mandatIndex < 0 || mandatIndex >= dossier.mandats.length) return;
     const terrainEntry = {
       date_limite_leve: form.date_limite_leve,
       instruments_requis: form.instruments_requis,
@@ -704,12 +703,14 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
       temps_prevu: form.temps_prevu,
       notes: form.notes,
     };
-    const updatedMandats = dossier.mandats.map((m, idx) => {
+    // Récupérer le dossier frais depuis le cache pour éviter les références obsolètes
+    const freshDossier = dossiers.find(d => d.id === dossier.id) || dossier;
+    const updatedMandats = freshDossier.mandats.map((m, idx) => {
       if (idx !== mandatIndex) return m;
       const terrains_list = [...(m.terrains_list || []), terrainEntry];
-      return { ...m, statut_terrain: form.statut_terrain, terrains_list };
+      return { ...m, tache_actuelle: "Cédule", statut_terrain: form.statut_terrain, terrains_list };
     });
-    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+    onUpdateDossier(freshDossier.id, { ...freshDossier, mandats: updatedMandats });
   };
 
   const handleSaveTerrain = () => {

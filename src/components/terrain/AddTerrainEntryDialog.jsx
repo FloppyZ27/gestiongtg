@@ -107,12 +107,14 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
     setSelectedDossier(dossier);
     const firstMandat = dossier.mandats?.[0] || null;
     setSelectedMandat(firstMandat);
+    setSelectedMandatIndex(0);
     setForm({ ...EMPTY_FORM, technicien: firstMandat?.terrain?.technicien || "", donneur: firstMandat?.terrain?.donneur || "" });
   };
 
   const handleReset = () => {
     setSelectedDossier(null);
     setSelectedMandat(null);
+    setSelectedMandatIndex(0);
     setSearchTerm("");
     setForm(EMPTY_FORM);
   };
@@ -124,10 +126,11 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
 
   const handleSave = () => {
     if (!selectedDossier || !selectedMandat) return;
-    onSave(selectedDossier, selectedMandat, form);
+    onSave(selectedDossier, selectedMandatIndex, form);
     handleClose();
   };
 
+  const [selectedMandatIndex, setSelectedMandatIndex] = useState(0);
   const [formCollapsed, setFormCollapsed] = useState(false);
   const [searchSimultane, setSearchSimultane] = useState("");
   const [showSimultaneDropdown, setShowSimultaneDropdown] = useState(false);
@@ -378,8 +381,8 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                   <Select
-                    value={selectedMandat ? String(mandatsDisponibles.indexOf(selectedMandat)) : ""}
-                    onValueChange={v => setSelectedMandat(mandatsDisponibles[parseInt(v)])}
+                    value={String(selectedMandatIndex)}
+                    onValueChange={v => { const i = parseInt(v); setSelectedMandatIndex(i); setSelectedMandat(mandatsDisponibles[i]); }}
                   >
                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
                       <SelectValue placeholder="Sélectionner" />
