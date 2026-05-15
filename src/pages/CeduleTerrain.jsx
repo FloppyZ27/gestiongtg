@@ -260,10 +260,10 @@ export default function CeduleTerrain() {
       <div className="w-full">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
               Cédule Terrain
             </h1>
-            <CalendarDays className="w-6 h-6 text-cyan-400" />
+            <CalendarDays className="w-6 h-6" style={{color: 'hsl(22, 90%, 65%)', filter: 'drop-shadow(0 0 4px rgba(220,80,30,0.5))'}} />
           </div>
           <p className="text-slate-400 mb-4">Planification des équipes de terrain</p>
           <Tabs value={activePlace} onValueChange={setActivePlace}>
