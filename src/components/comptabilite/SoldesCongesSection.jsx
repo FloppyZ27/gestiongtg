@@ -14,6 +14,7 @@ const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCa
 const TYPE_INFO = {
   'Vacances':    { color: 'text-emerald-400', bg: 'bg-emerald-500/20 border-emerald-500/30' },
   'Mieux-être':  { color: 'text-pink-400',    bg: 'bg-pink-500/20 border-pink-500/30' },
+  'Mieux-Être':  { color: 'text-pink-400',    bg: 'bg-pink-500/20 border-pink-500/30' },
   'Mieux-etre':  { color: 'text-pink-400',    bg: 'bg-pink-500/20 border-pink-500/30' },
   'En banque':   { color: 'text-amber-400',   bg: 'bg-amber-500/20 border-amber-500/30' },
 };
@@ -125,7 +126,7 @@ function UserEntriesPanel({ userEmail, year }) {
     <div className="divide-y divide-slate-800/50">
       {filtered.map((e, idx) => {
         const info = TYPE_INFO[e.tache] || { color: 'text-slate-400', bg: 'bg-slate-500/20 border-slate-500/30' };
-        const label = e.tache === 'Mieux-etre' ? 'Mieux-être' : e.tache;
+        const label = (e.tache === 'Mieux-etre' || e.tache === 'Mieux-Être') ? 'Mieux-être' : e.tache;
         return (
           <div key={idx} className="grid px-3 py-2 hover:bg-slate-800/20 transition-colors items-center" style={{ gridTemplateColumns: '1.4fr 1.5fr 1fr' }}>
             <span className="text-slate-400 text-xs">
