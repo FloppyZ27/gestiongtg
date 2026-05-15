@@ -1499,24 +1499,18 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                     <button onClick={() => setLinkingMode(null)} className="text-slate-400 hover:text-white ml-1"><X className="w-3 h-3" /></button>
                   </div>
                 )}
-                <Button
-                  size="sm"
+                <PremiumButton
+                  label="Vue carte"
                   onClick={() => setShowAllTerrainsMap(true)}
-                  className="bg-white/10 hover:bg-white/20"
-                  style={{ color: 'white' }}
-                >
-                  <Map className="w-3 h-3 mr-1" style={{ color: 'white' }} />
-                  Vue carte
-                </Button>
-                <Button
-                  size="sm"
-                  data-optimize-btn
-                  onClick={() => setShowOptimizeConfirm(true)}
-                  disabled={isOptimizing}
-                >
-                  {isOptimizing ? <Loader className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                  {isOptimizing ? 'Optimisation...' : 'Optimiser'}
-                </Button>
+                  icon={Map}
+                />
+                <PremiumButton
+                  label={isOptimizing ? 'Optimisation...' : 'Optimiser'}
+                  onClick={() => {
+                    if (!isOptimizing) setShowOptimizeConfirm(true);
+                  }}
+                  icon={isOptimizing ? Loader : Sparkles}
+                />
               </div>
             </div>
           </div>
