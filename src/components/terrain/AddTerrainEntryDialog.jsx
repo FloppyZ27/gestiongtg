@@ -276,8 +276,8 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                               return mA && mM && mV;
                             }).map((mandat, idx) => {
                               const lotsDisplay = mandat.lots?.length > 0
-                                ? mandat.lots.map(lotId => { const lot = (lots || []).find(l => l.id === lotId); return lot ? lot.numero_lot : lotId; }).join(', ')
-                                : '-';
+                                ? mandat.lots.map(lotId => { const lot = (lots || []).find(l => l.id === lotId); return lot ? lot.numero_lot : null; }).filter(Boolean).join(', ') || (mandat.lots_texte || '-')
+                                : (mandat.lots_texte || '-');
                               return (
                                 <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => handleSelectDossier(dossier)}>
                                   <TableCell className="font-medium text-xs">
