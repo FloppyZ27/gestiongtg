@@ -329,53 +329,53 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
             </div>
           </div>
 
-          {/* Formulaire terrain — affiché après sélection du dossier */}
+          {/* Formulaire terrain — layout identique à "Ajouter un terrain" dans EditDossierForm */}
           {selectedDossier && (
-            <div className="space-y-4">
-              {/* Sélection du mandat si plusieurs */}
-              {mandatsDisponibles.length > 1 && (
+            <div className="p-4 border-t border-slate-700 space-y-3">
+              {/* Ligne 1 : Mandat* | Temps prévu | Donneur | Instruments | Technicien */}
+              <div className="grid grid-cols-5 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-400">Mandat</Label>
+                  <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                   <Select
                     value={selectedMandat ? String(mandatsDisponibles.indexOf(selectedMandat)) : ""}
                     onValueChange={v => setSelectedMandat(mandatsDisponibles[parseInt(v)])}
                   >
-                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner un mandat" />
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                      <SelectValue placeholder="Sélectionner" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
                       {mandatsDisponibles.map((m, i) => (
-                        <SelectItem key={i} value={String(i)} className="text-white text-xs">{m.type_mandat || `Mandat ${i + 1}`}</SelectItem>
+                        <SelectItem key={i} value={String(i)} className="text-white text-xs">
+                          {m.type_mandat || `Mandat ${i + 1}`}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
-
-              {/* Statut terrain */}
-              <div className="space-y-1">
-                <Label className="text-xs text-slate-400">Statut terrain</Label>
-                <Select value={form.statut_terrain} onValueChange={v => setForm({ ...form, statut_terrain: v })}>
-                  <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="en_verification" className="text-white text-xs">En vérification</SelectItem>
-                    <SelectItem value="a_ceduler" className="text-white text-xs">À cédule</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Formulaire terrain */}
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-400">Date limite cédule</Label>
-                  <Input type="date" value={form.date_limite_leve} onChange={e => setForm({ ...form, date_limite_leve: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                  <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                  <Input
+                    placeholder="Ex: 2h30"
+                    value={form.temps_prevu}
+                    onChange={e => setForm({ ...form, temps_prevu: e.target.value })}
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                  />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-400">Instruments requis</Label>
+                  <Label className="text-slate-400 text-xs">Donneur</Label>
+                  <Select value={form.donneur} onValueChange={v => setForm({ ...form, donneur: v })}>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {(users || []).filter(u => u?.statut === 'Actif' || !u?.statut).map(u => (
+                        <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Instruments</Label>
                   <Select value={form.instruments_requis} onValueChange={v => setForm({ ...form, instruments_requis: v })}>
-                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
                       {["Can-Net","RTK","CONV","3 GPS","Chaine","SX10","NAVIS","Drône"].map(v => (
                         <SelectItem key={v} value={v} className="text-white text-xs">{v}</SelectItem>
@@ -383,24 +383,10 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-400">Donneur</Label>
-                  <Select value={form.donneur} onValueChange={v => setForm({ ...form, donneur: v })}>
-                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {(users || []).map(u => (
-                        <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-slate-400">Technicien</Label>
+                  <Label className="text-slate-400 text-xs">Technicien</Label>
                   <Select value={form.technicien} onValueChange={v => setForm({ ...form, technicien: v })}>
-                    <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
                       {(users || []).map(u => (
                         <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
@@ -410,58 +396,71 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label className="text-xs text-slate-400">Temps prévu</Label>
-                <Input placeholder="Ex: 2h30" value={form.temps_prevu} onChange={e => setForm({ ...form, temps_prevu: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
-              </div>
-
-              {/* Rendez-vous */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, a_rendez_vous: !form.a_rendez_vous })}
-                    className={`relative w-10 h-5 rounded-full transition-all shadow-lg ${form.a_rendez_vous ? "bg-gradient-to-r from-cyan-400 to-blue-500" : "bg-gradient-to-r from-slate-500 to-slate-600"}`}
-                  >
-                    <motion.div
-                      className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md"
-                      animate={{ x: form.a_rendez_vous ? 18 : 0 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              {/* Ligne 2 : Date limite cédule | Toggle Rendez-vous | Date RDV (si actif) | Heure RDV (si actif) */}
+              <div className="grid grid-cols-4 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Date limite cédule</Label>
+                  <Input
+                    type="date"
+                    value={form.date_limite_leve}
+                    onChange={e => setForm({ ...form, date_limite_leve: e.target.value })}
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1 flex items-end">
+                  <div className="flex items-center gap-2 h-8">
+                    <Switch
+                      checked={form.a_rendez_vous}
+                      onCheckedChange={checked => setForm({ ...form, a_rendez_vous: checked })}
+                      className="data-[state=checked]:bg-amber-400"
                     />
-                  </button>
-                  <Label className="text-xs text-slate-400">Rendez-vous requis</Label>
+                    <Label className="text-slate-400 text-xs">Rendez-vous</Label>
+                  </div>
                 </div>
                 {form.a_rendez_vous && (
-                  <div className="grid grid-cols-2 gap-4 pl-4">
+                  <>
                     <div className="space-y-1">
-                      <Label className="text-xs text-slate-400">Date RDV</Label>
-                      <Input type="date" value={form.date_rendez_vous} onChange={e => setForm({ ...form, date_rendez_vous: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                      <Label className="text-slate-400 text-xs">Date RDV</Label>
+                      <Input
+                        type="date"
+                        value={form.date_rendez_vous}
+                        onChange={e => setForm({ ...form, date_rendez_vous: e.target.value })}
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                      />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs text-slate-400">Heure RDV</Label>
-                      <Input type="time" value={form.heure_rendez_vous} onChange={e => setForm({ ...form, heure_rendez_vous: e.target.value })} className="text-sm bg-slate-800 border-slate-700 text-white h-8" />
+                      <Label className="text-slate-400 text-xs">Heure RDV</Label>
+                      <Input
+                        type="time"
+                        value={form.heure_rendez_vous}
+                        onChange={e => setForm({ ...form, heure_rendez_vous: e.target.value })}
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                      />
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
 
-              {/* Dossier simultané */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.a_dossier_simultane}
-                    onCheckedChange={checked => setForm({ ...form, a_dossier_simultane: checked })}
-                  />
-                  <Label className="text-xs text-slate-400">Dossier à faire en même temps</Label>
+              {/* Ligne 3 : Dossier simultané */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1 flex items-end">
+                  <div className="flex items-center gap-2 h-8">
+                    <Switch
+                      checked={form.a_dossier_simultane}
+                      onCheckedChange={checked => setForm({ ...form, a_dossier_simultane: checked, dossier_simultane: checked ? form.dossier_simultane : "" })}
+                      className="data-[state=checked]:bg-amber-400"
+                    />
+                    <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
+                  </div>
                 </div>
                 {form.a_dossier_simultane && (
-                  <div className="space-y-1 pl-6">
-                    <Label className="text-xs text-slate-400">Dossier simultané</Label>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Dossier simultané</Label>
                     <Select value={form.dossier_simultane} onValueChange={v => setForm({ ...form, dossier_simultane: v })}>
-                      <SelectTrigger className="text-sm bg-slate-800 border-slate-700 text-white h-8"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         {dossiers.filter(d => d.id !== selectedDossier?.id).map(d => (
-                          <SelectItem key={d.id} value={d.numero_dossier} className="text-white text-xs">
+                          <SelectItem key={d.id} value={`${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`} className="text-white text-xs">
                             {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
                           </SelectItem>
                         ))}
@@ -469,16 +468,6 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                     </Select>
                   </div>
                 )}
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs text-slate-400">Notes</Label>
-                <Textarea
-                  placeholder="Notes additionnelles..."
-                  value={form.notes}
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                  className="text-sm bg-slate-800 border-slate-700 text-white resize-none h-20"
-                />
               </div>
             </div>
           )}
