@@ -29,6 +29,7 @@ import { useStickySidebar } from "@/hooks/useStickySidebar";
 import { OptimizeConfirmDialog, OptimizeResultDialog } from "./OptimizeDialogs";
 import { DossierCard } from "./DossierCard";
 import ConfirmDeleteDialog from "@/components/shared/ConfirmDeleteDialog";
+import PremiumButton from "@/components/CommunicationClients/PremiumButton";
 
 // Congés fériés
 const getHolidays = (year) => {
