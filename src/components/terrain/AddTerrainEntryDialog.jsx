@@ -139,8 +139,8 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
         <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4">
 
           {/* Section sélection dossier — identique à EntreeTempsDialog */}
-          <div className="border border-slate-700 bg-transparent rounded-lg">
-            <div className="cursor-default rounded-t-lg py-2 px-3 bg-transparent">
+          <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+            <div className="cursor-default rounded-t-lg py-2 px-3 bg-blue-900/20">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
                   <FolderOpen className="w-3 h-3 text-blue-400" />
