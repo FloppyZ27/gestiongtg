@@ -127,7 +127,18 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
   };
 
   const [formCollapsed, setFormCollapsed] = useState(false);
+  const [searchSimultane, setSearchSimultane] = useState("");
+  const [showSimultaneDropdown, setShowSimultaneDropdown] = useState(false);
   const mandatsDisponibles = selectedDossier?.mandats || [];
+
+  const dossiersSimultaneFiltered = dossiers
+    .filter(d => d.id !== selectedDossier?.id)
+    .filter(d => {
+      if (!searchSimultane) return true;
+      const s = searchSimultane.toLowerCase();
+      const num = getArpenteurInitials(d.arpenteur_geometre) + d.numero_dossier;
+      return num.toLowerCase().includes(s) || getClientsNames(d.clients_ids).toLowerCase().includes(s);
+    });
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -493,18 +504,47 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                   </div>
                 </div>
                 {form.a_dossier_simultane && (
-                  <div className="space-y-1">
+                  <div className="space-y-1 relative">
                     <Label className="text-slate-400 text-xs">Dossier simultané</Label>
-                    <Select value={form.dossier_simultane} onValueChange={v => setForm({ ...form, dossier_simultane: v })}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {dossiers.filter(d => d.id !== selectedDossier?.id).map(d => (
-                          <SelectItem key={d.id} value={`${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`} className="text-white text-xs">
-                            {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 w-3 h-3" />
+                      <Input
+                        placeholder="Rechercher un dossier..."
+                        value={form.dossier_simultane ? form.dossier_simultane : searchSimultane}
+                        onChange={e => {
+                          setSearchSimultane(e.target.value);
+                          setForm({ ...form, dossier_simultane: "" });
+                          setShowSimultaneDropdown(true);
+                        }}
+                        onFocus={() => setShowSimultaneDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowSimultaneDropdown(false), 150)}
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs pl-7"
+                      />
+                    </div>
+                    {showSimultaneDropdown && !form.dossier_simultane && (
+                      <div className="absolute z-50 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-y-auto" style={{ maxHeight: '112px' }}>
+                        {dossiersSimultaneFiltered.length === 0 ? (
+                          <div className="px-3 py-2 text-slate-500 text-xs">Aucun résultat</div>
+                        ) : dossiersSimultaneFiltered.map(d => {
+                          const label = `${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`;
+                          const clients = getClientsNames(d.clients_ids);
+                          return (
+                            <div
+                              key={d.id}
+                              className="px-3 py-1.5 text-xs text-white cursor-pointer hover:bg-slate-700 flex items-center gap-2"
+                              onMouseDown={() => {
+                                setForm({ ...form, dossier_simultane: label });
+                                setSearchSimultane("");
+                                setShowSimultaneDropdown(false);
+                              }}
+                            >
+                              <Badge variant="outline" className={`${getArpenteurColor(d.arpenteur_geometre)} border text-xs`}>{label}</Badge>
+                              {clients && <span className="text-slate-400 truncate">{clients}</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
