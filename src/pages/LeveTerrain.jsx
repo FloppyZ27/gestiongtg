@@ -728,7 +728,7 @@ export default function LeveTerrain() {
                         </span>
                       );
                     })()}
-                    <Button size="sm" onClick={() => setShowRouteMap(true)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 border border-blue-500/30">
+                    <Button size="sm" onClick={() => setShowRouteMap(true)} className="bg-orange-500/20 hover:bg-red-500/30 text-orange-400 h-6 w-6 p-0 border border-orange-500/30">
                       <MapPin className="w-3 h-3" />
                     </Button>
                   </div>
