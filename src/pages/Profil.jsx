@@ -182,10 +182,13 @@ export default function Profil() {
   const usedVacances = entreesCongesAnnee.filter(e => e.tache === 'Vacances').reduce((s, e) => s + (e.heures || 0), 0);
   const usedMieuxEtre = entreesCongesAnnee.filter(e => e.tache === 'Mieux-Être' || e.tache === 'Mieux-etre').reduce((s, e) => s + (e.heures || 0), 0);
   const usedEnBanque = entreesCongesAnnee.filter(e => e.tache === 'En banque').reduce((s, e) => s + (e.heures || 0), 0);
+  const maxVacances = soldeBase.max_vacances ?? 120;
+  const maxMieuxEtre = soldeBase.max_mieux_etre ?? 40;
+  const maxEnBanque = soldeBase.max_en_banque ?? 80;
   const soldeRestant = {
-    vacances: Math.max(0, (soldeBase.heures_vacances ?? 0) - usedVacances),
-    mieuxEtre: Math.max(0, (soldeBase.heures_mieux_etre ?? 0) - usedMieuxEtre),
-    enBanque: Math.max(0, (soldeBase.heures_en_banque ?? 0) - usedEnBanque),
+    vacances: Math.max(0, maxVacances - usedVacances),
+    mieuxEtre: Math.max(0, maxMieuxEtre - usedMieuxEtre),
+    enBanque: Math.max(0, maxEnBanque - usedEnBanque),
   };
 
   const getMsDateRange = () => {
@@ -1321,18 +1324,19 @@ export default function Profil() {
                     <Palmtree className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
                     <div className="text-xs text-slate-400">Vacances</div>
                     <div className="text-lg font-bold text-emerald-400">{soldeRestant.vacances % 1 === 0 ? soldeRestant.vacances : soldeRestant.vacances.toFixed(1)}h</div>
-                    {soldeBase.max_vacances != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_vacances}h</div>}
+                    <div className="text-[10px] text-slate-500">/ {maxVacances}h</div>
                   </div>
                   <div className="text-center">
                     <Heart className="w-4 h-4 text-pink-400 mx-auto mb-1" />
                     <div className="text-xs text-slate-400">Mieux-Être</div>
                     <div className="text-lg font-bold text-pink-400">{soldeRestant.mieuxEtre % 1 === 0 ? soldeRestant.mieuxEtre : soldeRestant.mieuxEtre.toFixed(1)}h</div>
-                    {soldeBase.max_mieux_etre != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_mieux_etre}h</div>}
+                    <div className="text-[10px] text-slate-500">/ {maxMieuxEtre}h</div>
                   </div>
                   <div className="text-center">
                     <Wallet className="w-4 h-4 text-amber-400 mx-auto mb-1" />
                     <div className="text-xs text-slate-400">En banque</div>
                     <div className="text-lg font-bold text-amber-400">{soldeRestant.enBanque % 1 === 0 ? soldeRestant.enBanque : soldeRestant.enBanque.toFixed(1)}h</div>
+                    <div className="text-[10px] text-slate-500">/ {maxEnBanque}h</div>
                   </div>
                 </div>
                 
@@ -1447,18 +1451,19 @@ export default function Profil() {
                   <Palmtree className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
                   <div className="text-xs text-slate-400">Vacances</div>
                   <div className="text-lg font-bold text-emerald-400">{soldeRestant.vacances % 1 === 0 ? soldeRestant.vacances : soldeRestant.vacances.toFixed(1)}h</div>
-                  {soldeBase.max_vacances != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_vacances}h</div>}
+                  <div className="text-[10px] text-slate-500">/ {maxVacances}h</div>
                 </div>
                 <div className="text-center">
                   <Heart className="w-4 h-4 text-pink-400 mx-auto mb-1" />
                   <div className="text-xs text-slate-400">Mieux-Être</div>
                   <div className="text-lg font-bold text-pink-400">{soldeRestant.mieuxEtre % 1 === 0 ? soldeRestant.mieuxEtre : soldeRestant.mieuxEtre.toFixed(1)}h</div>
-                  {soldeBase.max_mieux_etre != null && <div className="text-[10px] text-slate-500">/ {soldeBase.max_mieux_etre}h</div>}
+                  <div className="text-[10px] text-slate-500">/ {maxMieuxEtre}h</div>
                 </div>
                 <div className="text-center">
                   <Wallet className="w-4 h-4 text-amber-400 mx-auto mb-1" />
                   <div className="text-xs text-slate-400">En banque</div>
                   <div className="text-lg font-bold text-amber-400">{soldeRestant.enBanque % 1 === 0 ? soldeRestant.enBanque : soldeRestant.enBanque.toFixed(1)}h</div>
+                  <div className="text-[10px] text-slate-500">/ {maxEnBanque}h</div>
                 </div>
               </div>
 
