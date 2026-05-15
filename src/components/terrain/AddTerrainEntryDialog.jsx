@@ -140,6 +140,17 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
       return num.toLowerCase().includes(s) || getClientsNames(d.clients_ids).toLowerCase().includes(s);
     });
 
+  const getUserByEmail = (email) => (users || []).find(u => u.email === email);
+  const getUserInitials = (email) => {
+    const u = getUserByEmail(email);
+    if (!u) return email?.split('@')[0]?.substring(0, 2).toUpperCase() || '?';
+    return (u.full_name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+  const getUserNomComplet = (email) => {
+    const u = getUserByEmail(email);
+    return u?.full_name || email?.split('@')[0] || '';
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
@@ -564,27 +575,47 @@ export default function AddTerrainEntryDialog({ open, onOpenChange, dossiers, cl
                                       {mandats.map((mandat, idx) => {
                                         const adresse = formatAdresse(mandat.adresse_travaux);
                                         return (
-                                          <div key={idx} className="flex items-center gap-1.5 flex-wrap min-w-0">
-                                            <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0 flex-shrink-0`}>
-                                              {getAbbreviatedMandatType(mandat.type_mandat)}
-                                            </Badge>
-                                            {mandat.tache_actuelle && (
-                                              <>
-                                                <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
-                                                <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[10px] px-1.5 py-0 flex-shrink-0">
-                                                  {mandat.tache_actuelle}
-                                                </Badge>
-                                              </>
-                                            )}
-                                            {adresse && (
-                                              <>
-                                                <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
-                                                <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
-                                                  <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-                                                  {adresse}
-                                                </span>
-                                              </>
-                                            )}
+                                          <div key={idx} className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                              <Badge className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0 flex-shrink-0`}>
+                                                {getAbbreviatedMandatType(mandat.type_mandat)}
+                                              </Badge>
+                                              {mandat.tache_actuelle && (
+                                                <>
+                                                  <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
+                                                  <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[10px] px-1.5 py-0 flex-shrink-0">
+                                                    {mandat.tache_actuelle}
+                                                  </Badge>
+                                                </>
+                                              )}
+                                              {adresse && (
+                                                <>
+                                                  <span className="w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
+                                                  <span className="text-[10px] text-slate-500 flex items-center gap-1 truncate">
+                                                    <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                                                    {adresse}
+                                                  </span>
+                                                </>
+                                              )}
+                                            </div>
+                                            {mandat.utilisateur_assigne && (() => {
+                                              const u = getUserByEmail(mandat.utilisateur_assigne);
+                                              const photoUrl = u?.photo_url || u?.profile_picture;
+                                              return (
+                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                  {photoUrl ? (
+                                                    <img src={photoUrl} alt="" className="w-5 h-5 rounded-full object-cover border border-slate-600" />
+                                                  ) : (
+                                                    <div className="w-5 h-5 rounded-full bg-primary/30 border border-primary/50 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                                                      {getUserInitials(mandat.utilisateur_assigne)}
+                                                    </div>
+                                                  )}
+                                                  <span className="text-[10px] text-slate-300">
+                                                    {getUserNomComplet(mandat.utilisateur_assigne)}
+                                                  </span>
+                                                </div>
+                                              );
+                                            })()}
                                           </div>
                                         );
                                       })}
