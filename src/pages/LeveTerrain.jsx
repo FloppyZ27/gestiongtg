@@ -677,7 +677,7 @@ export default function LeveTerrain() {
                 
                 <Button size="sm" variant="outline" onClick={goToNextDay} className="bg-slate-800 border-slate-700 text-white hover:bg-primary/30 hover:border-primary/50 hover:text-primary h-8 w-8 p-0"><ChevronRight className="w-4 h-4" /></Button>
                 
-                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105">Aujourd'hui</Button>
+                <Button size="sm" onClick={() => { setSelectedDate(today); setSelectedItem(null); }} className="bg-slate-800 border-slate-700 text-white hover:bg-primary/30 hover:border-primary/50 hover:text-primary">Aujourd'hui</Button>
               </div>
 
               <div className="flex items-center gap-3">
