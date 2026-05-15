@@ -89,6 +89,12 @@ export default function CeduleTerrain() {
     initialData: [],
   });
 
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots'],
+    queryFn: () => base44.entities.Lot.list(),
+    initialData: [],
+  });
+
   // Utiliser les utilisateurs actifs avec le poste "Technicien Terrain"
   const techniciensTerrain = users
     .filter(u => u.poste === "Technicien Terrain")
@@ -286,7 +292,7 @@ export default function CeduleTerrain() {
               equipements={equipementsByPlace}
               clients={clients}
               users={users}
-              lots={[]}
+              lots={lots}
               placeAffaire={activePlace}
               onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
               onAddTechnicien={() => {
