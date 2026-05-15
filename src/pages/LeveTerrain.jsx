@@ -752,7 +752,7 @@ export default function LeveTerrain() {
                       layout
                       initial={{ opacity: 1 }}
                       animate={isSelected ? { scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } } : { scale: 1, transition: { duration: 0.2 } }}
-                      className={`w-full text-left p-2 border-b border-slate-800/50 relative group`}
+                      className={`w-full text-left p-2 relative group`}
                       style={{
                         background: 'transparent',
                       }}
