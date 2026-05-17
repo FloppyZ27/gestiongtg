@@ -122,6 +122,22 @@ export default function RetourAppelSection({ editingDossier, formData, setFormDa
                     if (newRetourAppel.utilisateur_assigne) {
                       setFormData(prev => ({ ...prev, utilisateur_assigne: newRetourAppel.utilisateur_assigne }));
                     }
+                    // Créer notification
+                    if (newRetourAppel.utilisateur_assigne) {
+                      const clientsNames = editingDossier.clients_ids?.length > 0 ? editingDossier.clients_ids.map(id => {
+                        const client = users.find(u => u.email === id) || null;
+                        return client ? `${client.full_name}` : '';
+                      }).filter(name => name).join(", ") : '';
+
+                      await base44.entities.Notification.create({
+                        utilisateur_email: newRetourAppel.utilisateur_assigne,
+                        titre: "Nouveau retour d'appel assigné",
+                        message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+                        type: "retour_appel",
+                        dossier_id: editingDossier.id,
+                        lue: false
+                      });
+                    }
                     addActionLog("Retour d'appel ajouté", `${newRetourAppel.raison}`);
                     setRetoursAppel(prev => [created, ...prev]);
                     setNewRetourAppel({ date_appel: new Date().toISOString().split('T')[0], utilisateur_assigne: "", raison: "", statut: "Retour d'appel" });
