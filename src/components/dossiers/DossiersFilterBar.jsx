@@ -60,15 +60,18 @@ export default function DossiersFilterBar({
   return (
     <>
       <div className="mb-2 flex flex-col gap-2">
-        <PlaceAffaireTabs
-          value={filterPlaceAffaire}
-          onChange={setFilterPlaceAffaire}
-          counts={{
-            tous: dossiersWithMandats.length,
-            alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
-            saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
-          }}
-        />
+        <div className="flex items-center gap-3">
+          <PlaceAffaireTabs
+            value={filterPlaceAffaire}
+            onChange={setFilterPlaceAffaire}
+            counts={{
+              tous: dossiersWithMandats.length,
+              alma: dossiersWithMandats.filter(d => d.place_affaire === "Alma").length,
+              saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
+            }}
+          />
+          {onNouveauDossier && <PremiumButton label="Nouveau dossier" icon={Plus} onClick={onNouveauDossier} />}
+        </div>
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
           <div className="flex gap-1 flex-1">
@@ -87,7 +90,6 @@ export default function DossiersFilterBar({
               </button>
             ))}
           </div>
-          {onNouveauDossier && <PremiumButton label="Nouveau dossier" icon={Plus} onClick={onNouveauDossier} />}
         </div>
       </div>
 
