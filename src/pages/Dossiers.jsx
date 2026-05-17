@@ -3344,7 +3344,7 @@ export default function Dossiers() {
           uniqueVilles={uniqueVilles} dossiersWithMandats={dossiersWithMandats} onNouveauDossier={() => { resetForm(); setIsDialogOpen(true); }}
         />
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+        <Card className="border-0 bg-transparent shadow-none">
           <CardContent className="p-0">
             {isLoading ?
             <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div> :
