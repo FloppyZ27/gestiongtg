@@ -42,7 +42,7 @@ export default function EntreeTempsSection({ editingDossier, formData, users, en
   });
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="entree-temps">
+    <Card className="border-0 bg-transparent mt-3" data-section="entree-temps">
       <CardHeader
         className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
         onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
