@@ -1941,7 +1941,7 @@ export default function Lots() {
         </Card>
 
         {/* Table */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+        <Card className="border-0 bg-transparent shadow-none">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
