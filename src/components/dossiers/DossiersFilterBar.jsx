@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { Filter, Search, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Filter, Search, X, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import PlaceAffaireTabs from "./PlaceAffaireTabs";
+import PremiumButton from "../CommunicationClients/PremiumButton";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -26,6 +27,7 @@ export default function DossiersFilterBar({
   filterEquipe, setFilterEquipe,
   uniqueVilles,
   dossiersWithMandats,
+  onNouveauDossier,
 }) {
   const hasFilters = filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin;
 
@@ -67,9 +69,9 @@ export default function DossiersFilterBar({
             saguenay: dossiersWithMandats.filter(d => d.place_affaire === "Saguenay").length,
           }}
         />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs text-slate-400 font-medium whitespace-nowrap">Filtrer par équipe de travail</span>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-1">
             {["Toutes", ...EQUIPES].map(equipe => (
               <button
                 key={equipe}
@@ -85,6 +87,7 @@ export default function DossiersFilterBar({
               </button>
             ))}
           </div>
+          {onNouveauDossier && <PremiumButton label="Nouveau dossier" icon={Plus} onClick={onNouveauDossier} />}
         </div>
       </div>
 

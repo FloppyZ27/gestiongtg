@@ -2163,18 +2163,12 @@ export default function Dossiers() {
             <p className="text-slate-400">Gestion de vos dossiers d'arpentage</p>
           </div>
 
-          <div className="flex gap-3">
-            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open) {
                 resetForm();
               }
             }}>
-              <DialogTrigger asChild>
-                <span>
-                  <PremiumButton label="Nouveau dossier" icon={Plus} onClick={() => { resetForm(); setIsDialogOpen(true); }} />
-                </span>
-              </DialogTrigger>
               <DialogContent className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '50px', maxHeight: 'calc(100vh - 115px)' }} hideClose>
                 <EditDossierForm
                   formData={formData}
@@ -2211,7 +2205,6 @@ export default function Dossiers() {
                 />
               </DialogContent>
             </Dialog>
-          </div>
         </div>
 
         {/* Dialog pour ajouter une minute */}
@@ -3348,7 +3341,7 @@ export default function Dossiers() {
           filterDateFin={filterDateFin} setFilterDateFin={setFilterDateFin}
           filterPlaceAffaire={filterPlaceAffaire} setFilterPlaceAffaire={setFilterPlaceAffaire}
           filterEquipe={filterEquipe} setFilterEquipe={setFilterEquipe}
-          uniqueVilles={uniqueVilles} dossiersWithMandats={dossiersWithMandats}
+          uniqueVilles={uniqueVilles} dossiersWithMandats={dossiersWithMandats} onNouveauDossier={() => { resetForm(); setIsDialogOpen(true); }}
         />
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
