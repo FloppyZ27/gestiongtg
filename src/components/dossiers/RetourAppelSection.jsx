@@ -36,7 +36,7 @@ export default function RetourAppelSection({ editingDossier, formData, setFormDa
   });
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="retour-appel">
+    <Card className="border-0 bg-transparent mt-3" data-section="retour-appel">
       <CardHeader
         className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
         onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
