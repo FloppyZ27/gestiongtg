@@ -60,7 +60,7 @@ export default function DossiersFilterBar({
   return (
     <>
       <div className="mb-2 flex flex-col gap-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
           <PlaceAffaireTabs
             value={filterPlaceAffaire}
             onChange={setFilterPlaceAffaire}
