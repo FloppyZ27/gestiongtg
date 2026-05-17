@@ -74,10 +74,10 @@ export default function DossiersFilterBar({
               <button
                 key={equipe}
                 onClick={() => setFilterEquipe(equipe)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "bg-red-500/20 text-red-400 border-b-2 border-red-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all border-0 ${filterEquipe === equipe ? "bg-orange-500/20 text-orange-400 border-b-2 border-orange-400" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"}`}
               >
                 {equipe}
-                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterEquipe === equipe ? "bg-red-500/30 text-red-300" : "bg-slate-700 text-slate-400"}`}>
+                <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterEquipe === equipe ? "bg-orange-500/30 text-orange-300" : "bg-slate-700 text-slate-400"}`}>
                   {equipe === "Toutes"
                     ? dossiersWithMandats.length
                     : dossiersWithMandats.filter(d => d.mandatInfo?.equipe_assignee === equipe || d.mandatInfo?.utilisateur_assigne?.includes(equipe)).length}
