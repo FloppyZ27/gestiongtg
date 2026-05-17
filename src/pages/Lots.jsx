@@ -1903,7 +1903,7 @@ export default function Lots() {
         </div>
 
         {/* Filtres et recherche */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+        <Card className="border-transparent bg-transparent shadow-none mb-2">
           <CardHeader className="pb-2">
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-2">
