@@ -1127,24 +1127,14 @@ export default function EditDossierForm({
                                         <Edit className="w-4 h-4" />
                                         </button>
                                         <button 
-                                        type="button" 
-                                        onClick={() => {
-                                          const updatedMandats = [...formData.mandats];
-                                          updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
-
-                                          // Si on supprime le dernier terrain, réinitialiser les champs
-                                          if (updatedMandats[mandatIndex].terrains_list.length === 0) {
-                                            updatedMandats[mandatIndex].statut_terrain = null;
-                                            updatedMandats[mandatIndex].date_terrain = null;
-                                            updatedMandats[mandatIndex].equipe_assignee = null;
-                                          }
-
-                                          setFormData({...formData, mandats: updatedMandats});
-                                          addActionLog("Terrain supprimé", `Terrain supprimé pour le mandat: ${mandat.type_mandat || 'Mandat ' + (mandatIndex + 1)}`);
-                                        }}
-                                        className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-1 rounded transition-colors"
-                                        >
-                                        <Trash className="w-4 h-4" />
+                                          type="button" 
+                                          onClick={() => {
+                                            setMinuteToDeleteInfo({ terrainMandatIndex: mandatIndex, terrainIndex, terrainMandat: mandat });
+                                            setShowDeleteMinuteConfirm(true);
+                                          }}
+                                          className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-1 rounded transition-colors"
+                                          >
+                                          <Trash className="w-4 h-4" />
                                         </button>
                                     </div>
                                   </TableCell>
@@ -1412,13 +1402,25 @@ export default function EditDossierForm({
               {minuteToDeleteInfo?.minute ? `Êtes-vous sûr de vouloir supprimer cette minute (${minuteToDeleteInfo.minute}) ?` : 
                minuteToDeleteInfo?.entreeTempsId ? "Êtes-vous sûr de vouloir supprimer cette entrée de temps ?" :
                minuteToDeleteInfo?.retourAppelId ? "Êtes-vous sûr de vouloir supprimer ce retour d'appel ?" :
+               minuteToDeleteInfo?.terrainMandatIndex !== undefined ? "Êtes-vous sûr de vouloir supprimer ce terrain ?" :
                "Êtes-vous sûr de vouloir supprimer ?"}
             </p>
             <div className="flex justify-center gap-3 pt-4">
               <Button
                 type="button"
                 onClick={async () => {
-                  if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
+                  if (minuteToDeleteInfo?.terrainMandatIndex !== undefined) {
+                    // Supprimer un terrain
+                    const updatedMandats = [...formData.mandats];
+                    updatedMandats[minuteToDeleteInfo.terrainMandatIndex].terrains_list = updatedMandats[minuteToDeleteInfo.terrainMandatIndex].terrains_list.filter((_, idx) => idx !== minuteToDeleteInfo.terrainIndex);
+                    if (updatedMandats[minuteToDeleteInfo.terrainMandatIndex].terrains_list.length === 0) {
+                      updatedMandats[minuteToDeleteInfo.terrainMandatIndex].statut_terrain = null;
+                      updatedMandats[minuteToDeleteInfo.terrainMandatIndex].date_terrain = null;
+                      updatedMandats[minuteToDeleteInfo.terrainMandatIndex].equipe_assignee = null;
+                    }
+                    setFormData({...formData, mandats: updatedMandats});
+                    addActionLog("Terrain supprimé", `Terrain supprimé pour le mandat: ${minuteToDeleteInfo.terrainMandat?.type_mandat || 'Mandat ' + (minuteToDeleteInfo.terrainMandatIndex + 1)}`);
+                  } else if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
                     // Supprimer une minute
                     const updatedMandats = [...formData.mandats];
                     const mandatLabel = formData.mandats[minuteToDeleteInfo.mandatIndex]?.type_mandat || `Mandat ${minuteToDeleteInfo.mandatIndex + 1}`;
