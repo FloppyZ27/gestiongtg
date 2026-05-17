@@ -181,7 +181,7 @@ export default function TarificationStepForm({
           {mandatsWithType.length > 0 ? (
             <div>
               {/* Tableau de tarification */}
-              <div className="border border-slate-700 rounded-lg overflow-hidden">
+              <div className="overflow-hidden">
                 <table className="w-full text-xs table-fixed">
                   <thead>
                     <tr className="bg-slate-800/50 border-b border-slate-700">
