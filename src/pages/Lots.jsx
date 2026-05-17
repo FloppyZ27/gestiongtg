@@ -1897,8 +1897,8 @@ export default function Lots() {
         </div>
 
         {/* Filtres et recherche */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
-          <CardHeader className="pb-2">
+         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+           <CardHeader className="pb-2 bg-transparent border-0">
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-2">
                 <div className="relative flex-1"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" /><Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" /></div>
