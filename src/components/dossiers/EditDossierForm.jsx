@@ -1064,7 +1064,7 @@ export default function EditDossierForm({
 
                     {/* Liste des terrains par mandat */}
                     {formData.mandats.some(m => m.terrains_list && m.terrains_list.length > 0) && (
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <div className="overflow-hidden">
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
