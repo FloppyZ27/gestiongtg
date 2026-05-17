@@ -43,7 +43,7 @@ export default function TerrainEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-3xl w-full">
         <DialogHeader>
           <DialogTitle>Modifier les informations terrain</DialogTitle>
         </DialogHeader>
