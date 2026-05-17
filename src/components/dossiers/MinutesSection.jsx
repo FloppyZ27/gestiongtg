@@ -47,7 +47,7 @@ export default function MinutesSection({ formData, setFormData, addActionLog, on
   );
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30 mt-3" data-section="minutes">
+    <Card className="border-0 bg-transparent mt-3" data-section="minutes">
       <CardHeader
         className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
         onClick={() => setMinutesCollapsed(!minutesCollapsed)}
