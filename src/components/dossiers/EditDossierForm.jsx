@@ -1103,7 +1103,7 @@ export default function EditDossierForm({
                                   <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.temps_prevu || "-"}</TableCell>
                                   <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-1">
+                                    <div className="flex items-center justify-end gap-1.5">
                                       <button 
                                         type="button" 
                                         onClick={() => {
@@ -1122,9 +1122,10 @@ export default function EditDossierForm({
                                           });
                                           setIsTerrainDialogOpen(true);
                                         }}
-                                        className="text-slate-400 hover:text-emerald-400 transition-colors"
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-colors"
                                       >
-                                        <Edit className="w-4 h-4" />
+                                        <Edit className="w-3 h-3" />
+                                        Modifier
                                       </button>
                                       <button 
                                         type="button" 
@@ -1142,9 +1143,10 @@ export default function EditDossierForm({
                                           setFormData({...formData, mandats: updatedMandats});
                                           addActionLog("Terrain supprimé", `Terrain supprimé pour le mandat: ${mandat.type_mandat || 'Mandat ' + (mandatIndex + 1)}`);
                                         }}
-                                        className="text-slate-400 hover:text-red-400 transition-colors"
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/25 hover:bg-red-500/20 transition-colors"
                                       >
-                                        <Trash className="w-4 h-4" />
+                                        <Trash className="w-3 h-3" />
+                                        Supprimer
                                       </button>
                                     </div>
                                   </TableCell>
