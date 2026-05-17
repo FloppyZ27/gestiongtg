@@ -24,6 +24,7 @@ import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import { motion } from "framer-motion";
 import { getArpenteurInitials, getArpenteurColor } from "@/lib/arpenteurUtils";
 import LotHistoriqueEntry from "../components/lots/LotHistoriqueEntry";
+import PremiumButton from "../components/CommunicationClients/PremiumButton";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
@@ -1123,10 +1124,9 @@ export default function Lots() {
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 transition-all text-white shadow-lg">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Nouveau lot
-                </Button>
+                <span>
+                  <PremiumButton label="Nouveau lot" onClick={() => setIsFormDialogOpen(true)} icon={Plus} />
+                </span>
                 </DialogTrigger>
             <DialogContent className="border border-slate-700 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ position: 'fixed', top: '160px', left: '50%', transform: 'translateX(-50%)', maxHeight: 'calc(100vh - 180px)' }} hideClose>
               <DialogHeader className="sr-only">
