@@ -1918,7 +1918,7 @@ export default function Lots() {
                 <CollapsibleContent>
                   <div className="p-2 border border-red-500/30 rounded-lg space-y-2">
                     <div className="flex items-center justify-between pb-2 border-b border-red-500/30">
-                      <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-orange-400" /><h4 className="text-xs font-semibold text-orange-400">Filtrer</h4></div>
+                      <div className="flex items-center gap-2"><Filter className="w-3 h-3 text-red-500" /><h4 className="text-xs font-semibold text-red-500">Filtrer</h4></div>
                       {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (<Button variant="ghost" size="sm" onClick={() => { setFilterCirconscription([]); setFilterCadastre([]); setFilterTypeOperation([]); setFilterRang([]); }} className="h-6 text-xs text-orange-400 hover:text-orange-300 px-2"><X className="w-2.5 h-2.5 mr-1" />Réinitialiser</Button>)}
                     </div>
                     <div className="grid grid-cols-4 gap-2">
