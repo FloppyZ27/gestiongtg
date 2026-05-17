@@ -1391,67 +1391,36 @@ export default function EditDossierForm({
     </motion.div>
     <>
       {/* Dialog de confirmation suppression minute/entrée temps/retour appel */}
-      <Dialog open={showDeleteMinuteConfirm} onOpenChange={setShowDeleteMinuteConfirm}>
-        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              Attention
-              <span className="text-2xl">⚠️</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-slate-300 text-center">
-              {minuteToDeleteInfo?.minute ? `Êtes-vous sûr de vouloir supprimer cette minute (${minuteToDeleteInfo.minute}) ?` : 
-               minuteToDeleteInfo?.entreeTempsId ? "Êtes-vous sûr de vouloir supprimer cette entrée de temps ?" :
-               minuteToDeleteInfo?.retourAppelId ? "Êtes-vous sûr de vouloir supprimer ce retour d'appel ?" :
-               "Êtes-vous sûr de vouloir supprimer ?"}
-            </p>
-            <div className="flex justify-center gap-3 pt-4">
-              <Button
-                type="button"
-                onClick={async () => {
-                  if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
-                    // Supprimer une minute
-                    const updatedMandats = [...formData.mandats];
-                    const mandatLabel = formData.mandats[minuteToDeleteInfo.mandatIndex]?.type_mandat || `Mandat ${minuteToDeleteInfo.mandatIndex + 1}`;
-                    updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list = updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list.filter((_, idx) => idx !== minuteToDeleteInfo.minuteIndex);
-                    setFormData({...formData, mandats: updatedMandats});
-                    addActionLog("Minute supprimée", `Minute ${minuteToDeleteInfo.minute} supprimée pour le mandat: ${mandatLabel}`);
-                  } else if (minuteToDeleteInfo?.entreeTempsId) {
-                    // Supprimer une entrée de temps
-                    const entree = entreesTemps.find(e => e.id === minuteToDeleteInfo.entreeTempsId);
-                    await base44.entities.EntreeTemps.delete(minuteToDeleteInfo.entreeTempsId);
-                    setEntreesTemps(prev => prev.filter(e => e.id !== minuteToDeleteInfo.entreeTempsId));
-                    if (entree) addActionLog("Entrée de temps supprimée", `${entree.heures}h - ${entree.tache} - ${entree.mandat}`);
-                  } else if (minuteToDeleteInfo?.retourAppelId) {
-                    // Supprimer un retour d'appel
-                    const retour = retoursAppel.find(r => r.id === minuteToDeleteInfo.retourAppelId);
-                    await base44.entities.RetourAppel.delete(minuteToDeleteInfo.retourAppelId);
-                    setRetoursAppel(prev => prev.filter(r => r.id !== minuteToDeleteInfo.retourAppelId));
-                    if (retour) addActionLog("Retour d'appel supprimé", `${retour.raison}`);
-                  }
-                  setShowDeleteMinuteConfirm(false);
-                  setMinuteToDeleteInfo(null);
-                }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-              >
-                Supprimer
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => {
-                  setShowDeleteMinuteConfirm(false);
-                  setMinuteToDeleteInfo(null);
-                }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Annuler
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDeleteDialog
+        open={showDeleteMinuteConfirm}
+        onOpenChange={(open) => { setShowDeleteMinuteConfirm(open); if (!open) setMinuteToDeleteInfo(null); }}
+        onConfirm={async () => {
+          if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
+            const updatedMandats = [...formData.mandats];
+            const mandatLabel = formData.mandats[minuteToDeleteInfo.mandatIndex]?.type_mandat || `Mandat ${minuteToDeleteInfo.mandatIndex + 1}`;
+            updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list = updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list.filter((_, idx) => idx !== minuteToDeleteInfo.minuteIndex);
+            setFormData({...formData, mandats: updatedMandats});
+            addActionLog("Minute supprimée", `Minute ${minuteToDeleteInfo.minute} supprimée pour le mandat: ${mandatLabel}`);
+          } else if (minuteToDeleteInfo?.entreeTempsId) {
+            const entree = entreesTemps.find(e => e.id === minuteToDeleteInfo.entreeTempsId);
+            await base44.entities.EntreeTemps.delete(minuteToDeleteInfo.entreeTempsId);
+            setEntreesTemps(prev => prev.filter(e => e.id !== minuteToDeleteInfo.entreeTempsId));
+            if (entree) addActionLog("Entrée de temps supprimée", `${entree.heures}h - ${entree.tache} - ${entree.mandat}`);
+          } else if (minuteToDeleteInfo?.retourAppelId) {
+            const retour = retoursAppel.find(r => r.id === minuteToDeleteInfo.retourAppelId);
+            await base44.entities.RetourAppel.delete(minuteToDeleteInfo.retourAppelId);
+            setRetoursAppel(prev => prev.filter(r => r.id !== minuteToDeleteInfo.retourAppelId));
+            if (retour) addActionLog("Retour d'appel supprimé", `${retour.raison}`);
+          }
+          setMinuteToDeleteInfo(null);
+        }}
+        message={
+          minuteToDeleteInfo?.minute ? `Êtes-vous sûr de vouloir supprimer cette minute (${minuteToDeleteInfo.minute}) ? Cette action est irréversible.` :
+          minuteToDeleteInfo?.entreeTempsId ? "Êtes-vous sûr de vouloir supprimer cette entrée de temps ? Cette action est irréversible." :
+          minuteToDeleteInfo?.retourAppelId ? "Êtes-vous sûr de vouloir supprimer ce retour d'appel ? Cette action est irréversible." :
+          "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible."
+        }
+      />
 
       {/* Dialog de confirmation suppression mandat */}
       <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
