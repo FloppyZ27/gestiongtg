@@ -24,13 +24,7 @@ export default function Recherches() {
               }}>
                  Recherches
                </h1>
-               <SearchIcon className="w-10 h-10" style={{
-                background: 'linear-gradient(135deg, hsl(0,85%,62%), hsl(22,90%,68%))',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent'
-              }} />
+               <SearchIcon className="w-10 h-10" style={{ color: 'hsl(0, 80%, 58%)' }} />
             </div>
             <p className="text-slate-400">Consultez les lots et les actes</p>
           </div>
