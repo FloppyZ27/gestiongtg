@@ -909,9 +909,14 @@ export default function EditDossierForm({
                             <div className="space-y-1 flex items-end">
                               <div className="flex items-center gap-2 h-8">
                                 <Switch 
-                                  checked={newTerrainForm.a_rendez_vous || false}
-                                  onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
-                                  className="data-[state=checked]:bg-amber-400"
+                                 checked={newTerrainForm.a_rendez_vous || false}
+                                 onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
+                                 style={{
+                                   backgroundColor: newTerrainForm.a_rendez_vous ? 'hsl(45, 90%, 55%)' : 'hsl(220, 10%, 30%)',
+                                   border: 'none', width: '36px', height: '20px', borderRadius: '9999px',
+                                   display: 'inline-flex', alignItems: 'center', padding: '2px',
+                                   cursor: 'pointer', transition: 'background-color 0.2s',
+                                 }}
                                 />
                                 <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                               </div>
@@ -945,9 +950,14 @@ export default function EditDossierForm({
                             <div className="space-y-1 flex items-end">
                               <div className="flex items-center gap-2 h-8">
                                 <Switch 
-                                  checked={newTerrainForm.a_dossier_simultane || false}
-                                  onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_dossier_simultane: checked, dossier_simultane: checked ? newTerrainForm.dossier_simultane : ""})}
-                                  className="data-[state=checked]:bg-amber-400"
+                                 checked={newTerrainForm.a_dossier_simultane || false}
+                                 onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_dossier_simultane: checked, dossier_simultane: checked ? newTerrainForm.dossier_simultane : ""})}
+                                 style={{
+                                   backgroundColor: newTerrainForm.a_dossier_simultane ? 'hsl(45, 90%, 55%)' : 'hsl(220, 10%, 30%)',
+                                   border: 'none', width: '36px', height: '20px', borderRadius: '9999px',
+                                   display: 'inline-flex', alignItems: 'center', padding: '2px',
+                                   cursor: 'pointer', transition: 'background-color 0.2s',
+                                 }}
                                 />
                                 <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
                               </div>
