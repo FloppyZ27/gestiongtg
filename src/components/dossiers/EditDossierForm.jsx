@@ -1145,8 +1145,7 @@ export default function EditDossierForm({
                                         className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-1 rounded transition-colors"
                                         >
                                         <Trash className="w-4 h-4" />
-                                        Supprimer
-                                      </button>
+                                        </button>
                                     </div>
                                   </TableCell>
                                 </TableRow>
