@@ -93,7 +93,7 @@ export default function DossiersFilterBar({
         </div>
       </div>
 
-      <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg mb-2 p-3">
+      <div className="mb-2 p-3">
         <div className="space-y-3">
           <div className="flex justify-between items-center gap-2">
             <div className="relative flex-1">
