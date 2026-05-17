@@ -1077,7 +1077,7 @@ export default function Lots() {
               <h1 className="text-3xl md:text-4xl font-bold text-blue-400">
                 Lots
               </h1>
-              <Grid3x3 className="w-6 h-6 text-blue-400" />
+              <Grid3x3 className="w-6 h-6" style={{ background: 'linear-gradient(135deg, hsl(0,85%,62%), hsl(22,90%,68%))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }} />
             </div>
             <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
