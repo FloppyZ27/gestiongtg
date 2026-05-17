@@ -29,7 +29,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import { motion } from "framer-motion";
 import DossiersFilterBar from "../components/dossiers/DossiersFilterBar";
-import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
+import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog"; import PremiumButton from "../components/CommunicationClients/PremiumButton";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -2171,15 +2171,9 @@ export default function Dossiers() {
               }
             }}>
               <DialogTrigger asChild>
-                <Button 
-                  onClick={() => {
-                    resetForm();
-                    setIsDialogOpen(true);
-                  }}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Nouveau dossier
-                </Button>
+                <span>
+                  <PremiumButton label="Nouveau dossier" icon={Plus} onClick={() => { resetForm(); setIsDialogOpen(true); }} />
+                </span>
               </DialogTrigger>
               <DialogContent className="border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" style={{ marginTop: '50px', maxHeight: 'calc(100vh - 115px)' }} hideClose>
                 <EditDossierForm
