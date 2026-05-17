@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Phone, Plus, ChevronDown, ChevronUp, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useQueryClient } from "@tanstack/react-query";
 
 const STATUTS_RETOUR = ["Retour d'appel", "Message laissé", "Aucune réponse", "Terminé"];
 
@@ -24,6 +25,7 @@ const getStatutColor = (statut) => {
 };
 
 export default function RetourAppelSection({ editingDossier, formData, setFormData, users, retoursAppel, setRetoursAppel, addActionLog, onDeleteRequest, collapsed, onToggleCollapse }) {
+  const queryClient = useQueryClient();
   const [retourAppelCollapsedInternal, setRetourAppelCollapsedInternal] = useState(true);
   const retourAppelCollapsed = collapsed !== undefined ? collapsed : retourAppelCollapsedInternal;
   const setRetourAppelCollapsed = onToggleCollapse || setRetourAppelCollapsedInternal;
@@ -173,7 +175,33 @@ export default function RetourAppelSection({ editingDossier, formData, setFormDa
                         </TableCell>
                         <TableCell className="text-slate-300 text-xs max-w-[200px] truncate">{retour.raison || "-"}</TableCell>
                         <TableCell>
-                          <Badge className={`${getStatutColor(retour.statut)} border text-xs`}>{retour.statut || "-"}</Badge>
+                          <Select 
+                            value={retour.statut}
+                            onValueChange={async (newStatut) => {
+                              await base44.entities.RetourAppel.update(retour.id, {
+                                ...retour,
+                                statut: newStatut
+                              });
+                              setRetoursAppel(prev => prev.map(r => r.id === retour.id ? { ...r, statut: newStatut } : r));
+                              queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+                            }}
+                          >
+                            <SelectTrigger className={`border-slate-600 h-8 text-xs w-full ${
+                              retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                              retour.statut === "Message laissé" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
+                              retour.statut === "Aucune réponse" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                              retour.statut === "Terminé" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
+                              "bg-slate-700 text-white"
+                            }`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
+                              <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                              <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
+                              <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-slate-300 text-xs">{assignedUser?.full_name || retour.utilisateur_assigne || "-"}</TableCell>
                         <TableCell className="text-right">
