@@ -15,10 +15,22 @@ export default function Recherches() {
         <div className="flex items-center gap-3 mb-6">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl md:text-4xl font-bold text-blue-400">
-                Recherches
-              </h1>
-              <SearchIcon className="w-10 h-10 text-blue-400" />
+              <h1 className="text-3xl md:text-4xl font-bold" style={{
+                background: 'linear-gradient(90deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent'
+              }}>
+                 Recherches
+               </h1>
+               <SearchIcon className="w-10 h-10" style={{
+                background: 'linear-gradient(135deg, hsl(0,85%,62%), hsl(22,90%,68%))',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent'
+              }} />
             </div>
             <p className="text-slate-400">Consultez les lots et les actes</p>
           </div>
