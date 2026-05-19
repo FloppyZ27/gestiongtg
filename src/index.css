@@ -615,6 +615,39 @@ html.light [class*="SidebarGroupLabel"] {
   color: hsl(220, 10%, 45%) !important;
 }
 
+/* Date picker hover — rouge/orangé en light mode */
+html.light [class*="rdp"] button:hover,
+html.light [class*="rdp"] [role="gridcell"] button:hover,
+html.light [class*="DayPicker"] button:hover,
+html.light [data-radix-calendar] button:hover,
+html.light table[class*="calendar"] button:hover,
+html.light [class*="calendar"] td button:hover,
+html.light [class*="react-day-picker"] button:hover {
+  background: linear-gradient(135deg, rgba(200, 45, 45, 0.18), rgba(199, 91, 26, 0.18)) !important;
+  background-color: rgba(200, 45, 45, 0.15) !important;
+  color: hsl(0, 72%, 38%) !important;
+  border-color: rgba(200, 75, 45, 0.30) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html.light [class*="rdp"] button[aria-selected="true"],
+html.light [class*="rdp"] button[data-selected],
+html.light [class*="DayPicker"] button[aria-selected="true"] {
+  background: linear-gradient(135deg, hsl(0, 78%, 50%), hsl(22, 90%, 52%)) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(200, 45, 45, 0.30) !important;
+}
+
+html.light [class*="rdp"] button[aria-disabled="true"],
+html.light [class*="rdp"] button:disabled {
+  background: transparent !important;
+  color: hsl(220, 10%, 72%) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* Labels — teinte plus pâle pour se différencier du texte principal */
 html.light label,
 html.light [class*="label"],
