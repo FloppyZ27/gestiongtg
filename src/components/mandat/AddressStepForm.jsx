@@ -336,8 +336,9 @@ export default function AddressStepForm({
                           className={`px-2 py-1 rounded cursor-pointer text-xs ${
                             isSelected 
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                              : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                              : 'text-slate-300 hover:bg-slate-700'
                           }`}
+                          style={!isSelected ? { backgroundColor: 'rgba(45, 45, 45, 0.15)' } : {}}
                         >
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3 flex-shrink-0" />
