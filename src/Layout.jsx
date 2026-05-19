@@ -933,7 +933,12 @@ function LayoutContent({ children, currentPageName }) {
           border: 1px solid hsl(220, 15%, 84%) !important;
           box-shadow: inset 1px 1px 3px rgba(0,0,0,0.04) !important;
         }
-        html.light h1:not(.topbar-title) { color: hsl(22, 76%, 44%) !important; }
+        html.light h1:not(.topbar-title),
+        html.light h2, html.light h3, html.light h4 {
+          background: none !important;
+          -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
+          color: hsl(220, 20%, 14%) !important;
+        }
         html.light button.timesheet-tab-button {
           background: hsl(0, 70%, 46%) !important; color: white !important;
         }

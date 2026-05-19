@@ -404,12 +404,14 @@ a.flex.items-center.gap-3 {
 
 /* Page titles */
 html.light h1:not(.topbar-title),
-html.light h2 {
-  background: linear-gradient(90deg, hsl(0, 78%, 46%), hsl(22, 85%, 50%)) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
+html.light h2,
+html.light h3,
+html.light h4 {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
+  color: hsl(220, 20%, 14%) !important;
 }
 
 /* Topbar gradient title */
