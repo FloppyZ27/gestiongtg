@@ -620,6 +620,6 @@ html.light label,
 html.light [class*="label"],
 html.light [for],
 html.light [class*="Label"] {
-  color: hsl(220, 8%, 52%) !important;
-  -webkit-text-fill-color: hsl(220, 8%, 52%) !important;
+  color: hsl(220, 6%, 62%) !important;
+  -webkit-text-fill-color: hsl(220, 6%, 62%) !important;
 }
