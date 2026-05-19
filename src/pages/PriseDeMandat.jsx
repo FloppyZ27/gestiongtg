@@ -2399,11 +2399,10 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
                         const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                         setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
-                      } else if (value !== "Mandats à ouvrir") {
-                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
                       } else {
-                        setFormData({...formData, statut: value});
+                        setFormData({...formData, statut: value, ...(value !== "Mandats à ouvrir" ? {numero_dossier: "", date_ouverture: ""} : {})});
                       }
+                      setHasFormChanges(true);
                     }}
                     numeroDossier={formData.numero_dossier}
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
