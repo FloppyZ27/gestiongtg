@@ -933,11 +933,19 @@ function LayoutContent({ children, currentPageName }) {
           border: 1px solid hsl(220, 15%, 84%) !important;
           box-shadow: inset 1px 1px 3px rgba(0,0,0,0.04) !important;
         }
-        html.light h1:not(.topbar-title),
-        html.light h2, html.light h3, html.light h4 {
-          background: none !important;
-          -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
+        html.light h1:not(.topbar-title), html.light h2 {
+          background: linear-gradient(90deg, hsl(0, 80%, 50%), hsl(22, 90%, 55%)) !important;
+          -webkit-background-clip: text !important; background-clip: text !important;
+          -webkit-text-fill-color: transparent !important; color: transparent !important;
+        }
+        html.light h3, html.light h4, html.light h5, html.light h6 {
+          background: none !important; -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
           color: hsl(220, 20%, 14%) !important;
+        }
+        html.light .text-white, html.light [class*="text-slate-"],
+        html.light [class*="text-gray-"], html.light .text-foreground {
+          color: hsl(220, 15%, 20%) !important;
+          -webkit-text-fill-color: hsl(220, 15%, 20%) !important;
         }
         html.light button.timesheet-tab-button {
           background: hsl(0, 70%, 46%) !important; color: white !important;

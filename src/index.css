@@ -402,16 +402,48 @@ a.flex.items-center.gap-3 {
    LIGHT MODE OVERRIDES
    ═══════════════════════════════════════════════════ */
 
-/* Page titles */
+/* Page titles — keep gradient like dark mode */
 html.light h1:not(.topbar-title),
-html.light h2,
+html.light h2 {
+  background: linear-gradient(90deg, hsl(0, 80%, 50%), hsl(22, 90%, 55%)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Section sub-titles — dark in light mode */
 html.light h3,
-html.light h4 {
+html.light h4,
+html.light h5,
+html.light h6 {
   background: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
   -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
   color: hsl(220, 20%, 14%) !important;
+}
+
+/* White and light text → dark in light mode */
+html.light .text-white,
+html.light [class*="text-slate-"],
+html.light [class*="text-gray-"],
+html.light [class*="text-zinc-"],
+html.light [class*="text-neutral-"],
+html.light .text-foreground,
+html.light [class*="text-muted"] {
+  color: hsl(220, 15%, 20%) !important;
+  -webkit-text-fill-color: hsl(220, 15%, 20%) !important;
+}
+
+/* Muted text slightly lighter */
+html.light [class*="text-muted-foreground"],
+html.light [class*="text-slate-4"],
+html.light [class*="text-slate-5"],
+html.light [class*="text-gray-4"],
+html.light [class*="text-gray-5"] {
+  color: hsl(220, 10%, 45%) !important;
+  -webkit-text-fill-color: hsl(220, 10%, 45%) !important;
 }
 
 /* Topbar gradient title */
