@@ -219,7 +219,7 @@ export default function ClientStepForm({
                           disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${
                           isSelected ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'
                         }`}
-                        style={!isSelected ? { backgroundColor: 'rgba(45, 45, 45, 0.30)' } : {}}
+                        style={!isSelected ? { backgroundColor: 'rgba(45, 45, 45, 0.15)' } : {}}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium truncate">{client.prenom} {client.nom}</span>
