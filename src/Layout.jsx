@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut, Play, Square, ClipboardList, Landmark, Mountain } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut, Play, Square, ClipboardList, Landmark, Mountain, Sun, Moon } from "lucide-react";
 import { format } from "date-fns";
 import {
   Sidebar,
@@ -197,6 +197,16 @@ function LayoutContent({ children, currentPageName }) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showPunchControls, setShowPunchControls] = useState(false);
   const [isHoveringPunch, setIsHoveringPunch] = useState(false);
+  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('gestiongtg-theme') || 'dark');
+
+  useEffect(() => {
+    if (themeMode === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    localStorage.setItem('gestiongtg-theme', themeMode);
+  }, [themeMode]);
   const punchTimerRef = React.useRef(null);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
@@ -862,6 +872,74 @@ function LayoutContent({ children, currentPageName }) {
           width: 0 !important;
         }
 
+        /* ─── LIGHT MODE inline overrides ─── */
+        html.light [data-state="open"] > div[data-radix-dialog-overlay],
+        html.light div[data-radix-dialog-overlay],
+        html.light [data-radix-dialog-overlay] {
+          background-color: rgba(15, 18, 28, 0.38) !important;
+        }
+        html.light [role="dialog"] {
+          background: #ffffff !important;
+          border: 1px solid hsl(220, 15%, 87%) !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.10) !important;
+        }
+        html.light .bg-slate-900, html.light .bg-slate-800, html.light .bg-slate-950 {
+          background: hsl(220, 12%, 95%) !important;
+        }
+        html.light button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
+        html.light [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
+          background: rgba(200, 45, 45, 0.06) !important;
+          border: 1px solid rgba(200, 45, 45, 0.18) !important;
+          color: hsl(220, 15%, 15%) !important;
+        }
+        html.light button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):not([data-custom-hover]) {
+          background: rgba(200, 45, 45, 0.12) !important;
+          border-color: rgba(200, 75, 45, 0.28) !important;
+          box-shadow: 0 4px 12px rgba(200, 45, 45, 0.10) !important;
+        }
+        html.light button[role="tab"]:hover, html.light [role="tab"]:hover {
+          background: rgba(175, 65, 26, 0.09) !important;
+          color: hsl(22, 76%, 36%) !important;
+        }
+        html.light button[role="tab"][data-state="active"], html.light [role="tab"][data-state="active"] {
+          background: rgba(200, 45, 45, 0.09) !important;
+          color: hsl(0, 72%, 38%) !important;
+          border-bottom: 2px solid hsl(22, 76%, 44%) !important;
+        }
+        html.light input, html.light textarea, html.light select {
+          background-color: #ffffff !important;
+          border: 1px solid hsl(220, 15%, 84%) !important;
+          color: hsl(220, 15%, 12%) !important;
+        }
+        html.light input:focus, html.light textarea:focus {
+          border-color: hsl(0, 72%, 50%) !important;
+          box-shadow: 0 0 0 3px rgba(210, 45, 45, 0.10) !important;
+        }
+        html.light [role="listbox"], html.light [role="menu"],
+        html.light [data-radix-select-content],
+        html.light [data-radix-popper-content-wrapper] > div {
+          background-color: #ffffff !important;
+          border: 1px solid hsl(220, 15%, 88%) !important;
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09) !important;
+        }
+        html.light [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
+        html.light [data-radix-select-content] [role="option"]:hover,
+        html.light [data-radix-select-content] [role="option"][data-highlighted] {
+          background-color: rgba(200, 45, 45, 0.08) !important;
+          color: hsl(0, 72%, 38%) !important;
+        }
+        html.light button[role="combobox"], html.light [data-radix-select-trigger] {
+          background-color: #ffffff !important;
+          border: 1px solid hsl(220, 15%, 84%) !important;
+          box-shadow: inset 1px 1px 3px rgba(0,0,0,0.04) !important;
+        }
+        html.light h1:not(.topbar-title) { color: hsl(22, 76%, 44%) !important; }
+        html.light button.timesheet-tab-button {
+          background: hsl(0, 70%, 46%) !important; color: white !important;
+        }
+        html.light button.timesheet-tab-button[data-state="inactive"] {
+          background: hsl(220, 12%, 88%) !important; color: hsl(220, 10%, 42%) !important;
+        }
 
       `}</style>
       
@@ -1189,6 +1267,15 @@ function LayoutContent({ children, currentPageName }) {
               >
                 <Timer className="w-5 h-5" style={{color: 'white'}} />
               </Button>
+              <button
+                onClick={() => setThemeMode(t => t === 'dark' ? 'light' : 'dark')}
+                title={themeMode === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                style={{background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', transition: 'all 0.2s ease', width: '32px', height: '32px'}}
+                onMouseEnter={e => { e.currentTarget.style.background = 'hsl(var(--muted))'; e.currentTarget.style.color = 'hsl(var(--foreground))'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'hsl(var(--muted-foreground))'; }}
+              >
+                {themeMode === 'dark' ? <Sun style={{width: '16px', height: '16px'}} /> : <Moon style={{width: '16px', height: '16px'}} />}
+              </button>
               <NotificationButton user={user} />
             </div>
           </header>

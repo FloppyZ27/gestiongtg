@@ -93,6 +93,39 @@
     --sidebar-border: 220 10% 16%;
     --sidebar-ring: 0 68% 34%;
   }
+
+  /* ─── Light Mode Variables ─── */
+  .light {
+    --background: 40 15% 97%;
+    --foreground: 220 15% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 12%;
+    --primary: 0 78% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 12% 92%;
+    --secondary-foreground: 220 15% 25%;
+    --muted: 220 12% 94%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 22 76% 44%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 86%;
+    --input: 0 0% 100%;
+    --ring: 0 78% 50%;
+    --chart-1: 0 78% 50%;
+    --chart-2: 22 76% 48%;
+    --sidebar-background: 220 15% 94%;
+    --sidebar-foreground: 220 15% 18%;
+    --sidebar-primary: 0 78% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 90%;
+    --sidebar-accent-foreground: 220 15% 18%;
+    --sidebar-border: 220 15% 82%;
+    --sidebar-ring: 0 78% 50%;
+  }
 }
 
 @layer base {
@@ -363,4 +396,173 @@ button.timesheet-tab-button:hover {
 /* ─── Sidebar nav item active highlight ─── */
 a.flex.items-center.gap-3 {
   border-radius: 10px !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   ═══════════════════════════════════════════════════ */
+
+/* Page titles */
+html.light h1:not(.topbar-title),
+html.light h2 {
+  background: linear-gradient(90deg, hsl(0, 78%, 46%), hsl(22, 85%, 50%)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Topbar gradient title */
+html.light .topbar-title {
+  background: linear-gradient(90deg, hsl(0, 85%, 52%), hsl(22, 90%, 58%), hsl(0, 85%, 52%)) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: gradientShift 3s linear infinite !important;
+}
+
+/* Scrollbar */
+html.light *::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, hsl(0, 65%, 60%), hsl(22, 72%, 55%)) !important;
+}
+
+/* Header/Topbar */
+html.light header {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-bottom: 1px solid hsl(220, 15%, 88%) !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Dialog overlay */
+html.light [data-state="open"] > div[data-radix-dialog-overlay],
+html.light div[data-radix-dialog-overlay],
+html.light [data-radix-dialog-overlay] {
+  background-color: rgba(15, 18, 28, 0.38) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Dialog content */
+html.light [role="dialog"] {
+  background: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 87%) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0,0,0,0.03) !important;
+}
+
+/* Slate backgrounds */
+html.light .bg-slate-900,
+html.light .bg-slate-800,
+html.light .bg-slate-950 {
+  background: hsl(220, 12%, 95%) !important;
+}
+
+/* Inputs */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 84%) !important;
+  color: hsl(220, 15%, 12%) !important;
+}
+
+html.light input:hover,
+html.light textarea:hover,
+html.light select:hover {
+  background-color: #fafafa !important;
+  border-color: hsl(220, 15%, 70%) !important;
+}
+
+html.light input:focus,
+html.light textarea:focus,
+html.light select:focus {
+  background-color: #ffffff !important;
+  border-color: hsl(0, 72%, 50%) !important;
+  box-shadow: 0 0 0 3px rgba(210, 45, 45, 0.10) !important;
+}
+
+/* Select triggers */
+html.light button[role="combobox"],
+html.light button[aria-haspopup="listbox"],
+html.light button[data-radix-select-trigger],
+html.light [data-radix-select-trigger] {
+  background-color: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 84%) !important;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light button[role="combobox"]:hover,
+html.light button[aria-haspopup="listbox"]:hover,
+html.light [data-radix-select-trigger]:hover {
+  background-color: #f7f7f7 !important;
+  border-color: hsl(220, 15%, 68%) !important;
+}
+
+/* Dropdown / Select menus */
+html.light [role="listbox"],
+html.light [role="menu"],
+html.light [data-radix-select-content],
+html.light [data-radix-popper-content-wrapper] > div {
+  background-color: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 88%) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09) !important;
+}
+
+html.light [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
+html.light [data-radix-dropdown-menu-content] [role="menuitemcheckbox"]:hover,
+html.light [data-radix-select-content] [role="option"]:hover,
+html.light [data-radix-select-content] [role="option"]:focus,
+html.light [data-radix-select-content] [role="option"][data-highlighted] {
+  background-color: rgba(200, 45, 45, 0.08) !important;
+  color: hsl(0, 72%, 38%) !important;
+}
+
+/* General buttons */
+html.light button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
+html.light [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
+  background: rgba(200, 45, 45, 0.06) !important;
+  border: 1px solid rgba(200, 45, 45, 0.18) !important;
+  color: hsl(220, 15%, 15%) !important;
+}
+
+html.light button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):hover,
+html.light [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):hover {
+  background: rgba(200, 45, 45, 0.12) !important;
+  border-color: rgba(200, 75, 45, 0.28) !important;
+  box-shadow: 0 4px 12px rgba(200, 45, 45, 0.10) !important;
+  transform: translateY(-1px);
+}
+
+/* Tabs */
+html.light button[role="tab"],
+html.light [role="tab"] {
+  color: hsl(220, 15%, 35%) !important;
+}
+
+html.light button[role="tab"]:hover,
+html.light [role="tab"]:hover {
+  background: rgba(175, 65, 26, 0.09) !important;
+  color: hsl(22, 76%, 36%) !important;
+}
+
+html.light button[role="tab"][data-state="active"],
+html.light [role="tab"][data-state="active"] {
+  background: rgba(200, 45, 45, 0.09) !important;
+  color: hsl(0, 72%, 38%) !important;
+  border-bottom: 2px solid hsl(22, 76%, 44%) !important;
+}
+
+/* Timesheet tab buttons */
+html.light button.timesheet-tab-button {
+  background: hsl(0, 70%, 46%) !important;
+  color: white !important;
+}
+
+html.light button.timesheet-tab-button[data-state="inactive"] {
+  background: hsl(220, 12%, 88%) !important;
+  color: hsl(220, 10%, 42%) !important;
+}
+
+html.light button.timesheet-tab-button:hover {
+  background: hsl(0, 70%, 54%) !important;
 }
