@@ -214,7 +214,7 @@ export default function MandatStepForm({
                 {dropdownOpen && (
                   <div
                     className="absolute left-0 top-full mt-1 w-full z-50 max-h-[200px] overflow-y-auto p-2 space-y-0.5"
-                    style={{background: 'hsl(220, 13%, 10%)', border: '1px solid hsl(220, 10%, 20%)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}}
+                    style={{background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.55)'}}
                     onWheelCapture={(e) => e.stopPropagation()}
                   >
                     {TYPES_MANDATS.map((type) => {
