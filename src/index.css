@@ -566,3 +566,17 @@ html.light button.timesheet-tab-button[data-state="inactive"] {
 html.light button.timesheet-tab-button:hover {
   background: hsl(0, 70%, 54%) !important;
 }
+
+/* Logos en light mode */
+html.light img[src*="GTG-ETOILE"] {
+  filter: none !important;
+  opacity: 0.9;
+}
+
+/* Textes généraux en light mode */
+html.light .sidebar h2 {
+  color: hsl(220, 15%, 18%) !important;
+}
+html.light [class*="SidebarGroupLabel"] {
+  color: hsl(220, 10%, 45%) !important;
+}
