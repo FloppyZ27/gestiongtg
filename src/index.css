@@ -715,3 +715,10 @@ html.light [class*="Label"] {
 html.light button[data-custom-hover]:hover {
   color: white !important;
 }
+
+/* Icônes dans les entêtes de sections collapsibles en light mode */
+html.light [data-radix-collapsible-trigger] svg,
+html.light [data-state] svg,
+html.light button[data-state] svg {
+  color: hsl(220, 20%, 20%) !important;
+}
