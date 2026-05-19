@@ -15,9 +15,9 @@ const ARPENTEURS = [
 ];
 
 const STATUTS = [
-  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", activeStyle: { background: 'rgba(6,182,212,0.25)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.5)', boxShadow: '0 0 10px rgba(6,182,212,0.3)' } },
-  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", activeStyle: { background: 'rgba(168,85,247,0.25)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.5)', boxShadow: '0 0 10px rgba(168,85,247,0.3)' } },
-  { value: "Mandat non octroyé", label: "Non octroyé", activeStyle: { background: 'rgba(239,68,68,0.25)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.5)', boxShadow: '0 0 10px rgba(239,68,68,0.3)' } }
+  { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan", activeStyle: { background: 'rgba(6,182,212,0.25)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.5)', boxShadow: '0 0 10px rgba(6,182,212,0.3)' } },
+  { value: "Mandats à ouvrir", label: "Mandats à ouvrir", color: "purple", activeStyle: { background: 'rgba(168,85,247,0.25)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.5)', boxShadow: '0 0 10px rgba(168,85,247,0.3)' } },
+  { value: "Mandat non octroyé", label: "Non octroyé", color: "red", activeStyle: { background: 'rgba(239,68,68,0.25)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.5)', boxShadow: '0 0 10px rgba(239,68,68,0.3)' } }
 ];
 
 export default function DossierInfoStepForm({
@@ -95,6 +95,7 @@ export default function DossierInfoStepForm({
                       onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
                       disabled={!arpenteurGeometre || disabled}
                       data-active={statut === s.value ? 'true' : undefined}
+                      data-statut-color={statut === s.value ? s.color : undefined}
                       style={{
                         padding: '2px 8px',
                         borderRadius: '4px',

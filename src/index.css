@@ -750,10 +750,18 @@ html.light [class*="rounded-full"][class*="bg-"] svg {
   -webkit-text-fill-color: unset !important;
 }
 
-/* Boutons de statut actifs — préserver la couleur définie en inline style */
-html.light button[data-active="true"] {
-  color: unset !important;
-  -webkit-text-fill-color: unset !important;
+/* Boutons de statut actifs — préserver la couleur en light mode */
+html.light button[data-statut-color="cyan"] {
+  color: #06b6d4 !important;
+  -webkit-text-fill-color: #06b6d4 !important;
+}
+html.light button[data-statut-color="purple"] {
+  color: #a855f7 !important;
+  -webkit-text-fill-color: #a855f7 !important;
+}
+html.light button[data-statut-color="red"] {
+  color: #ef4444 !important;
+  -webkit-text-fill-color: #ef4444 !important;
 }
 
 /* Liens téléphone clicables en light mode */
