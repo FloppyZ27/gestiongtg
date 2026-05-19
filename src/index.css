@@ -684,23 +684,8 @@ html.light [class*="rdp"] button:disabled {
   box-shadow: none !important;
 }
 
-/* Icônes dans les titres de sections collapsables — plus foncées */
-[data-radix-collapsible-trigger] svg,
-[data-state] svg,
-button[data-radix-collapsible-trigger] svg {
-  color: hsl(220, 15%, 35%) !important;
-  opacity: 1 !important;
-}
-
+/* Icônes dans les titres de sections collapsables — plus foncées (light mode) */
 html.light [data-radix-collapsible-trigger] svg,
-html.light [data-state] svg,
-html.light button[data-radix-collapsible-trigger] svg,
-html.light [class*="CardHeader"] svg,
-html.light [class*="collapsible"] svg,
-html.light .cursor-pointer svg {
-  color: hsl(220, 15%, 22%) !important;
-  opacity: 1 !important;
-}
 
 /* Labels — teinte plus pâle pour se différencier du texte principal */
 html.light label,
