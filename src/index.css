@@ -722,3 +722,9 @@ html.light [data-state] svg,
 html.light button[data-state] svg {
   color: hsl(220, 20%, 20%) !important;
 }
+
+/* Icônes colorées en light mode dans les dialogs/modals */
+html.light [role="dialog"] svg {
+  color: inherit !important;
+  opacity: 1 !important;
+}
