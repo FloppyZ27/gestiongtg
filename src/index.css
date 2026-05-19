@@ -688,8 +688,17 @@ html.light [class*="rdp"] button:disabled {
 html.light [data-radix-collapsible-trigger] svg,
 html.light button[data-radix-collapsible-trigger] svg,
 html.light [class*="CardHeader"] svg,
-html.light [class*="collapsible"] svg {
-  color: hsl(220, 15%, 22%) !important;
+html.light [class*="collapsible"] svg,
+html.light [data-state="open"] > button svg,
+html.light [data-state="closed"] > button svg,
+html.light h2 svg, html.light h3 svg, html.light h4 svg,
+html.light [class*="section"] > div > svg,
+html.light [class*="section"] > button > svg,
+html.light [class*="header"] svg,
+html.light [class*="Header"] svg,
+html.light [class*="title"] svg,
+html.light [class*="Title"] svg {
+  color: hsl(220, 15%, 18%) !important;
   opacity: 1 !important;
 }
 
