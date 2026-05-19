@@ -569,31 +569,6 @@ html.light button.timesheet-tab-button:hover {
   background: hsl(0, 70%, 54%) !important;
 }
 
-/* Date picker buttons en light mode */
-html.light [class*="rdp"] button,
-html.light [class*="rdp"] [role="gridcell"] button,
-html.light [class*="rdp"] [role="columnheader"],
-html.light [class*="rdp"] caption,
-html.light [class*="rdp"] [aria-label],
-html.light [data-radix-popper-content-wrapper] button,
-html.light .rdp button,
-html.light .rdp-day,
-html.light .rdp-head_cell,
-html.light .rdp-caption_label,
-html.light .rdp-nav_button,
-html.light [class*="calendar"] button,
-html.light [class*="Calendar"] button {
-  color: hsl(220, 20%, 14%) !important;
-  -webkit-text-fill-color: hsl(220, 20%, 14%) !important;
-}
-
-html.light .rdp-day_selected,
-html.light .rdp-day_selected:hover,
-html.light [class*="rdp"] [aria-selected="true"] button {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
 /* Logos en light mode */
 html.light img[src*="GTG-ETOILE"] {
   filter: none !important;
