@@ -217,8 +217,9 @@ export default function ClientStepForm({
                         onClick={() => !disabled && handleClientClick(client, isSelected)}
                         className={`px-2 py-1.5 rounded text-xs ${
                           disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${
-                          isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                          isSelected ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'
                         }`}
+                        style={!isSelected ? { backgroundColor: '#2d2d2d' } : {}}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium truncate">{client.prenom} {client.nom}</span>
