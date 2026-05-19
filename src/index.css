@@ -710,3 +710,8 @@ html.light [class*="Label"] {
   color: hsl(220, 6%, 62%) !important;
   -webkit-text-fill-color: hsl(220, 6%, 62%) !important;
 }
+
+/* Boutons avec hover personnalisé en light mode */
+html.light button[data-custom-hover]:hover {
+  color: white !important;
+}
