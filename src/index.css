@@ -643,8 +643,8 @@ html.light .text-slate-700 {
 
 /* ─── Logos en light mode ─── */
 html.light img[src*="GTG-ETOILE"] {
-  filter: none !important;
-  opacity: 0.9;
+  filter: brightness(0) !important;
+  opacity: 0.85;
 }
 
 html.light [class*="SidebarGroupLabel"] {
