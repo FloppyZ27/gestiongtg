@@ -614,3 +614,12 @@ html.light .sidebar h2 {
 html.light [class*="SidebarGroupLabel"] {
   color: hsl(220, 10%, 45%) !important;
 }
+
+/* Labels — teinte plus pâle pour se différencier du texte principal */
+html.light label,
+html.light [class*="label"],
+html.light [for],
+html.light [class*="Label"] {
+  color: hsl(220, 8%, 52%) !important;
+  -webkit-text-fill-color: hsl(220, 8%, 52%) !important;
+}
