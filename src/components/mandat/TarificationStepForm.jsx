@@ -284,7 +284,7 @@ export default function TarificationStepForm({
                        <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalPrixPremierLot.toFixed(2)} $</td>
                        <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalAutresLots > 0 ? `${totalAutresLots.toFixed(2)} $` : <span className="block text-center text-slate-600">-</span>}</td>
                        <td className="p-2 text-left text-slate-300 text-xs font-bold">{totalRabais > 0 ? `${totalRabais.toFixed(2)} $` : <span className="block text-center text-slate-600">-</span>}</td>
-                       <td colSpan="2"></td>
+                       <td colSpan="3"></td>
                        <td className="p-2 text-right text-purple-400 text-xs font-bold">{(totalEstime - totalRabais).toFixed(2)} $</td>
                      </tr>
                    </tfoot>
