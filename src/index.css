@@ -730,15 +730,13 @@ html.light [role="dialog"] svg {
 }
 
 /* Préserver les couleurs des icônes de sidebar dans les dialogs en light mode */
-html.light [role="dialog"] .sidebar-nav-btn svg[class*="text-"] {
-  color: inherit !important;
-}
-html.light [role="dialog"] svg[class*="text-teal-"],
-html.light [role="dialog"] svg[class*="text-blue-"],
-html.light [role="dialog"] svg[class*="text-pink-"],
-html.light [role="dialog"] svg[class*="text-emerald-"],
-html.light [role="dialog"] svg[class*="text-orange-"],
-html.light [role="dialog"] svg[class*="text-purple-"],
-html.light [role="dialog"] svg[class*="text-yellow-"] {
-  color: currentColor !important;
-}
+html.light [role="dialog"] svg.text-teal-400 { color: #34d399 !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-blue-400 { color: #60a5fa !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-pink-400 { color: #f472b6 !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-emerald-400 { color: #34d399 !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-orange-400 { color: #fb923c !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-purple-400 { color: #c084fc !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-yellow-400 { color: #facc15 !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-red-400 { color: #f87171 !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-cyan-400 { color: #22d3ee !important; -webkit-text-fill-color: unset !important; }
+html.light [role="dialog"] svg.text-indigo-400 { color: #818cf8 !important; -webkit-text-fill-color: unset !important; }
