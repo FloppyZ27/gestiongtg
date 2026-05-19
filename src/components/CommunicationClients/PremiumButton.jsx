@@ -68,6 +68,7 @@ export default function PremiumButton({ label, onClick, icon: Icon = Plus, varia
       buttonRef.current.style.setProperty('filter', 'none', 'important');
       buttonRef.current.style.setProperty('border', 'none', 'important');
       buttonRef.current.style.setProperty('box-shadow', `0 6px 22px ${currentShadowColor}`, 'important');
+      buttonRef.current.style.setProperty('color', 'white', 'important');
     }
   };
 
