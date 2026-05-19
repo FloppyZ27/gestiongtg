@@ -601,16 +601,52 @@ html.light button.timesheet-tab-button:hover {
   background: hsl(0, 70%, 54%) !important;
 }
 
-/* Logos en light mode */
+/* ─── Hardcoded dark backgrounds → light equivalents ─── */
+html.light [class*="bg-slate-9"],
+html.light [class*="bg-slate-8"],
+html.light [class*="bg-slate-7"] {
+  background-color: hsl(220, 12%, 94%) !important;
+  background: hsl(220, 12%, 94%) !important;
+}
+
+html.light [class*="bg-slate-6"] {
+  background-color: hsl(220, 10%, 90%) !important;
+  background: hsl(220, 10%, 90%) !important;
+}
+
+/* ─── Hardcoded white/light text → dark in light mode ─── */
+html.light .text-white {
+  color: hsl(220, 15%, 12%) !important;
+  -webkit-text-fill-color: hsl(220, 15%, 12%) !important;
+}
+
+/* ─── Hardcoded dark borders → light borders ─── */
+html.light [class*="border-slate-7"],
+html.light [class*="border-slate-8"],
+html.light [class*="border-slate-6"] {
+  border-color: hsl(220, 15%, 82%) !important;
+}
+
+/* ─── Hardcoded dark text colors → readable in light ─── */
+html.light .text-slate-400,
+html.light .text-slate-500,
+html.light .text-slate-300 {
+  color: hsl(220, 10%, 42%) !important;
+  -webkit-text-fill-color: hsl(220, 10%, 42%) !important;
+}
+
+html.light .text-slate-600,
+html.light .text-slate-700 {
+  color: hsl(220, 8%, 62%) !important;
+  -webkit-text-fill-color: hsl(220, 8%, 62%) !important;
+}
+
+/* ─── Logos en light mode ─── */
 html.light img[src*="GTG-ETOILE"] {
   filter: none !important;
   opacity: 0.9;
 }
 
-/* Textes généraux en light mode */
-html.light .sidebar h2 {
-  color: hsl(220, 15%, 18%) !important;
-}
 html.light [class*="SidebarGroupLabel"] {
   color: hsl(220, 10%, 45%) !important;
 }
