@@ -728,3 +728,17 @@ html.light [role="dialog"] svg {
   color: inherit !important;
   opacity: 1 !important;
 }
+
+/* Préserver les couleurs des icônes de sidebar dans les dialogs en light mode */
+html.light [role="dialog"] .sidebar-nav-btn svg[class*="text-"] {
+  color: inherit !important;
+}
+html.light [role="dialog"] svg[class*="text-teal-"],
+html.light [role="dialog"] svg[class*="text-blue-"],
+html.light [role="dialog"] svg[class*="text-pink-"],
+html.light [role="dialog"] svg[class*="text-emerald-"],
+html.light [role="dialog"] svg[class*="text-orange-"],
+html.light [role="dialog"] svg[class*="text-purple-"],
+html.light [role="dialog"] svg[class*="text-yellow-"] {
+  color: currentColor !important;
+}
