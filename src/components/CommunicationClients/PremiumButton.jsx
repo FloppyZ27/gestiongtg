@@ -39,7 +39,7 @@ const resetToBase = (el, borderColor = 'rgba(139, 0, 0, 0.5)') => {
   el.style.setProperty('opacity', '1', 'important');
 };
 
-export default function PremiumButton({ label, onClick, icon: Icon = Plus, variant = 'default' }) {
+export default function PremiumButton({ label, onClick, icon: Icon = Plus, variant = 'default', type = 'button' }) {
   const buttonRef = React.useRef(null);
   
   const gradients = {
@@ -89,6 +89,7 @@ export default function PremiumButton({ label, onClick, icon: Icon = Plus, varia
   return (
     <button
       ref={buttonRef}
+      type={type}
       onClick={onClick}
       data-custom-hover
       onMouseEnter={handleMouseEnter}
