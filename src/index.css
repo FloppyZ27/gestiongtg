@@ -740,3 +740,14 @@ html.light [role="dialog"] svg.text-yellow-400 { color: #facc15 !important; -web
 html.light [role="dialog"] svg.text-red-400 { color: #f87171 !important; -webkit-text-fill-color: unset !important; }
 html.light [role="dialog"] svg.text-cyan-400 { color: #22d3ee !important; -webkit-text-fill-color: unset !important; }
 html.light [role="dialog"] svg.text-indigo-400 { color: #818cf8 !important; -webkit-text-fill-color: unset !important; }
+
+/* Liens téléphone clicables en light mode */
+html.light a[href^="tel:"] {
+  color: hsl(220, 80%, 50%) !important;
+  -webkit-text-fill-color: hsl(220, 80%, 50%) !important;
+  text-decoration: underline;
+}
+html.light a[href^="tel:"]:hover {
+  color: hsl(220, 80%, 40%) !important;
+  -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
+}
