@@ -750,6 +750,12 @@ html.light [class*="rounded-full"][class*="bg-"] svg {
   -webkit-text-fill-color: unset !important;
 }
 
+/* Boutons de statut actifs — préserver la couleur définie en inline style */
+html.light button[data-active="true"] {
+  color: unset !important;
+  -webkit-text-fill-color: unset !important;
+}
+
 /* Liens téléphone clicables en light mode */
 html.light a[href^="tel:"] {
   color: hsl(220, 80%, 50%) !important;

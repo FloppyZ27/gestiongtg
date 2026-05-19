@@ -94,6 +94,7 @@ export default function DossierInfoStepForm({
                       data-custom-hover
                       onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
                       disabled={!arpenteurGeometre || disabled}
+                      data-active={statut === s.value ? 'true' : undefined}
                       style={{
                         padding: '2px 8px',
                         borderRadius: '4px',
