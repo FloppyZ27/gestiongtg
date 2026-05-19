@@ -26,6 +26,7 @@ const resetToBase = (el, borderColor = 'rgba(139, 0, 0, 0.5)') => {
   if (isLightMode()) {
     el.style.setProperty('background', 'rgba(200, 45, 45, 0.06)', 'important');
     el.style.setProperty('color', 'hsl(220, 15%, 15%)', 'important');
+    el.style.setProperty('-webkit-text-fill-color', 'hsl(220, 15%, 15%)', 'important');
     el.style.setProperty('border', '1px solid rgba(200, 45, 45, 0.22)', 'important');
     el.style.setProperty('box-shadow', '0 2px 8px rgba(0,0,0,0.07)', 'important');
   } else {
@@ -69,6 +70,7 @@ export default function PremiumButton({ label, onClick, icon: Icon = Plus, varia
       buttonRef.current.style.setProperty('border', 'none', 'important');
       buttonRef.current.style.setProperty('box-shadow', `0 6px 22px ${currentShadowColor}`, 'important');
       buttonRef.current.style.setProperty('color', 'white', 'important');
+      buttonRef.current.style.setProperty('-webkit-text-fill-color', 'white', 'important');
     }
   };
 
