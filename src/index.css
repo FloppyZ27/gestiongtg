@@ -346,8 +346,11 @@ header {
 }
 
 /* ─── Sidebar nav items ─── */
-[class*="SidebarMenuButton"] {
+[class*="SidebarMenuButton"],
+[class*="SidebarMenuButton"]:hover {
   border-radius: 10px !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* ─── Gradient topbar title — rouge → orangé animé ─── */
