@@ -286,8 +286,21 @@ Deno.serve(async (req) => {
     for (let ci=1; ci<(clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
       const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
-      halfRow(`Client ${ci+1} :`, nm, y);
-      y += RH;
+      const cxTel = cx?.telephones?.[0]?.telephone || '';
+      const cxTelType = cx?.telephones?.[0]?.type_telephone || '';
+      const cxTelWithType = cxTelType ? `${cxTel} (${cxTelType})` : cxTel;
+      const cxEmail = cx?.courriels?.[0]?.courriel || '';
+      const cxAdr = cx?.adresses?.[0];
+      const cxRue = cxAdr ? [(cxAdr.numeros_civiques||[]).filter(Boolean).join(' '), cxAdr.rue].filter(Boolean).join(' ') : '';
+      const cxVille = cxAdr?.ville || '';
+      const cxCP = cxAdr?.code_postal || '';
+      // Afficher toutes les infos du client additionnel
+      halfRow(`Client ${ci+1} :`, nm, y); y += RH;
+      halfRow(`Téléphone :`, cxTelWithType, y); y += RH;
+      halfRow(`Courriel :`, cxEmail, y); y += RH;
+      halfRow(`Adresse :`, cxRue, y); y += RH;
+      halfRow(`Municipalité :`, cxVille, y); y += RH;
+      halfRow(`Code postal :`, cxCP, y); y += RH;
     }
 
     // ── LOCALISATION DES TRAVAUX ──
