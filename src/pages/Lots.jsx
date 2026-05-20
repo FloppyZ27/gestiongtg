@@ -1558,7 +1558,7 @@ export default function Lots() {
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
                           {commentairesCount > 0 && (
-                            <span className="ml-1.5 inline-flex items-center justify-center bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 leading-none">
+                            <span className="ml-1.5 inline-flex items-center justify-center bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 leading-none">
                               {commentairesCount}
                             </span>
                           )}
