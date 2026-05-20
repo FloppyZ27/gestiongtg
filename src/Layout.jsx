@@ -722,7 +722,7 @@ function LayoutContent({ children, currentPageName }) {
                               asChild 
                               className={`transition-all duration-200 rounded-lg mb-0.5 ${
                                 location.pathname === item.url 
-                                  ? 'text-primary bg-transparent shadow-none' 
+                                  ? 'text-accent bg-transparent shadow-none' 
                                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                               }`}
                             >
