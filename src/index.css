@@ -858,10 +858,13 @@ html.light a[href^="tel:"]:hover {
   -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
 }
 
-/* Icône titre page Lots — toujours rouge */
-html.light .lots-title-icon {
-  color: hsl(0, 80%, 58%) !important;
+/* Icône titre page Lots — toujours rouge/orangé */
+html.light .lots-title-icon,
+html.light svg.lots-title-icon {
+  color: hsl(12, 85%, 52%) !important;
+  stroke: hsl(12, 85%, 52%) !important;
   -webkit-text-fill-color: unset !important;
+  opacity: 1 !important;
 }
 
 /* Icônes des boutons dans les cartes terrain en light mode */
