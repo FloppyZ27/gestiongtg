@@ -190,17 +190,13 @@ export default function TableauDeBord() {
     
     if (!arpenteurAttendu || d.arpenteur_geometre !== arpenteurAttendu) return false;
     
-    // Trouver la date de livraison la plus proche parmi tous les mandats
-    const mandatsAvecDate = d.mandats?.filter(m => m.date_livraison) || [];
-    if (mandatsAvecDate.length === 0) return false;
-    
-    const plusProcheDate = mandatsAvecDate.reduce((min, m) => {
-      const date = new Date(m.date_livraison);
-      return date < min ? date : min;
-    }, new Date(mandatsAvecDate[0].date_livraison));
-    
-    // Inclure seulement si la date la plus proche est dans le passé
-    return plusProcheDate < today;
+    // Vérifier qu'au moins un mandat est en retard (pas de date de livraison OU date antérieure à aujourd'hui)
+    const hasMandatEnRetard = d.mandats?.some(m => {
+      if (!m.date_livraison) return true; // Pas de date = en retard
+      const dateLivraison = new Date(m.date_livraison);
+      return dateLivraison < today;
+    });
+    return hasMandatEnRetard;
   }).sort((a, b) => {
     const minDateA = Math.min(...a.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
     const minDateB = Math.min(...b.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
@@ -598,7 +594,7 @@ export default function TableauDeBord() {
                           {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                         </Badge>
                         <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">
-                          {joursRetard <= 0 ? (dateLivraison ? 'À terme' : 'Sans date') : `${joursRetard}j de retard`}
+                          {joursRetard}j de retard
                         </Badge>
                       </div>
 
