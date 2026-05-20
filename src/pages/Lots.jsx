@@ -24,6 +24,7 @@ import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import { motion } from "framer-motion";
 import { getArpenteurInitials, getArpenteurColor } from "@/lib/arpenteurUtils";
 import LotHistoriqueEntry from "../components/lots/LotHistoriqueEntry";
+import LotHistoriquePanel from "../components/lots/LotHistoriquePanel";
 import PremiumButton from "../components/CommunicationClients/PremiumButton";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
@@ -1578,22 +1579,8 @@ export default function Lots() {
                         />
                       </TabsContent>
 
-                      <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
-                        {actionLogs.length > 0 ? (
-                          <div className="space-y-2">
-                            {actionLogs.map((log) => (
-                              <LotHistoriqueEntry key={log.id} log={log} users={users} />
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-center">
-                            <div>
-                              <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                              <p className="text-slate-500">Aucune action enregistrée</p>
-                              <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                            </div>
-                          </div>
-                        )}
+                      <TabsContent value="historique" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                        <LotHistoriquePanel actionLogs={actionLogs} users={users} />
                       </TabsContent>
                     </Tabs>
                   )}
