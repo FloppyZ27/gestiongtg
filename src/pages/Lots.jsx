@@ -1084,7 +1084,7 @@ export default function Lots() {
               }}>
                 Lots
               </h1>
-              <Grid3x3 className="w-6 h-6" style={{ color: 'hsl(0, 80%, 58%)' }} />
+              <Grid3x3 className="w-6 h-6 lots-title-icon" style={{ color: 'hsl(0, 80%, 58%)' }} />
             </div>
             <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
