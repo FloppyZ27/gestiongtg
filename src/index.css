@@ -804,6 +804,28 @@ html.light button.arpenteur-tab-btn:hover {
   box-shadow: none !important;
 }
 
+/* Couleurs foncées par arpenteur en light mode */
+html.light button.arpenteur-tab-btn[data-arpenteur="Samuel Guay"] {
+  color: hsl(0, 75%, 32%) !important;
+  -webkit-text-fill-color: hsl(0, 75%, 32%) !important;
+}
+html.light button.arpenteur-tab-btn[data-arpenteur="Pierre-Luc Pilote"] {
+  color: hsl(215, 20%, 28%) !important;
+  -webkit-text-fill-color: hsl(215, 20%, 28%) !important;
+}
+html.light button.arpenteur-tab-btn[data-arpenteur="Frédéric Gilbert"] {
+  color: hsl(22, 85%, 30%) !important;
+  -webkit-text-fill-color: hsl(22, 85%, 30%) !important;
+}
+html.light button.arpenteur-tab-btn[data-arpenteur="Dany Gaboury"] {
+  color: hsl(36, 90%, 28%) !important;
+  -webkit-text-fill-color: hsl(36, 90%, 28%) !important;
+}
+html.light button.arpenteur-tab-btn[data-arpenteur="Benjamin Larouche"] {
+  color: hsl(188, 80%, 22%) !important;
+  -webkit-text-fill-color: hsl(188, 80%, 22%) !important;
+}
+
 /* Liens téléphone clicables en light mode */
 html.light a[href^="tel:"] {
   color: hsl(220, 80%, 50%) !important;
