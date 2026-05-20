@@ -53,10 +53,11 @@ Deno.serve(async (req) => {
     const { dossierData, clientsData, notairesData, courtiersData, entreesTempsData } = await req.json();
     if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
     
-    // Debug log
+    // Debug log - vérifier structure des données clients
     console.log('=== DEBUG generateFicheMandat ===');
-    console.log('clientsData[0]:', JSON.stringify(clientsData?.[0], null, 2));
-    console.log('clientsData[0].telephones:', clientsData?.[0]?.telephones);
+    console.log('clientsData length:', clientsData?.length);
+    console.log('client1 telephones:', JSON.stringify(clientsData?.[0]?.telephones));
+    console.log('client1 telephone[0]:', JSON.stringify(clientsData?.[0]?.telephones?.[0]));
     
 
     // Fetch users + employees to build email → "Prénom Nom" map

@@ -20,14 +20,8 @@ export default function FicheMandatButton({ formData, clients, editingDossier, e
       ...(formData.courtiers_ids || [])
     ].filter((id, i, arr) => arr.indexOf(id) === i);
     
-    let freshClientsMap = {};
-    if (allClientIds.length > 0) {
-      const allClients = await base44.entities.Client.list();
-      const freshClients = allClients.filter(c => allClientIds.includes(c.id));
-      freshClients.forEach(c => { freshClientsMap[c.id] = c; });
-    }
-    // Fallback sur le cache local si non trouvé
-    const getClient = (id) => freshClientsMap[id] || (clients || []).find(c => c.id === id);
+    // Utiliser directement les données clients déjà chargées (elles contiennent tous les champs dont 'type')
+    const getClient = (id) => (clients || []).find(c => c.id === id);
     
     const clientsData   = (formData.clients_ids   || []).map(getClient).filter(Boolean);
     const notairesData  = (formData.notaires_ids  || []).map(getClient).filter(Boolean);
