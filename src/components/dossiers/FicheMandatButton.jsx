@@ -13,9 +13,18 @@ export default function FicheMandatButton({ formData, clients, editingDossier, e
 
   const handleClick = async () => {
     setLoading(true);
-    const clientsData   = (formData.clients_ids   || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
-    const notairesData  = (formData.notaires_ids  || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
-    const courtiersData = (formData.courtiers_ids || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
+    // S'assurer que les données clients sont fraîches et complètes
+    const fetchFreshClientData = async (id) => {
+      try {
+        return await base44.entities.Client.get(id);
+      } catch (error) {
+        return (clients || []).find(c => c.id === id);
+      }
+    };
+    
+    const clientsData   = await Promise.all((formData.clients_ids   || []).map(id => fetchFreshClientData(id)));
+    const notairesData  = await Promise.all((formData.notaires_ids  || []).map(id => fetchFreshClientData(id)));
+    const courtiersData = await Promise.all((formData.courtiers_ids || []).map(id => fetchFreshClientData(id)));
 
     const res = await base44.functions.invoke('generateFicheMandat', {
       dossierData: formData,
