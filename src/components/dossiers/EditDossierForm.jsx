@@ -626,7 +626,7 @@ export default function EditDossierForm({
                       <div className="flex-1 max-w-[200px] space-y-1 ml-auto mr-2">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs font-medium text-slate-400">Progression</span>
-                          <span className="text-xs font-bold text-emerald-400">
+                          <span className="text-xs font-bold text-orange-400">
                             {(() => {
                               const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
                               const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
@@ -640,8 +640,9 @@ export default function EditDossierForm({
                         </div>
                         <div className="w-full bg-slate-900/50 h-1.5 rounded-full overflow-hidden border border-slate-700/50">
                           <div 
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
-                            style={{ 
+                            className="h-full transition-all duration-500"
+                            style={{
+                              background: 'linear-gradient(to right, hsl(0,80%,58%), hsl(22,90%,52%))',
                               width: `${(() => {
                                 const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
                                 const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
@@ -650,7 +651,7 @@ export default function EditDossierForm({
                                   rawProgress = (tacheIndex / (TACHES_LIST.length - 1)) * 95;
                                 }
                                 return Math.round(rawProgress / 5) * 5;
-                              })()}%` 
+                              })()}%`
                             }}
                           />
                         </div>
