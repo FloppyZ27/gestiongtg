@@ -177,11 +177,18 @@ export default function TableauDeBord() {
     return isWithinInterval(dateOuverture, periodDates) && d.statut === 'Ouvert';
   }).length;
 
-  // Dossiers en retard - livraison (tous les dossiers ouverts du même arpenteur avec date de livraison antérieure à aujourd'hui)
+  // Dossiers en retard - livraison (dossiers de l'arpenteur de l'utilisateur avec date de livraison antérieure à aujourd'hui)
   const dossiersEnRetardLivraison = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
-    // Vérifier que le dossier appartient au même arpenteur que l'utilisateur connecté
-    if (d.arpenteur_geometre !== user?.arpenteur_geometre) return false;
+    
+    // Filtrer par l'arpenteur-géomètre correspondant à l'équipe de l'utilisateur
+    const arpenteurAttendu = userEquipe === 'Samuel' ? 'Samuel Guay' :
+                             userEquipe === 'Dany' ? 'Dany Gaboury' :
+                             userEquipe === 'Pierre-Luc' ? 'Pierre-Luc Pilote' :
+                             userEquipe === 'Benjamin' ? 'Benjamin Larouche' :
+                             userEquipe === 'Frédéric' ? 'Frédéric Gilbert' : null;
+    
+    if (!arpenteurAttendu || d.arpenteur_geometre !== arpenteurAttendu) return false;
     
     // Vérifier qu'au moins un mandat a une date de livraison antérieure à aujourd'hui
     const hasMandatEnRetard = d.mandats?.some(m => {
