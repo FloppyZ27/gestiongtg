@@ -155,7 +155,6 @@ Deno.serve(async (req) => {
     const firstMandat = dossierData.mandats?.[0] || {};
 
     // Ligne 1: Date mandat | Numéro dossier
-    d.fill(ML, y, CW, 16, C.altBg);
     d.box(ML, y, CW, 16);
     d.vline(ML + CW * 0.5, y, y + 16);
     d.txt('Date du mandat :', ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
@@ -176,7 +175,6 @@ Deno.serve(async (req) => {
     y += 16;
 
     // Ligne 3: Type d'arpentage (texte)
-    d.fill(ML, y, CW, 16, C.altBg);
     d.box(ML, y, CW, 16);
     d.txt("Type d'arpentage :", ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     const mandatTypesText = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean).join('  |  ');
@@ -205,8 +203,8 @@ Deno.serve(async (req) => {
     const c1Ville = c1Adr?.ville || '';
     const c1CP    = c1Adr?.code_postal || '';
     const extraClients = Math.max(0, (clientsData||[]).length - 1);
-    // 2 en-têtes (15px chacun) + 6 lignes client + extraClients + 4 lignes loc
-    const leftHeight = 15 + (6 + extraClients) * RH + 15 + 4 * RH;
+    // 2 en-têtes (17px chacun) + 6 lignes client + extraClients + 4 lignes loc
+    const leftHeight = 17 + (6 + extraClients) * RH + 17 + 4 * RH;
 
     // ── Fetch carte avec le bon ratio ──
     let mapImageBytes = null;
@@ -226,12 +224,10 @@ Deno.serve(async (req) => {
 
     // ── Sous-helper pour en-tête de section demi-largeur ──
     const halfHdr = (title, ty) => {
-      d.fill(ML, ty, LH, 15, C.red);
-      d.txt(title, ML + LH/2, ty + 15 - 2, { b:true, sz:7.5, col:C.white, ctr:true });
+      d.fill(ML, ty, LH, 17, C.red);
+      d.txt(title, ML + LH/2, ty + 17 - 2, { b:true, sz:9, col:C.white, ctr:true });
     };
-    const halfRow = (lbl, val, ty, alt) => {
-      d.fill(ML, ty, LWH, RH, C.lblBg);
-      d.fill(ML+LWH, ty, LH-LWH, RH, alt ? C.altBg : C.white);
+    const halfRow = (lbl, val, ty) => {
       d.box(ML, ty, LH, RH);
       d.vline(ML+LWH, ty, ty+RH);
       d.txt(safe(lbl), ML+3, ty+RH-5, { b:true, sz:7.5, col:C.lbl });
@@ -243,11 +239,11 @@ Deno.serve(async (req) => {
     y += 15;
     // Ordre: Nom, Téléphone, Courriel, Adresse, Municipalité, Code postal
     [['Nom(s) :', c1Name], ['Téléphone :', c1Tel], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
-      .forEach(([lbl, val], i) => { halfRow(lbl, val, y, i%2===1); y += RH; });
+      .forEach(([lbl, val]) => { halfRow(lbl, val, y); y += RH; });
     for (let ci=1; ci<(clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
       const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
-      halfRow(`Client ${ci+1} :`, nm, y, false);
+      halfRow(`Client ${ci+1} :`, nm, y);
       y += RH;
     }
 
@@ -255,7 +251,7 @@ Deno.serve(async (req) => {
     halfHdr('LOCALISATION DES TRAVAUX', y);
     y += 15;
     [['Adresse :', addrRue], ['Municipalité :', addrVil], ['Code postal :', addrCP], ['Lots :', lotsStr]]
-      .forEach(([lbl, val], i) => { halfRow(lbl, val, y, i%2===1); y += RH; });
+      .forEach(([lbl, val]) => { halfRow(lbl, val, y); y += RH; });
 
     // ── CARTE (droite 50%) avec ratio correct ──
     const actualLeftHeight = y - yStart;
@@ -279,8 +275,6 @@ Deno.serve(async (req) => {
       const tel = person?.telephones?.[0]?.telephone || '';
       const em  = person?.courriels?.[0]?.courriel  || '';
       const LW3 = 55, PW2 = CW/3;
-      d.fill(ML, ty, LW3, 15, C.lblBg);
-      if (alt) d.fill(ML+LW3, ty, PW2-LW3, 15, C.altBg);
       d.box(ML, ty, CW, 15);
       d.vline(ML+LW3, ty, ty+15);
       d.vline(ML+PW2, ty, ty+15);
@@ -291,7 +285,6 @@ Deno.serve(async (req) => {
       d.txt(em, ML+PW2*2+3, ty+11, { sz:8.5 });
     };
     // Header row
-    d.fill(ML, y, CW, 13, C.lblBg);
     d.box(ML, y, CW, 13);
     d.vline(ML+55, y, y+13);
     d.vline(ML+CW/3, y, y+13);
@@ -315,7 +308,6 @@ Deno.serve(async (req) => {
     y += d.sHdr('LIVRAISON', y);
 
     // Date de signature
-    d.fill(ML, y, CW, 15, C.altBg);
     d.box(ML, y, CW, 15);
     d.txt('Date de signature :', ML+3, y+11, { b:true, sz:8.5, col:C.lbl });
     d.txt(fd(firstMandat.date_signature), ML+78, y+11, { sz:8.5 });
@@ -328,7 +320,6 @@ Deno.serve(async (req) => {
     const livCols = [CW*0.22, CW*0.26, CW*0.26, CW*0.26];
     const colX = [ML, ML+livCols[0], ML+livCols[0]+livCols[1], ML+livCols[0]+livCols[1]+livCols[2]];
     // Header row for livraison
-    d.fill(ML, y, CW, 13, C.lblBg);
     d.box(ML, y, CW, 13);
     ['Destinataire','Préférences de livraison','Adresse courriel','Mode de facturation'].forEach((h,i) => {
       d.txt(h, colX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
@@ -344,8 +335,6 @@ Deno.serve(async (req) => {
       const { label, person } = allPersons[i];
       const prefs = (person?.preferences_livraison||[]).join(', ');
       const em = person?.courriels?.[0]?.courriel||'';
-      d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
-      d.fill(ML, y, livCols[0], 15, C.lblBg);
       d.box(ML, y, CW, 15);
       colX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
       d.txt(label, colX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
@@ -362,7 +351,6 @@ Deno.serve(async (req) => {
     // Table header
     const pCols = [CW*0.35, CW*0.18, CW*0.15, CW*0.15, CW*0.17];
     const pX    = [ML, ML+pCols[0], ML+pCols[0]+pCols[1], ML+pCols[0]+pCols[1]+pCols[2], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3]];
-    d.fill(ML, y, CW, 13, C.lblBg);
     d.box(ML, y, CW, 13);
     ['Opération','Prix estimé','Rabais','Total HT','Taxes'].forEach((h,i) => {
       d.txt(h, pX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
@@ -376,8 +364,6 @@ Deno.serve(async (req) => {
       const rab   = Number(m.rabais)||0;
       const total = prix - rab;
       grandTotal += total;
-      d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
-      d.fill(ML, y, pCols[0], 15, C.lblBg);
       d.box(ML, y, CW, 15);
       pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
       d.txt(m.type_mandat||`Mandat ${i+1}`, pX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
@@ -390,10 +376,8 @@ Deno.serve(async (req) => {
       const mNotes = String(m.commentaire_tarification || m.notes || '').trim();
       const noteLines = mNotes.length > 0 ? (mNotes.match(/.{1,90}/g) || [mNotes]) : [];
       const notesRowH = Math.max(1, noteLines.length) * 16 + 4;
-      d.fill(ML, y, CW, notesRowH, rgb(0.99, 0.97, 0.94));
       d.box(ML, y, CW, notesRowH);
       const LWN = 50;
-      d.fill(ML, y, LWN, notesRowH, C.lblBg);
       d.vline(ML + LWN, y, y + notesRowH);
       d.txt('Notes :', ML + 3, y + 14, { b:true, sz:8, col:C.dark });
       noteLines.forEach((l, ni) => {
@@ -402,7 +386,6 @@ Deno.serve(async (req) => {
       y += notesRowH;
     }
     // Total row
-    d.fill(ML, y, CW, 16, C.lblBg);
     d.box(ML, y, CW, 16);
     pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+16); });
     d.txt('TOTAL', pX[0]+3, y+12, { b:true, sz:9, col:C.dark });
@@ -419,7 +402,6 @@ Deno.serve(async (req) => {
       y += d.sHdr('MINUTES', y);
       const mCols = [CW*0.25, CW*0.28, CW*0.22, CW*0.25];
       const mX    = [ML, ML+mCols[0], ML+mCols[0]+mCols[1], ML+mCols[0]+mCols[1]+mCols[2]];
-      d.fill(ML, y, CW, 13, C.lblBg);
       d.box(ML, y, CW, 13);
       ['Numéro','Mandat','Date','Type'].forEach((h,i) => {
         d.txt(h, mX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
@@ -428,8 +410,6 @@ Deno.serve(async (req) => {
       y += 13;
       for (let i=0; i<allMinutes.length; i++) {
         const mn = allMinutes[i];
-        d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
-        d.fill(ML, y, mCols[0], 15, C.lblBg);
         d.box(ML, y, CW, 15);
         mX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
         d.txt(safe(mn.minute), mX[0]+3, y+11, { b:true, sz:8.5, col:C.dark });
@@ -443,7 +423,6 @@ Deno.serve(async (req) => {
     // ─── SECTION: FERMETURE ───────────────────────────────────────────
     y += 2;
     y += d.sHdr('FERMETURE', y);
-    d.fill(ML, y, CW, 16, C.altBg);
     d.box(ML, y, CW, 16);
     d.vline(ML+CW/2, y, y+16);
     d.txt('Date de fermeture :', ML+3, y+12, { b:true, sz:8.5, col:C.lbl });
@@ -473,7 +452,6 @@ Deno.serve(async (req) => {
 
     // Main header
     y2 += d2.sHdr('ENTRÉES DE TEMPS', y2);
-    d2.fill(ML, y2, CW, 12, C.lblBg);
     d2.box(ML, y2, CW, 12);
     ['Date','Employé(s)','Description','Tâche','Heures'].forEach((h,i) => {
       d2.txt(h, txArr[i]+3, y2+9, { b:true, sz:7.5, col:C.lbl });
@@ -502,8 +480,6 @@ Deno.serve(async (req) => {
 
       for (let ri=0; ri<rows; ri++) {
         const e = sectionEntrees[ri];
-        d2.fill(ML, y2, CW, 12, ri%2===1?C.altBg:C.white);
-        d2.fill(ML, y2, tCols[0], 12, C.lblBg);
         d2.box(ML, y2, CW, 12);
         txArr.forEach((x,ci) => { if(ci>0) d2.vline(x, y2, y2+12); });
         if (e) {
