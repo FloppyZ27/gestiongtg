@@ -51,6 +51,9 @@ export default function TarificationStepForm({
   const [localInputs, setLocalInputs] = useState({});
   const debounceTimers = useRef({});
   const [openCommentIndex, setOpenCommentIndex] = useState(null);
+  // Ref toujours à jour pour les closures de debounce
+  const mandatsRef = useRef(mandats);
+  mandatsRef.current = mandats;
 
   const getLocalValue = (index, field) => {
     const key = `${index}_${field}`;
@@ -79,8 +82,8 @@ export default function TarificationStepForm({
     // Débounce la mise à jour du parent
     debounceTimers.current[key] = setTimeout(() => {
       const numericValue = value === "" ? 0 : parseFloat(value) || 0;
-      // Créer une copie profonde pour éviter les références partagées
-      const updatedMandats = mandats.map((m, i) => {
+      // Utiliser mandatsRef.current pour avoir les données les plus récentes (évite stale closure)
+      const updatedMandats = mandatsRef.current.map((m, i) => {
         const copy = JSON.parse(JSON.stringify(m));
         if (i === index) {
           copy[field] = numericValue;
@@ -109,8 +112,8 @@ export default function TarificationStepForm({
     const localValue = localInputs[key];
     if (localValue !== undefined) {
       const numericValue = localValue === "" ? 0 : parseFloat(localValue) || 0;
-      // Créer une copie profonde pour éviter les références partagées
-      const updatedMandats = mandats.map((m, i) => {
+      // Utiliser mandatsRef.current pour avoir les données les plus récentes
+      const updatedMandats = mandatsRef.current.map((m, i) => {
         const copy = JSON.parse(JSON.stringify(m));
         if (i === index) {
           copy[field] = numericValue;
