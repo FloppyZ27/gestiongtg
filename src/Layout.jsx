@@ -217,9 +217,7 @@ function LayoutContent({ children, currentPageName }) {
       return newState;
     });
   };
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [showPunchControls, setShowPunchControls] = useState(false);
-  const [isHoveringPunch, setIsHoveringPunch] = useState(false);
+
   const [themeMode, setThemeMode] = useState(() => localStorage.getItem('gestiongtg-theme') || 'dark');
 
   useEffect(() => {
@@ -230,7 +228,6 @@ function LayoutContent({ children, currentPageName }) {
     }
     localStorage.setItem('gestiongtg-theme', themeMode);
   }, [themeMode]);
-  const punchTimerRef = React.useRef(null);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -359,37 +356,7 @@ function LayoutContent({ children, currentPageName }) {
     }
   }, [user, location.pathname, navigate]);
 
-  // Calculer le temps écoulé du pointage en cours
-  useEffect(() => {
-    if (!pointageEnCours) {
-      setElapsedTime(0);
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      const debut = new Date(pointageEnCours.heure_debut).getTime();
-      const now = new Date().getTime();
-      const elapsed = Math.floor((now - debut) / 1000);
-      setElapsedTime(elapsed);
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [pointageEnCours]);
 
-  // Gérer la fermeture automatique après 3 secondes
-  useEffect(() => {
-    if (showPunchControls && !isHoveringPunch) {
-      punchTimerRef.current = setTimeout(() => {
-        setShowPunchControls(false);
-      }, 3000);
-    }
-    
-    return () => {
-      if (punchTimerRef.current) {
-        clearTimeout(punchTimerRef.current);
-      }
-    };
-  }, [showPunchControls, isHoveringPunch]);
 
   const getWeekStartDate = () => {
     const today = new Date();
@@ -537,40 +504,7 @@ function LayoutContent({ children, currentPageName }) {
   const selectedDossier = dossiers.find(d => d.id === selectedDossierId);
   const availableMandats = selectedDossier?.mandats || [];
 
-  const handlePunchIn = () => {
-    const now = new Date();
-    createPointageMutation.mutate({
-      utilisateur_email: user?.email,
-      date: now.toISOString().split('T')[0],
-      heure_debut: now.toISOString(),
-      statut: 'en_cours'
-    });
-  };
 
-  const handlePunchOut = () => {
-    if (!pointageEnCours) return;
-    
-    const now = new Date();
-    const debut = new Date(pointageEnCours.heure_debut);
-    const dureeHeures = (now.getTime() - debut.getTime()) / 1000 / 60 / 60;
-    
-    updatePointageMutation.mutate({
-      id: pointageEnCours.id,
-      data: {
-        ...pointageEnCours,
-        heure_fin: now.toISOString(),
-        duree_heures: parseFloat(dureeHeures.toFixed(2)),
-        statut: 'termine'
-      }
-    });
-  };
-
-  const formatElapsedTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const handleDossierSelect = (dossierId) => {
     if (!dossierId) {
@@ -817,100 +751,8 @@ function LayoutContent({ children, currentPageName }) {
               <DossierSearchBar dossiers={dossiers} clients={clients} users={users} />
             </div>
 
-            {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
+            {/* Boutons à droite */}
             <div className="flex items-center gap-3">
-              {/* Voyant lumineux pour afficher/masquer les contrôles de pointage */}
-              <div className="flex flex-col items-center gap-0">
-                <Button
-                  onClick={() => setShowPunchControls(!showPunchControls)}
-                  variant="ghost"
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/40 relative transition-transform duration-200 hover:scale-110 active:scale-95"
-                >
-                  <div className="relative w-4 h-4 flex items-center justify-center">
-                    {pointageEnCours ? (
-                      <>
-                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-3 h-3 bg-primary rounded-full animate-ping"></div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-3 h-3 bg-muted rounded-full"></div>
-                    )}
-                  </div>
-                </Button>
-                <span className="text-[9px] text-muted-foreground whitespace-nowrap">
-                  {pointageEnCours ? "En travail" : "Hors travail"}
-                </span>
-              </div>
-
-              {/* Chronomètre et boutons Punch (cachés par défaut) */}
-              <AnimatePresence>
-                {showPunchControls && (
-                  <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                  >
-                    <div 
-                      className="flex items-center gap-3"
-                      onMouseEnter={() => setIsHoveringPunch(true)}
-                      onMouseLeave={() => setIsHoveringPunch(false)}
-                    >
-                      {/* Chronomètre */}
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-card backdrop-blur-sm rounded-lg border border-border">
-                        <span className="text-foreground text-sm font-bold tabular-nums min-w-[70px]">
-                          {formatElapsedTime(elapsedTime)}
-                        </span>
-                      </div>
-
-                      {/* Bouton Punch In/Out */}
-                      {!pointageEnCours ? (
-                       <button
-                         onClick={handlePunchIn}
-                         className="transition-all duration-200 group"
-                         style={{background: 'hsl(142, 76%, 36%) !important', backgroundImage: 'none !important', color: 'white', border: 'none !important', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(34,197,94,0.4) !important'}}
-                         onMouseEnter={(e) => e.target.style.color = 'hsl(142, 100%, 45%)'}
-                         onMouseLeave={(e) => e.target.style.color = 'white'}
-                       >
-                         <Play style={{width: '14px', height: '14px'}} />
-                         Punch In
-                       </button>
-                      ) : (
-                       <button
-                         onClick={handlePunchOut}
-                         className="transition-all duration-200 group"
-                         style={{background: 'hsl(0, 84%, 60%) !important', backgroundImage: 'none !important', color: 'white', border: 'none !important', borderRadius: '0.375rem', padding: '0 12px', height: '32px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(239,68,68,0.4) !important'}}
-                         onMouseEnter={(e) => e.target.style.color = 'hsl(0, 100%, 75%)'}
-                         onMouseLeave={(e) => e.target.style.color = 'white'}
-                       >
-                         <Square style={{width: '14px', height: '14px'}} />
-                         Punch Out
-                       </button>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <Button
-                onClick={() => setIsEntreeTempsOpen(true)}
-                size="icon"
-                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95 entree-temps-btn"
-              >
-                <Timer className="w-5 h-5" style={{color: 'white'}} />
-              </Button>
-              <button
-                onClick={() => setThemeMode(t => t === 'dark' ? 'light' : 'dark')}
-                title={themeMode === 'dark' ? 'Mode clair' : 'Mode sombre'}
-                style={{background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))', transition: 'all 0.2s ease', width: '32px', height: '32px'}}
-                onMouseEnter={e => { e.currentTarget.style.background = 'hsl(var(--muted))'; e.currentTarget.style.color = 'hsl(var(--foreground))'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'hsl(var(--muted-foreground))'; }}
-              >
-                {themeMode === 'dark' ? <Sun style={{width: '16px', height: '16px'}} /> : <Moon style={{width: '16px', height: '16px'}} />}
-              </button>
               <NotificationButton user={user} />
             </div>
           </header>
