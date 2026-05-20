@@ -843,9 +843,11 @@ html.light a[href^="tel:"]:hover {
 }
 
 /* Icônes des boutons dans les cartes terrain en light mode */
-html.light .bg-slate-800\/50 button svg,
-html.light [class*="rounded-lg"] button svg,
-html.light [data-kanban-column] button svg {
+html.light [style*="display: grid"] div[style*="cursor: pointer"] {
+  color: hsl(220, 15%, 12%) !important;
+  -webkit-text-fill-color: hsl(220, 15%, 12%) !important;
+}
+html.light [style*="display: grid"] div[style*="cursor: pointer"] svg {
   color: hsl(220, 15%, 12%) !important;
   -webkit-text-fill-color: hsl(220, 15%, 12%) !important;
   opacity: 1 !important;
