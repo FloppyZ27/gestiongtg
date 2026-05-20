@@ -177,8 +177,8 @@ export default function TableauDeBord() {
     return isWithinInterval(dateOuverture, periodDates) && d.statut === 'Ouvert';
   }).length;
 
-  // Dossiers en retard - livraison
-  const dossiersEnRetardLivraison = dossiers.filter(d => {
+  // Dossiers en retard - livraison (équipe de l'utilisateur seulement)
+  const dossiersEnRetardLivraison = dossiersEquipe.filter(d => {
     if (d.statut === 'Fermé') return false;
     const hasMandatEnRetard = d.mandats?.some(m => {
       if (!m.date_livraison) return false;
@@ -192,11 +192,13 @@ export default function TableauDeBord() {
     return minDateA - minDateB;
   });
 
-  // Dossiers en retard - terrain
+  // Dossiers en retard - terrain (utilisateur connecté est donneur seulement)
   const dossiersEnRetardTerrain = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
     return d.mandats?.some(m => {
       if (!m.date_terrain || m.statut_terrain === 'pas_de_terrain') return false;
+      // Vérifier que l'utilisateur est le donneur (assigné à la tâche Terrain)
+      if (m.tache_actuelle !== 'Terrain' || m.utilisateur_assigne !== user?.email) return false;
       const dateTerrain = new Date(m.date_terrain);
       return dateTerrain < today && !isSameDay(dateTerrain, today);
     });
