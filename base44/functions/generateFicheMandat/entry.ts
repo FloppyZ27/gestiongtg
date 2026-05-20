@@ -161,7 +161,18 @@ Deno.serve(async (req) => {
       try {
         const img = await doc.embedPng(logoBytes);
         const logoW = 50, logoH = 56;
+        // Apply black color to logo by drawing it with blend mode
         p1.drawImage(img, { x:ML, y:PH - (y + 52), width:logoW, height:logoH });
+        // Redraw with black overlay to ensure logo is black
+        p1.drawPath({
+          type: 'rect',
+          x: ML,
+          y: PH - (y + 52),
+          width: logoW,
+          height: logoH,
+          color: rgb(0, 0, 0),
+          blendMode: 'Multiply'
+        });
       } catch(_) {}
     }
     d.txt('Girard Tremblay Gilbert Inc.', ML + 58, y + 14, { sz:11, col:C.dark });
