@@ -379,67 +379,205 @@ export default function TableauDeBord() {
         </Card>
 
         {/* Section 2: Dossiers à monter aujourd'hui */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
-            <CardTitle className="text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-orange-400" />
-              Dossiers à monter aujourd'hui
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {dossiersAMonterAujourdhui.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {dossiersAMonterAujourdhui.map((dossier) => {
-                  const mandat = dossier.mandats?.[0];
-                  const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                  const bgColorClass = arpenteurColor.split(' ')[0];
-                  
-                  return (
-                    <div 
-                      key={dossier.id}
-                      className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                      onClick={() => setEditingDossier(dossier)}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </Badge>
-                        <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>
-                          {mandat?.type_mandat}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-1 mb-1">
-                        <User className="w-3 h-3 text-white flex-shrink-0" />
-                        <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                      </div>
-
-                      {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                        <div className="flex items-start gap-1 mb-2">
-                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                          <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
-                        </div>
-                      )}
-
-                      <Button
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingDossier(dossier);
-                        }}
+        <div className="grid gap-6 md:grid-cols-3 mb-6">
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-orange-400" />
+                Dossiers à monter aujourd'hui
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersAMonterAujourdhui.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersAMonterAujourdhui.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    
+                    return (
+                      <div 
+                        key={dossier.id}
+                        className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
+                        onClick={() => setEditingDossier(dossier)}
                       >
-                        Ouvrir le dossier
-                      </Button>
-                    </div>
-                  );
-                })}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                          </Badge>
+                          <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>
+                            {mandat?.type_mandat}
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+
+                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                          <div className="flex items-start gap-1 mb-2">
+                            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
+                          </div>
+                        )}
+
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDossier(dossier);
+                          }}
+                        >
+                          Ouvrir le dossier
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-slate-500 py-8">Aucun dossier à monter aujourd'hui</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Dossiers en retard - Livraison */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  Dossiers en retard - Livraison
+                </CardTitle>
+                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                  {dossiersEnRetardLivraison.length}
+                </Badge>
               </div>
-            ) : (
-              <p className="text-center text-slate-500 py-8">Aucun dossier à monter aujourd'hui</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersEnRetardLivraison.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersEnRetardLivraison.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const dateLivraison = mandat?.date_livraison ? new Date(mandat.date_livraison) : null;
+                    const joursRetard = dateLivraison ? differenceInDays(today, dateLivraison) : 0;
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    
+                    return (
+                      <div 
+                        key={dossier.id}
+                        className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
+                        onClick={() => setEditingDossier(dossier)}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                          </Badge>
+                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">
+                            {joursRetard}j
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-1">
+                          <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          <span className="text-xs text-slate-400">
+                            {dateLivraison ? format(dateLivraison, "dd MMM") : 'Aucune date'}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between">
+                          <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
+                            {mandat?.tache_actuelle || 'Ouverture'}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  Aucun retard
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section 6: Dossiers en retard - Terrain */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 py-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-amber-400" />
+                  Dossiers en retard - Terrain
+                </CardTitle>
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                  {dossiersEnRetardTerrain.length}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersEnRetardTerrain.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersEnRetardTerrain.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
+                    const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    
+                    return (
+                      <div 
+                        key={dossier.id}
+                        className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
+                        onClick={() => setEditingDossier(dossier)}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                          </Badge>
+                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">
+                            {joursRetard}j
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-1">
+                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          <span className="text-xs text-slate-400">
+                            {dateTerrain ? format(dateTerrain, "dd MMM") : '-'}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between">
+                          <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">
+                            {getEquipeTerrain(dossier)}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  Aucun retard
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Section 3: Statistiques et Rendement */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
@@ -560,157 +698,7 @@ export default function TableauDeBord() {
           </CardContent>
         </Card>
 
-        {/* Section 5: Dossiers en retard - Livraison */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-white flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-400" />
-                Dossiers en retard - Livraison
-              </CardTitle>
-              <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                {dossiersEnRetardLivraison.length} dossiers
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            {dossiersEnRetardLivraison.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {dossiersEnRetardLivraison.slice(0, 9).map((dossier) => {
-                  const mandat = dossier.mandats?.[0];
-                  const dateLivraison = mandat?.date_livraison ? new Date(mandat.date_livraison) : null;
-                  const joursRetard = dateLivraison ? differenceInDays(today, dateLivraison) : 0;
-                  const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                  const bgColorClass = arpenteurColor.split(' ')[0];
-                  
-                  return (
-                    <div 
-                      key={dossier.id}
-                      className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                      onClick={() => setEditingDossier(dossier)}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </Badge>
-                        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">
-                          {joursRetard}j de retard
-                        </Badge>
-                      </div>
 
-                      <div className="flex items-center gap-1 mb-1">
-                        <User className="w-3 h-3 text-white flex-shrink-0" />
-                        <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1 mb-1">
-                        <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                        <span className="text-xs text-slate-400">
-                          Livré: {dateLivraison ? format(dateLivraison, "dd MMM yyyy") : '-'}
-                        </span>
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between">
-                        <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
-                          {mandat?.tache_actuelle || 'Ouverture'}
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          <Avatar className="w-5 h-5 border-2 border-red-500/50">
-                            <AvatarImage src={users.find(u => u.email === mandat?.utilisateur_assigne)?.photo_url} />
-                            <AvatarFallback className="text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white">
-                              {getUserInitials(getResponsable(dossier))}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-5 h-5" />
-                Aucun retard de livraison
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Section 6: Dossiers en retard - Terrain */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 py-3">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Truck className="w-5 h-5 text-amber-400" />
-                Dossiers en retard - Terrain
-              </CardTitle>
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-                {dossiersEnRetardTerrain.length} dossiers
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            {dossiersEnRetardTerrain.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {dossiersEnRetardTerrain.slice(0, 9).map((dossier) => {
-                  const mandat = dossier.mandats?.[0];
-                  const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
-                  const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
-                  const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                  const bgColorClass = arpenteurColor.split(' ')[0];
-                  
-                  return (
-                    <div 
-                      key={dossier.id}
-                      className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                      onClick={() => setEditingDossier(dossier)}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </Badge>
-                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">
-                          {joursRetard}j de retard
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-1 mb-1">
-                        <User className="w-3 h-3 text-white flex-shrink-0" />
-                        <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1 mb-1">
-                        <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                        <span className="text-xs text-slate-400">
-                          Terrain: {dateTerrain ? format(dateTerrain, "dd MMM yyyy") : '-'}
-                        </span>
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between">
-                        <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">
-                          {getEquipeTerrain(dossier)}
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          <Avatar className="w-5 h-5 border-2 border-amber-500/50">
-                            <AvatarImage src={users.find(u => u.email === mandat?.utilisateur_assigne)?.photo_url} />
-                            <AvatarFallback className="text-xs bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
-                              {getUserInitials(getResponsable(dossier))}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-5 h-5" />
-                Aucun retard de terrain
-              </p>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       {editingDossier && (
