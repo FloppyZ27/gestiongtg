@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
 
     const { dossierData, clientsData, notairesData, courtiersData, entreesTempsData } = await req.json();
     if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
+    
 
     // Fetch users + employees to build email → "Prénom Nom" map
     let employeMap = {};

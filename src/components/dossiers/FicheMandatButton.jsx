@@ -13,18 +13,24 @@ export default function FicheMandatButton({ formData, clients, editingDossier, e
 
   const handleClick = async () => {
     setLoading(true);
-    // S'assurer que les données clients sont fraîches et complètes
-    const fetchFreshClientData = async (id) => {
-      try {
-        return await base44.entities.Client.get(id);
-      } catch (error) {
-        return (clients || []).find(c => c.id === id);
-      }
-    };
+    // Récupérer les données fraîches de tous les clients depuis la base de données
+    const allClientIds = [
+      ...(formData.clients_ids || []),
+      ...(formData.notaires_ids || []),
+      ...(formData.courtiers_ids || [])
+    ].filter((id, i, arr) => arr.indexOf(id) === i);
     
-    const clientsData   = await Promise.all((formData.clients_ids   || []).map(id => fetchFreshClientData(id)));
-    const notairesData  = await Promise.all((formData.notaires_ids  || []).map(id => fetchFreshClientData(id)));
-    const courtiersData = await Promise.all((formData.courtiers_ids || []).map(id => fetchFreshClientData(id)));
+    let freshClientsMap = {};
+    if (allClientIds.length > 0) {
+      const freshClients = await base44.entities.Client.filter({ id: { $in: allClientIds } });
+      freshClients.forEach(c => { freshClientsMap[c.id] = c; });
+    }
+    // Fallback sur le cache local si non trouvé
+    const getClient = (id) => freshClientsMap[id] || (clients || []).find(c => c.id === id);
+    
+    const clientsData   = (formData.clients_ids   || []).map(getClient).filter(Boolean);
+    const notairesData  = (formData.notaires_ids  || []).map(getClient).filter(Boolean);
+    const courtiersData = (formData.courtiers_ids || []).map(getClient).filter(Boolean);
 
     const res = await base44.functions.invoke('generateFicheMandat', {
       dossierData: formData,
