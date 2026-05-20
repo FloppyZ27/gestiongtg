@@ -185,6 +185,22 @@ function LayoutContent({ children, currentPageName }) {
   const [entreeTempsFilterMandat, setEntreeTempsFilterMandat] = useState([]);
   const [entreeTempsFilterTache, setEntreeTempsFilterTache] = useState([]);
   const [entreeTempsFilterVille, setEntreeTempsFilterVille] = useState([]);
+  const [openCategories, setOpenCategories] = useState(() => {
+    const saved = localStorage.getItem('gestiongtg-nav-categories');
+    return saved ? JSON.parse(saved) : {
+      "Utilisateur": true,
+      "Dossier Arpentage": true,
+      "Terrain": true,
+      "Comptabilité": true,
+      "Recherches": true,
+      "Inventaire": true,
+      "Ressources humaines": true
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('gestiongtg-nav-categories', JSON.stringify(openCategories));
+  }, [openCategories]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showPunchControls, setShowPunchControls] = useState(false);
   const [isHoveringPunch, setIsHoveringPunch] = useState(false);
@@ -642,13 +658,22 @@ function LayoutContent({ children, currentPageName }) {
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigationCategories.map((category) => (
-                    <Collapsible key={category.title} className="mb-2">
+                  {navigationCategories.map((category) => {
+                    const isOpen = openCategories[category.title] ?? true;
+                    const toggleCategory = () => {
+                      setOpenCategories(prev => ({ ...prev, [category.title]: !prev[category.title] }));
+                    };
+                    return (
+                    <Collapsible key={category.title} open={isOpen} onOpenChange={toggleCategory} className="mb-2">
                       {!isCollapsed && category.items.length > 0 && (
-                        <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
-                          {category.title}
-                        </SidebarGroupLabel>
+                        <CollapsibleTrigger asChild>
+                          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2 cursor-pointer hover:text-slate-300 transition-colors flex items-center gap-2">
+                            <ChevronDown className={`w-3 h-3 transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
+                            {category.title}
+                          </SidebarGroupLabel>
+                        </CollapsibleTrigger>
                       )}
+                      <CollapsibleContent>
                       {category.items.map((item) => (
                         <SidebarMenuItem key={item.title}>
                           {isCollapsed ? (
@@ -698,8 +723,9 @@ function LayoutContent({ children, currentPageName }) {
                           Bientôt disponible...
                         </div>
                       )}
+                      </CollapsibleContent>
                     </Collapsible>
-                  ))}
+                  );})}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
