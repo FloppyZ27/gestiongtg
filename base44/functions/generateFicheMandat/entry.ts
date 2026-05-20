@@ -7,19 +7,20 @@ const formatMoney = v => (v != null && v !== '' && Number(v) > 0) ? `${Number(v)
 const getArpenteurInitials = a => ({ "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" }[a] || 'XX');
 const safeText = t => (t || '–').toString();
 
-// Colors
-const NAVY   = rgb(0.06, 0.12, 0.30);
-const ACCENT = rgb(0.88, 0.35, 0.12);
-const SECTION_BG = rgb(0.18, 0.24, 0.44);
-const WHITE  = rgb(1, 1, 1);
-const ROW_ALT = rgb(0.95, 0.96, 0.98);
-const BORDER = rgb(0.78, 0.80, 0.88);
-const TEXT_DARK  = rgb(0.08, 0.10, 0.15);
-const TEXT_LABEL = rgb(0.28, 0.34, 0.52);
-const SUB_BG = rgb(0.88, 0.90, 0.95);
-const PRICE_BG = rgb(0.92, 0.93, 0.97);
-const GREEN  = rgb(0.12, 0.58, 0.32);
-const RED_C  = rgb(0.78, 0.16, 0.16);
+// Colors — rouge/orangé (GTG brand)
+const DARK_HEADER = rgb(0.10, 0.03, 0.03);   // presque noir avec teinte rouge
+const SECTION_BG  = rgb(0.72, 0.12, 0.08);   // rouge vif — entêtes de sections
+const ACCENT      = rgb(0.78, 0.36, 0.10);   // orangé brûlé GTG — entêtes mandats
+const ACCENT_LITE = rgb(0.88, 0.50, 0.18);   // orangé clair — badges
+const WHITE       = rgb(1, 1, 1);
+const ROW_ALT     = rgb(0.99, 0.95, 0.93);   // crème très légèrement rosé
+const BORDER      = rgb(0.88, 0.68, 0.60);   // contour chaud
+const TEXT_DARK   = rgb(0.10, 0.05, 0.04);   // presque noir teinté rouge
+const TEXT_LABEL  = rgb(0.55, 0.18, 0.08);   // rouge-orangé foncé
+const SUB_BG      = rgb(0.96, 0.88, 0.84);   // pêche clair — sous-titres
+const PRICE_BG    = rgb(0.97, 0.91, 0.87);   // saumon très clair — tarification
+const GREEN       = rgb(0.12, 0.58, 0.32);
+const RED_C       = rgb(0.78, 0.16, 0.16);
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -137,10 +138,10 @@ Deno.serve(async (req) => {
     newPage();
 
     // Full-width dark header
-    currentPage.drawRectangle({ x:0, y:py(70), width:PW, height:70, color:NAVY });
+    currentPage.drawRectangle({ x:0, y:py(70), width:PW, height:70, color:DARK_HEADER });
 
     // Accent top stripe
-    currentPage.drawRectangle({ x:0, y:py(4), width:PW, height:4, color:ACCENT });
+    currentPage.drawRectangle({ x:0, y:py(4), width:PW, height:4, color:ACCENT_LITE });
 
     // Logo
     if (logoBytes) {
@@ -155,7 +156,7 @@ Deno.serve(async (req) => {
     txt('Girard Tremblay Gilbert Inc. — Arpenteurs-Géomètres', ML + 50, 50, { size:9, color:rgb(0.68, 0.73, 0.90) });
 
     // Dossier number block (right)
-    rct(R - 160, 8, 158, 30, ACCENT);
+    rct(R - 160, 8, 158, 30, SECTION_BG);
     txt(fullNum, R - 81, 18, { bold:true, size:17, color:WHITE, align:'center' });
     txt(dossierData.arpenteur_geometre || '', R - 81, 34, { size:8, color:WHITE, align:'center' });
 
@@ -165,9 +166,9 @@ Deno.serve(async (req) => {
     txt((dossierData.statut || 'Ouvert').toUpperCase(), R - 81, 50, { bold:true, size:9, color:WHITE, align:'center' });
 
     // Place d'affaire + TTL row
-    rct(R - 160, 62, 78, 14, rgb(0.10, 0.16, 0.38));
+    rct(R - 160, 62, 78, 14, ACCENT);
     txt(dossierData.place_affaire || '–', R - 122, 69, { size:8, color:WHITE, align:'center' });
-    rct(R - 81, 62, 79, 14, dossierData.ttl === 'Oui' ? rgb(0.70, 0.35, 0.05) : rgb(0.10, 0.16, 0.38));
+    rct(R - 81, 62, 79, 14, dossierData.ttl === 'Oui' ? rgb(0.62, 0.18, 0.04) : ACCENT);
     txt(dossierData.ttl === 'Oui' ? 'TTL' : 'Non-TTL', R - 41, 69, { bold:true, size:8, color:WHITE, align:'center' });
 
     y = 84;
@@ -287,8 +288,8 @@ Deno.serve(async (req) => {
         txt(`${mi + 1}. ${m.type_mandat || 'Mandat'}`, L + 10, y + 14, { bold:true, size:10.5, color:WHITE });
         if (m.tache_actuelle) {
           const bw = fontBold.widthOfTextAtSize(m.tache_actuelle, 8) + 14;
-          rct(R - bw - 6, y + 5, bw, 12, NAVY);
-          txt(m.tache_actuelle, R - bw/2 - 6, y + 13, { bold:true, size:8, color:WHITE, align:'center' });
+          rct(R - bw - 6, y + 5, bw, 12, DARK_HEADER);
+          txt(m.tache_actuelle, R - bw/2 - 6, y + 13, { bold:true, size:8, color:ACCENT_LITE, align:'center' });
         }
         y += 20;
 
@@ -409,12 +410,12 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════
     for (let pi = 0; pi < pages.length; pi++) {
       const pg = pages[pi];
-      pg.drawRectangle({ x:0, y:0, width:PW, height:20, color:NAVY });
-      pg.drawText(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, { x:ML, y:6, font:fontReg, size:7, color:rgb(0.65,0.70,0.88) });
+      pg.drawRectangle({ x:0, y:0, width:PW, height:20, color:DARK_HEADER });
+      pg.drawText(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, { x:ML, y:6, font:fontReg, size:7, color:rgb(0.85,0.60,0.45) });
       const pgTxt = `Page ${pi+1} / ${pages.length}`;
-      pg.drawText(pgTxt, { x: R - fontReg.widthOfTextAtSize(pgTxt, 7), y:6, font:fontReg, size:7, color:rgb(0.65,0.70,0.88) });
+      pg.drawText(pgTxt, { x: R - fontReg.widthOfTextAtSize(pgTxt, 7), y:6, font:fontReg, size:7, color:rgb(0.85,0.60,0.45) });
       // Accent bottom stripe
-      pg.drawRectangle({ x:0, y:20, width:PW, height:3, color:ACCENT });
+      pg.drawRectangle({ x:0, y:20, width:PW, height:3, color:ACCENT_LITE });
     }
 
     const pdfBytes = await pdfDoc.save();
