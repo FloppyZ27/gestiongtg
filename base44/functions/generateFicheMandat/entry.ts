@@ -156,18 +156,17 @@ Deno.serve(async (req) => {
     // ─── Header ───────────────────────────────────────────────────────
     d.fill(0, y, PW, 50, C.header);
 
-    // Logo noir et centré
+    // Logo noir à gauche (comme topbar)
     if (logoBytes) {
       try {
         const img = await doc.embedPng(logoBytes);
-        const logoW = 40, logoH = 45;
-        const logoX = (PW - logoW) / 2;
-        p1.drawImage(img, { x:logoX, y:PH - (y + 48), width:logoW, height:logoH });
+        const logoW = 50, logoH = 56;
+        p1.drawImage(img, { x:ML, y:PH - (y + 52), width:logoW, height:logoH });
       } catch(_) {}
     }
-    d.txt('Girard Tremblay Gilbert Inc.', PW/2, y + 12, { sz:10, col:C.dark, ctr:true });
-    d.txt('Arpenteurs-Géomètres', PW/2, y + 24, { sz:7.5, col:C.dark, ctr:true });
-    d.txt('FICHE MANDAT', PW/2, y + 38, { b:true, sz:20, col:C.dark, ctr:true });
+    d.txt('Girard Tremblay Gilbert Inc.', ML + 58, y + 14, { sz:11, col:C.dark });
+    d.txt('Arpenteurs-Géomètres', ML + 58, y + 26, { sz:8, col:C.dark });
+    d.txt('FICHE MANDAT', MR, y + 22, { b:true, sz:20, col:C.dark, rgt:true });
     y += 50;
 
     // ─── Infos principales (date, livraison, type arpentage) ──────────
