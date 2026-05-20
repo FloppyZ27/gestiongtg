@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Download, Printer, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function FicheMandatButton({ formData, clients, editingDossier }) {
   const [loading, setLoading] = useState(false);
@@ -12,25 +13,28 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
 
   const handleClick = async () => {
     setLoading(true);
-    const clientsData = (formData.clients_ids || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
-    const notairesData = (formData.notaires_ids || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
+    const clientsData   = (formData.clients_ids   || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
+    const notairesData  = (formData.notaires_ids  || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
+    const courtiersData = (formData.courtiers_ids || []).map(id => (clients || []).find(c => c.id === id)).filter(Boolean);
+
     const res = await base44.functions.invoke('generateFicheMandat', {
       dossierData: formData,
-      mandatType: formData.mandats?.[0] || {},
       clientsData,
-      notairesData
+      notairesData,
+      courtiersData,
     });
     setLoading(false);
+
     if (res.data?.pdf) {
       const base64 = res.data.pdf.split(',')[1];
       const byteChars = atob(base64);
-      const byteNumbers = new Uint8Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([byteNumbers], { type: 'application/pdf' });
+      const byteArr = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteArr], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setPdfData(res.data.pdf);
       setPdfUrl(url);
-      setPdfName(res.data.fileName || 'fiche_mandat.pdf');
+      setPdfName(res.data.fileName || 'fiche_dossier.pdf');
     }
   };
 
@@ -54,42 +58,72 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
 
   return (
     <>
-      <div style={{ border: '2px solid #fbbf24', borderRadius: '8px', padding: '8px 12px', background: 'rgba(15, 23, 42, 0.5)' }}>
-        <button
-          type="button"
-          onClick={handleClick}
-          disabled={loading}
-          style={{ border: '2px solid #fbbf24', color: '#fbbf24', background: 'transparent', borderRadius: '6px', padding: '2px 6px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-        >
-          {loading && <Loader2 className="w-3 h-3 animate-spin" />}
-          Fiche mandat
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '5px 12px',
+          borderRadius: '6px',
+          border: '1.5px solid #f59e0b',
+          background: 'rgba(245,158,11,0.10)',
+          color: '#f59e0b',
+          fontSize: '12px',
+          fontWeight: 600,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.7 : 1,
+          transition: 'all 0.2s',
+          whiteSpace: 'nowrap',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.22)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245,158,11,0.10)'; }}
+      >
+        {loading
+          ? <Loader2 style={{width:13,height:13}} className="animate-spin" />
+          : <FileText style={{width:13,height:13}} />
+        }
+        {loading ? 'Génération…' : 'Fiche dossier PDF'}
+      </button>
 
       {pdfUrl && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
-          <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col" style={{ width: '85vw', height: '90vh' }}>
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+        >
+          <div
+            className="flex flex-col rounded-xl shadow-2xl overflow-hidden"
+            style={{ width: '88vw', height: '92vh', background: '#0f172a', border: '1px solid rgba(255,255,255,0.10)' }}
+          >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 flex-shrink-0">
-              <span className="text-white font-semibold text-sm">{pdfName}</span>
+            <div
+              className="flex items-center justify-between flex-shrink-0 px-5 py-2.5"
+              style={{ background: '#06122a', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <div className="flex items-center gap-2">
+                <FileText style={{ width: 16, height: 16, color: '#f59e0b' }} />
+                <span style={{ color: '#e2e8f0', fontWeight: 600, fontSize: 13 }}>{pdfName}</span>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  style={{ border: '1px solid #64748b', color: '#94a3b8', background: 'transparent', borderRadius: '5px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer' }}
+                  style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 11px', borderRadius:5, border:'1px solid #475569', background:'transparent', color:'#94a3b8', fontSize:12, cursor:'pointer' }}
                 >
-                  Imprimer
+                  <Printer style={{width:13,height:13}} /> Imprimer
                 </button>
                 <button
                   onClick={handleDownload}
-                  style={{ border: '1px solid #fbbf24', color: '#fbbf24', background: 'transparent', borderRadius: '5px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer' }}
+                  style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 11px', borderRadius:5, border:'1.5px solid #f59e0b', background:'rgba(245,158,11,0.10)', color:'#f59e0b', fontSize:12, fontWeight:600, cursor:'pointer' }}
                 >
-                  Enregistrer
+                  <Download style={{width:13,height:13}} /> Enregistrer
                 </button>
                 <button
                   onClick={handleClose}
-                  className="text-slate-400 hover:text-white ml-2"
+                  style={{ padding:'4px', borderRadius:5, border:'none', background:'transparent', color:'#64748b', cursor:'pointer', display:'flex' }}
                 >
-                  <X className="w-5 h-5" />
+                  <X style={{width:18,height:18}} />
                 </button>
               </div>
             </div>
@@ -97,7 +131,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
             <iframe
               id="fiche-mandat-iframe"
               src={pdfUrl}
-              className="flex-1 w-full rounded-b-xl"
+              className="flex-1 w-full"
               style={{ border: 'none' }}
             />
           </div>

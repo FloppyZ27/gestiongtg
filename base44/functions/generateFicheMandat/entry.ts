@@ -1,25 +1,25 @@
-import { PDFDocument, rgb, StandardFonts, PDFName, PDFBool, PDFString } from 'npm:pdf-lib@1.17.1';
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { PDFDocument, rgb, StandardFonts } from 'npm:pdf-lib@1.17.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const getArpenteurInitials = (arpenteur) => {
-  const m = { "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" };
-  return m[arpenteur] || "XX";
-};
-
-const formatDate = (d) => {
-  if (!d) return "";
-  try { return new Date(d + 'T12:00:00').toLocaleDateString('fr-CA'); } catch { return d; }
-};
-
-// Convert mm to points (72pt = 1 inch = 25.4mm)
-const mm = (v) => v * 2.83464566929;
+const mm = v => v * 2.83464566929;
+const formatDate = d => { if (!d) return '–'; try { return new Date(d + 'T12:00:00').toLocaleDateString('fr-CA'); } catch { return d; } };
+const formatMoney = v => (v != null && v !== '' && Number(v) > 0) ? `${Number(v).toFixed(2)} $` : '–';
+const getArpenteurInitials = a => ({ "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" }[a] || 'XX');
+const safeText = t => (t || '–').toString();
 
 // Colors
-const BLACK = rgb(0,0,0);
-const DARK_BLUE = rgb(0, 0.15, 0.39);
-const GRAY = rgb(0.7, 0.7, 0.7);
-const LIGHT_GRAY = rgb(0.82, 0.82, 0.82);
-const WHITE = rgb(1,1,1);
+const NAVY   = rgb(0.06, 0.12, 0.30);
+const ACCENT = rgb(0.88, 0.35, 0.12);
+const SECTION_BG = rgb(0.18, 0.24, 0.44);
+const WHITE  = rgb(1, 1, 1);
+const ROW_ALT = rgb(0.95, 0.96, 0.98);
+const BORDER = rgb(0.78, 0.80, 0.88);
+const TEXT_DARK  = rgb(0.08, 0.10, 0.15);
+const TEXT_LABEL = rgb(0.28, 0.34, 0.52);
+const SUB_BG = rgb(0.88, 0.90, 0.95);
+const PRICE_BG = rgb(0.92, 0.93, 0.97);
+const GREEN  = rgb(0.12, 0.58, 0.32);
+const RED_C  = rgb(0.78, 0.16, 0.16);
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 });
@@ -29,13 +29,13 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { dossierData, mandatType, clientsData, notairesData } = await req.json();
-    if (!dossierData) return Response.json({ error: 'Missing required data' }, { status: 400 });
+    const { dossierData, clientsData, notairesData, courtiersData } = await req.json();
+    if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
 
-    const mandat = mandatType || dossierData.mandats?.[0] || {};
     const arpInitials = getArpenteurInitials(dossierData.arpenteur_geometre);
     const dossierNum = dossierData.numero_dossier || '';
-    const pdfFileName = `FICHE_MANDAT_${arpInitials}-${dossierNum}.pdf`;
+    const fullNum = dossierNum ? `${arpInitials}-${dossierNum}` : arpInitials;
+    const pdfFileName = `FICHE_DOSSIER_${fullNum}.pdf`;
 
     // Fetch logo
     let logoBytes = null;
@@ -44,576 +44,388 @@ Deno.serve(async (req) => {
       if (r.ok) logoBytes = new Uint8Array(await r.arrayBuffer());
     } catch(_) {}
 
-    // ── Document ───────────────────────────────────────────────────────────
     const pdfDoc = await PDFDocument.create();
     pdfDoc.setTitle(pdfFileName);
     pdfDoc.setAuthor('Girard Tremblay Gilbert Inc.');
 
-    const form = pdfDoc.getForm();
-
-    // Legal: 8.5" x 14" = 612 x 1008 pt
-    const PW = 612, PH = 1008;
-    const ML = mm(10), MR = mm(10);
-    const W = PW - ML - MR;
-    const L = ML, R = PW - MR;
-    const RH = mm(5.5);
-
-    const page1 = pdfDoc.addPage([PW, PH]);
-    const page2 = pdfDoc.addPage([PW, PH]);
-
-    // Load fonts
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontReg  = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // ── Helper: pdf-lib y = from bottom, we work from top ──────────────────
-    // topY: position from top of page
-    const py = (topY) => PH - topY;
+    const PW = 612, PH = 792;
+    const ML = 22, MR = 22;
+    const W  = PW - ML - MR;
+    const L  = ML, R = PW - MR;
+    const HALF = W / 2;
 
-    // ── Drawing helpers ─────────────────────────────────────────────────────
-    const hline = (page, topY, x1 = L, x2 = R, lw = 0.5) => {
-      page.drawLine({ start:{x:x1,y:py(topY)}, end:{x:x2,y:py(topY)}, thickness:lw, color:BLACK });
-    };
-    const vline = (page, x, topY1, topY2, lw = 0.5) => {
-      page.drawLine({ start:{x,y:py(topY1)}, end:{x,y:py(topY2)}, thickness:lw, color:BLACK });
-    };
-    const rect = (page, x, topY, w, h, options = {}) => {
-      page.drawRectangle({ x, y: py(topY + h), width: w, height: h,
-        borderColor: options.noBorder ? undefined : BLACK,
-        borderWidth: options.noBorder ? 0 : (options.bw || 0.5),
-        color: options.fill || undefined,
-        opacity: options.opacity ?? 1,
-      });
-    };
+    const pages = [];
+    let currentPage = null;
+    let y = 0;
 
-    const label = (page, text, x, topY, options = {}) => {
-      const font = options.bold ? fontBold : fontReg;
-      const size = options.size || 8;
-      const color = options.color || BLACK;
-      const tW = font.widthOfTextAtSize(text, size);
-      let tx = x;
-      if (options.align === 'center') tx = x - tW / 2;
-      else if (options.align === 'right') tx = x - tW;
-      page.drawText(text, { x: tx, y: py(topY) - size * 0.35, font, size, color });
+    const py = topY => PH - topY;
+
+    const newPage = () => {
+      const page = pdfDoc.addPage([PW, PH]);
+      pages.push(page);
+      currentPage = page;
+      y = 28;
+      return page;
     };
 
-    const sectionBar = (page, title, x, topY, w, h = mm(5)) => {
-      rect(page, x, topY, w, h, { fill: LIGHT_GRAY });
-      label(page, title, x + w/2, topY + h/2 + mm(1), { bold:true, size:9, align:'center' });
+    const ensureSpace = needed => {
+      if (y + needed > PH - 30) newPage();
     };
 
-    let _cbIdx = 0;
-    const checkbox = (page, x, topY, size = mm(2.8), checked = false) => {
-      const field = form.createCheckBox(`cb_${_cbIdx++}`);
-      if (checked) field.check();
-      field.acroField.dict.set(PDFName.of('DA'), PDFString.of('/ZaDb 8 Tf 0 0 0 rg'));
-      field.addToPage(page, {
-        x, y: py(topY + size), width: size, height: size,
-        borderWidth: 0.5, borderColor: BLACK, backgroundColor: WHITE,
-      });
-    };
-
-    // ── AcroForm text field helper ──────────────────────────────────────────
-    // x, topY: top-left in our coordinate system
-    // DA = default appearance string required by PDF spec
-    const DA_STRING = '/Helv 8 Tf 0 0 0 rg';
-
-    const addField = (name, page, x, topY, w, h, value = '', options = {}) => {
-      const field = form.createTextField(name);
-      if (value) field.setText(value);
-      if (options.multiline) field.enableMultiline();
-      // Set /DA directly on the acroField dict to avoid the missing DA error
-      field.acroField.dict.set(PDFName.of('DA'), PDFString.of(DA_STRING));
-      field.addToPage(page, {
+    const rct = (x, topY, w, h, fill, borderCol = null, bw = 0.4) => {
+      currentPage.drawRectangle({
         x, y: py(topY + h), width: w, height: h,
-        borderWidth: 0, borderColor: rgb(1,1,1), backgroundColor: rgb(1,1,1),
+        color: fill,
+        borderColor: borderCol || undefined,
+        borderWidth: borderCol ? bw : 0,
       });
     };
 
-    // ────────────────────────────────────────────────────────────────────────
-    // PAGE 1
-    // ────────────────────────────────────────────────────────────────────────
-    const p = page1;
+    const txt = (text, x, topY, opts = {}) => {
+      const font = opts.bold ? fontBold : fontReg;
+      const size = opts.size || 8.5;
+      const color = opts.color || TEXT_DARK;
+      let tx = x;
+      if (opts.align === 'right')  tx = x - font.widthOfTextAtSize(text, size);
+      if (opts.align === 'center') tx = x - font.widthOfTextAtSize(text, size) / 2;
+      currentPage.drawText(text, { x: tx, y: py(topY) - size * 0.2, font, size, color });
+    };
 
-    // Footer
-    label(p, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
+    const hline = (topY, x1 = L, x2 = R) => {
+      currentPage.drawLine({ start:{x:x1, y:py(topY)}, end:{x:x2, y:py(topY)}, thickness:0.3, color:BORDER });
+    };
 
-    // Outer border
-    rect(p, L, mm(9), W, PH - mm(9) - mm(7), { bw: 1.5 });
+    const sectionHeader = (title) => {
+      ensureSpace(22);
+      rct(L, y, W, 20, SECTION_BG);
+      txt(title, L + 10, y + 14, { bold:true, size:10, color:WHITE });
+      y += 20;
+    };
 
-    // ── HEADER ──────────────────────────────────────────────────────────────
-    let y = mm(9);
-    const hdrH = mm(15);
+    const subHeader = (title) => {
+      ensureSpace(16);
+      rct(L, y, W, 14, SUB_BG);
+      txt(title, L + 8, y + 10, { bold:true, size:8, color:SECTION_BG });
+      y += 14;
+    };
 
+    const infoRow = (label, value, altRow = false, xOffset = 0, rowW = W, rowH = 16) => {
+      if (altRow) rct(L + xOffset, y, rowW, rowH, ROW_ALT);
+      txt(label, L + xOffset + 6, y + rowH - 4.5, { bold:true, size:7.5, color:TEXT_LABEL });
+      txt(safeText(value), L + xOffset + 95, y + rowH - 4.5, { size:8, color:TEXT_DARK });
+    };
+
+    const wrapText = (text, maxW, size, font) => {
+      const words = (text || '').split(' ');
+      const lines = [];
+      let line = '';
+      for (const word of words) {
+        const test = line ? line + ' ' + word : word;
+        if (font.widthOfTextAtSize(test, size) > maxW) { if (line) lines.push(line); line = word; }
+        else line = test;
+      }
+      if (line) lines.push(line);
+      return lines;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // PAGE 1 — HEADER
+    // ═══════════════════════════════════════════════════════════════════
+    newPage();
+
+    // Full-width dark header
+    currentPage.drawRectangle({ x:0, y:py(70), width:PW, height:70, color:NAVY });
+
+    // Accent top stripe
+    currentPage.drawRectangle({ x:0, y:py(4), width:PW, height:4, color:ACCENT });
+
+    // Logo
     if (logoBytes) {
       try {
         const img = await pdfDoc.embedPng(logoBytes);
-        p.drawImage(img, { x: L + mm(1), y: py(y + hdrH) + mm(1), width: mm(11), height: mm(13) });
+        currentPage.drawImage(img, { x: ML, y: py(58), width:38, height:46 });
       } catch(_) {}
     }
 
-    label(p, 'Girard Tremblay Gilbert Inc.', L + mm(14), y + mm(8.5), { bold:true, size:10.5 });
-    label(p, 'FICHE MANDAT', R - mm(2), y + mm(9), { bold:true, size:24, align:'right' });
-    hline(p, y + hdrH, L, R, 1);
-
-    y += hdrH;
-    const HALF = W / 2;
-
-    // ── DATE MANDAT / DOSSIER ────────────────────────────────────────────────
-    hline(p, y + RH);
-    vline(p, L + HALF, y, y + RH);
-    label(p, 'Date du mandat :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    label(p, `Numéro de dossier : ${arpInitials}-`, L + HALF + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-
-    const dateMandat = formatDate(dossierData.date_ouverture);
-    addField('date_mandat', p, L + mm(29), y + mm(0.5), HALF - mm(30), RH - mm(1), dateMandat);
-
-    const numAfterInitX = L + HALF + mm(1.5) + fontBold.widthOfTextAtSize(`Numéro de dossier : ${arpInitials}-`, 8);
-    addField('numero_dossier', p, numAfterInitX + mm(1), y + mm(0.5), R - numAfterInitX - mm(2), RH - mm(1), dossierNum);
-    y += RH;
-
-    // ── DATE LIVRAISON ───────────────────────────────────────────────────────
-    hline(p, y + RH);
-    vline(p, L + HALF, y, y + RH);
-    label(p, 'Date de livraison :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-
-    const dateLiv = formatDate(mandat.date_livraison);
-    addField('date_livraison', p, L + mm(29), y + mm(0.5), HALF - mm(30), RH - mm(1), dateLiv);
-
-    // FLEXIBLE / STRICTE
-    const fxX = L + HALF + mm(2);
-    checkbox(p, fxX, y + RH/2 - mm(1.4));
-    label(p, 'FLEXIBLE', fxX + mm(4), y + RH/2 + mm(1.2), { bold:true, size:8.5 });
-    const stX = L + HALF + HALF * 0.52;
-    checkbox(p, stX, y + RH/2 - mm(1.4));
-    label(p, 'STRICTE', stX + mm(4), y + RH/2 + mm(1.2), { bold:true, size:8.5 });
-    y += RH;
-
-    // ── TYPE D'ARPENTAGE ─────────────────────────────────────────────────────
-    const typeH = mm(11);
-    hline(p, y + typeH);
-    label(p, "Type d'arpentage :", L + mm(1.5), y + mm(4.5), { bold:true, size:8 });
-
-    // Map mandat types to checkbox abbreviations
-    const mandatTypeMap = {
-      'Certificat de localisation': 'CL',
-      'Description Technique': 'DT',
-      'Piquetage': 'PIQ',
-      'Projet de lotissement': 'LOTIS',
-      'Implantation': 'IMP *',
-      'OCTR': 'OCTR',
-      'Levé topographique': 'LEVÉ',
-      'Bornage': 'BORN',
-    };
-    const activeMandatAbbrevs = new Set((dossierData.mandats||[]).map(m => mandatTypeMap[m.type_mandat]).filter(Boolean));
-
-    const row1 = ['CL','DT','PIQ','LOTIS','AUT ___'];
-    const row2 = ['IMP *','OCTR','LEVÉ','BORN'];
-    const colStep = (W - mm(32)) / 5;
-    let cx = L + mm(32);
-    for (const lbl of row1) {
-      checkbox(p, cx, y + mm(2), mm(2.8), activeMandatAbbrevs.has(lbl));
-      label(p, lbl, cx + mm(4.5), y + mm(4), { size:8 });
-      cx += colStep;
-    }
-    cx = L + mm(32);
-    for (const lbl of row2) {
-      checkbox(p, cx, y + mm(7), mm(2.8), activeMandatAbbrevs.has(lbl));
-      label(p, lbl, cx + mm(4.5), y + mm(9), { size:8 });
-      cx += colStep;
-    }
-    y += typeH;
-
-    // ── CLIENT(S) ────────────────────────────────────────────────────────────
-    sectionBar(p, 'CLIENT(S)', L, y, W);
-    y += mm(5);
-
-    const client = clientsData?.[0] || {};
-    const clientNom = `${client.prenom||''} ${client.nom||''}`.trim();
-    const clientCell = client.telephones?.find(t=>t.actuel)?.telephone || client.telephones?.[0]?.telephone || '';
-    const clientTravail = client.telephones?.find(t=>!t.actuel)?.telephone || '';
-    const clientEmail = client.courriels?.find(c=>c.actuel)?.courriel || client.courriels?.[0]?.courriel || '';
-    const clientAddr = client.adresses?.find(a=>a.actuelle) || client.adresses?.[0] || {};
-    const clientNumCivique = (clientAddr.numeros_civiques||[]).filter(Boolean).join(', ');
-    const clientAdresseStr = [clientNumCivique, clientAddr.rue].filter(Boolean).join(' ');
-    const cDiv = L + HALF;
-
-    // Nom | Cellulaire
-    hline(p, y + RH); vline(p, cDiv, y, y + RH);
-    label(p, 'Nom(s) :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    label(p, 'Cellulaire :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_nom', p, L + mm(17), y + mm(0.5), cDiv - L - mm(18), RH - mm(1), clientNom);
-    addField('client_cell', p, cDiv + mm(22), y + mm(0.5), R - cDiv - mm(23), RH - mm(1), clientCell);
-    y += RH;
-
-    // blank | Travail
-    hline(p, y + RH); vline(p, cDiv, y, y + RH);
-    label(p, 'Travail :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_travail', p, cDiv + mm(17), y + mm(0.5), R - cDiv - mm(18), RH - mm(1), clientTravail);
-    y += RH;
-
-    // Adresse | Maison
-    hline(p, y + RH); vline(p, cDiv, y, y + RH);
-    label(p, 'Adresse :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    label(p, 'Maison :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_adresse', p, L + mm(18), y + mm(0.5), cDiv - L - mm(19), RH - mm(1), clientAdresseStr);
-    addField('client_maison', p, cDiv + mm(18), y + mm(0.5), R - cDiv - mm(19), RH - mm(1));
-    y += RH;
-
-    // Municipalité | Autre
-    hline(p, y + RH); vline(p, cDiv, y, y + RH);
-    label(p, 'Municipalité :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    label(p, 'Autre :', cDiv + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_ville', p, L + mm(23), y + mm(0.5), cDiv - L - mm(24), RH - mm(1), clientAddr.ville || '');
-    addField('client_autre', p, cDiv + mm(14), y + mm(0.5), R - cDiv - mm(15), RH - mm(1));
-    y += RH;
-
-    // Code postal
-    hline(p, y + RH); vline(p, cDiv, y, y + RH);
-    label(p, 'Code postal :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_cp', p, L + mm(22), y + mm(0.5), cDiv - L - mm(23), RH - mm(1), clientAddr.code_postal || '');
-    y += RH;
-
-    // Courriel
-    hline(p, y + RH);
-    label(p, 'Courriel :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('client_courriel', p, L + mm(18), y + mm(0.5), W - mm(19), RH - mm(1), clientEmail);
-    y += RH;
-
-    // ── LOCALISATION / FICHIER ───────────────────────────────────────────────
-    const locW = W * 0.54, noteW = W - locW;
-    sectionBar(p, 'LOCALISATION DES TRAVAUX', L, y, locW);
-    sectionBar(p, 'FICHIER :', L + locW, y, noteW);
-    y += mm(5);
-
-    const addrT = mandat.adresse_travaux || {};
-    const addrStr = [(addrT.numeros_civiques||[]).filter(Boolean).join(', '), addrT.rue].filter(Boolean).join(' ');
-    const lotsStr = (mandat.lots||[]).join(', ') || mandat.lots_texte || '';
-
-    const locH = RH * 7;
-    rect(p, L, y, locW, locH, { bw: 0.5 });
-    rect(p, L + locW, y, noteW, locH, { bw: 0.5 });
-    label(p, 'NOTES', L + locW + noteW/2, y + mm(4), { bold:true, size:9, align:'center' });
-    hline(p, y + mm(5), L + locW, R);
-
-    // Notes field
-    addField('notes', p, L + locW + mm(1), y + mm(5.5), noteW - mm(2), locH - mm(6), '', { multiline: true });
-
-    // Localisation rows
-    let ly = y;
-    hline(p, ly + RH, L, L + locW);
-    label(p, 'Adresse :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('loc_adresse', p, L + mm(18), ly + mm(0.5), locW - mm(19), RH - mm(1), addrStr);
-    ly += RH;
-    hline(p, ly + RH, L, L + locW);
-    label(p, 'Municipalité :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('loc_ville', p, L + mm(23), ly + mm(0.5), locW - mm(24), RH - mm(1), addrT.ville || '');
-    ly += RH;
-    hline(p, ly + RH, L, L + locW);
-    label(p, 'Code postal :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('loc_cp', p, L + mm(22), ly + mm(0.5), locW - mm(23), RH - mm(1), addrT.code_postal || '');
-    ly += RH;
-    hline(p, ly + RH, L, L + locW);
-    checkbox(p, L + mm(1.5), ly + RH/2 - mm(1.4));
-    label(p, "Identique à l'adresse contact", L + mm(6), ly + RH/2 + mm(1.2), { size:8 });
-    ly += RH;
-    hline(p, ly + RH, L, L + locW);
-    checkbox(p, L + mm(1.5), ly + RH/2 - mm(1.4));
-    label(p, 'Litige avec voisin', L + mm(6), ly + RH/2 + mm(1.2), { size:8 });
-    ly += RH;
-    label(p, 'Lots :', L + mm(1.5), ly + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('lots', p, L + mm(12), ly + mm(0.5), locW - mm(13), RH - mm(1), lotsStr);
-
-    y += locH;
-
-    // ── INTERVENANTS ──────────────────────────────────────────────────────────
-    sectionBar(p, 'INTERVENANTS', L, y, W);
-    y += mm(5);
-
-    const notaire = notairesData?.[0] || {};
-    const notaireNom = `${notaire.prenom||''} ${notaire.nom||''}`.trim();
-
-    for (const [lbl, val] of [['Notaire :', notaireNom], ['Courtier :', ''], ['Autre :', '']]) {
-      hline(p, y + RH);
-      label(p, lbl, L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-      addField('interv_'+lbl, p, L + mm(18), y + mm(0.5), W - mm(19), RH - mm(1), val);
-      y += RH;
-    }
-
-    hline(p, y + RH);
-    label(p, 'Mandant :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    checkbox(p, L + mm(19), y + RH/2 - mm(1.4));
-    label(p, 'Identique client', L + mm(23), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    checkbox(p, L + mm(52), y + RH/2 - mm(1.4));
-    label(p, 'Autre :', L + mm(56), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('mandant_autre', p, L + mm(66), y + mm(0.5), W - mm(67), RH - mm(1));
-    y += RH;
-
-    hline(p, y + RH);
-    label(p, 'Propriétaire :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    checkbox(p, L + mm(22), y + RH/2 - mm(1.4));
-    label(p, 'Identique client', L + mm(26), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    checkbox(p, L + mm(55), y + RH/2 - mm(1.4));
-    label(p, 'Autre :', L + mm(59), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('proprio_autre', p, L + mm(69), y + mm(0.5), W - mm(70), RH - mm(1));
-    y += RH;
-
-    // ── LIVRAISON ─────────────────────────────────────────────────────────────
-    sectionBar(p, 'LIVRAISON', L, y, W);
-    y += mm(5);
-
-    hline(p, y + RH);
-    label(p, 'Date de signature:', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    const dateSig = formatDate(mandat.date_signature);
-    addField('date_signature', p, L + mm(30), y + mm(0.5), W - mm(31), RH - mm(1), dateSig);
-    y += RH;
-
-    // EN MAIN PROPRE | DOCUMENTS | FACTURE
-    const mpW = W * 0.19, docsW = W * 0.50, factW = W - mpW - docsW, barH = mm(5);
-    sectionBar(p, 'EN MAIN PROPRE :', L, y, mpW, barH);
-    checkbox(p, L + mpW - mm(5), y + barH/2 - mm(1.4));
-    sectionBar(p, 'DOCUMENTS', L + mpW, y, docsW, barH);
-    sectionBar(p, 'FACTURE', L + mpW + docsW, y, factW, barH);
-    y += barH;
-
-    for (const rowLbl of ['Client','Notaire','Courtier','Aut. :']) {
-      hline(p, y + RH);
-      vline(p, L + mpW, y, y + RH);
-      vline(p, L + mpW + docsW, y, y + RH);
-      const lblW = fontBold.widthOfTextAtSize(rowLbl, 8);
-      label(p, rowLbl, L + mpW - mm(1.5) - lblW, y + RH/2 + mm(1.2), { bold:true, size:8 });
-      let dx = L + mpW + mm(3);
-      for (const opt of ['Poste','Courriel']) {
-        checkbox(p, dx, y + RH/2 - mm(1.4));
-        label(p, opt, dx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); dx += mm(26);
-      }
-      dx = L + mpW + docsW + mm(2);
-      for (const opt of ['Papier','Courriel']) {
-        checkbox(p, dx, y + RH/2 - mm(1.4));
-        label(p, opt, dx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); dx += mm(26);
-      }
-      y += RH;
-    }
-
-    // ── PRIX ──────────────────────────────────────────────────────────────────
-    sectionBar(p, 'PRIX', L, y, W);
-    y += mm(5);
-
-    const pCols = [W*0.26, W*0.12, W*0.12, W*0.12];
-    const pRightX = L + pCols[0] + pCols[1] + pCols[2] + pCols[3];
-    const pRightW = R - pRightX;
-    const rightBlockRows = 5;
-    const rightBlockH = RH * rightBlockRows;
-
-    // Header
-    let px = L;
-    for (const [h, w] of [['Opération',pCols[0]],['Prix',pCols[1]],['Rabais',pCols[2]],['Total',pCols[3]]]) {
-      rect(p, px, y, w, RH, { bw: 0.5 });
-      label(p, h, px + w/2, y + RH/2 + mm(1.2), { bold:true, size:8.5, align:'center' });
-      px += w;
-    }
-
-    // Right block
-    rect(p, pRightX, y, pRightW, rightBlockH, { bw: 0.5 });
-
-    // Right block row lines
-    for (let ri = 1; ri < rightBlockRows; ri++) {
-      hline(p, y + RH * ri, pRightX, R);
-    }
-
-    // Right block content
-    let ry = y;
-    label(p, 'Taxes :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(14), ry + RH/2 - mm(1.4));
-    label(p, 'Non-Incluses', pRightX + mm(18), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(40), ry + RH/2 - mm(1.4));
-    label(p, 'Incluses', pRightX + mm(44), ry + RH/2 + mm(1.2), { size:8 });
-    ry += RH;
-
-    label(p, 'Frais dépôt :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(21), ry + RH/2 - mm(1.4));
-    label(p, 'Oui', pRightX + mm(25.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(34), ry + RH/2 - mm(1.4));
-    label(p, 'Non', pRightX + mm(38.5), ry + RH/2 + mm(1.2), { size:8 });
-    ry += RH;
-
-    label(p, 'Frais ouvert :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(22), ry + RH/2 - mm(1.4));
-    label(p, 'Oui', pRightX + mm(26.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(35), ry + RH/2 - mm(1.4));
-    label(p, 'Non', pRightX + mm(39.5), ry + RH/2 + mm(1.2), { size:8 });
-    ry += RH;
-
-    label(p, 'Modalités :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('modalites', p, pRightX + mm(19), ry + mm(0.5), pRightW - mm(20), RH - mm(1));
-    ry += RH;
-
-    label(p, '*Piquetage suggéré :', pRightX + mm(1.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(30), ry + RH/2 - mm(1.4));
-    label(p, 'Oui', pRightX + mm(34.5), ry + RH/2 + mm(1.2), { size:8 });
-    checkbox(p, pRightX + mm(43), ry + RH/2 - mm(1.4));
-    label(p, 'Non', pRightX + mm(47.5), ry + RH/2 + mm(1.2), { size:8 });
-
-    y += RH;
-
-    // Mandat data rows
-    const mandats = dossierData.mandats?.length ? dossierData.mandats : [mandat];
-    const dataRows = mandats.filter(m => m?.type_mandat);
-    const totalRows = Math.max(3, dataRows.length);
-
-    for (let i = 0; i < totalRows; i++) {
-      const m = dataRows[i] || null;
-      const total = m ? ((m.prix_estime||0) - (m.rabais||0)) : 0;
-      px = L;
-      const vals = [
-        [m?.type_mandat||'', pCols[0]],
-        [m?.prix_estime ? `${Number(m.prix_estime).toFixed(2)} $` : '', pCols[1]],
-        [m?.rabais ? `${Number(m.rabais).toFixed(2)} $` : '', pCols[2]],
-        [total > 0 ? `${total.toFixed(2)} $` : '', pCols[3]]
-      ];
-      for (const [val, w] of vals) {
-        rect(p, px, y, w, RH, { bw: 0.5 });
-        addField(`prix_r${i}_c${px.toFixed(0)}`, p, px + mm(0.5), y + mm(0.5), w - mm(1), RH - mm(1), val);
-        px += w;
-      }
-      y += RH;
-    }
-
-    // Total row
-    px = L;
-    const grandTotal = mandats.reduce((s, m) => s + ((m?.prix_estime||0) - (m?.rabais||0)), 0);
-    for (const [val, w, bold] of [['',pCols[0],false],['',pCols[1],false],['Total',pCols[2],true],[grandTotal > 0 ? `${grandTotal.toFixed(2)} $` : '',pCols[3],false]]) {
-      rect(p, px, y, w, RH, { bw: 0.5 });
-      if (bold) label(p, val, px + w/2, y + RH/2 + mm(1.2), { bold:true, size:8.5, align:'center' });
-      else if (val) {
-        label(p, val, px + mm(1.5), y + RH/2 + mm(1.2), { size:8, color: DARK_BLUE });
-      }
-      px += w;
-    }
-    y += RH;
-
-    // ── RÉFÉRENCE ─────────────────────────────────────────────────────────────
-    sectionBar(p, 'RÉFÉRENCE', L, y, W);
-    y += mm(5);
-
-    const refs1 = ['Courtier','Notaire','Connaissance','Site Web','Bouche à oreille'];
-    const refs2 = ['Bottin','Publicité','Réseaux sociaux','Greffe','Club sociaux/BNI'];
-    const refs3 = ['Magasineux','Anc. Client','Autre ___________________________'];
-
-    rect(p, L, y, W, RH * 3, { bw: 0.5 });
-    hline(p, y + RH); hline(p, y + RH * 2);
-
-    const refStep = W / 5;
-    let rx = L + mm(1.5);
-    for (const r of refs1) { checkbox(p, rx, y + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
-    rx = L + mm(1.5);
-    for (const r of refs2) { checkbox(p, rx, y + RH*1 + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
-    rx = L + mm(1.5);
-    for (const r of refs3) { checkbox(p, rx, y + RH*2 + RH/2 - mm(1.4)); label(p, r, rx + mm(4.5), y + RH*2 + RH/2 + mm(1.2), { size:8 }); rx += refStep; }
-    y += RH * 3;
-
-    // ── VALIDATION DES OBSERVATIONS ───────────────────────────────────────────
-    sectionBar(p, 'VALIDATION DES OBSERVATIONS', L, y, W);
-    y += mm(5);
-
-    const validH = mm(24);
-    rect(p, L, y, W, validH, { bw: 0.5 });
-
-    const validText = `Je, soussigné ${dossierData.arpenteur_geometre||''}, arpenteur-géomètre, certifie par la présente avoir pris personnellement connaissance des observations relatives aux éléments visés aux paragraphes 9 et 13 à 17 du premier alinéa de l'article 9 du Règlement sur la norme de pratique relative au certificat de localisation et les avoir validées.`;
-
-    // Word wrap manually
-    const words = validText.split(' ');
-    const maxLineW = W - mm(3);
-    let lines = [], line = '';
-    for (const word of words) {
-      const test = line ? line + ' ' + word : word;
-      if (fontReg.widthOfTextAtSize(test, 7.5) > maxLineW) { lines.push(line); line = word; }
-      else line = test;
-    }
-    if (line) lines.push(line);
-
-    for (let i = 0; i < lines.length; i++) {
-      label(p, lines[i], L + mm(1.5), y + mm(3.5) + i * mm(3.2), { size: 7.5 });
-    }
-
-    const afterTxt = y + mm(3.5) + lines.length * mm(3.2) + mm(2);
-    checkbox(p, L + mm(2), afterTxt - mm(1.4));
-    label(p, 'Visite des lieux', L + mm(6.5), afterTxt + mm(1.2), { bold:true, size:8 });
-    checkbox(p, L + mm(2), afterTxt + mm(4));
-    label(p, 'Photographies', L + mm(6.5), afterTxt + mm(6.6), { bold:true, size:8 });
-
-    const sigY = y + validH - mm(4);
-    label(p, 'Date de la validation :', L + mm(2), sigY + mm(1.2), { size:8 });
-    p.drawLine({ start:{x:L+mm(36),y:py(sigY)}, end:{x:L+mm(76),y:py(sigY)}, thickness:0.5, color:BLACK });
-    addField('date_validation', p, L + mm(36), sigY - mm(4), mm(40), mm(4.5));
-    label(p, 'Signature :', L + mm(78), sigY + mm(1.2), { size:8 });
-    p.drawLine({ start:{x:L+mm(92),y:py(sigY)}, end:{x:R-mm(1),y:py(sigY)}, thickness:0.5, color:BLACK });
-    y += validH;
-
-    // ── FERMETURE ─────────────────────────────────────────────────────────────
-    sectionBar(p, 'FERMETURE', L, y, W);
-    y += mm(5);
-    rect(p, L, y, W/2, RH, { bw: 0.5 });
-    rect(p, L + W/2, y, W/2, RH, { bw: 0.5 });
-    label(p, 'Date de fermeture :', L + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    label(p, 'Signature :', L + W/2 + mm(1.5), y + RH/2 + mm(1.2), { bold:true, size:8 });
-    addField('date_fermeture', p, L + mm(31), y + mm(0.5), W/2 - mm(32), RH - mm(1));
-
-    // ────────────────────────────────────────────────────────────────────────
-    // PAGE 2: TEMPS
-    // ────────────────────────────────────────────────────────────────────────
-    const p2 = page2;
-    label(p2, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
-
-    const p2Y0 = mm(9);
-    const p2H = mm(175);
-    rect(p2, L, p2Y0, W, p2H, { bw: 1.5 });
-    sectionBar(p2, 'TEMPS', L, p2Y0, W, mm(6));
-
-    const tCols = [W*0.17, W*0.25, W*0.44, W*0.14];
-    const tHeaders = ['DATE','EMPLOYÉ(S)','DESCRIPTION','TEMPS'];
-    let ty = p2Y0 + mm(6);
-
-    let tx = L;
-    for (let i = 0; i < tHeaders.length; i++) {
-      rect(p2, tx, ty, tCols[i], mm(6), { bw: 0.5 });
-      label(p2, tHeaders[i], tx + tCols[i]/2, ty + mm(3.5), { bold:true, size:9, align:'center' });
-      tx += tCols[i];
-    }
-    ty += mm(6);
-
-    const subSections = [
-      ['PLANIFICATION',2],['TERRAIN',6],
-      ['RECHERCHES ET ANALYSE FONCIÈRE',4],['TRAITEMENT ET DESSIN',4],['RAPPORT/RÉDACTION',3],
+    // Title block
+    txt('FICHE DOSSIER', ML + 50, 30, { bold:true, size:22, color:WHITE });
+    txt('Girard Tremblay Gilbert Inc. — Arpenteurs-Géomètres', ML + 50, 50, { size:9, color:rgb(0.68, 0.73, 0.90) });
+
+    // Dossier number block (right)
+    rct(R - 160, 8, 158, 30, ACCENT);
+    txt(fullNum, R - 81, 18, { bold:true, size:17, color:WHITE, align:'center' });
+    txt(dossierData.arpenteur_geometre || '', R - 81, 34, { size:8, color:WHITE, align:'center' });
+
+    // Statut badge
+    const isOpen = dossierData.statut !== 'Fermé';
+    rct(R - 160, 42, 158, 18, isOpen ? GREEN : RED_C);
+    txt((dossierData.statut || 'Ouvert').toUpperCase(), R - 81, 50, { bold:true, size:9, color:WHITE, align:'center' });
+
+    // Place d'affaire + TTL row
+    rct(R - 160, 62, 78, 14, rgb(0.10, 0.16, 0.38));
+    txt(`📍 ${dossierData.place_affaire || '–'}`, R - 122, 69, { size:8, color:WHITE, align:'center' });
+    rct(R - 81, 62, 79, 14, dossierData.ttl === 'Oui' ? rgb(0.70, 0.35, 0.05) : rgb(0.10, 0.16, 0.38));
+    txt(dossierData.ttl === 'Oui' ? 'TTL' : 'Non-TTL', R - 41, 69, { bold:true, size:8, color:WHITE, align:'center' });
+
+    y = 84;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INFORMATIONS GÉNÉRALES
+    // ═══════════════════════════════════════════════════════════════════
+    sectionHeader('INFORMATIONS GÉNÉRALES');
+
+    const genRows = [
+      ['Arpenteur-géomètre', dossierData.arpenteur_geometre],
+      ['Place d\'affaire', dossierData.place_affaire],
+      ['Statut', dossierData.statut || 'Ouvert'],
+      ['Dossier TTL', dossierData.ttl === 'Oui' ? 'Oui' : 'Non'],
+      ['Date d\'ouverture', formatDate(dossierData.date_ouverture)],
+      ['Date de fermeture', formatDate(dossierData.date_fermeture)],
     ];
 
-    for (const [title, count] of subSections) {
-      rect(p2, L, ty, W, mm(5.5), { fill: LIGHT_GRAY, bw: 0.5 });
-      label(p2, title, L + mm(2), ty + mm(4), { bold:true, size:8.5 });
-      ty += mm(5.5);
-      for (let r = 0; r < count; r++) {
-        tx = L;
-        for (let ci = 0; ci < tCols.length; ci++) {
-          rect(p2, tx, ty, tCols[ci], mm(6), { bw: 0.5 });
-          addField(`temps_${title.slice(0,8)}_r${r}_c${ci}`, p2, tx + mm(0.5), ty + mm(0.5), tCols[ci] - mm(1), mm(5));
-          tx += tCols[ci];
+    for (let i = 0; i < genRows.length; i += 2) {
+      ensureSpace(16);
+      const alt = (i / 2) % 2 === 1;
+      if (alt) rct(L, y, W, 16, ROW_ALT);
+      infoRow(genRows[i][0], genRows[i][1], false, 0, HALF, 16);
+      if (genRows[i+1]) infoRow(genRows[i+1][0], genRows[i+1][1], false, HALF, HALF, 16);
+      hline(y + 16);
+      y += 16;
+    }
+
+    y += 10;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // CLIENTS
+    // ═══════════════════════════════════════════════════════════════════
+    if (clientsData && clientsData.length > 0) {
+      sectionHeader(`CLIENTS (${clientsData.length})`);
+
+      for (let ci = 0; ci < clientsData.length; ci++) {
+        const client = clientsData[ci];
+        if (!client) continue;
+        if (ci > 0) { ensureSpace(8); y += 6; }
+
+        const clientName  = `${client.prenom || ''} ${client.nom || ''}`.trim();
+        const clientPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || '–';
+        const clientEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || '–';
+        const adr = client.adresses?.find(a => a.actuelle) || client.adresses?.[0];
+        const clientAddr = adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(', '), adr.rue, adr.ville, adr.code_postal].filter(Boolean).join(', ') : '–';
+        const clientPrefs = (client.preferences_livraison || []).join(', ') || '–';
+
+        const cRows = [
+          ['Nom', clientName],
+          ['Téléphone', clientPhone],
+          ['Courriel', clientEmail],
+          ['Adresse', clientAddr],
+          ['Préférences livraison', clientPrefs],
+        ];
+
+        for (let ri = 0; ri < cRows.length; ri++) {
+          ensureSpace(15);
+          const alt = ri % 2 === 1;
+          if (alt) rct(L, y, W, 15, ROW_ALT);
+          infoRow(cRows[ri][0], cRows[ri][1], false, 0, W, 15);
+          hline(y + 15);
+          y += 15;
         }
-        ty += mm(6);
+      }
+      y += 10;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INTERVENANTS
+    // ═══════════════════════════════════════════════════════════════════
+    const hasN = notairesData && notairesData.length > 0;
+    const hasC = courtiersData && courtiersData.length > 0;
+    if (hasN || hasC) {
+      sectionHeader('INTERVENANTS');
+
+      const drawIntervenants = (list, label) => {
+        if (!list || list.length === 0) return;
+        subHeader(label);
+        for (let i = 0; i < list.length; i++) {
+          const p = list[i];
+          if (!p) continue;
+          if (i > 0) { y += 4; }
+          const pName  = `${p.prenom || ''} ${p.nom || ''}`.trim();
+          const pPhone = p.telephones?.find(t => t.actuel)?.telephone || p.telephones?.[0]?.telephone || '–';
+          const pEmail = p.courriels?.find(c => c.actuel)?.courriel || p.courriels?.[0]?.courriel || '–';
+          const iRows  = [['Nom', pName], ['Téléphone', pPhone], ['Courriel', pEmail]];
+          for (let ri = 0; ri < iRows.length; ri++) {
+            ensureSpace(15);
+            if (ri % 2 === 1) rct(L, y, W, 15, ROW_ALT);
+            infoRow(iRows[ri][0], iRows[ri][1], false, 0, W, 15);
+            hline(y + 15);
+            y += 15;
+          }
+        }
+      };
+
+      drawIntervenants(notairesData, 'NOTAIRES');
+      drawIntervenants(courtiersData, 'COURTIERS IMMOBILIERS');
+      y += 10;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // MANDATS
+    // ═══════════════════════════════════════════════════════════════════
+    const mandats = dossierData.mandats || [];
+    if (mandats.length > 0) {
+      sectionHeader(`MANDATS (${mandats.length})`);
+
+      for (let mi = 0; mi < mandats.length; mi++) {
+        const m = mandats[mi];
+        if (!m) continue;
+
+        // Mandat accent header
+        ensureSpace(22);
+        rct(L, y, W, 20, ACCENT);
+        txt(`${mi + 1}. ${m.type_mandat || 'Mandat'}`, L + 10, y + 14, { bold:true, size:10.5, color:WHITE });
+        if (m.tache_actuelle) {
+          const bw = fontBold.widthOfTextAtSize(m.tache_actuelle, 8) + 14;
+          rct(R - bw - 6, y + 5, bw, 12, NAVY);
+          txt(m.tache_actuelle, R - bw/2 - 6, y + 13, { bold:true, size:8, color:WHITE, align:'center' });
+        }
+        y += 20;
+
+        // Infos de base – 2 colonnes
+        const mBaseRows = [
+          ['Tâche actuelle', m.tache_actuelle],
+          ['Utilisateur assigné', m.utilisateur_assigne],
+          ['Date d\'ouverture', formatDate(m.date_ouverture)],
+          ['Date de livraison', formatDate(m.date_livraison)],
+          ['Date de signature', formatDate(m.date_signature)],
+          ['Début des travaux', formatDate(m.date_debut_travaux)],
+        ];
+        for (let ri = 0; ri < mBaseRows.length; ri += 2) {
+          ensureSpace(15);
+          if ((ri / 2) % 2 === 0) rct(L, y, W, 15, ROW_ALT);
+          infoRow(mBaseRows[ri][0], mBaseRows[ri][1], false, 0, HALF, 15);
+          if (mBaseRows[ri+1]) infoRow(mBaseRows[ri+1][0], mBaseRows[ri+1][1], false, HALF, HALF, 15);
+          hline(y + 15);
+          y += 15;
+        }
+
+        // Adresse des travaux
+        const addr = m.adresse_travaux;
+        const addrStr = m.adresse_travaux_texte || (addr ? [(addr.numeros_civiques||[]).filter(Boolean).join(', '), addr.rue, addr.ville, addr.code_postal].filter(Boolean).join(', ') : '–');
+        ensureSpace(15);
+        infoRow('Adresse des travaux', addrStr, false, 0, W, 15);
+        hline(y + 15);
+        y += 15;
+
+        // Lots
+        const lotsStr = m.lots_texte || (m.lots || []).join(', ') || '–';
+        ensureSpace(15);
+        rct(L, y, W, 15, ROW_ALT);
+        infoRow('Lots', lotsStr, false, 0, W, 15);
+        hline(y + 15);
+        y += 15;
+
+        // ── TARIFICATION ──────────────────────────────────────────────
+        ensureSpace(16);
+        rct(L, y, W, 14, PRICE_BG);
+        txt('TARIFICATION', L + 8, y + 10, { bold:true, size:8, color:SECTION_BG });
+        y += 14;
+
+        const total = (Number(m.prix_estime) || 0) - (Number(m.rabais) || 0);
+        const pRows = [
+          ['Prix estimé', formatMoney(m.prix_estime), 'Rabais', formatMoney(m.rabais)],
+          ['Total HT', total > 0 ? `${total.toFixed(2)} $` : '–', 'Taxes incluses', m.taxes_incluses ? 'Oui' : 'Non'],
+          ['Prix convenu', m.prix_convenu ? 'Oui' : 'Non', '', ''],
+        ];
+        for (let pi = 0; pi < pRows.length; pi++) {
+          ensureSpace(15);
+          if (pi % 2 === 0) rct(L, y, W, 15, ROW_ALT);
+          infoRow(pRows[pi][0], pRows[pi][1], false, 0, HALF, 15);
+          if (pRows[pi][2]) infoRow(pRows[pi][2], pRows[pi][3], false, HALF, HALF, 15);
+          hline(y + 15);
+          y += 15;
+        }
+
+        // ── MINUTES ───────────────────────────────────────────────────
+        const minutes = m.minutes_list?.length ? m.minutes_list : (m.minute ? [{ minute: m.minute, date_minute: m.date_minute, type_minute: m.type_minute }] : []);
+        if (minutes.length > 0) {
+          ensureSpace(18);
+          rct(L, y, W, 14, PRICE_BG);
+          txt('MINUTES', L + 8, y + 10, { bold:true, size:8, color:SECTION_BG });
+          y += 14;
+
+          // Column headers
+          ensureSpace(14);
+          const mCW = [W * 0.40, W * 0.30, W * 0.30];
+          rct(L, y, W, 13, SUB_BG);
+          let mx = L;
+          for (const [h, cw] of [['N° Minute', mCW[0]], ['Date', mCW[1]], ['Type', mCW[2]]]) {
+            txt(h, mx + 5, y + 9.5, { bold:true, size:7.5, color:SECTION_BG });
+            mx += cw;
+          }
+          y += 13;
+
+          for (let ki = 0; ki < minutes.length; ki++) {
+            const min = minutes[ki];
+            ensureSpace(14);
+            if (ki % 2 === 1) rct(L, y, W, 14, ROW_ALT);
+            mx = L;
+            for (const [val, cw] of [[min.minute||'–', mCW[0]], [formatDate(min.date_minute), mCW[1]], [min.type_minute||'–', mCW[2]]]) {
+              txt(safeText(val), mx + 5, y + 10, { size:8, color:TEXT_DARK });
+              mx += cw;
+            }
+            hline(y + 14);
+            y += 14;
+          }
+        }
+
+        // ── NOTES DU MANDAT ───────────────────────────────────────────
+        if (m.notes) {
+          ensureSpace(18);
+          rct(L, y, W, 14, PRICE_BG);
+          txt('NOTES', L + 8, y + 10, { bold:true, size:8, color:SECTION_BG });
+          y += 14;
+
+          const noteLines = wrapText(m.notes, W - 20, 8, fontReg);
+          for (const nl of noteLines) {
+            ensureSpace(13);
+            txt(nl, L + 8, y + 10, { size:8, color:TEXT_DARK });
+            y += 13;
+          }
+        }
+
+        y += 10;
+        if (mi < mandats.length - 1) {
+          ensureSpace(4);
+          currentPage.drawLine({ start:{x:L, y:py(y)}, end:{x:R, y:py(y)}, thickness:1, color:ACCENT });
+          y += 10;
+        }
       }
     }
 
-    label(p2, 'Rév. 13    Date : 2 juin 2022', L, PH - mm(4), { size: 7 });
+    // ═══════════════════════════════════════════════════════════════════
+    // FOOTER on all pages
+    // ═══════════════════════════════════════════════════════════════════
+    for (let pi = 0; pi < pages.length; pi++) {
+      const pg = pages[pi];
+      pg.drawRectangle({ x:0, y:0, width:PW, height:20, color:NAVY });
+      pg.drawText(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, { x:ML, y:6, font:fontReg, size:7, color:rgb(0.65,0.70,0.88) });
+      const pgTxt = `Page ${pi+1} / ${pages.length}`;
+      pg.drawText(pgTxt, { x: R - fontReg.widthOfTextAtSize(pgTxt, 7), y:6, font:fontReg, size:7, color:rgb(0.65,0.70,0.88) });
+      // Accent bottom stripe
+      pg.drawRectangle({ x:0, y:20, width:PW, height:3, color:ACCENT });
+    }
 
-    // ── OUTPUT ─────────────────────────────────────────────────────────────────
-    form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
-    const pdfBytes = await pdfDoc.save({ updateFieldAppearances: false });
+    const pdfBytes = await pdfDoc.save();
     let base64 = '';
     for (let i = 0; i < pdfBytes.length; i += 8192) base64 += String.fromCharCode(...pdfBytes.subarray(i, i + 8192));
     base64 = btoa(base64);
 
-    return Response.json({ success: true, fileName: pdfFileName, pdf: `data:application/pdf;base64,${base64}` });
+    return Response.json({ success:true, fileName:pdfFileName, pdf:`data:application/pdf;base64,${base64}` });
 
   } catch (error) {
-    console.error('Erreur:', error);
-    return Response.json({ error: error.message || 'Erreur' }, { status: 500 });
+    console.error('Erreur generateFicheMandat:', error);
+    return Response.json({ error: error.message || 'Erreur serveur' }, { status:500 });
   }
 });
