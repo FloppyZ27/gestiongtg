@@ -183,9 +183,47 @@ Deno.serve(async (req) => {
     d.txt(mandatTypesText, ML + 88, y + 12, { b:true, sz:9, col:C.dark });
     y += 16;
 
-    // ─── SECTION: CLIENT(S) ───────────────────────────────────────────
-    y += 2;
-    y += d.sHdr('CLIENT(S)', y);
+    // ─── Fetch map AVANT de dessiner les sections ───────────────────
+    const adr = firstMandat.adresse_travaux;
+    const addrRue  = firstMandat.adresse_travaux_texte || (adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(' '), adr.rue].filter(Boolean).join(' ') : '');
+    const addrVil  = adr?.ville || '';
+    const addrCP   = adr?.code_postal || '';
+    const lotsStr  = firstMandat.lots_texte || (firstMandat.lots||[]).join(', ') || '';
+
+    let mapImageBytes = null;
+    try {
+      const mapAddr = [addrRue, addrVil, 'QC, Canada'].filter(Boolean).join(', ');
+      const mapApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY') || '';
+      if (mapApiKey && mapAddr.length > 5) {
+        const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(mapAddr)}&zoom=14&size=640x640&format=jpg&maptype=roadmap&markers=color:red|${encodeURIComponent(mapAddr)}&key=${mapApiKey}`;
+        const mr = await fetch(mapUrl);
+        if (mr.ok) mapImageBytes = new Uint8Array(await mr.arrayBuffer());
+      }
+    } catch(_) {}
+
+    // ─── LAYOUT : Gauche 50% = Clients + Localisation | Droite 50% = Carte ───
+    const LH  = CW / 2;   // largeur demi-colonne (282)
+    const LWH = 68;        // largeur label dans demi-colonne
+    const RH  = 13;        // hauteur ligne
+
+    const yStart = y + 2;
+    y = yStart;
+
+    // ── Sous-helper pour en-tête de section demi-largeur ──
+    const halfHdr = (title, ty) => {
+      d.fill(ML, ty, LH, 15, C.red);
+      d.txt(title, ML + LH/2, ty + 15 - 2, { b:true, sz:7.5, col:C.white, ctr:true });
+    };
+    const halfRow = (lbl, val, ty, alt) => {
+      d.fill(ML, ty, LWH, RH, C.lblBg);
+      d.fill(ML+LWH, ty, LH-LWH, RH, alt ? C.altBg : C.white);
+      d.box(ML, ty, LH, RH);
+      d.vline(ML+LWH, ty, ty+RH);
+      d.txt(safe(lbl), ML+3, ty+RH-3, { b:true, sz:7, col:C.lbl });
+      d.txt(safe(val), ML+LWH+3, ty+RH-3, { sz:7.5 });
+    };
+
+    // ── CLIENT(S) ──
     const client1 = clientsData?.[0];
     const c1Name  = client1 ? `${client1.prenom || ''} ${client1.nom || ''}`.trim() : '';
     const c1Tel   = client1?.telephones?.[0]?.telephone || '';
@@ -195,88 +233,36 @@ Deno.serve(async (req) => {
     const c1Ville = c1Adr?.ville || '';
     const c1CP    = c1Adr?.code_postal || '';
 
-    const LW2 = 65, HW = CW / 2;
-    const clientRows = [
-      ['Nom(s) :', c1Name,       'Téléphone :', c1Tel],
-      ['Adresse :', c1Rue,      'Courriel :', c1Email],
-      ['Municipalité :', c1Ville, '', ''],
-      ['Code postal :', c1CP,   '', ''],
-    ];
-    for (let i = 0; i < clientRows.length; i++) {
-      const [l1,v1,l2,v2] = clientRows[i];
-      d.fill(ML, y, LW2, 15, C.lblBg);
-      d.fill(ML + LW2, y, HW - LW2, 15, i%2===1 ? C.altBg : C.white);
-      d.fill(ML + HW, y, LW2, 15, C.lblBg);
-      d.fill(ML + HW + LW2, y, HW - LW2, 15, i%2===1 ? C.altBg : C.white);
-      d.box(ML, y, CW, 15);
-      d.vline(ML + LW2, y, y + 15);
-      d.vline(ML + HW, y, y + 15);
-      d.vline(ML + HW + LW2, y, y + 15);
-      d.txt(l1, ML+3, y+11, { b:true, sz:8, col:C.lbl });
-      d.txt(safe(v1), ML+LW2+3, y+11, { sz:8.5 });
-      d.txt(l2, ML+HW+3, y+11, { b:true, sz:8, col:C.lbl });
-      d.txt(safe(v2), ML+HW+LW2+3, y+11, { sz:8.5 });
-      y += 15;
-    }
-    // Clients supplémentaires
-    for (let ci = 1; ci < (clientsData||[]).length; ci++) {
+    halfHdr('CLIENT(S)', y);
+    y += 15;
+    [['Nom(s) :', c1Name], ['Téléphone :', c1Tel], ['Adresse :', c1Rue], ['Courriel :', c1Email], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
+      .forEach(([lbl, val], i) => { halfRow(lbl, val, y, i%2===1); y += RH; });
+    for (let ci=1; ci<(clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
       const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
-      d.fill(ML, y, LW2, 15, C.lblBg);
-      d.fill(ML+LW2, y, CW-LW2, 15, C.white);
-      d.box(ML, y, CW, 15);
-      d.vline(ML+LW2, y, y+15);
-      d.txt(`Client ${ci+1} :`, ML+3, y+11, { b:true, sz:8, col:C.lbl });
-      d.txt(nm, ML+LW2+3, y+11, { sz:8.5 });
-      y += 15;
+      halfRow(`Client ${ci+1} :`, nm, y, false);
+      y += RH;
     }
 
-    // ─── SECTION: LOCALISATION DES TRAVAUX ───────────────────────────
-    y += d.sHdr('LOCALISATION DES TRAVAUX', y);
+    // ── LOCALISATION DES TRAVAUX ──
+    halfHdr('LOCALISATION DES TRAVAUX', y);
+    y += 15;
+    [['Adresse :', addrRue], ['Municipalité :', addrVil], ['Code postal :', addrCP], ['Lots :', lotsStr]]
+      .forEach(([lbl, val], i) => { halfRow(lbl, val, y, i%2===1); y += RH; });
 
-    const adr = firstMandat.adresse_travaux;
-    const addrRue  = firstMandat.adresse_travaux_texte || (adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(' '), adr.rue].filter(Boolean).join(' ') : '');
-    const addrVil  = adr?.ville || '';
-    const addrCP   = adr?.code_postal || '';
-    const lotsStr  = firstMandat.lots_texte || (firstMandat.lots||[]).join(', ') || '';
-
-    const locRows = [
-      ['Adresse :', addrRue],
-      ['Municipalité :', addrVil],
-      ['Code postal :', addrCP],
-      ['Lots :', lotsStr],
-    ];
-    for (let i = 0; i < locRows.length; i++) {
-      const [lbl,val] = locRows[i];
-      const rh = 15;
-      d.fill(ML, y, LW2, rh, C.lblBg);
-      d.fill(ML+LW2, y, CW-LW2, rh, i%2===1 ? C.altBg : C.white);
-      d.box(ML, y, CW, rh);
-      d.vline(ML+LW2, y, y+rh);
-      d.txt(lbl, ML+3, y+11, { b:true, sz:8 });
-      d.txt(safe(val), ML+LW2+3, y+11, { sz:8.5 });
-      y += rh;
-    }
-
-    // Carte de localisation (Google Static Maps)
-    let mapImageBytes = null;
-    try {
-      const mapAddr = [addrRue, addrVil, 'QC, Canada'].filter(Boolean).join(', ');
-      const mapApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY') || '';
-      if (mapApiKey && mapAddr.length > 5) {
-        const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(mapAddr)}&zoom=14&size=640x220&format=jpg&maptype=roadmap&markers=color:red|${encodeURIComponent(mapAddr)}&key=${mapApiKey}`;
-        const mr = await fetch(mapUrl);
-        if (mr.ok) mapImageBytes = new Uint8Array(await mr.arrayBuffer());
-      }
-    } catch(_) {}
+    // ── CARTE (droite 50%) ──
+    const leftHeight = y - yStart;
     if (mapImageBytes) {
       try {
         const mapImg = await doc.embedJpg(mapImageBytes);
-        const mapH = Math.round(CW * 220 / 640);
-        p1.drawImage(mapImg, { x: ML, y: PH - (y + mapH), width: CW, height: mapH });
-        d.box(ML, y, CW, mapH);
-        y += mapH;
+        p1.drawImage(mapImg, { x: ML+LH, y: PH-(yStart+leftHeight), width: LH, height: leftHeight });
+        d.box(ML+LH, yStart, LH, leftHeight);
       } catch(_) {}
+    } else {
+      // Placeholder si pas de carte
+      d.fill(ML+LH, yStart, LH, leftHeight, rgb(0.95, 0.95, 0.95));
+      d.box(ML+LH, yStart, LH, leftHeight);
+      d.txt('Carte non disponible', ML+LH+LH/2, yStart+leftHeight/2, { sz:8, col:rgb(0.5,0.5,0.5), ctr:true });
     }
 
     // ─── SECTION: INTERVENANTS ────────────────────────────────────────
