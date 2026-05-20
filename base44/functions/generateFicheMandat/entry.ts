@@ -17,7 +17,7 @@ const C = {
   altBg:   rgb(0.99, 0.95, 0.93),   // fond lignes paires
   border:  rgb(0.75, 0.50, 0.40),   // bordure chaude
   dark:    rgb(0.08, 0.04, 0.04),   // texte principal
-  lbl:     rgb(0.45, 0.14, 0.06),   // texte label rouge-orangé
+  lbl:     rgb(0.08, 0.04, 0.04),   // texte label (noir)
   white:   rgb(1, 1, 1),
   green:   rgb(0.12, 0.58, 0.32),
   redSts:  rgb(0.75, 0.14, 0.14),
@@ -128,10 +128,10 @@ Deno.serve(async (req) => {
         p1.drawImage(img, { x:ML, y:PH - (y + 42), width:32, height:36 });
       } catch(_) {}
     }
-    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:C.orange });
-    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:C.lbl });
-    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.red, rgt:true });
-    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:C.orange, rgt:true });
+    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:C.dark });
+    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:C.dark });
+    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.dark, rgt:true });
+    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:C.dark, rgt:true });
     y += 50;
 
     // ─── Infos principales (date, livraison, type arpentage) ──────────
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
     d.txt('Date du mandat :', ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     d.txt(fd(dossierData.date_ouverture), ML + 82, y + 12, { sz:8.5 });
     d.txt('Numéro de dossier :', ML + CW * 0.5 + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
-    d.txt(fullNum, ML + CW * 0.5 + 88, y + 12, { b:true, sz:9, col:C.red });
+    d.txt(fullNum, ML + CW * 0.5 + 88, y + 12, { b:true, sz:9, col:C.dark });
     y += 16;
 
     // Ligne 2: Date de livraison | Statut
@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
     d.box(ML, y, CW, 16);
     d.txt("Type d'arpentage :", ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     const mandatTypesText = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean).join('  |  ');
-    d.txt(mandatTypesText, ML + 88, y + 12, { b:true, sz:9, col:C.red });
+    d.txt(mandatTypesText, ML + 88, y + 12, { b:true, sz:9, col:C.dark });
     y += 16;
 
     // ─── SECTION: CLIENT(S) ───────────────────────────────────────────
@@ -214,22 +214,14 @@ Deno.serve(async (req) => {
       y += 15;
     }
 
-    // ─── SECTION: LOCALISATION DES TRAVAUX + NOTES ───────────────────
-    y += 2;
-    // Split header
-    const locW = CW * 0.55, notW = CW - locW;
-    d.fill(ML, y, locW, 13, C.red);
-    d.txt('LOCALISATION DES TRAVAUX', ML + locW/2, y + 10, { b:true, sz:9, col:C.white, ctr:true });
-    d.fill(ML + locW, y, notW, 13, C.orange);
-    d.txt('NOTES', ML + locW + notW/2, y + 10, { b:true, sz:9, col:C.white, ctr:true });
-    y += 13;
+    // ─── SECTION: LOCALISATION DES TRAVAUX ───────────────────────────
+    y += d.sHdr('LOCALISATION DES TRAVAUX', y);
 
     const adr = firstMandat.adresse_travaux;
     const addrRue  = firstMandat.adresse_travaux_texte || (adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(' '), adr.rue].filter(Boolean).join(' ') : '');
     const addrVil  = adr?.ville || '';
     const addrCP   = adr?.code_postal || '';
     const lotsStr  = firstMandat.lots_texte || (firstMandat.lots||[]).join(', ') || '';
-    const notesStr = firstMandat.notes || '';
 
     const locRows = [
       ['Adresse :', addrRue],
@@ -237,36 +229,38 @@ Deno.serve(async (req) => {
       ['Code postal :', addrCP],
       ['Lots :', lotsStr],
     ];
-    const notesH = locRows.length * 11 + 22;
-    // Notes box (right column, spans all loc rows)
-    d.fill(ML + locW, y, notW, notesH, C.white);
-    d.box(ML + locW, y, notW, notesH);
-    // Multi-line notes text
-    const noteLines = notesStr.match(/.{1,40}/g) || [''];
-    noteLines.forEach((l,i) => d.txt(l, ML+locW+4, y+10+i*10, { sz:7, col:C.dark }));
-
     for (let i = 0; i < locRows.length; i++) {
       const [lbl,val] = locRows[i];
       const rh = 15;
       d.fill(ML, y, LW2, rh, C.lblBg);
-      d.fill(ML+LW2, y, locW-LW2, rh, i%2===1 ? C.altBg : C.white);
-      d.box(ML, y, locW, rh);
+      d.fill(ML+LW2, y, CW-LW2, rh, i%2===1 ? C.altBg : C.white);
+      d.box(ML, y, CW, rh);
       d.vline(ML+LW2, y, y+rh);
-      d.txt(lbl, ML+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(lbl, ML+3, y+11, { b:true, sz:8 });
       d.txt(safe(val), ML+LW2+3, y+11, { sz:8.5 });
       y += rh;
     }
-    // Mandat(s) row
-    d.fill(ML, y, locW, 15, C.altBg);
-    d.box(ML, y, locW, 15);
-    d.txt('Mandat(s) :', ML+3, y+11, { b:true, sz:8, col:C.lbl });
-    d.txt((dossierData.mandats||[]).map(m => m.type_mandat||'').filter(Boolean).join(', '), ML+LW2+3, y+11, { sz:8.5 });
-    y += 15;
-    // Close notes right box
-    const extraH = 15;
-    d.fill(ML + locW, y, notW, extraH, C.white);
-    d.box(ML + locW, y, notW, extraH);
-    y += extraH;
+
+    // Carte de localisation (Google Static Maps)
+    let mapImageBytes = null;
+    try {
+      const mapAddr = [addrRue, addrVil, 'QC, Canada'].filter(Boolean).join(', ');
+      const mapApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY') || '';
+      if (mapApiKey && mapAddr.length > 5) {
+        const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(mapAddr)}&zoom=14&size=640x220&format=jpg&maptype=roadmap&markers=color:red|${encodeURIComponent(mapAddr)}&key=${mapApiKey}`;
+        const mr = await fetch(mapUrl);
+        if (mr.ok) mapImageBytes = new Uint8Array(await mr.arrayBuffer());
+      }
+    } catch(_) {}
+    if (mapImageBytes) {
+      try {
+        const mapImg = await doc.embedJpg(mapImageBytes);
+        const mapH = Math.round(CW * 220 / 640);
+        p1.drawImage(mapImg, { x: ML, y: PH - (y + mapH), width: CW, height: mapH });
+        d.box(ML, y, CW, mapH);
+        y += mapH;
+      } catch(_) {}
+    }
 
     // ─── SECTION: INTERVENANTS ────────────────────────────────────────
     y += 2;
@@ -391,7 +385,7 @@ Deno.serve(async (req) => {
       const LWN = 45;
       d.fill(ML, y, LWN, notesRowH, C.lblBg);
       d.vline(ML + LWN, y, y + notesRowH);
-      d.txt('Notes :', ML+3, y + Math.min(12, notesRowH - 3), { b:true, sz:8, col:C.orange });
+      d.txt('Notes :', ML+3, y + Math.min(12, notesRowH - 3), { b:true, sz:8, col:C.dark });
       if (noteLines.length === 0) {
         // ligne vide
       } else {
@@ -406,7 +400,7 @@ Deno.serve(async (req) => {
     d.box(ML, y, CW, 16);
     pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+16); });
     d.txt('TOTAL', pX[0]+3, y+12, { b:true, sz:9, col:C.dark });
-    d.txt(fm(grandTotal), pX[3]+3, y+12, { b:true, sz:10, col:C.red });
+    d.txt(fm(grandTotal), pX[3]+3, y+12, { b:true, sz:10, col:C.dark });
     y += 16;
 
     // ─── SECTION: MINUTES ─────────────────────────────────────────────
@@ -432,7 +426,7 @@ Deno.serve(async (req) => {
         d.fill(ML, y, mCols[0], 15, C.lblBg);
         d.box(ML, y, CW, 15);
         mX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
-        d.txt(safe(mn.minute), mX[0]+3, y+11, { b:true, sz:8.5, col:C.red });
+        d.txt(safe(mn.minute), mX[0]+3, y+11, { b:true, sz:8.5, col:C.dark });
         d.txt(safe(mn.type_mandat), mX[1]+3, y+11, { sz:8 });
         d.txt(fd(mn.date_minute), mX[2]+3, y+11, { sz:8.5 });
         d.txt(safe(mn.type_minute), mX[3]+3, y+11, { sz:8 });
@@ -511,7 +505,7 @@ Deno.serve(async (req) => {
           d2.txt(safe(e.utilisateur_email?.split('@')[0]||''), txArr[1]+2, y2+9, { sz:7 });
           d2.txt(safe(e.description||e.mandat||''), txArr[2]+2, y2+9, { sz:7 });
           d2.txt(safe(e.tache||''), txArr[3]+2, y2+9, { sz:7 });
-          d2.txt(e.heures ? `${e.heures}h` : '', txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.red });
+          d2.txt(e.heures ? `${e.heures}h` : '', txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.dark });
         }
         y2 += 12;
       }
