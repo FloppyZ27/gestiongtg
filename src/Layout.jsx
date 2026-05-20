@@ -895,7 +895,7 @@ function LayoutContent({ children, currentPageName }) {
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
                 size="icon"
-                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95"
+                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg transition-transform duration-200 hover:scale-110 active:scale-95 entree-temps-btn"
               >
                 <Timer className="w-5 h-5" style={{color: 'white'}} />
               </Button>

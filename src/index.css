@@ -858,6 +858,12 @@ html.light a[href^="tel:"]:hover {
   -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
 }
 
+/* Icône du bouton entrée de temps (Timer) dans la topbar — noire en light mode */
+html.light button.entree-temps-btn svg {
+  color: hsl(220, 20%, 10%) !important;
+  stroke: hsl(220, 20%, 10%) !important;
+}
+
 /* Bouton collapse de la sidebar — neutre en light mode */
 html.light button.sidebar-collapse-btn {
   background: transparent !important;
