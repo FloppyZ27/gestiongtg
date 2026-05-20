@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
     }
     d.txt('Girard Tremblay Gilbert Inc.', ML + 58, y + 14, { sz:11, col:C.dark });
     d.txt('Arpenteurs-Géomètres', ML + 58, y + 26, { sz:8, col:C.dark });
-    d.txt('FICHE MANDAT', MR, y + 22, { b:true, sz:20, col:C.dark, rgt:true });
+    d.txt('FICHE MANDAT', PW - MR, y + 22, { b:true, sz:20, col:C.dark, rgt:true });
     y += 50;
 
     // ─── Infos principales (date, livraison, type arpentage) ──────────
