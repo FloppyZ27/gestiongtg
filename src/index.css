@@ -746,9 +746,13 @@ html.light [role="dialog"] svg.text-indigo-400 { color: #818cf8 !important; -web
 
 /* Cards transparents en light mode */
 html.light .bg-transparent[class*="Card"],
-html.light [class*="Card"].bg-transparent {
+html.light [class*="Card"].bg-transparent,
+html.light .bg-transparent.border-transparent,
+html.light .bg-transparent.shadow-none {
   background-color: transparent !important;
   background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Icônes des sections (cercles colorés dans les headers de sections) — noires en light mode */
