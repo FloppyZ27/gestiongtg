@@ -858,6 +858,21 @@ html.light a[href^="tel:"]:hover {
   -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
 }
 
+/* Bouton collapse de la sidebar — neutre en light mode */
+html.light button.sidebar-collapse-btn {
+  background: transparent !important;
+  border: 1px solid hsl(220, 15%, 80%) !important;
+  color: hsl(220, 10%, 42%) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+html.light button.sidebar-collapse-btn:hover {
+  background: rgba(100, 116, 139, 0.12) !important;
+  border: 1px solid hsl(220, 15%, 72%) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Sidebar nav buttons dans les fenêtres dossier/mandat — fond toujours transparent */
 button.sidebar-nav-btn {
   background: transparent !important;

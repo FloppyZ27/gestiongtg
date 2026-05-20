@@ -778,7 +778,7 @@ function LayoutContent({ children, currentPageName }) {
               onClick={() => setOpen(!open)}
               variant="ghost"
               size="icon"
-              className="w-full bg-muted hover:bg-muted/80 text-muted-foreground"
+              className="w-full bg-muted hover:bg-muted/80 text-muted-foreground sidebar-collapse-btn"
             >
               {isCollapsed ? (
                 <ChevronRight className="w-4 h-4" />
