@@ -824,6 +824,8 @@ export default function Comptabilite() {
                         onClick={() => setSelectedArpenteur(arp)}
                         className={`arpenteur-tab-btn flex flex-col items-center justify-center py-2.5 px-2 text-xs font-medium transition-all border-b-2 ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
                         style={{
+                          '--arp-color': tabStyle.color,
+                          '--arp-bg': tabStyle.background,
                           color: tabStyle.color,
                           background: tabStyle.background,
                           borderBottomColor: isActive ? tabStyle.color : 'transparent',
