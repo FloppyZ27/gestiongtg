@@ -383,17 +383,23 @@ Deno.serve(async (req) => {
       d.txt(fm(total), pX[3]+3, y+11, { sz:8.5 });
       d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+11, { sz:8 });
       y += 15;
-      // Notes du mandat
-      if (m.notes) {
-        const noteLines = m.notes.match(/.{1,90}/g) || [];
-        for (let ni=0; ni<noteLines.length; ni++) {
-          d.fill(ML, y, CW, 10, rgb(0.99, 0.97, 0.94));
-          d.box(ML, y, CW, 10);
-          if (ni===0) d.txt('Note :', ML+3, y+7.5, { b:true, sz:6.5, col:C.orange });
-          d.txt(noteLines[ni], ML+32, y+7.5, { sz:6.5, col:C.dark });
-          y += 10;
-        }
+      // Notes du mandat (toujours visible)
+      const noteLines = m.notes ? (m.notes.match(/.{1,95}/g) || []) : [];
+      const notesRowH = Math.max(1, noteLines.length) * 14;
+      d.fill(ML, y, CW, notesRowH, rgb(0.99, 0.97, 0.94));
+      d.box(ML, y, CW, notesRowH);
+      const LWN = 45;
+      d.fill(ML, y, LWN, notesRowH, C.lblBg);
+      d.vline(ML + LWN, y, y + notesRowH);
+      d.txt('Notes :', ML+3, y + Math.min(12, notesRowH - 3), { b:true, sz:8, col:C.orange });
+      if (noteLines.length === 0) {
+        // ligne vide
+      } else {
+        noteLines.forEach((l, ni) => {
+          d.txt(l, ML + LWN + 4, y + 11 + ni * 14, { sz:8, col:C.dark });
+        });
       }
+      y += notesRowH;
     }
     // Total row
     d.fill(ML, y, CW, 16, C.lblBg);
