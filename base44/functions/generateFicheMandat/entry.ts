@@ -8,6 +8,25 @@ const safe = t => (t || '').toString();
 const arpInit = a => ({ "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" }[a] || 'XX');
 const mandatAbbr = t => ({ "Certificat de localisation":"CL","Description Technique":"DT","Piquetage":"PIQ","Projet de lotissement":"LOTIS","Implantation":"IMP","OCTR":"OCTR","Levé topographique":"LEVÉ","Bornage":"BORN","Bornage":"BORN" }[t] || t);
 
+// Couleurs PDF pour les badges de mandats
+const getMandatColorForPDF = (type) => {
+  const colors = {
+    "Bornage": rgb(0.8, 0.15, 0.15),
+    "Certificat de localisation": rgb(0.1, 0.6, 0.2),
+    "CPTAQ": rgb(0.8, 0.5, 0.1),
+    "Description Technique": rgb(0.1, 0.4, 0.8),
+    "Dérogation mineure": rgb(0.5, 0.2, 0.7),
+    "Implantation": rgb(0.1, 0.7, 0.7),
+    "Levé topographique": rgb(0.5, 0.7, 0.1),
+    "OCTR": rgb(0.9, 0.4, 0.1),
+    "Piquetage": rgb(0.9, 0.2, 0.5),
+    "Plan montrant": rgb(0.3, 0.3, 0.8),
+    "Projet de lotissement": rgb(0.1, 0.7, 0.6),
+    "Recherches": rgb(0.6, 0.2, 0.7)
+  };
+  return colors[type] || rgb(0.5, 0.5, 0.5);
+};
+
 // ─── Brand colors ─────────────────────────────────────────────────────────
 const C = {
   header:  rgb(0.97, 0.93, 0.90),   // crème pâle — en-tête
@@ -135,19 +154,20 @@ Deno.serve(async (req) => {
     let y = 18;
 
     // ─── Header ───────────────────────────────────────────────────────
-    d.fill(0, y + 44, PW, 3, C.red);
+    d.fill(0, y, PW, 50, C.header);
 
-    // Logo
+    // Logo noir et centré
     if (logoBytes) {
       try {
         const img = await doc.embedPng(logoBytes);
-        p1.drawImage(img, { x:ML, y:PH - (y + 42), width:32, height:36 });
+        const logoW = 40, logoH = 45;
+        const logoX = (PW - logoW) / 2;
+        p1.drawImage(img, { x:logoX, y:PH - (y + 48), width:logoW, height:logoH });
       } catch(_) {}
     }
-    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:C.dark });
-    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:C.dark });
-    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.dark, rgt:true });
-    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:C.dark, rgt:true });
+    d.txt('Girard Tremblay Gilbert Inc.', PW/2, y + 12, { sz:10, col:C.dark, ctr:true });
+    d.txt('Arpenteurs-Géomètres', PW/2, y + 24, { sz:7.5, col:C.dark, ctr:true });
+    d.txt('FICHE MANDAT', PW/2, y + 38, { b:true, sz:20, col:C.dark, ctr:true });
     y += 50;
 
     // ─── Infos principales (date, livraison, type arpentage) ──────────
@@ -159,7 +179,7 @@ Deno.serve(async (req) => {
     d.txt('Date du mandat :', ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     d.txt(fd(dossierData.date_ouverture), ML + 82, y + 12, { sz:8.5 });
     d.txt('Numéro de dossier :', ML + CW * 0.5 + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
-    d.txt(fullNum, ML + CW * 0.5 + 88, y + 12, { b:true, sz:9, col:C.dark });
+    d.txt(fullNum, ML + CW * 0.5 + 88, y + 12, { b:true, sz:9, col:C.primary });
     y += 16;
 
     // Ligne 2: Date de livraison | Statut
@@ -173,11 +193,23 @@ Deno.serve(async (req) => {
     d.txt((dossierData.statut || 'Ouvert').toUpperCase(), ML + CW * 0.5 + 77, y + 12, { b:true, sz:8, col:C.white, ctr:true });
     y += 16;
 
-    // Ligne 3: Type d'arpentage (texte)
+    // Ligne 3: Type d'arpentage (badges de couleur)
     d.box(ML, y, CW, 16);
     d.txt("Type d'arpentage :", ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
-    const mandatTypesText = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean).join('  |  ');
-    d.txt(mandatTypesText, ML + 88, y + 12, { b:true, sz:9, col:C.dark });
+    const mandatTypes = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean);
+    let badgeX = ML + 88;
+    const badgeH = 12;
+    const badgePad = 4;
+    for (let i = 0; i < mandatTypes.length; i++) {
+      const type = mandatTypes[i];
+      const abbr = mandatAbbr(type);
+      const badgeW = fB.widthOfTextAtSize(abbr, 7.5) + badgePad * 2;
+      // Couleur du badge basée sur le type
+      const badgeColor = getMandatColorForPDF(type);
+      d.fill(badgeX, y + 2, badgeW, badgeH, badgeColor);
+      d.txt(abbr, badgeX + badgeW/2, y + 2 + badgeH/2 + 0.5, { b:true, sz:7.5, col:C.white, ctr:true });
+      badgeX += badgeW + 3;
+    }
     y += 16;
 
     // ─── LAYOUT : Gauche 50% = Clients + Localisation | Droite 50% = Carte ───
@@ -237,8 +269,9 @@ Deno.serve(async (req) => {
     halfHdr('CLIENT(S)', y);
     y += 15;
     const c1TelType = client1?.telephones?.[0]?.type_telephone || '';
-    // Ordre: Nom, Téléphone, Type téléphone, Courriel, Adresse, Municipalité, Code postal
-    [['Nom(s) :', c1Name], ['Téléphone :', c1Tel], ['Type :', c1TelType], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
+    const c1TelWithType = c1TelType ? `${c1Tel} (${c1TelType})` : c1Tel;
+    // Ordre: Nom, Téléphone (avec type), Courriel, Adresse, Municipalité, Code postal
+    [['Nom(s) :', c1Name], ['Téléphone :', c1TelWithType], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
       .forEach(([lbl, val]) => { halfRow(lbl, val, y); y += RH; });
     for (let ci=1; ci<(clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
