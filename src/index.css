@@ -536,13 +536,21 @@ html.light [data-radix-select-trigger]:hover {
 }
 
 /* Dropdown / Select menus */
+html.light [role="menu"] {
+  background-color: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 84%) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  border-radius: 10px !important;
+  color: hsl(220, 15%, 12%) !important;
+}
 html.light [role="listbox"],
-html.light [role="menu"],
 html.light [data-radix-select-content],
 html.light [data-radix-popper-content-wrapper] > div {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  background-color: #ffffff !important;
+  border: 1px solid hsl(220, 15%, 84%) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  border-radius: 10px !important;
+  color: hsl(220, 15%, 12%) !important;
 }
 
 html.light [data-radix-dropdown-menu-content] [role="menuitem"]:hover,
