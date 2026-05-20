@@ -1137,9 +1137,9 @@ export default function Lots() {
 
               <div className="flex flex-col" style={{ height: 'calc(100vh - 180px)' }}>
                 {/* Header pleine largeur */}
-                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800">
+                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-2 border-b border-slate-800" style={{ background: 'hsl(220, 13%, 12%)', borderColor: 'hsl(220, 10%, 18%)' }}>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-white">
+                    <h2 className="text-2xl font-bold" style={{ background: 'none', WebkitBackgroundClip: 'unset', backgroundClip: 'unset', WebkitTextFillColor: 'white', color: 'white' }}>
                       {editingLot ? "Modifier lot" : "Nouveau lot"}
                     </h2>
                     {editingLot && (
