@@ -34,13 +34,20 @@ Deno.serve(async (req) => {
     const { dossierData, clientsData, notairesData, courtiersData, entreesTempsData } = await req.json();
     if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
 
-    // Fetch employees to build email → "Prénom Nom" map
+    // Fetch users + employees to build email → "Prénom Nom" map
     let employeMap = {};
+    try {
+      const users = await base44.asServiceRole.entities.User.list();
+      for (const u of (users || [])) {
+        if (u.email) employeMap[u.email] = u.full_name || u.email;
+      }
+    } catch(_) {}
     try {
       const employes = await base44.asServiceRole.entities.Employe.list();
       for (const emp of (employes || [])) {
-        if (emp.compte_utilisateur) employeMap[emp.compte_utilisateur] = `${emp.prenom||''} ${emp.nom||''}`.trim();
-        if (emp.courriel) employeMap[emp.courriel] = `${emp.prenom||''} ${emp.nom||''}`.trim();
+        const nom = `${emp.prenom||''} ${emp.nom||''}`.trim();
+        if (nom && emp.compte_utilisateur) employeMap[emp.compte_utilisateur] = nom;
+        if (nom && emp.courriel) employeMap[emp.courriel] = nom;
       }
     } catch(_) {}
 
@@ -387,8 +394,8 @@ Deno.serve(async (req) => {
       d.txt(fm(total), pX[3]+3, y+11, { sz:8.5 });
       d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+11, { sz:8 });
       y += 15;
-      // Notes du mandat (toujours visible)
-      const mNotes = String(m.notes || '').trim();
+      // Notes du mandat (toujours visible) — field: commentaire_tarification
+      const mNotes = String(m.commentaire_tarification || m.notes || '').trim();
       const noteLines = mNotes.length > 0 ? (mNotes.match(/.{1,90}/g) || [mNotes]) : [];
       const notesRowH = Math.max(1, noteLines.length) * 16 + 4;
       d.fill(ML, y, CW, notesRowH, rgb(0.99, 0.97, 0.94));
