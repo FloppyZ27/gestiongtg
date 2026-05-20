@@ -858,6 +858,32 @@ html.light a[href^="tel:"]:hover {
   -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
 }
 
+/* Sidebar nav buttons dans les fenêtres dossier/mandat — fond toujours transparent */
+button.sidebar-nav-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  padding: 0 !important;
+}
+button.sidebar-nav-btn:hover {
+  background: rgba(100, 116, 139, 0.25) !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+html.light button.sidebar-nav-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+html.light button.sidebar-nav-btn:hover {
+  background: rgba(100, 116, 139, 0.15) !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 /* Icône titre page Lots — toujours rouge/orangé */
 html.light .lots-title-icon,
 html.light svg.lots-title-icon {
