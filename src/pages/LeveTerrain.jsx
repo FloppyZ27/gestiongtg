@@ -128,6 +128,9 @@ export default function LeveTerrain() {
   const [travelSecs, setTravelSecs] = useState(0);
   const [cardStatuts, setCardStatuts] = useState(() => { try { return JSON.parse(localStorage.getItem('terrainCardStatuts') || '{}'); } catch { return {}; } });
   const [deletePhotoConfirm, setDeletePhotoConfirm] = useState(null); // { idx, photoName }
+  const [cameraPhotoCount, setCameraPhotoCount] = useState(0);
+  const [cameraUploading, setCameraUploading] = useState(false);
+  const [cameraFlash, setCameraFlash] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -447,6 +450,8 @@ export default function LeveTerrain() {
   };
 
   const openCamera = async () => {
+    setCameraPhotoCount(0);
+    setCameraUploading(false);
     setShowCamera(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
@@ -532,12 +537,18 @@ export default function LeveTerrain() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
+    // Flash visuel
+    setCameraFlash(true);
+    setTimeout(() => setCameraFlash(false), 200);
+
     canvas.toBlob(async (blob) => {
       if (!blob) return;
+      setCameraUploading(true);
       const fileName = `photo_${format(new Date(), "yyyyMMdd_HHmmss")}.jpg`;
       const file = new File([blob], fileName, { type: 'image/jpeg' });
-      closeCamera();
       await uploadPhoto(file, deviceGPS);
+      setCameraPhotoCount(prev => prev + 1);
+      setCameraUploading(false);
     }, 'image/jpeg', 0.92);
   };
 
@@ -1224,7 +1235,8 @@ export default function LeveTerrain() {
             </div>
 
             {/* Vidéo */}
-            <div className="flex-1 flex items-center justify-center bg-black overflow-hidden">
+            <div className="flex-1 flex items-center justify-center bg-black overflow-hidden relative">
+              {cameraFlash && <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ opacity: 0.8 }} />}
               <video
                 ref={videoRef}
                 autoPlay
@@ -1237,20 +1249,24 @@ export default function LeveTerrain() {
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Boutons */}
-            <div className="flex gap-4 justify-center px-4 py-4 border-t border-slate-700 flex-shrink-0">
+            <div className="flex items-center gap-4 justify-center px-4 py-4 border-t border-slate-700 flex-shrink-0">
               <Button
                 onClick={closeCamera}
                 size="lg"
                 className="bg-slate-700 hover:bg-slate-600 border-none text-white px-8"
               >
-                Annuler
+                {cameraPhotoCount > 0 ? `Terminer (${cameraPhotoCount} photo${cameraPhotoCount > 1 ? 's' : ''})` : 'Annuler'}
               </Button>
               <Button
                 onClick={takeSnapshot}
+                disabled={cameraUploading}
                 size="lg"
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 border-none text-white px-8 disabled:opacity-50"
               >
-                <Camera className="w-5 h-5 mr-2" /> Capturer
+                {cameraUploading
+                  ? <><span className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> Envoi...</>
+                  : <><Camera className="w-5 h-5 mr-2" /> Capturer</>
+                }
               </Button>
             </div>
           </div>
