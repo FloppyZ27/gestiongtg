@@ -1,39 +1,43 @@
 import { PDFDocument, rgb, StandardFonts } from 'npm:pdf-lib@1.17.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const formatDate = d => { if (!d) return '–'; try { return new Date(d + 'T12:00:00').toLocaleDateString('fr-CA'); } catch { return d; } };
-const formatMoney = v => (v != null && v !== '' && Number(v) > 0) ? `${Number(v).toFixed(2)} $` : '–';
-const getArpenteurInitials = a => ({ "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" }[a] || 'XX');
-const safe = t => (t || '–').toString();
+// ─── Helpers ────────────────────────────────────────────────────────────────
+const fd = d => { if (!d) return ''; try { return new Date(d + 'T12:00:00').toLocaleDateString('fr-CA'); } catch { return d || ''; } };
+const fm = v => (v != null && v !== '' && Number(v) > 0) ? `${Number(v).toFixed(2)} $` : '';
+const safe = t => (t || '').toString();
+const arpInit = a => ({ "Samuel Guay":"SG","Dany Gaboury":"DG","Pierre-Luc Pilote":"PLP","Benjamin Larouche":"BL","Frédéric Gilbert":"FG" }[a] || 'XX');
+const mandatAbbr = t => ({ "Certificat de localisation":"CL","Description Technique":"DT","Piquetage":"PIQ","Projet de lotissement":"LOTIS","Implantation":"IMP","OCTR":"OCTR","Levé topographique":"LEVÉ","Bornage":"BORN","Bornage":"BORN" }[t] || t);
 
-// GTG brand colors
-const PRIMARY    = rgb(0.72, 0.12, 0.08);   // rouge vif — en-têtes sections
-const ACCENT     = rgb(0.78, 0.36, 0.10);   // orangé brûlé — en-têtes mandats
-const DARK_HDR   = rgb(0.10, 0.03, 0.03);   // quasi-noir teinté rouge — header page
-const LABEL_BG   = rgb(0.97, 0.91, 0.88);   // crème rosé — colonne labels
-const WHITE      = rgb(1, 1, 1);
-const BORDER     = rgb(0.82, 0.60, 0.52);   // bordure chaude
-const TEXT_DARK  = rgb(0.08, 0.04, 0.04);
-const TEXT_LABEL = rgb(0.50, 0.15, 0.06);
-const STRIPE     = rgb(0.99, 0.95, 0.93);   // fond lignes paires
-const GREEN      = rgb(0.12, 0.58, 0.32);
-const RED_STS    = rgb(0.75, 0.14, 0.14);
+// ─── Brand colors ─────────────────────────────────────────────────────────
+const C = {
+  header:  rgb(0.10, 0.03, 0.03),   // quasi-noir teinté rouge
+  red:     rgb(0.72, 0.12, 0.08),   // rouge GTG — en-têtes sections
+  orange:  rgb(0.78, 0.36, 0.10),   // orangé — sous-titres
+  lblBg:   rgb(0.97, 0.91, 0.88),   // crème rosé — fond labels
+  altBg:   rgb(0.99, 0.95, 0.93),   // fond lignes paires
+  border:  rgb(0.75, 0.50, 0.40),   // bordure chaude
+  dark:    rgb(0.08, 0.04, 0.04),   // texte principal
+  lbl:     rgb(0.45, 0.14, 0.06),   // texte label rouge-orangé
+  white:   rgb(1, 1, 1),
+  green:   rgb(0.12, 0.58, 0.32),
+  redSts:  rgb(0.75, 0.14, 0.14),
+  chkBg:   rgb(0.92, 0.82, 0.77),   // fond checkbox inactif
+};
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 });
-
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { dossierData, clientsData, notairesData, courtiersData } = await req.json();
+    const { dossierData, clientsData, notairesData, courtiersData, entreesTempsData } = await req.json();
     if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
 
-    const arpInitials = getArpenteurInitials(dossierData.arpenteur_geometre);
-    const dossierNum  = dossierData.numero_dossier || '';
-    const fullNum     = dossierNum ? `${arpInitials}-${dossierNum}` : arpInitials;
-    const pdfFileName = `FICHE_DOSSIER_${fullNum}.pdf`;
+    const arpIni  = arpInit(dossierData.arpenteur_geometre);
+    const dNum    = dossierData.numero_dossier || '';
+    const fullNum = dNum ? `${arpIni}-${dNum}` : arpIni;
+    const pdfFileName = `FICHE_MANDAT_${fullNum}.pdf`;
 
     // Logo
     let logoBytes = null;
@@ -42,336 +46,497 @@ Deno.serve(async (req) => {
       if (r.ok) logoBytes = new Uint8Array(await r.arrayBuffer());
     } catch(_) {}
 
-    const pdfDoc  = await PDFDocument.create();
-    const fontB   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const fontR   = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const doc  = await PDFDocument.create();
+    const fB   = await doc.embedFont(StandardFonts.HelveticaBold);
+    const fR   = await doc.embedFont(StandardFonts.Helvetica);
 
+    // ─── Page dimensions ──────────────────────────────────────────────
     const PW = 612, PH = 792;
-    const ML = 28, MR = 28;
-    const CW = PW - ML - MR;   // content width 556
-    const L  = ML, R = PW - MR;
+    const ML = 24, MR = 24;
+    const CW = PW - ML - MR;   // 564
 
-    // label column width (for 2-col form rows)
-    const LW = 130;
-    const VW = CW - LW;
-    // half-width form (2 fields per row)
-    const HCW = CW / 2;
-    const HLW = 90;
-    const HVW = HCW - HLW;
+    // ─── Draw helpers per-page ────────────────────────────────────────
+    const makeDrawers = (pg) => {
+      const py = ty => PH - ty;
+      const fill = (x, ty, w, h, col) =>
+        pg.drawRectangle({ x, y: py(ty + h), width: w, height: h, color: col });
+      const box = (x, ty, w, h, col = C.border, lw = 0.5) =>
+        pg.drawRectangle({ x, y: py(ty + h), width: w, height: h, borderColor: col, borderWidth: lw });
+      const line = (x1, ty, x2, col = C.border) =>
+        pg.drawLine({ start:{x:x1, y:py(ty)}, end:{x:x2, y:py(ty)}, thickness:0.4, color:col });
+      const vline = (x, ty1, ty2, col = C.border) =>
+        pg.drawLine({ start:{x, y:py(ty1)}, end:{x, y:py(ty2)}, thickness:0.4, color:col });
+      const txt = (text, x, ty, opts = {}) => {
+        const font = opts.b ? fB : fR;
+        const sz   = opts.sz || 8;
+        const col  = opts.col || C.dark;
+        let tx = x;
+        if (opts.ctr) tx = x - font.widthOfTextAtSize(text, sz) / 2;
+        if (opts.rgt) tx = x - font.widthOfTextAtSize(text, sz);
+        pg.drawText(text, { x:tx, y:py(ty) - sz * 0.15, font, size:sz, color:col });
+      };
 
-    const pages = [];
-    let pg = null, y = 0;
-    const py = ty => PH - ty;
+      // Section header (full width, filled red)
+      const sHdr = (title, ty, h = 13) => {
+        fill(ML, ty, CW, h, C.red);
+        txt(title, ML + CW/2, ty + h - 2, { b:true, sz:9, col:C.white, ctr:true });
+        return h;
+      };
 
-    const newPage = () => {
-      pg = pdfDoc.addPage([PW, PH]);
-      pages.push(pg);
-      y = 28;
+      // Sub-header (half-width, filled orange)
+      const subHdr = (title, x, ty, w, h = 11) => {
+        fill(x, ty, w, h, C.orange);
+        txt(title, x + w/2, ty + h - 2, { b:true, sz:8, col:C.white, ctr:true });
+      };
+
+      // Checkbox (small square, optionally filled/checked)
+      const chk = (x, ty, checked = false, sz = 7) => {
+        fill(x, ty, sz, sz, checked ? C.orange : C.chkBg);
+        pg.drawRectangle({ x, y:py(ty + sz), width:sz, height:sz, borderColor:C.border, borderWidth:0.6 });
+        if (checked) { fill(x+1.5, ty+1.5, sz-3, sz-3, C.white); }
+      };
+
+      // Label | Value cell (full row height)
+      const lv = (label, value, x, ty, lw, vw, h = 12, alt = false) => {
+        fill(x, ty, lw, h, C.lblBg);
+        if (alt) fill(x + lw, ty, vw, h, C.altBg);
+        pg.drawRectangle({ x, y:py(ty + h), width:lw + vw, height:h, borderColor:C.border, borderWidth:0.4 });
+        vline(x + lw, ty, ty + h);
+        txt(safe(label), x + 3, ty + h - 3.5, { b:true, sz:7, col:C.lbl });
+        txt(safe(value), x + lw + 3, ty + h - 3.5, { sz:7.5, col:C.dark });
+      };
+
+      return { py, fill, box, line, vline, txt, sHdr, subHdr, chk, lv };
     };
 
-    const space = n => { if (y + n > PH - 28) newPage(); };
+    // ══════════════════════════════════════════════════════════════════
+    // PAGE 1 — FICHE MANDAT
+    // ══════════════════════════════════════════════════════════════════
+    const p1 = doc.addPage([PW, PH]);
+    const d  = makeDrawers(p1);
 
-    // Draw filled rectangle
-    const fillRect = (x, ty, w, h, color) =>
-      pg.drawRectangle({ x, y: py(ty + h), width: w, height: h, color });
+    let y = 18;
 
-    // Draw rectangle outline
-    const borderRect = (x, ty, w, h, color = BORDER, lw = 0.5) =>
-      pg.drawRectangle({ x, y: py(ty + h), width: w, height: h, borderColor: color, borderWidth: lw, color: WHITE });
-
-    // Draw text (top-based y)
-    const t = (text, x, ty, opts = {}) => {
-      const font = opts.b ? fontB : fontR;
-      const sz   = opts.sz || 8.5;
-      const col  = opts.col || TEXT_DARK;
-      let tx = x;
-      if (opts.right)  tx = x - font.widthOfTextAtSize(text, sz);
-      if (opts.center) tx = x - font.widthOfTextAtSize(text, sz) / 2;
-      pg.drawText(text, { x: tx, y: py(ty) - sz * 0.15, font, size: sz, color: col });
-    };
-
-    const hline = (ty, x1 = L, x2 = R, col = BORDER) =>
-      pg.drawLine({ start:{x:x1, y:py(ty)}, end:{x:x2, y:py(ty)}, thickness:0.4, color: col });
-
-    const vline = (x, ty1, ty2, col = BORDER) =>
-      pg.drawLine({ start:{x, y:py(ty1)}, end:{x, y:py(ty2)}, thickness:0.4, color: col });
-
-    // ── Section header (rouge vif plein) ────────────────────────────────────────
-    const sectionHead = (title) => {
-      space(18);
-      fillRect(L, y, CW, 17, PRIMARY);
-      t(title, L + 8, y + 12, { b:true, sz:9.5, col:WHITE });
-      y += 17;
-    };
-
-    // ── Mandat header (orangé) ───────────────────────────────────────────────────
-    const mandatHead = (title, badge = '') => {
-      space(18);
-      fillRect(L, y, CW, 16, ACCENT);
-      t(title, L + 8, y + 11.5, { b:true, sz:9, col:WHITE });
-      if (badge) {
-        const bw = fontB.widthOfTextAtSize(badge, 7.5) + 12;
-        fillRect(R - bw - 4, y + 3, bw, 11, DARK_HDR);
-        t(badge, R - bw/2 - 4, y + 10.5, { b:true, sz:7.5, col:rgb(0.95,0.65,0.40), center:true });
-      }
-      y += 16;
-    };
-
-    // ── Sub header (crème rosé + texte rouge) ───────────────────────────────────
-    const subHead = (title) => {
-      space(14);
-      fillRect(L, y, CW, 13, LABEL_BG);
-      pg.drawLine({ start:{x:L, y:py(y)}, end:{x:R, y:py(y)}, thickness:1, color:ACCENT });
-      t(title, L + 8, y + 9.5, { b:true, sz:8, col:TEXT_LABEL });
-      y += 13;
-    };
-
-    // ── Form row: 1 field (label | value) full width ─────────────────────────────
-    const row1 = (label, value, stripe = false) => {
-      space(14);
-      if (stripe) fillRect(L, y, CW, 14, STRIPE);
-      else        fillRect(L, y, CW, 14, WHITE);
-      fillRect(L, y, LW, 14, LABEL_BG);
-      t(safe(label), L + 5, y + 10, { b:true, sz:7.5, col:TEXT_LABEL });
-      t(safe(value), L + LW + 5, y + 10, { sz:8, col:TEXT_DARK });
-      // borders
-      pg.drawRectangle({ x:L, y:py(y+14), width:CW, height:14, borderColor:BORDER, borderWidth:0.4 });
-      vline(L + LW, y, y + 14);
-      y += 14;
-    };
-
-    // ── Form row: 2 fields side by side ─────────────────────────────────────────
-    const row2 = (l1, v1, l2, v2, stripe = false) => {
-      space(14);
-      if (stripe) fillRect(L, y, CW, 14, STRIPE);
-      else        fillRect(L, y, CW, 14, WHITE);
-      // left cell
-      fillRect(L, y, HLW, 14, LABEL_BG);
-      t(safe(l1), L + 5, y + 10, { b:true, sz:7.5, col:TEXT_LABEL });
-      t(safe(v1), L + HLW + 5, y + 10, { sz:8, col:TEXT_DARK });
-      // right cell
-      fillRect(L + HCW, y, HLW, 14, LABEL_BG);
-      t(safe(l2), L + HCW + 5, y + 10, { b:true, sz:7.5, col:TEXT_LABEL });
-      t(safe(v2), L + HCW + HLW + 5, y + 10, { sz:8, col:TEXT_DARK });
-      // borders
-      pg.drawRectangle({ x:L, y:py(y+14), width:CW, height:14, borderColor:BORDER, borderWidth:0.4 });
-      vline(L + HLW,  y, y + 14);
-      vline(L + HCW,  y, y + 14);
-      vline(L + HCW + HLW, y, y + 14);
-      y += 14;
-    };
-
-    // ── Multi-line text row ──────────────────────────────────────────────────────
-    const rowText = (label, text) => {
-      if (!text) return;
-      const maxW  = CW - LW - 10;
-      const words = text.split(' ');
-      const lines = [];
-      let cur = '';
-      for (const w of words) {
-        const test = cur ? cur + ' ' + w : w;
-        if (fontR.widthOfTextAtSize(test, 8) > maxW) { lines.push(cur); cur = w; }
-        else cur = test;
-      }
-      if (cur) lines.push(cur);
-      const rh = Math.max(14, lines.length * 12 + 4);
-      space(rh);
-      fillRect(L, y, CW, rh, WHITE);
-      fillRect(L, y, LW, rh, LABEL_BG);
-      t(safe(label), L + 5, y + 10, { b:true, sz:7.5, col:TEXT_LABEL });
-      lines.forEach((l, i) => t(l, L + LW + 5, y + 10 + i * 12, { sz:8, col:TEXT_DARK }));
-      pg.drawRectangle({ x:L, y:py(y+rh), width:CW, height:rh, borderColor:BORDER, borderWidth:0.4 });
-      vline(L + LW, y, y + rh);
-      y += rh;
-    };
-
-    // ════════════════════════════════════════════════════════════════════
-    // PAGE 1 — EN-TÊTE
-    // ════════════════════════════════════════════════════════════════════
-    newPage();
-
-    // Bande rouge + stripe orangée en bas
-    fillRect(0, 0, PW, 62, DARK_HDR);
-    fillRect(0, 62, PW, 4, PRIMARY);
+    // ─── Header ───────────────────────────────────────────────────────
+    d.fill(0, 0, PW, y + 44, C.header);
+    d.fill(0, y + 44, PW, 3, C.red);
 
     // Logo
     if (logoBytes) {
       try {
-        const img = await pdfDoc.embedPng(logoBytes);
-        pg.drawImage(img, { x: ML, y: py(54), width:36, height:42 });
+        const img = await doc.embedPng(logoBytes);
+        p1.drawImage(img, { x:ML, y:PH - (y + 42), width:32, height:36 });
       } catch(_) {}
     }
+    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:rgb(0.85,0.60,0.42) });
+    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:rgb(0.75,0.48,0.32) });
+    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.white, rgt:true });
+    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:rgb(0.95,0.65,0.40), rgt:true });
+    y += 50;
 
-    // Titre
-    t('FICHE DOSSIER', ML + 46, 26, { b:true, sz:20, col:WHITE });
-    t('Girard Tremblay Gilbert Inc. — Arpenteurs-Géomètres', ML + 46, 46, { sz:8.5, col:rgb(0.82, 0.55, 0.42) });
+    // ─── Infos principales (date, livraison, type arpentage) ──────────
+    const firstMandat = dossierData.mandats?.[0] || {};
 
-    // Bloc numéro dossier (droite)
-    fillRect(R - 148, 6, 146, 28, PRIMARY);
-    t(fullNum, R - 75, 14, { b:true, sz:16, col:WHITE, center:true });
-    t(dossierData.arpenteur_geometre || '', R - 75, 30, { sz:7.5, col:rgb(0.95,0.78,0.72), center:true });
+    // Ligne 1: Date mandat | Numéro dossier
+    d.fill(ML, y, CW, 12, C.altBg);
+    d.box(ML, y, CW, 12);
+    d.vline(ML + CW * 0.5, y, y + 12);
+    d.txt('Date du mandat :', ML + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fd(dossierData.date_ouverture), ML + 75, y + 9, { sz:7.5 });
+    d.txt('Numéro de dossier :', ML + CW * 0.5 + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fullNum, ML + CW * 0.5 + 80, y + 9, { b:true, sz:8, col:C.red });
+    y += 12;
 
-    // Statut
+    // Ligne 2: Date de livraison | Statut
+    d.box(ML, y, CW, 12);
+    d.vline(ML + CW * 0.5, y, y + 12);
+    d.txt('Date de livraison :', ML + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_livraison), ML + 75, y + 9, { sz:7.5 });
+    d.txt('Statut :', ML + CW * 0.5 + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
     const isOpen = dossierData.statut !== 'Fermé';
-    fillRect(R - 148, 38, 146, 16, isOpen ? GREEN : RED_STS);
-    t((dossierData.statut || 'Ouvert').toUpperCase(), R - 75, 48, { b:true, sz:8.5, col:WHITE, center:true });
+    d.fill(ML + CW * 0.5 + 45, y + 2, 55, 9, isOpen ? C.green : C.redSts);
+    d.txt((dossierData.statut || 'Ouvert').toUpperCase(), ML + CW * 0.5 + 72, y + 9, { b:true, sz:7.5, col:C.white, ctr:true });
+    y += 12;
 
-    // Place + TTL
-    fillRect(R - 148, 56, 72, 12, ACCENT);
-    t(dossierData.place_affaire || '–', R - 112, 64, { sz:7.5, col:WHITE, center:true });
-    fillRect(R - 76, 56, 74, 12, dossierData.ttl === 'Oui' ? rgb(0.62,0.18,0.04) : ACCENT);
-    t(dossierData.ttl === 'Oui' ? 'TTL' : 'Non-TTL', R - 39, 64, { b:true, sz:7.5, col:WHITE, center:true });
+    // Ligne 3: Type d'arpentage (checkboxes)
+    d.fill(ML, y, CW, 13, C.altBg);
+    d.box(ML, y, CW, 13);
+    d.txt("Type d'arpentage :", ML + 3, y + 9.5, { b:true, sz:7.5, col:C.lbl });
+    const mandatTypes = (dossierData.mandats || []).map(m => mandatAbbr(m.type_mandat));
+    const typeList = ["CL","DT","PIQ","LOTIS","IMP","OCTR","LEVÉ","BORN"];
+    let tx = ML + 80;
+    for (const type of typeList) {
+      const isChk = mandatTypes.includes(type);
+      d.chk(tx, y + 3, isChk, 8);
+      d.txt(type, tx + 10, y + 9.5, { b:isChk, sz:7.5, col: isChk ? C.red : C.dark });
+      tx += 42;
+    }
+    y += 13;
 
-    y = 80;
+    // ─── SECTION: CLIENT(S) ───────────────────────────────────────────
+    y += 2;
+    y += d.sHdr('CLIENT(S)', y);
+    const client1 = clientsData?.[0];
+    const c1Name  = client1 ? `${client1.prenom || ''} ${client1.nom || ''}`.trim() : '';
+    const c1Tel   = client1?.telephones?.[0]?.telephone || '';
+    const c1Email = client1?.courriels?.[0]?.courriel  || '';
+    const c1Adr   = client1?.adresses?.[0];
+    const c1Rue   = c1Adr ? [(c1Adr.numeros_civiques||[]).filter(Boolean).join(' '), c1Adr.rue].filter(Boolean).join(' ') : '';
+    const c1Ville = c1Adr?.ville || '';
+    const c1CP    = c1Adr?.code_postal || '';
 
-    // ════════════════════════════════════════════════════════════════════
-    // INFORMATIONS GÉNÉRALES
-    // ════════════════════════════════════════════════════════════════════
-    y += 6;
-    sectionHead('INFORMATIONS GÉNÉRALES');
-    row2('Arpenteur-géomètre', dossierData.arpenteur_geometre, 'Place d\'affaire', dossierData.place_affaire, false);
-    row2('Statut', dossierData.statut || 'Ouvert', 'Dossier TTL', dossierData.ttl === 'Oui' ? 'Oui' : 'Non', true);
-    row2('Date d\'ouverture', formatDate(dossierData.date_ouverture), 'Date de fermeture', formatDate(dossierData.date_fermeture), false);
-    y += 8;
-
-    // ════════════════════════════════════════════════════════════════════
-    // CLIENTS
-    // ════════════════════════════════════════════════════════════════════
-    if (clientsData && clientsData.length > 0) {
-      sectionHead(`CLIENTS (${clientsData.length})`);
-      for (let ci = 0; ci < clientsData.length; ci++) {
-        const c = clientsData[ci];
-        if (!c) continue;
-        if (ci > 0) { y += 4; subHead(`Client ${ci + 1}`); }
-        const name  = `${c.prenom || ''} ${c.nom || ''}`.trim();
-        const phone = c.telephones?.find(t => t.actuel)?.telephone || c.telephones?.[0]?.telephone || '–';
-        const email = c.courriels?.find(x => x.actuel)?.courriel  || c.courriels?.[0]?.courriel  || '–';
-        const adr   = c.adresses?.find(a => a.actuelle) || c.adresses?.[0];
-        const addr  = adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(', '), adr.rue, adr.ville, adr.code_postal].filter(Boolean).join(', ') : '–';
-        const prefs = (c.preferences_livraison || []).join(', ') || '–';
-        row2('Nom', name, 'Téléphone', phone, false);
-        row2('Courriel', email, 'Livraison', prefs, true);
-        rowText('Adresse', addr);
-      }
-      y += 8;
+    const LW2 = 55, HW = CW / 2;
+    const clientRows = [
+      ['Nom(s) :', c1Name,    'Téléphone :', c1Tel],
+      ['Adresse :', c1Rue,    'Courriel :', c1Email],
+      ['Municipalité :', c1Ville, 'TTL :', dossierData.ttl === 'Oui' ? 'Oui' : 'Non'],
+      ['Code postal :', c1CP, 'Place d\'affaire :', dossierData.place_affaire || ''],
+    ];
+    for (let i = 0; i < clientRows.length; i++) {
+      const [l1,v1,l2,v2] = clientRows[i];
+      d.fill(ML, y, LW2, 11, C.lblBg);
+      d.fill(ML + LW2, y, HW - LW2, 11, i%2===1 ? C.altBg : C.white);
+      d.fill(ML + HW, y, LW2, 11, C.lblBg);
+      d.fill(ML + HW + LW2, y, HW - LW2, 11, i%2===1 ? C.altBg : C.white);
+      d.box(ML, y, CW, 11);
+      d.vline(ML + LW2, y, y + 11);
+      d.vline(ML + HW, y, y + 11);
+      d.vline(ML + HW + LW2, y, y + 11);
+      d.txt(l1, ML+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(safe(v1), ML+LW2+3, y+8, { sz:7.5 });
+      d.txt(l2, ML+HW+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(safe(v2), ML+HW+LW2+3, y+8, { sz:7.5 });
+      y += 11;
+    }
+    // Clients supplémentaires
+    for (let ci = 1; ci < (clientsData||[]).length; ci++) {
+      const cx = clientsData[ci];
+      const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
+      d.fill(ML, y, LW2, 11, C.lblBg);
+      d.fill(ML+LW2, y, CW-LW2, 11, C.white);
+      d.box(ML, y, CW, 11);
+      d.vline(ML+LW2, y, y+11);
+      d.txt(`Client ${ci+1} :`, ML+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(nm, ML+LW2+3, y+8, { sz:7.5 });
+      y += 11;
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    // INTERVENANTS
-    // ════════════════════════════════════════════════════════════════════
-    const hasN = notairesData && notairesData.length > 0;
-    const hasC = courtiersData && courtiersData.length > 0;
-    if (hasN || hasC) {
-      sectionHead('INTERVENANTS');
-      const drawGroup = (list, label) => {
-        if (!list?.length) return;
-        subHead(label);
-        for (let i = 0; i < list.length; i++) {
-          const p = list[i]; if (!p) continue;
-          const name  = `${p.prenom || ''} ${p.nom || ''}`.trim();
-          const phone = p.telephones?.find(t => t.actuel)?.telephone || p.telephones?.[0]?.telephone || '–';
-          const email = p.courriels?.find(x => x.actuel)?.courriel  || p.courriels?.[0]?.courriel  || '–';
-          row2('Nom', name, 'Téléphone', phone, i % 2 === 0);
-          row1('Courriel', email, i % 2 !== 0);
-        }
-      };
-      drawGroup(notairesData,  'NOTAIRES');
-      drawGroup(courtiersData, 'COURTIERS IMMOBILIERS');
-      y += 8;
+    // ─── SECTION: LOCALISATION DES TRAVAUX + NOTES ───────────────────
+    y += 2;
+    // Split header
+    const locW = CW * 0.55, notW = CW - locW;
+    d.fill(ML, y, locW, 13, C.red);
+    d.txt('LOCALISATION DES TRAVAUX', ML + locW/2, y + 10, { b:true, sz:9, col:C.white, ctr:true });
+    d.fill(ML + locW, y, notW, 13, C.orange);
+    d.txt('NOTES', ML + locW + notW/2, y + 10, { b:true, sz:9, col:C.white, ctr:true });
+    y += 13;
+
+    const adr = firstMandat.adresse_travaux;
+    const addrRue  = firstMandat.adresse_travaux_texte || (adr ? [(adr.numeros_civiques||[]).filter(Boolean).join(' '), adr.rue].filter(Boolean).join(' ') : '');
+    const addrVil  = adr?.ville || '';
+    const addrCP   = adr?.code_postal || '';
+    const lotsStr  = firstMandat.lots_texte || (firstMandat.lots||[]).join(', ') || '';
+    const notesStr = firstMandat.notes || '';
+
+    const locRows = [
+      ['Adresse :', addrRue],
+      ['Municipalité :', addrVil],
+      ['Code postal :', addrCP],
+      ['Lots :', lotsStr],
+    ];
+    const notesH = locRows.length * 11 + 22;
+    // Notes box (right column, spans all loc rows)
+    d.fill(ML + locW, y, notW, notesH, C.white);
+    d.box(ML + locW, y, notW, notesH);
+    // Multi-line notes text
+    const noteLines = notesStr.match(/.{1,40}/g) || [''];
+    noteLines.forEach((l,i) => d.txt(l, ML+locW+4, y+10+i*10, { sz:7, col:C.dark }));
+
+    for (let i = 0; i < locRows.length; i++) {
+      const [lbl,val] = locRows[i];
+      const rh = 11;
+      d.fill(ML, y, LW2, rh, C.lblBg);
+      d.fill(ML+LW2, y, locW-LW2, rh, i%2===1 ? C.altBg : C.white);
+      d.box(ML, y, locW, rh);
+      d.vline(ML+LW2, y, y+rh);
+      d.txt(lbl, ML+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(safe(val), ML+LW2+3, y+8, { sz:7.5 });
+      y += rh;
+    }
+    // Mandat(s) + place d'affaire row
+    d.fill(ML, y, locW, 11, C.altBg);
+    d.box(ML, y, locW, 11);
+    d.txt('Mandat(s) :', ML+3, y+8, { b:true, sz:7, col:C.lbl });
+    d.txt((dossierData.mandats||[]).map(m => m.type_mandat||'').filter(Boolean).join(', '), ML+LW2+3, y+8, { sz:7.5 });
+    y += 11;
+    // Close notes right box
+    const extraH = 11;
+    d.fill(ML + locW, y, notW, extraH, C.white);
+    d.box(ML + locW, y, notW, extraH);
+    y += extraH;
+
+    // ─── SECTION: INTERVENANTS ────────────────────────────────────────
+    y += 2;
+    y += d.sHdr('INTERVENANTS', y);
+    const drawPerson = (label, person, ty, alt) => {
+      const nm  = person ? `${person.prenom||''} ${person.nom||''}`.trim() : '';
+      const tel = person?.telephones?.[0]?.telephone || '';
+      const em  = person?.courriels?.[0]?.courriel  || '';
+      const LW3 = 50, PW2 = CW/3;
+      d.fill(ML, ty, LW3, 11, C.lblBg);
+      if (alt) d.fill(ML+LW3, ty, PW2-LW3, 11, C.altBg);
+      d.box(ML, ty, CW, 11);
+      d.vline(ML+LW3, ty, ty+11);
+      d.vline(ML+PW2, ty, ty+11);
+      d.vline(ML+PW2*2, ty, ty+11);
+      d.txt(label, ML+3, ty+8, { b:true, sz:7, col:C.lbl });
+      d.txt(nm, ML+LW3+3, ty+8, { sz:7.5 });
+      d.txt(tel, ML+PW2+3, ty+8, { sz:7.5 });
+      d.txt(em, ML+PW2*2+3, ty+8, { sz:7.5 });
+    };
+    // Header row
+    d.fill(ML, y, CW, 10, C.lblBg);
+    d.box(ML, y, CW, 10);
+    d.vline(ML+50, y, y+10);
+    d.vline(ML+CW/3, y, y+10);
+    d.vline(ML+CW/3*2, y, y+10);
+    d.txt('Intervenant', ML+3, y+7.5, { b:true, sz:7, col:C.lbl });
+    d.txt('Nom', ML+55, y+7.5, { b:true, sz:7, col:C.lbl });
+    d.txt('Téléphone', ML+CW/3+3, y+7.5, { b:true, sz:7, col:C.lbl });
+    d.txt('Courriel', ML+CW/3*2+3, y+7.5, { b:true, sz:7, col:C.lbl });
+    y += 10;
+    for (let i=0; i<Math.max(1,(notairesData||[]).length); i++) {
+      drawPerson(`Notaire${i>0?' '+(i+1):''}`, notairesData?.[i], y, i%2===0);
+      y += 11;
+    }
+    for (let i=0; i<Math.max(1,(courtiersData||[]).length); i++) {
+      drawPerson(`Courtier${i>0?' '+(i+1):''}`, courtiersData?.[i], y, i%2===0);
+      y += 11;
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    // MANDATS
-    // ════════════════════════════════════════════════════════════════════
+    // ─── SECTION: LIVRAISON ───────────────────────────────────────────
+    y += 2;
+    y += d.sHdr('LIVRAISON', y);
+
+    // Date de signature
+    d.fill(ML, y, CW, 11, C.altBg);
+    d.box(ML, y, CW, 11);
+    d.txt('Date de signature :', ML+3, y+8, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_signature), ML+70, y+8, { sz:7.5 });
+    d.txt('Début des travaux :', ML+CW/2+3, y+8, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_debut_travaux), ML+CW/2+72, y+8, { sz:7.5 });
+    d.vline(ML+CW/2, y, y+11);
+    y += 11;
+
+    // Livraison preferences per client
+    const livCols = [CW*0.22, CW*0.26, CW*0.26, CW*0.26];
+    const colX = [ML, ML+livCols[0], ML+livCols[0]+livCols[1], ML+livCols[0]+livCols[1]+livCols[2]];
+    // Header row for livraison
+    d.fill(ML, y, CW, 10, C.lblBg);
+    d.box(ML, y, CW, 10);
+    ['Destinataire','Préférences de livraison','Adresse courriel','Mode de facturation'].forEach((h,i) => {
+      d.txt(h, colX[i]+3, y+7.5, { b:true, sz:6.5, col:C.lbl });
+      if (i>0) d.vline(colX[i], y, y+10);
+    });
+    y += 10;
+    const allPersons = [
+      ...(clientsData||[]).map((c,i)=>({ label:i===0?'Client':`Client ${i+1}`, person:c })),
+      ...(notairesData||[]).map((n,i)=>({ label:i===0?'Notaire':`Notaire ${i+1}`, person:n })),
+      ...(courtiersData||[]).map((c,i)=>({ label:i===0?'Courtier':`Courtier ${i+1}`, person:c })),
+    ];
+    for (let i=0; i<allPersons.length; i++) {
+      const { label, person } = allPersons[i];
+      const prefs = (person?.preferences_livraison||[]).join(', ');
+      const em = person?.courriels?.[0]?.courriel||'';
+      d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
+      d.fill(ML, y, livCols[0], 11, C.lblBg);
+      d.box(ML, y, CW, 11);
+      colX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
+      d.txt(label, colX[0]+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(prefs, colX[1]+3, y+8, { sz:7 });
+      d.txt(em, colX[2]+3, y+8, { sz:7 });
+      y += 11;
+    }
+
+    // ─── SECTION: PRIX ────────────────────────────────────────────────
+    y += 2;
+    y += d.sHdr('PRIX', y);
+
     const mandats = dossierData.mandats || [];
-    if (mandats.length > 0) {
-      sectionHead(`MANDATS (${mandats.length})`);
-      for (let mi = 0; mi < mandats.length; mi++) {
-        const m = mandats[mi]; if (!m) continue;
-        if (mi > 0) { y += 6; }
+    // Table header
+    const pCols = [CW*0.35, CW*0.18, CW*0.15, CW*0.15, CW*0.17];
+    const pX    = [ML, ML+pCols[0], ML+pCols[0]+pCols[1], ML+pCols[0]+pCols[1]+pCols[2], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3]];
+    d.fill(ML, y, CW, 10, C.lblBg);
+    d.box(ML, y, CW, 10);
+    ['Opération','Prix estimé','Rabais','Total HT','Taxes'].forEach((h,i) => {
+      d.txt(h, pX[i]+3, y+7.5, { b:true, sz:7, col:C.lbl });
+      if(i>0) d.vline(pX[i], y, y+10);
+    });
+    y += 10;
+    let grandTotal = 0;
+    for (let i=0; i<mandats.length; i++) {
+      const m = mandats[i];
+      const prix  = Number(m.prix_estime)||0;
+      const rab   = Number(m.rabais)||0;
+      const total = prix - rab;
+      grandTotal += total;
+      d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
+      d.fill(ML, y, pCols[0], 11, C.lblBg);
+      d.box(ML, y, CW, 11);
+      pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
+      d.txt(m.type_mandat||`Mandat ${i+1}`, pX[0]+3, y+8, { b:true, sz:7, col:C.lbl });
+      d.txt(fm(prix),  pX[1]+3, y+8, { sz:7.5 });
+      d.txt(fm(rab),   pX[2]+3, y+8, { sz:7.5 });
+      d.txt(fm(total), pX[3]+3, y+8, { sz:7.5 });
+      d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+8, { sz:7 });
+      y += 11;
+    }
+    // Total row
+    d.fill(ML, y, CW, 12, C.lblBg);
+    d.box(ML, y, CW, 12);
+    pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+12); });
+    d.txt('TOTAL', pX[3]+3, y+9, { b:true, sz:8, col:C.red, rgt:false });
+    d.txt(fm(grandTotal), pX[3]+3, y+9, { b:true, sz:8, col:C.red });
+    y += 12;
 
-        mandatHead(`${mi + 1}. ${m.type_mandat || 'Mandat'}`, m.tache_actuelle || '');
-
-        // Infos de base
-        row2('Tâche actuelle',    m.tache_actuelle,    'Utilisateur assigné', m.utilisateur_assigne, false);
-        row2('Date d\'ouverture', formatDate(m.date_ouverture), 'Date de livraison', formatDate(m.date_livraison), true);
-        row2('Date de signature', formatDate(m.date_signature), 'Début des travaux', formatDate(m.date_debut_travaux), false);
-
-        // Adresse des travaux
-        const addr = m.adresse_travaux;
-        const addrStr = m.adresse_travaux_texte || (addr ? [(addr.numeros_civiques||[]).filter(Boolean).join(', '), addr.rue, addr.ville, addr.code_postal].filter(Boolean).join(', ') : null);
-        rowText('Adresse des travaux', addrStr);
-
-        // Lots
-        const lotsStr = m.lots_texte || (m.lots || []).join(', ') || null;
-        row1('Lots', lotsStr || '–', true);
-
-        // Tarification
-        subHead('TARIFICATION');
-        const total = (Number(m.prix_estime) || 0) - (Number(m.rabais) || 0);
-        row2('Prix estimé', formatMoney(m.prix_estime), 'Rabais', formatMoney(m.rabais), false);
-        row2('Total HT', total > 0 ? `${total.toFixed(2)} $` : '–', 'Taxes incluses', m.taxes_incluses ? 'Oui' : 'Non', true);
-        row1('Prix convenu', m.prix_convenu ? 'Oui' : 'Non', false);
-
-        // Minutes
-        const minutes = m.minutes_list?.length ? m.minutes_list : (m.minute ? [{minute:m.minute, date_minute:m.date_minute, type_minute:m.type_minute}] : []);
-        if (minutes.length > 0) {
-          subHead('MINUTES');
-          // Table header
-          space(14);
-          fillRect(L, y, CW, 13, LABEL_BG);
-          pg.drawRectangle({ x:L, y:py(y+13), width:CW, height:13, borderColor:BORDER, borderWidth:0.4 });
-          const colW = [CW * 0.40, CW * 0.32, CW * 0.28];
-          let mx = L;
-          for (const [h, cw] of [['N° Minute', colW[0]], ['Date', colW[1]], ['Type', colW[2]]]) {
-            t(h, mx + 5, y + 9.5, { b:true, sz:7.5, col:TEXT_LABEL });
-            vline(mx + cw, y, y + 13);
-            mx += cw;
-          }
-          y += 13;
-          for (let ki = 0; ki < minutes.length; ki++) {
-            const min = minutes[ki];
-            space(13);
-            if (ki % 2 === 1) fillRect(L, y, CW, 13, STRIPE);
-            pg.drawRectangle({ x:L, y:py(y+13), width:CW, height:13, borderColor:BORDER, borderWidth:0.4 });
-            mx = L;
-            for (const [val, cw] of [[safe(min.minute), colW[0]], [formatDate(min.date_minute), colW[1]], [safe(min.type_minute), colW[2]]]) {
-              t(val, mx + 5, y + 9.5, { sz:8, col:TEXT_DARK });
-              vline(mx + cw, y, y + 13);
-              mx += cw;
-            }
-            y += 13;
-          }
-        }
-
-        // Notes
-        if (m.notes) {
-          subHead('NOTES');
-          rowText('', m.notes);
-        }
+    // ─── SECTION: MINUTES ─────────────────────────────────────────────
+    const allMinutes = mandats.flatMap(m => {
+      const list = m.minutes_list?.length ? m.minutes_list : (m.minute ? [{minute:m.minute, date_minute:m.date_minute, type_minute:m.type_minute}] : []);
+      return list.map(mn => ({ ...mn, type_mandat: m.type_mandat }));
+    });
+    if (allMinutes.length > 0) {
+      y += 2;
+      y += d.sHdr('MINUTES', y);
+      const mCols = [CW*0.25, CW*0.28, CW*0.22, CW*0.25];
+      const mX    = [ML, ML+mCols[0], ML+mCols[0]+mCols[1], ML+mCols[0]+mCols[1]+mCols[2]];
+      d.fill(ML, y, CW, 10, C.lblBg);
+      d.box(ML, y, CW, 10);
+      ['Numéro','Mandat','Date','Type'].forEach((h,i) => {
+        d.txt(h, mX[i]+3, y+7.5, { b:true, sz:7, col:C.lbl });
+        if(i>0) d.vline(mX[i], y, y+10);
+      });
+      y += 10;
+      for (let i=0; i<allMinutes.length; i++) {
+        const mn = allMinutes[i];
+        d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
+        d.fill(ML, y, mCols[0], 11, C.lblBg);
+        d.box(ML, y, CW, 11);
+        mX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
+        d.txt(safe(mn.minute), mX[0]+3, y+8, { b:true, sz:7.5, col:C.red });
+        d.txt(safe(mn.type_mandat), mX[1]+3, y+8, { sz:7 });
+        d.txt(fd(mn.date_minute), mX[2]+3, y+8, { sz:7.5 });
+        d.txt(safe(mn.type_minute), mX[3]+3, y+8, { sz:7 });
+        y += 11;
       }
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    // PIED DE PAGE
-    // ════════════════════════════════════════════════════════════════════
-    for (let pi = 0; pi < pages.length; pi++) {
-      pg = pages[pi];
-      pg.drawRectangle({ x:0, y:0, width:PW, height:18, color:DARK_HDR });
-      pg.drawRectangle({ x:0, y:18, width:PW, height:3, color:PRIMARY });
-      pg.drawText(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, { x:ML, y:5, font:fontR, size:7, color:rgb(0.82,0.52,0.38) });
-      const pgTxt = `Page ${pi+1} / ${pages.length}`;
-      pg.drawText(pgTxt, { x: R - fontR.widthOfTextAtSize(pgTxt, 7), y:5, font:fontR, size:7, color:rgb(0.82,0.52,0.38) });
+    // ─── SECTION: FERMETURE ───────────────────────────────────────────
+    y += 2;
+    y += d.sHdr('FERMETURE', y);
+    d.fill(ML, y, CW, 12, C.altBg);
+    d.box(ML, y, CW, 12);
+    d.vline(ML+CW/2, y, y+12);
+    d.txt('Date de fermeture :', ML+3, y+9, { b:true, sz:7.5, col:C.lbl });
+    d.txt(fd(dossierData.date_fermeture), ML+75, y+9, { sz:7.5 });
+    d.txt('Arpenteur-géomètre :', ML+CW/2+3, y+9, { b:true, sz:7.5, col:C.lbl });
+    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+78, y+9, { sz:7.5 });
+    y += 12;
+
+    // ─── Footer p1 ────────────────────────────────────────────────────
+    d.fill(0, PH-18, PW, 18, C.header);
+    d.fill(0, PH-21, PW, 3, C.red);
+    d.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:rgb(0.82,0.52,0.38) });
+    d.txt('Page 1 / 2', PW-MR, PH-12, { sz:7, col:rgb(0.82,0.52,0.38), rgt:true });
+
+    // ══════════════════════════════════════════════════════════════════
+    // PAGE 2 — TEMPS
+    // ══════════════════════════════════════════════════════════════════
+    const p2 = doc.addPage([PW, PH]);
+    const d2 = makeDrawers(p2);
+    let y2 = 18;
+
+    // Header
+    d2.fill(0, 0, PW, y2 + 22, C.header);
+    d2.fill(0, y2 + 22, PW, 3, C.red);
+    if (logoBytes) {
+      try {
+        const img = await doc.embedPng(logoBytes);
+        p2.drawImage(img, { x:ML, y:PH-(y2+20), width:22, height:24 });
+      } catch(_) {}
+    }
+    d2.txt('Girard Tremblay Gilbert Inc. — TEMPS', ML+32, y2+18, { sz:9, col:rgb(0.82,0.52,0.38) });
+    d2.txt(fullNum, PW-MR, y2+18, { b:true, sz:10, col:rgb(0.95,0.65,0.40), rgt:true });
+    y2 += 28;
+
+    // Columns: DATE | EMPLOYE(S) | DESCRIPTION | TACHE | TEMPS
+    const tCols = [CW*0.14, CW*0.22, CW*0.38, CW*0.14, CW*0.12];
+    const tX    = [ML];
+    tCols.forEach((w,i) => { if(i>0) tX.push(tX[i-1]+tCols[i-1]); else tX.push(ML); });
+    tX.shift(); // remove duplicate
+    // Recalc
+    const txArr = [ML, ML+tCols[0], ML+tCols[0]+tCols[1], ML+tCols[0]+tCols[1]+tCols[2], ML+tCols[0]+tCols[1]+tCols[2]+tCols[3]];
+
+    // Main header
+    y2 += d2.sHdr('ENTRÉES DE TEMPS', y2);
+    d2.fill(ML, y2, CW, 12, C.lblBg);
+    d2.box(ML, y2, CW, 12);
+    ['Date','Employé(s)','Description','Tâche','Heures'].forEach((h,i) => {
+      d2.txt(h, txArr[i]+3, y2+9, { b:true, sz:7.5, col:C.lbl });
+      if(i>0) d2.vline(txArr[i], y2, y2+12);
+    });
+    y2 += 12;
+
+    const sections2 = [
+      { label:'PLANIFICATION', taches:['Ouverture','Montage','Compilation','Décision/Calcul','Analyse'] },
+      { label:'TERRAIN', taches:['Terrain','Cédule'] },
+      { label:'RECHERCHES ET ANALYSE FONCIÈRE', taches:['Recherches','Mise en plan','Reliage'] },
+      { label:'TRAITEMENT ET DESSIN / RAPPORT', taches:['Rapport','Vérification','Facturer'] },
+    ];
+
+    const entreesTemps = entreesTempsData || [];
+
+    for (const section of sections2) {
+      // Section sub-header
+      d2.fill(ML, y2, CW, 11, C.orange);
+      d2.box(ML, y2, CW, 11);
+      d2.txt(section.label, ML+4, y2+8.5, { b:true, sz:8, col:C.white });
+      y2 += 11;
+
+      const sectionEntrees = entreesTemps.filter(e => section.taches.includes(e.tache));
+      const rows = Math.max(3, sectionEntrees.length + 1);
+
+      for (let ri=0; ri<rows; ri++) {
+        const e = sectionEntrees[ri];
+        d2.fill(ML, y2, CW, 12, ri%2===1?C.altBg:C.white);
+        d2.fill(ML, y2, tCols[0], 12, C.lblBg);
+        d2.box(ML, y2, CW, 12);
+        txArr.forEach((x,ci) => { if(ci>0) d2.vline(x, y2, y2+12); });
+        if (e) {
+          d2.txt(fd(e.date), txArr[0]+2, y2+9, { sz:7 });
+          d2.txt(safe(e.utilisateur_email?.split('@')[0]||''), txArr[1]+2, y2+9, { sz:7 });
+          d2.txt(safe(e.description||e.mandat||''), txArr[2]+2, y2+9, { sz:7 });
+          d2.txt(safe(e.tache||''), txArr[3]+2, y2+9, { sz:7 });
+          d2.txt(e.heures ? `${e.heures}h` : '', txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.red });
+        }
+        y2 += 12;
+      }
     }
 
-    const pdfBytes = await pdfDoc.save();
+    // Footer p2
+    d2.fill(0, PH-18, PW, 18, C.header);
+    d2.fill(0, PH-21, PW, 3, C.red);
+    d2.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:rgb(0.82,0.52,0.38) });
+    d2.txt('Page 2 / 2', PW-MR, PH-12, { sz:7, col:rgb(0.82,0.52,0.38), rgt:true });
+
+    // ─── Serialize ────────────────────────────────────────────────────
+    const pdfBytes = await doc.save();
     let b64 = '';
-    for (let i = 0; i < pdfBytes.length; i += 8192) b64 += String.fromCharCode(...pdfBytes.subarray(i, i + 8192));
+    for (let i=0; i<pdfBytes.length; i+=8192) b64 += String.fromCharCode(...pdfBytes.subarray(i, i+8192));
     b64 = btoa(b64);
     return Response.json({ success:true, fileName:pdfFileName, pdf:`data:application/pdf;base64,${b64}` });
 
   } catch (error) {
-    console.error('Erreur generateFicheMandat:', error);
+    console.error('generateFicheMandat error:', error);
     return Response.json({ error: error.message || 'Erreur serveur' }, { status:500 });
   }
 });

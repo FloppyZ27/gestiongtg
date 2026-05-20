@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, X, Download, Printer, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function FicheMandatButton({ formData, clients, editingDossier }) {
+export default function FicheMandatButton({ formData, clients, editingDossier, entreesTemps }) {
   const [loading, setLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfData, setPdfData] = useState(null);
@@ -22,6 +22,7 @@ export default function FicheMandatButton({ formData, clients, editingDossier })
       clientsData,
       notairesData,
       courtiersData,
+      entreesTempsData: entreesTemps || [],
     });
     setLoading(false);
 

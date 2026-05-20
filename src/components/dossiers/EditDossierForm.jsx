@@ -434,7 +434,7 @@ export default function EditDossierForm({
       {/* Header sur toute la largeur */}
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
         <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
-        <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} />
+        <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} entreesTemps={entreesTemps} />
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
             <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
