@@ -190,14 +190,17 @@ export default function TableauDeBord() {
     
     if (!arpenteurAttendu || d.arpenteur_geometre !== arpenteurAttendu) return false;
     
-    // Vérifier qu'au moins un mandat est en retard (pas de date de livraison OU date antérieure à aujourd'hui)
-    // Exclure les dates dans le futur
-    const hasMandatEnRetard = d.mandats?.some(m => {
-      if (!m.date_livraison) return true; // Pas de date = en retard
-      const dateLivraison = new Date(m.date_livraison);
-      return dateLivraison < today; // Seulement les dates passées
-    });
-    return hasMandatEnRetard;
+    // Trouver la date de livraison la plus proche parmi tous les mandats
+    const mandatsAvecDate = d.mandats?.filter(m => m.date_livraison) || [];
+    if (mandatsAvecDate.length === 0) return false;
+    
+    const plusProcheDate = mandatsAvecDate.reduce((min, m) => {
+      const date = new Date(m.date_livraison);
+      return date < min ? date : min;
+    }, new Date(mandatsAvecDate[0].date_livraison));
+    
+    // Inclure seulement si la date la plus proche est dans le passé
+    return plusProcheDate < today;
   }).sort((a, b) => {
     const minDateA = Math.min(...a.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
     const minDateB = Math.min(...b.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
