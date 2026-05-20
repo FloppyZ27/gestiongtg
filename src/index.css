@@ -775,6 +775,18 @@ html.light button[data-statut-color="red"] {
   -webkit-text-fill-color: #ef4444 !important;
 }
 
+/* Liens courriel clicables en light mode */
+html.light a[href^="mailto:"] {
+  color: hsl(220, 80%, 50%) !important;
+  -webkit-text-fill-color: hsl(220, 80%, 50%) !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+html.light a[href^="mailto:"]:hover {
+  color: hsl(220, 80%, 40%) !important;
+  -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
+}
+
 /* Liens téléphone clicables en light mode */
 html.light a[href^="tel:"] {
   color: hsl(220, 80%, 50%) !important;
