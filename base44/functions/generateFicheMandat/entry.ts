@@ -29,7 +29,7 @@ const getMandatColorForPDF = (type) => {
 
 // ─── Brand colors ─────────────────────────────────────────────────────────
 const C = {
-  header:  rgb(0.97, 0.93, 0.90),   // crème pâle — en-tête
+  header:  rgb(0.92, 0.92, 0.92),   // gris — en-tête
   red:     rgb(0.72, 0.12, 0.08),   // rouge GTG — en-têtes sections
   orange:  rgb(0.78, 0.36, 0.10),   // orangé — sous-titres
   lblBg:   rgb(0.97, 0.91, 0.88),   // crème rosé — fond labels
