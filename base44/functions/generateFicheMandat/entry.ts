@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
     // ── CLIENT(S) ──
     halfHdr('CLIENT(S)', y);
     y += 15;
-    const c1TelType = client1?.telephones?.[0]?.type_telephone || '';
+    const c1TelType = client1?.telephones?.[0]?.type || client1?.telephones?.[0]?.type_telephone || '';
     const c1TelWithType = c1TelType ? `${c1Tel} (${c1TelType})` : c1Tel;
     // Ordre: Nom, Téléphone (avec type), Courriel, Adresse, Municipalité, Code postal
     [['Nom(s) :', c1Name], ['Téléphone :', c1TelWithType], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
       const cx = clientsData[ci];
       const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
       const cxTel = cx?.telephones?.[0]?.telephone || '';
-      const cxTelType = cx?.telephones?.[0]?.type_telephone || '';
+      const cxTelType = cx?.telephones?.[0]?.type || cx?.telephones?.[0]?.type_telephone || '';
       const cxTelWithType = cxTelType ? `${cxTel} (${cxTelType})` : cxTel;
       const cxEmail = cx?.courriels?.[0]?.courriel || '';
       const cxAdr = cx?.adresses?.[0];
