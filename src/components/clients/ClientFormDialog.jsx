@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
+import HistoriquePanel from "@/components/mandat/HistoriquePanel";
 import ClientDossiersSection from "./ClientDossiersSection";
 import AddressSearchInput from "@/components/shared/AddressSearchInput";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1610,46 +1611,11 @@ export default function ClientFormDialog({
                 />
               </TabsContent>
 
-              <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
-                {editingClient && actionLogs.length > 0 ? (
-                  <div className="space-y-2">
-                    {actionLogs.map((entry, idx) => {
-                      const userObj = allUsers.find(u => u.email === entry.utilisateur_email);
-                      const photo = userObj?.photo_url || null;
-                      const initials = entry.utilisateur_nom ? entry.utilisateur_nom.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
-                      return (
-                        <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                          <div className="flex flex-col gap-1.5">
-                            <p className="text-white text-sm font-medium">{entry.action}</p>
-                            {entry.details && (
-                              <p className="text-slate-400 text-xs break-words">{entry.details}</p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-emerald-500/20 flex items-center justify-center">
-                                {photo ? (
-                                  <img src={photo} alt={entry.utilisateur_nom} className="w-full h-full object-cover" />
-                                ) : (
-                                  <span className="text-[9px] font-semibold text-emerald-400">{initials}</span>
-                                )}
-                              </div>
-                              <span className="text-emerald-400 text-xs">{entry.utilisateur_nom}</span>
-                              <span className="text-slate-600 text-xs">•</span>
-                              <span className="text-slate-500 text-xs">{format(new Date(entry.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-center">
-                    <div>
-                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p className="text-slate-500">Aucune action enregistrée</p>
-                      <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                    </div>
-                  </div>
-                )}
+              <TabsContent value="historique" className="flex-1 overflow-hidden p-4 mt-0">
+                <HistoriquePanel
+                  historique={actionLogs.map(e => ({ ...e, date: e.created_date }))}
+                  users={allUsers}
+                />
               </TabsContent>
               </Tabs>
               )}
