@@ -34,6 +34,16 @@ Deno.serve(async (req) => {
     const { dossierData, clientsData, notairesData, courtiersData, entreesTempsData } = await req.json();
     if (!dossierData) return Response.json({ error: 'Missing dossier data' }, { status: 400 });
 
+    // Fetch employees to build email → "Prénom Nom" map
+    let employeMap = {};
+    try {
+      const employes = await base44.asServiceRole.entities.Employe.list();
+      for (const emp of (employes || [])) {
+        if (emp.compte_utilisateur) employeMap[emp.compte_utilisateur] = `${emp.prenom||''} ${emp.nom||''}`.trim();
+        if (emp.courriel) employeMap[emp.courriel] = `${emp.prenom||''} ${emp.nom||''}`.trim();
+      }
+    } catch(_) {}
+
     const arpIni  = arpInit(dossierData.arpenteur_geometre);
     const dNum    = dossierData.numero_dossier || '';
     const fullNum = dNum ? `${arpIni}-${dNum}` : arpIni;
@@ -378,21 +388,18 @@ Deno.serve(async (req) => {
       d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+11, { sz:8 });
       y += 15;
       // Notes du mandat (toujours visible)
-      const noteLines = m.notes ? (m.notes.match(/.{1,95}/g) || []) : [];
-      const notesRowH = Math.max(1, noteLines.length) * 14;
+      const mNotes = String(m.notes || '').trim();
+      const noteLines = mNotes.length > 0 ? (mNotes.match(/.{1,90}/g) || [mNotes]) : [];
+      const notesRowH = Math.max(1, noteLines.length) * 16 + 4;
       d.fill(ML, y, CW, notesRowH, rgb(0.99, 0.97, 0.94));
       d.box(ML, y, CW, notesRowH);
-      const LWN = 45;
+      const LWN = 50;
       d.fill(ML, y, LWN, notesRowH, C.lblBg);
       d.vline(ML + LWN, y, y + notesRowH);
-      d.txt('Notes :', ML+3, y + Math.min(12, notesRowH - 3), { b:true, sz:8, col:C.dark });
-      if (noteLines.length === 0) {
-        // ligne vide
-      } else {
-        noteLines.forEach((l, ni) => {
-          d.txt(l, ML + LWN + 4, y + 11 + ni * 14, { sz:8, col:C.dark });
-        });
-      }
+      d.txt('Notes :', ML + 3, y + 14, { b:true, sz:8, col:C.dark });
+      noteLines.forEach((l, ni) => {
+        d.txt(l, ML + LWN + 5, y + 14 + ni * 16, { sz:8, col:C.dark });
+      });
       y += notesRowH;
     }
     // Total row
@@ -502,7 +509,8 @@ Deno.serve(async (req) => {
         txArr.forEach((x,ci) => { if(ci>0) d2.vline(x, y2, y2+12); });
         if (e) {
           d2.txt(fd(e.date), txArr[0]+2, y2+9, { sz:7 });
-          d2.txt(safe(e.utilisateur_email?.split('@')[0]||''), txArr[1]+2, y2+9, { sz:7 });
+          const empName = employeMap[e.utilisateur_email] || e.utilisateur_email?.split('@')[0] || '';
+          d2.txt(safe(empName), txArr[1]+2, y2+9, { sz:7 });
           d2.txt(safe(e.description||e.mandat||''), txArr[2]+2, y2+9, { sz:7 });
           d2.txt(safe(e.tache||''), txArr[3]+2, y2+9, { sz:7 });
           d2.txt(e.heures ? `${e.heures}h` : '', txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.dark });
