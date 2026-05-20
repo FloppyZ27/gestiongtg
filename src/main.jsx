@@ -1,5 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+
+// Unregister stale service workers in dev to prevent caching old React copies
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((sw) => sw.unregister());
+  });
+  caches.keys().then((keys) => {
+    keys.forEach((key) => caches.delete(key));
+  });
+}
 import App from '@/App.jsx'
 import '@/index.css'
 
