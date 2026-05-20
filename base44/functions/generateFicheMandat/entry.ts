@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     // Logo
     let logoBytes = null;
     try {
-      const r = await fetch('https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png');
+      const r = await fetch('https://media.base44.com/images/public/69033e618d595dd20c703c3b/76c35d10f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png');
       if (r.ok) logoBytes = new Uint8Array(await r.arrayBuffer());
     } catch(_) {}
 
