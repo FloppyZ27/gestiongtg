@@ -190,9 +190,9 @@ export default function TableauDeBord() {
     
     if (!arpenteurAttendu || d.arpenteur_geometre !== arpenteurAttendu) return false;
     
-    // Vérifier qu'au moins un mandat a une date de livraison antérieure à aujourd'hui
+    // Vérifier qu'au moins un mandat est en retard (pas de date de livraison OU date antérieure à aujourd'hui)
     const hasMandatEnRetard = d.mandats?.some(m => {
-      if (!m.date_livraison) return false;
+      if (!m.date_livraison) return true; // Pas de date = en retard
       const dateLivraison = new Date(m.date_livraison);
       return dateLivraison < today;
     });
