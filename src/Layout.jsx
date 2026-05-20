@@ -43,61 +43,52 @@ import GlobalDossierEditDialog from "@/components/shared/GlobalDossierEditDialog
 import EntreeTempsDialog from "@/components/shared/EntreeTempsDialog";
 import UnsavedWarningDialog from "@/components/shared/UnsavedWarningDialog";
 
-const navigationItems = [
+const navigationCategories = [
   {
-    title: "Tableau de Bord",
-    url: createPageUrl("TableauDeBord"),
-    icon: BarChart3,
+    title: "Utilisateur",
+    items: [
+      { title: "Tableau de Bord", url: createPageUrl("TableauDeBord"), icon: BarChart3 },
+      { title: "Profil", url: createPageUrl("Profil"), icon: UserCircle },
+      { title: "Calendrier", url: createPageUrl("Calendrier"), icon: Calendar },
+    ]
   },
   {
-    title: "Profil",
-    url: createPageUrl("Profil"),
-    icon: UserCircle,
+    title: "Dossier Arpentage",
+    items: [
+      { title: "Dossiers", url: createPageUrl("Dossiers"), icon: FolderOpen },
+      { title: "Clients", url: createPageUrl("Clients"), icon: User },
+      { title: "Gestion de Mandat", url: createPageUrl("GestionDeMandat"), icon: Kanban },
+      { title: "Communication clients", url: createPageUrl("CommunicationClients"), icon: MessageCircle },
+    ]
   },
   {
-    title: "Calendrier",
-    url: createPageUrl("Calendrier"),
-    icon: Calendar,
-  },
-  {
-    title: "Communication clients",
-    url: createPageUrl("CommunicationClients"),
-    icon: MessageCircle,
-  },
-  {
-    title: "Dossiers",
-    url: createPageUrl("Dossiers"),
-    icon: FolderOpen,
-  },
-  {
-    title: "Clients",
-    url: createPageUrl("Clients"),
-    icon: User,
-  },
-  {
-    title: "Gestion de Mandat",
-    url: createPageUrl("GestionDeMandat"),
-    icon: Kanban,
+    title: "Terrain",
+    items: [
+      { title: "Cédule Terrain", url: createPageUrl("CeduleTerrain"), icon: CalendarDays },
+      { title: "Levé Terrain", url: createPageUrl("LeveTerrain"), icon: Mountain },
+    ]
   },
   {
     title: "Comptabilité",
-    url: createPageUrl("Comptabilite"),
-    icon: Landmark,
-  },
-  {
-    title: "Cédule Terrain",
-    url: createPageUrl("CeduleTerrain"),
-    icon: CalendarDays,
-  },
-  {
-    title: "Levé Terrain",
-    url: createPageUrl("LeveTerrain"),
-    icon: Mountain,
+    items: [
+      { title: "Comptabilité", url: createPageUrl("Comptabilite"), icon: Landmark },
+    ]
   },
   {
     title: "Recherches",
-    url: createPageUrl("Recherches"),
-    icon: Search,
+    items: [
+      { title: "Recherches", url: createPageUrl("Recherches"), icon: Search },
+    ]
+  },
+  {
+    title: "Inventaire",
+    items: []
+  },
+  {
+    title: "Ressources humaines",
+    items: [
+      { title: "Administration", url: createPageUrl("Administration"), icon: Shield },
+    ]
   },
 ];
 
@@ -649,99 +640,66 @@ function LayoutContent({ children, currentPageName }) {
           
           <SidebarContent className="p-1.5 bg-sidebar">
             <SidebarGroup>
-              {!isCollapsed && (
-                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
-                  Navigation
-                </SidebarGroupLabel>
-              )}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigationItems.map((item) => {
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        {isCollapsed ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <SidebarMenuButton 
-                                asChild 
-                                className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                  location.pathname === item.url 
-                                    ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/30' 
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                                }`}
-                              >
-                                <Link to={item.url} className="flex items-center justify-center p-2.5">
-                                  <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
-                                    <item.icon className="w-5 h-5" />
-                                  </motion.span>
-                                </Link>
-                              </SidebarMenuButton>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                              <p>{item.title}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <SidebarMenuButton 
-                            asChild 
-                            className={`transition-all duration-200 rounded-lg mb-0.5 ${
-                              location.pathname === item.url 
-                                ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/30' 
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                            }`}
-                          >
-                            <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                              <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
-                                <item.icon className="w-5 h-5" />
-                              </motion.span>
-                              <span className="font-medium">{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        )}
-                      </SidebarMenuItem>
-                    );
-                  })}
-
-                  {/* Admin menu item */}
-                  {user?.role === 'admin' && (
-                    <SidebarMenuItem>
-                      {isCollapsed ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
+                  {navigationCategories.map((category) => (
+                    <Collapsible key={category.title} className="mb-2">
+                      {!isCollapsed && category.items.length > 0 && (
+                        <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
+                          {category.title}
+                        </SidebarGroupLabel>
+                      )}
+                      {category.items.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          {isCollapsed ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <SidebarMenuButton 
+                                  asChild 
+                                  className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
+                                    location.pathname === item.url 
+                                      ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/30' 
+                                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                                  }`}
+                                >
+                                  <Link to={item.url} className="flex items-center justify-center p-2.5">
+                                    <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
+                                      <item.icon className="w-5 h-5" />
+                                    </motion.span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
+                                <p>{item.title}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
                             <SidebarMenuButton 
                               asChild 
-                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                location.pathname === createPageUrl("Administration")
-                                  ? 'bg-destructive/15 text-destructive border border-destructive/30 shadow-lg shadow-destructive/20' 
+                              className={`transition-all duration-200 rounded-lg mb-0.5 ${
+                                location.pathname === item.url 
+                                  ? 'bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/30' 
                                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                               }`}
                             >
-                              <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5">
-                                <Shield className="w-5 h-5" />
+                              <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
+                                <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
+                                  <item.icon className="w-5 h-5" />
+                                </motion.span>
+                                <span className="font-medium">{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                            <p>Administration</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <SidebarMenuButton 
-                          asChild 
-                          className={`transition-all duration-200 rounded-lg mb-0.5 ${
-                            location.pathname === createPageUrl("Administration")
-                              ? 'bg-destructive/15 text-destructive border border-destructive/30 shadow-lg shadow-destructive/20' 
-                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                          }`}
-                        >
-                          <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5">
-                            <Shield className="w-5 h-5" />
-                            <span className="font-medium">Administration</span>
-                          </Link>
-                        </SidebarMenuButton>
+                          )}
+                        </SidebarMenuItem>
+                      ))}
+                      {/* Empty category placeholder */}
+                      {!isCollapsed && category.items.length === 0 && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground italic">
+                          Bientôt disponible...
+                        </div>
                       )}
-                    </SidebarMenuItem>
-                  )}
+                    </Collapsible>
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
