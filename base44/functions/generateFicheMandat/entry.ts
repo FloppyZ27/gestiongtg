@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       };
 
       // Section header (full width, filled red)
-      const sHdr = (title, ty, h = 13) => {
+      const sHdr = (title, ty, h = 17) => {
         fill(ML, ty, CW, h, C.red);
         txt(title, ML + CW/2, ty + h - 2, { b:true, sz:9, col:C.white, ctr:true });
         return h;
@@ -138,33 +138,33 @@ Deno.serve(async (req) => {
     const firstMandat = dossierData.mandats?.[0] || {};
 
     // Ligne 1: Date mandat | Numéro dossier
-    d.fill(ML, y, CW, 12, C.altBg);
-    d.box(ML, y, CW, 12);
-    d.vline(ML + CW * 0.5, y, y + 12);
-    d.txt('Date du mandat :', ML + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fd(dossierData.date_ouverture), ML + 75, y + 9, { sz:7.5 });
-    d.txt('Numéro de dossier :', ML + CW * 0.5 + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fullNum, ML + CW * 0.5 + 80, y + 9, { b:true, sz:8, col:C.red });
-    y += 12;
+    d.fill(ML, y, CW, 16, C.altBg);
+    d.box(ML, y, CW, 16);
+    d.vline(ML + CW * 0.5, y, y + 16);
+    d.txt('Date du mandat :', ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fd(dossierData.date_ouverture), ML + 82, y + 12, { sz:8.5 });
+    d.txt('Numéro de dossier :', ML + CW * 0.5 + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fullNum, ML + CW * 0.5 + 88, y + 12, { b:true, sz:9, col:C.red });
+    y += 16;
 
     // Ligne 2: Date de livraison | Statut
-    d.box(ML, y, CW, 12);
-    d.vline(ML + CW * 0.5, y, y + 12);
-    d.txt('Date de livraison :', ML + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fd(firstMandat.date_livraison), ML + 75, y + 9, { sz:7.5 });
-    d.txt('Statut :', ML + CW * 0.5 + 3, y + 9, { b:true, sz:7.5, col:C.lbl });
+    d.box(ML, y, CW, 16);
+    d.vline(ML + CW * 0.5, y, y + 16);
+    d.txt('Date de livraison :', ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_livraison), ML + 82, y + 12, { sz:8.5 });
+    d.txt('Statut :', ML + CW * 0.5 + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     const isOpen = dossierData.statut !== 'Fermé';
-    d.fill(ML + CW * 0.5 + 45, y + 2, 55, 9, isOpen ? C.green : C.redSts);
-    d.txt((dossierData.statut || 'Ouvert').toUpperCase(), ML + CW * 0.5 + 72, y + 9, { b:true, sz:7.5, col:C.white, ctr:true });
-    y += 12;
+    d.fill(ML + CW * 0.5 + 48, y + 3, 58, 10, isOpen ? C.green : C.redSts);
+    d.txt((dossierData.statut || 'Ouvert').toUpperCase(), ML + CW * 0.5 + 77, y + 12, { b:true, sz:8, col:C.white, ctr:true });
+    y += 16;
 
     // Ligne 3: Type d'arpentage (texte)
-    d.fill(ML, y, CW, 13, C.altBg);
-    d.box(ML, y, CW, 13);
-    d.txt("Type d'arpentage :", ML + 3, y + 9.5, { b:true, sz:7.5, col:C.lbl });
+    d.fill(ML, y, CW, 16, C.altBg);
+    d.box(ML, y, CW, 16);
+    d.txt("Type d'arpentage :", ML + 3, y + 12, { b:true, sz:8.5, col:C.lbl });
     const mandatTypesText = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean).join('  |  ');
-    d.txt(mandatTypesText, ML + 85, y + 9.5, { b:true, sz:8, col:C.red });
-    y += 13;
+    d.txt(mandatTypesText, ML + 88, y + 12, { b:true, sz:9, col:C.red });
+    y += 16;
 
     // ─── SECTION: CLIENT(S) ───────────────────────────────────────────
     y += 2;
@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
     const c1Ville = c1Adr?.ville || '';
     const c1CP    = c1Adr?.code_postal || '';
 
-    const LW2 = 55, HW = CW / 2;
+    const LW2 = 65, HW = CW / 2;
     const clientRows = [
       ['Nom(s) :', c1Name,       'Téléphone :', c1Tel],
       ['Adresse :', c1Rue,      'Courriel :', c1Email],
@@ -187,31 +187,31 @@ Deno.serve(async (req) => {
     ];
     for (let i = 0; i < clientRows.length; i++) {
       const [l1,v1,l2,v2] = clientRows[i];
-      d.fill(ML, y, LW2, 11, C.lblBg);
-      d.fill(ML + LW2, y, HW - LW2, 11, i%2===1 ? C.altBg : C.white);
-      d.fill(ML + HW, y, LW2, 11, C.lblBg);
-      d.fill(ML + HW + LW2, y, HW - LW2, 11, i%2===1 ? C.altBg : C.white);
-      d.box(ML, y, CW, 11);
-      d.vline(ML + LW2, y, y + 11);
-      d.vline(ML + HW, y, y + 11);
-      d.vline(ML + HW + LW2, y, y + 11);
-      d.txt(l1, ML+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(safe(v1), ML+LW2+3, y+8, { sz:7.5 });
-      d.txt(l2, ML+HW+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(safe(v2), ML+HW+LW2+3, y+8, { sz:7.5 });
-      y += 11;
+      d.fill(ML, y, LW2, 15, C.lblBg);
+      d.fill(ML + LW2, y, HW - LW2, 15, i%2===1 ? C.altBg : C.white);
+      d.fill(ML + HW, y, LW2, 15, C.lblBg);
+      d.fill(ML + HW + LW2, y, HW - LW2, 15, i%2===1 ? C.altBg : C.white);
+      d.box(ML, y, CW, 15);
+      d.vline(ML + LW2, y, y + 15);
+      d.vline(ML + HW, y, y + 15);
+      d.vline(ML + HW + LW2, y, y + 15);
+      d.txt(l1, ML+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(safe(v1), ML+LW2+3, y+11, { sz:8.5 });
+      d.txt(l2, ML+HW+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(safe(v2), ML+HW+LW2+3, y+11, { sz:8.5 });
+      y += 15;
     }
     // Clients supplémentaires
     for (let ci = 1; ci < (clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
       const nm = `${cx.prenom||''} ${cx.nom||''}`.trim();
-      d.fill(ML, y, LW2, 11, C.lblBg);
-      d.fill(ML+LW2, y, CW-LW2, 11, C.white);
-      d.box(ML, y, CW, 11);
-      d.vline(ML+LW2, y, y+11);
-      d.txt(`Client ${ci+1} :`, ML+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(nm, ML+LW2+3, y+8, { sz:7.5 });
-      y += 11;
+      d.fill(ML, y, LW2, 15, C.lblBg);
+      d.fill(ML+LW2, y, CW-LW2, 15, C.white);
+      d.box(ML, y, CW, 15);
+      d.vline(ML+LW2, y, y+15);
+      d.txt(`Client ${ci+1} :`, ML+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(nm, ML+LW2+3, y+11, { sz:8.5 });
+      y += 15;
     }
 
     // ─── SECTION: LOCALISATION DES TRAVAUX + NOTES ───────────────────
@@ -247,23 +247,23 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < locRows.length; i++) {
       const [lbl,val] = locRows[i];
-      const rh = 11;
+      const rh = 15;
       d.fill(ML, y, LW2, rh, C.lblBg);
       d.fill(ML+LW2, y, locW-LW2, rh, i%2===1 ? C.altBg : C.white);
       d.box(ML, y, locW, rh);
       d.vline(ML+LW2, y, y+rh);
-      d.txt(lbl, ML+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(safe(val), ML+LW2+3, y+8, { sz:7.5 });
+      d.txt(lbl, ML+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(safe(val), ML+LW2+3, y+11, { sz:8.5 });
       y += rh;
     }
-    // Mandat(s) + place d'affaire row
-    d.fill(ML, y, locW, 11, C.altBg);
-    d.box(ML, y, locW, 11);
-    d.txt('Mandat(s) :', ML+3, y+8, { b:true, sz:7, col:C.lbl });
-    d.txt((dossierData.mandats||[]).map(m => m.type_mandat||'').filter(Boolean).join(', '), ML+LW2+3, y+8, { sz:7.5 });
-    y += 11;
+    // Mandat(s) row
+    d.fill(ML, y, locW, 15, C.altBg);
+    d.box(ML, y, locW, 15);
+    d.txt('Mandat(s) :', ML+3, y+11, { b:true, sz:8, col:C.lbl });
+    d.txt((dossierData.mandats||[]).map(m => m.type_mandat||'').filter(Boolean).join(', '), ML+LW2+3, y+11, { sz:8.5 });
+    y += 15;
     // Close notes right box
-    const extraH = 11;
+    const extraH = 15;
     d.fill(ML + locW, y, notW, extraH, C.white);
     d.box(ML + locW, y, notW, extraH);
     y += extraH;
@@ -275,36 +275,36 @@ Deno.serve(async (req) => {
       const nm  = person ? `${person.prenom||''} ${person.nom||''}`.trim() : '';
       const tel = person?.telephones?.[0]?.telephone || '';
       const em  = person?.courriels?.[0]?.courriel  || '';
-      const LW3 = 50, PW2 = CW/3;
-      d.fill(ML, ty, LW3, 11, C.lblBg);
-      if (alt) d.fill(ML+LW3, ty, PW2-LW3, 11, C.altBg);
-      d.box(ML, ty, CW, 11);
-      d.vline(ML+LW3, ty, ty+11);
-      d.vline(ML+PW2, ty, ty+11);
-      d.vline(ML+PW2*2, ty, ty+11);
-      d.txt(label, ML+3, ty+8, { b:true, sz:7, col:C.lbl });
-      d.txt(nm, ML+LW3+3, ty+8, { sz:7.5 });
-      d.txt(tel, ML+PW2+3, ty+8, { sz:7.5 });
-      d.txt(em, ML+PW2*2+3, ty+8, { sz:7.5 });
+      const LW3 = 55, PW2 = CW/3;
+      d.fill(ML, ty, LW3, 15, C.lblBg);
+      if (alt) d.fill(ML+LW3, ty, PW2-LW3, 15, C.altBg);
+      d.box(ML, ty, CW, 15);
+      d.vline(ML+LW3, ty, ty+15);
+      d.vline(ML+PW2, ty, ty+15);
+      d.vline(ML+PW2*2, ty, ty+15);
+      d.txt(label, ML+3, ty+11, { b:true, sz:8, col:C.lbl });
+      d.txt(nm, ML+LW3+3, ty+11, { sz:8.5 });
+      d.txt(tel, ML+PW2+3, ty+11, { sz:8.5 });
+      d.txt(em, ML+PW2*2+3, ty+11, { sz:8.5 });
     };
     // Header row
-    d.fill(ML, y, CW, 10, C.lblBg);
-    d.box(ML, y, CW, 10);
-    d.vline(ML+50, y, y+10);
-    d.vline(ML+CW/3, y, y+10);
-    d.vline(ML+CW/3*2, y, y+10);
-    d.txt('Intervenant', ML+3, y+7.5, { b:true, sz:7, col:C.lbl });
-    d.txt('Nom', ML+55, y+7.5, { b:true, sz:7, col:C.lbl });
-    d.txt('Téléphone', ML+CW/3+3, y+7.5, { b:true, sz:7, col:C.lbl });
-    d.txt('Courriel', ML+CW/3*2+3, y+7.5, { b:true, sz:7, col:C.lbl });
-    y += 10;
+    d.fill(ML, y, CW, 13, C.lblBg);
+    d.box(ML, y, CW, 13);
+    d.vline(ML+55, y, y+13);
+    d.vline(ML+CW/3, y, y+13);
+    d.vline(ML+CW/3*2, y, y+13);
+    d.txt('Intervenant', ML+3, y+10, { b:true, sz:8, col:C.lbl });
+    d.txt('Nom', ML+60, y+10, { b:true, sz:8, col:C.lbl });
+    d.txt('Téléphone', ML+CW/3+3, y+10, { b:true, sz:8, col:C.lbl });
+    d.txt('Courriel', ML+CW/3*2+3, y+10, { b:true, sz:8, col:C.lbl });
+    y += 13;
     for (let i=0; i<Math.max(1,(notairesData||[]).length); i++) {
       drawPerson(`Notaire${i>0?' '+(i+1):''}`, notairesData?.[i], y, i%2===0);
-      y += 11;
+      y += 15;
     }
     for (let i=0; i<Math.max(1,(courtiersData||[]).length); i++) {
       drawPerson(`Courtier${i>0?' '+(i+1):''}`, courtiersData?.[i], y, i%2===0);
-      y += 11;
+      y += 15;
     }
 
     // ─── SECTION: LIVRAISON ───────────────────────────────────────────
@@ -312,26 +312,26 @@ Deno.serve(async (req) => {
     y += d.sHdr('LIVRAISON', y);
 
     // Date de signature
-    d.fill(ML, y, CW, 11, C.altBg);
-    d.box(ML, y, CW, 11);
-    d.txt('Date de signature :', ML+3, y+8, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fd(firstMandat.date_signature), ML+70, y+8, { sz:7.5 });
-    d.txt('Début des travaux :', ML+CW/2+3, y+8, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fd(firstMandat.date_debut_travaux), ML+CW/2+72, y+8, { sz:7.5 });
-    d.vline(ML+CW/2, y, y+11);
-    y += 11;
+    d.fill(ML, y, CW, 15, C.altBg);
+    d.box(ML, y, CW, 15);
+    d.txt('Date de signature :', ML+3, y+11, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_signature), ML+78, y+11, { sz:8.5 });
+    d.txt('Début des travaux :', ML+CW/2+3, y+11, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fd(firstMandat.date_debut_travaux), ML+CW/2+80, y+11, { sz:8.5 });
+    d.vline(ML+CW/2, y, y+15);
+    y += 15;
 
     // Livraison preferences per client
     const livCols = [CW*0.22, CW*0.26, CW*0.26, CW*0.26];
     const colX = [ML, ML+livCols[0], ML+livCols[0]+livCols[1], ML+livCols[0]+livCols[1]+livCols[2]];
     // Header row for livraison
-    d.fill(ML, y, CW, 10, C.lblBg);
-    d.box(ML, y, CW, 10);
+    d.fill(ML, y, CW, 13, C.lblBg);
+    d.box(ML, y, CW, 13);
     ['Destinataire','Préférences de livraison','Adresse courriel','Mode de facturation'].forEach((h,i) => {
-      d.txt(h, colX[i]+3, y+7.5, { b:true, sz:6.5, col:C.lbl });
-      if (i>0) d.vline(colX[i], y, y+10);
+      d.txt(h, colX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
+      if (i>0) d.vline(colX[i], y, y+13);
     });
-    y += 10;
+    y += 13;
     const allPersons = [
       ...(clientsData||[]).map((c,i)=>({ label:i===0?'Client':`Client ${i+1}`, person:c })),
       ...(notairesData||[]).map((n,i)=>({ label:i===0?'Notaire':`Notaire ${i+1}`, person:n })),
@@ -341,14 +341,14 @@ Deno.serve(async (req) => {
       const { label, person } = allPersons[i];
       const prefs = (person?.preferences_livraison||[]).join(', ');
       const em = person?.courriels?.[0]?.courriel||'';
-      d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
-      d.fill(ML, y, livCols[0], 11, C.lblBg);
-      d.box(ML, y, CW, 11);
-      colX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
-      d.txt(label, colX[0]+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(prefs, colX[1]+3, y+8, { sz:7 });
-      d.txt(em, colX[2]+3, y+8, { sz:7 });
-      y += 11;
+      d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
+      d.fill(ML, y, livCols[0], 15, C.lblBg);
+      d.box(ML, y, CW, 15);
+      colX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
+      d.txt(label, colX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(prefs, colX[1]+3, y+11, { sz:8 });
+      d.txt(em, colX[2]+3, y+11, { sz:8 });
+      y += 15;
     }
 
     // ─── SECTION: PRIX ────────────────────────────────────────────────
@@ -359,13 +359,13 @@ Deno.serve(async (req) => {
     // Table header
     const pCols = [CW*0.35, CW*0.18, CW*0.15, CW*0.15, CW*0.17];
     const pX    = [ML, ML+pCols[0], ML+pCols[0]+pCols[1], ML+pCols[0]+pCols[1]+pCols[2], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3]];
-    d.fill(ML, y, CW, 10, C.lblBg);
-    d.box(ML, y, CW, 10);
+    d.fill(ML, y, CW, 13, C.lblBg);
+    d.box(ML, y, CW, 13);
     ['Opération','Prix estimé','Rabais','Total HT','Taxes'].forEach((h,i) => {
-      d.txt(h, pX[i]+3, y+7.5, { b:true, sz:7, col:C.lbl });
-      if(i>0) d.vline(pX[i], y, y+10);
+      d.txt(h, pX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
+      if(i>0) d.vline(pX[i], y, y+13);
     });
-    y += 10;
+    y += 13;
     let grandTotal = 0;
     for (let i=0; i<mandats.length; i++) {
       const m = mandats[i];
@@ -373,16 +373,16 @@ Deno.serve(async (req) => {
       const rab   = Number(m.rabais)||0;
       const total = prix - rab;
       grandTotal += total;
-      d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
-      d.fill(ML, y, pCols[0], 11, C.lblBg);
-      d.box(ML, y, CW, 11);
-      pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
-      d.txt(m.type_mandat||`Mandat ${i+1}`, pX[0]+3, y+8, { b:true, sz:7, col:C.lbl });
-      d.txt(fm(prix),  pX[1]+3, y+8, { sz:7.5 });
-      d.txt(fm(rab),   pX[2]+3, y+8, { sz:7.5 });
-      d.txt(fm(total), pX[3]+3, y+8, { sz:7.5 });
-      d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+8, { sz:7 });
-      y += 11;
+      d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
+      d.fill(ML, y, pCols[0], 15, C.lblBg);
+      d.box(ML, y, CW, 15);
+      pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
+      d.txt(m.type_mandat||`Mandat ${i+1}`, pX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
+      d.txt(fm(prix),  pX[1]+3, y+11, { sz:8.5 });
+      d.txt(fm(rab),   pX[2]+3, y+11, { sz:8.5 });
+      d.txt(fm(total), pX[3]+3, y+11, { sz:8.5 });
+      d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+11, { sz:8 });
+      y += 15;
       // Notes du mandat
       if (m.notes) {
         const noteLines = m.notes.match(/.{1,90}/g) || [];
@@ -396,12 +396,12 @@ Deno.serve(async (req) => {
       }
     }
     // Total row
-    d.fill(ML, y, CW, 13, C.lblBg);
-    d.box(ML, y, CW, 13);
-    pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+13); });
-    d.txt('TOTAL', pX[0]+3, y+9.5, { b:true, sz:8.5, col:C.dark });
-    d.txt(fm(grandTotal), pX[3]+3, y+9.5, { b:true, sz:9, col:C.red });
-    y += 13;
+    d.fill(ML, y, CW, 16, C.lblBg);
+    d.box(ML, y, CW, 16);
+    pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+16); });
+    d.txt('TOTAL', pX[0]+3, y+12, { b:true, sz:9, col:C.dark });
+    d.txt(fm(grandTotal), pX[3]+3, y+12, { b:true, sz:10, col:C.red });
+    y += 16;
 
     // ─── SECTION: MINUTES ─────────────────────────────────────────────
     const allMinutes = mandats.flatMap(m => {
@@ -413,44 +413,40 @@ Deno.serve(async (req) => {
       y += d.sHdr('MINUTES', y);
       const mCols = [CW*0.25, CW*0.28, CW*0.22, CW*0.25];
       const mX    = [ML, ML+mCols[0], ML+mCols[0]+mCols[1], ML+mCols[0]+mCols[1]+mCols[2]];
-      d.fill(ML, y, CW, 10, C.lblBg);
-      d.box(ML, y, CW, 10);
+      d.fill(ML, y, CW, 13, C.lblBg);
+      d.box(ML, y, CW, 13);
       ['Numéro','Mandat','Date','Type'].forEach((h,i) => {
-        d.txt(h, mX[i]+3, y+7.5, { b:true, sz:7, col:C.lbl });
-        if(i>0) d.vline(mX[i], y, y+10);
+        d.txt(h, mX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
+        if(i>0) d.vline(mX[i], y, y+13);
       });
-      y += 10;
+      y += 13;
       for (let i=0; i<allMinutes.length; i++) {
         const mn = allMinutes[i];
-        d.fill(ML, y, CW, 11, i%2===1?C.altBg:C.white);
-        d.fill(ML, y, mCols[0], 11, C.lblBg);
-        d.box(ML, y, CW, 11);
-        mX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+11); });
-        d.txt(safe(mn.minute), mX[0]+3, y+8, { b:true, sz:7.5, col:C.red });
-        d.txt(safe(mn.type_mandat), mX[1]+3, y+8, { sz:7 });
-        d.txt(fd(mn.date_minute), mX[2]+3, y+8, { sz:7.5 });
-        d.txt(safe(mn.type_minute), mX[3]+3, y+8, { sz:7 });
-        y += 11;
+        d.fill(ML, y, CW, 15, i%2===1?C.altBg:C.white);
+        d.fill(ML, y, mCols[0], 15, C.lblBg);
+        d.box(ML, y, CW, 15);
+        mX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
+        d.txt(safe(mn.minute), mX[0]+3, y+11, { b:true, sz:8.5, col:C.red });
+        d.txt(safe(mn.type_mandat), mX[1]+3, y+11, { sz:8 });
+        d.txt(fd(mn.date_minute), mX[2]+3, y+11, { sz:8.5 });
+        d.txt(safe(mn.type_minute), mX[3]+3, y+11, { sz:8 });
+        y += 15;
       }
     }
 
     // ─── SECTION: FERMETURE ───────────────────────────────────────────
     y += 2;
     y += d.sHdr('FERMETURE', y);
-    d.fill(ML, y, CW, 12, C.altBg);
-    d.box(ML, y, CW, 12);
-    d.vline(ML+CW/2, y, y+12);
-    d.txt('Date de fermeture :', ML+3, y+9, { b:true, sz:7.5, col:C.lbl });
-    d.txt(fd(dossierData.date_fermeture), ML+75, y+9, { sz:7.5 });
-    d.txt('Arpenteur-géomètre :', ML+CW/2+3, y+9, { b:true, sz:7.5, col:C.lbl });
-    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+78, y+9, { sz:7.5 });
-    y += 12;
+    d.fill(ML, y, CW, 16, C.altBg);
+    d.box(ML, y, CW, 16);
+    d.vline(ML+CW/2, y, y+16);
+    d.txt('Date de fermeture :', ML+3, y+12, { b:true, sz:8.5, col:C.lbl });
+    d.txt(fd(dossierData.date_fermeture), ML+82, y+12, { sz:8.5 });
+    d.txt('Arpenteur-géomètre :', ML+CW/2+3, y+12, { b:true, sz:8.5, col:C.lbl });
+    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+86, y+12, { sz:8.5 });
+    y += 16;
 
-    // ─── Footer p1 ────────────────────────────────────────────────────
-    d.fill(0, PH-18, PW, 18, C.header);
-    d.fill(0, PH-21, PW, 3, C.red);
-    d.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:C.lbl });
-    d.txt('Page 1 / 2', PW-MR, PH-12, { sz:7, col:C.lbl, rgt:true });
+    // (no footer)
 
     // ══════════════════════════════════════════════════════════════════
     // PAGE 2 — TEMPS
@@ -459,18 +455,7 @@ Deno.serve(async (req) => {
     const d2 = makeDrawers(p2);
     let y2 = 18;
 
-    // Header
-    d2.fill(0, 0, PW, y2 + 22, C.header);
-    d2.fill(0, y2 + 22, PW, 3, C.red);
-    if (logoBytes) {
-      try {
-        const img = await doc.embedPng(logoBytes);
-        p2.drawImage(img, { x:ML, y:PH-(y2+20), width:22, height:24 });
-      } catch(_) {}
-    }
-    d2.txt('Girard Tremblay Gilbert Inc. — TEMPS', ML+32, y2+18, { sz:9, col:C.orange });
-    d2.txt(fullNum, PW-MR, y2+18, { b:true, sz:10, col:C.red, rgt:true });
-    y2 += 28;
+    // (no header on page 2)
 
     // Columns: DATE | EMPLOYE(S) | DESCRIPTION | TACHE | TEMPS
     const tCols = [CW*0.14, CW*0.22, CW*0.38, CW*0.14, CW*0.12];
@@ -526,11 +511,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Footer p2
-    d2.fill(0, PH-18, PW, 18, C.header);
-    d2.fill(0, PH-21, PW, 3, C.red);
-    d2.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:C.lbl });
-    d2.txt('Page 2 / 2', PW-MR, PH-12, { sz:7, col:C.lbl, rgt:true });
+    // (no footer)
 
     // ─── Serialize ────────────────────────────────────────────────────
     const pdfBytes = await doc.save();
