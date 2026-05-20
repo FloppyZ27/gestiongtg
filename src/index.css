@@ -787,6 +787,12 @@ html.light a[href^="mailto:"]:hover {
   -webkit-text-fill-color: hsl(220, 80%, 40%) !important;
 }
 
+/* Entêtes d'équipes — plus opaque en light mode */
+html.light [style*="linear-gradient(90deg, rgba(220, 38, 38"]:not(h1):not(h2):not(h3):not(.topbar-title) {
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.25), rgba(234, 88, 12, 0.25)) !important;
+  border-bottom-color: rgba(248, 113, 113, 0.3) !important;
+}
+
 /* Boutons arpenteur tabs — préserver les couleurs inline en light mode */
 html.light button.arpenteur-tab-btn {
   background: var(--arp-bg) !important;
