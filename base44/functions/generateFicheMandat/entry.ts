@@ -10,7 +10,7 @@ const mandatAbbr = t => ({ "Certificat de localisation":"CL","Description Techni
 
 // ─── Brand colors ─────────────────────────────────────────────────────────
 const C = {
-  header:  rgb(0.10, 0.03, 0.03),   // quasi-noir teinté rouge
+  header:  rgb(0.97, 0.93, 0.90),   // crème pâle — en-tête
   red:     rgb(0.72, 0.12, 0.08),   // rouge GTG — en-têtes sections
   orange:  rgb(0.78, 0.36, 0.10),   // orangé — sous-titres
   lblBg:   rgb(0.97, 0.91, 0.88),   // crème rosé — fond labels
@@ -128,10 +128,10 @@ Deno.serve(async (req) => {
         p1.drawImage(img, { x:ML, y:PH - (y + 42), width:32, height:36 });
       } catch(_) {}
     }
-    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:rgb(0.85,0.60,0.42) });
-    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:rgb(0.75,0.48,0.32) });
-    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.white, rgt:true });
-    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:rgb(0.95,0.65,0.40), rgt:true });
+    d.txt('Girard Tremblay Gilbert Inc.', ML + 40, y + 12, { sz:10, col:C.orange });
+    d.txt('Arpenteurs-Géomètres', ML + 40, y + 24, { sz:7.5, col:C.lbl });
+    d.txt('FICHE MANDAT', ML + CW, y + 22, { b:true, sz:20, col:C.red, rgt:true });
+    d.txt(fullNum, ML + CW, y + 38, { b:true, sz:11, col:C.orange, rgt:true });
     y += 50;
 
     // ─── Infos principales (date, livraison, type arpentage) ──────────
@@ -158,19 +158,12 @@ Deno.serve(async (req) => {
     d.txt((dossierData.statut || 'Ouvert').toUpperCase(), ML + CW * 0.5 + 72, y + 9, { b:true, sz:7.5, col:C.white, ctr:true });
     y += 12;
 
-    // Ligne 3: Type d'arpentage (checkboxes)
+    // Ligne 3: Type d'arpentage (texte)
     d.fill(ML, y, CW, 13, C.altBg);
     d.box(ML, y, CW, 13);
     d.txt("Type d'arpentage :", ML + 3, y + 9.5, { b:true, sz:7.5, col:C.lbl });
-    const mandatTypes = (dossierData.mandats || []).map(m => mandatAbbr(m.type_mandat));
-    const typeList = ["CL","DT","PIQ","LOTIS","IMP","OCTR","LEVÉ","BORN"];
-    let tx = ML + 80;
-    for (const type of typeList) {
-      const isChk = mandatTypes.includes(type);
-      d.chk(tx, y + 3, isChk, 8);
-      d.txt(type, tx + 10, y + 9.5, { b:isChk, sz:7.5, col: isChk ? C.red : C.dark });
-      tx += 42;
-    }
+    const mandatTypesText = (dossierData.mandats || []).map(m => m.type_mandat).filter(Boolean).join('  |  ');
+    d.txt(mandatTypesText, ML + 85, y + 9.5, { b:true, sz:8, col:C.red });
     y += 13;
 
     // ─── SECTION: CLIENT(S) ───────────────────────────────────────────
@@ -187,10 +180,10 @@ Deno.serve(async (req) => {
 
     const LW2 = 55, HW = CW / 2;
     const clientRows = [
-      ['Nom(s) :', c1Name,    'Téléphone :', c1Tel],
-      ['Adresse :', c1Rue,    'Courriel :', c1Email],
-      ['Municipalité :', c1Ville, 'TTL :', dossierData.ttl === 'Oui' ? 'Oui' : 'Non'],
-      ['Code postal :', c1CP, 'Place d\'affaire :', dossierData.place_affaire || ''],
+      ['Nom(s) :', c1Name,       'Téléphone :', c1Tel],
+      ['Adresse :', c1Rue,      'Courriel :', c1Email],
+      ['Municipalité :', c1Ville, '', ''],
+      ['Code postal :', c1CP,   '', ''],
     ];
     for (let i = 0; i < clientRows.length; i++) {
       const [l1,v1,l2,v2] = clientRows[i];
@@ -390,14 +383,25 @@ Deno.serve(async (req) => {
       d.txt(fm(total), pX[3]+3, y+8, { sz:7.5 });
       d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+8, { sz:7 });
       y += 11;
+      // Notes du mandat
+      if (m.notes) {
+        const noteLines = m.notes.match(/.{1,90}/g) || [];
+        for (let ni=0; ni<noteLines.length; ni++) {
+          d.fill(ML, y, CW, 10, rgb(0.99, 0.97, 0.94));
+          d.box(ML, y, CW, 10);
+          if (ni===0) d.txt('Note :', ML+3, y+7.5, { b:true, sz:6.5, col:C.orange });
+          d.txt(noteLines[ni], ML+32, y+7.5, { sz:6.5, col:C.dark });
+          y += 10;
+        }
+      }
     }
     // Total row
-    d.fill(ML, y, CW, 12, C.lblBg);
-    d.box(ML, y, CW, 12);
-    pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+12); });
-    d.txt('TOTAL', pX[3]+3, y+9, { b:true, sz:8, col:C.red, rgt:false });
-    d.txt(fm(grandTotal), pX[3]+3, y+9, { b:true, sz:8, col:C.red });
-    y += 12;
+    d.fill(ML, y, CW, 13, C.lblBg);
+    d.box(ML, y, CW, 13);
+    pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+13); });
+    d.txt('TOTAL', pX[0]+3, y+9.5, { b:true, sz:8.5, col:C.dark });
+    d.txt(fm(grandTotal), pX[3]+3, y+9.5, { b:true, sz:9, col:C.red });
+    y += 13;
 
     // ─── SECTION: MINUTES ─────────────────────────────────────────────
     const allMinutes = mandats.flatMap(m => {
@@ -445,8 +449,8 @@ Deno.serve(async (req) => {
     // ─── Footer p1 ────────────────────────────────────────────────────
     d.fill(0, PH-18, PW, 18, C.header);
     d.fill(0, PH-21, PW, 3, C.red);
-    d.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:rgb(0.82,0.52,0.38) });
-    d.txt('Page 1 / 2', PW-MR, PH-12, { sz:7, col:rgb(0.82,0.52,0.38), rgt:true });
+    d.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:C.lbl });
+    d.txt('Page 1 / 2', PW-MR, PH-12, { sz:7, col:C.lbl, rgt:true });
 
     // ══════════════════════════════════════════════════════════════════
     // PAGE 2 — TEMPS
@@ -464,8 +468,8 @@ Deno.serve(async (req) => {
         p2.drawImage(img, { x:ML, y:PH-(y2+20), width:22, height:24 });
       } catch(_) {}
     }
-    d2.txt('Girard Tremblay Gilbert Inc. — TEMPS', ML+32, y2+18, { sz:9, col:rgb(0.82,0.52,0.38) });
-    d2.txt(fullNum, PW-MR, y2+18, { b:true, sz:10, col:rgb(0.95,0.65,0.40), rgt:true });
+    d2.txt('Girard Tremblay Gilbert Inc. — TEMPS', ML+32, y2+18, { sz:9, col:C.orange });
+    d2.txt(fullNum, PW-MR, y2+18, { b:true, sz:10, col:C.red, rgt:true });
     y2 += 28;
 
     // Columns: DATE | EMPLOYE(S) | DESCRIPTION | TACHE | TEMPS
@@ -525,8 +529,8 @@ Deno.serve(async (req) => {
     // Footer p2
     d2.fill(0, PH-18, PW, 18, C.header);
     d2.fill(0, PH-21, PW, 3, C.red);
-    d2.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:rgb(0.82,0.52,0.38) });
-    d2.txt('Page 2 / 2', PW-MR, PH-12, { sz:7, col:rgb(0.82,0.52,0.38), rgt:true });
+    d2.txt(`Girard Tremblay Gilbert Inc. — ${pdfFileName}`, ML, PH-12, { sz:7, col:C.lbl });
+    d2.txt('Page 2 / 2', PW-MR, PH-12, { sz:7, col:C.lbl, rgt:true });
 
     // ─── Serialize ────────────────────────────────────────────────────
     const pdfBytes = await doc.save();
