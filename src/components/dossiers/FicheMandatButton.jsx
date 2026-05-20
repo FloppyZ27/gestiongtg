@@ -22,7 +22,8 @@ export default function FicheMandatButton({ formData, clients, editingDossier, e
     
     let freshClientsMap = {};
     if (allClientIds.length > 0) {
-      const freshClients = await base44.entities.Client.filter({ id: { $in: allClientIds } });
+      const allClients = await base44.entities.Client.list();
+      const freshClients = allClients.filter(c => allClientIds.includes(c.id));
       freshClients.forEach(c => { freshClientsMap[c.id] = c; });
     }
     // Fallback sur le cache local si non trouvé
