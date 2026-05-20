@@ -839,6 +839,14 @@ html.light button.arpenteur-tab-btn[data-arpenteur="Benjamin Larouche"] {
   -webkit-text-fill-color: hsl(188, 80%, 22%) !important;
 }
 
+/* Checkbox checkmark — noir en light mode */
+html.light [data-state="checked"] svg,
+html.light [role="checkbox"][data-state="checked"] svg,
+html.light [data-radix-checkbox-indicator] svg {
+  color: hsl(220, 20%, 10%) !important;
+  stroke: hsl(220, 20%, 10%) !important;
+}
+
 /* Liens téléphone clicables en light mode */
 html.light a[href^="tel:"] {
   color: hsl(220, 80%, 50%) !important;
