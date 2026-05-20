@@ -432,6 +432,11 @@ Deno.serve(async (req) => {
     d.txt('Arpenteur-géomètre :', ML+CW/2+3, y+12, { b:true, sz:8.5, col:C.lbl });
     d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+86, y+12, { sz:8.5 });
     y += 16;
+    // Espace pour signature
+    d.box(ML, y, CW, 25);
+    d.txt('Signature :', ML+3, y+21, { b:true, sz:8.5, col:C.lbl });
+    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+3, y+21, { sz:8.5 });
+    y += 25;
 
     // (no footer)
 
@@ -476,7 +481,7 @@ Deno.serve(async (req) => {
       // Section sub-header
       d2.fill(ML, y2, CW, 11, C.orange);
       d2.box(ML, y2, CW, 11);
-      d2.txt(section.label, ML+4, y2+11/2 + 1, { b:true, sz:8, col:C.white, ctr:true });
+      d2.txt(section.label, ML + CW/2, y2+11/2 + 1, { b:true, sz:8, col:C.white, ctr:true });
       y2 += 11;
 
       const sectionEntrees = entreesTemps.filter(e => section.taches.includes(e.tache));
@@ -503,7 +508,8 @@ Deno.serve(async (req) => {
     // Total des heures
     y2 += 4;
     d2.box(ML, y2, CW, 14);
-    d2.txt(`TOTAL DES HEURES: ${totalHeures.toFixed(2)}h`, ML+CW-100, y2+10, { b:true, sz:9, col:C.dark, rgt:true });
+    d2.txt(`TOTAL DES HEURES:`, ML+3, y2+10, { b:true, sz:9, col:C.dark });
+    d2.txt(`${totalHeures.toFixed(2)}h`, txArr[4]+2, y2+10, { b:true, sz:9, col:C.dark });
     y2 += 14;
 
     // (no footer)
