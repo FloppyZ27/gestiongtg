@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
       // Section header (full width, filled red)
       const sHdr = (title, ty, h = 17) => {
         fill(ML, ty, CW, h, C.red);
-        txt(title, ML + CW/2, ty + h - 2, { b:true, sz:9, col:C.white, ctr:true });
+        txt(title, ML + CW/2, ty + h/2 + 1, { b:true, sz:9, col:C.white, ctr:true });
         return h;
       };
 
@@ -135,7 +135,6 @@ Deno.serve(async (req) => {
     let y = 18;
 
     // ─── Header ───────────────────────────────────────────────────────
-    d.fill(0, 0, PW, y + 44, C.header);
     d.fill(0, y + 44, PW, 3, C.red);
 
     // Logo
@@ -203,8 +202,8 @@ Deno.serve(async (req) => {
     const c1Ville = c1Adr?.ville || '';
     const c1CP    = c1Adr?.code_postal || '';
     const extraClients = Math.max(0, (clientsData||[]).length - 1);
-    // 2 en-têtes (17px chacun) + 6 lignes client + extraClients + 4 lignes loc
-    const leftHeight = 17 + (6 + extraClients) * RH + 17 + 4 * RH;
+    // 2 en-têtes (17px chacun) + 7 lignes client (avec type) + extraClients + 4 lignes loc
+    const leftHeight = 17 + (7 + extraClients) * RH + 17 + 4 * RH;
 
     // ── Fetch carte avec le bon ratio ──
     let mapImageBytes = null;
@@ -225,7 +224,7 @@ Deno.serve(async (req) => {
     // ── Sous-helper pour en-tête de section demi-largeur ──
     const halfHdr = (title, ty) => {
       d.fill(ML, ty, LH, 17, C.red);
-      d.txt(title, ML + LH/2, ty + 17 - 2, { b:true, sz:9, col:C.white, ctr:true });
+      d.txt(title, ML + LH/2, ty + 17/2 + 1, { b:true, sz:9, col:C.white, ctr:true });
     };
     const halfRow = (lbl, val, ty) => {
       d.box(ML, ty, LH, RH);
@@ -237,8 +236,9 @@ Deno.serve(async (req) => {
     // ── CLIENT(S) ──
     halfHdr('CLIENT(S)', y);
     y += 15;
-    // Ordre: Nom, Téléphone, Courriel, Adresse, Municipalité, Code postal
-    [['Nom(s) :', c1Name], ['Téléphone :', c1Tel], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
+    const c1TelType = client1?.telephones?.[0]?.type_telephone || '';
+    // Ordre: Nom, Téléphone, Type téléphone, Courriel, Adresse, Municipalité, Code postal
+    [['Nom(s) :', c1Name], ['Téléphone :', c1Tel], ['Type :', c1TelType], ['Courriel :', c1Email], ['Adresse :', c1Rue], ['Municipalité :', c1Ville], ['Code postal :', c1CP]]
       .forEach(([lbl, val]) => { halfRow(lbl, val, y); y += RH; });
     for (let ci=1; ci<(clientsData||[]).length; ci++) {
       const cx = clientsData[ci];
@@ -348,11 +348,11 @@ Deno.serve(async (req) => {
     y += d.sHdr('PRIX', y);
 
     const mandats = dossierData.mandats || [];
-    // Table header
-    const pCols = [CW*0.35, CW*0.18, CW*0.15, CW*0.15, CW*0.17];
-    const pX    = [ML, ML+pCols[0], ML+pCols[0]+pCols[1], ML+pCols[0]+pCols[1]+pCols[2], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3]];
+    // Table header: Opération, Prix estimé, Rabais, Prix convenu, Total HT, Taxes
+    const pCols = [CW*0.28, CW*0.14, CW*0.12, CW*0.14, CW*0.14, CW*0.18];
+    const pX    = [ML, ML+pCols[0], ML+pCols[0]+pCols[1], ML+pCols[0]+pCols[1]+pCols[2], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3], ML+pCols[0]+pCols[1]+pCols[2]+pCols[3]+pCols[4]];
     d.box(ML, y, CW, 13);
-    ['Opération','Prix estimé','Rabais','Total HT','Taxes'].forEach((h,i) => {
+    ['Opération','Prix estimé','Rabais','Prix convenu','Total HT','Taxes'].forEach((h,i) => {
       d.txt(h, pX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
       if(i>0) d.vline(pX[i], y, y+13);
     });
@@ -364,13 +364,15 @@ Deno.serve(async (req) => {
       const rab   = Number(m.rabais)||0;
       const total = prix - rab;
       grandTotal += total;
+      const prixConvenu = m.prix_convenu ? 'Oui' : 'Non';
       d.box(ML, y, CW, 15);
       pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
       d.txt(m.type_mandat||`Mandat ${i+1}`, pX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
       d.txt(fm(prix),  pX[1]+3, y+11, { sz:8.5 });
       d.txt(fm(rab),   pX[2]+3, y+11, { sz:8.5 });
-      d.txt(fm(total), pX[3]+3, y+11, { sz:8.5 });
-      d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[4]+3, y+11, { sz:8 });
+      d.txt(prixConvenu, pX[3]+3, y+11, { sz:8 });
+      d.txt(fm(total), pX[4]+3, y+11, { sz:8.5 });
+      d.txt(m.taxes_incluses?'Incl.':'Non-Incl.', pX[5]+3, y+11, { sz:8 });
       y += 15;
       // Notes du mandat (toujours visible) — field: commentaire_tarification
       const mNotes = String(m.commentaire_tarification || m.notes || '').trim();
@@ -389,7 +391,7 @@ Deno.serve(async (req) => {
     d.box(ML, y, CW, 16);
     pX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+16); });
     d.txt('TOTAL', pX[0]+3, y+12, { b:true, sz:9, col:C.dark });
-    d.txt(fm(grandTotal), pX[3]+3, y+12, { b:true, sz:10, col:C.dark });
+    d.txt(fm(grandTotal), pX[4]+3, y+12, { b:true, sz:10, col:C.dark });
     y += 16;
 
     // ─── SECTION: MINUTES ─────────────────────────────────────────────
@@ -463,16 +465,18 @@ Deno.serve(async (req) => {
       { label:'PLANIFICATION', taches:['Ouverture','Montage','Compilation','Décision/Calcul','Analyse'] },
       { label:'TERRAIN', taches:['Terrain','Cédule'] },
       { label:'RECHERCHES ET ANALYSE FONCIÈRE', taches:['Recherches','Mise en plan','Reliage'] },
-      { label:'TRAITEMENT ET DESSIN / RAPPORT', taches:['Rapport','Vérification','Facturer'] },
+      { label:'TRAITEMENT ET DESSIN', taches:['Rapport'] },
+      { label:'RAPPORT', taches:['Vérification','Facturer'] },
     ];
 
     const entreesTemps = entreesTempsData || [];
 
+    let totalHeures = 0;
     for (const section of sections2) {
       // Section sub-header
       d2.fill(ML, y2, CW, 11, C.orange);
       d2.box(ML, y2, CW, 11);
-      d2.txt(section.label, ML+4, y2+8.5, { b:true, sz:8, col:C.white });
+      d2.txt(section.label, ML+4, y2+11/2 + 1, { b:true, sz:8, col:C.white, ctr:true });
       y2 += 11;
 
       const sectionEntrees = entreesTemps.filter(e => section.taches.includes(e.tache));
@@ -488,11 +492,19 @@ Deno.serve(async (req) => {
           d2.txt(safe(empName), txArr[1]+2, y2+9, { sz:7 });
           d2.txt(safe(e.description||e.mandat||''), txArr[2]+2, y2+9, { sz:7 });
           d2.txt(safe(e.tache||''), txArr[3]+2, y2+9, { sz:7 });
-          d2.txt(e.heures ? `${e.heures}h` : '', txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.dark });
+          const heuresStr = e.heures ? `${e.heures}h` : '';
+          d2.txt(heuresStr, txArr[4]+2, y2+9, { b:true, sz:7.5, col:C.dark });
+          totalHeures += (e.heures || 0);
         }
         y2 += 12;
       }
     }
+
+    // Total des heures
+    y2 += 4;
+    d2.box(ML, y2, CW, 14);
+    d2.txt(`TOTAL DES HEURES: ${totalHeures.toFixed(2)}h`, ML+CW-100, y2+10, { b:true, sz:9, col:C.dark, rgt:true });
+    y2 += 14;
 
     // (no footer)
 
