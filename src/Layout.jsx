@@ -189,18 +189,34 @@ function LayoutContent({ children, currentPageName }) {
     const saved = localStorage.getItem('gestiongtg-nav-categories');
     return saved ? JSON.parse(saved) : {
       "Utilisateur": true,
-      "Dossier Arpentage": true,
-      "Terrain": true,
-      "Comptabilité": true,
-      "Recherches": true,
-      "Inventaire": true,
-      "Ressources humaines": true
+      "Dossier Arpentage": false,
+      "Terrain": false,
+      "Comptabilité": false,
+      "Recherches": false,
+      "Inventaire": false,
+      "Ressources humaines": false
     };
   });
 
   useEffect(() => {
     localStorage.setItem('gestiongtg-nav-categories', JSON.stringify(openCategories));
   }, [openCategories]);
+
+  const toggleCategory = (categoryTitle) => {
+    setOpenCategories(prev => {
+      const newState = {
+        "Utilisateur": false,
+        "Dossier Arpentage": false,
+        "Terrain": false,
+        "Comptabilité": false,
+        "Recherches": false,
+        "Inventaire": false,
+        "Ressources humaines": false
+      };
+      newState[categoryTitle] = !prev[categoryTitle];
+      return newState;
+    });
+  };
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showPunchControls, setShowPunchControls] = useState(false);
   const [isHoveringPunch, setIsHoveringPunch] = useState(false);
@@ -659,21 +675,24 @@ function LayoutContent({ children, currentPageName }) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationCategories.map((category) => {
-                    const isOpen = openCategories[category.title] ?? true;
-                    const toggleCategory = () => {
-                      setOpenCategories(prev => ({ ...prev, [category.title]: !prev[category.title] }));
-                    };
+                    const isOpen = openCategories[category.title] ?? false;
                     return (
-                    <Collapsible key={category.title} open={isOpen} onOpenChange={toggleCategory} className="mb-2">
-                      {!isCollapsed && category.items.length > 0 && (
+                    <Collapsible key={category.title} open={isOpen} onOpenChange={() => toggleCategory(category.title)} className="mb-3">
+                      {!isCollapsed && (
                         <CollapsibleTrigger asChild>
-                          <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2 cursor-pointer hover:text-slate-300 transition-colors flex items-center gap-2">
-                            <ChevronDown className={`w-3 h-3 transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
-                            {category.title}
-                          </SidebarGroupLabel>
+                          <div className="px-2 py-1.5">
+                            <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all cursor-pointer ${
+                              isOpen 
+                                ? 'bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30' 
+                                : 'bg-slate-800/40 border border-slate-700/50 hover:bg-slate-700/50'
+                            }`}>
+                              <ChevronDown className={`w-4 h-4 text-primary transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
+                              <span className="text-xs font-bold text-primary uppercase tracking-wider">{category.title}</span>
+                            </div>
+                          </div>
                         </CollapsibleTrigger>
                       )}
-                      <CollapsibleContent>
+                      <CollapsibleContent className="ml-2">
                       {category.items.map((item) => (
                         <SidebarMenuItem key={item.title}>
                           {isCollapsed ? (
