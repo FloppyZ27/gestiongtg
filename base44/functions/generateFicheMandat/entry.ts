@@ -317,11 +317,11 @@ Deno.serve(async (req) => {
     y += 15;
 
     // Livraison preferences per client
-    const livCols = [CW*0.22, CW*0.26, CW*0.26, CW*0.26];
-    const colX = [ML, ML+livCols[0], ML+livCols[0]+livCols[1], ML+livCols[0]+livCols[1]+livCols[2]];
+    const livCols = [CW*0.33, CW*0.33, CW*0.34];
+    const colX = [ML, ML+livCols[0], ML+livCols[0]+livCols[1]];
     // Header row for livraison
     d.box(ML, y, CW, 13);
-    ['Destinataire','Préférences de livraison','Adresse courriel','Mode de facturation'].forEach((h,i) => {
+    ['Destinataire','Préférences de livraison','Mode de facturation'].forEach((h,i) => {
       d.txt(h, colX[i]+3, y+10, { b:true, sz:8, col:C.lbl });
       if (i>0) d.vline(colX[i], y, y+13);
     });
@@ -334,12 +334,10 @@ Deno.serve(async (req) => {
     for (let i=0; i<allPersons.length; i++) {
       const { label, person } = allPersons[i];
       const prefs = (person?.preferences_livraison||[]).join(', ');
-      const em = person?.courriels?.[0]?.courriel||'';
       d.box(ML, y, CW, 15);
       colX.forEach((x,ci) => { if(ci>0) d.vline(x, y, y+15); });
       d.txt(label, colX[0]+3, y+11, { b:true, sz:8, col:C.lbl });
       d.txt(prefs, colX[1]+3, y+11, { sz:8 });
-      d.txt(em, colX[2]+3, y+11, { sz:8 });
       y += 15;
     }
 
@@ -426,17 +424,15 @@ Deno.serve(async (req) => {
     y += 2;
     y += d.sHdr('FERMETURE', y);
     d.box(ML, y, CW, 16);
-    d.vline(ML+CW/2, y, y+16);
     d.txt('Date de fermeture :', ML+3, y+12, { b:true, sz:8.5, col:C.lbl });
     d.txt(fd(dossierData.date_fermeture), ML+82, y+12, { sz:8.5 });
-    d.txt('Arpenteur-géomètre :', ML+CW/2+3, y+12, { b:true, sz:8.5, col:C.lbl });
-    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+86, y+12, { sz:8.5 });
     y += 16;
-    // Espace pour signature
-    d.box(ML, y, CW, 25);
-    d.txt('Signature :', ML+3, y+21, { b:true, sz:8.5, col:C.lbl });
-    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2+3, y+21, { sz:8.5 });
-    y += 25;
+    // Espace pour signature avec ligne
+    d.box(ML, y, CW, 40);
+    // Ligne pour signature
+    d.line(ML+20, y+30, ML+CW-20, C.border);
+    d.txt(dossierData.arpenteur_geometre||'', ML+CW/2, y+38, { b:true, sz:8.5, col:C.dark, ctr:true });
+    y += 40;
 
     // (no footer)
 
