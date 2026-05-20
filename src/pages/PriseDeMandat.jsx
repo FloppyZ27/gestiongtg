@@ -756,7 +756,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     const updatedHistorique=[...newHistoriqueEntries,...historique];
 
     try {
-      await updatePriseMandatMutation.mutateAsync({
+      return await updatePriseMandatMutation.mutateAsync({
         id: editingPriseMandat.id,
         data: { ...dataToSubmit, historique: updatedHistorique },
         autoSave: true
@@ -2329,7 +2329,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 mandatsInfo.some(m => m.type_mandat) ||
                 (commentairesTemporaires?.length ?? 0) > 0;
               
-              if(editingPriseMandat){await handleAutoSave();if(!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");return;}
+              if(editingPriseMandat){const _pm=await handleAutoSave();if(!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...(_pm||editingPriseMandat),locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");return;}
               if(hasChanges&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
               queryClient.invalidateQueries({queryKey:['priseMandats']});
               setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
