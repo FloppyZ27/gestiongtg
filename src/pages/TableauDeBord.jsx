@@ -143,12 +143,16 @@ export default function TableauDeBord() {
     });
   };
 
-  // Dossiers à monter aujourd'hui (utilisateur est donneur)
+  // Dossiers à montrer aujourd'hui (utilisateur est donneur - même logique que Cédule Terrain)
+  const todayStr = format(today, 'yyyy-MM-dd');
   const dossiersAMonterAujourdhui = dossiers.filter(d => {
+    if (d.statut === 'Fermé') return false;
     return d.mandats?.some(m => {
-      if (!isSameDay(new Date(m.date_livraison || ''), today)) return false;
-      // Vérifier si l'utilisateur est donneur (assigné à la tâche Montage)
-      return m.tache_actuelle === 'Montage' && m.utilisateur_assigne === user?.email;
+      // Vérifier que la date de terrain est aujourd'hui
+      if (!m.date_terrain || m.statut_terrain === 'pas_de_terrain') return false;
+      if (m.date_terrain !== todayStr) return false;
+      // Vérifier que l'utilisateur est le donneur (assigné à la tâche Terrain)
+      return m.tache_actuelle === 'Terrain' && m.utilisateur_assigne === user?.email;
     });
   });
 
