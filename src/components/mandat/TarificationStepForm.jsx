@@ -247,8 +247,8 @@ export default function TarificationStepForm({
                            <button
                              type="button"
                              onClick={() => setOpenCommentIndex(openCommentIndex === index ? null : index)}
-                             className={`border-0 bg-transparent shadow-none p-0 hover:bg-transparent ${mandat.commentaire_tarification ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'}`}
-                             title={mandat.commentaire_tarification || "Ajouter un commentaire"}
+                             className={`border-0 bg-transparent shadow-none p-0 hover:bg-transparent ${mandat.notes ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'}`}
+                             title={mandat.notes || "Ajouter un commentaire"}
                            >
                              <MessageSquare className="w-4 h-4" />
                            </button>
@@ -261,11 +261,11 @@ export default function TarificationStepForm({
                          <tr className="bg-slate-900/50 border-b border-slate-800">
                            <td colSpan="9" className="p-2">
                              <Textarea
-                               value={mandat.commentaire_tarification || ""}
+                               value={mandat.notes || ""}
                                onChange={(e) => {
-                                 const updatedMandats = mandats.map((m, i) => {
+                                 const updatedMandats = mandatsRef.current.map((m, i) => {
                                    const copy = JSON.parse(JSON.stringify(m));
-                                   if (i === index) copy.commentaire_tarification = e.target.value;
+                                   if (i === index) copy.notes = e.target.value;
                                    return copy;
                                  });
                                  onTarificationChange(updatedMandats);
