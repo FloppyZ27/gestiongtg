@@ -822,7 +822,7 @@ export default function Comptabilite() {
                       <button
                         key={arp}
                         onClick={() => setSelectedArpenteur(arp)}
-                        className={`flex flex-col items-center justify-center py-2.5 px-2 text-xs font-medium transition-all border-b-2 ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
+                        className={`arpenteur-tab-btn flex flex-col items-center justify-center py-2.5 px-2 text-xs font-medium transition-all border-b-2 ${isActive ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
                         style={{
                           color: tabStyle.color,
                           background: tabStyle.background,
