@@ -134,11 +134,8 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
       if (!mapRef.current) return;
 
       try {
-        const map = new window.google.maps.Map(mapRef.current, {
-          zoom: 10,
-          center: { lat: 48.5198, lng: -71.6859 }, // Alma, QC
-          mapTypeId: 'roadmap',
-          styles: [
+        const isLightMode = document.documentElement.classList.contains('light');
+        const darkStyles = [
             { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
             { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
             { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
@@ -159,7 +156,12 @@ export default function MultiRouteMap({ routes, apiKey, onRouteDurations, visibl
             { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
             { featureType: 'poi', stylers: [{ visibility: 'off' }] },
             { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-          ],
+        ];
+        const map = new window.google.maps.Map(mapRef.current, {
+          zoom: 10,
+          center: { lat: 48.5198, lng: -71.6859 }, // Alma, QC
+          mapTypeId: 'roadmap',
+          styles: isLightMode ? [] : darkStyles,
         });
 
         googleMapRef.current = map;

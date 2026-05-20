@@ -60,11 +60,8 @@ function TerrainMap({ cards, apiKey, clients, users }) {
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
-    const map = new window.google.maps.Map(mapRef.current, {
-      zoom: 10,
-      center: { lat: 48.5, lng: -71.6 },
-      mapTypeId: 'roadmap',
-      styles: [
+    const isLightMode = document.documentElement.classList.contains('light');
+    const darkStyles = [
         { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
         { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
         { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
@@ -85,7 +82,12 @@ function TerrainMap({ cards, apiKey, clients, users }) {
         { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
         { featureType: 'poi', stylers: [{ visibility: 'off' }] },
         { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-      ],
+    ];
+    const map = new window.google.maps.Map(mapRef.current, {
+      zoom: 10,
+      center: { lat: 48.5, lng: -71.6 },
+      mapTypeId: 'roadmap',
+      styles: isLightMode ? [] : darkStyles,
     });
     mapInstanceRef.current = map;
   }, [isLoaded]);
