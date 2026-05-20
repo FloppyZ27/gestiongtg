@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
 
     // Place d'affaire + TTL row
     rct(R - 160, 62, 78, 14, rgb(0.10, 0.16, 0.38));
-    txt(`📍 ${dossierData.place_affaire || '–'}`, R - 122, 69, { size:8, color:WHITE, align:'center' });
+    txt(dossierData.place_affaire || '–', R - 122, 69, { size:8, color:WHITE, align:'center' });
     rct(R - 81, 62, 79, 14, dossierData.ttl === 'Oui' ? rgb(0.70, 0.35, 0.05) : rgb(0.10, 0.16, 0.38));
     txt(dossierData.ttl === 'Oui' ? 'TTL' : 'Non-TTL', R - 41, 69, { bold:true, size:8, color:WHITE, align:'center' });
 
