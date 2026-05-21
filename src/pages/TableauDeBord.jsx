@@ -318,11 +318,11 @@ export default function TableauDeBord() {
                 )}
               </div>
               <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5 flex-shrink-0">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide">Terminés / À Faire</span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-wide">Terminés / Total</span>
                 <span className="text-sm font-bold leading-tight text-foreground">
                   {mandatsTerminesSemaine.length}
                   <span className="text-slate-500"> / </span>
-                  {mandatsAFaireSemaine.length}
+                  {mandatsSemaine.length}
                 </span>
               </div>
             </div>
