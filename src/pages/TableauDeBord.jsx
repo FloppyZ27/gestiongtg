@@ -10,10 +10,12 @@ import {
   Calendar, TrendingUp, AlertCircle, CheckCircle2, 
   MapPin, FileText, User, BarChart3, Truck
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays, addWeeks } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays, addWeeks, differenceInCalendarWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import EditDossierDialog from "@/components/dossiers/EditDossierDialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
@@ -83,6 +85,7 @@ export default function TableauDeBord() {
   const [editingDossier, setEditingDossier] = useState(null);
   const [periodeRendement, setPeriodeRendement] = useState("semaine");
   const [weekOffset, setWeekOffset] = useState(0);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -332,10 +335,33 @@ export default function TableauDeBord() {
                 onClick={() => setWeekOffset(w => w - 1)}
                 style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
               >‹</button>
-              <span style={{fontWeight:700,color:'white',fontSize:'15px',display:'flex',alignItems:'center',gap:'7px'}}>
-                Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
-                <Calendar className="w-4 h-4" style={{color:'hsl(210,11%,55%)'}} />
-              </span>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <span
+                    style={{fontWeight:700,color:'white',fontSize:'15px',display:'flex',alignItems:'center',gap:'7px',cursor:'pointer',padding:'4px 8px',borderRadius:'8px',transition:'background 0.15s',background: isCalendarOpen ? 'hsl(220,13%,20%)' : 'transparent'}}
+                    onMouseEnter={e => e.currentTarget.style.background='hsl(220,13%,20%)'}
+                    onMouseLeave={e => { if (!isCalendarOpen) e.currentTarget.style.background='transparent'; }}
+                  >
+                    Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
+                    <Calendar className="w-4 h-4" style={{color:'hsl(210,11%,55%)'}} />
+                  </span>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarPicker
+                    mode="single"
+                    selected={weekStart}
+                    onSelect={(date) => {
+                      if (!date) return;
+                      const newWeekStart = startOfWeek(date, { weekStartsOn: 1 });
+                      const baseWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+                      setWeekOffset(differenceInCalendarWeeks(newWeekStart, baseWeekStart, { weekStartsOn: 1 }));
+                      setIsCalendarOpen(false);
+                    }}
+                    locale={fr}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <button
                 onClick={() => setWeekOffset(w => w + 1)}
                 style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
