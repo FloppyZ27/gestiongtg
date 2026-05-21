@@ -466,10 +466,13 @@ export default function TableauDeBord() {
           {/* Col 1: Dossiers à monter aujourd'hui */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
-              <CardTitle className="text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-orange-400" />
-                Dossiers à monter aujourd'hui
-              </CardTitle>
+              <div className="flex justify-between items-center w-full">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-orange-400" />
+                  Dossiers à monter aujourd'hui
+                </CardTitle>
+                <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{dossiersAMonterAujourdhui.length}</Badge>
+              </div>
             </CardHeader>
             <CardContent className="p-4">
               {dossiersAMonterAujourdhui.length > 0 ? (
