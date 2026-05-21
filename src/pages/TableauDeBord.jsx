@@ -304,14 +304,11 @@ export default function TableauDeBord() {
               {mandatsSemaine.length > 0 && (
                 <div className="flex-1 flex flex-col gap-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression moyenne</span>
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression de la semaine</span>
                     <span className="text-[10px] font-bold text-slate-300">{avgProgress}%</span>
                   </div>
-                  <div className="w-full bg-slate-900/50 h-4 rounded-full overflow-hidden relative">
+                  <div className="w-full bg-slate-900/50 h-2 rounded-full overflow-hidden relative">
                     <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${avgProgress}%` }} />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{avgProgress}%</span>
-                    </div>
                   </div>
                 </div>
               )}
