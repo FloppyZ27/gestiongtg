@@ -295,10 +295,9 @@ export default function TableauDeBord() {
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 Calendrier des livraisons - Semaine en cours
               </CardTitle>
-              <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-xs text-slate-400">Fermés / Prévus</span>
-                <span className="text-sm font-bold">
+              <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wide">Fermés / Prévus</span>
+                <span className="text-sm font-bold leading-tight">
                   <span className="text-emerald-400">{mandatsFermesSemaine.length}</span>
                   <span className="text-slate-500"> / </span>
                   <span className="text-yellow-300">{mandatsSemaine.length}</span>
