@@ -302,24 +302,6 @@ export default function TableauDeBord() {
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 Calendrier des livraisons
               </CardTitle>
-              {/* Navigation semaine */}
-              <div className="flex items-center gap-2 mx-4">
-                <button onClick={() => setWeekOffset(w => w - 1)} style={{background:'transparent',border:'none',color:'hsl(210,11%,75%)',fontSize:'20px',cursor:'pointer',padding:'2px 6px',lineHeight:1,borderRadius:'6px'}}>
-                  ‹
-                </button>
-                <span className="font-bold text-white text-sm whitespace-nowrap flex items-center gap-1.5">
-                  Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                </span>
-                <button onClick={() => setWeekOffset(w => w + 1)} style={{background:'transparent',border:'none',color:'hsl(210,11%,75%)',fontSize:'20px',cursor:'pointer',padding:'2px 6px',lineHeight:1,borderRadius:'6px'}}>
-                  ›
-                </button>
-                {weekOffset !== 0 && (
-                  <button onClick={() => setWeekOffset(0)} style={{background:'hsl(0,80%,50%)',border:'none',color:'white',borderRadius:'8px',padding:'4px 12px',fontWeight:600,fontSize:'12px',cursor:'pointer',marginLeft:'4px'}}>
-                    Aujourd'hui
-                  </button>
-                )}
-              </div>
               <div className="flex-1 flex justify-center">
                 {mandatsSemaine.length > 0 && (
                   <div className="flex flex-col gap-1" style={{width: '40%'}}>
@@ -344,6 +326,27 @@ export default function TableauDeBord() {
             </div>
           </CardHeader>
           <CardContent className="p-4">
+            {/* Navigation semaine */}
+            <div className="flex items-center justify-center gap-3 mb-4 pb-3 border-b border-slate-800">
+              <button
+                onClick={() => setWeekOffset(w => w - 1)}
+                style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
+              >‹</button>
+              <span style={{fontWeight:700,color:'white',fontSize:'15px',display:'flex',alignItems:'center',gap:'7px'}}>
+                Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
+                <Calendar className="w-4 h-4" style={{color:'hsl(210,11%,55%)'}} />
+              </span>
+              <button
+                onClick={() => setWeekOffset(w => w + 1)}
+                style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
+              >›</button>
+              {weekOffset !== 0 && (
+                <button
+                  onClick={() => setWeekOffset(0)}
+                  style={{background:'hsl(0,80%,50%)',border:'none',color:'white',borderRadius:'8px',padding:'5px 14px',fontWeight:700,fontSize:'13px',cursor:'pointer'}}
+                >Aujourd'hui</button>
+              )}
+            </div>
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
               {weekDays.map((date) => {
                 const isToday = isSameDay(date, today);
