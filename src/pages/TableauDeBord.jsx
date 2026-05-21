@@ -290,12 +290,12 @@ export default function TableauDeBord() {
                 return sum + (idx >= 0 ? Math.round(((idx / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
               }, 0) / mandatsSemaine.length)
             : 0;
-          const mandatsFermesSemaine = dossiers.filter(d => {
-            if (d.statut !== 'Fermé' || !d.date_fermeture) return false;
-            if (arpenteurEquipe && d.arpenteur_geometre !== arpenteurEquipe) return false;
-            const df = new Date(d.date_fermeture);
-            return df >= weekStart && df <= weekEnd;
-          });
+          const mandatsTerminesSemaine = mandatsSemaine.filter(card =>
+            card.dossier.statut === 'Fermé' || card.mandat.tache_actuelle === 'Facturer'
+          );
+          const mandatsAFaireSemaine = mandatsSemaine.filter(card =>
+            card.dossier.statut !== 'Fermé' && card.mandat.tache_actuelle !== 'Facturer'
+          );
           return (
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
@@ -318,11 +318,11 @@ export default function TableauDeBord() {
                 )}
               </div>
               <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5 flex-shrink-0">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide">Fermés / Prévus</span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-wide">Terminés / À Faire</span>
                 <span className="text-sm font-bold leading-tight text-foreground">
-                  {mandatsFermesSemaine.length}
+                  {mandatsTerminesSemaine.length}
                   <span className="text-slate-500"> / </span>
-                  {mandatsSemaine.length}
+                  {mandatsAFaireSemaine.length}
                 </span>
               </div>
             </div>
