@@ -10,7 +10,7 @@ import {
   Calendar, TrendingUp, AlertCircle, CheckCircle2, 
   MapPin, FileText, User, BarChart3, Truck
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays, addWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import EditDossierDialog from "@/components/dossiers/EditDossierDialog";
@@ -82,6 +82,7 @@ export default function TableauDeBord() {
   const navigate = useNavigate();
   const [editingDossier, setEditingDossier] = useState(null);
   const [periodeRendement, setPeriodeRendement] = useState("semaine");
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -135,8 +136,8 @@ export default function TableauDeBord() {
   };
 
   // Semaine en cours (lundi-vendredi)
-  const weekStart = startOfWeek(today, { locale: fr, weekStartsOn: 1 });
-  const weekEnd = endOfWeek(today, { locale: fr, weekStartsOn: 1 });
+  const weekStart = startOfWeek(addWeeks(today, weekOffset), { locale: fr, weekStartsOn: 1 });
+  const weekEnd = endOfWeek(addWeeks(today, weekOffset), { locale: fr, weekStartsOn: 1 });
   const weekDays = [];
   for (let i = 0; i < 5; i++) {
     const day = new Date(weekStart);
@@ -272,6 +273,37 @@ export default function TableauDeBord() {
               <p className="text-slate-400">Vue opérationnelle de la semaine du {format(weekStart, "dd MMMM", { locale: fr })}</p>
             </div>
           </div>
+        </div>
+
+        {/* Navigation semaine */}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setWeekOffset(w => w - 1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              style={{background: 'transparent', border: '1px solid hsl(220,10%,28%)', color: 'hsl(210,11%,70%)', minWidth: 0, padding: 0}}
+            >
+              ‹
+            </button>
+            <span className="font-bold text-white text-sm">
+              Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
+            </span>
+            <button
+              onClick={() => setWeekOffset(w => w + 1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              style={{background: 'transparent', border: '1px solid hsl(220,10%,28%)', color: 'hsl(210,11%,70%)', minWidth: 0, padding: 0}}
+            >
+              ›
+            </button>
+          </div>
+          {weekOffset !== 0 && (
+            <button
+              onClick={() => setWeekOffset(0)}
+              style={{background: 'hsl(0,80%,50%)', border: 'none', color: 'white', borderRadius: '8px', padding: '4px 14px', fontWeight: 600, fontSize: '13px', cursor: 'pointer'}}
+            >
+              Aujourd'hui
+            </button>
+          )}
         </div>
 
         {/* Calendrier pleine largeur */}
