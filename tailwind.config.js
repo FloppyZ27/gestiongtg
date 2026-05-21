@@ -28,10 +28,6 @@ module.exports = {
     ],
   theme: {
   	extend: {
-  		fontFamily: {
-  			sans: ['DM Sans', 'sans-serif'],
-  			mono: ['DM Mono', 'monospace'],
-  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
