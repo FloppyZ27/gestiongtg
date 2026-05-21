@@ -7,14 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  Calendar, Users, TrendingUp, AlertCircle, CheckCircle2, 
-  Clock, MapPin, FileText, User, BarChart3, ArrowRight,
-  Package, Truck
+  Calendar, TrendingUp, AlertCircle, CheckCircle2, 
+  MapPin, FileText, User, BarChart3, Truck
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import EditDossierDialog from "@/components/dossiers/EditDossierDialog";
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -75,6 +73,11 @@ const getUserInitials = (name) => {
   return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = { "Certificat de localisation": "CL", "Description Technique": "DT", "Implantation": "Imp", "Levé topographique": "Levé Topo", "Piquetage": "Piq" };
+  return abbreviations[type] || type;
+};
+
 export default function TableauDeBord() {
   const navigate = useNavigate();
   const [editingDossier, setEditingDossier] = useState(null);
@@ -103,25 +106,28 @@ export default function TableauDeBord() {
     initialData: [],
   });
 
-  const { data: employes = [] } = useQuery({
-    queryKey: ['employes'],
-    queryFn: () => base44.entities.Employe.list(),
-    initialData: [],
-  });
-
   const today = new Date();
-
-  // Obtenir l'équipe de l'utilisateur
   const userEquipe = user?.equipe || null;
 
-  // Filtrer les dossiers de l'équipe
-  const dossiersEquipe = dossiers.filter(d => {
-    if (!userEquipe) return false;
-    return d.mandats?.some(m => {
-      const assigne = users.find(u => u.email === m.utilisateur_assigne);
-      return assigne?.equipe === userEquipe;
+  // Construire les cartes mandats (comme GestionDeMandat)
+  const allMandatCards = [];
+  dossiers.filter(d => d.statut === 'Ouvert').forEach(dossier => {
+    dossier.mandats?.forEach((mandat, mandatIndex) => {
+      allMandatCards.push({ id: `${dossier.id}-${mandatIndex}`, dossier, mandat, mandatIndex });
     });
   });
+
+  // Cartes du calendrier filtrées par équipe et date
+  const getMandatCardsForDay = (date) => {
+    return allMandatCards.filter(card => {
+      if (!card.mandat.date_livraison) return false;
+      if (!isSameDay(new Date(card.mandat.date_livraison + 'T00:00:00'), date)) return false;
+      if (!userEquipe) return false;
+      const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+      const cardTeam = assignedUser?.equipe || null;
+      return cardTeam === userEquipe;
+    });
+  };
 
   // Semaine en cours (lundi-vendredi)
   const weekStart = startOfWeek(today, { locale: fr, weekStartsOn: 1 });
@@ -133,25 +139,13 @@ export default function TableauDeBord() {
     weekDays.push(day);
   }
 
-  // Mandats par jour pour l'équipe
-  const getMandatsForDay = (date) => {
-    return dossiersEquipe.filter(dossier => {
-      return dossier.mandats?.some(mandat => {
-        if (!mandat.date_livraison) return false;
-        return isSameDay(new Date(mandat.date_livraison), date);
-      });
-    });
-  };
-
-  // Dossiers à montrer aujourd'hui (tous les terrains d'aujourd'hui avec l'utilisateur comme donneur)
+  // Dossiers à montrer aujourd'hui
   const todayStr = format(today, 'yyyy-MM-dd');
   const dossiersAMonterAujourdhui = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
     return d.mandats?.some(m => {
-      // Vérifier que la date de terrain est aujourd'hui
       if (!m.date_terrain) return false;
       if (m.date_terrain !== todayStr) return false;
-      // Vérifier que l'utilisateur est le donneur
       return m.terrain?.donneur === user?.full_name || m.terrains_list?.some(t => t.donneur === user?.full_name);
     });
   });
@@ -181,38 +175,30 @@ export default function TableauDeBord() {
     return isWithinInterval(dateOuverture, periodDates) && d.statut === 'Ouvert';
   }).length;
 
-  // Dossiers en retard - livraison (dossiers de l'arpenteur de l'utilisateur avec date de livraison antérieure à aujourd'hui)
+  // Dossiers en retard - livraison
   const dossiersEnRetardLivraison = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
-    
-    // Filtrer par l'arpenteur-géomètre correspondant à l'équipe de l'utilisateur
     const arpenteurAttendu = userEquipe === 'Samuel' ? 'Samuel Guay' :
                              userEquipe === 'Dany' ? 'Dany Gaboury' :
                              userEquipe === 'Pierre-Luc' ? 'Pierre-Luc Pilote' :
                              userEquipe === 'Benjamin' ? 'Benjamin Larouche' :
                              userEquipe === 'Frédéric' ? 'Frédéric Gilbert' : null;
-    
     if (!arpenteurAttendu || d.arpenteur_geometre !== arpenteurAttendu) return false;
-    
-    // Vérifier qu'au moins un mandat est en retard (pas de date de livraison OU date antérieure à aujourd'hui)
-    const hasMandatEnRetard = d.mandats?.some(m => {
-      if (!m.date_livraison) return true; // Pas de date = en retard
-      const dateLivraison = new Date(m.date_livraison);
-      return dateLivraison < today;
+    return d.mandats?.some(m => {
+      if (!m.date_livraison) return true;
+      return new Date(m.date_livraison) < today;
     });
-    return hasMandatEnRetard;
   }).sort((a, b) => {
     const minDateA = Math.min(...a.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
     const minDateB = Math.min(...b.mandats.filter(m => m.date_livraison).map(m => new Date(m.date_livraison).getTime()));
     return minDateA - minDateB;
   });
 
-  // Dossiers en retard - terrain (utilisateur connecté est donneur seulement)
+  // Dossiers en retard - terrain
   const dossiersEnRetardTerrain = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
     return d.mandats?.some(m => {
       if (!m.date_terrain || m.statut_terrain === 'pas_de_terrain') return false;
-      // Vérifier que l'utilisateur est le donneur (assigné à la tâche Terrain)
       if (m.tache_actuelle !== 'Terrain' || m.utilisateur_assigne !== user?.email) return false;
       const dateTerrain = new Date(m.date_terrain);
       return dateTerrain < today && !isSameDay(dateTerrain, today);
@@ -229,7 +215,6 @@ export default function TableauDeBord() {
   
   let statutRendement = "En contrôle";
   let couleurStatut = "text-emerald-400";
-  let couleurBarre = "from-emerald-500 to-teal-400";
   
   if (dossiersTermines > dossiersOuverts) {
     statutRendement = "En avance";
@@ -237,11 +222,13 @@ export default function TableauDeBord() {
   } else if (dossiersTermines < dossiersOuverts * 0.8) {
     statutRendement = "Sous le rendement";
     couleurStatut = "text-red-400";
-    couleurBarre = "from-red-500 to-orange-400";
   }
 
   // Analyse statistique
-  const chargeEquipe = dossiersEquipe.filter(d => d.statut === 'Ouvert').length;
+  const chargeEquipe = allMandatCards.filter(c => {
+    const assignedUser = users.find(u => u.email === c.mandat.utilisateur_assigne);
+    return assignedUser?.equipe === userEquipe;
+  }).length;
   const totalRetards = dossiersEnRetardLivraison.length + dossiersEnRetardTerrain.length;
   
   let recommandation = "";
@@ -255,18 +242,10 @@ export default function TableauDeBord() {
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
-    const clientNames = clientIds.map(id => {
+    return clientIds.map(id => {
       const client = clients.find(c => c.id === id);
       return client ? `${client.prenom} ${client.nom}` : "";
-    }).filter(name => name);
-    return clientNames.join(", ") || "-";
-  };
-
-  const getResponsable = (dossier) => {
-    const mandat = dossier.mandats?.[0];
-    if (!mandat?.utilisateur_assigne) return dossier.arpenteur_geometre;
-    const assigne = users.find(u => u.email === mandat.utilisateur_assigne);
-    return assigne?.full_name || dossier.arpenteur_geometre;
+    }).filter(name => name).join(", ") || "-";
   };
 
   const getEquipeTerrain = (dossier) => {
@@ -302,7 +281,7 @@ export default function TableauDeBord() {
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
               {weekDays.map((date) => {
                 const isToday = isSameDay(date, today);
-                const dossiersList = getMandatsForDay(date);
+                const cardsList = getMandatCardsForDay(date);
                 const dayName = format(date, 'EEE', { locale: fr });
                 const dayNum = format(date, 'd');
                 return (
@@ -313,38 +292,61 @@ export default function TableauDeBord() {
                         <p className={`${isToday ? 'text-emerald-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>{dayNum}</p>
                       </div>
                     </div>
-                    {dossiersList.length > 0 ? (
-                      <div className={`space-y-2 max-h-[400px] overflow-y-auto ${isToday ? '' : 'opacity-70'}`}>
-                        {dossiersList.map((dossier) => {
-                          const mandat = dossier.mandats?.[0];
-                          const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                          const bgColorClass = arpenteurColor.split(' ')[0];
+                    {cardsList.length > 0 ? (
+                      <div className={`space-y-2 max-h-[500px] overflow-y-auto ${isToday ? '' : 'opacity-70'}`}>
+                        {cardsList.map((card) => {
+                          const arpColor = getArpenteurColor(card.dossier.arpenteur_geometre);
+                          const [bg, , border] = arpColor.split(' ');
+                          const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+                          const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
+                          const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
                           return (
-                            <div key={dossier.id} className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`} onClick={() => setEditingDossier(dossier)}>
+                            <div key={card.id} className={`${bg} rounded-lg p-2 border ${border} cursor-pointer hover:scale-[1.02] transition-all`} onClick={() => setEditingDossier(card.dossier)}>
                               <div className="flex items-start justify-between gap-2 mb-2">
-                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
-                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>
+                                  {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
                                 </Badge>
-                                <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
-                                  {mandat?.type_mandat?.substring(0, 3).toUpperCase()}
+                                <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+                                  {getAbbreviatedMandatType(card.mandat.type_mandat)}
                                 </Badge>
                               </div>
                               <div className="flex items-center gap-1 mb-1">
                                 <User className="w-3 h-3 text-white flex-shrink-0" />
-                                <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                                <span className="text-xs text-white font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</span>
                               </div>
-                              {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                                <div className="flex items-start gap-1 mb-1">
-                                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                                  <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
+                              {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+                                <div className="flex items-center gap-1 mb-1">
+                                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                                  <span className="text-xs text-slate-400 truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
                                 </div>
                               )}
-                              <div className="mt-2 flex items-center justify-between">
-                                <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat?.tache_actuelle || 'Ouverture'}</Badge>
-                                <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
-                                  <AvatarImage src={users.find(u => u.email === mandat?.utilisateur_assigne)?.photo_url} />
-                                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(getResponsable(dossier))}</AvatarFallback>
-                                </Avatar>
+                              {card.mandat.tache_actuelle && (
+                                <div className="mb-1">
+                                  <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{card.mandat.tache_actuelle}</Badge>
+                                </div>
+                              )}
+                              <div className="flex items-center justify-between mt-2 pt-1" style={{borderTop: '1px solid rgba(239,68,68,0.3)'}}>
+                                {card.mandat.date_livraison ? (
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                    <span className="text-xs text-yellow-300">{format(new Date(card.mandat.date_livraison + 'T00:00:00'), 'dd MMM yy', { locale: fr })}</span>
+                                  </div>
+                                ) : <div />}
+                                {assignedUser ? (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-white font-bold">{getUserInitials(assignedUser.full_name)}</span>
+                                    <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
+                                      <AvatarImage src={assignedUser.photo_url} />
+                                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback>
+                                    </Avatar>
+                                  </div>
+                                ) : <div />}
+                              </div>
+                              <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden relative">
+                                <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{progress}%</span>
+                                </div>
                               </div>
                             </div>
                           );
@@ -380,7 +382,7 @@ export default function TableauDeBord() {
                     return (
                       <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>{mandat?.type_mandat}</Badge>
                         </div>
                         <div className="flex items-center gap-1 mb-1">
@@ -427,7 +429,7 @@ export default function TableauDeBord() {
                     return (
                       <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">{joursRetard}j</Badge>
                         </div>
                         <div className="flex items-center gap-1 mb-1">
@@ -474,7 +476,7 @@ export default function TableauDeBord() {
                     return (
                       <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">{joursRetard}j</Badge>
                         </div>
                         <div className="flex items-center gap-1 mb-1">
@@ -562,7 +564,7 @@ export default function TableauDeBord() {
                 <div className="space-y-3">
                   <div className="bg-slate-800/50 rounded-lg p-3">
                     <p className="text-xs text-slate-400 mb-1">Charge actuelle de l'équipe</p>
-                    <p className="text-2xl font-bold text-white">{chargeEquipe} dossiers</p>
+                    <p className="text-2xl font-bold text-white">{chargeEquipe} mandats</p>
                     <p className="text-xs text-slate-500 mt-1">en cours</p>
                   </div>
                   <div className="bg-slate-800/50 rounded-lg p-3">
@@ -579,8 +581,6 @@ export default function TableauDeBord() {
             </Card>
           </div>
         </div>
-
-
       </div>
 
       {editingDossier && (
