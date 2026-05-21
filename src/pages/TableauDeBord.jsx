@@ -290,405 +290,273 @@ export default function TableauDeBord() {
           </div>
         </div>
 
-        {/* Layout principal: Calendrier + Listes (gauche) + Stats (droite) */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 380px' }}>
-          {/* Colonne gauche: Calendrier + Dossiers */}
-          <div className="space-y-6">
-            {/* Section 1: Calendrier hebdomadaire de l'équipe */}
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-emerald-400" />
-                  Calendrier des livraisons - Semaine en cours
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="grid gap-3" style={{ gridTemplateColumns: weekDays.map((date) => isSameDay(date, today) ? '2fr' : '1fr').join(' ') }}>
-                  {weekDays.map((date) => {
-                    const isToday = isSameDay(date, today);
-                    const dossiersList = getMandatsForDay(date);
-                    const dayName = format(date, 'EEE', { locale: fr });
-                    const dayNum = format(date, 'd');
-                    
-                    return (
-                      <div key={date.toISOString()}>
-                        <div className={`rounded-lg transition-all mb-3 ${isToday ? 'ring-2 ring-emerald-400 bg-emerald-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-70'}`}>
-                          <div className={`text-center ${isToday ? 'border-b-2 border-emerald-400 pb-2' : ''}`}>
-                            <p className={`font-semibold capitalize ${isToday ? 'text-emerald-400 text-lg' : 'text-slate-300 text-sm'}`}>
-                              {dayName}
-                            </p>
-                            <p className={`${isToday ? 'text-emerald-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>
-                              {dayNum}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {dossiersList.length > 0 ? (
-                          <div className={`space-y-2 max-h-[400px] overflow-y-auto ${isToday ? '' : 'opacity-70'}`}>
-                            {dossiersList.map((dossier) => {
-                              const mandat = dossier.mandats?.[0];
-                              const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                              const bgColorClass = arpenteurColor.split(' ')[0];
-                              
-                              return (
-                                <div 
-                                  key={dossier.id}
-                                  className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`}
-                                  onClick={() => setEditingDossier(dossier)}
-                                >
-                                  <div className="flex items-start justify-between gap-2 mb-2">
-                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
-                                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                    </Badge>
-                                    <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
-                                      {mandat?.type_mandat?.substring(0, 3).toUpperCase()}
-                                    </Badge>
-                                  </div>
-
-                                  <div className="flex items-center gap-1 mb-1">
-                                    <User className="w-3 h-3 text-white flex-shrink-0" />
-                                    <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                                  </div>
-
-                                  {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                                    <div className="flex items-start gap-1 mb-1">
-                                      <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                                      <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
-                                    </div>
-                                  )}
-
-                                  <div className="mt-2 flex items-center justify-between">
-                                    <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
-                                      {mandat?.tache_actuelle || 'Ouverture'}
-                                    </Badge>
-                                    <div className="flex items-center gap-1">
-                                      <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
-                                        <AvatarImage src={users.find(u => u.email === mandat?.utilisateur_assigne)?.photo_url} />
-                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getUserInitials(getResponsable(dossier))}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    </div>
-                                  </div>
+        {/* Calendrier pleine largeur */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-emerald-400" />
+              Calendrier des livraisons - Semaine en cours
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid gap-3" style={{ gridTemplateColumns: weekDays.map((date) => isSameDay(date, today) ? '2fr' : '1fr').join(' ') }}>
+              {weekDays.map((date) => {
+                const isToday = isSameDay(date, today);
+                const dossiersList = getMandatsForDay(date);
+                const dayName = format(date, 'EEE', { locale: fr });
+                const dayNum = format(date, 'd');
+                return (
+                  <div key={date.toISOString()}>
+                    <div className={`rounded-lg transition-all mb-3 ${isToday ? 'ring-2 ring-emerald-400 bg-emerald-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-70'}`}>
+                      <div className={`text-center ${isToday ? 'border-b-2 border-emerald-400 pb-2' : ''}`}>
+                        <p className={`font-semibold capitalize ${isToday ? 'text-emerald-400 text-lg' : 'text-slate-300 text-sm'}`}>{dayName}</p>
+                        <p className={`${isToday ? 'text-emerald-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>{dayNum}</p>
+                      </div>
+                    </div>
+                    {dossiersList.length > 0 ? (
+                      <div className={`space-y-2 max-h-[400px] overflow-y-auto ${isToday ? '' : 'opacity-70'}`}>
+                        {dossiersList.map((dossier) => {
+                          const mandat = dossier.mandats?.[0];
+                          const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                          const bgColorClass = arpenteurColor.split(' ')[0];
+                          return (
+                            <div key={dossier.id} className={`${bgColorClass} rounded-lg p-2 hover:scale-[1.02] transition-all cursor-pointer`} onClick={() => setEditingDossier(dossier)}>
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                                <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+                                  {mandat?.type_mandat?.substring(0, 3).toUpperCase()}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-1 mb-1">
+                                <User className="w-3 h-3 text-white flex-shrink-0" />
+                                <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                              </div>
+                              {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                                <div className="flex items-start gap-1 mb-1">
+                                  <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                                  <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
                                 </div>
-                              );
-                            })}
+                              )}
+                              <div className="mt-2 flex items-center justify-between">
+                                <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat?.tache_actuelle || 'Ouverture'}</Badge>
+                                <Avatar className="w-5 h-5 border-2 border-emerald-500/50">
+                                  <AvatarImage src={users.find(u => u.email === mandat?.utilisateur_assigne)?.photo_url} />
+                                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(getResponsable(dossier))}</AvatarFallback>
+                                </Avatar>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className={`text-center ${isToday ? 'text-emerald-300/60' : 'text-slate-500/60'} text-xs`}>—</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 4 colonnes: Dossiers à monter, Retard livraison, Retard terrain, Statistiques */}
+        <div className="grid gap-6 grid-cols-4">
+          {/* Col 1: Dossiers à monter aujourd'hui */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-orange-400" />
+                Dossiers à monter aujourd'hui
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersAMonterAujourdhui.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersAMonterAujourdhui.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    return (
+                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>{mandat?.type_mandat}</Badge>
+                        </div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                          <div className="flex items-start gap-1 mb-2">
+                            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
                           </div>
-                        ) : (
-                          <p className={`text-center ${isToday ? 'text-emerald-300/60' : 'text-slate-500/60'} text-xs`}>
-                            —
-                          </p>
                         )}
+                        <Button size="sm" className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs" onClick={(e) => { e.stopPropagation(); setEditingDossier(dossier); }}>Ouvrir le dossier</Button>
                       </div>
                     );
                   })}
                 </div>
+              ) : (
+                <p className="text-center text-slate-500 py-8">Aucun dossier à monter aujourd'hui</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Col 2: Dossiers en retard - Livraison */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  Dossiers en retard - Livraison
+                </CardTitle>
+                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">{dossiersEnRetardLivraison.length}</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersEnRetardLivraison.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersEnRetardLivraison.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const dateLivraison = mandat?.date_livraison ? new Date(mandat.date_livraison) : null;
+                    const joursRetard = dateLivraison ? differenceInDays(today, dateLivraison) : 0;
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    return (
+                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">{joursRetard}j</Badge>
+                        </div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          <span className="text-xs text-slate-400">{dateLivraison ? format(dateLivraison, "dd MMM") : 'Aucune date'}</span>
+                        </div>
+                        <div className="mt-2">
+                          <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat?.tache_actuelle || 'Ouverture'}</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2"><CheckCircle2 className="w-5 h-5" />Aucun retard</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Col 3: Dossiers en retard - Terrain */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 py-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-amber-400" />
+                  Dossiers en retard - Terrain
+                </CardTitle>
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">{dossiersEnRetardTerrain.length}</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              {dossiersEnRetardTerrain.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {dossiersEnRetardTerrain.slice(0, 5).map((dossier) => {
+                    const mandat = dossier.mandats?.[0];
+                    const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
+                    const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
+                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    return (
+                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">{joursRetard}j</Badge>
+                        </div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <User className="w-3 h-3 text-white flex-shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          <span className="text-xs text-slate-400">{dateTerrain ? format(dateTerrain, "dd MMM") : '-'}</span>
+                        </div>
+                        <div className="mt-2">
+                          <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">{getEquipeTerrain(dossier)}</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2"><CheckCircle2 className="w-5 h-5" />Aucun retard</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Col 4: Statistiques + Rendement + Analyse */}
+          <div className="space-y-4">
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Terminés cette semaine</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <p className="text-3xl font-bold text-white">{dossiersTermines}</p>
+                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
               </CardContent>
             </Card>
-
-            {/* Section 2: Dossiers (3 colonnes) */}
-            <div className="grid gap-6 md:grid-cols-3">
-              {/* Dossiers à monter aujourd'hui */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-orange-400" />
-                    Dossiers à monter aujourd'hui
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {dossiersAMonterAujourdhui.length > 0 ? (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                      {dossiersAMonterAujourdhui.slice(0, 5).map((dossier) => {
-                        const mandat = dossier.mandats?.[0];
-                        const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                        const bgColorClass = arpenteurColor.split(' ')[0];
-                        
-                        return (
-                          <div 
-                            key={dossier.id}
-                            className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                            onClick={() => setEditingDossier(dossier)}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
-                              <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>
-                                {mandat?.type_mandat}
-                              </Badge>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
-                              <User className="w-3 h-3 text-white flex-shrink-0" />
-                              <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                            </div>
-
-                            {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                              <div className="flex items-start gap-1 mb-2">
-                                <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                                <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
-                              </div>
-                            )}
-
-                            <Button
-                              size="sm"
-                              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingDossier(dossier);
-                              }}
-                            >
-                              Ouvrir le dossier
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-center text-slate-500 py-8">Aucun dossier à monter aujourd'hui</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Dossiers en retard - Livraison */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-red-400" />
-                      Dossiers en retard - Livraison
-                    </CardTitle>
-                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                      {dossiersEnRetardLivraison.length}
-                    </Badge>
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 py-2">
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-blue-400" />Terminés ce mois</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <p className="text-3xl font-bold text-white">
+                  {dossiers.filter(d => { if (!d.date_fermeture) return false; return isWithinInterval(new Date(d.date_fermeture), { start: startOfMonth(today), end: endOfMonth(today) }) && d.statut === 'Fermé'; }).length}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/20 to-pink-500/20 py-2">
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-purple-400" />Terminés cette année</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <p className="text-3xl font-bold text-white">
+                  {dossiers.filter(d => { if (!d.date_fermeture) return false; return isWithinInterval(new Date(d.date_fermeture), { start: startOfYear(today), end: endOfYear(today) }) && d.statut === 'Fermé'; }).length}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><TrendingUp className="w-4 h-4 text-orange-400" />Rendement opérationnel</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="flex gap-2 mb-3">
+                  {['semaine', 'mois', 'année'].map((p) => (
+                    <Button key={p} size="sm" variant={periodeRendement === p ? 'default' : 'ghost'} onClick={() => setPeriodeRendement(p)} className={`text-xs ${periodeRendement === p ? 'bg-orange-500' : 'text-slate-400'}`}>{p}</Button>
+                  ))}
+                </div>
+                <div className="flex justify-between items-end mb-2">
+                  <div>
+                    <p className="text-2xl font-bold text-white">{pourcentageControle}%</p>
+                    <p className={`text-xs font-semibold ${couleurStatut}`}>{statutRendement}</p>
                   </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {dossiersEnRetardLivraison.length > 0 ? (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                      {dossiersEnRetardLivraison.slice(0, 5).map((dossier) => {
-                        const mandat = dossier.mandats?.[0];
-                        const dateLivraison = mandat?.date_livraison ? new Date(mandat.date_livraison) : null;
-                        const joursRetard = dateLivraison ? differenceInDays(today, dateLivraison) : 0;
-                        const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                        const bgColorClass = arpenteurColor.split(' ')[0];
-                        
-                        return (
-                          <div 
-                            key={dossier.id}
-                            className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                            onClick={() => setEditingDossier(dossier)}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
-                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">
-                                {joursRetard}j
-                              </Badge>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
-                              <User className="w-3 h-3 text-white flex-shrink-0" />
-                              <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
-                              <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                              <span className="text-xs text-slate-400">
-                                {dateLivraison ? format(dateLivraison, "dd MMM") : 'Aucune date'}
-                              </span>
-                            </div>
-
-                            <div className="mt-2 flex items-center justify-between">
-                              <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
-                                {mandat?.tache_actuelle || 'Ouverture'}
-                              </Badge>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
-                      <CheckCircle2 className="w-5 h-5" />
-                      Aucun retard
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Dossiers en retard - Terrain */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 py-3">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Truck className="w-5 h-5 text-amber-400" />
-                      Dossiers en retard - Terrain
-                    </CardTitle>
-                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-                      {dossiersEnRetardTerrain.length}
-                    </Badge>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400">{dossiersTermines} / {dossiersOuverts + dossiersTermines}</p>
+                    <p className="text-xs text-slate-400">terminés</p>
                   </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {dossiersEnRetardTerrain.length > 0 ? (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                      {dossiersEnRetardTerrain.slice(0, 5).map((dossier) => {
-                        const mandat = dossier.mandats?.[0];
-                        const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
-                        const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
-                        const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                        const bgColorClass = arpenteurColor.split(' ')[0];
-                        
-                        return (
-                          <div 
-                            key={dossier.id}
-                            className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`}
-                            onClick={() => setEditingDossier(dossier)}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
-                              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">
-                                {joursRetard}j
-                              </Badge>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
-                              <User className="w-3 h-3 text-white flex-shrink-0" />
-                              <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 mb-1">
-                              <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                              <span className="text-xs text-slate-400">
-                                {dateTerrain ? format(dateTerrain, "dd MMM") : '-'}
-                              </span>
-                            </div>
-
-                            <div className="mt-2 flex items-center justify-between">
-                              <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">
-                                {getEquipeTerrain(dossier)}
-                              </Badge>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-center text-emerald-400 py-8 flex items-center justify-center gap-2">
-                      <CheckCircle2 className="w-5 h-5" />
-                      Aucun retard
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Colonne droite: Statistiques + Analyse */}
-          <div className="space-y-6">
-            {/* Section 3: Statistiques et Rendement */}
-            <div className="space-y-4">
-              {/* Dossiers terminés - Semaine */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    Terminés cette semaine
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <p className="text-3xl font-bold text-white">{dossiersTermines}</p>
-                  <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
-                </CardContent>
-              </Card>
-
-              {/* Dossiers terminés - Mois */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 py-2">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                    Terminés ce mois
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <p className="text-3xl font-bold text-white">
-                    {dossiers.filter(d => {
-                      if (!d.date_fermeture) return false;
-                      return isWithinInterval(new Date(d.date_fermeture), { start: startOfMonth(today), end: endOfMonth(today) }) && d.statut === 'Fermé';
-                    }).length}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
-                </CardContent>
-              </Card>
-
-              {/* Dossiers terminés - Année */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/20 to-pink-500/20 py-2">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-purple-400" />
-                    Terminés cette année
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <p className="text-3xl font-bold text-white">
-                    {dossiers.filter(d => {
-                      if (!d.date_fermeture) return false;
-                      return isWithinInterval(new Date(d.date_fermeture), { start: startOfYear(today), end: endOfYear(today) }) && d.statut === 'Fermé';
-                    }).length}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
-                </CardContent>
-              </Card>
-
-              {/* Rendement opérationnel */}
-              <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-orange-400" />
-                    Rendement opérationnel
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex gap-2 mb-3">
-                    {['semaine', 'mois', 'année'].map((p) => (
-                      <Button
-                        key={p}
-                        size="sm"
-                        variant={periodeRendement === p ? 'default' : 'ghost'}
-                        onClick={() => setPeriodeRendement(p)}
-                        className={`text-xs ${periodeRendement === p ? 'bg-orange-500' : 'text-slate-400'}`}
-                      >
-                        {p}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between items-end mb-2">
-                    <div>
-                      <p className="text-2xl font-bold text-white">{pourcentageControle}%</p>
-                      <p className={`text-xs font-semibold ${couleurStatut}`}>{statutRendement}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-400">{dossiersTermines} / {dossiersOuverts + dossiersTermines}</p>
-                      <p className="text-xs text-slate-400">terminés</p>
-                    </div>
-                  </div>
-                  <Progress value={pourcentageControle} className="h-2 bg-slate-800" />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Section 4: Analyse statistique */}
+                </div>
+                <Progress value={pourcentageControle} className="h-2 bg-slate-800" />
+              </CardContent>
+            </Card>
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 py-3">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-cyan-400" />
-                  Analyse de la production
-                </CardTitle>
+                <CardTitle className="text-white flex items-center gap-2"><BarChart3 className="w-5 h-5 text-cyan-400" />Analyse de la production</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 <div className="space-y-3">
