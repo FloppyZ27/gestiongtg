@@ -645,8 +645,8 @@ function LayoutContent({ children, currentPageName }) {
         onContinue={() => setShowUnsavedWarning(false)}
       />
       
-      <div className="min-h-screen flex w-full bg-background">
-        <Sidebar collapsible="none" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar">
+      <div className="h-screen flex w-full bg-background overflow-hidden">
+        <Sidebar collapsible="none" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar h-screen sticky top-0 flex-shrink-0">
           <SidebarHeader className="border-b border-border p-3 bg-card">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
