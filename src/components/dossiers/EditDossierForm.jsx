@@ -628,6 +628,7 @@ export default function EditDossierForm({
                           <span className="text-xs font-medium text-slate-400">Progression</span>
                           <span className="text-xs font-bold text-orange-400">
                             {(() => {
+                              if (formData.statut === 'Fermé') return 100;
                               const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
                               const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
                               let rawProgress = 0;
@@ -644,6 +645,7 @@ export default function EditDossierForm({
                             style={{
                               background: 'linear-gradient(to right, hsl(0,80%,58%), hsl(22,90%,52%))',
                               width: `${(() => {
+                                if (formData.statut === 'Fermé') return 100;
                                 const TACHES_LIST = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
                                 const tacheIndex = TACHES_LIST.indexOf(formData.mandats[parseInt(activeTabMandat)]?.tache_actuelle);
                                 let rawProgress = 0;
