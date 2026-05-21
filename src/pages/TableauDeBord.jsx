@@ -373,10 +373,10 @@ export default function TableauDeBord() {
                 const dayNum = format(date, 'd');
                 return (
                   <div key={date.toISOString()}>
-                    <div className={`rounded-lg transition-all mb-3 ${isToday ? 'ring-2 ring-emerald-400 bg-emerald-500/20 p-4' : 'bg-slate-800/50 p-3 opacity-70'}`}>
-                      <div className={`text-center ${isToday ? 'border-b-2 border-emerald-400 pb-2' : ''}`}>
-                        <p className={`font-semibold capitalize ${isToday ? 'text-emerald-400 text-lg' : 'text-slate-300 text-sm'}`}>{dayName}</p>
-                        <p className={`${isToday ? 'text-emerald-300 text-lg font-bold' : 'text-slate-400 text-xs'}`}>{dayNum}</p>
+                    <div className={`rounded-lg transition-all mb-3 p-3 ${isToday ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : 'bg-slate-800/50 opacity-70'}`}>
+                      <div className="text-center">
+                        <p className={`font-semibold capitalize text-sm ${isToday ? 'text-emerald-400' : 'text-slate-300'}`}>{dayName}</p>
+                        <p className={`text-xs ${isToday ? 'text-emerald-300 font-bold' : 'text-slate-400'}`}>{dayNum}</p>
                       </div>
                     </div>
                     {cardsList.length > 0 ? (
