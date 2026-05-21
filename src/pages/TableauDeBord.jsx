@@ -112,7 +112,7 @@ export default function TableauDeBord() {
 
   // Construire les cartes mandats (comme GestionDeMandat)
   const allMandatCards = [];
-  dossiers.filter(d => d.statut === 'Ouvert').forEach(dossier => {
+  dossiers.forEach(dossier => {
     dossier.mandats?.forEach((mandat, mandatIndex) => {
       allMandatCards.push({ id: `${dossier.id}-${mandatIndex}`, dossier, mandat, mandatIndex });
     });
@@ -327,7 +327,7 @@ export default function TableauDeBord() {
           </CardHeader>
           <CardContent className="p-4">
             {/* Navigation semaine */}
-            <div className="flex items-center justify-center gap-3 mb-4 pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-start gap-3 mb-4 pb-3 border-b border-slate-800">
               <button
                 onClick={() => setWeekOffset(w => w - 1)}
                 style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
