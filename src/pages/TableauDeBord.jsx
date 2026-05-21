@@ -8,7 +8,8 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Calendar, TrendingUp, AlertCircle, CheckCircle2, 
-  MapPin, FileText, User, BarChart3, Truck
+  MapPin, FileText, User, BarChart3, Truck,
+  Clock, Wrench, UserCheck, Link2, Timer
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays, addWeeks, differenceInCalendarWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -156,6 +157,15 @@ export default function TableauDeBord() {
       return m.terrain?.donneur === user?.full_name || m.terrains_list?.some(t => t.donneur === user?.full_name);
     });
   });
+
+  const getDateCeduleeColor = (dateCedulee, dateLimite) => {
+    if (!dateLimite) return null;
+    const ref = dateCedulee ? new Date(dateCedulee + 'T00:00:00') : new Date();
+    const diff = Math.round((new Date(dateLimite + 'T00:00:00') - ref) / 86400000);
+    if (diff > 7) return 'green';
+    if (diff > 0) return 'orange';
+    return 'red';
+  };
 
   // Statistiques dossiers terminés
   const getPeriodDates = () => {
@@ -464,27 +474,64 @@ export default function TableauDeBord() {
             <CardContent className="p-4">
               {dossiersAMonterAujourdhui.length > 0 ? (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {dossiersAMonterAujourdhui.slice(0, 5).map((dossier) => {
-                    const mandat = dossier.mandats?.[0];
-                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                    const bgColorClass = arpenteurColor.split(' ')[0];
+                  {dossiersAMonterAujourdhui.map((dossier) => {
+                    // Trouver le mandat et le terrain pertinent
+                    let mandat = null;
+                    let terrain = null;
+                    dossier.mandats?.forEach(m => {
+                      if (m.date_terrain === todayStr) {
+                        if (m.terrain?.donneur === user?.full_name) { mandat = m; terrain = m.terrain; }
+                        else if (!terrain) { const t = m.terrains_list?.find(t2 => t2.donneur === user?.full_name); if (t) { mandat = m; terrain = t; } }
+                      }
+                    });
+                    if (!mandat) mandat = dossier.mandats?.[0];
+                    if (!terrain) terrain = mandat?.terrain || {};
+                    const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bg = arpColor.split(' ')[0];
+                    const colorMap = { 'bg-red-500/20': 'rgba(239,68,68,0.6)', 'bg-slate-500/20': 'rgba(148,163,184,0.6)', 'bg-orange-500/20': 'rgba(249,115,22,0.6)', 'bg-yellow-500/20': 'rgba(234,179,8,0.6)', 'bg-cyan-500/20': 'rgba(34,211,238,0.6)' };
+                    const clr = colorMap[bg] || 'rgba(16,185,129,0.6)';
+                    const boxShadow = `inset 0 0 0 1px ${clr}, 0 4px 16px 0 rgba(0,0,0,0.4)`;
+                    const couleurLimite = getDateCeduleeColor(terrain?.date_cedulee || null, terrain?.date_limite_leve);
+                    const badgeBg = couleurLimite === 'green' ? 'rgba(22,163,74,0.85)' : couleurLimite === 'orange' ? 'rgba(234,88,12,0.85)' : couleurLimite === 'red' ? 'rgba(220,38,38,0.9)' : 'rgba(161,161,170,0.5)';
+                    const badgeBorder = couleurLimite === 'green' ? '#4ade80' : couleurLimite === 'orange' ? '#fb923c' : couleurLimite === 'red' ? '#f87171' : '#a1a1aa';
+                    const badgeGlow = couleurLimite === 'green' ? '0 0 8px rgba(74,222,128,0.5)' : couleurLimite === 'orange' ? '0 0 8px rgba(251,146,60,0.6)' : couleurLimite === 'red' ? '0 0 10px rgba(248,113,113,0.7)' : 'none';
+                    const donnerUser = terrain?.donneur ? users.find(u => u.full_name === terrain.donneur) : null;
                     return (
-                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                      <div key={dossier.id} className={`${bg} rounded-xl p-2 mb-2 hover:scale-[1.02] transition-all duration-150 cursor-pointer`} style={{ boxShadow }} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
-                          <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold`}>{mandat?.type_mandat}</Badge>
+                          <div className="flex gap-2 flex-wrap">
+                            <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                            <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <User className="w-3 h-3 text-white flex-shrink-0" />
-                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-                        </div>
-                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                          <div className="flex items-start gap-1 mb-2">
-                            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
-                            <span className="text-xs text-slate-400 break-words line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span></div>
+                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && <div className="flex items-start gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span></div>}
+                        {mandat?.date_livraison && <div className="flex items-center gap-1 mb-1"><Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span></div>}
+                        {terrain?.date_limite_leve && (
+                          <div className="flex items-center gap-1 mb-1">
+                            <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: badgeBorder }} />
+                            <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: badgeBg, color: '#fff', border: `1px solid ${badgeBorder}`, boxShadow: badgeGlow }}>
+                              {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}
+                            </span>
                           </div>
                         )}
-                        <Button size="sm" className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs" onClick={(e) => { e.stopPropagation(); setEditingDossier(dossier); }}>Ouvrir le dossier</Button>
+                        {terrain?.a_rendez_vous && terrain?.date_rendez_vous && <div className="flex items-center gap-1 mb-1"><Clock className="w-3 h-3 text-orange-400 flex-shrink-0" /><span className="text-xs text-orange-300">RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}{terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}</span></div>}
+                        {terrain?.instruments_requis && <div className="flex items-center gap-1 mb-1"><Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span></div>}
+                        {terrain?.technicien && <div className="flex items-center gap-1 mb-1"><UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" /><span className="text-xs text-blue-300 truncate">{terrain.technicien}</span></div>}
+                        {terrain?.dossier_simultane && <div className="flex items-center gap-1 mb-1"><Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" /><span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span></div>}
+                        <div className="mt-2 pt-1 border-t border-emerald-500/30">
+                          <div className="flex items-center justify-between gap-1">
+                            {terrain?.temps_prevu
+                              ? <div className="flex items-center gap-0.5"><Timer className="w-3 h-3 text-emerald-400" /><span className="text-xs text-emerald-300">{terrain.temps_prevu}</span></div>
+                              : <div />}
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {terrain?.donneur && <span className="text-xs text-slate-400 font-medium">{terrain.donneur.split(' ').map(n => n[0]).join('').toUpperCase()}</span>}
+                              {donnerUser
+                                ? <Avatar className="w-5 h-5 border border-emerald-500/50"><AvatarImage src={donnerUser.photo_url} /><AvatarFallback className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{donnerUser.full_name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback></Avatar>
+                                : <div className="w-5 h-5 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30"><User className="w-2.5 h-2.5 text-emerald-500" /></div>}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
