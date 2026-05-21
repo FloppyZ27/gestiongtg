@@ -275,37 +275,6 @@ export default function TableauDeBord() {
           </div>
         </div>
 
-        {/* Navigation semaine */}
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setWeekOffset(w => w - 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              style={{background: 'transparent', border: '1px solid hsl(220,10%,28%)', color: 'hsl(210,11%,70%)', minWidth: 0, padding: 0}}
-            >
-              ‹
-            </button>
-            <span className="font-bold text-white text-sm">
-              Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
-            </span>
-            <button
-              onClick={() => setWeekOffset(w => w + 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
-              style={{background: 'transparent', border: '1px solid hsl(220,10%,28%)', color: 'hsl(210,11%,70%)', minWidth: 0, padding: 0}}
-            >
-              ›
-            </button>
-          </div>
-          {weekOffset !== 0 && (
-            <button
-              onClick={() => setWeekOffset(0)}
-              style={{background: 'hsl(0,80%,50%)', border: 'none', color: 'white', borderRadius: '8px', padding: '4px 14px', fontWeight: 600, fontSize: '13px', cursor: 'pointer'}}
-            >
-              Aujourd'hui
-            </button>
-          )}
-        </div>
-
         {/* Calendrier pleine largeur */}
         {(() => {
           const mandatsSemaine = allMandatCards.filter(card => {
@@ -331,8 +300,26 @@ export default function TableauDeBord() {
             <div className="flex items-center w-full">
               <CardTitle className="text-white flex items-center gap-2 flex-shrink-0">
                 <Calendar className="w-5 h-5 text-emerald-400" />
-                Calendrier des livraisons - Semaine en cours
+                Calendrier des livraisons
               </CardTitle>
+              {/* Navigation semaine */}
+              <div className="flex items-center gap-2 mx-4">
+                <button onClick={() => setWeekOffset(w => w - 1)} style={{background:'transparent',border:'none',color:'hsl(210,11%,75%)',fontSize:'20px',cursor:'pointer',padding:'2px 6px',lineHeight:1,borderRadius:'6px'}}>
+                  ‹
+                </button>
+                <span className="font-bold text-white text-sm whitespace-nowrap flex items-center gap-1.5">
+                  Semaine du {format(weekStart, 'd MMM', { locale: fr })} au {format(weekEnd, 'd MMM yyyy', { locale: fr })}
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                </span>
+                <button onClick={() => setWeekOffset(w => w + 1)} style={{background:'transparent',border:'none',color:'hsl(210,11%,75%)',fontSize:'20px',cursor:'pointer',padding:'2px 6px',lineHeight:1,borderRadius:'6px'}}>
+                  ›
+                </button>
+                {weekOffset !== 0 && (
+                  <button onClick={() => setWeekOffset(0)} style={{background:'hsl(0,80%,50%)',border:'none',color:'white',borderRadius:'8px',padding:'4px 12px',fontWeight:600,fontSize:'12px',cursor:'pointer',marginLeft:'4px'}}>
+                    Aujourd'hui
+                  </button>
+                )}
+              </div>
               <div className="flex-1 flex justify-center">
                 {mandatsSemaine.length > 0 && (
                   <div className="flex flex-col gap-1" style={{width: '40%'}}>
