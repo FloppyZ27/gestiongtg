@@ -670,7 +670,7 @@ function LayoutContent({ children, currentPageName }) {
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-1.5 bg-sidebar">
+          <SidebarContent className="p-1.5 bg-sidebar overflow-y-auto flex-1">
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
