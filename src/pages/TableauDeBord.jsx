@@ -361,7 +361,7 @@ export default function TableauDeBord() {
                 <Button
                   size="sm"
                   onClick={() => setWeekOffset(0)}
-                  className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105"
+                  className="bg-primary/20 text-primary border border-primary/40 transition-all duration-200 hover:bg-primary/40 hover:scale-105"
                 >Aujourd'hui</Button>
               )}
             </div>
