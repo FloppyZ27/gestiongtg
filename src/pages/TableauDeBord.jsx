@@ -296,22 +296,24 @@ export default function TableauDeBord() {
           return (
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center w-full">
               <CardTitle className="text-white flex items-center gap-2 flex-shrink-0">
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 Calendrier des livraisons - Semaine en cours
               </CardTitle>
-              {mandatsSemaine.length > 0 && (
-                <div className="flex flex-col gap-1" style={{width: '30%'}}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression de la semaine</span>
-                    <span className="text-[10px] font-bold text-slate-300">{avgProgress}%</span>
+              <div className="flex-1 flex justify-center">
+                {mandatsSemaine.length > 0 && (
+                  <div className="flex flex-col gap-1" style={{width: '30%'}}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression de la semaine</span>
+                      <span className="text-[10px] font-bold text-slate-300">{avgProgress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-900/50 h-2 rounded-full overflow-hidden relative">
+                      <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${avgProgress}%` }} />
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-900/50 h-2 rounded-full overflow-hidden relative">
-                    <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${avgProgress}%` }} />
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
               <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5 flex-shrink-0">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wide">Fermés / Prévus</span>
                 <span className="text-sm font-bold leading-tight text-foreground">
