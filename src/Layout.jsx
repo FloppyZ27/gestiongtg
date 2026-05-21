@@ -646,7 +646,7 @@ function LayoutContent({ children, currentPageName }) {
       />
       
       <div className="min-h-screen flex w-full bg-background">
-        <Sidebar collapsible="icon" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar">
+        <Sidebar collapsible="none" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar">
           <SidebarHeader className="border-b border-border p-3 bg-card">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
@@ -784,18 +784,7 @@ function LayoutContent({ children, currentPageName }) {
           <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-card/95 backdrop-blur-sm border-b border-border px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="lg:hidden text-muted-foreground hover:text-foreground" />
-              <Button
-                onClick={() => setOpen(!open)}
-                variant="ghost"
-                size="icon"
-                className="bg-muted hover:bg-muted/80 text-muted-foreground sidebar-collapse-btn"
-              >
-                {isCollapsed ? (
-                  <ChevronRight className="w-4 h-4" />
-                ) : (
-                  <ChevronLeft className="w-4 h-4" />
-                )}
-              </Button>
+
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                 alt="GTG Logo"
@@ -940,16 +929,8 @@ function LayoutContent({ children, currentPageName }) {
 }
 
 function LayoutWrapper({ children, currentPageName }) {
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
-  
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   return (
-    <SidebarProvider defaultOpen={isDesktop}>
+    <SidebarProvider defaultOpen={true}>
       <LayoutContent children={children} currentPageName={currentPageName} />
     </SidebarProvider>
   );
