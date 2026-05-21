@@ -646,7 +646,7 @@ function LayoutContent({ children, currentPageName }) {
       />
       
       <div className="min-h-screen flex w-full bg-background">
-        <Sidebar collapsible="none" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar">
+        <Sidebar collapsible="none" className="border-r border-border bg-gradient-to-b from-sidebar to-sidebar" style={{height: 'calc(100vh - 100px)'}}>
           <SidebarHeader className="border-b border-border p-3 bg-card">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
