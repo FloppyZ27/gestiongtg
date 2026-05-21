@@ -117,15 +117,20 @@ export default function TableauDeBord() {
     });
   });
 
-  // Cartes du calendrier filtrées par équipe et date
+  // Arpenteur correspondant à l'équipe de l'utilisateur
+  const arpenteurEquipe = userEquipe === 'Samuel' ? 'Samuel Guay' :
+                          userEquipe === 'Dany' ? 'Dany Gaboury' :
+                          userEquipe === 'Pierre-Luc' ? 'Pierre-Luc Pilote' :
+                          userEquipe === 'Benjamin' ? 'Benjamin Larouche' :
+                          userEquipe === 'Frédéric' ? 'Frédéric Gilbert' : null;
+
+  // Cartes du calendrier filtrées par arpenteur du dossier et date
   const getMandatCardsForDay = (date) => {
     return allMandatCards.filter(card => {
       if (!card.mandat.date_livraison) return false;
       if (!isSameDay(new Date(card.mandat.date_livraison + 'T00:00:00'), date)) return false;
-      if (!userEquipe) return false;
-      const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
-      const cardTeam = assignedUser?.equipe || null;
-      return cardTeam === userEquipe;
+      if (!arpenteurEquipe) return false;
+      return card.dossier.arpenteur_geometre === arpenteurEquipe;
     });
   };
 
