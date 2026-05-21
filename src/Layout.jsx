@@ -47,7 +47,7 @@ const navigationCategories = [
   {
     title: "Utilisateur",
     items: [
-      { title: "Tableau de Bord", url: createPageUrl("TableauDeBord"), icon: BarChart3 },
+      { title: "Tableau de Bord", url: createPageUrl("TableauDeBord"), icon: null, logoImg: true },
       { title: "Profil", url: createPageUrl("Profil"), icon: UserCircle },
       { title: "Calendrier", url: createPageUrl("Calendrier"), icon: Calendar },
     ]
@@ -708,7 +708,7 @@ function LayoutContent({ children, currentPageName }) {
                                 >
                                   <Link to={item.url} className="flex items-center justify-center p-2.5">
                                     <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
-                                      <item.icon className="w-5 h-5" />
+                                     {item.logoImg ? <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png" alt="GTG" style={{width:'20px',height:'auto'}} /> : <item.icon className="w-5 h-5" />}
                                     </motion.span>
                                   </Link>
                                 </SidebarMenuButton>
@@ -728,9 +728,9 @@ function LayoutContent({ children, currentPageName }) {
                             >
                               <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
                                 <motion.span whileHover={{ scale: 1.2, rotate: 8 }} whileTap={{ scale: 0.9 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} style={{ display: 'inline-flex' }}>
-                                  <item.icon className="w-5 h-5" />
-                                </motion.span>
-                                <span className="font-medium">{item.title}</span>
+                                      {item.logoImg ? <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png" alt="GTG" style={{width:'20px',height:'auto'}} /> : <item.icon className="w-5 h-5" />}
+                                    </motion.span>
+                                    <span className="font-medium">{item.title}</span>
                               </Link>
                             </SidebarMenuButton>
                           )}
