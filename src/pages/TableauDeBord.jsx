@@ -275,12 +275,39 @@ export default function TableauDeBord() {
         </div>
 
         {/* Calendrier pleine largeur */}
+        {(() => {
+          const mandatsSemaine = allMandatCards.filter(card => {
+            if (!card.mandat.date_livraison || card.dossier.arpenteur_geometre !== arpenteurEquipe) return false;
+            const d = new Date(card.mandat.date_livraison + 'T00:00:00');
+            return d >= weekStart && d <= weekEnd;
+          });
+          const mandatsFermesSemaine = dossiers.filter(d => {
+            if (d.statut !== 'Fermé' || !d.date_fermeture) return false;
+            if (arpenteurEquipe && d.arpenteur_geometre !== arpenteurEquipe) return false;
+            const df = new Date(d.date_fermeture);
+            return df >= weekStart && df <= weekEnd;
+          });
+          return (
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-emerald-400" />
-              Calendrier des livraisons - Semaine en cours
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-emerald-400" />
+                Calendrier des livraisons - Semaine en cours
+              </CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-yellow-400" />
+                  <span className="text-xs text-slate-400">Livraisons prévues</span>
+                  <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs font-bold">{mandatsSemaine.length}</Badge>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-xs text-slate-400">Dossiers fermés</span>
+                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-bold">{mandatsFermesSemaine.length}</Badge>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-4">
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
@@ -366,6 +393,8 @@ export default function TableauDeBord() {
             </div>
           </CardContent>
         </Card>
+          );
+        })()}
 
         {/* 4 colonnes: Dossiers à monter, Retard livraison, Retard terrain, Statistiques */}
         <div className="grid gap-6 grid-cols-4">
