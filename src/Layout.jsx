@@ -750,34 +750,7 @@ function LayoutContent({ children, currentPageName }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-border p-2.5 bg-card">
-            {isCollapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => base44.auth.logout()}
-                    variant="ghost"
-                    size="icon"
-                    className="w-full bg-destructive/15 hover:bg-destructive/25 text-destructive"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-card border-border text-foreground">
-                  <p>Déconnexion</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <Button
-                onClick={() => base44.auth.logout()}
-                variant="ghost"
-                className="w-full bg-destructive/15 hover:bg-destructive/25 text-destructive justify-center"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Déconnexion
-              </Button>
-            )}
-          </SidebarFooter>
+
         </Sidebar>
 
         <main className="flex-1 flex flex-col overflow-hidden">
@@ -901,6 +874,15 @@ function LayoutContent({ children, currentPageName }) {
                 {themeMode === 'dark' ? <Sun style={{width: '16px', height: '16px'}} /> : <Moon style={{width: '16px', height: '16px'}} />}
               </button>
               <NotificationButton user={user} />
+              <button
+                onClick={() => base44.auth.logout()}
+                title="Déconnexion"
+                style={{background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--destructive))', transition: 'all 0.2s ease', width: '32px', height: '32px'}}
+                onMouseEnter={e => { e.currentTarget.style.background = 'hsl(var(--destructive) / 0.15)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <LogOut style={{width: '16px', height: '16px'}} />
+              </button>
             </div>
           </header>
 
