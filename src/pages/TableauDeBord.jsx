@@ -303,7 +303,7 @@ export default function TableauDeBord() {
               </CardTitle>
               <div className="flex-1 flex justify-center">
                 {mandatsSemaine.length > 0 && (
-                  <div className="flex flex-col gap-1" style={{width: '30%'}}>
+                  <div className="flex flex-col gap-1" style={{width: '40%'}}>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression de la semaine</span>
                       <span className="text-[10px] font-bold text-slate-300">{avgProgress}%</span>
