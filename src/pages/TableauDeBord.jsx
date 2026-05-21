@@ -384,7 +384,7 @@ export default function TableauDeBord() {
                           const [bg, , border] = arpColor.split(' ');
                           const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
                           const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
-                          const progress = tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
+                          const progress = card.dossier.statut === 'Fermé' ? 100 : (tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
                           return (
                             <div key={card.id} className={`${bg} rounded-lg p-2 border ${border} cursor-pointer hover:scale-[1.02] transition-all`} onClick={() => setEditingDossier(card.dossier)}>
                               <div className="flex items-start justify-between gap-2 mb-2">
