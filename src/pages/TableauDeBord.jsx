@@ -561,24 +561,41 @@ export default function TableauDeBord() {
                     const mandat = dossier.mandats?.[0];
                     const dateLivraison = mandat?.date_livraison ? new Date(mandat.date_livraison) : null;
                     const joursRetard = dateLivraison ? differenceInDays(today, dateLivraison) : 0;
-                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bg = arpColor.split(' ')[0];
+                    const assignedUser = users.find(u => u.email === mandat?.utilisateur_assigne);
+                    const tacheIndex = TACHES.indexOf(mandat?.tache_actuelle);
+                    const progress = dossier.statut === 'Fermé' || mandat?.tache_actuelle === 'Facturer' ? 100 : (tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
                     return (
-                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                      <div key={dossier.id} className={`${bg} rounded-lg p-2 border ${arpColor.split(' ')[2]} cursor-pointer hover:scale-[1.02] transition-all`} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
-                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-semibold">{joursRetard}j</Badge>
+                          <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <div className="flex items-center gap-1">
+                            <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat)}</Badge>
+                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-bold">{joursRetard}j</Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <User className="w-3 h-3 text-white flex-shrink-0" />
-                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
+                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                          <div className="flex items-center gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" /><span className="text-xs text-slate-400 truncate">{formatAdresse(mandat.adresse_travaux)}</span></div>
+                        )}
+                        {mandat?.tache_actuelle && (
+                          <div className="mb-1"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge></div>
+                        )}
+                        <div className="flex items-center justify-between mt-2 pt-1" style={{borderTop: '1px solid rgba(239,68,68,0.3)'}}>
+                          {dateLivraison ? (
+                            <div className="flex items-center gap-1"><Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" /><span className="text-xs text-yellow-300">{format(dateLivraison, 'dd MMM yy', { locale: fr })}</span></div>
+                          ) : <div />}
+                          {assignedUser ? (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-white font-bold">{getUserInitials(assignedUser.full_name)}</span>
+                              <Avatar className="w-5 h-5 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar>
+                            </div>
+                          ) : <div />}
                         </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                          <span className="text-xs text-slate-400">{dateLivraison ? format(dateLivraison, "dd MMM") : 'Aucune date'}</span>
-                        </div>
-                        <div className="mt-2">
-                          <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat?.tache_actuelle || 'Ouverture'}</Badge>
+                        <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden relative">
+                          <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+                          <div className="absolute inset-0 flex items-center justify-center"><span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{progress}%</span></div>
                         </div>
                       </div>
                     );
@@ -608,24 +625,41 @@ export default function TableauDeBord() {
                     const mandat = dossier.mandats?.[0];
                     const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
                     const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
-                    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
-                    const bgColorClass = arpenteurColor.split(' ')[0];
+                    const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
+                    const bg = arpColor.split(' ')[0];
+                    const assignedUser = users.find(u => u.email === mandat?.utilisateur_assigne);
+                    const tacheIndex = TACHES.indexOf(mandat?.tache_actuelle);
+                    const progress = dossier.statut === 'Fermé' || mandat?.tache_actuelle === 'Facturer' ? 100 : (tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
                     return (
-                      <div key={dossier.id} className={`${bgColorClass} rounded-lg p-3 hover:scale-[1.02] transition-all cursor-pointer border ${arpenteurColor}`} onClick={() => setEditingDossier(dossier)}>
+                      <div key={dossier.id} className={`${bg} rounded-lg p-2 border ${arpColor.split(' ')[2]} cursor-pointer hover:scale-[1.02] transition-all`} onClick={() => setEditingDossier(dossier)}>
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`${arpenteurColor} border text-xs`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
-                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold">{joursRetard}j</Badge>
+                          <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          <div className="flex items-center gap-1">
+                            <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat)}</Badge>
+                            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-bold">{joursRetard}j</Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <User className="w-3 h-3 text-white flex-shrink-0" />
-                          <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
+                        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                          <div className="flex items-center gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" /><span className="text-xs text-slate-400 truncate">{formatAdresse(mandat.adresse_travaux)}</span></div>
+                        )}
+                        {mandat?.tache_actuelle && (
+                          <div className="mb-1"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge></div>
+                        )}
+                        <div className="flex items-center justify-between mt-2 pt-1" style={{borderTop: '1px solid rgba(239,68,68,0.3)'}}>
+                          {dateTerrain ? (
+                            <div className="flex items-center gap-1"><Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" /><span className="text-xs text-yellow-300">{format(dateTerrain, 'dd MMM yy', { locale: fr })}</span></div>
+                          ) : <div />}
+                          {assignedUser ? (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-white font-bold">{getUserInitials(assignedUser.full_name)}</span>
+                              <Avatar className="w-5 h-5 border-2 border-emerald-500/50"><AvatarImage src={assignedUser.photo_url} /><AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">{getUserInitials(assignedUser.full_name)}</AvatarFallback></Avatar>
+                            </div>
+                          ) : <div />}
                         </div>
-                        <div className="flex items-center gap-1 mb-1">
-                          <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                          <span className="text-xs text-slate-400">{dateTerrain ? format(dateTerrain, "dd MMM") : '-'}</span>
-                        </div>
-                        <div className="mt-2">
-                          <Badge className="bg-slate-500/20 text-slate-300 border border-slate-500/30 text-xs">{getEquipeTerrain(dossier)}</Badge>
+                        <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden relative">
+                          <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+                          <div className="absolute inset-0 flex items-center justify-center"><span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{progress}%</span></div>
                         </div>
                       </div>
                     );
