@@ -295,17 +295,14 @@ export default function TableauDeBord() {
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 Calendrier des livraisons - Semaine en cours
               </CardTitle>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-yellow-400" />
-                  <span className="text-xs text-slate-400">Livraisons prévues</span>
-                  <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs font-bold">{mandatsSemaine.length}</Badge>
-                </div>
-                <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-xs text-slate-400">Dossiers fermés</span>
-                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-bold">{mandatsFermesSemaine.length}</Badge>
-                </div>
+              <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs text-slate-400">Fermés / Prévus</span>
+                <span className="text-sm font-bold">
+                  <span className="text-emerald-400">{mandatsFermesSemaine.length}</span>
+                  <span className="text-slate-500"> / </span>
+                  <span className="text-yellow-300">{mandatsSemaine.length}</span>
+                </span>
               </div>
             </div>
           </CardHeader>
