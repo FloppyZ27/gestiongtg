@@ -280,14 +280,10 @@ export default function TableauDeBord() {
         {/* En-tête */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
+            <BarChart3 className="w-8 h-8 text-emerald-400" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Tableau de Bord - {userEquipe || 'Mon Équipe'}
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
-                  alt="GTG"
-                  style={{width: '40px', height: 'auto', filter: 'drop-shadow(0 0 6px rgba(220,60,30,0.5))'}}
-                />
               </h1>
               <p className="text-slate-400">Vue opérationnelle de la semaine du {format(weekStart, "dd MMMM", { locale: fr })}</p>
             </div>
