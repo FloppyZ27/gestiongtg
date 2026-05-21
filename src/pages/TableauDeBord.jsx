@@ -299,7 +299,7 @@ export default function TableauDeBord() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="grid gap-3" style={{ gridTemplateColumns: weekDays.map((date) => isSameDay(date, today) ? '2fr' : '1fr').join(' ') }}>
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
               {weekDays.map((date) => {
                 const isToday = isSameDay(date, today);
                 const dossiersList = getMandatsForDay(date);
