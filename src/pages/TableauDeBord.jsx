@@ -358,10 +358,11 @@ export default function TableauDeBord() {
                 style={{background:'hsl(220,13%,16%)',border:'1px solid hsl(220,10%,26%)',color:'hsl(210,11%,80%)',fontSize:'22px',cursor:'pointer',padding:'2px 10px',lineHeight:1.2,borderRadius:'8px',fontWeight:300}}
               >›</button>
               {weekOffset !== 0 && (
-                <button
+                <Button
+                  size="sm"
                   onClick={() => setWeekOffset(0)}
-                  style={{background:'hsl(0,80%,50%)',border:'none',color:'white',borderRadius:'8px',padding:'5px 14px',fontWeight:700,fontSize:'13px',cursor:'pointer'}}
-                >Aujourd'hui</button>
+                  className="bg-primary/20 text-primary transition-all duration-200 hover:bg-primary/40 hover:scale-105"
+                >Aujourd'hui</Button>
               )}
             </div>
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
