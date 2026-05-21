@@ -285,6 +285,7 @@ export default function TableauDeBord() {
           });
           const avgProgress = mandatsSemaine.length > 0
             ? Math.round(mandatsSemaine.reduce((sum, card) => {
+                if (card.dossier.statut === 'Fermé') return sum + 100;
                 const idx = TACHES.indexOf(card.mandat.tache_actuelle);
                 return sum + (idx >= 0 ? Math.round(((idx / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
               }, 0) / mandatsSemaine.length)
