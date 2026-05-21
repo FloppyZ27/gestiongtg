@@ -281,6 +281,12 @@ export default function TableauDeBord() {
             const d = new Date(card.mandat.date_livraison + 'T00:00:00');
             return d >= weekStart && d <= weekEnd;
           });
+          const avgProgress = mandatsSemaine.length > 0
+            ? Math.round(mandatsSemaine.reduce((sum, card) => {
+                const idx = TACHES.indexOf(card.mandat.tache_actuelle);
+                return sum + (idx >= 0 ? Math.round(((idx / (TACHES.length - 1)) * 95) / 5) * 5 : 0);
+              }, 0) / mandatsSemaine.length)
+            : 0;
           const mandatsFermesSemaine = dossiers.filter(d => {
             if (d.statut !== 'Fermé' || !d.date_fermeture) return false;
             if (arpenteurEquipe && d.arpenteur_geometre !== arpenteurEquipe) return false;
@@ -290,17 +296,31 @@ export default function TableauDeBord() {
           return (
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <CardTitle className="text-white flex items-center gap-2 flex-shrink-0">
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 Calendrier des livraisons - Semaine en cours
               </CardTitle>
-              <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5">
+              {mandatsSemaine.length > 0 && (
+                <div className="flex-1 flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wide">Progression moyenne</span>
+                    <span className="text-[10px] font-bold text-slate-300">{avgProgress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-900/50 h-4 rounded-full overflow-hidden relative">
+                    <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${avgProgress}%` }} />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">{avgProgress}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-col items-center bg-slate-800/60 rounded-lg px-3 py-1.5 flex-shrink-0">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wide">Fermés / Prévus</span>
-                <span className="text-sm font-bold leading-tight">
-                  <span className="text-emerald-400">{mandatsFermesSemaine.length}</span>
+                <span className="text-sm font-bold leading-tight text-foreground">
+                  {mandatsFermesSemaine.length}
                   <span className="text-slate-500"> / </span>
-                  <span className="text-yellow-300">{mandatsSemaine.length}</span>
+                  {mandatsSemaine.length}
                 </span>
               </div>
             </div>
