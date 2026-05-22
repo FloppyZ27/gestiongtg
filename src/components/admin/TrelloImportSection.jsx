@@ -253,8 +253,7 @@ export default function TrelloImportSection() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300 text-xs py-2">N° Dossier</TableHead>
-                        <TableHead className="text-slate-300 text-xs py-2">Arpenteur</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Dossier</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Client</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Mandats (étiquettes)</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
@@ -266,11 +265,11 @@ export default function TrelloImportSection() {
                         const valid = card.numero_dossier && card.arpenteur_geometre;
                         return (
                           <TableRow key={i} className={`border-slate-800 text-xs ${!valid ? 'opacity-40' : ''}`}>
-                            <TableCell className="py-1.5 font-mono">
-                              {card.numero_dossier || <span className="text-red-400 italic">manquant</span>}
-                            </TableCell>
-                            <TableCell className="py-1.5">
-                              {card.arpenteur_geometre || <span className="text-red-400 italic">manquant</span>}
+                            <TableCell className="py-1.5 font-mono font-semibold">
+                              {card.numero_dossier && card.arpenteur_geometre
+                                ? `${Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?'}-${card.numero_dossier}`
+                                : <span className="text-red-400 italic">manquant</span>
+                              }
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">
                               {card.clients_texte || '-'}
