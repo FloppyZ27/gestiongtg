@@ -755,7 +755,7 @@ export default function TableauDeBord() {
           <div className="space-y-4">
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
-                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Production de l'équipe</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Production et rendement de l'équipe</CardTitle>
               </CardHeader>
               <CardContent className="p-3">
                 <div className="space-y-2">
@@ -798,7 +798,7 @@ export default function TableauDeBord() {
             </Card>
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-2">
-                <CardTitle className="text-white flex items-center gap-2 text-sm"><TrendingUp className="w-4 h-4 text-orange-400" />Rendement opérationnel</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><TrendingUp className="w-4 h-4 text-orange-400" />Production et rendement de l'équipe</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 <div className="flex gap-2 mb-3">
