@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Calendar, TrendingUp, AlertCircle, CheckCircle2, 
   MapPin, FileText, User, BarChart3, Truck,
-  Clock, Wrench, UserCheck, Link2, Timer
+  Clock, Wrench, UserCheck, Link2, Timer, ChevronDown, ChevronUp
 } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay, differenceInDays, addWeeks, differenceInCalendarWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -83,6 +83,7 @@ const getAbbreviatedMandatType = (type) => {
 export default function TableauDeBord() {
   const navigate = useNavigate();
   const [editingDossier, setEditingDossier] = useState(null);
+  const [vueOperationnelleCollapsed, setVueOperationnelleCollapsed] = useState(false);
   const [periodeRendement, setPeriodeRendement] = useState("semaine");
   const [weekOffset, setWeekOffset] = useState(0);
 
@@ -346,6 +347,25 @@ export default function TableauDeBord() {
             </div>
           </div>
         </div>
+
+        {/* Section Vue opérationnelle - collapsible style Profil */}
+        <Card className="border-transparent bg-transparent shadow-none mb-6">
+          <div
+            className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-primary/5 border-b border-slate-800"
+            onClick={() => setVueOperationnelleCollapsed(!vueOperationnelleCollapsed)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                  <BarChart3 className="w-3 h-3 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold" style={{background:'linear-gradient(90deg,hsl(0,80%,62%),hsl(22,90%,65%))',WebkitBackgroundClip:'text',backgroundClip:'text',WebkitTextFillColor:'transparent'}}>Vue opérationnelle de l'Équipe</h3>
+              </div>
+              {vueOperationnelleCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+            </div>
+          </div>
+          {!vueOperationnelleCollapsed && (
+          <CardContent className="p-0 pt-4">
 
         {/* Calendrier pleine largeur */}
         {(() => {
@@ -798,6 +818,8 @@ export default function TableauDeBord() {
             </Card>
           </div>
         </div>
+          </CardContent>)}
+        </Card>
       </div>
 
       {editingDossier && (
