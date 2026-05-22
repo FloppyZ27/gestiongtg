@@ -11,6 +11,7 @@ import { Shield, Users, Search, CheckCircle, XCircle, KeyRound, Lock, FileText, 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PermissionsDialog from "@/components/admin/PermissionsDialog";
+import TrelloImportSection from "@/components/admin/TrelloImportSection";
 import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDialog";
 import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 import { format } from "date-fns";
@@ -744,6 +745,8 @@ export default function Administration() {
         template={selectedTemplate}
         onSave={handleSaveTemplate}
       />
+
+      <TrelloImportSection />
     </div>
   );
 }
