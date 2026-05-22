@@ -172,7 +172,19 @@ export default function TrelloImportSection() {
     setImportResults({ success, skipped, errors });
   };
 
-  const validCount = parsedCards.filter(c => c.numero_dossier && c.arpenteur_geometre).length;
+  const validCards = parsedCards.filter(c => c.numero_dossier && c.arpenteur_geometre);
+  const validCount = validCards.length;
+
+  // Une ligne par mandat (étiquette)
+  const displayRows = validCards
+    .sort((a, b) => parseInt(a.numero_dossier || 0) - parseInt(b.numero_dossier || 0))
+    .flatMap(card => {
+      const dossierLabel = `${Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?'}-${card.numero_dossier}`;
+      if (card.mandats.length === 0) {
+        return [{ ...card, dossierLabel, type_mandat: null }];
+      }
+      return card.mandats.map(m => ({ ...card, dossierLabel, type_mandat: m.type_mandat }));
+    });
 
   return (
     <Card className="border-slate-700 bg-slate-800/30 mt-6">
@@ -248,7 +260,8 @@ export default function TrelloImportSection() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{parsedCards.length} cartes</Badge>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{validCount} importables</Badge>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{validCount} dossiers valides</Badge>
+                  <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">{displayRows.length} lignes</Badge>
                   <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{parsedCards.length - validCount} ignorées</Badge>
                 </div>
 
@@ -258,47 +271,31 @@ export default function TrelloImportSection() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300 text-xs py-2">Dossier</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Client</TableHead>
-                        <TableHead className="text-slate-300 text-xs py-2">Mandats (étiquettes)</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {[...parsedCards].sort((a, b) => parseInt(a.numero_dossier || 0) - parseInt(b.numero_dossier || 0)).map((card, i) => {
-                        const valid = card.numero_dossier && card.arpenteur_geometre;
-                        return (
-                          <TableRow key={i} className={`border-slate-800 text-xs ${!valid ? 'opacity-40' : ''}`}>
-                            <TableCell className="py-1.5 font-mono font-semibold">
-                              {card.numero_dossier && card.arpenteur_geometre
-                                ? `${Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?'}-${card.numero_dossier}`
-                                : <span className="text-red-400 italic">manquant</span>
+                      {displayRows.map((row, i) => (
+                          <TableRow key={i} className="border-slate-800 text-xs">
+                            <TableCell className="py-1.5 font-mono font-semibold">{row.dossierLabel}</TableCell>
+                            <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">{row.clients_texte || '-'}</TableCell>
+                            <TableCell className="py-1.5">
+                              {row.type_mandat
+                                ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{row.type_mandat}</Badge>
+                                : <span className="text-orange-400 italic text-[10px]">aucune étiquette</span>
                               }
                             </TableCell>
-                            <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">
-                              {card.clients_texte || '-'}
-                            </TableCell>
+                            <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
                             <TableCell className="py-1.5">
-                              <div className="flex flex-wrap gap-1">
-                                {card.mandats.length > 0
-                                  ? card.mandats.map((m, mi) => (
-                                    <Badge key={mi} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
-                                      {m.type_mandat}
-                                    </Badge>
-                                  ))
-                                  : <span className="text-orange-400 italic text-[10px]">aucune étiquette</span>
-                                }
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-1.5 text-slate-400">{card.tache_actuelle}</TableCell>
-                            <TableCell className="py-1.5">
-                              {card.statut === 'Fermé'
+                              {row.statut === 'Fermé'
                                 ? <Badge className="bg-slate-700 text-slate-400 text-[10px]">Fermé</Badge>
                                 : <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">Ouvert</Badge>
                               }
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
+                        ))}
                     </TableBody>
                   </Table>
                 </div>
