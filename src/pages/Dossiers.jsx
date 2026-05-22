@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock, Loader2, Filter } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ChevronDown, ChevronUp, ChevronsUpDown, Package, Download, FileUp, MessageSquare, Clock, Loader2, Filter } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -1710,11 +1710,7 @@ export default function Dossiers() {
     return filterArpenteur.length > 0 || filterVille.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterDateDebut || filterDateFin;
   };
 
-  const getSortIcon = (field) => {
-    if (!hasActiveFilters() && sortField !== field) return null;
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-50" />;
-    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
+
 
   const sortedDossiers = useMemo(() => {
     if (!sortField) return filteredDossiersWithMandats;
@@ -3354,15 +3350,11 @@ export default function Dossiers() {
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                       <TableHead className="text-slate-300 w-8"></TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('numero_dossier')}>N° Dossier {getSortIcon('numero_dossier')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('clients')}>Clients {getSortIcon('clients')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('type_mandat')}>Mandat {getSortIcon('type_mandat')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('lots')}>Lot {getSortIcon('lots')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('tache_actuelle')}>Tâche actuelle {getSortIcon('tache_actuelle')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('ville')}>Adresse Travaux {getSortIcon('ville')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_ouverture')}>Date ouverture {getSortIcon('date_ouverture')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_fermeture')}>Date fermeture {getSortIcon('date_fermeture')}</TableHead>
-                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('statut')}>Statut {getSortIcon('statut')}</TableHead>
+                      {[{key:'numero_dossier',label:'N° Dossier'},{key:'clients',label:'Clients'},{key:'type_mandat',label:'Mandat'},{key:'lots',label:'Lot'},{key:'tache_actuelle',label:'Tâche actuelle'},{key:'ville',label:'Adresse Travaux'},{key:'date_ouverture',label:'Date ouverture'},{key:'date_fermeture',label:'Date fermeture'},{key:'statut',label:'Statut'}].map(col => (
+                        <TableHead key={col.key} onClick={() => handleSort(col.key)} className="text-slate-300 cursor-pointer hover:text-white transition-colors select-none">
+                          <div className="flex items-center gap-1">{col.label}{sortField === col.key ? (sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 text-red-400" /> : <ChevronDown className="w-3 h-3 text-red-400" />) : <ChevronsUpDown className="w-3 h-3 text-slate-500" />}</div>
+                        </TableHead>
+                      ))}
                       <TableHead className="text-slate-300 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
