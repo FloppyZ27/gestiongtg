@@ -17,6 +17,7 @@ const INITIALS_TO_ARPENTEUR = {
   "FG": "Frédéric Gilbert",
   "PG": "Pierre Girard",
   "JV": "Jérémie Vachon",
+  "LT": "Luc Tremblay",
 };
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
