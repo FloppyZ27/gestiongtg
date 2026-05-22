@@ -172,6 +172,18 @@ export default function TableauDeBord() {
 
   const teamDossiers = arpenteurEquipe ? dossiers.filter(d => d.arpenteur_geometre === arpenteurEquipe) : [];
 
+  const countWorkingDays = (from, to) => {
+    let count = 0;
+    const cur = new Date(from);
+    const end = new Date(to);
+    while (cur <= end) {
+      const day = cur.getDay();
+      if (day !== 0 && day !== 6) count++;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return count;
+  };
+
   const getMandatProgress = (dossier, mandat) => {
     if (dossier.statut === 'Fermé' || mandat.tache_actuelle === 'Facturer') return 100;
     const tacheIndex = TACHES.indexOf(mandat.tache_actuelle);
@@ -200,9 +212,16 @@ export default function TableauDeBord() {
       });
     });
     const avgProgress = totalMandats > 0 ? Math.round(totalProgress / totalMandats) : null;
+    // Calcul du % de jours ouvrables écoulés dans la période
+    const totalWorkDays = countWorkingDays(start, end);
+    const elapsedEnd = today < end ? today : end;
+    const elapsedWorkDays = today < start ? 0 : countWorkingDays(start, elapsedEnd);
+    const elapsedPercent = totalWorkDays > 0 ? (elapsedWorkDays / totalWorkDays) * 100 : 0;
     let statut = 'En contrôle'; let statutColor = 'text-emerald-400';
-    if (termines > ouverts) { statut = 'En avance'; statutColor = 'text-cyan-400'; }
-    else if (ouverts > 0 && termines < ouverts * 0.8) { statut = 'Sous le rendement'; statutColor = 'text-red-400'; }
+    if (avgProgress !== null) {
+      if (avgProgress > elapsedPercent) { statut = 'En avance'; statutColor = 'text-cyan-400'; }
+      else if (avgProgress < elapsedPercent * 0.85) { statut = 'Sous le rendement'; statutColor = 'text-red-400'; }
+    }
     return { termines, ouverts, avgProgress, statut, statutColor };
   };
 
