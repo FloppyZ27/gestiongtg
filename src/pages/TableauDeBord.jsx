@@ -361,6 +361,7 @@ export default function TableauDeBord() {
 
   // Variables pour la section Social
   const todayMD = format(today, 'MM-dd');
+  const currentMonth = today.getMonth() + 1;
   const absencesJour = rendezVousAujourdhui.filter(rv => {
     if (rv.type !== 'absence') return false;
     const d = new Date(rv.date_debut);
@@ -370,17 +371,20 @@ export default function TableauDeBord() {
     if (!u.date_naissance) return false;
     return u.date_naissance.slice(5) === todayMD;
   });
+  // Anniversaires ce mois-ci seulement (excluant aujourd'hui)
   const prochainsAnniversaires = users
-    .filter(u => u.date_naissance)
+    .filter(u => {
+      if (!u.date_naissance) return false;
+      const mm = parseInt(u.date_naissance.split('-')[1]);
+      return mm === currentMonth && u.date_naissance.slice(5) !== todayMD;
+    })
     .map(u => {
       const [, mm, dd] = u.date_naissance.split('-');
       const year = today.getFullYear();
-      let next = new Date(`${year}-${mm}-${dd}T00:00:00`);
-      if (next <= today) next = new Date(`${year + 1}-${mm}-${dd}T00:00:00`);
+      const next = new Date(`${year}-${mm}-${dd}T00:00:00`);
       return { user: u, days: Math.ceil((next - today) / 86400000) };
     })
-    .sort((a, b) => a.days - b.days)
-    .slice(0, 4);
+    .sort((a, b) => a.days - b.days);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -1006,16 +1010,31 @@ export default function TableauDeBord() {
                     {anniversairesJour.length > 0 ? (
                       <div className="space-y-2">
                         {anniversairesJour.map(u => (
-                          <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                            <Avatar className="w-8 h-8 border-2 border-pink-500/40">
+                          <div key={u.id} className="relative overflow-hidden flex items-center gap-3 p-2 rounded-lg bg-pink-500/10 border border-pink-500/20">
+                            {/* Confettis animés */}
+                            {[...Array(12)].map((_, i) => (
+                              <div key={i} style={{
+                                position: 'absolute',
+                                width: i % 3 === 0 ? '6px' : '5px',
+                                height: i % 3 === 0 ? '6px' : '8px',
+                                borderRadius: i % 2 === 0 ? '50%' : '1px',
+                                background: ['#f472b6','#fb923c','#facc15','#34d399','#60a5fa','#a78bfa'][i % 6],
+                                left: `${(i * 8.5) % 100}%`,
+                                top: '-10px',
+                                animation: `confettiFall ${1.2 + (i * 0.15)}s ease-in ${(i * 0.1)}s infinite`,
+                                opacity: 0.85,
+                              }} />
+                            ))}
+                            <style>{`@keyframes confettiFall { 0% { transform: translateY(-10px) rotate(0deg); opacity:1; } 100% { transform: translateY(120px) rotate(360deg); opacity:0; } }`}</style>
+                            <Avatar className="w-8 h-8 border-2 border-pink-500/40 relative z-10">
                               <AvatarImage src={u.photo_url} />
                               <AvatarFallback className="text-xs bg-pink-500/20 text-pink-300">{getUserInitials(u.full_name)}</AvatarFallback>
                             </Avatar>
-                            <div>
+                            <div className="relative z-10">
                               <p className="text-sm font-semibold text-pink-300">{u.full_name}</p>
                               <p className="text-[10px] text-slate-400">{u.poste || 'Employé'}</p>
                             </div>
-                            <span className="ml-auto text-xl">🎂</span>
+                            <span className="ml-auto text-xl relative z-10">🎂</span>
                           </div>
                         ))}
                       </div>
@@ -1032,8 +1051,8 @@ export default function TableauDeBord() {
                             <Badge className="bg-slate-700 text-slate-300 border-slate-600 text-[10px]">dans {days}j</Badge>
                           </div>
                         ))}
-                        {prochainsAnniversaires.length === 0 && (
-                          <p className="text-xs text-slate-500 text-center py-4">Aucune date connue</p>
+                        {prochainsAnniversaires.length === 0 && anniversairesJour.length === 0 && (
+                          <p className="text-xs text-slate-500 text-center py-4">Aucun anniversaire ce mois-ci</p>
                         )}
                       </div>
                     )}
