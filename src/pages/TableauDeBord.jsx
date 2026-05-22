@@ -167,30 +167,37 @@ export default function TableauDeBord() {
     return 'red';
   };
 
-  // Statistiques dossiers terminés
-  const getPeriodDates = () => {
-    if (periodeRendement === "semaine") {
-      return { start: weekStart, end: weekEnd };
-    } else if (periodeRendement === "mois") {
-      return { start: startOfMonth(today), end: endOfMonth(today) };
-    } else {
-      return { start: startOfYear(today), end: endOfYear(today) };
-    }
+  // Helper: dossier terminé = fermé OU tache_actuelle === 'Facturer' sur au moins un mandat
+  const isDossierTermine = (d) => d.statut === 'Fermé' || d.mandats?.some(m => m.tache_actuelle === 'Facturer');
+
+  const teamDossiers = arpenteurEquipe ? dossiers.filter(d => d.arpenteur_geometre === arpenteurEquipe) : [];
+
+  const getStats = (start, end) => {
+    const termines = teamDossiers.filter(d => {
+      const refDate = d.date_fermeture || d.updated_date;
+      if (!refDate) return false;
+      return isDossierTermine(d) && isWithinInterval(new Date(refDate), { start, end });
+    }).length;
+    const ouverts = teamDossiers.filter(d => {
+      if (!d.date_ouverture) return false;
+      return isWithinInterval(new Date(d.date_ouverture), { start, end });
+    }).length;
+    return { termines, ouverts };
   };
 
-  const periodDates = getPeriodDates();
-  
-  const dossiersTermines = dossiers.filter(d => {
-    if (!d.date_fermeture) return false;
-    const dateFermeture = new Date(d.date_fermeture);
-    return isWithinInterval(dateFermeture, periodDates) && d.statut === 'Fermé';
-  }).length;
+  const statsSemaine = getStats(weekStart, weekEnd);
+  const statsMois = getStats(startOfMonth(today), endOfMonth(today));
+  const statsAnnee = getStats(startOfYear(today), endOfYear(today));
 
-  const dossiersOuverts = dossiers.filter(d => {
-    if (!d.date_ouverture) return false;
-    const dateOuverture = new Date(d.date_ouverture);
-    return isWithinInterval(dateOuverture, periodDates) && d.statut === 'Ouvert';
-  }).length;
+  // Pour le rendement (garde compatibilité)
+  const getPeriodDates = () => {
+    if (periodeRendement === "semaine") return { start: weekStart, end: weekEnd };
+    if (periodeRendement === "mois") return { start: startOfMonth(today), end: endOfMonth(today) };
+    return { start: startOfYear(today), end: endOfYear(today) };
+  };
+  const periodDates = getPeriodDates();
+  const dossiersTermines = periodeRendement === 'semaine' ? statsSemaine.termines : periodeRendement === 'mois' ? statsMois.termines : statsAnnee.termines;
+  const dossiersOuverts = periodeRendement === 'semaine' ? statsSemaine.ouverts : periodeRendement === 'mois' ? statsMois.ouverts : statsAnnee.ouverts;
 
   // Dossiers en retard - livraison
   const dossiersEnRetardLivraison = dossiers.filter(d => {
@@ -708,33 +715,32 @@ export default function TableauDeBord() {
           <div className="space-y-4">
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
-                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Terminés cette semaine</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Production de l'équipe</CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                <p className="text-3xl font-bold text-white">{dossiersTermines}</p>
-                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 py-2">
-                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-blue-400" />Terminés ce mois</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <p className="text-3xl font-bold text-white">
-                  {dossiers.filter(d => { if (!d.date_fermeture) return false; return isWithinInterval(new Date(d.date_fermeture), { start: startOfMonth(today), end: endOfMonth(today) }) && d.statut === 'Fermé'; }).length}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/20 to-pink-500/20 py-2">
-                <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-purple-400" />Terminés cette année</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <p className="text-3xl font-bold text-white">
-                  {dossiers.filter(d => { if (!d.date_fermeture) return false; return isWithinInterval(new Date(d.date_fermeture), { start: startOfYear(today), end: endOfYear(today) }) && d.statut === 'Fermé'; }).length}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">Dossiers fermés</p>
+              <CardContent className="p-3">
+                <div className="space-y-2">
+                  {[
+                    { label: 'Cette semaine', stats: statsSemaine },
+                    { label: 'Ce mois', stats: statsMois },
+                    { label: 'Cette année', stats: statsAnnee },
+                  ].map(({ label, stats }) => (
+                    <div key={label} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
+                      <span className="text-xs text-slate-400 font-medium">{label}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-emerald-400 leading-none">{stats.termines}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">terminés</p>
+                        </div>
+                        <div className="text-slate-600 text-xs">/</div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-blue-400 leading-none">{stats.ouverts}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">ouverts</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-slate-600 mt-2 text-center">Fermés ou à facturer</p>
               </CardContent>
             </Card>
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
