@@ -228,6 +228,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const [optimizeResult, setOptimizeResult] = useState(null); // null | { totalNew: number }
   const [showAllTerrainsMap, setShowAllTerrainsMap] = useState(false);
   const [showAddTerrainEntry, setShowAddTerrainEntry] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState("verification");
+  const prevSidebarTabRef = useRef("verification");
 
   // Groupes de cartes liées: [{id: string, cardIds: [string, ...]}]
   const [linkedGroups, setLinkedGroups] = useState(() => {
@@ -1129,6 +1131,16 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
 
   const { dragging, ghostPos, overColumn, dropIndex, handleDragStart } = useKanbanDrag({ onDrop: executeDrop });
 
+  // Auto-switch sidebar tab to "planifier" when dragging starts, restore on drop
+  useEffect(() => {
+    if (dragging) {
+      prevSidebarTabRef.current = sidebarTab;
+      setSidebarTab("planifier");
+    } else {
+      setSidebarTab(prevSidebarTabRef.current);
+    }
+  }, [!!dragging]);
+
   // ---- Drag & drop pour les équipes entières ----
   const [draggingEquipe, setDraggingEquipe] = useState(null);
   const [equipeGhostPos, setEquipeGhostPos] = useState({ x: 0, y: 0 });
@@ -1564,7 +1576,7 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
           <div ref={sidebarContainerRef} className="w-[240px] flex-shrink-0" style={{ visibility: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
           {/* Panneau fixe dont le top est calculé dynamiquement via JS */}
           <div ref={sidebarRef} className="bg-transparent rounded-lg p-4 flex flex-col w-[240px] flex-shrink-0 overflow-y-auto" style={{ position: 'fixed', top: '73px', maxHeight: 'calc(100vh - 73px - 10px)', zIndex: 10 }}>
-            <Tabs defaultValue="verification" className="w-full flex flex-col">
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="w-full flex flex-col">
               <TabsList className="bg-transparent w-full grid grid-cols-2 mb-3 gap-1 p-1 rounded-lg">
                 <TabsTrigger value="verification" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">En vérification</TabsTrigger>
                 <TabsTrigger value="planifier" className="text-xs px-2 py-2 rounded-lg transition-all duration-200 data-[state=active]:bg-primary/30 data-[state=active]:text-primary data-[state=active]:ring-2 data-[state=active]:ring-primary/60 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 data-[state=inactive]:bg-slate-800 data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:bg-slate-700 data-[state=inactive]:hover:text-slate-300">À planifier</TabsTrigger>
