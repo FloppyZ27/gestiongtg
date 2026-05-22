@@ -1597,8 +1597,13 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
                 <div
                   data-kanban-column="unassigned"
                   data-kanban-scroll
-                  className={`pr-2 rounded-lg transition-all ${overColumn === 'unassigned' && dragging ? 'bg-emerald-500/10 ring-2 ring-emerald-400/50' : ''}`}
+                  className={`pr-2 rounded-lg transition-all min-h-[80px] ${overColumn === 'unassigned' && dragging ? 'bg-emerald-500/10 ring-2 ring-emerald-400/50' : 'border-2 border-dashed border-slate-700/50'}`}
                 >
+                  {unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").length === 0 && (
+                    <div className={`flex items-center justify-center h-[70px] text-xs transition-all ${overColumn === 'unassigned' && dragging ? 'text-emerald-400 font-semibold' : 'text-slate-600'}`}>
+                      {dragging ? '⬇ Déposer ici' : 'Aucun dossier à planifier'}
+                    </div>
+                  )}
                   {unassignedCards.filter(c => c.terrain?.statut_terrain === "a_ceduler").map((card) => (
                     <div key={card.id} className="mb-2">
                       <DossierCard card={card} showLock {...dossierCardProps} />
