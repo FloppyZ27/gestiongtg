@@ -41,6 +41,13 @@ const LABELS_TO_IGNORE = [
   "Suivi demandé par le notaire",
   "Pendant vacances",
   "Océane",
+  "Décision à prendre",
+  "En attente des plans de constructions",
+  "semaine prochaine",
+  "dossier annulé par le client",
+  "signature planifiée",
+  "en attente de permis lotis",
+  "Vérification",
 ];
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
