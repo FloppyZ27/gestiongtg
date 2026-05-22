@@ -261,7 +261,7 @@ export default function TrelloImportSection() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {parsedCards.map((card, i) => {
+                      {[...parsedCards].sort((a, b) => parseInt(a.numero_dossier || 0) - parseInt(b.numero_dossier || 0)).map((card, i) => {
                         const valid = card.numero_dossier && card.arpenteur_geometre;
                         return (
                           <TableRow key={i} className={`border-slate-800 text-xs ${!valid ? 'opacity-40' : ''}`}>
