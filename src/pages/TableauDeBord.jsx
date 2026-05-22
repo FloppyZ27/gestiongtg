@@ -232,7 +232,6 @@ export default function TableauDeBord() {
       if (!d.date_ouverture) return false;
       return isWithinInterval(new Date(d.date_ouverture), { start, end });
     }).length;
-    // Progression moyenne: mandats dont la date_livraison tombe dans la période (comme le calendrier)
     let totalProgress = 0; let totalMandats = 0;
     teamDossiers.forEach(d => {
       (d.mandats || []).forEach(m => {
@@ -244,7 +243,6 @@ export default function TableauDeBord() {
       });
     });
     const avgProgress = totalMandats > 0 ? Math.round(totalProgress / totalMandats) : null;
-    // Calcul du % de jours ouvrables écoulés dans la période
     const totalWorkDays = countWorkingDays(start, end);
     const elapsedEnd = today < end ? today : end;
     const elapsedWorkDays = today < start ? 0 : countWorkingDays(start, elapsedEnd);
@@ -261,7 +259,6 @@ export default function TableauDeBord() {
   const statsMois = getStats(startOfMonth(today), endOfMonth(today));
   const statsAnnee = getStats(startOfYear(today), endOfYear(today));
 
-  // Pour le rendement (garde compatibilité)
   const getPeriodDates = () => {
     if (periodeRendement === "semaine") return { start: weekStart, end: weekEnd };
     if (periodeRendement === "mois") return { start: startOfMonth(today), end: endOfMonth(today) };
@@ -291,7 +288,6 @@ export default function TableauDeBord() {
   });
 
   // Dossiers en retard - terrain
-  // Critères : terrains cédulés aujourd'hui ou plus tard mais dont la date_cedulee dépasse la date_limite_leve
   const todayStart = new Date(todayStr + 'T00:00:00');
   const dossiersEnRetardTerrain = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
@@ -362,6 +358,29 @@ export default function TableauDeBord() {
     const mandat = dossier.mandats?.[0];
     return mandat?.equipe_assignee || "Non assignée";
   };
+
+  // Variables pour la section Social
+  const todayMD = format(today, 'MM-dd');
+  const absencesJour = rendezVousAujourdhui.filter(rv => {
+    if (rv.type !== 'absence') return false;
+    const d = new Date(rv.date_debut);
+    return format(d, 'yyyy-MM-dd') === todayStr;
+  });
+  const anniversairesJour = users.filter(u => {
+    if (!u.date_naissance) return false;
+    return u.date_naissance.slice(5) === todayMD;
+  });
+  const prochainsAnniversaires = users
+    .filter(u => u.date_naissance)
+    .map(u => {
+      const [, mm, dd] = u.date_naissance.split('-');
+      const year = today.getFullYear();
+      let next = new Date(`${year}-${mm}-${dd}T00:00:00`);
+      if (next <= today) next = new Date(`${year + 1}-${mm}-${dd}T00:00:00`);
+      return { user: u, days: Math.ceil((next - today) / 86400000) };
+    })
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -590,7 +609,6 @@ export default function TableauDeBord() {
               {dossiersAMonterAujourdhui.length > 0 ? (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {dossiersAMonterAujourdhui.map((dossier) => {
-                    // Trouver le mandat et le terrain pertinent
                     let mandat = null;
                     let terrain = null;
                     dossier.mandats?.forEach(m => {
@@ -737,7 +755,6 @@ export default function TableauDeBord() {
               {dossiersEnRetardTerrain.length > 0 ? (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {dossiersEnRetardTerrain.slice(0, 5).map((dossier) => {
-                    // Trouver le mandat et terrain pertinent
                     let mandat = null;
                     let terrainRetard = null;
                     dossier.mandats?.forEach(m => {
@@ -844,7 +861,6 @@ export default function TableauDeBord() {
                     </div>
                   ))}
                 </div>
-
               </CardContent>
             </Card>
           </div>
@@ -853,18 +869,6 @@ export default function TableauDeBord() {
         </Card>{/* fin Vue opérationnelle */}
 
         {/* Section Social - collapsible */}
-        {(() => {
-          const todayMD = format(today, 'MM-dd');
-          const absencesJour = rendezVousAujourdhui.filter(rv => {
-            if (rv.type !== 'absence') return false;
-            const d = new Date(rv.date_debut);
-            return format(d, 'yyyy-MM-dd') === todayStr;
-          });
-          const anniversairesJour = users.filter(u => {
-            if (!u.date_naissance) return false;
-            return u.date_naissance.slice(5) === todayMD;
-          });
-          return (
         <Card className="border-transparent bg-transparent shadow-none mb-6">
           <div
             className="cursor-pointer hover:bg-purple-900/20 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/10 border-b border-slate-800"
@@ -876,151 +880,149 @@ export default function TableauDeBord() {
                   <Users2 className="w-3 h-3 text-purple-400" />
                 </div>
                 <h3 className="text-purple-300 text-sm font-semibold">Social</h3>
-                {absencesJour.length > 0 && <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">{absencesJour.length} absence{absencesJour.length > 1 ? 's' : ''}</Badge>}
-                {anniversairesJour.length > 0 && <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30 text-xs">🎂 {anniversairesJour.length}</Badge>}
+                {absencesJour.length > 0 && (
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                    {absencesJour.length} absence{absencesJour.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+                {anniversairesJour.length > 0 && (
+                  <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30 text-xs">
+                    🎂 {anniversairesJour.length}
+                  </Badge>
+                )}
               </div>
               {socialCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
           </div>
 
           {!socialCollapsed && (
-          <CardContent className="p-0 pt-4">
-            <div className="grid grid-cols-3 gap-4">
+            <CardContent className="p-0 pt-4">
+              <div className="grid grid-cols-3 gap-4">
 
-              {/* Absences du jour */}
-              <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/10 to-red-500/10 py-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-white flex items-center gap-2 text-sm">
-                      <Coffee className="w-4 h-4 text-orange-400" />
-                      Absences aujourd'hui
-                    </CardTitle>
-                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{absencesJour.length}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-3">
-                  {absencesJour.length > 0 ? (
-                    <div className="space-y-2 max-h-[280px] overflow-y-auto">
-                      {absencesJour.map(rv => {
-                        const absentUser = users.find(u => u.email === rv.utilisateur_email);
-                        return (
-                          <div key={rv.id} className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                            <Avatar className="w-7 h-7 border border-orange-500/30 flex-shrink-0">
-                              <AvatarImage src={absentUser?.photo_url} />
-                              <AvatarFallback className="text-xs bg-orange-500/20 text-orange-300">{getUserInitials(absentUser?.full_name || rv.utilisateur_email)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold text-orange-300 truncate">{absentUser?.full_name || rv.utilisateur_email}</p>
-                              <p className="text-[10px] text-slate-400 truncate">{rv.titre || 'Absent'}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
+                {/* Absences du jour */}
+                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
+                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/10 to-red-500/10 py-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white flex items-center gap-2 text-sm">
+                        <Coffee className="w-4 h-4 text-orange-400" />
+                        Absences aujourd'hui
+                      </CardTitle>
+                      <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{absencesJour.length}</Badge>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-2 opacity-60" />
-                      <p className="text-xs text-slate-500">Toute l'équipe est présente !</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Chat */}
-              <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/10 to-blue-500/10 py-3">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm">
-                    <MessageCircle className="w-4 h-4 text-purple-400" />
-                    Chat d'équipe
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 flex flex-col" style={{height: '300px'}}>
-                  <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                    {messagesChat.length === 0 ? (
-                      <p className="text-center text-slate-500 text-xs py-4">Aucun message pour l'instant</p>
-                    ) : (
-                      messagesChat.map(msg => {
-                        const isMe = msg.utilisateur_email === user?.email;
-                        return (
-                          <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                            <Avatar className="w-6 h-6 flex-shrink-0">
-                              <AvatarImage src={users.find(u => u.email === msg.utilisateur_email)?.photo_url} />
-                              <AvatarFallback className="text-[9px] bg-purple-500/20 text-purple-300">{getUserInitials(msg.utilisateur_nom)}</AvatarFallback>
-                            </Avatar>
-                            <div className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                              {!isMe && <p className="text-[9px] text-slate-500 mb-0.5">{msg.utilisateur_nom}</p>}
-                              <div className={`px-2 py-1.5 rounded-lg text-xs ${isMe ? 'bg-purple-500/20 text-purple-100 border border-purple-500/30' : 'bg-slate-800 text-slate-200 border border-slate-700'}`}>
-                                {msg.contenu}
+                  </CardHeader>
+                  <CardContent className="p-3">
+                    {absencesJour.length > 0 ? (
+                      <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                        {absencesJour.map(rv => {
+                          const absentUser = users.find(u => u.email === rv.utilisateur_email);
+                          return (
+                            <div key={rv.id} className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                              <Avatar className="w-7 h-7 border border-orange-500/30 flex-shrink-0">
+                                <AvatarImage src={absentUser?.photo_url} />
+                                <AvatarFallback className="text-xs bg-orange-500/20 text-orange-300">{getUserInitials(absentUser?.full_name || rv.utilisateur_email)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-orange-300 truncate">{absentUser?.full_name || rv.utilisateur_email}</p>
+                                <p className="text-[10px] text-slate-400 truncate">{rv.titre || 'Absent'}</p>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-2 opacity-60" />
+                        <p className="text-xs text-slate-500">Toute l'équipe est présente !</p>
+                      </div>
                     )}
-                  </div>
-                  <div className="p-2 border-t border-slate-800 flex gap-2">
-                    <input
-                      value={chatInput}
-                      onChange={e => setChatInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) sendMessageMutation.mutate(chatInput.trim()); }}
-                      placeholder="Écrire un message..."
-                      className="flex-1 text-xs px-2 py-1.5"
-                    />
-                    <button
-                      onClick={() => { if (chatInput.trim()) sendMessageMutation.mutate(chatInput.trim()); }}
-                      disabled={!chatInput.trim() || sendMessageMutation.isPending}
-                      style={{background:'transparent',border:'1px solid rgba(168,85,247,0.4)',borderRadius:'8px',padding:'4px 8px',cursor:'pointer',color:'#c084fc',display:'flex',alignItems:'center'}}
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Anniversaires */}
-              <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-pink-500/10 to-rose-500/10 py-3">
-                  <div className="flex items-center justify-between">
+                {/* Chat */}
+                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
+                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/10 to-blue-500/10 py-3">
                     <CardTitle className="text-white flex items-center gap-2 text-sm">
-                      <Gift className="w-4 h-4 text-pink-400" />
-                      Anniversaires
+                      <MessageCircle className="w-4 h-4 text-purple-400" />
+                      Chat d'équipe
                     </CardTitle>
-                    {anniversairesJour.length > 0 && <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30">{anniversairesJour.length}</Badge>}
-                  </div>
-                </CardHeader>
-                <CardContent className="p-3">
-                  {anniversairesJour.length > 0 ? (
-                    <div className="space-y-2">
-                      {anniversairesJour.map(u => (
-                        <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-pink-500/10 border border-pink-500/20">
-                          <Avatar className="w-8 h-8 border-2 border-pink-500/40">
-                            <AvatarImage src={u.photo_url} />
-                            <AvatarFallback className="text-xs bg-pink-500/20 text-pink-300">{getUserInitials(u.full_name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-semibold text-pink-300">{u.full_name}</p>
-                            <p className="text-[10px] text-slate-400">{u.poste || 'Employé'}</p>
-                          </div>
-                          <span className="ml-auto text-xl">🎂</span>
-                        </div>
-                      ))}
+                  </CardHeader>
+                  <CardContent className="p-0 flex flex-col" style={{height: '300px'}}>
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                      {messagesChat.length === 0 ? (
+                        <p className="text-center text-slate-500 text-xs py-4">Aucun message pour l'instant</p>
+                      ) : (
+                        messagesChat.map(msg => {
+                          const isMe = msg.utilisateur_email === user?.email;
+                          return (
+                            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                              <Avatar className="w-6 h-6 flex-shrink-0">
+                                <AvatarImage src={users.find(u => u.email === msg.utilisateur_email)?.photo_url} />
+                                <AvatarFallback className="text-[9px] bg-purple-500/20 text-purple-300">{getUserInitials(msg.utilisateur_nom)}</AvatarFallback>
+                              </Avatar>
+                              <div className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                                {!isMe && <p className="text-[9px] text-slate-500 mb-0.5">{msg.utilisateur_nom}</p>}
+                                <div className={`px-2 py-1.5 rounded-lg text-xs ${isMe ? 'bg-purple-500/20 text-purple-100 border border-purple-500/30' : 'bg-slate-800 text-slate-200 border border-slate-700'}`}>
+                                  {msg.contenu}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
-                  ) : (() => {
-                    const prochains = users
-                      .filter(u => u.date_naissance)
-                      .map(u => {
-                        const [, mm, dd] = u.date_naissance.split('-');
-                        const year = today.getFullYear();
-                        let next = new Date(`${year}-${mm}-${dd}T00:00:00`);
-                        if (next <= today) next = new Date(`${year + 1}-${mm}-${dd}T00:00:00`);
-                        return { user: u, days: Math.ceil((next - today) / 86400000) };
-                      })
-                      .sort((a, b) => a.days - b.days)
-                      .slice(0, 4);
-                    return (
+                    <div className="p-2 border-t border-slate-800 flex gap-2">
+                      <input
+                        value={chatInput}
+                        onChange={e => setChatInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) sendMessageMutation.mutate(chatInput.trim()); }}
+                        placeholder="Écrire un message..."
+                        className="flex-1 text-xs px-2 py-1.5"
+                      />
+                      <button
+                        onClick={() => { if (chatInput.trim()) sendMessageMutation.mutate(chatInput.trim()); }}
+                        disabled={!chatInput.trim() || sendMessageMutation.isPending}
+                        style={{background:'transparent',border:'1px solid rgba(168,85,247,0.4)',borderRadius:'8px',padding:'4px 8px',cursor:'pointer',color:'#c084fc',display:'flex',alignItems:'center'}}
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Anniversaires */}
+                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
+                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-pink-500/10 to-rose-500/10 py-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-white flex items-center gap-2 text-sm">
+                        <Gift className="w-4 h-4 text-pink-400" />
+                        Anniversaires
+                      </CardTitle>
+                      {anniversairesJour.length > 0 && (
+                        <Badge className="bg-pink-500/20 text-pink-400 border-pink-500/30">{anniversairesJour.length}</Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-3">
+                    {anniversairesJour.length > 0 ? (
+                      <div className="space-y-2">
+                        {anniversairesJour.map(u => (
+                          <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-pink-500/10 border border-pink-500/20">
+                            <Avatar className="w-8 h-8 border-2 border-pink-500/40">
+                              <AvatarImage src={u.photo_url} />
+                              <AvatarFallback className="text-xs bg-pink-500/20 text-pink-300">{getUserInitials(u.full_name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-semibold text-pink-300">{u.full_name}</p>
+                              <p className="text-[10px] text-slate-400">{u.poste || 'Employé'}</p>
+                            </div>
+                            <span className="ml-auto text-xl">🎂</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
                       <div className="space-y-2">
                         <p className="text-[10px] text-slate-500 mb-2">Prochains anniversaires :</p>
-                        {prochains.map(({ user: u, days }) => (
+                        {prochainsAnniversaires.map(({ user: u, days }) => (
                           <div key={u.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-800/40">
                             <Avatar className="w-6 h-6">
                               <AvatarImage src={u.photo_url} />
@@ -1030,18 +1032,18 @@ export default function TableauDeBord() {
                             <Badge className="bg-slate-700 text-slate-300 border-slate-600 text-[10px]">dans {days}j</Badge>
                           </div>
                         ))}
-                        {prochains.length === 0 && <p className="text-xs text-slate-500 text-center py-4">Aucune date connue</p>}
+                        {prochainsAnniversaires.length === 0 && (
+                          <p className="text-xs text-slate-500 text-center py-4">Aucune date connue</p>
+                        )}
                       </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
 
-            </div>
-          </CardContent>)}
+              </div>
+            </CardContent>
+          )}
         </Card>
-          );
-        })()}
 
       </div>
 
