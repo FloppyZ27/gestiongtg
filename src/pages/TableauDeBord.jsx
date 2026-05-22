@@ -575,7 +575,7 @@ export default function TableauDeBord() {
                           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           <div className="flex items-center gap-1">
                             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat)}</Badge>
-                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs font-bold">{joursRetard}j</Badge>
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs font-bold">{joursRetard} jours</Badge>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
@@ -639,7 +639,7 @@ export default function TableauDeBord() {
                           <Badge variant="outline" className={`${arpColor} border text-xs flex-shrink-0`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           <div className="flex items-center gap-1">
                             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat)}</Badge>
-                            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-bold">{joursRetard}j</Badge>
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs font-bold">{joursRetard} jours</Badge>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
