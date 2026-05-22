@@ -740,7 +740,7 @@ export default function TableauDeBord() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-600 mt-2 text-center">Fermés ou à facturer</p>
+
               </CardContent>
             </Card>
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
