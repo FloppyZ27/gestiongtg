@@ -200,7 +200,10 @@ export default function TableauDeBord() {
       });
     });
     const avgProgress = totalMandats > 0 ? Math.round(totalProgress / totalMandats) : null;
-    return { termines, ouverts, avgProgress };
+    let statut = 'En contrôle'; let statutColor = 'text-emerald-400';
+    if (termines > ouverts) { statut = 'En avance'; statutColor = 'text-cyan-400'; }
+    else if (ouverts > 0 && termines < ouverts * 0.8) { statut = 'Sous le rendement'; statutColor = 'text-red-400'; }
+    return { termines, ouverts, avgProgress, statut, statutColor };
   };
 
   const statsSemaine = getStats(weekStart, weekEnd);
@@ -760,7 +763,7 @@ export default function TableauDeBord() {
                       {stats.avgProgress !== null && (
                         <div>
                           <div className="flex justify-between items-center mb-0.5">
-                            <span className="text-[10px] text-slate-500">Rendement moyen</span>
+                            <span className={`text-[10px] font-semibold ${stats.statutColor}`}>{stats.statut}</span>
                             <span className="text-[10px] font-bold text-slate-300">{stats.avgProgress}%</span>
                           </div>
                           <div className="w-full bg-slate-900/60 h-1.5 rounded-full overflow-hidden">
