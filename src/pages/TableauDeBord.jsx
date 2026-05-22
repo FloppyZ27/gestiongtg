@@ -172,6 +172,12 @@ export default function TableauDeBord() {
 
   const teamDossiers = arpenteurEquipe ? dossiers.filter(d => d.arpenteur_geometre === arpenteurEquipe) : [];
 
+  const getMandatProgress = (dossier, mandat) => {
+    if (dossier.statut === 'Fermé' || mandat.tache_actuelle === 'Facturer') return 100;
+    const tacheIndex = TACHES.indexOf(mandat.tache_actuelle);
+    return tacheIndex >= 0 ? Math.round(((tacheIndex / (TACHES.length - 1)) * 95) / 5) * 5 : 0;
+  };
+
   const getStats = (start, end) => {
     const termines = teamDossiers.filter(d => {
       const refDate = d.date_fermeture || d.updated_date;
@@ -182,7 +188,20 @@ export default function TableauDeBord() {
       if (!d.date_ouverture) return false;
       return isWithinInterval(new Date(d.date_ouverture), { start, end });
     }).length;
-    return { termines, ouverts };
+    // Progression moyenne: dossiers ouverts pendant la période
+    const dossiersInPeriod = teamDossiers.filter(d => {
+      if (!d.date_ouverture) return false;
+      return isWithinInterval(new Date(d.date_ouverture), { start, end });
+    });
+    let totalProgress = 0; let totalMandats = 0;
+    dossiersInPeriod.forEach(d => {
+      (d.mandats || []).forEach(m => {
+        totalProgress += getMandatProgress(d, m);
+        totalMandats++;
+      });
+    });
+    const avgProgress = totalMandats > 0 ? Math.round(totalProgress / totalMandats) : null;
+    return { termines, ouverts, avgProgress };
   };
 
   const statsSemaine = getStats(weekStart, weekEnd);
@@ -724,19 +743,32 @@ export default function TableauDeBord() {
                     { label: 'Ce mois', stats: statsMois },
                     { label: 'Cette année', stats: statsAnnee },
                   ].map(({ label, stats }) => (
-                    <div key={label} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
-                      <span className="text-xs text-slate-400 font-medium">{label}</span>
-                      <div className="flex items-center gap-3">
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-emerald-400 leading-none">{stats.termines}</p>
-                          <p className="text-[10px] text-slate-500 mt-0.5">terminés</p>
-                        </div>
-                        <div className="text-slate-600 text-xs">/</div>
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-blue-400 leading-none">{stats.ouverts}</p>
-                          <p className="text-[10px] text-slate-500 mt-0.5">ouverts</p>
+                    <div key={label} className="bg-slate-800/50 rounded-lg px-3 py-2">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs text-slate-400 font-medium">{label}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="text-center">
+                            <p className="text-base font-bold text-emerald-400 leading-none">{stats.termines}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">terminés</p>
+                          </div>
+                          <div className="text-slate-600 text-xs">/</div>
+                          <div className="text-center">
+                            <p className="text-base font-bold text-blue-400 leading-none">{stats.ouverts}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">ouverts</p>
+                          </div>
                         </div>
                       </div>
+                      {stats.avgProgress !== null && (
+                        <div>
+                          <div className="flex justify-between items-center mb-0.5">
+                            <span className="text-[10px] text-slate-500">Rendement moyen</span>
+                            <span className="text-[10px] font-bold text-slate-300">{stats.avgProgress}%</span>
+                          </div>
+                          <div className="w-full bg-slate-900/60 h-1.5 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-400 transition-all duration-500" style={{ width: `${stats.avgProgress}%` }} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
