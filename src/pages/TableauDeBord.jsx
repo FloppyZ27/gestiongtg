@@ -188,10 +188,12 @@ export default function TableauDeBord() {
       if (!d.date_ouverture) return false;
       return isWithinInterval(new Date(d.date_ouverture), { start, end });
     }).length;
-    // Progression moyenne: dossiers ouverts pendant la période
+    // Progression moyenne: dossiers ouverts OU terminés/fermés pendant la période
     const dossiersInPeriod = teamDossiers.filter(d => {
-      if (!d.date_ouverture) return false;
-      return isWithinInterval(new Date(d.date_ouverture), { start, end });
+      const ouvertDans = d.date_ouverture && isWithinInterval(new Date(d.date_ouverture), { start, end });
+      const refFermeture = d.date_fermeture || d.updated_date;
+      const termineDans = isDossierTermine(d) && refFermeture && isWithinInterval(new Date(refFermeture), { start, end });
+      return ouvertDans || termineDans;
     });
     let totalProgress = 0; let totalMandats = 0;
     dossiersInPeriod.forEach(d => {
