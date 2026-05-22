@@ -220,7 +220,7 @@ export default function TableauDeBord() {
     let statut = 'En contrôle'; let statutColor = 'text-emerald-400';
     if (avgProgress !== null) {
       if (avgProgress > elapsedPercent) { statut = 'En avance'; statutColor = 'text-cyan-400'; }
-      else if (avgProgress < elapsedPercent * 0.75) { statut = 'Sous le rendement'; statutColor = 'text-red-400'; }
+      else if (avgProgress < elapsedPercent - 25) { statut = 'Sous le rendement'; statutColor = 'text-red-400'; }
     }
     return { termines, ouverts, avgProgress, statut, statutColor };
   };
