@@ -796,29 +796,6 @@ export default function TableauDeBord() {
 
               </CardContent>
             </Card>
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 py-3">
-                <CardTitle className="text-white flex items-center gap-2"><BarChart3 className="w-5 h-5 text-cyan-400" />Analyse de la production</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="bg-slate-800/50 rounded-lg p-3">
-                    <p className="text-xs text-slate-400 mb-1">Charge actuelle de l'équipe</p>
-                    <p className="text-2xl font-bold text-white">{chargeEquipe} mandats</p>
-                    <p className="text-xs text-slate-500 mt-1">en cours</p>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-3">
-                    <p className="text-xs text-slate-400 mb-1">Total des retards</p>
-                    <p className="text-2xl font-bold text-red-400">{totalRetards} dossiers</p>
-                    <p className="text-xs text-slate-500 mt-1">livraison + terrain</p>
-                  </div>
-                  <div className="bg-slate-800/50 rounded-lg p-3">
-                    <p className="text-xs text-slate-400 mb-1">Tendance</p>
-                    <p className={`text-sm font-semibold ${couleurStatut}`}>{recommandation}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
