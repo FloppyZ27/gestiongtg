@@ -212,18 +212,31 @@ export default function TableauDeBord() {
   });
 
   // Dossiers en retard - terrain
+  // Critères : terrains cédulés aujourd'hui ou plus tard mais dont la date_cedulee dépasse la date_limite_leve
+  const todayStart = new Date(todayStr + 'T00:00:00');
   const dossiersEnRetardTerrain = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
     return d.mandats?.some(m => {
-      if (!m.date_terrain || m.statut_terrain === 'pas_de_terrain') return false;
-      if (m.tache_actuelle !== 'Terrain' || m.utilisateur_assigne !== user?.email) return false;
-      const dateTerrain = new Date(m.date_terrain);
-      return dateTerrain < today && !isSameDay(dateTerrain, today);
+      const terrains = [...(m.terrains_list || []), ...(m.terrain ? [m.terrain] : [])];
+      return terrains.some(t => {
+        if (!t.date_cedulee || !t.date_limite_leve) return false;
+        const dateCedulee = new Date(t.date_cedulee + 'T00:00:00');
+        const dateLimite = new Date(t.date_limite_leve + 'T00:00:00');
+        return dateCedulee >= todayStart && dateCedulee > dateLimite;
+      });
     });
   }).sort((a, b) => {
-    const minDateA = Math.min(...a.mandats.filter(m => m.date_terrain).map(m => new Date(m.date_terrain).getTime()));
-    const minDateB = Math.min(...b.mandats.filter(m => m.date_terrain).map(m => new Date(m.date_terrain).getTime()));
-    return minDateA - minDateB;
+    const getMinDate = (d) => {
+      let min = Infinity;
+      d.mandats?.forEach(m => {
+        const terrains = [...(m.terrains_list || []), ...(m.terrain ? [m.terrain] : [])];
+        terrains.forEach(t => {
+          if (t.date_cedulee) min = Math.min(min, new Date(t.date_cedulee + 'T00:00:00').getTime());
+        });
+      });
+      return min;
+    };
+    return getMinDate(a) - getMinDate(b);
   });
 
   // Calcul du rendement
@@ -625,9 +638,24 @@ export default function TableauDeBord() {
               {dossiersEnRetardTerrain.length > 0 ? (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {dossiersEnRetardTerrain.slice(0, 5).map((dossier) => {
-                    const mandat = dossier.mandats?.[0];
-                    const dateTerrain = mandat?.date_terrain ? new Date(mandat.date_terrain) : null;
-                    const joursRetard = dateTerrain ? differenceInDays(today, dateTerrain) : 0;
+                    // Trouver le mandat et terrain pertinent
+                    let mandat = null;
+                    let terrainRetard = null;
+                    dossier.mandats?.forEach(m => {
+                      if (terrainRetard) return;
+                      const terrains = [...(m.terrains_list || []), ...(m.terrain ? [m.terrain] : [])];
+                      terrains.forEach(t => {
+                        if (terrainRetard) return;
+                        if (!t.date_cedulee || !t.date_limite_leve) return;
+                        const dc = new Date(t.date_cedulee + 'T00:00:00');
+                        const dl = new Date(t.date_limite_leve + 'T00:00:00');
+                        if (dc >= todayStart && dc > dl) { mandat = m; terrainRetard = t; }
+                      });
+                    });
+                    if (!mandat) mandat = dossier.mandats?.[0];
+                    const dateCedulee = terrainRetard?.date_cedulee ? new Date(terrainRetard.date_cedulee + 'T00:00:00') : null;
+                    const dateLimite = terrainRetard?.date_limite_leve ? new Date(terrainRetard.date_limite_leve + 'T00:00:00') : null;
+                    const joursRetard = dateCedulee && dateLimite ? differenceInDays(dateCedulee, dateLimite) : 0;
                     const arpColor = getArpenteurColor(dossier.arpenteur_geometre);
                     const bg = arpColor.split(' ')[0];
                     const assignedUser = users.find(u => u.email === mandat?.utilisateur_assigne);
@@ -650,9 +678,10 @@ export default function TableauDeBord() {
                           <div className="mb-1"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">{mandat.tache_actuelle}</Badge></div>
                         )}
                         <div className="flex items-center justify-between mt-2 pt-1" style={{borderTop: '1px solid rgba(239,68,68,0.3)'}}>
-                          {dateTerrain ? (
-                            <div className="flex items-center gap-1"><Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" /><span className="text-xs text-yellow-300">{format(dateTerrain, 'dd MMM yy', { locale: fr })}</span></div>
-                          ) : <div />}
+                          <div className="flex flex-col gap-0.5">
+                            {dateLimite && <div className="flex items-center gap-1"><AlertCircle className="w-3 h-3 text-red-400 flex-shrink-0" /><span className="text-xs text-red-300">Limite: {format(dateLimite, 'dd MMM yy', { locale: fr })}</span></div>}
+                            {dateCedulee && <div className="flex items-center gap-1"><Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" /><span className="text-xs text-yellow-300">Cédulé: {format(dateCedulee, 'dd MMM yy', { locale: fr })}</span></div>}
+                          </div>
                           {assignedUser ? (
                             <div className="flex items-center gap-1">
                               <span className="text-xs text-white font-bold">{getUserInitials(assignedUser.full_name)}</span>
