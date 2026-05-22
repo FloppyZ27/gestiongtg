@@ -216,6 +216,7 @@ export default function TableauDeBord() {
   const todayStart = new Date(todayStr + 'T00:00:00');
   const dossiersEnRetardTerrain = dossiers.filter(d => {
     if (d.statut === 'Fermé') return false;
+    if (!arpenteurEquipe || d.arpenteur_geometre !== arpenteurEquipe) return false;
     return d.mandats?.some(m => {
       const terrains = [...(m.terrains_list || []), ...(m.terrain ? [m.terrain] : [])];
       return terrains.some(t => {
