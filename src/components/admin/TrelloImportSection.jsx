@@ -20,6 +20,29 @@ const INITIALS_TO_ARPENTEUR = {
   "LT": "Luc Tremblay",
 };
 
+const LABELS_TO_IGNORE = [
+  "Donner a une collab si trouvé",
+  "En attente du contrat",
+  "OCTR - CORRECTION",
+  "Facturé",
+  "Stricte",
+  "En attente",
+  "Cette semaine",
+  "RDV",
+  "Promesse",
+  "Retour terrain",
+  "Urgent",
+  "Levé technique par drône",
+  "Printemps",
+  "Suivi demandé par le client",
+  "Avant les vacances",
+  "Bureau Julie/Cynthia",
+  "Avant Noel",
+  "Suivi demandé par le notaire",
+  "Pendant vacances",
+  "Océane",
+];
+
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
@@ -68,7 +91,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   // Labels → mandats (each label name is a type_mandat)
   const mandats = (card.labels || [])
     .map(label => (label.name || "").trim())
-    .filter(Boolean)
+    .filter(name => name && !LABELS_TO_IGNORE.some(ig => ig.toLowerCase() === name.toLowerCase()))
     .map(labelName => ({
       type_mandat: matchMandat(labelName),
       tache_actuelle: tache,
