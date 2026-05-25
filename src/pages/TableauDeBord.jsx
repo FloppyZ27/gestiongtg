@@ -405,7 +405,7 @@ export default function TableauDeBord() {
         {/* Section Social - collapsible */}
         <Card className="border-transparent bg-transparent shadow-none mb-6">
           <div
-            className="cursor-pointer hover:bg-purple-900/20 transition-colors rounded-t-lg py-2 px-3 bg-purple-900/10 border-b border-slate-800"
+            className="cursor-pointer hover:bg-purple-900/10 transition-colors rounded-t-lg py-2 px-3 border-b border-slate-800"
             onClick={() => setSocialCollapsed(!socialCollapsed)}
           >
             <div className="flex items-center justify-between">
@@ -434,8 +434,8 @@ export default function TableauDeBord() {
               <div className="grid grid-cols-3 gap-4">
 
                 {/* Absences du jour */}
-                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/10 to-red-500/10 py-3">
+                <Card className="border-slate-800 bg-transparent shadow-none">
+                  <CardHeader className="border-b border-slate-800 py-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-white flex items-center gap-2 text-sm">
                         <Coffee className="w-4 h-4 text-orange-400" />
@@ -473,8 +473,8 @@ export default function TableauDeBord() {
                 </Card>
 
                 {/* Chat */}
-                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-purple-500/10 to-blue-500/10 py-3">
+                <Card className="border-slate-800 bg-transparent shadow-none">
+                  <CardHeader className="border-b border-slate-800 py-3">
                     <CardTitle className="text-white flex items-center gap-2 text-sm">
                       <MessageCircle className="w-4 h-4 text-purple-400" />
                       Chat d'équipe
@@ -524,8 +524,8 @@ export default function TableauDeBord() {
                 </Card>
 
                 {/* Anniversaires */}
-                <Card className="border-slate-800 bg-slate-900/50 shadow-xl">
-                  <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-pink-500/10 to-rose-500/10 py-3">
+                <Card className="border-slate-800 bg-transparent shadow-none">
+                  <CardHeader className="border-b border-slate-800 py-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-white flex items-center gap-2 text-sm">
                         <Gift className="w-4 h-4 text-pink-400" />
@@ -596,7 +596,7 @@ export default function TableauDeBord() {
         {/* Section Vue opérationnelle - collapsible style Profil */}
         <Card className="border-transparent bg-transparent shadow-none mb-6">
           <div
-            className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 bg-primary/5 border-b border-slate-800"
+            className="cursor-pointer hover:bg-primary/10 transition-colors rounded-t-lg py-2 px-3 border-b border-slate-800"
             onClick={() => setVueOperationnelleCollapsed(!vueOperationnelleCollapsed)}
           >
             <div className="flex items-center justify-between">
@@ -633,8 +633,8 @@ export default function TableauDeBord() {
             card.dossier.statut !== 'Fermé' && card.mandat.tache_actuelle !== 'Facturer'
           );
           return (
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-3">
+        <Card className="border-slate-800 bg-transparent shadow-none mb-6">
+          <CardHeader className="border-b border-slate-800 py-3">
             <div className="flex items-center w-full">
               <CardTitle className="text-white flex items-center gap-2 flex-shrink-0">
                 <Calendar className="w-5 h-5 text-emerald-400" />
@@ -790,8 +790,8 @@ export default function TableauDeBord() {
         {/* 4 colonnes: Dossiers à monter, Retard livraison, Retard terrain, Statistiques */}
         <div className="grid gap-6 grid-cols-4">
           {/* Col 1: Dossiers à monter aujourd'hui */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-orange-500/20 to-red-500/20 py-3">
+          <Card className="border-slate-800 bg-transparent shadow-none">
+            <CardHeader className="border-b border-slate-800 py-3">
               <div className="flex justify-between items-center w-full">
                 <CardTitle className="text-white flex items-center gap-2">
                   <FileText className="w-5 h-5 text-orange-400" />
@@ -872,8 +872,8 @@ export default function TableauDeBord() {
           </Card>
 
           {/* Col 2: Dossiers en retard - Livraison */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-red-500/20 to-orange-500/20 py-3">
+          <Card className="border-slate-800 bg-transparent shadow-none">
+            <CardHeader className="border-b border-slate-800 py-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-white flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-400" />
@@ -936,8 +936,8 @@ export default function TableauDeBord() {
           </Card>
 
           {/* Col 3: Dossiers en retard - Terrain */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 py-3">
+          <Card className="border-slate-800 bg-transparent shadow-none">
+            <CardHeader className="border-b border-slate-800 py-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-white flex items-center gap-2">
                   <Truck className="w-5 h-5 text-amber-400" />
@@ -1016,8 +1016,8 @@ export default function TableauDeBord() {
 
           {/* Col 4: Statistiques + Rendement + Analyse */}
           <div className="space-y-4">
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 py-2">
+            <Card className="border-slate-800 bg-transparent shadow-none">
+              <CardHeader className="border-b border-slate-800 py-2">
                 <CardTitle className="text-white flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-emerald-400" />Production et rendement de l'équipe</CardTitle>
               </CardHeader>
               <CardContent className="p-3">
