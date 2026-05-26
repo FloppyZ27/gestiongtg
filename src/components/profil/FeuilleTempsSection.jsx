@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Timer, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, CalendarDays, Calendar, MessageSquare, Camera } from "lucide-react";
+import { Timer, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, CalendarDays, Calendar, MessageSquare, Camera, Printer } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -91,6 +91,97 @@ export default function FeuilleTempsSection({
   const handleOpenComment = () => {
     setCommentText(commentaireActuel?.contenu || "");
     setIsCommentOpen(true);
+  };
+
+  const handlePrint = () => {
+    const days = getPointageWeekDays();
+    const weekLabel = `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[6], "d MMMM yyyy", { locale: fr })}`;
+
+    const rows = days.map(day => {
+      const ps = getPointageForDate(day);
+      let pointage = 0, vacances = 0, mieuxEtre = 0, banque = 0;
+      ps.forEach(p => {
+        const mult = parseFloat(p.multiplicateur || 1);
+        const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+        const h = isModified ? (p.duree_heures_modifiee || 0) * mult : ((new Date(p.heure_fin) - new Date(p.heure_debut)) / 3600000) * mult;
+        if (p.type?.includes('Vacance')) vacances += h;
+        else if (p.type?.includes('Mieux')) mieuxEtre += h;
+        else if (p.type === 'En banque') banque += h;
+        else pointage += h;
+      });
+      const total = pointage + vacances + mieuxEtre + banque;
+      const details = ps.map(p => {
+        const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+        const debut = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+        const fin = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
+        const mult = parseFloat(p.multiplicateur || 1);
+        const h = isModified ? (p.duree_heures_modifiee || 0) * mult : ((fin - debut) / 3600000) * mult;
+        return `${getTypeLabel(p)}${p.description ? ` – ${p.description}` : ''} (${format(debut,'HH:mm')}–${format(fin,'HH:mm')}${mult !== 1 ? ` ×${mult}` : ''} = ${h.toFixed(1)}h)`;
+      }).join('<br/>');
+      return `<tr>
+        <td>${format(day,'EEE d MMM',{locale:fr})}</td>
+        <td>${total > 0 ? total.toFixed(1)+'h' : '–'}</td>
+        <td>${pointage > 0 ? pointage.toFixed(1)+'h' : '–'}</td>
+        <td>${vacances > 0 ? vacances.toFixed(1)+'h' : '–'}</td>
+        <td>${mieuxEtre > 0 ? mieuxEtre.toFixed(1)+'h' : '–'}</td>
+        <td>${banque > 0 ? banque.toFixed(1)+'h' : '–'}</td>
+        <td style="font-size:11px">${details || '–'}</td>
+      </tr>`;
+    }).join('');
+
+    const grandTotals = days.reduce((acc, day) => {
+      getPointageForDate(day).forEach(p => {
+        const mult = parseFloat(p.multiplicateur || 1);
+        const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+        const h = isModified ? (p.duree_heures_modifiee || 0) * mult : ((new Date(p.heure_fin) - new Date(p.heure_debut)) / 3600000) * mult;
+        if (p.type?.includes('Vacance')) acc.vacances += h;
+        else if (p.type?.includes('Mieux')) acc.mieuxEtre += h;
+        else if (p.type === 'En banque') acc.banque += h;
+        else acc.pointage += h;
+      });
+      return acc;
+    }, { pointage: 0, vacances: 0, mieuxEtre: 0, banque: 0 });
+    const grandTotal = grandTotals.pointage + grandTotals.vacances + grandTotals.mieuxEtre + grandTotals.banque;
+
+    const commentaire = commentaireActuel?.contenu || '';
+
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Feuille de temps – ${weekLabel}</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px; margin: 30px; color: #111; }
+      h1 { font-size: 18px; margin-bottom: 4px; }
+      h2 { font-size: 14px; color: #555; margin-bottom: 16px; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+      th { background: #1a1a2e; color: white; padding: 8px; text-align: left; font-size: 12px; }
+      td { padding: 7px 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+      tr:nth-child(even) td { background: #f9f9f9; }
+      tfoot td { background: #eee; font-weight: bold; }
+      .note { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 4px; white-space: pre-wrap; }
+      .footer { color: #888; font-size: 11px; margin-top: 24px; }
+    </style></head><body>
+    <h1>Feuille de temps – ${currentUser?.full_name || ''}</h1>
+    <h2>${weekLabel}</h2>
+    <table>
+      <thead><tr><th>Jour</th><th>Total</th><th>Pointage</th><th>Vacances</th><th>Mieux-Être</th><th>Banque</th><th>Détails</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td>TOTAL</td>
+        <td>${grandTotal > 0 ? grandTotal.toFixed(1)+'h' : '–'}</td>
+        <td>${grandTotals.pointage > 0 ? grandTotals.pointage.toFixed(1)+'h' : '–'}</td>
+        <td>${grandTotals.vacances > 0 ? grandTotals.vacances.toFixed(1)+'h' : '–'}</td>
+        <td>${grandTotals.mieuxEtre > 0 ? grandTotals.mieuxEtre.toFixed(1)+'h' : '–'}</td>
+        <td>${grandTotals.banque > 0 ? grandTotals.banque.toFixed(1)+'h' : '–'}</td>
+        <td></td>
+      </tr></tfoot>
+    </table>
+    ${commentaire ? `<p><strong>Note :</strong></p><div class="note">${commentaire}</div>` : ''}
+    <p class="footer">Imprimé le ${format(new Date(),'d MMMM yyyy',{locale:fr})}</p>
+    </body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
   };
 
   
@@ -205,6 +296,13 @@ export default function FeuilleTempsSection({
                     onClick={handleOpenComment} 
                     icon={MessageSquare}
                     variant="orange"
+                  />
+                )}
+                {viewMode === "week" && (
+                  <PremiumButton
+                    label="Imprimer PDF"
+                    onClick={handlePrint}
+                    icon={Printer}
                   />
                 )}
               </div>
