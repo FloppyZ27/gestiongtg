@@ -37,6 +37,7 @@ export default function Dossiers() {
     const { data: dossiers = [], isLoading } = useQuery({ queryKey: ['dossiers'], queryFn: () => base44.entities.Dossier.list('-created_date'), initialData: [] });
     const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), initialData: [] });
     const { data: lots = [] } = useQuery({ queryKey: ['lots'], queryFn: () => base44.entities.Lot.list(), initialData: [] });
+    const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => base44.entities.User.list(), initialData: [] });
     
     const deleteDossierMutation = useMutation({
         mutationFn: (id) => base44.entities.Dossier.delete(id),
@@ -187,7 +188,14 @@ export default function Dossiers() {
                 </Card>
             </div>
 
-            {isDialogOpen && <EditDossierDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} dossier={editingDossier} />}
+            <EditDossierDialog 
+                isOpen={isDialogOpen} 
+                onClose={() => setIsDialogOpen(false)} 
+                dossier={editingDossier} 
+                onSuccess={() => queryClient.invalidateQueries({ queryKey: ['dossiers'] })} 
+                clients={clients}
+                users={users}
+            />
 
             <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={setIsClientFormDialogOpen} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['clients'] })} />
         </div>
