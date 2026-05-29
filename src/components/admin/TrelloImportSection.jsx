@@ -293,6 +293,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     tache_actuelle: tache,
     adresse_travaux: structuredAddress,
     adresse_travaux_texte: adresse_travaux_texte || "",
+    lots_texte: lots.length > 0 ? lots.join('\n') : "",
     lots: [],
     prix_estime: 0,
     rabais: 0,
