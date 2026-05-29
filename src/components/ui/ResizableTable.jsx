@@ -17,18 +17,9 @@ export default function ResizableTable({ tableId, children, className, style }) 
   const containerRef = useRef(null);
   const dragging = useRef(null); // { th, startX, startWidth }
 
-  const getSavedWidths = useCallback(() => {
-    if (!tableId) return null;
-    try {
-      const saved = localStorage.getItem(`rtable-${tableId}`);
-      return saved ? JSON.parse(saved) : null;
-    } catch { return null; }
-  }, [tableId]);
+  const getSavedWidths = useCallback(() => null, []);
 
-  const saveWidths = useCallback((widths) => {
-    if (!tableId) return;
-    try { localStorage.setItem(`rtable-${tableId}`, JSON.stringify(widths)); } catch {}
-  }, [tableId]);
+  const saveWidths = useCallback(() => {}, []);
 
   const applyWidths = useCallback((ths, widths) => {
     ths.forEach((th, i) => {
