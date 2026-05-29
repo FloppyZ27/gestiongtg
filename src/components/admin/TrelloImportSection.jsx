@@ -90,16 +90,16 @@ function parseAddressFromDesc(desc) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // 2. Civic number + street + city: "123 Rue ..., Ville"
-    const mFull = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
+    // 2. Civic number (max 5 digits) + street + city: "123 Rue ..., Ville"
+    const mFull = trimmed.match(/^(\d{1,5}[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
     if (mFull) return `${mFull[1]} ${mFull[2]}, ${mFull[3].trim()}`;
 
     // 3. Street + city: "Rue ..., Ville"
     const mStreetCity = trimmed.match(/^((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*(.+)$/i);
     if (mStreetCity) return `${mStreetCity[1]}, ${mStreetCity[2].trim()}`;
 
-    // 4. Civic number + street only (no city): "123 Rue des Pins"
-    const mCivicOnly = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+)$/i);
+    // 4. Civic number (max 5 digits) + street only: "123 Rue des Pins"
+    const mCivicOnly = trimmed.match(/^(\d{1,5}[A-Za-z]?),?\s+((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+)$/i);
     if (mCivicOnly) return `${mCivicOnly[1]} ${mCivicOnly[2].trim()}`;
 
     // 5. Street only (no civic, no city): "Rue des Pins"
@@ -107,8 +107,8 @@ function parseAddressFromDesc(desc) {
     if (mStreetOnly) return mStreetOnly[1].trim();
   }
 
-  // 6. Fallback: inline civic + street + city
-  const m = desc.match(/(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
+  // 6. Fallback: inline civic (max 5 digits) + street + city
+  const m = desc.match(/(\d{1,5}[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
   if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
 
   return "";
