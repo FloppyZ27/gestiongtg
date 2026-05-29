@@ -3376,9 +3376,7 @@ export default function Dossiers() {
                           <TableCell className="font-medium text-white">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.ttl === "Oui" ? (dossier.clients_texte || "-") : getClientsNames(dossier.clients_ids)}
-                          </TableCell>
+                          <TableCell className="text-slate-300">{(dossier.ttl === "Oui" ? dossier.clients_texte : getClientsNames(dossier.clients_ids) !== "-" ? getClientsNames(dossier.clients_ids) : dossier.clients_texte) || "-"}</TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.mandatInfo?.type_mandat ? (
                               <Badge className={`${getMandatColor(dossier.mandatInfo.type_mandat)} border text-xs`}>

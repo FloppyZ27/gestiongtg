@@ -572,7 +572,6 @@ export default function TrelloImportSection() {
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Lots</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
-                        <TableHead className="text-slate-300 text-xs py-2">Commentaires</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -600,14 +599,6 @@ export default function TrelloImportSection() {
                               }
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
-                            <TableCell className="py-1.5">
-                              {row.trelloCommentsCount > 0
-                                ? <Badge className={`border text-[10px] ${row.trelloComments?.length >= row.trelloCommentsCount ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-orange-500/20 text-orange-400 border-orange-500/30'}`}>
-                                    {row.trelloComments?.length || 0}/{row.trelloCommentsCount} 💬
-                                  </Badge>
-                                : <span className="text-slate-600 italic text-[10px]">—</span>
-                              }
-                            </TableCell>
                             <TableCell className="py-1.5">
                               {row.statut === 'Fermé'
                                 ? <Badge className="bg-slate-700 text-slate-400 text-[10px]">Fermé</Badge>
