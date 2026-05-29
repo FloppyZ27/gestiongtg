@@ -61,11 +61,57 @@ const normalizeListToTache = (listName) => {
   return (listName || "").trim();
 };
 
+// Aliases courants retrouvés dans Trello → type exact dans TYPES_MANDATS
+const MANDAT_ALIASES = {
+  "cl": "Certificat de localisation",
+  "cert loc": "Certificat de localisation",
+  "certificat": "Certificat de localisation",
+  "certificat de localisation": "Certificat de localisation",
+  "certif": "Certificat de localisation",
+  "impl": "Implantation",
+  "implantation": "Implantation",
+  "piq": "Piquetage",
+  "piquetage": "Piquetage",
+  "born": "Bornage",
+  "bornage": "Bornage",
+  "octr": "OCTR",
+  "dt": "Description Technique",
+  "description technique": "Description Technique",
+  "desc technique": "Description Technique",
+  "lotissement": "Projet de lotissement",
+  "lotis": "Projet de lotissement",
+  "projet de lotissement": "Projet de lotissement",
+  "leve": "Levé topographique",
+  "levé": "Levé topographique",
+  "leve topo": "Levé topographique",
+  "levé topographique": "Levé topographique",
+  "leve topographique": "Levé topographique",
+  "plan montrant": "Plan montrant",
+  "cptaq": "CPTAQ",
+  "derog": "Dérogation mineure",
+  "dérog": "Dérogation mineure",
+  "dérogation mineure": "Dérogation mineure",
+  "derogation mineure": "Dérogation mineure",
+  "recherche": "Recherches",
+  "recherches": "Recherches",
+};
+
 const matchMandat = (labelName) => {
   const raw = (labelName || "").trim();
-  return TYPES_MANDATS.find(t => t.toLowerCase() === raw.toLowerCase())
-    || TYPES_MANDATS.find(t => t.toLowerCase().includes(raw.toLowerCase()))
-    || raw;
+  const key = stripAccents(raw).toLowerCase();
+  // 1. Alias exact
+  if (MANDAT_ALIASES[key]) return MANDAT_ALIASES[key];
+  // 2. Correspondance exacte (insensible à la casse/accents)
+  const exact = TYPES_MANDATS.find(t => stripAccents(t).toLowerCase() === key);
+  if (exact) return exact;
+  // 3. Le type contient le label
+  const partial = TYPES_MANDATS.find(t => stripAccents(t).toLowerCase().includes(key));
+  if (partial) return partial;
+  // 4. Le label contient le type
+  const reverse = TYPES_MANDATS.find(t => key.includes(stripAccents(t).toLowerCase()));
+  if (reverse) return reverse;
+  // 5. Aucune correspondance → null (sera filtré)
+  return null;
 };
 
 const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\b/i;
@@ -160,23 +206,29 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const listName = listsMap[card.idList] || "";
   const tache = normalizeListToTache(listName);
 
-  // Labels → mandats (each label name is a type_mandat)
-  const mandats = (card.labels || [])
+  // Labels → mandats (each label name is a type_mandat exact)
+  const mandatTypes = (card.labels || [])
     .map(label => (label.name || "").trim())
     .filter(name => name && !LABELS_TO_IGNORE.some(ig => ig.toLowerCase() === name.toLowerCase()))
-    .map(labelName => ({
-      type_mandat: matchMandat(labelName),
-      tache_actuelle: tache,
-      adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
-      lots: [],
-      prix_estime: 0,
-      rabais: 0,
-      taxes_incluses: false,
-      date_livraison: "",
-      date_signature: "",
-      notes: card.desc || "",
-      minutes_list: [],
-    }));
+    .map(labelName => matchMandat(labelName))
+    .filter(Boolean); // exclure les labels non reconnus
+
+  // Toujours avoir au moins un mandat
+  const finalMandatTypes = mandatTypes.length > 0 ? mandatTypes : ["Certificat de localisation"];
+
+  const mandats = finalMandatTypes.map(type_mandat => ({
+    type_mandat,
+    tache_actuelle: tache,
+    adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+    lots: [],
+    prix_estime: 0,
+    rabais: 0,
+    taxes_incluses: false,
+    date_livraison: "",
+    date_signature: "",
+    notes: card.desc || "",
+    minutes_list: [],
+  }));
 
   const adresse_travaux_texte = parseAddressFromDesc(card.desc);
   const lots = parseLotsFromDesc(card.desc);
