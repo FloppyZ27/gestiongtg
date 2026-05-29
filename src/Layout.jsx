@@ -530,7 +530,8 @@ function LayoutContent({ children, currentPageName }) {
     return (
       fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower)
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.clients_texte?.toLowerCase().includes(searchLower)
     );
   });
 

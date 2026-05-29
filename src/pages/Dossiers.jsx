@@ -1663,14 +1663,7 @@ export default function Dossiers() {
       const searchLower = searchTerm.toLowerCase();
       const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
       const clientsNames = getClientsNames(item.clients_ids);
-      const matchesSearch =
-        fullNumber.toLowerCase().includes(searchLower) ||
-        item.numero_dossier?.toLowerCase().includes(searchLower) ||
-        clientsNames.toLowerCase().includes(searchLower) ||
-        item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
-        item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
-        item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
-        item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
+      const matchesSearch = [fullNumber, item.numero_dossier, clientsNames, item.clients_texte, item.mandatInfo?.type_mandat, item.mandatInfo?.tache_actuelle, item.mandatInfo?.adresse_travaux?.rue, item.mandatInfo?.adresse_travaux?.ville].some(v => v?.toLowerCase().includes(searchLower));
 
       const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(item.arpenteur_geometre);
       const matchesVille = filterVille.length === 0 || filterVille.includes(item.mandatInfo?.adresse_travaux?.ville);

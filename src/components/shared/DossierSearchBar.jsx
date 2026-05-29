@@ -119,7 +119,8 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
         courtiersNames,
         adresses,
         mandatsTypes,
-        dossier.adresse_texte
+        dossier.adresse_texte,
+        dossier.clients_texte
       ].filter(Boolean).join(' ').toLowerCase();
 
       return matchesAllWords(haystack, words);
@@ -196,10 +197,10 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0 w-fit`}>
                           {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                         </Badge>
-                        {clientsNames && (
+                        {(clientsNames || dossier.clients_texte) && (
                           <span className="text-sm text-slate-300 flex items-center gap-1 flex-shrink-0">
                             <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
-                            {clientsNames}
+                            {clientsNames || dossier.clients_texte}
                           </span>
                         )}
                       </div>
