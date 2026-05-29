@@ -72,6 +72,11 @@ const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|m
 function parseAddressFromDesc(desc) {
   if (!desc) return "";
   const lines = desc.split(/\n/);
+  // Check for explicit "Adresse:" prefix first
+  for (const line of lines) {
+    const m = line.match(/^adresse\s*:\s*(.+)$/i);
+    if (m) return m[1].trim();
+  }
   for (const line of lines) {
     const trimmed = line.trim();
     // With civic number: "123 Rue des ..., Ville"
