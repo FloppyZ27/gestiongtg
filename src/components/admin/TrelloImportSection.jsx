@@ -281,7 +281,7 @@ export default function TrelloImportSection() {
   };
 
   const validCards = parsedCards.filter(c =>
-    c.numero_dossier && c.arpenteur_geometre &&
+    c.numero_dossier && c.arpenteur_geometre && c.clients_texte &&
     !(excludeTermine && c.statut === 'Fermé')
   );
   const validCount = validCards.length;
