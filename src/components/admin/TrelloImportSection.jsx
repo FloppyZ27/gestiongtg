@@ -56,6 +56,7 @@ const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Re
 
 const normalizeListToTache = (listName) => {
   const name = (listName || "").trim();
+  if (name.toLowerCase() === "terminé") return "Facturer";
   if (TACHES.includes(name)) return name;
   return TACHES.find(t => name.toLowerCase().includes(t.toLowerCase())) || "Ouverture";
 };
@@ -137,7 +138,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     adresse_travaux_texte,
     mandats,
     tache_actuelle: tache,
-    statut: card.closed ? "Fermé" : "Ouvert",
+    statut: card.closed || listName.toLowerCase() === "terminé" ? "Fermé" : "Ouvert",
     date_ouverture: card.dateLastActivity
       ? card.dateLastActivity.split("T")[0]
       : new Date().toISOString().split("T")[0],
