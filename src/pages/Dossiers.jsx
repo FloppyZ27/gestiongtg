@@ -1056,15 +1056,10 @@ export default function Dossiers() {
 
 
   const getFirstAdresseTravaux = (mandats) => {
-    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
+    if (!mandats || mandats.length === 0) return "-";
     const addr = mandats[0].adresse_travaux;
-    const parts = [];
-    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter((n) => n).join(', '));
-    }
-    if (addr.rue) parts.push(addr.rue);
-    if (addr.ville) parts.push(addr.ville);
-    return parts.filter((p) => p).join(', ');
+    const parts = [addr?.numeros_civiques?.filter(n => n && n !== "").join(', '), addr?.rue, addr?.ville].filter(Boolean);
+    return parts.join(', ') || mandats[0].adresse_travaux_texte || "-";
   };
 
   const updateMandat = (index, field, value) => {
