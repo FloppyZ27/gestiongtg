@@ -480,7 +480,10 @@ const SidebarMenuButton = React.forwardRef((props, ref) => {
   if (typeof tooltip === "string") {
     tooltip = {
       children: tooltip,
-    }
+    };
+  } else if (tooltip) {
+    // Ensure tooltip is a valid object if it's not a string
+    tooltip = { ...tooltip };
   }
 
   return (

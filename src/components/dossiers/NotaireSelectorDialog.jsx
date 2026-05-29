@@ -1,0 +1,84 @@
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Plus, Edit, User } from "lucide-react";
+
+const NotaireSelectorDialog = ({ 
+    isOpen, 
+    onOpenChange, 
+    notaires, 
+    selectedNotaireIds, 
+    onToggleNotaire, 
+    onNewNotaire, 
+    onEditNotaire, 
+    searchTerm, 
+    onSearchTermChange, 
+    formatAdresse 
+}) => {
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+                <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
+                    <div className="flex items-center justify-between">
+                        <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+                        <Button variant="outline" onClick={onNewNotaire} className="bg-purple-500 hover:bg-purple-600 border-0 text-white">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nouveau
+                        </Button>
+                    </div>
+                </DialogHeader>
+                <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input placeholder="Rechercher un notaire..." value={searchTerm} onChange={(e) => onSearchTermChange(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-3 p-4">
+                        {notaires.length > 0 ? notaires.map((notaire) => (
+                            <div
+                                key={notaire.id}
+                                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                                    selectedNotaireIds.includes(notaire.id)
+                                        ? 'bg-purple-500/20 border border-purple-500/30'
+                                        : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                                }`}
+                                onClick={() => onToggleNotaire(notaire.id)}
+                            >
+                                <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                                 <div className="text-sm text-slate-400 space-y-1 mt-1">
+                                    {notaire.adresses?.find((a) => a.actuelle) && formatAdresse(notaire.adresses.find((a) => a.actuelle)) &&
+                                        <p className="truncate">📍 {formatAdresse(notaire.adresses.find((a) => a.actuelle))}</p>
+                                    }
+                                    {notaire.courriels?.find((c) => c.actuel)?.courriel &&
+                                        <p className="truncate">✉️ {notaire.courriels.find((c) => c.actuel).courriel}</p>
+                                    }
+                                    {notaire.telephones?.find((t) => t.actuel)?.telephone &&
+                                        <p>
+                                            📞 <a href={`tel:${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer">
+                                                {notaire.telephones.find((t) => t.actuel).telephone}
+                                            </a>
+                                        </p>
+                                    }
+                                </div>
+                                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onEditNotaire(notaire); }} className="text-purple-400 hover:text-purple-300 mt-2 w-full">
+                                    <Edit className="w-4 h-4 mr-1" />
+                                    Modifier
+                                </Button>
+                            </div>
+                        )) : (
+                            <div className="col-span-2 text-center py-12 text-slate-500">
+                                <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                <p>Aucun notaire trouvé</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+                    <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default NotaireSelectorDialog;
