@@ -67,6 +67,20 @@ const matchMandat = (labelName) => {
     || raw;
 };
 
+function parseAddressFromDesc(desc) {
+  if (!desc) return "";
+  // Match lines starting with a civic number followed by street and city
+  const lines = desc.split(/\n/);
+  for (const line of lines) {
+    const m = line.trim().match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
+    if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
+  }
+  // Fallback: try inline without newline
+  const m = desc.match(/(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
+  if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
+  return "";
+}
+
 function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const name = (card.name || "").trim();
 
@@ -114,10 +128,13 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
       minutes_list: [],
     }));
 
+  const adresse_travaux_texte = parseAddressFromDesc(card.desc);
+
   return {
     numero_dossier: numeroDossier,
     arpenteur_geometre: arpenteur,
     clients_texte: clientsTexte,
+    adresse_travaux_texte,
     mandats,
     tache_actuelle: tache,
     statut: card.closed ? "Fermé" : "Ouvert",
@@ -210,6 +227,7 @@ export default function TrelloImportSection() {
           date_ouverture: card.date_ouverture,
           statut: card.statut,
           clients_texte: card.clients_texte,
+          adresse_texte: card.adresse_travaux_texte || "",
           ttl: "Non",
           clients_ids: [],
           notaires_ids: [],
@@ -330,6 +348,7 @@ export default function TrelloImportSection() {
                         </TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Dossier</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Client</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Adresse des travaux</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
@@ -345,6 +364,7 @@ export default function TrelloImportSection() {
                             </TableCell>
                             <TableCell className="py-1.5 font-mono font-semibold">{row.dossierLabel}</TableCell>
                             <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">{row.clients_texte || '-'}</TableCell>
+                            <TableCell className="py-1.5 text-slate-400 max-w-[160px] truncate">{row.adresse_travaux_texte || <span className="text-slate-600 italic text-[10px]">—</span>}</TableCell>
                             <TableCell className="py-1.5">
                               {row.mandats.length > 0
                                 ? <div className="flex flex-wrap gap-1">{row.mandats.map((m, mi) => <Badge key={mi} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{m.type_mandat}</Badge>)}</div>
