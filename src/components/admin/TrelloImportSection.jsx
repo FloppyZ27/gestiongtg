@@ -537,13 +537,16 @@ export default function TrelloImportSection() {
             {trelloData && parsedCards.length > 0 && (
               <div className="space-y-3">
                 {jsonStats && (
-                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs mb-2 ${jsonStats.totalComments === 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
-                    <span className={jsonStats.totalComments === 0 ? 'text-red-400' : 'text-emerald-400'}>
-                      {jsonStats.totalComments === 0
-                        ? `⚠️ Aucun commentaire détecté dans le fichier JSON — le fichier contient ${jsonStats.totalActions} actions totales dont 0 commentaire. L'export Trello ne contient probablement pas les commentaires.`
-                        : `✅ ${jsonStats.totalComments} commentaire(s) détecté(s) (${jsonStats.commentActions} dans actions globales + ${jsonStats.cardComments} dans les cartes)`
-                      }
-                    </span>
+                  <div className={`px-3 py-2 rounded-lg text-xs mb-2 ${jsonStats.totalComments === 0 ? 'bg-orange-500/10 border border-orange-500/30' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
+                    {jsonStats.totalComments === 0 ? (
+                      <div className="space-y-1">
+                        <p className="text-orange-400 font-medium">⚠️ Les commentaires ne sont pas dans le fichier d'export</p>
+                        <p className="text-slate-400">L'export JSON standard de Trello n'inclut pas les commentaires des cartes. Les colonnes affichent <span className="font-mono">0/N</span> car les commentaires existent sur Trello mais ne sont pas dans le fichier.</p>
+                        <p className="text-slate-400">Pour inclure les commentaires, vous devez exporter via l'<span className="text-orange-300 font-medium">API Trello</span> avec le paramètre <span className="font-mono text-orange-300">actions=commentCard</span>, ou les ajouter manuellement après import.</p>
+                      </div>
+                    ) : (
+                      <p className="text-emerald-400">✅ {jsonStats.totalComments} commentaire(s) détecté(s) ({jsonStats.commentActions} actions globales + {jsonStats.cardComments} dans les cartes)</p>
+                    )}
                   </div>
                 )}
                 <div className="flex items-center gap-2 flex-wrap">
