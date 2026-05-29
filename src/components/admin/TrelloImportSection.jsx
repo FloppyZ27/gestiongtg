@@ -233,10 +233,26 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const adresse_travaux_texte = parseAddressFromDesc(card.desc);
   const lots = parseLotsFromDesc(card.desc);
 
+  // Parser le texte d'adresse en champs structurés
+  const parseTextToStructuredAddress = (text) => {
+    if (!text) return { numeros_civiques: [""], rue: "", ville: "", code_postal: "", province: "QC" };
+    const parts = text.split(',').map(p => p.trim());
+    const streetPart = parts[0] || "";
+    const match = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+    return {
+      numeros_civiques: [match ? match[1] : ""],
+      rue: match ? match[2] : streetPart,
+      ville: parts[1] || "",
+      code_postal: parts[2] ? parts[2].replace(/[^A-Z0-9 ]/gi, "").trim() : "",
+      province: "QC"
+    };
+  };
+  const structuredAddress = parseTextToStructuredAddress(adresse_travaux_texte);
+
   const mandats = finalMandatTypes.map(type_mandat => ({
     type_mandat,
     tache_actuelle: tache,
-    adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+    adresse_travaux: structuredAddress,
     adresse_travaux_texte: adresse_travaux_texte || "",
     lots: [],
     prix_estime: 0,
