@@ -230,10 +230,14 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   // Toujours avoir au moins un mandat
   const finalMandatTypes = mandatTypes.length > 0 ? mandatTypes : ["Certificat de localisation"];
 
+  const adresse_travaux_texte = parseAddressFromDesc(card.desc);
+  const lots = parseLotsFromDesc(card.desc);
+
   const mandats = finalMandatTypes.map(type_mandat => ({
     type_mandat,
     tache_actuelle: tache,
     adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+    adresse_travaux_texte: adresse_travaux_texte || "",
     lots: [],
     prix_estime: 0,
     rabais: 0,
@@ -243,9 +247,6 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     notes: card.desc || "",
     minutes_list: [],
   }));
-
-  const adresse_travaux_texte = parseAddressFromDesc(card.desc);
-  const lots = parseLotsFromDesc(card.desc);
   const description = (card.desc || '').trim();
 
   return {
