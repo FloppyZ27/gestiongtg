@@ -257,6 +257,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     mandats,
     description,
     tache_actuelle: tache,
+    trelloCommentsCount: card.badges?.comments || 0,
     statut: card.closed || stripAccents(listName) === "termine" ? "Fermé" : "Ouvert",
     date_ouverture: card.dateLastActivity
       ? card.dateLastActivity.split("T")[0]
@@ -597,8 +598,10 @@ export default function TrelloImportSection() {
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
                             <TableCell className="py-1.5">
-                              {row.trelloComments && row.trelloComments.length > 0
-                                ? <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-[10px]">{row.trelloComments.length} 💬</Badge>
+                              {row.trelloCommentsCount > 0
+                                ? <Badge className={`border text-[10px] ${row.trelloComments?.length >= row.trelloCommentsCount ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-orange-500/20 text-orange-400 border-orange-500/30'}`}>
+                                    {row.trelloComments?.length || 0}/{row.trelloCommentsCount} 💬
+                                  </Badge>
                                 : <span className="text-slate-600 italic text-[10px]">—</span>
                               }
                             </TableCell>
