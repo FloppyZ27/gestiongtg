@@ -158,6 +158,7 @@ export default function Dossiers() {
                     filterTache={filterTache} setFilterTache={setFilterTache}
                     filterVille={filterVille} setFilterVille={setFilterVille}
                     uniqueVilles={uniqueVilles}
+                    dossiersWithMandats={dossiersWithMandats}
                     onNouveauDossier={() => {
                         setEditingDossier(null);
                         setIsDialogOpen(true);
