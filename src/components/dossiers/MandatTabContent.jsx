@@ -131,14 +131,6 @@ export default function MandatTabContent({
           </div>
         </div>
         
-        {/* Adresse importée (Trello/TTL) */}
-        {mandat.adresse_travaux_texte && !mandat.adresse_travaux?.rue && !mandat.adresse_travaux?.ville && (
-          <div className="flex items-center gap-2 px-2 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs text-amber-300">
-            <MapPin className="w-3 h-3 flex-shrink-0" />
-            <span>{mandat.adresse_travaux_texte}</span>
-          </div>
-        )}
-
         {/* Barre de recherche d'adresse */}
         <div className="relative">
           <div className="relative">

@@ -383,6 +383,36 @@ export default function EditDossierForm({
     }
   }, [editingDossier?.id]);
 
+  // Pré-remplir les champs d'adresse structurés depuis adresse_travaux_texte si vides
+  React.useEffect(() => {
+    if (!formData.mandats?.length) return;
+    const hasEmpty = formData.mandats.some(m =>
+      m.adresse_travaux_texte && !m.adresse_travaux?.rue && !m.adresse_travaux?.ville
+    );
+    if (!hasEmpty) return;
+    const parseText = (text) => {
+      if (!text) return null;
+      const parts = text.split(',').map(p => p.trim());
+      const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+      return {
+        numeros_civiques: [match ? match[1] : ""],
+        rue: match ? match[2] : (parts[0] || ""),
+        ville: parts[1] || "",
+        code_postal: "",
+        province: "QC"
+      };
+    };
+    setFormData(prev => ({
+      ...prev,
+      mandats: prev.mandats.map(m => {
+        if (m.adresse_travaux_texte && !m.adresse_travaux?.rue && !m.adresse_travaux?.ville) {
+          return { ...m, adresse_travaux: parseText(m.adresse_travaux_texte) || m.adresse_travaux };
+        }
+        return m;
+      })
+    }));
+  }, [editingDossier?.id]);
+
   const getClientById = (id) => (clients || []).find(c => c.id === id);
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
