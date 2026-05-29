@@ -112,38 +112,53 @@ const DossiersTable = ({
                   </TableCell>
                   <TableCell className="text-slate-300">{(dossier.ttl === "Oui" ? dossier.clients_texte : getClientsNames(dossier.clients_ids) !== "-" ? getClientsNames(dossier.clients_ids) : dossier.clients_texte) || "-"}</TableCell>
                   <TableCell className="text-slate-300">
-                    {dossier.mandatInfo?.type_mandat ? (
-                      <Badge className={`${getMandatColor(dossier.mandatInfo.type_mandat)} border text-xs`}>
-                        {getAbbreviatedMandatType(dossier.mandatInfo.type_mandat)}
-                      </Badge>
+                    {dossier.allMandats && dossier.allMandats.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {dossier.allMandats.map((mandat, idx) => (
+                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                            {getAbbreviatedMandatType(mandat.type_mandat)}
+                          </Badge>
+                        ))}
+                      </div>
                     ) : (
                       <span className="text-slate-600 text-xs">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-slate-300 text-sm">
-                    {dossier.ttl === "Oui" || dossier.trello === "Oui" ? (
-                      dossier.mandatInfo?.lots_texte ? (
-                        <div className="flex flex-col gap-0.5">
-                          {dossier.mandatInfo.lots_texte.split('\n').filter(l => l.trim()).map((lot, idx) => (
-                            <div key={idx}>{lot.trim()}</div>
-                          ))}
-                        </div>
-                      ) : "-"
+                    {(dossier.allMandats || []).some(m => m.lots_texte) || (dossier.allMandats || []).some(m => m.lots?.length > 0) ? (
+                      <div className="flex flex-wrap gap-1">
+                        {/* Lots from lots_texte (TTL/Trello) */}
+                        {(dossier.allMandats || []).flatMap(m => 
+                          m.lots_texte ? m.lots_texte.split('\n').filter(l => l.trim()) : []
+                        ).map((lot, idx) => (
+                          <Badge key={idx} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">
+                            {lot.trim()}
+                          </Badge>
+                        ))}
+                        {/* Lots from lots array (linked lots) */}
+                        {(dossier.allMandats || []).flatMap(m => m.lots || []).map((lotId, idx) => {
+                          const lot = lots.find(l => l.id === lotId);
+                          return lot ? (
+                            <Badge key={lotId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">
+                              {lot.numero_lot}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
                     ) : (
-                      dossier.mandatInfo?.lots && dossier.mandatInfo.lots.length > 0 ? (
-                        <div className="flex flex-col gap-0.5">
-                          {dossier.mandatInfo.lots.map((lotId) => {
-                            const lot = lots.find(l => l.id === lotId);
-                            return lot ? <div key={lotId}>{lot.numero_lot}</div> : null;
-                          })}
-                        </div>
-                      ) : "-"
+                      <span className="text-slate-600 text-xs">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-slate-300">
-                    {dossier.mandatInfo?.tache_actuelle &&
-              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
-              }
+                    {(dossier.allMandats || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {Array.from(new Set((dossier.allMandats || []).map(m => m.tache_actuelle).filter(Boolean))).map((tache, idx) => (
+                          <Badge key={idx} className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                            {tache}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-slate-300">
                     {dossier.ttl === "Oui" ? (dossier.adresse_texte || dossier.mandatInfo?.adresse_travaux_texte || "-") : getFirstAdresseTravaux(dossier.mandats)}

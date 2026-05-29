@@ -90,12 +90,13 @@ export default function Dossiers() {
     };
     
     const dossiersWithMandats = useMemo(() => {
-        return dossiers.flatMap((dossier) => {
-          if (dossier.mandats && dossier.mandats.length > 0) {
-            return dossier.mandats.map((mandat, idx) => ({...dossier, mandatInfo: mandat, displayId: `${dossier.id}_${idx}`}));
-          } 
-          return [{ ...dossier, mandatInfo: null, displayId: dossier.id }];
-        });
+        return dossiers.map((dossier) => ({
+          ...dossier,
+          displayId: dossier.id,
+          // Keep all mandats together, use first one for primary info
+          mandatInfo: dossier.mandats?.[0] || null,
+          allMandats: dossier.mandats || []
+        }));
       }, [dossiers]);
 
       const filteredDossiers = useMemo(() => {
@@ -103,15 +104,21 @@ export default function Dossiers() {
             const searchLower = searchTerm.toLowerCase();
             const fullNumber = ((item.arpenteur_geometre || "")) + (item.numero_dossier || "");
             const clientsNames = getClientsNames(item.clients_ids);
+            
+            // Check if any mandat matches the filters
+            const matchesMandat = filterMandat.length === 0 || (item.allMandats || []).some(m => filterMandat.includes(m.type_mandat));
+            const matchesTache = filterTache.length === 0 || (item.allMandats || []).some(m => filterTache.includes(m.tache_actuelle));
+            const matchesVille = filterVille.length === 0 || (item.allMandats || []).some(m => filterVille.includes(m.adresse_travaux?.ville));
+            
             return (
                 (fullNumber.toLowerCase().includes(searchLower) ||
                 (item.numero_dossier || "").toLowerCase().includes(searchLower) ||
                 clientsNames.toLowerCase().includes(searchLower)) &&
                 (filterArpenteur.length === 0 || filterArpenteur.includes(item.arpenteur_geometre)) &&
-                (filterVille.length === 0 || filterVille.includes(item.mandatInfo?.adresse_travaux?.ville)) &&
+                matchesVille &&
                 (filterStatut.length === 0 || filterStatut.includes(item.statut)) &&
-                (filterMandat.length === 0 || filterMandat.includes(item.mandatInfo?.type_mandat)) &&
-                (filterTache.length === 0 || filterTache.includes(item.mandatInfo?.tache_actuelle))
+                matchesMandat &&
+                matchesTache
             );
         });
     }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, getClientsNames]);
