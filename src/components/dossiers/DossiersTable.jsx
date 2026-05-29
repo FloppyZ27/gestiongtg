@@ -121,7 +121,7 @@ const DossiersTable = ({
                     )}
                   </TableCell>
                   <TableCell className="text-slate-300 text-sm">
-                    {dossier.ttl === "Oui" ? (
+                    {dossier.ttl === "Oui" || dossier.trello === "Oui" ? (
                       dossier.mandatInfo?.lots_texte ? (
                         <div className="flex flex-col gap-0.5">
                           {dossier.mandatInfo.lots_texte.split('\n').filter(l => l.trim()).map((lot, idx) => (
