@@ -627,6 +627,7 @@ export default function TrelloImportSection() {
                         <TableHead className="text-slate-300 text-xs py-2">Adresse des travaux</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Lots</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Date livraison</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
                       </TableRow>
@@ -653,6 +654,11 @@ export default function TrelloImportSection() {
                                 ? <div className="flex flex-wrap gap-1">{row.lots.map((l, li) => <Badge key={li} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">{l}</Badge>)}</div>
                                 : <span className="text-slate-600 italic text-[10px]">—</span>
                               }
+                            </TableCell>
+                            <TableCell className="py-1.5 text-slate-400">
+                              {row.mandats[0]?.date_livraison
+                                ? <span className="text-amber-400 font-mono">{row.mandats[0].date_livraison}</span>
+                                : <span className="text-slate-600 italic text-[10px]">—</span>}
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
                             <TableCell className="py-1.5">
