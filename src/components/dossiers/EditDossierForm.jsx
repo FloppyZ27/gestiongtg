@@ -449,13 +449,16 @@ export default function EditDossierForm({
         )}
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
-            <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
-              <span>
-                {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
-                  <span> - {getClientsNames(formData.clients_ids)}</span>
-                )}
-              </span>
+          <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
+          <span>
+            {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+            {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
+              <span> - {getClientsNames(formData.clients_ids)}</span>
+            )}
+            {(!formData.clients_ids || formData.clients_ids.length === 0) && formData.clients_texte && (
+              <span> - {formData.clients_texte}</span>
+            )}
+          </span>
               {formData.mandats && formData.mandats.length > 0 && (
                 <span className="flex gap-1">
                   {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
@@ -578,7 +581,15 @@ export default function EditDossierForm({
                         </div>
 
                         {/* Colonne droite - Tabs Clients/Notaires/Courtiers */}
-                        <div>
+                         <div>
+                          {/* Badge temporaire client Trello */}
+                          {formData.trello === "Oui" && formData.clients_texte && (!formData.clients_ids || formData.clients_ids.length === 0) && (
+                            <div className="mb-2 flex items-center gap-2 px-2 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                              <User className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                              <span className="text-amber-300 text-xs font-medium">{formData.clients_texte}</span>
+                              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[9px] ml-auto">Trello</Badge>
+                            </div>
+                          )}
                           <ContactsTabsSection
                             formData={formData}
                             setFormData={setFormData}
