@@ -115,6 +115,22 @@ function parseAddressFromDesc(desc) {
   return "";
 }
 
+function buildCommentsMap(json) {
+  const map = {};
+  (json.actions || []).forEach(action => {
+    if (action.type === 'commentCard' && action.data?.card?.id) {
+      const cardId = action.data.card.id;
+      if (!map[cardId]) map[cardId] = [];
+      map[cardId].push({
+        text: action.data.text || '',
+        author: action.memberCreator?.fullName || 'Trello',
+        date: action.date || new Date().toISOString(),
+      });
+    }
+  });
+  return map;
+}
+
 function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const name = (card.name || "").trim();
 
@@ -164,6 +180,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
 
   const adresse_travaux_texte = parseAddressFromDesc(card.desc);
   const lots = parseLotsFromDesc(card.desc);
+  const description = (card.desc || '').trim();
 
   return {
     numero_dossier: numeroDossier,
@@ -172,6 +189,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     adresse_travaux_texte,
     lots,
     mandats,
+    description,
     tache_actuelle: tache,
     statut: card.closed || stripAccents(listName) === "termine" ? "Fermé" : "Ouvert",
     date_ouverture: card.dateLastActivity
@@ -196,7 +214,12 @@ export default function TrelloImportSection() {
   const buildParsed = (json, defArp) => {
     const listsMap = {};
     (json.lists || []).forEach(l => { listsMap[l.id] = l.name; });
-    return (json.cards || []).map(c => parseTrelloCard(c, listsMap, defArp));
+    const commentsMap = buildCommentsMap(json);
+    return (json.cards || []).map(c => ({
+      ...parseTrelloCard(c, listsMap, defArp),
+      trelloComments: commentsMap[c.id] || [],
+      trelloCardId: c.id,
+    }));
   };
 
   const processFile = (file) => {
@@ -275,7 +298,7 @@ export default function TrelloImportSection() {
       }
 
       try {
-        await base44.entities.Dossier.create({
+        const newDossier = await base44.entities.Dossier.create({
           numero_dossier: card.numero_dossier,
           arpenteur_geometre: card.arpenteur_geometre,
           date_ouverture: card.date_ouverture,
@@ -289,6 +312,31 @@ export default function TrelloImportSection() {
           courtiers_ids: [],
           mandats: card.mandats,
         });
+
+        // Ajouter la description comme commentaire
+        if (card.description) {
+          await base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: card.description,
+            utilisateur_email: 'import@trello',
+            utilisateur_nom: 'Import Trello (description)',
+            date_modification: new Date().toISOString(),
+          });
+        }
+
+        // Ajouter les commentaires Trello
+        for (const comment of (card.trelloComments || [])) {
+          if (comment.text) {
+            await base44.entities.CommentaireDossier.create({
+              dossier_id: newDossier.id,
+              contenu: comment.text,
+              utilisateur_email: 'import@trello',
+              utilisateur_nom: `Import Trello — ${comment.author}`,
+              date_modification: comment.date,
+            });
+          }
+        }
+
         success++;
       } catch {
         errors++;
