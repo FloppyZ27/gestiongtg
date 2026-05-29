@@ -82,21 +82,19 @@ export default function MandatTabContent({
         </div>
         <div className="space-y-1">
           <Label className="text-slate-400 text-xs">Tâche</Label>
-          {mandat.tache_actuelle && !TACHES.includes(mandat.tache_actuelle) && (
-            <div className="flex items-center gap-1 mb-0.5">
-              <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5 truncate max-w-full" title={`Valeur importée : ${mandat.tache_actuelle}`}>
-                📥 {mandat.tache_actuelle}
-              </span>
-            </div>
-          )}
           <Select
-            value={TACHES.includes(mandat.tache_actuelle) ? mandat.tache_actuelle : ""}
+            value={mandat.tache_actuelle || ""}
             onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}
           >
             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
               <SelectValue placeholder="Sélectionner une tâche" />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-700">
+              {mandat.tache_actuelle && !TACHES.includes(mandat.tache_actuelle) && (
+                <SelectItem value={mandat.tache_actuelle} disabled className="text-amber-400 text-xs opacity-70 italic">
+                  {mandat.tache_actuelle} (importé)
+                </SelectItem>
+              )}
               {TACHES.map((tache) => (
                 <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
               ))}
