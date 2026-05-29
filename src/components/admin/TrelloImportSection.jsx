@@ -57,11 +57,7 @@ const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Re
 const stripAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/gi, "").toLowerCase().trim();
 
 const normalizeListToTache = (listName) => {
-  const name = (listName || "").trim();
-  const norm = stripAccents(name);
-  if (norm === "termine" || norm === "termines") return "Facturer";
-  if (TACHES.includes(name)) return name;
-  return TACHES.find(t => name.toLowerCase().includes(t.toLowerCase())) || "Ouverture";
+  return (listName || "").trim();
 };
 
 const matchMandat = (labelName) => {
