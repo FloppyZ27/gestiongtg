@@ -231,16 +231,13 @@ export default function TrelloImportSection() {
   const selectedCount = validCards.filter(c => selectedKeys.has(c.numero_dossier)).length;
   const allSelected = validCount > 0 && validCards.every(c => selectedKeys.has(c.numero_dossier));
 
-  // Une ligne par mandat (étiquette)
+  // Une ligne par dossier
   const displayRows = validCards
     .sort((a, b) => parseInt(a.numero_dossier || 0) - parseInt(b.numero_dossier || 0))
-    .flatMap(card => {
-      const dossierLabel = `${Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?'}-${card.numero_dossier}`;
-      if (card.mandats.length === 0) {
-        return [{ ...card, dossierLabel, type_mandat: null }];
-      }
-      return card.mandats.map(m => ({ ...card, dossierLabel, type_mandat: m.type_mandat }));
-    });
+    .map(card => ({
+      ...card,
+      dossierLabel: `${Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?'}-${card.numero_dossier}`,
+    }));
 
   return (
     <Card className="border-slate-700 bg-slate-800/30 mt-6">
@@ -340,20 +337,17 @@ export default function TrelloImportSection() {
                     </TableHeader>
                     <TableBody>
                       {displayRows.map((row, i) => {
-                        const isFirstRow = i === 0 || displayRows[i - 1].numero_dossier !== row.numero_dossier;
                         const isSelected = selectedKeys.has(row.numero_dossier);
                         return (
-                          <TableRow key={i} className={`border-slate-800 text-xs cursor-pointer ${!isSelected ? 'opacity-40' : ''}`} onClick={() => isFirstRow && toggleCard(row.numero_dossier)}>
+                          <TableRow key={i} className={`border-slate-800 text-xs cursor-pointer ${!isSelected ? 'opacity-40' : ''}`} onClick={() => toggleCard(row.numero_dossier)}>
                             <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
-                              {isFirstRow && (
-                                <Checkbox checked={isSelected} onCheckedChange={() => toggleCard(row.numero_dossier)} className="border-slate-600" />
-                              )}
+                              <Checkbox checked={isSelected} onCheckedChange={() => toggleCard(row.numero_dossier)} className="border-slate-600" />
                             </TableCell>
                             <TableCell className="py-1.5 font-mono font-semibold">{row.dossierLabel}</TableCell>
                             <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">{row.clients_texte || '-'}</TableCell>
                             <TableCell className="py-1.5">
-                              {row.type_mandat
-                                ? <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{row.type_mandat}</Badge>
+                              {row.mandats.length > 0
+                                ? <div className="flex flex-wrap gap-1">{row.mandats.map((m, mi) => <Badge key={mi} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{m.type_mandat}</Badge>)}</div>
                                 : <span className="text-orange-400 italic text-[10px]">aucune étiquette</span>
                               }
                             </TableCell>
@@ -364,9 +358,9 @@ export default function TrelloImportSection() {
                                 : <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">Ouvert</Badge>
                               }
                             </TableCell>
-                          </TableRow>
-                          );
-                          })}
+                           </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
