@@ -71,17 +71,26 @@ const matchMandat = (labelName) => {
     || raw;
 };
 
+const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\b/i;
+
 function parseAddressFromDesc(desc) {
   if (!desc) return "";
-  // Match lines starting with a civic number followed by street and city
   const lines = desc.split(/\n/);
   for (const line of lines) {
-    const m = line.trim().match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
-    if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
+    const trimmed = line.trim();
+    // With civic number: "123 Rue des ..., Ville"
+    const mCivic = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
+    if (mCivic) return `${mCivic[1]} ${mCivic[2]}, ${mCivic[3].trim()}`;
+    // Without civic number: "Rue ..., Ville" or "Chemin ..., Ville"
+    const mStreet = trimmed.match(/^((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*(.+)$/i);
+    if (mStreet) return `${mStreet[1]}, ${mStreet[2].trim()}`;
   }
-  // Fallback: try inline without newline
+  // Fallback: inline with civic number
   const m = desc.match(/(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
   if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
+  // Fallback: inline street keyword
+  const mS = desc.match(/((?:rue|chemin|boulevard|avenue|route|rang)\s+.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/i);
+  if (mS) return `${mS[1]}, ${mS[2].trim()}`;
   return "";
 }
 
