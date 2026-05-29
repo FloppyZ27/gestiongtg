@@ -177,6 +177,7 @@ export default function EditDossierForm({
   const [minuteToDeleteInfo, setMinuteToDeleteInfo] = useState(null);
   const [showDeleteTerrainConfirm, setShowDeleteTerrainConfirm] = useState(false);
   const [terrainToDeleteInfo, setTerrainToDeleteInfo] = useState(null);
+  const [showDeleteDossierConfirm, setShowDeleteDossierConfirm] = useState(false);
   const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
   const [editingTerrainInfo, setEditingTerrainInfo] = useState(null);
   const [terrainForm, setTerrainForm] = useState({});
@@ -435,6 +436,17 @@ export default function EditDossierForm({
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
         <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} entreesTemps={entreesTemps} />
+        {editingDossier && (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => setShowDeleteDossierConfirm(true)}
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 h-7 text-xs"
+          >
+            <Trash2 className="w-3 h-3 mr-1" />
+            Supprimer le dossier
+          </Button>
+        )}
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
             <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
@@ -1400,6 +1412,18 @@ export default function EditDossierForm({
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteDialog
+        open={showDeleteDossierConfirm}
+        onOpenChange={setShowDeleteDossierConfirm}
+        onConfirm={async () => {
+          if (!editingDossier?.id) return;
+          await base44.entities.Dossier.delete(editingDossier.id);
+          queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+          onCancel();
+        }}
+        message={`Êtes-vous sûr de vouloir supprimer définitivement le dossier ${getArpenteurInitials(formData.arpenteur_geometre)}${formData.numero_dossier} ? Cette action est irréversible.`}
+      />
 
       <ConfirmDeleteDialog
         open={showDeleteTerrainConfirm}
