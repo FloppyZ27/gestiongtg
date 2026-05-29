@@ -90,8 +90,8 @@ function parseAddressFromDesc(desc) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // 2. Civic number (max 5 digits) + street + city: "123 Rue ..., Ville"
-    const mFull = trimmed.match(/^(\d{1,5}[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
+    // 2. Civic number (max 5 digits, no spaces) + street keyword + city: "123 Rue ..., Ville"
+    const mFull = trimmed.match(/^(\d{1,5}[A-Za-z]?),?\s+((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*(.+)$/i);
     if (mFull) return `${mFull[1]} ${mFull[2]}, ${mFull[3].trim()}`;
 
     // 3. Street + city: "Rue ..., Ville"
@@ -107,8 +107,8 @@ function parseAddressFromDesc(desc) {
     if (mStreetOnly) return mStreetOnly[1].trim();
   }
 
-  // 6. Fallback: inline civic (max 5 digits) + street + city
-  const m = desc.match(/(\d{1,5}[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
+  // 6. Fallback: inline civic (max 5 digits, no spaces) + street keyword + city
+  const m = desc.match(/(\d{1,5}[A-Za-z]?),?\s+((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/i);
   if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
 
   return "";
