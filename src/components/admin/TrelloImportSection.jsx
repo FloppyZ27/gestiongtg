@@ -157,6 +157,7 @@ export default function TrelloImportSection() {
   const [importResults, setImportResults] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
+  const [excludeTermine, setExcludeTermine] = useState(false);
   const fileRef = useRef();
 
   const buildParsed = (json, defArp) => {
@@ -248,7 +249,10 @@ export default function TrelloImportSection() {
     setImportResults({ success, skipped, errors });
   };
 
-  const validCards = parsedCards.filter(c => c.numero_dossier && c.arpenteur_geometre);
+  const validCards = parsedCards.filter(c =>
+    c.numero_dossier && c.arpenteur_geometre &&
+    !(excludeTermine && c.statut === 'Fermé')
+  );
   const validCount = validCards.length;
   const selectedCount = validCards.filter(c => selectedKeys.has(c.numero_dossier)).length;
   const allSelected = validCount > 0 && validCards.every(c => selectedKeys.has(c.numero_dossier));
@@ -307,6 +311,10 @@ export default function TrelloImportSection() {
                   </SelectContent>
                 </Select>
               </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox checked={excludeTermine} onCheckedChange={v => setExcludeTermine(!!v)} className="border-slate-600" />
+                <span className="text-xs text-slate-400">Exclure les cartes "Terminé 🎉"</span>
+              </label>
               {trelloData && (
                 <Button size="sm" variant="ghost" onClick={() => { setTrelloData(null); setParsedCards([]); setImportResults(null); }} className="text-slate-400 h-8 text-xs">
                   <X className="w-3 h-3 mr-1" /> Effacer le fichier
