@@ -327,6 +327,8 @@ export default function TrelloImportSection() {
     setSelectedKeys(allSelected ? new Set() : new Set(validKeys));
   };
 
+  const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
   const handleImport = async () => {
     setIsImporting(true);
     let success = 0, skipped = 0, errors = 0;
@@ -350,6 +352,7 @@ export default function TrelloImportSection() {
       }
 
       try {
+        await sleep(300);
         const newDossier = await base44.entities.Dossier.create({
           numero_dossier: card.numero_dossier,
           arpenteur_geometre: card.arpenteur_geometre,
@@ -367,6 +370,7 @@ export default function TrelloImportSection() {
 
         // Ajouter la description comme commentaire
         if (card.description) {
+          await sleep(200);
           await base44.entities.CommentaireDossier.create({
             dossier_id: newDossier.id,
             contenu: card.description,
@@ -379,6 +383,7 @@ export default function TrelloImportSection() {
         // Ajouter les commentaires Trello
         for (const comment of (card.trelloComments || [])) {
           if (comment.text) {
+            await sleep(200);
             await base44.entities.CommentaireDossier.create({
               dossier_id: newDossier.id,
               contenu: comment.text,
