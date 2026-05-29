@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Upload, Database, FileJson, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -134,6 +135,7 @@ export default function TrelloImportSection() {
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState(new Set());
   const fileRef = useRef();
 
   const buildParsed = (json, defArp) => {
@@ -151,9 +153,12 @@ export default function TrelloImportSection() {
     reader.onload = (e) => {
       try {
         const json = JSON.parse(e.target.result);
+        const parsed = buildParsed(json, defaultArpenteur);
         setTrelloData(json);
         setImportResults(null);
-        setParsedCards(buildParsed(json, defaultArpenteur));
+        setParsedCards(parsed);
+        const valid = parsed.filter(c => c.numero_dossier && c.arpenteur_geometre);
+        setSelectedKeys(new Set(valid.map(c => c.numero_dossier)));
       } catch {
         alert("Fichier JSON invalide ou non reconnu comme export Trello.");
       }
@@ -170,14 +175,33 @@ export default function TrelloImportSection() {
 
   const handleDefaultArpenteurChange = (val) => {
     setDefaultArpenteur(val);
-    if (trelloData) setParsedCards(buildParsed(trelloData, val));
+    if (trelloData) {
+      const parsed = buildParsed(trelloData, val);
+      setParsedCards(parsed);
+      const valid = parsed.filter(c => c.numero_dossier && c.arpenteur_geometre);
+      setSelectedKeys(new Set(valid.map(c => c.numero_dossier)));
+    }
+  };
+
+  const toggleCard = (key) => {
+    setSelectedKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    const validKeys = validCards.map(c => c.numero_dossier);
+    const allSelected = validKeys.every(k => selectedKeys.has(k));
+    setSelectedKeys(allSelected ? new Set() : new Set(validKeys));
   };
 
   const handleImport = async () => {
     setIsImporting(true);
     let success = 0, skipped = 0, errors = 0;
 
-    for (const card of parsedCards) {
+    for (const card of parsedCards.filter(c => selectedKeys.has(c.numero_dossier))) {
       if (!card.numero_dossier || !card.arpenteur_geometre) { skipped++; continue; }
       try {
         await base44.entities.Dossier.create({
@@ -204,6 +228,8 @@ export default function TrelloImportSection() {
 
   const validCards = parsedCards.filter(c => c.numero_dossier && c.arpenteur_geometre);
   const validCount = validCards.length;
+  const selectedCount = validCards.filter(c => selectedKeys.has(c.numero_dossier)).length;
+  const allSelected = validCount > 0 && validCards.every(c => selectedKeys.has(c.numero_dossier));
 
   // Une ligne par mandat (étiquette)
   const displayRows = validCards
@@ -291,14 +317,20 @@ export default function TrelloImportSection() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{parsedCards.length} cartes</Badge>
                   <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{validCount} dossiers valides</Badge>
-                  <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">{displayRows.length} lignes</Badge>
                   <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{parsedCards.length - validCount} ignorées</Badge>
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">{selectedCount} sélectionnés</Badge>
+                  <button onClick={toggleAll} className="text-xs text-slate-400 hover:text-white underline ml-auto" style={{background:'transparent',border:'none',cursor:'pointer',padding:0}}>
+                    {allSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
+                  </button>
                 </div>
 
                 <div className="max-h-72 overflow-y-auto border border-slate-700 rounded-lg">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                        <TableHead className="text-slate-300 text-xs py-2 w-8">
+                          <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-slate-600" />
+                        </TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Dossier</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Client</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
@@ -307,8 +339,16 @@ export default function TrelloImportSection() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {displayRows.map((row, i) => (
-                          <TableRow key={i} className="border-slate-800 text-xs">
+                      {displayRows.map((row, i) => {
+                        const isFirstRow = i === 0 || displayRows[i - 1].numero_dossier !== row.numero_dossier;
+                        const isSelected = selectedKeys.has(row.numero_dossier);
+                        return (
+                          <TableRow key={i} className={`border-slate-800 text-xs cursor-pointer ${!isSelected ? 'opacity-40' : ''}`} onClick={() => isFirstRow && toggleCard(row.numero_dossier)}>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              {isFirstRow && (
+                                <Checkbox checked={isSelected} onCheckedChange={() => toggleCard(row.numero_dossier)} className="border-slate-600" />
+                              )}
+                            </TableCell>
                             <TableCell className="py-1.5 font-mono font-semibold">{row.dossierLabel}</TableCell>
                             <TableCell className="py-1.5 text-slate-400 max-w-[130px] truncate">{row.clients_texte || '-'}</TableCell>
                             <TableCell className="py-1.5">
@@ -325,7 +365,8 @@ export default function TrelloImportSection() {
                               }
                             </TableCell>
                           </TableRow>
-                        ))}
+                          );
+                          })}
                     </TableBody>
                   </Table>
                 </div>
@@ -347,13 +388,13 @@ export default function TrelloImportSection() {
                 ) : (
                   <Button
                     onClick={handleImport}
-                    disabled={isImporting || validCount === 0}
+                    disabled={isImporting || selectedCount === 0}
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white"
                   >
                     {isImporting ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Importation en cours...</>
                     ) : (
-                      <><Upload className="w-4 h-4 mr-2" />Importer {validCount} dossiers dans la base de données</>
+                      <><Upload className="w-4 h-4 mr-2" />Importer {selectedCount} dossier{selectedCount > 1 ? 's' : ''} sélectionné{selectedCount > 1 ? 's' : ''}</>
                     )}
                   </Button>
                 )}
