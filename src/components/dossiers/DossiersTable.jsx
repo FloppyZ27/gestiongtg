@@ -125,29 +125,31 @@ const DossiersTable = ({
                     )}
                   </TableCell>
                   <TableCell className="text-slate-300 text-sm">
-                    {(dossier.allMandats || []).some(m => m.lots_texte) || (dossier.allMandats || []).some(m => m.lots?.length > 0) ? (
-                      <div className="flex flex-wrap gap-1">
-                        {/* Lots from lots_texte (TTL/Trello) */}
-                        {(dossier.allMandats || []).flatMap(m => 
-                          m.lots_texte ? m.lots_texte.split('\n').filter(l => l.trim()) : []
-                        ).map((lot, idx) => (
-                          <Badge key={idx} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">
-                            {lot.trim()}
-                          </Badge>
-                        ))}
-                        {/* Lots from lots array (linked lots) */}
-                        {(dossier.allMandats || []).flatMap(m => m.lots || []).map((lotId, idx) => {
-                          const lot = lots.find(l => l.id === lotId);
-                          return lot ? (
-                            <Badge key={lotId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">
-                              {lot.numero_lot}
+                    {(() => {
+                      // Collect all lots (both texte and linked)
+                      const lotsTexte = (dossier.allMandats || []).flatMap(m => 
+                        m.lots_texte ? m.lots_texte.split('\n').filter(l => l.trim()) : []
+                      ).map(l => l.trim());
+                      const lotsLinked = (dossier.allMandats || []).flatMap(m => m.lots || []).map(lotId => {
+                        const lot = lots.find(l => l.id === lotId);
+                        return lot ? lot.numero_lot : null;
+                      }).filter(Boolean);
+                      
+                      // Combine and deduplicate
+                      const allLots = [...new Set([...lotsTexte, ...lotsLinked])].filter(Boolean);
+                      
+                      return allLots.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {allLots.map((lot, idx) => (
+                            <Badge key={idx} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">
+                              {lot}
                             </Badge>
-                          ) : null;
-                        })}
-                      </div>
-                    ) : (
-                      <span className="text-slate-600 text-xs">-</span>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-slate-600 text-xs">-</span>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell className="text-slate-300">
                     {(dossier.allMandats || []).length > 0 && (
