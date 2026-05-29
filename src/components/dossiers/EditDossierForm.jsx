@@ -501,7 +501,24 @@ export default function EditDossierForm({
     >
       {/* Header sur toute la largeur */}
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
-        <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>
+            {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
+          </h2>
+          {editingDossier?.ttl === "Oui" && (
+            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs font-semibold px-2 py-0.5">
+              TTL
+            </Badge>
+          )}
+          {editingDossier?.trello === "Oui" && (
+            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold px-2 py-0.5 flex items-center gap-1">
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 5h5v5H5V5zm0 7h5v5H5v-5zm0 7h5v5H5v-5zm7-14h5v5h-5V5zm0 7h5v5h-5v-5zm0 7h5v5h-5v-5zm7-14h5v5h-5V5zm0 7h5v5h-5v-5zm0 7h5v5h-5v-5z"/>
+              </svg>
+              Trello
+            </Badge>
+          )}
+        </div>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} entreesTemps={entreesTemps} />
         {editingDossier && (
           <Button
@@ -519,12 +536,12 @@ export default function EditDossierForm({
           <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
           <span>
             {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-            {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
-              <span> - {getClientsNames(formData.clients_ids)}</span>
-            )}
-            {(!formData.clients_ids || formData.clients_ids.length === 0) && formData.clients_texte && (
-              <span> - {formData.clients_texte}</span>
-            )}
+            {(() => {
+              const clientName = formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" 
+                ? getClientsNames(formData.clients_ids)
+                : formData.clients_texte || "";
+              return clientName ? <span> - {clientName}</span> : null;
+            })()}
           </span>
               {formData.mandats && formData.mandats.length > 0 && (
                 <span className="flex gap-1">
