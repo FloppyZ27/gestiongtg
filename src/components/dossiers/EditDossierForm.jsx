@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle, Edit, Receipt } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle, Edit, Receipt, Kanban } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -75,6 +75,17 @@ const getArpenteurInitials = (arpenteur) => {
     "Frédéric Gilbert": "FG-"
   };
   return mapping[arpenteur] || "";
+};
+
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
 
@@ -501,24 +512,7 @@ export default function EditDossierForm({
     >
       {/* Header sur toute la largeur */}
       <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>
-            {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
-          </h2>
-          {editingDossier?.ttl === "Oui" && (
-            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs font-semibold px-2 py-0.5">
-              TTL
-            </Badge>
-          )}
-          {editingDossier?.trello === "Oui" && (
-            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-semibold px-2 py-0.5 flex items-center gap-1">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 5h5v5H5V5zm0 7h5v5H5v-5zm0 7h5v5H5v-5zm7-14h5v5h-5V5zm0 7h5v5h-5v-5zm0 7h5v5h-5v-5zm7-14h5v5h-5V5zm0 7h5v5h-5v-5zm0 7h5v5h-5v-5z"/>
-              </svg>
-              Trello
-            </Badge>
-          )}
-        </div>
+        <h2 className="text-2xl font-bold" style={{background:'linear-gradient(90deg, hsl(0,80%,62%), hsl(22,90%,65%))', WebkitBackgroundClip:'text', backgroundClip:'text', WebkitTextFillColor:'transparent', color:'transparent'}}>{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         <FicheMandatButton formData={formData} clients={clients} editingDossier={editingDossier} entreesTemps={entreesTemps} />
         {editingDossier && (
           <Button
@@ -534,15 +528,15 @@ export default function EditDossierForm({
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
           <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
-          <span>
-            {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+            <Badge variant="outline" className={`${getArpenteurColor(formData.arpenteur_geometre)} border`}>
+              {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+            </Badge>
             {(() => {
               const clientName = formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" 
                 ? getClientsNames(formData.clients_ids)
                 : formData.clients_texte || "";
-              return clientName ? <span> - {clientName}</span> : null;
+              return clientName ? <span className="text-slate-300">{clientName}</span> : null;
             })()}
-          </span>
               {formData.mandats && formData.mandats.length > 0 && (
                 <span className="flex gap-1">
                   {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
@@ -557,6 +551,16 @@ export default function EditDossierForm({
                   )}
                 </span>
               )}
+            </div>
+          )}
+          {editingDossier?.ttl === "Oui" && (
+            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs font-semibold px-2 py-0.5">
+              TTL
+            </Badge>
+          )}
+          {editingDossier?.trello === "Oui" && (
+            <div className="p-1 bg-blue-500/80 rounded flex items-center justify-center" title="Dossier Trello">
+              <Kanban className="w-3 h-3 text-white" />
             </div>
           )}
         </div>
