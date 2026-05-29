@@ -72,26 +72,38 @@ const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|m
 function parseAddressFromDesc(desc) {
   if (!desc) return "";
   const lines = desc.split(/\n/);
-  // Check for explicit "Adresse:" prefix first
+
+  // 1. Explicit "Adresse:" prefix
   for (const line of lines) {
     const m = line.match(/^adresse\s*:\s*(.+)$/i);
     if (m) return m[1].trim();
   }
+
   for (const line of lines) {
     const trimmed = line.trim();
-    // With civic number: "123 Rue des ..., Ville"
-    const mCivic = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
-    if (mCivic) return `${mCivic[1]} ${mCivic[2]}, ${mCivic[3].trim()}`;
-    // Without civic number: "Rue ..., Ville" or "Chemin ..., Ville"
-    const mStreet = trimmed.match(/^((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*(.+)$/i);
-    if (mStreet) return `${mStreet[1]}, ${mStreet[2].trim()}`;
+    if (!trimmed) continue;
+
+    // 2. Civic number + street + city: "123 Rue ..., Ville"
+    const mFull = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*(.+)$/);
+    if (mFull) return `${mFull[1]} ${mFull[2]}, ${mFull[3].trim()}`;
+
+    // 3. Street + city: "Rue ..., Ville"
+    const mStreetCity = trimmed.match(/^((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+?),\s*(.+)$/i);
+    if (mStreetCity) return `${mStreetCity[1]}, ${mStreetCity[2].trim()}`;
+
+    // 4. Civic number + street only (no city): "123 Rue des Pins"
+    const mCivicOnly = trimmed.match(/^(\d[\d-]*[A-Za-z]?),?\s+((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+)$/i);
+    if (mCivicOnly) return `${mCivicOnly[1]} ${mCivicOnly[2].trim()}`;
+
+    // 5. Street only (no civic, no city): "Rue des Pins"
+    const mStreetOnly = trimmed.match(/^((?:rue|chemin|boulevard|boul|avenue|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\s+.+)$/i);
+    if (mStreetOnly) return mStreetOnly[1].trim();
   }
-  // Fallback: inline with civic number
+
+  // 6. Fallback: inline civic + street + city
   const m = desc.match(/(\d[\d-]*[A-Za-z]?),?\s+(.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/);
   if (m) return `${m[1]} ${m[2]}, ${m[3].trim()}`;
-  // Fallback: inline street keyword
-  const mS = desc.match(/((?:rue|chemin|boulevard|avenue|route|rang)\s+.+?),\s*([A-ZÀ-Ÿa-zà-ÿ][^,\n]{2,30})/i);
-  if (mS) return `${mS[1]}, ${mS[2].trim()}`;
+
   return "";
 }
 
