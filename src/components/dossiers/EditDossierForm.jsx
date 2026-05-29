@@ -531,10 +531,10 @@ export default function EditDossierForm({
           <span>
             {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
             {(() => {
-              const clientName = formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" 
+              const clientName = (formData.clients_ids && formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-") 
                 ? getClientsNames(formData.clients_ids)
-                : formData.clients_texte || "";
-              return clientName ? <span> - {clientName}</span> : null;
+                : (formData.clients_texte || "");
+              return clientName && clientName.trim() ? <span> - {clientName}</span> : null;
             })()}
           </span>
               {formData.mandats && formData.mandats.length > 0 && (
