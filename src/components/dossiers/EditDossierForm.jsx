@@ -528,15 +528,15 @@ export default function EditDossierForm({
         <div className="flex items-center gap-3 ml-auto">
           {formData.numero_dossier && formData.arpenteur_geometre && (
           <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${formData.arpenteur_geometre==="Samuel Guay"?"text-red-400":formData.arpenteur_geometre==="Pierre-Luc Pilote"?"text-slate-400":formData.arpenteur_geometre==="Frédéric Gilbert"?"text-orange-400":formData.arpenteur_geometre==="Dany Gaboury"?"text-yellow-400":formData.arpenteur_geometre==="Benjamin Larouche"?"text-cyan-400":"text-emerald-400"}`}>
-            <Badge variant="outline" className={`${getArpenteurColor(formData.arpenteur_geometre)} border`}>
-              {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-            </Badge>
+          <span>
+            {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
             {(() => {
               const clientName = formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" 
                 ? getClientsNames(formData.clients_ids)
                 : formData.clients_texte || "";
-              return clientName ? <span className="text-slate-300">{clientName}</span> : null;
+              return clientName ? <span> - {clientName}</span> : null;
             })()}
+          </span>
               {formData.mandats && formData.mandats.length > 0 && (
                 <span className="flex gap-1">
                   {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
