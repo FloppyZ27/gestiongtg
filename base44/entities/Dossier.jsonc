@@ -1,0 +1,379 @@
+{
+  "name": "Dossier",
+  "type": "object",
+  "properties": {
+    "numero_dossier": {
+      "type": "string",
+      "description": "Num\u00e9ro unique du dossier"
+    },
+    "arpenteur_geometre": {
+      "type": "string",
+      "enum": [
+        "Samuel Guay",
+        "Dany Gaboury",
+        "Pierre-Luc Pilote",
+        "Benjamin Larouche",
+        "Fr\u00e9d\u00e9ric Gilbert"
+      ],
+      "description": "Arpenteur-g\u00e9om\u00e8tre responsable du dossier"
+    },
+    "place_affaire": {
+      "type": "string",
+      "enum": [
+        "Alma",
+        "Saguenay"
+      ],
+      "description": "Place d'affaire du dossier"
+    },
+    "date_ouverture": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'ouverture du dossier"
+    },
+    "date_fermeture": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de fermeture du dossier"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Ouvert",
+        "Ferm\u00e9"
+      ],
+      "default": "Ouvert",
+      "description": "Statut du dossier"
+    },
+    "ttl": {
+      "type": "string",
+      "enum": [
+        "Oui",
+        "Non"
+      ],
+      "default": "Non",
+      "description": "Indique si le dossier provient de TTL"
+    },
+    "trello": {
+      "type": "string",
+      "enum": [
+        "Oui",
+        "Non"
+      ],
+      "default": "Non",
+      "description": "Indique si le dossier provient de Trello"
+    },
+    "utilisateur_assigne": {
+      "type": "string",
+      "description": "Email de l'utilisateur assign\u00e9 au retour d'appel"
+    },
+    "clients_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des clients associ\u00e9s"
+    },
+    "clients_texte": {
+      "type": "string",
+      "description": "Clients en texte libre (pour dossiers TTL)"
+    },
+    "notaires_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des notaires associ\u00e9s"
+    },
+    "notaires_texte": {
+      "type": "string",
+      "description": "Notaires en texte libre (pour dossiers TTL)"
+    },
+    "courtiers_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des courtiers immobiliers associ\u00e9s"
+    },
+    "courtiers_texte": {
+      "type": "string",
+      "description": "Courtiers en texte libre (pour dossiers TTL)"
+    },
+    "adresse_texte": {
+      "type": "string",
+      "description": "Adresse en texte libre (pour dossiers TTL)"
+    },
+    "mandats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type_mandat": {
+            "type": "string",
+            "enum": [
+              "Certificat de localisation",
+              "Implantation",
+              "Piquetage",
+              "OCTR",
+              "Projet de lotissement"
+            ]
+          },
+          "date_ouverture": {
+            "type": "string",
+            "format": "date"
+          },
+          "minute": {
+            "type": "string"
+          },
+          "date_minute": {
+            "type": "string",
+            "format": "date"
+          },
+          "type_minute": {
+            "type": "string",
+            "enum": [
+              "Initiale",
+              "Remplace",
+              "Corrige"
+            ],
+            "description": "Type de minute"
+          },
+          "minutes_list": {
+            "type": "array",
+            "description": "Liste des minutes pour ce mandat",
+            "items": {
+              "type": "object",
+              "properties": {
+                "minute": {
+                  "type": "string"
+                },
+                "date_minute": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "type_minute": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "factures": {
+            "type": "array",
+            "description": "Liste des factures g\u00e9n\u00e9r\u00e9es pour ce mandat",
+            "items": {
+              "type": "object",
+              "properties": {
+                "numero_facture": {
+                  "type": "string"
+                },
+                "date_facture": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "total_ht": {
+                  "type": "number"
+                },
+                "total_ttc": {
+                  "type": "number"
+                },
+                "facture_html": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "tache_actuelle": {
+            "type": "string",
+            "enum": [
+              "Ouverture",
+              "C\u00e9dule",
+              "Montage",
+              "Terrain",
+              "Compilation",
+              "Reliage",
+              "D\u00e9cision/Calcul",
+              "Mise en plan",
+              "Analyse",
+              "Rapport",
+              "V\u00e9rification",
+              "Facturer"
+            ]
+          },
+          "utilisateur_assigne": {
+            "type": "string"
+          },
+          "statut_terrain": {
+            "type": "string",
+            "enum": [
+              "en_verification",
+              "a_ceduler",
+              "pas_de_terrain"
+            ]
+          },
+          "equipe_assignee": {
+            "type": "string"
+          },
+          "date_terrain": {
+            "type": "string",
+            "format": "date"
+          },
+          "terrains_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date_limite_leve": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "instruments_requis": {
+                  "type": "string"
+                },
+                "a_rendez_vous": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "date_rendez_vous": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "heure_rendez_vous": {
+                  "type": "string"
+                },
+                "donneur": {
+                  "type": "string"
+                },
+                "technicien": {
+                  "type": "string"
+                },
+                "dossier_simultane": {
+                  "type": "string"
+                },
+                "temps_prevu": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "date_cedulee": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "equipe_assignee": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "terrain": {
+            "type": "object",
+            "properties": {
+              "date_limite_leve": {
+                "type": "string",
+                "format": "date"
+              },
+              "instruments_requis": {
+                "type": "string"
+              },
+              "a_rendez_vous": {
+                "type": "boolean",
+                "default": false
+              },
+              "date_rendez_vous": {
+                "type": "string",
+                "format": "date"
+              },
+              "heure_rendez_vous": {
+                "type": "string"
+              },
+              "donneur": {
+                "type": "string"
+              },
+              "technicien": {
+                "type": "string"
+              },
+              "dossier_simultane": {
+                "type": "string"
+              },
+              "temps_prevu": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "adresse_travaux": {
+            "type": "object",
+            "properties": {
+              "ville": {
+                "type": "string"
+              },
+              "numeros_civiques": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rue": {
+                "type": "string"
+              },
+              "code_postal": {
+                "type": "string"
+              },
+              "province": {
+                "type": "string"
+              }
+            }
+          },
+          "adresse_travaux_texte": {
+            "type": "string"
+          },
+          "lots": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lots_texte": {
+            "type": "string"
+          },
+          "prix_estime": {
+            "type": "number"
+          },
+          "rabais": {
+            "type": "number"
+          },
+          "taxes_incluses": {
+            "type": "boolean",
+            "default": false
+          },
+          "prix_convenu": {
+            "type": "boolean",
+            "default": false
+          },
+          "date_livraison": {
+            "type": "string",
+            "format": "date"
+          },
+          "date_signature": {
+            "type": "string",
+            "format": "date"
+          },
+          "date_debut_travaux": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Liste des mandats du dossier avec leurs d\u00e9tails"
+    }
+  },
+  "required": [
+    "arpenteur_geometre",
+    "date_ouverture"
+  ]
+}

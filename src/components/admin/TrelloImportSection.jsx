@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Upload, Database, FileJson, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
+import { Upload, Database, FileJson, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, Loader2, X, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -189,6 +190,7 @@ export default function TrelloImportSection() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [excludeTermine, setExcludeTermine] = useState(false);
+  const [duplicatesAlert, setDuplicatesAlert] = useState([]);
   const fileRef = useRef();
 
   const buildParsed = (json, defArp) => {
@@ -253,9 +255,25 @@ export default function TrelloImportSection() {
   const handleImport = async () => {
     setIsImporting(true);
     let success = 0, skipped = 0, errors = 0;
+    const duplicates = [];
+
+    // Fetch existing dossiers to check for duplicates
+    const existingDossiers = await base44.entities.Dossier.list();
 
     for (const card of parsedCards.filter(c => selectedKeys.has(c.numero_dossier))) {
       if (!card.numero_dossier || !card.arpenteur_geometre) { skipped++; continue; }
+
+      // Check for duplicate (same numero_dossier + arpenteur_geometre)
+      const alreadyExists = existingDossiers.some(
+        d => d.numero_dossier === card.numero_dossier && d.arpenteur_geometre === card.arpenteur_geometre
+      );
+      if (alreadyExists) {
+        const initials = Object.entries(INITIALS_TO_ARPENTEUR).find(([,v]) => v === card.arpenteur_geometre)?.[0] || '?';
+        duplicates.push(`${initials}-${card.numero_dossier} (${card.clients_texte})`);
+        skipped++;
+        continue;
+      }
+
       try {
         await base44.entities.Dossier.create({
           numero_dossier: card.numero_dossier,
@@ -265,6 +283,7 @@ export default function TrelloImportSection() {
           clients_texte: card.clients_texte,
           adresse_texte: card.adresse_travaux_texte || "",
           ttl: "Non",
+          trello: "Oui",
           clients_ids: [],
           notaires_ids: [],
           courtiers_ids: [],
@@ -278,6 +297,7 @@ export default function TrelloImportSection() {
 
     setIsImporting(false);
     setImportResults({ success, skipped, errors });
+    if (duplicates.length > 0) setDuplicatesAlert(duplicates);
   };
 
   const validCards = parsedCards.filter(c =>
@@ -297,6 +317,24 @@ export default function TrelloImportSection() {
     }));
 
   return (
+    <>
+    {/* Duplicate alert dialog */}
+    <Dialog open={duplicatesAlert.length > 0} onOpenChange={() => setDuplicatesAlert([])}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-orange-400">
+            <AlertTriangle className="w-5 h-5" />
+            Dossiers déjà existants
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-slate-400 mb-3">Les dossiers suivants n'ont pas été importés car ils existent déjà dans la base de données :</p>
+        <ul className="space-y-1 max-h-60 overflow-y-auto">
+          {duplicatesAlert.map((d, i) => (
+            <li key={i} className="text-sm font-mono text-orange-300 bg-orange-500/10 px-3 py-1.5 rounded">{d}</li>
+          ))}
+        </ul>
+      </DialogContent>
+    </Dialog>
     <Card className="border-slate-700 bg-slate-800/30 mt-6">
       <CardHeader
         className="pb-3 border-b border-slate-700 cursor-pointer hover:bg-slate-800/40 transition-colors rounded-t-lg"
@@ -475,5 +513,6 @@ export default function TrelloImportSection() {
         </CardContent>
       )}
     </Card>
+    </>
   );
 }
