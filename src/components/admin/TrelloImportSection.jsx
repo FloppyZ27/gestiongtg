@@ -243,6 +243,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
 
   const adresse_travaux_texte = parseAddressFromDesc(card.desc);
   const lots = parseLotsFromDesc(card.desc);
+  const date_livraison = card.due ? card.due.split('T')[0] : "";
 
   // Parser le texte d'adresse en champs structurés
   const parseTextToStructuredAddress = (text) => {
@@ -296,7 +297,7 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     prix_estime: 0,
     rabais: 0,
     taxes_incluses: false,
-    date_livraison: "",
+    date_livraison: date_livraison,
     date_signature: "",
     notes: card.desc || "",
     minutes_list: [],
