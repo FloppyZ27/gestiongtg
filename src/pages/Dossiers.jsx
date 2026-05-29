@@ -29,7 +29,7 @@ import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import { motion } from "framer-motion";
 import DossiersFilterBar from "../components/dossiers/DossiersFilterBar";
-import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog"; import PremiumButton from "../components/CommunicationClients/PremiumButton";
+import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog"; import PremiumButton from "../components/CommunicationClients/PremiumButton"; import ResizableTable from "../components/ui/ResizableTable";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
@@ -3333,7 +3333,7 @@ export default function Dossiers() {
             {isLoading ?
             <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div> :
 
-            <div className="overflow-x-auto">
+            <ResizableTable tableId="dossiers">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -3428,7 +3428,7 @@ export default function Dossiers() {
                   }
                   </TableBody>
                   </Table>
-                  </div>
+                  </ResizableTable>
                   }
                   </CardContent>
                   </Card>

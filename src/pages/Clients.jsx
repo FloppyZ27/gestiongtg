@@ -21,6 +21,7 @@ import CommentairesSectionClient from "../components/clients/CommentairesSection
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import PremiumButton from "../components/CommunicationClients/PremiumButton";
 import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";
+import ResizableTable from "../components/ui/ResizableTable";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -411,7 +412,7 @@ export default function Clients() {
         {/* Table */}
         <Card className="border-transparent bg-transparent shadow-none">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <ResizableTable tableId="clients">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -504,7 +505,7 @@ export default function Clients() {
                   })}
                 </TableBody>
               </Table>
-            </div>
+            </ResizableTable>
           </CardContent>
         </Card>
 

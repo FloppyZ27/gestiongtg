@@ -16,6 +16,7 @@ import TemplatePermissionsDialog from "@/components/admin/TemplatePermissionsDia
 import ResetPasswordDialog from "@/components/admin/ResetPasswordDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import ResizableTable from "../components/ui/ResizableTable";
 
 const getRoleColor = (role) => {
   const colors = {
@@ -299,7 +300,7 @@ export default function Administration() {
               </TabsList>
 
               <TabsContent value="actifs">
-                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                <ResizableTable tableId="admin-actifs" className="border border-slate-700 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -471,13 +472,13 @@ export default function Administration() {
                                 )}
                                 </TableBody>
                                 </Table>
-                                </div>
+                                </ResizableTable>
                                 </TabsContent>
 
 
 
-              <TabsContent value="inactifs">
-                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                <TabsContent value="inactifs">
+                <ResizableTable tableId="admin-inactifs" className="border border-slate-700 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -649,7 +650,7 @@ export default function Administration() {
                       )}
                     </TableBody>
                   </Table>
-                </div>
+                </ResizableTable>
               </TabsContent>
 
 
