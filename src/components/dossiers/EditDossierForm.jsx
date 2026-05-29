@@ -390,6 +390,15 @@ export default function EditDossierForm({
       m.adresse_travaux_texte && !m.adresse_travaux?.rue && !m.adresse_travaux?.ville
     );
     if (!hasEmpty) return;
+    const VILLES = [
+      "Alma","Saguenay","Chicoutimi","Jonquière","La Baie","Roberval","Saint-Félicien",
+      "Dolbeau-Mistassini","Métabetchouan","Métabetchouan-Lac-à-la-Croix","Lac-Bouchette",
+      "Normandin","Péribonka","Saint-Gédéon","Hébertville","Desbiens","Chambord",
+      "Saint-Bruno","Hébertville-Station","Labrecque","Saint-Prime","Sainte-Hedwidge",
+      "Saint-C\u0153ur-de-Marie","Lamarche","Saint-Henri-de-Taillon","Saint-Nazaire",
+      "Sainte-Monique","Notre-Dame-de-Lorette","Girardville","Saint-Thomas-Didyme",
+      "Saint-Augustin","Mistissini","Chibougamau","Larouche","Laterrière"
+    ];
     const parseText = (text) => {
       if (!text) return null;
       const parts = text.split(',').map(p => p.trim());
@@ -397,15 +406,38 @@ export default function EditDossierForm({
       if (/^\d+[a-zA-Z]?$/.test(parts[0]) && parts.length >= 3) {
         return { numeros_civiques: [parts[0]], rue: parts[1] || "", ville: parts[2] || "", code_postal: "", province: "QC" };
       }
-      // Format anglais/compact: "123 Rue Principale, Alma"
-      const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
-      return {
-        numeros_civiques: [match ? match[1] : ""],
-        rue: match ? match[2] : (parts[0] || ""),
-        ville: parts[1] || "",
-        code_postal: "",
-        province: "QC"
-      };
+      // Format avec virgule: "123 Rue Principale, Alma"
+      if (parts.length >= 2) {
+        const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+        return {
+          numeros_civiques: [match ? match[1] : ""],
+          rue: match ? match[2] : (parts[0] || ""),
+          ville: parts[1] || "",
+          code_postal: "",
+          province: "QC"
+        };
+      }
+      // Pas de virgule: chercher une ville connue dans le texte
+      const textLower = text.toLowerCase();
+      const foundCity = VILLES.find(v => {
+        const vl = v.toLowerCase();
+        return textLower.endsWith(vl) || textLower.includes(' ' + vl) || textLower.includes(', ' + vl);
+      });
+      if (foundCity) {
+        const idx = text.toLowerCase().lastIndexOf(foundCity.toLowerCase());
+        const streetPart = text.slice(0, idx).trim().replace(/[,\s]+$/, "");
+        const match = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+        return {
+          numeros_civiques: [match ? match[1] : ""],
+          rue: match ? match[2] : streetPart,
+          ville: foundCity,
+          code_postal: "",
+          province: "QC"
+        };
+      }
+      // Fallback
+      const match = text.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+      return { numeros_civiques: [match ? match[1] : ""], rue: match ? match[2] : text, ville: "", code_postal: "", province: "QC" };
     };
     setFormData(prev => ({
       ...prev,

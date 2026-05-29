@@ -116,6 +116,17 @@ const matchMandat = (labelName) => {
 
 const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\b/i;
 
+const VILLES_CONNUES = [
+  "Alma","Saguenay","Chicoutimi","Jonquière","La Baie","Roberval","Saint-Félicien",
+  "Dolbeau-Mistassini","Métabetchouan","Métabetchouan-Lac-à-la-Croix","Lac-Bouchette",
+  "Normandin","Péribonka","Saint-Gédéon","Hébertville","Desbiens","Chambord",
+  "Saint-Bruno","Hébertville-Station","Labrecque","Saint-Prime","Sainte-Hedwidge",
+  "Saint-C\u0153ur-de-Marie","Lamarche","Saint-Henri-de-Taillon","Saint-Nazaire",
+  "Sainte-Monique","Notre-Dame-de-Lorette","Girardville","Saint-Thomas-Didyme",
+  "Saint-Augustin","Mistissini","Chibougamau","Larouche","L'Anse-Saint-Jean",
+  "Ferland-et-Boilleau","Saint-David-de-Falardeau","Shipshaw","Laterrière"
+];
+
 function parseLotsFromDesc(desc) {
   if (!desc) return [];
   // Match 7-digit lot numbers with optional spaces: "1 234 567" or "1234567"
@@ -237,19 +248,42 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const parseTextToStructuredAddress = (text) => {
     if (!text) return { numeros_civiques: [""], rue: "", ville: "", code_postal: "", province: "QC" };
     const parts = text.split(',').map(p => p.trim());
-    // Format français: "1234, rue des Érables, Alma" (numéro seul avant virgule)
+    // Format français: "1234, rue des Érables, Alma"
     if (/^\d+[a-zA-Z]?$/.test(parts[0]) && parts.length >= 3) {
       return { numeros_civiques: [parts[0]], rue: parts[1] || "", ville: parts[2] || "", code_postal: "", province: "QC" };
     }
-    // Format anglais: "123 Rue Principale, Alma"
-    const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
-    return {
-      numeros_civiques: [match ? match[1] : ""],
-      rue: match ? match[2] : (parts[0] || ""),
-      ville: parts[1] || "",
-      code_postal: "",
-      province: "QC"
-    };
+    // Format avec virgule: "123 Rue Principale, Alma"
+    if (parts.length >= 2) {
+      const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+      return {
+        numeros_civiques: [match ? match[1] : ""],
+        rue: match ? match[2] : (parts[0] || ""),
+        ville: parts[1] || "",
+        code_postal: "",
+        province: "QC"
+      };
+    }
+    // Pas de virgule: chercher une ville connue dans le texte
+    const textLower = text.toLowerCase();
+    const foundCity = VILLES_CONNUES.find(v => {
+      const vl = v.toLowerCase();
+      return textLower.endsWith(vl) || textLower.includes(' ' + vl) || textLower.includes(', ' + vl);
+    });
+    if (foundCity) {
+      const idx = text.toLowerCase().lastIndexOf(foundCity.toLowerCase());
+      const streetPart = text.slice(0, idx).trim().replace(/[,\s]+$/, "");
+      const match = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+      return {
+        numeros_civiques: [match ? match[1] : ""],
+        rue: match ? match[2] : streetPart,
+        ville: foundCity,
+        code_postal: "",
+        province: "QC"
+      };
+    }
+    // Fallback: tout dans rue
+    const match = text.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+    return { numeros_civiques: [match ? match[1] : ""], rue: match ? match[2] : text, ville: "", code_postal: "", province: "QC" };
   };
   const structuredAddress = parseTextToStructuredAddress(adresse_travaux_texte);
 
