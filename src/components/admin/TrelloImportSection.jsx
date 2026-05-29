@@ -163,16 +163,30 @@ function parseAddressFromDesc(desc) {
 
 function buildCommentsMap(json) {
   const map = {};
+  // Top-level actions array (standard board export)
   (json.actions || []).forEach(action => {
     if (action.type === 'commentCard' && action.data?.card?.id) {
       const cardId = action.data.card.id;
       if (!map[cardId]) map[cardId] = [];
       map[cardId].push({
         text: action.data.text || '',
-        author: action.memberCreator?.fullName || 'Trello',
+        author: action.memberCreator?.fullName || action.idMemberCreator || 'Trello',
         date: action.date || new Date().toISOString(),
       });
     }
+  });
+  // Fallback: per-card actions array (some Trello export formats)
+  (json.cards || []).forEach(card => {
+    (card.actions || []).forEach(action => {
+      if (action.type === 'commentCard') {
+        if (!map[card.id]) map[card.id] = [];
+        map[card.id].push({
+          text: action.data?.text || '',
+          author: action.memberCreator?.fullName || 'Trello',
+          date: action.date || new Date().toISOString(),
+        });
+      }
+    });
   });
   return map;
 }
@@ -538,6 +552,7 @@ export default function TrelloImportSection() {
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Lots</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Commentaires</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -565,6 +580,12 @@ export default function TrelloImportSection() {
                               }
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
+                            <TableCell className="py-1.5">
+                              {row.trelloComments && row.trelloComments.length > 0
+                                ? <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-[10px]">{row.trelloComments.length} 💬</Badge>
+                                : <span className="text-slate-600 italic text-[10px]">—</span>
+                              }
+                            </TableCell>
                             <TableCell className="py-1.5">
                               {row.statut === 'Fermé'
                                 ? <Badge className="bg-slate-700 text-slate-400 text-[10px]">Fermé</Badge>
