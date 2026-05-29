@@ -275,6 +275,7 @@ export default function TrelloImportSection() {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [excludeTermine, setExcludeTermine] = useState(false);
   const [duplicatesAlert, setDuplicatesAlert] = useState([]);
+  const [jsonStats, setJsonStats] = useState(null);
   const fileRef = useRef();
 
   const buildParsed = (json, defArp) => {
@@ -303,6 +304,11 @@ export default function TrelloImportSection() {
         setParsedCards(parsed);
         const valid = parsed.filter(c => c.numero_dossier && c.arpenteur_geometre);
         setSelectedKeys(new Set(valid.map(c => c.numero_dossier)));
+        // Diagnostic
+        const totalActions = (json.actions || []).length;
+        const commentActions = (json.actions || []).filter(a => a.type === 'commentCard').length;
+        const cardComments = (json.cards || []).reduce((sum, c) => sum + (c.actions || []).filter(a => a.type === 'commentCard').length, 0);
+        setJsonStats({ totalActions, commentActions, cardComments, totalComments: commentActions + cardComments });
       } catch {
         alert("Fichier JSON invalide ou non reconnu comme export Trello.");
       }
@@ -529,6 +535,16 @@ export default function TrelloImportSection() {
             {/* Preview table */}
             {trelloData && parsedCards.length > 0 && (
               <div className="space-y-3">
+                {jsonStats && (
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs mb-2 ${jsonStats.totalComments === 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
+                    <span className={jsonStats.totalComments === 0 ? 'text-red-400' : 'text-emerald-400'}>
+                      {jsonStats.totalComments === 0
+                        ? `⚠️ Aucun commentaire détecté dans le fichier JSON — le fichier contient ${jsonStats.totalActions} actions totales dont 0 commentaire. L'export Trello ne contient probablement pas les commentaires.`
+                        : `✅ ${jsonStats.totalComments} commentaire(s) détecté(s) (${jsonStats.commentActions} dans actions globales + ${jsonStats.cardComments} dans les cartes)`
+                      }
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">{parsedCards.length} cartes</Badge>
                   <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">{validCount} dossiers valides</Badge>
