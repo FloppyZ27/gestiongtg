@@ -393,6 +393,11 @@ export default function EditDossierForm({
     const parseText = (text) => {
       if (!text) return null;
       const parts = text.split(',').map(p => p.trim());
+      // Format français: "1234, rue des Érables, Alma"
+      if (/^\d+[a-zA-Z]?$/.test(parts[0]) && parts.length >= 3) {
+        return { numeros_civiques: [parts[0]], rue: parts[1] || "", ville: parts[2] || "", code_postal: "", province: "QC" };
+      }
+      // Format anglais/compact: "123 Rue Principale, Alma"
       const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
       return {
         numeros_civiques: [match ? match[1] : ""],

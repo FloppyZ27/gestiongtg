@@ -237,13 +237,17 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
   const parseTextToStructuredAddress = (text) => {
     if (!text) return { numeros_civiques: [""], rue: "", ville: "", code_postal: "", province: "QC" };
     const parts = text.split(',').map(p => p.trim());
-    const streetPart = parts[0] || "";
-    const match = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
+    // Format français: "1234, rue des Érables, Alma" (numéro seul avant virgule)
+    if (/^\d+[a-zA-Z]?$/.test(parts[0]) && parts.length >= 3) {
+      return { numeros_civiques: [parts[0]], rue: parts[1] || "", ville: parts[2] || "", code_postal: "", province: "QC" };
+    }
+    // Format anglais: "123 Rue Principale, Alma"
+    const match = parts[0]?.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
     return {
       numeros_civiques: [match ? match[1] : ""],
-      rue: match ? match[2] : streetPart,
+      rue: match ? match[2] : (parts[0] || ""),
       ville: parts[1] || "",
-      code_postal: parts[2] ? parts[2].replace(/[^A-Z0-9 ]/gi, "").trim() : "",
+      code_postal: "",
       province: "QC"
     };
   };
