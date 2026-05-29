@@ -69,6 +69,13 @@ const matchMandat = (labelName) => {
 
 const STREET_KEYWORDS = /\b(rue|chemin|boulevard|boul|bvd|avenue|av|route|rang|montée|côte|place|impasse|allée|sentier|carré|croissant|promenade|terrasse)\b/i;
 
+function parseLotsFromDesc(desc) {
+  if (!desc) return [];
+  // Match 7-digit lot numbers with optional spaces: "1 234 567" or "1234567"
+  const matches = desc.match(/\b(\d{1}[\s]?\d{3}[\s]?\d{3})\b/g) || [];
+  return [...new Set(matches.map(m => m.replace(/\s/g, ' ').trim()))];
+}
+
 function parseAddressFromDesc(desc) {
   if (!desc) return "";
   const lines = desc.split(/\n/);
@@ -155,12 +162,14 @@ function parseTrelloCard(card, listsMap, defaultArpenteur) {
     }));
 
   const adresse_travaux_texte = parseAddressFromDesc(card.desc);
+  const lots = parseLotsFromDesc(card.desc);
 
   return {
     numero_dossier: numeroDossier,
     arpenteur_geometre: arpenteur,
     clients_texte: clientsTexte,
     adresse_travaux_texte,
+    lots,
     mandats,
     tache_actuelle: tache,
     statut: card.closed || stripAccents(listName) === "termine" ? "Fermé" : "Ouvert",
@@ -384,6 +393,7 @@ export default function TrelloImportSection() {
                         <TableHead className="text-slate-300 text-xs py-2">Client</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Adresse des travaux</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Mandat</TableHead>
+                        <TableHead className="text-slate-300 text-xs py-2">Lots</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Tâche (liste)</TableHead>
                         <TableHead className="text-slate-300 text-xs py-2">Statut</TableHead>
                       </TableRow>
@@ -403,6 +413,12 @@ export default function TrelloImportSection() {
                               {row.mandats.length > 0
                                 ? <div className="flex flex-wrap gap-1">{row.mandats.map((m, mi) => <Badge key={mi} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{m.type_mandat}</Badge>)}</div>
                                 : <span className="text-orange-400 italic text-[10px]">aucune étiquette</span>
+                              }
+                            </TableCell>
+                            <TableCell className="py-1.5">
+                              {row.lots && row.lots.length > 0
+                                ? <div className="flex flex-wrap gap-1">{row.lots.map((l, li) => <Badge key={li} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px] font-mono">{l}</Badge>)}</div>
+                                : <span className="text-slate-600 italic text-[10px]">—</span>
                               }
                             </TableCell>
                             <TableCell className="py-1.5 text-slate-400">{row.tache_actuelle}</TableCell>
