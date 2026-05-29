@@ -57,7 +57,7 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-export default function DossierSearchBar({ dossiers, clients, users = [], onDossierSelect }) {
+export default function DossierSearchBar({ dossiers, clients, users = [], lots = [] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
@@ -110,6 +110,15 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
       const courtiersNames = getClientsNames(dossier.courtiers_ids);
       const adresses = (dossier.mandats || []).map(m => getAdresse(m)).join(' ');
       const mandatsTypes = (dossier.mandats || []).map(m => m.type_mandat || '').join(' ');
+      // Extract lots from mandats (both lots array and lots_texte)
+      const lotsFromDossier = (dossier.mandats || []).flatMap(m => {
+        const lotsFromIds = (m.lots || []).map(lotId => {
+          const lot = lots.find(l => l.id === lotId);
+          return lot ? lot.numero_lot : '';
+        });
+        const lotsFromTexte = m.lots_texte ? m.lots_texte.split('\n').filter(l => l.trim()) : [];
+        return [...lotsFromIds, ...lotsFromTexte].filter(Boolean);
+      });
       // Concatenate everything into one big searchable string
       const haystack = [
         fullNumber,
@@ -120,7 +129,8 @@ export default function DossierSearchBar({ dossiers, clients, users = [], onDoss
         adresses,
         mandatsTypes,
         dossier.adresse_texte,
-        dossier.clients_texte
+        dossier.clients_texte,
+        lotsFromDossier.join(' ')
       ].filter(Boolean).join(' ').toLowerCase();
 
       return matchesAllWords(haystack, words);
