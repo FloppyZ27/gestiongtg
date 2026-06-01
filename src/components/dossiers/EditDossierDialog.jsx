@@ -1026,9 +1026,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         defaultType={clientTypeForForm}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['clients'] });
-          if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);
-          if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
-          if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
         }}
       />
 
