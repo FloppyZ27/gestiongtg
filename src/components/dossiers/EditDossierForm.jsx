@@ -690,7 +690,20 @@ export default function EditDossierForm({
                             onNewClientClick={onNewClientClick}
                             onClientCardClick={onClientCardClick}
                             />
-                        </div>
+                          {/* Badges lots pour dossiers TTL ou Trello */}
+                          {(formData.ttl === "Oui" || formData.trello === "Oui") && formData.mandats?.some(m => m.lots_texte) && (
+                            <div className="mt-2 flex items-center flex-wrap gap-1.5 px-2 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+                              <span className="text-slate-400 text-xs font-medium flex-shrink-0">Lots:</span>
+                              {formData.mandats.flatMap((m, mi) =>
+                                m.lots_texte ? m.lots_texte.split(',').filter(l => l.trim()).map((lot, li) => (
+                                  <Badge key={`${mi}-${li}`} className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-medium">
+                                    {lot.trim()}
+                                  </Badge>
+                                )) : []
+                              )}
+                            </div>
+                          )}
+                          </div>
                       </div>
                     </CardContent>
                   )}
