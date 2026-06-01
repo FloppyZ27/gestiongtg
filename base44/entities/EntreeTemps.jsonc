@@ -36,5 +36,46 @@
     "date",
     "heures",
     "tache"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "data.utilisateur_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.utilisateur_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.utilisateur_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.utilisateur_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
