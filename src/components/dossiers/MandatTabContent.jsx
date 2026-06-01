@@ -392,6 +392,16 @@ export default function MandatTabContent({
       {/* Lots */}
       <div className={`grid ${lotTabExpanded && currentMandatIndexForLot === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
         <div className="space-y-2">
+          {(formData.ttl === "Oui" || formData.trello === "Oui") && mandat.lots_texte && (
+            <div className="flex items-center flex-wrap gap-1.5 px-2 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+              <span className="text-slate-400 text-xs font-medium flex-shrink-0">Lots (importé):</span>
+              {mandat.lots_texte.split(',').filter(l => l.trim()).map((lot, i) => (
+                <Badge key={i} className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-medium">
+                  {lot.trim()}
+                </Badge>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <Label className="text-slate-400 text-xs">Lots</Label>
             <div className="flex items-center gap-1.5">
