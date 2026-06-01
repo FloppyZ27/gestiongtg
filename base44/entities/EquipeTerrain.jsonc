@@ -1,0 +1,56 @@
+{
+  "name": "EquipeTerrain",
+  "type": "object",
+  "properties": {
+    "date_terrain": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de l'\u00e9quipe terrain"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9quipe"
+    },
+    "place_affaire": {
+      "type": "string",
+      "enum": [
+        "Alma",
+        "Saguenay"
+      ],
+      "description": "Place d'affaire de l'\u00e9quipe"
+    },
+    "techniciens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des techniciens assign\u00e9s"
+    },
+    "vehicules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des v\u00e9hicules assign\u00e9s"
+    },
+    "equipements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des \u00e9quipements assign\u00e9s"
+    },
+    "mandats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des cartes de mandats assign\u00e9s"
+    }
+  },
+  "required": [
+    "date_terrain",
+    "nom",
+    "place_affaire"
+  ]
+}

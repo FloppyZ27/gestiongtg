@@ -1,0 +1,48 @@
+{
+  "name": "Vehicule",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom/Identification du v\u00e9hicule"
+    },
+    "marque": {
+      "type": "string",
+      "description": "Marque du v\u00e9hicule"
+    },
+    "modele": {
+      "type": "string",
+      "description": "Mod\u00e8le du v\u00e9hicule"
+    },
+    "plaque": {
+      "type": "string",
+      "description": "Plaque d'immatriculation"
+    },
+    "annee": {
+      "type": "number",
+      "description": "Ann\u00e9e du v\u00e9hicule"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Disponible",
+        "En service",
+        "En r\u00e9paration",
+        "Hors service"
+      ],
+      "default": "Disponible",
+      "description": "Statut du v\u00e9hicule"
+    },
+    "assigne_a": {
+      "type": "string",
+      "description": "ID de l'employ\u00e9 assign\u00e9"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes suppl\u00e9mentaires"
+    }
+  },
+  "required": [
+    "nom"
+  ]
+}

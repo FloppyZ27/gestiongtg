@@ -1,0 +1,36 @@
+{
+  "name": "PermissionsTemplate",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "poste",
+        "role"
+      ],
+      "description": "Type de template (par poste ou par r\u00f4le)"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom du poste ou r\u00f4le"
+    },
+    "permissions_pages": {
+      "type": "array",
+      "description": "Liste des pages accessibles",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissions_informations": {
+      "type": "array",
+      "description": "Liste des types d'informations accessibles",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "nom"
+  ]
+}

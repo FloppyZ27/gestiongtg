@@ -1,0 +1,46 @@
+{
+  "name": "RetourAppel",
+  "type": "object",
+  "properties": {
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9"
+    },
+    "date_appel": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de l'appel"
+    },
+    "utilisateur_assigne": {
+      "type": "string",
+      "description": "Email de l'utilisateur assign\u00e9"
+    },
+    "raison": {
+      "type": "string",
+      "description": "Raison/notes de l'appel"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Retour d'appel",
+        "Message laiss\u00e9",
+        "Aucune r\u00e9ponse",
+        "Termin\u00e9"
+      ],
+      "default": "Retour d'appel",
+      "description": "Statut du retour d'appel"
+    },
+    "client_nom": {
+      "type": "string",
+      "description": "Nom du client (si aucun dossier)"
+    },
+    "client_telephone": {
+      "type": "string",
+      "description": "T\u00e9l\u00e9phone du client (si aucun dossier)"
+    }
+  },
+  "required": [
+    "date_appel",
+    "raison"
+  ]
+}

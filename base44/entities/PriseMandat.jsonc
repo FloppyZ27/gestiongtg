@@ -1,0 +1,249 @@
+{
+  "name": "PriseMandat",
+  "type": "object",
+  "properties": {
+    "arpenteur_geometre": {
+      "type": "string",
+      "enum": [
+        "Samuel Guay",
+        "Dany Gaboury",
+        "Pierre-Luc Pilote",
+        "Benjamin Larouche",
+        "Fr\u00e9d\u00e9ric Gilbert"
+      ],
+      "description": "Arpenteur-g\u00e9om\u00e8tre responsable"
+    },
+    "place_affaire": {
+      "type": "string",
+      "enum": [
+        "Alma",
+        "Saguenay"
+      ],
+      "description": "Place d'affaire du dossier"
+    },
+    "numero_dossier": {
+      "type": "string",
+      "description": "Num\u00e9ro de dossier assign\u00e9 (pour statut Mandats \u00e0 ouvrir)"
+    },
+    "date_ouverture": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'ouverture du dossier"
+    },
+    "clients_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des clients associ\u00e9s"
+    },
+    "notaires_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des notaires associ\u00e9s"
+    },
+    "courtiers_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des courtiers immobiliers associ\u00e9s"
+    },
+    "compagnies_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des compagnies associ\u00e9es"
+    },
+    "client_info": {
+      "type": "object",
+      "properties": {
+        "prenom": {
+          "type": "string"
+        },
+        "nom": {
+          "type": "string"
+        },
+        "telephone": {
+          "type": "string"
+        },
+        "type_telephone": {
+          "type": "string"
+        },
+        "courriel": {
+          "type": "string"
+        }
+      },
+      "description": "Informations du client saisies dans le formulaire"
+    },
+    "professionnel_info": {
+      "type": "object",
+      "properties": {
+        "notaire": {
+          "type": "string"
+        },
+        "courtier": {
+          "type": "string"
+        },
+        "compagnie": {
+          "type": "string"
+        }
+      },
+      "description": "Informations des professionnels saisies manuellement"
+    },
+    "adresse_travaux": {
+      "type": "object",
+      "properties": {
+        "numeros_civiques": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rue": {
+          "type": "string"
+        },
+        "ville": {
+          "type": "string"
+        },
+        "province": {
+          "type": "string"
+        },
+        "code_postal": {
+          "type": "string"
+        },
+        "numero_lot": {
+          "type": "string"
+        }
+      },
+      "description": "Adresse des travaux"
+    },
+    "mandats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type_mandat": {
+            "type": "string"
+          },
+          "prix_estime": {
+            "type": "number"
+          },
+          "prix_premier_lot": {
+            "type": "number"
+          },
+          "prix_autres_lots": {
+            "type": "number"
+          },
+          "rabais": {
+            "type": "number"
+          },
+          "taxes_incluses": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Liste des mandats avec leur tarification individuelle"
+    },
+    "echeance_souhaitee": {
+      "type": "string",
+      "description": "\u00c9ch\u00e9ance souhait\u00e9e"
+    },
+    "date_signature": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de signature"
+    },
+    "date_debut_travaux": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de d\u00e9but des travaux"
+    },
+    "date_livraison": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de livraison"
+    },
+    "urgence_percue": {
+      "type": "string",
+      "enum": [
+        "Pas press\u00e9",
+        "Normal",
+        "Rapide"
+      ],
+      "description": "Urgence per\u00e7ue"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Nouveau mandat/Demande d'information",
+        "Mandats \u00e0 ouvrir",
+        "Mandat non octroy\u00e9"
+      ],
+      "default": "Nouveau mandat/Demande d'information",
+      "description": "Statut de la prise de mandat"
+    },
+    "commentaires": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "contenu": {
+            "type": "string"
+          },
+          "utilisateur_email": {
+            "type": "string"
+          },
+          "utilisateur_nom": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Commentaires associ\u00e9s"
+    },
+    "historique": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "utilisateur_email": {
+            "type": "string"
+          },
+          "utilisateur_nom": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Historique des actions sur la prise de mandat"
+    },
+    "locked_by": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a verrouill\u00e9 le mandat"
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date et heure du verrouillage"
+    }
+  },
+  "required": [
+    "arpenteur_geometre"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "EntreeTemps",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de l'entr\u00e9e"
+    },
+    "heures": {
+      "type": "number",
+      "description": "Nombre d'heures travaill\u00e9es"
+    },
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9"
+    },
+    "mandat": {
+      "type": "string",
+      "description": "Mandat du dossier"
+    },
+    "tache": {
+      "type": "string",
+      "description": "T\u00e2che accomplie"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description de l'activit\u00e9"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    }
+  },
+  "required": [
+    "date",
+    "heures",
+    "tache"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur destinataire"
+    },
+    "titre": {
+      "type": "string",
+      "description": "Titre de la notification"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message de la notification"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "retour_appel",
+        "dossier",
+        "general"
+      ],
+      "default": "general",
+      "description": "Type de notification"
+    },
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9 (optionnel)"
+    },
+    "lue": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indique si la notification a \u00e9t\u00e9 lue"
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "titre",
+    "message",
+    "type"
+  ]
+}

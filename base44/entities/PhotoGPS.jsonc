@@ -1,0 +1,49 @@
+{
+  "name": "PhotoGPS",
+  "type": "object",
+  "properties": {
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9"
+    },
+    "mandat_type": {
+      "type": "string",
+      "description": "Type de mandat"
+    },
+    "photo_name": {
+      "type": "string",
+      "description": "Nom du fichier photo"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude en degr\u00e9s"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude en degr\u00e9s"
+    },
+    "accuracy_meters": {
+      "type": "number",
+      "description": "Pr\u00e9cision de la g\u00e9olocalisation en m\u00e8tres"
+    },
+    "heading": {
+      "type": "number",
+      "description": "Direction de la prise de photo en degr\u00e9s (0-360), null si indisponible"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp ISO de la prise de photo"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a pris la photo"
+    }
+  },
+  "required": [
+    "dossier_id",
+    "photo_name",
+    "latitude",
+    "longitude"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Note",
+  "type": "object",
+  "properties": {
+    "titre": {
+      "type": "string",
+      "description": "Titre de la note"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Contenu de la note"
+    },
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur propri\u00e9taire"
+    }
+  },
+  "required": [
+    "titre",
+    "contenu"
+  ]
+}

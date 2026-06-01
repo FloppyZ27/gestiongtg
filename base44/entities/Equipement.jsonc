@@ -1,0 +1,61 @@
+{
+  "name": "Equipement",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9quipement"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "GPS",
+        "Th\u00e9odolite",
+        "Station totale",
+        "Niveau",
+        "Drone",
+        "Ordinateur portable",
+        "Tablette",
+        "Autre"
+      ],
+      "description": "Type d'\u00e9quipement"
+    },
+    "numero_serie": {
+      "type": "string",
+      "description": "Num\u00e9ro de s\u00e9rie"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Disponible",
+        "En service",
+        "En r\u00e9paration",
+        "Hors service"
+      ],
+      "default": "Disponible",
+      "description": "Statut de l'\u00e9quipement"
+    },
+    "assigne_a": {
+      "type": "string",
+      "description": "ID de l'employ\u00e9 assign\u00e9"
+    },
+    "date_achat": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'achat"
+    },
+    "date_derniere_calibration": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de derni\u00e8re calibration"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes suppl\u00e9mentaires"
+    }
+  },
+  "required": [
+    "nom",
+    "type"
+  ]
+}

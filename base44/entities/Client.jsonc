@@ -1,0 +1,108 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom du client"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom du client"
+    },
+    "type_client": {
+      "type": "string",
+      "enum": [
+        "Client",
+        "Notaire",
+        "Courtier immobilier",
+        "Compagnie"
+      ],
+      "default": "Client",
+      "description": "Type de client"
+    },
+    "preferences_livraison": {
+      "type": "array",
+      "description": "Modes de livraison pr\u00e9f\u00e9r\u00e9s",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Main propre",
+          "Poste",
+          "Courriel"
+        ]
+      }
+    },
+    "adresses": {
+      "type": "array",
+      "description": "Liste des adresses du client",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ville": {
+            "type": "string"
+          },
+          "numeros_civiques": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rue": {
+            "type": "string"
+          },
+          "code_postal": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "actuelle": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "courriels": {
+      "type": "array",
+      "description": "Liste des courriels du client",
+      "items": {
+        "type": "object",
+        "properties": {
+          "courriel": {
+            "type": "string"
+          },
+          "actuel": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "telephones": {
+      "type": "array",
+      "description": "Liste des t\u00e9l\u00e9phones du client",
+      "items": {
+        "type": "object",
+        "properties": {
+          "telephone": {
+            "type": "string"
+          },
+          "actuel": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes suppl\u00e9mentaires concernant le client"
+    }
+  },
+  "required": [
+    "nom",
+    "prenom"
+  ]
+}

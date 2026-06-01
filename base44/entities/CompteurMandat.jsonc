@@ -1,0 +1,27 @@
+{
+  "name": "CompteurMandat",
+  "type": "object",
+  "properties": {
+    "dossier_id": {
+      "type": "string",
+      "description": "ID du dossier associ\u00e9"
+    },
+    "arpenteur_geometre": {
+      "type": "string",
+      "description": "Arpenteur-g\u00e9om\u00e8tre du mandat"
+    },
+    "type_mandat": {
+      "type": "string",
+      "description": "Type de mandat cr\u00e9\u00e9"
+    },
+    "date_creation": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de cr\u00e9ation du mandat"
+    }
+  },
+  "required": [
+    "dossier_id",
+    "date_creation"
+  ]
+}

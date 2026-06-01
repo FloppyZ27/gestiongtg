@@ -1,0 +1,45 @@
+{
+  "name": "RaccourciUtilisateur",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    },
+    "titre": {
+      "type": "string",
+      "description": "Titre du raccourci"
+    },
+    "icone": {
+      "type": "string",
+      "description": "Nom de l'ic\u00f4ne Lucide React"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "page",
+        "dialog",
+        "externe"
+      ],
+      "description": "Type d'action du raccourci"
+    },
+    "action_cible": {
+      "type": "string",
+      "description": "Cible de l'action (nom de page, dialog, ou URL)"
+    },
+    "ordre": {
+      "type": "number",
+      "description": "Ordre d'affichage"
+    },
+    "couleur": {
+      "type": "string",
+      "description": "Couleur du bouton"
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "titre",
+    "action_type",
+    "action_cible"
+  ]
+}

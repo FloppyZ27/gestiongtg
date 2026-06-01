@@ -1,0 +1,39 @@
+{
+  "name": "ActionLog",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a effectu\u00e9 l'action"
+    },
+    "utilisateur_nom": {
+      "type": "string",
+      "description": "Nom de l'utilisateur qui a effectu\u00e9 l'action"
+    },
+    "action": {
+      "type": "string",
+      "description": "Type d'action effectu\u00e9e"
+    },
+    "entite": {
+      "type": "string",
+      "description": "Type d'entit\u00e9 concern\u00e9e (Dossier, Client, Lot, etc.)"
+    },
+    "entite_id": {
+      "type": "string",
+      "description": "ID de l'entit\u00e9 concern\u00e9e"
+    },
+    "details": {
+      "type": "string",
+      "description": "D\u00e9tails suppl\u00e9mentaires sur l'action"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "M\u00e9tadonn\u00e9es suppl\u00e9mentaires"
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "action"
+  ]
+}

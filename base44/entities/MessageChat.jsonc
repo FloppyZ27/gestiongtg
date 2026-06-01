@@ -1,0 +1,138 @@
+{
+  "name": "MessageChat",
+  "type": "object",
+  "properties": {
+    "utilisateur_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur qui a cr\u00e9\u00e9 le message"
+    },
+    "utilisateur_nom": {
+      "type": "string",
+      "description": "Nom de l'utilisateur"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "generale",
+        "equipe"
+      ],
+      "description": "Canal du chat"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Contenu du message"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL de l'image du message"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "URL de l'audio du message"
+    },
+    "date_modification": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de modification du message"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "post",
+        "sondage"
+      ],
+      "default": "post",
+      "description": "Type de publication"
+    },
+    "sondage_question": {
+      "type": "string",
+      "description": "Question du sondage"
+    },
+    "sondage_options": {
+      "type": "array",
+      "description": "Options du sondage",
+      "items": {
+        "type": "object",
+        "properties": {
+          "option": {
+            "type": "string"
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "reactions": {
+      "type": "array",
+      "description": "R\u00e9actions au message",
+      "items": {
+        "type": "object",
+        "properties": {
+          "utilisateur_email": {
+            "type": "string"
+          },
+          "emoji": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commentaires": {
+      "type": "array",
+      "description": "Commentaires sur le message",
+      "items": {
+        "type": "object",
+        "properties": {
+          "utilisateur_email": {
+            "type": "string"
+          },
+          "utilisateur_nom": {
+            "type": "string"
+          },
+          "contenu": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "date_modification": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "audio_url": {
+            "type": "string"
+          },
+          "reactions": {
+            "type": "array",
+            "description": "R\u00e9actions au commentaire",
+            "items": {
+              "type": "object",
+              "properties": {
+                "utilisateur_email": {
+                  "type": "string"
+                },
+                "emoji": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "utilisateur_email",
+    "utilisateur_nom",
+    "canal",
+    "type"
+  ]
+}

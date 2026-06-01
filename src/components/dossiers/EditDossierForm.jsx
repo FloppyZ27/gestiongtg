@@ -670,12 +670,17 @@ export default function EditDossierForm({
 
                         {/* Colonne droite - Tabs Clients/Notaires/Courtiers */}
                          <div>
-                          {/* Badge temporaire client Trello */}
-                          {formData.trello === "Oui" && formData.clients_texte && (!formData.clients_ids || formData.clients_ids.length === 0) && (
-                            <div className="mb-2 flex items-center gap-2 px-2 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                              <User className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                              <span className="text-amber-300 text-xs font-medium">{formData.clients_texte}</span>
-                              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[9px] ml-auto">Trello</Badge>
+                          {/* Badges clients pour dossiers TTL ou Trello */}
+                          {(formData.ttl === "Oui" || formData.trello === "Oui") && formData.clients_texte && (
+                            <div className="mb-2 flex items-center flex-wrap gap-1.5 px-2 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+                              <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                              {formData.clients_texte.split(',').map((nom, i) => nom.trim() && (
+                                <Badge key={i} className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs font-medium">
+                                  {nom.trim()}
+                                </Badge>
+                              ))}
+                              {formData.ttl === "Oui" && <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[9px] ml-auto">TTL</Badge>}
+                              {formData.trello === "Oui" && <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[9px] ml-auto">Trello</Badge>}
                             </div>
                           )}
                           <ContactsTabsSection

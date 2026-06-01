@@ -1,0 +1,74 @@
+{
+  "name": "Lot",
+  "type": "object",
+  "properties": {
+    "circonscription_fonciere": {
+      "type": "string",
+      "enum": [
+        "Lac-Saint-Jean-Est",
+        "Lac-Saint-Jean-Ouest",
+        "Chicoutimi"
+      ],
+      "description": "Circonscription fonci\u00e8re"
+    },
+    "cadastre": {
+      "type": "string",
+      "description": "Cadastre du lot"
+    },
+    "rang": {
+      "type": "string",
+      "description": "Rang du lot"
+    },
+    "numero_lot": {
+      "type": "string",
+      "description": "Num\u00e9ro du lot"
+    },
+    "types_operation": {
+      "type": "array",
+      "description": "Liste des types d'op\u00e9ration",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type_operation": {
+            "type": "string"
+          },
+          "date_bpd": {
+            "type": "string",
+            "format": "date"
+          },
+          "concordances_anterieures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "circonscription_fonciere": {
+                  "type": "string"
+                },
+                "cadastre": {
+                  "type": "string"
+                },
+                "numero_lot": {
+                  "type": "string"
+                },
+                "rang": {
+                  "type": "string"
+                },
+                "est_partie": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "document_pdf_url": {
+      "type": "string",
+      "description": "URL du document PDF"
+    }
+  },
+  "required": [
+    "circonscription_fonciere",
+    "numero_lot"
+  ]
+}
