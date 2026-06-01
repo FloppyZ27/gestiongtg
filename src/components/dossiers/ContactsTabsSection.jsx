@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp } from "lucide-react";
 import ClientSelectionCard from "@/components/mandat/ClientSelectionCard";
 
@@ -121,6 +122,14 @@ export default function ContactsTabsSection({
                         hoverColor: "hover:bg-blue-500/30"
                       });
                     })}
+                  </div>
+                ) : (formData.clients_texte && (formData.trello === "Oui" || formData.ttl === "Oui")) ? (
+                  <div className="flex flex-wrap gap-1.5 p-1">
+                    {formData.clients_texte.split(',').map((nom, i) => nom.trim() && (
+                      <Badge key={i} className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs font-medium">
+                        {nom.trim()}
+                      </Badge>
+                    ))}
                   </div>
                 ) : (
                   <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
