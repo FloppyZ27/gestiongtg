@@ -597,6 +597,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             setIsClientFormDialogOpen={setIsClientFormDialogOpen}
             setClientTypeForForm={setClientTypeForForm}
             setViewingClientDetails={setViewingClientDetails}
+            onNewClientClick={(type) => {
+              setClientTypeForForm(type);
+              setEditingClientForForm(null);
+              setIsClientFormDialogOpen(true);
+            }}
             calculerProchainNumeroDossier={() => ""}
             editingDossier={dossier}
             onOpenNewLotDialog={(mandatIndex) => {
