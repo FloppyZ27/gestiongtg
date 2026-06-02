@@ -274,19 +274,21 @@ export default function ClientStepForm({
 
           {/* Clients supplémentaires */}
           {extraClients.map((extra, index) => (
-            <div key={index} className="border border-blue-500/20 rounded-lg p-3 bg-blue-900/10 space-y-2">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-semibold text-blue-300">Client {index + 2}</p>
-                <div className="flex items-center gap-2">
-                  <RepresentantButton myKey={`extra_${index}`} />
-                  {!disabled && (
-                    <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+            <div key={index} className="space-y-2">
+              <div className="border-t border-slate-600/50 pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-slate-400">Client {index + 2}</p>
+                  <div className="flex items-center gap-2">
+                    <RepresentantButton myKey={`extra_${index}`} />
+                    {!disabled && (
+                      <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
+                <ClientInfoFields data={extra} onChange={(newData) => updateExtraClient(index, newData)} disabled={disabled} />
               </div>
-              <ClientInfoFields data={extra} onChange={(newData) => updateExtraClient(index, newData)} disabled={disabled} />
             </div>
           ))}
 
