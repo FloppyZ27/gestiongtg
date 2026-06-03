@@ -89,12 +89,13 @@ export default function PriseMandatTable({
 
   const sortedData = applyFilters(priseMandats
     .filter(pm => {
-      const tabStatut = activeListTab === "nouveau" 
-        ? "Nouveau mandat/Demande d'information"
-        : activeListTab === "ouvrir"
-        ? "Mandats à ouvrir"
-        : "Mandat non octroyé";
-      return pm.statut === tabStatut;
+      if (activeListTab === "nouveau") {
+        return pm.statut === "Nouveau mandat/Demande d'information" || pm.statut === "Nouveau mandat" || pm.statut === "Demande d'information";
+      } else if (activeListTab === "ouvrir") {
+        return pm.statut === "Mandats à ouvrir";
+      } else {
+        return pm.statut === "Mandat non octroyé";
+      }
     }))
     .sort((a, b) => {
       if (!sortField) return 0;
