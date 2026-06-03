@@ -206,8 +206,9 @@ export default function ClientStepForm({
 
   const getRepresentantLabel = () => {
     const key = clientForm.representant_key;
-    if (!key || key === "primary") {
-      return `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim() || "Client principal";
+    if (!key) return null;
+    if (key === "primary") {
+      return `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim() || "Client 1";
     }
     if (key.startsWith("extra_")) {
       const idx = parseInt(key.split("_")[1]);
@@ -220,14 +221,14 @@ export default function ClientStepForm({
   };
 
   const extraClients = clientForm.extra_clients || [];
-  const representantKey = clientForm.representant_key || "primary";
+  const representantKey = clientForm.representant_key || null;
 
   const RepresentantCheckbox = ({ myKey }) => (
     <div className="flex items-center gap-1.5">
       <Checkbox
         id={`rep-${myKey}`}
         checked={representantKey === myKey}
-        onCheckedChange={(checked) => { if (!disabled) setRepresentant(checked ? myKey : "primary"); }}
+        onCheckedChange={(checked) => { if (!disabled) setRepresentant(checked ? myKey : null); }}
         disabled={disabled}
         className="w-3.5 h-3.5"
       />
@@ -258,7 +259,7 @@ export default function ClientStepForm({
                 </Badge>
               ) : null;
             })}
-            {(clientForm.prenom || clientForm.nom) && (
+            {representantKey && getRepresentantLabel() && (
               <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs flex items-center gap-1">
                 <Star className="w-2.5 h-2.5 fill-yellow-400" />
                 Représentant: {getRepresentantLabel()}
