@@ -229,7 +229,7 @@ export default function ClientStepForm({
         checked={representantKey === myKey}
         onCheckedChange={(checked) => { if (!disabled) setRepresentant(checked ? myKey : "primary"); }}
         disabled={disabled}
-        className="w-3.5 h-3.5 border-yellow-500/50 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
+        className="w-3.5 h-3.5"
       />
       <label htmlFor={`rep-${myKey}`} className="text-xs text-slate-400 cursor-pointer select-none">
         Représentant
