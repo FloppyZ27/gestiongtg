@@ -39,7 +39,7 @@ import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
-import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import MandatDialogTitle from "../components/mandat/MandatDialogTitle";import PremiumButton from "../components/CommunicationClients/PremiumButton";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";import PriseMandatAlertDialogs from "../components/mandat/PriseMandatAlertDialogs";import LotEditDialog from "../components/lots/LotEditDialog";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import MandatDialogTitle from "../components/mandat/MandatDialogTitle";import PremiumButton from "../components/CommunicationClients/PremiumButton";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";import PriseMandatAlertDialogs from "../components/mandat/PriseMandatAlertDialogs";import LotEditDialog from "../components/lots/LotEditDialog";import LotSelectorDialog from "../components/mandat/LotSelectorDialog";import ViewDossierDialog from "../components/mandat/ViewDossierDialog";import ClientSelectorDialogs from "../components/mandat/ClientSelectorDialogs";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2664,96 +2664,18 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
         {/* Dialog pour ajouter une minute - inline compact */}
         {isAddMinuteDialogOpen && <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}><DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50"><DialogHeader><DialogTitle className="text-xl">Ajouter une minute</DialogTitle></DialogHeader><div className="space-y-4"><div className="space-y-2"><Label>Minute <span className="text-red-400">*</span></Label><Input value={newMinuteForm.minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })} placeholder="Ex: 12345" className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Date de minute <span className="text-red-400">*</span></Label><Input type="date" value={newMinuteForm.date_minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })} className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Type de minute <span className="text-red-400">*</span></Label><Select value={newMinuteForm.type_minute} onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}><SelectTrigger className="bg-slate-800 border-slate-700 text-white"><SelectValue placeholder="Type" /></SelectTrigger><SelectContent className="bg-slate-800 border-slate-700"><SelectItem value="Initiale" className="text-white">Initiale</SelectItem><SelectItem value="Remplace" className="text-white">Remplace</SelectItem><SelectItem value="Corrige" className="text-white">Corrige</SelectItem></SelectContent></Select></div><div className="flex justify-end gap-3 pt-4 border-t border-slate-800"><Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button><Button type="button" onClick={handleAddMinuteFromDialog} disabled={!newMinuteForm.minute || !newMinuteForm.date_minute} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ajouter</Button></div></div></DialogContent></Dialog>}
 
-        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader><DialogTitle>Sélectionner des clients</DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher un client..."
-                    value={clientSearchTerm}
-                    onChange={(e) => setClientSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <Button type="button" onClick={() => openClientFormDialog("Client")} className="bg-emerald-500 hover:bg-emerald-600">
-                 <Plus className="w-4 h-4 mr-2" />
-                 Nouveau
-                </Button>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3">
-                 {filteredClientsForSelector.map((client) => (
-                    <div
-                      key={client.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.clients_ids.includes(client.id)
-                          ? 'bg-blue-500/20 border border-blue-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(client.id, 'clients')}>{client.prenom} {client.nom}</div>))}</div></div><Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">Valider</Button></motion.div></DialogContent></Dialog>
-                      <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader><DialogTitle>Sélectionner des notaires</DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher un notaire..."
-                    value={notaireSearchTerm}
-                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <Button type="button" onClick={() => openClientFormDialog("Notaire")} className="bg-purple-500 hover:bg-purple-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau
-                </Button>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3">
-                  {filteredNotairesForSelector.map((notaire) => (
-                    <div
-                      key={notaire.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.notaires_ids.includes(notaire.id)
-                          ? 'bg-purple-500/20 border border-purple-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(notaire.id, 'notaires')}>{notaire.prenom} {notaire.nom}</div>))}</div></div><Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">Valider</Button></motion.div></DialogContent></Dialog>
-                      <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50">
-            <DialogHeader><DialogTitle>Sélectionner des courtiers</DialogTitle></DialogHeader>
-            <motion.div className="space-y-4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher un courtier..."
-                    value={courtierSearchTerm}
-                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <Button type="button" onClick={() => openClientFormDialog("Courtier immobilier")} className="bg-orange-500 hover:bg-orange-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau
-                </Button>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3">
-                  {filteredCourtiersForSelector.map((courtier) => (
-                    <div
-                      key={courtier.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.courtiers_ids.includes(courtier.id)
-                          ? 'bg-orange-500/20 border border-orange-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(courtier.id, 'courtiers')}>{courtier.prenom} {courtier.nom}</div>))}</div></div><Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">Valider</Button></motion.div></DialogContent></Dialog>
+        <ClientSelectorDialogs
+          isClientSelectorOpen={isClientSelectorOpen} setIsClientSelectorOpen={setIsClientSelectorOpen}
+          isNotaireSelectorOpen={isNotaireSelectorOpen} setIsNotaireSelectorOpen={setIsNotaireSelectorOpen}
+          isCourtierSelectorOpen={isCourtierSelectorOpen} setIsCourtierSelectorOpen={setIsCourtierSelectorOpen}
+          clientSearchTerm={clientSearchTerm} setClientSearchTerm={setClientSearchTerm}
+          notaireSearchTerm={notaireSearchTerm} setNotaireSearchTerm={setNotaireSearchTerm}
+          courtierSearchTerm={courtierSearchTerm} setCourtierSearchTerm={setCourtierSearchTerm}
+          filteredClients={filteredClientsForSelector} filteredNotaires={filteredNotairesForSelector} filteredCourtiers={filteredCourtiersForSelector}
+          clientsIds={formData.clients_ids} notairesIds={formData.notaires_ids || []} courtiersIds={formData.courtiers_ids || []}
+          onToggleClient={(id) => toggleClient(id, 'clients')} onToggleNotaire={(id) => toggleClient(id, 'notaires')} onToggleCourtier={(id) => toggleClient(id, 'courtiers')}
+          openClientFormDialog={openClientFormDialog}
+        />
                       {/* ClientFormDialog */}
         <ClientFormDialog
           key={`cf-${isClientFormDialogOpen}-${clientFormInitialData?.prenom}-${clientFormInitialData?.nom}`}
@@ -2777,139 +2699,18 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           }}
         />
 
-        {/* Lot Selector Dialog */}
-        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
-          setIsLotSelectorOpen(open);
-          if (!open) {
-            setLotCirconscriptionFilter("all");
-            setLotSearchTerm("");
-            setLotCadastreFilter("Québec");
-          }
-        }}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-black/50">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="space-y-4 flex-1 overflow-hidden flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher par numéro, rang..."
-                    value={lotSearchTerm}
-                    onChange={(e) => setLotSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Circonscription" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                      <SelectItem key={circ} value={circ} className="text-white">
-                        {circ}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
-                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Cadastre" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
-                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  onClick={() => setIsNewLotDialogOpen(true)}
-                  className="bg-emerald-500 hover:bg-emerald-600"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nouveau lot
-                </Button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                      <TableHead className="text-slate-300">Circonscription</TableHead>
-                      <TableHead className="text-slate-300">Cadastre</TableHead>
-                      <TableHead className="text-slate-300">Rang</TableHead>
-                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredLotsForSelector.length > 0 ? (
-                      filteredLotsForSelector.map((lot) => {
-                        const isSelected = currentMandatIndex !== null &&
-                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
-                        return (
-                          <TableRow
-                            key={lot.id}
-                            className={`cursor-pointer transition-colors border-slate-800 ${
-                              isSelected
-                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
-                                : 'hover:bg-slate-800/30'
-                            }`}
-                            onClick={() => addLotToCurrentMandat(lot.id)}
-                          >
-                            <TableCell className="font-medium text-white">
-                              {lot.numero_lot}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                {lot.circonscription_fonciere}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.cadastre || "-"}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.rang || "-"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {isSelected && (
-                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
-                                  <Check className="w-3 h-3 mr-1" />
-                                  Sélectionné
-                                </Badge>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-12">
-                          <div className="text-slate-400">
-                            <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>Aucun lot trouvé</p>
-                            <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
-                Valider la sélection
-              </Button>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        <LotSelectorDialog
+          isOpen={isLotSelectorOpen}
+          onOpenChange={setIsLotSelectorOpen}
+          lots={lots}
+          lotSearchTerm={lotSearchTerm} setLotSearchTerm={setLotSearchTerm}
+          lotCirconscriptionFilter={lotCirconscriptionFilter} setLotCirconscriptionFilter={setLotCirconscriptionFilter}
+          lotCadastreFilter={lotCadastreFilter} setLotCadastreFilter={setLotCadastreFilter}
+          currentMandatIndex={currentMandatIndex}
+          formDataMandats={formData.mandats}
+          onAddLot={addLotToCurrentMandat}
+          onNewLot={() => setIsNewLotDialogOpen(true)}
+        />
 
         <LotEditDialog
           isOpen={isNewLotDialogOpen}
@@ -2935,140 +2736,19 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           lots={lots} user={user} users={users}
         />
 
-        {/* Client Details Dialog */}
-        <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50">
-            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
-              <DialogTitle className="text-2xl">
-                Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
-              </DialogTitle>
-            </DialogHeader>
-            <motion.div 
-              className="flex-1 overflow-hidden p-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              {viewingClientDetails && (
-                <ClientDetailView
-                  client={viewingClientDetails}
-                  onClose={() => setViewingClientDetails(null)}
-                  onViewDossier={(dossier) => {
-                    setViewingClientDetails(null);
-                    setViewingDossier(dossier);
-                    setIsViewDialogOpen(true);
-                  }}
-                />
-              )}
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+        {viewingClientDetails && <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}><DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50"><DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0"><DialogTitle className="text-2xl">Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}</DialogTitle></DialogHeader><motion.div className="flex-1 overflow-hidden p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}><ClientDetailView client={viewingClientDetails} onClose={() => setViewingClientDetails(null)} onViewDossier={(dossier) => { setViewingClientDetails(null); setViewingDossier(dossier); setIsViewDialogOpen(true); }} /></motion.div></DialogContent></Dialog>}
 
-        {/* View Dossier Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
-            <DialogHeader className="sr-only">
-              <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
-            </DialogHeader>
-            {viewingDossier && (
-              <motion.div 
-                className="flex h-[90vh]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {/* Main content - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6 flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-white">
-                      Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
-                    </h2>
-                    {viewingDossier.ttl === "Oui" && (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Informations principales */}
-                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
-                      <div>
-                        <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
-                        <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Statut</Label>
-                        <div className="mt-1">
-                          <Badge variant="outline" className={`${getStatutBadgeColor(viewingDossier.statut)} border`}>
-                            {viewingDossier.statut}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-slate-400 text-sm">Date de création</Label>
-                        <p className="text-white font-medium mt-1">
-                          {viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {viewingDossier.utilisateur_assigne && (
-                      <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                        <p className="text-white font-medium mt-1 text-sm">
-                          {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
-                        </p>
-                      </div>
-                    )}
-
-                    {viewingDossier.description && (
-                      <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
-                        <Label className="text-slate-400 text-sm">Description</Label>
-                        <p className="text-white mt-2 whitespace-pre-wrap">{viewingDossier.description}</p>
-                      </div>
-                    )}
-
-                    {/* Clients, Notaires, Courtiers */}
-                    <div className="grid grid-cols-3 gap-4">
-                      {/* Clients */}
-                      {viewingDossier.clients_ids?.map(id=>{const c=getClientById(id);return c?<Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border cursor-pointer" onClick={()=>{setIsViewDialogOpen(false);setViewingClientDetails(c);}}>{c.prenom} {c.nom}</Badge>:null;})}
-                       {viewingDossier.notaires_ids?.map(id=>{const n=getClientById(id);return n?<Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer" onClick={()=>{setIsViewDialogOpen(false);setViewingClientDetails(n);}}>{n.prenom} {n.nom}</Badge>:null;})}
-                    </div>
-
-                    {viewingDossier.mandats?.map((m,i)=><div key={i} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg text-sm"><span className="text-emerald-400 font-semibold">{m.type_mandat||`Mandat ${i+1}`}</span>{m.prix_estime>0&&<span className="ml-2 text-green-400">{m.prix_estime.toFixed(2)} $</span>}</div>)}
-                  </div>
-
-                  {/* Boutons Fermer/Modifier tout en bas */}
-                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                      Fermer
-                    </Button>
-                    <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Modifier
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Right side - Commentaires Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
-                  </div>
-                  <div className="flex-1 overflow-hidden p-4 pr-4">
-                    <CommentairesSection
-                      dossierId={viewingDossier?.id}
-                      dossierTemporaire={false}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </DialogContent>
-        </Dialog>
+        <ViewDossierDialog
+          isOpen={isViewDialogOpen}
+          onOpenChange={setIsViewDialogOpen}
+          viewingDossier={viewingDossier}
+          users={users}
+          getArpenteurInitials={getArpenteurInitials}
+          getStatutBadgeColor={getStatutBadgeColor}
+          getClientById={getClientById}
+          setViewingClientDetails={setViewingClientDetails}
+          onEdit={handleEditFromView}
+        />
 
 
         {/* Table des prises de mandat */}

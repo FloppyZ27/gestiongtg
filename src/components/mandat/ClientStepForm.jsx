@@ -125,20 +125,23 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // Synchroniser quand clientInfo change depuis le parent (chargement d'un mandat existant)
-  // On utilise une ref pour tracker la dernière valeur "externe" et éviter les boucles
-  const lastExternalClientInfo = useRef(null);
+  // Synchroniser quand resetKey change ET quand extra_clients arrive du parent
+  // (cas: ouverture d'un mandat existant — les extra_clients sont chargés async après le montage)
+  const prevResetKey = useRef(resetKey);
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      lastExternalClientInfo.current = JSON.stringify(clientInfo);
+      prevResetKey.current = resetKey;
       return;
     }
-    const serialized = JSON.stringify(clientInfo);
-    // Ne synchroniser que si le parent change réellement (pas les mises à jour locales déjà propagées)
-    if (serialized !== lastExternalClientInfo.current) {
-      lastExternalClientInfo.current = serialized;
+    // Toujours resync si resetKey change
+    const keyChanged = resetKey !== prevResetKey.current;
+    prevResetKey.current = resetKey;
+    // Aussi resync si des extra_clients arrivent depuis le parent mais qu'on n'en a pas localement
+    const parentHasExtra = (clientInfo.extra_clients || []).length > 0;
+    const localHasExtra = (clientForm.extra_clients || []).length > 0;
+    if (keyChanged || (parentHasExtra && !localHasExtra)) {
       setClientForm({
         prenom: clientInfo.prenom || "",
         nom: clientInfo.nom || "",
@@ -150,12 +153,10 @@ export default function ClientStepForm({
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientInfo]);
+  }, [resetKey, clientInfo.extra_clients]);
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
-    // Mettre à jour la ref pour que le useEffect ne re-synchro pas depuis le parent
-    lastExternalClientInfo.current = JSON.stringify(newForm);
     if (onClientInfoChange) onClientInfoChange(newForm);
   };
 
