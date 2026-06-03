@@ -93,42 +93,49 @@ export default function OuvrirDossierDialog({
       ''
     ];
 
-    // Clients
+    // Clients via IDs (base de données)
     const clientNames = (data.clients_ids || []).map(id => {
       const c = (clients || []).find(cl => cl.id === id);
       return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
     }).filter(Boolean);
-    if (clientNames.length > 0) recapLines.push(`👤 Client(s): ${clientNames.join(', ')}`);
 
-    // Informations du client saisies manuellement (depuis data._clientInfo ou _priseMandat)
+    // Informations du client saisies manuellement
     const clientInfo = data._clientInfo || data._priseMandat?.client_info;
+    const manualClientName = clientInfo ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() : '';
+
+    // Fusionner tous les clients (éviter doublon si même nom)
+    const allClientNames = [...clientNames];
+    if (manualClientName && !clientNames.includes(manualClientName)) allClientNames.push(manualClientName);
+    if (allClientNames.length > 0) recapLines.push(`👤 Client(s): ${allClientNames.join(', ')}`);
+
+    // Téléphone et courriel du client saisi manuellement
     if (clientInfo) {
-     const fullName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
-     if (fullName) recapLines.push(`👤 Client: ${fullName}`);
-     if (clientInfo.telephone) recapLines.push(`📞 Téléphone: ${clientInfo.telephone}${clientInfo.type_telephone ? ` (${clientInfo.type_telephone})` : ''}`);
-     if (clientInfo.courriel) recapLines.push(`✉️ Courriel: ${clientInfo.courriel}`);
+      if (clientInfo.telephone) recapLines.push(`📞 Téléphone: ${clientInfo.telephone}${clientInfo.type_telephone ? ` (${clientInfo.type_telephone})` : ''}`);
+      if (clientInfo.courriel) recapLines.push(`✉️ Courriel: ${clientInfo.courriel}`);
     }
 
-    // Professionnels (depuis data._professionnelInfo ou _priseMandat)
+    // Représentants — combiner IDs + texte manuel
     const professionnelInfo = data._professionnelInfo || data._priseMandat?.professionnel_info;
-    if (professionnelInfo) {
-     if (professionnelInfo.notaire) recapLines.push(`⚖️ Notaire: ${professionnelInfo.notaire}`);
-     if (professionnelInfo.courtier) recapLines.push(`🏡 Courtier immobilier: ${professionnelInfo.courtier}`);
-     if (professionnelInfo.compagnie) recapLines.push(`🏗️ Compagnie: ${professionnelInfo.compagnie}`);
-    } else {
-      // Afficher notaires et courtiers via IDs seulement si pas d'infos manuelles
-      const notaireNames = (data.notaires_ids || []).map(id => {
-        const n = (clients || []).find(cl => cl.id === id);
-        return n ? `${n.prenom || ''} ${n.nom || ''}`.trim() : null;
-      }).filter(Boolean);
-      if (notaireNames.length > 0) recapLines.push(`⚖️ Notaire(s): ${notaireNames.join(', ')}`);
 
-      const courtierNames = (data.courtiers_ids || []).map(id => {
-        const c = (clients || []).find(cl => cl.id === id);
-        return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
-      }).filter(Boolean);
-      if (courtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${courtierNames.join(', ')}`);
-    }
+    // Notaires via IDs
+    const notaireNamesById = (data.notaires_ids || []).map(id => {
+      const n = (clients || []).find(cl => cl.id === id);
+      return n ? `${n.prenom || ''} ${n.nom || ''}`.trim() : null;
+    }).filter(Boolean);
+    const allNotaireNames = [...notaireNamesById];
+    if (professionnelInfo?.notaire && !notaireNamesById.includes(professionnelInfo.notaire)) allNotaireNames.push(professionnelInfo.notaire);
+    if (allNotaireNames.length > 0) recapLines.push(`⚖️ Notaire(s): ${allNotaireNames.join(', ')}`);
+
+    // Courtiers via IDs
+    const courtierNamesById = (data.courtiers_ids || []).map(id => {
+      const c = (clients || []).find(cl => cl.id === id);
+      return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() : null;
+    }).filter(Boolean);
+    const allCourtierNames = [...courtierNamesById];
+    if (professionnelInfo?.courtier && !courtierNamesById.includes(professionnelInfo.courtier)) allCourtierNames.push(professionnelInfo.courtier);
+    if (allCourtierNames.length > 0) recapLines.push(`🏡 Courtier(s): ${allCourtierNames.join(', ')}`);
+
+    if (professionnelInfo?.compagnie) recapLines.push(`🏗️ Compagnie: ${professionnelInfo.compagnie}`);
 
     recapLines.push('');
     recapLines.push(`<b>📋 MANDATS (${(data.mandats || []).length})</b>`);
