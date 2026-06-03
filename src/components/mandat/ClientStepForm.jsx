@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Users, Check, Plus, Trash2, Star } from "lucide-react";
 
@@ -53,6 +54,56 @@ function ClientInfoFields({ data, onChange, disabled }) {
   );
 }
 
+function ClientExistantsList({ clients, data, onSelectClient, isSelectedId, disabled }) {
+  const filtered = useMemo(() => {
+    return clients.filter(client => {
+      const prenomMatch = !data.prenom || client.prenom?.toLowerCase().includes(data.prenom.toLowerCase());
+      const nomMatch = !data.nom || client.nom?.toLowerCase().includes(data.nom.toLowerCase());
+      const telMatch = !data.telephone || client.telephones?.some(t => t.telephone?.includes(data.telephone));
+      const mailMatch = !data.courriel || client.courriels?.some(c => c.courriel?.toLowerCase().includes(data.courriel.toLowerCase()));
+      return prenomMatch && nomMatch && telMatch && mailMatch;
+    });
+  }, [clients, data]);
+
+  const getCurrentPhone = (client) => {
+    const c = client.telephones?.find(t => t.actuel);
+    return c?.telephone || client.telephones?.[0]?.telephone || "";
+  };
+  const getCurrentEmail = (client) => {
+    const c = client.courriels?.find(e => e.actuel);
+    return c?.courriel || client.courriels?.[0]?.courriel || "";
+  };
+
+  return (
+    <div className="pl-3">
+      <p className="text-slate-400 text-xs mb-2">Clients existants ({filtered.length})</p>
+      <div className="max-h-[100px] overflow-y-auto space-y-1">
+        {filtered.length > 0 ? (
+          filtered.slice(0, 15).map((client) => {
+            const isSelected = isSelectedId(client.id);
+            return (
+              <div key={client.id} onClick={() => !disabled && onSelectClient(client)}
+                className={`px-2 py-1.5 rounded text-xs ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'}`}
+                style={!isSelected ? { backgroundColor: 'rgba(45, 45, 45, 0.15)' } : {}}>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium truncate">{client.prenom} {client.nom}</span>
+                  {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                  {getCurrentPhone(client) && <p>📞 <a href={`tel:${getCurrentPhone(client).replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300">{getCurrentPhone(client)}</a></p>}
+                  {getCurrentEmail(client) && <p className="truncate">✉️ {getCurrentEmail(client)}</p>}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ClientStepForm({
   clients = [],
   selectedClientIds = [],
@@ -63,10 +114,6 @@ export default function ClientStepForm({
   onClientInfoChange,
   disabled = false
 }) {
-  // clientInfo contains: prenom, nom, telephone, type_telephone, courriel,
-  //   extra_clients: [{prenom, nom, telephone, type_telephone, courriel}, ...],
-  //   representant_key: "primary" | "extra_0" | "extra_1" | ... | <clientId>
-
   const [clientForm, setClientForm] = useState({
     prenom: clientInfo.prenom || "",
     nom: clientInfo.nom || "",
@@ -94,28 +141,19 @@ export default function ClientStepForm({
     if (onClientInfoChange) onClientInfoChange(newForm);
   };
 
-  const filteredClients = useMemo(() => {
-    return clients.filter(client => {
-      const prenomMatch = !clientForm.prenom || client.prenom?.toLowerCase().includes(clientForm.prenom.toLowerCase());
-      const nomMatch = !clientForm.nom || client.nom?.toLowerCase().includes(clientForm.nom.toLowerCase());
-      const telephoneMatch = !clientForm.telephone || client.telephones?.some(t => t.telephone?.includes(clientForm.telephone));
-      const courrielMatch = !clientForm.courriel || client.courriels?.some(c => c.courriel?.toLowerCase().includes(clientForm.courriel.toLowerCase()));
-      return prenomMatch && nomMatch && telephoneMatch && courrielMatch;
-    });
-  }, [clients, clientForm]);
-
   const getCurrentPhone = (client) => {
-    const current = client.telephones?.find(t => t.actuel);
-    return current?.telephone || client.telephones?.[0]?.telephone || "";
+    const c = client.telephones?.find(t => t.actuel);
+    return c?.telephone || client.telephones?.[0]?.telephone || "";
   };
-
   const getCurrentEmail = (client) => {
-    const current = client.courriels?.find(c => c.actuel);
-    return current?.courriel || client.courriels?.[0]?.courriel || "";
+    const c = client.courriels?.find(e => e.actuel);
+    return c?.courriel || client.courriels?.[0]?.courriel || "";
   };
 
-  const handleClientClick = (client, isAlreadySelected) => {
-    if (isAlreadySelected) {
+  // Primary client: click existing to fill fields
+  const handlePrimaryClientClick = (client) => {
+    const isSelected = selectedClientIds.includes(client.id);
+    if (isSelected) {
       updateClientForm({ ...clientForm, prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" });
     } else {
       updateClientForm({
@@ -142,8 +180,24 @@ export default function ClientStepForm({
 
   const removeExtraClient = (index) => {
     const updated = (clientForm.extra_clients || []).filter((_, i) => i !== index);
-    const newRepresentant = clientForm.representant_key === `extra_${index}` ? "primary" : clientForm.representant_key;
-    updateClientForm({ ...clientForm, extra_clients: updated, representant_key: newRepresentant });
+    const newRep = clientForm.representant_key === `extra_${index}` ? "primary" : clientForm.representant_key;
+    updateClientForm({ ...clientForm, extra_clients: updated, representant_key: newRep });
+  };
+
+  const handleExtraClientClick = (index, client) => {
+    const extra = clientForm.extra_clients[index];
+    // Toggle: if already filled with this client, clear
+    const alreadyFilled = extra.prenom === client.prenom && extra.nom === client.nom;
+    const newData = alreadyFilled
+      ? { prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" }
+      : {
+          prenom: client.prenom || "",
+          nom: client.nom || "",
+          telephone: getCurrentPhone(client),
+          type_telephone: client.telephones?.[0]?.type || "Cellulaire",
+          courriel: getCurrentEmail(client)
+        };
+    updateExtraClient(index, newData);
   };
 
   const setRepresentant = (key) => {
@@ -153,8 +207,7 @@ export default function ClientStepForm({
   const getRepresentantLabel = () => {
     const key = clientForm.representant_key;
     if (!key || key === "primary") {
-      const name = `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim();
-      return name || "Client principal";
+      return `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim() || "Client principal";
     }
     if (key.startsWith("extra_")) {
       const idx = parseInt(key.split("_")[1]);
@@ -169,20 +222,19 @@ export default function ClientStepForm({
   const extraClients = clientForm.extra_clients || [];
   const representantKey = clientForm.representant_key || "primary";
 
-  const RepresentantButton = ({ myKey, className = "" }) => (
-    <button
-      type="button"
-      onClick={() => !disabled && setRepresentant(myKey)}
-      disabled={disabled}
-      className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-colors border ${
-        representantKey === myKey
-          ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-          : 'text-slate-500 hover:text-yellow-400 border-transparent'
-      } ${className}`}
-    >
-      <Star className={`w-3 h-3 ${representantKey === myKey ? 'fill-yellow-400' : ''}`} />
-      Représentant
-    </button>
+  const RepresentantCheckbox = ({ myKey }) => (
+    <div className="flex items-center gap-1.5">
+      <Checkbox
+        id={`rep-${myKey}`}
+        checked={representantKey === myKey}
+        onCheckedChange={(checked) => { if (!disabled) setRepresentant(checked ? myKey : "primary"); }}
+        disabled={disabled}
+        className="w-3.5 h-3.5 border-yellow-500/50 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
+      />
+      <label htmlFor={`rep-${myKey}`} className="text-xs text-slate-400 cursor-pointer select-none">
+        Représentant
+      </label>
+    </div>
   );
 
   return (
@@ -200,14 +252,13 @@ export default function ClientStepForm({
             {selectedClientIds.length > 0 && selectedClientIds.map(clientId => {
               const client = clients.find(c => c.id === clientId);
               return client ? (
-                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs cursor-pointer hover:bg-blue-500/30 transition-colors flex items-center gap-1"
-                  onClick={(e) => { e.stopPropagation(); if (window.openClientForEdit) window.openClientForEdit(client); }}>
+                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
                   {representantKey === clientId && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
                   {client.prenom} {client.nom}
                 </Badge>
               ) : null;
             })}
-            {(representantKey !== "primary" || (clientForm.prenom || clientForm.nom)) && (
+            {(clientForm.prenom || clientForm.nom) && (
               <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs flex items-center gap-1">
                 <Star className="w-2.5 h-2.5 fill-yellow-400" />
                 Représentant: {getRepresentantLabel()}
@@ -222,10 +273,10 @@ export default function ClientStepForm({
         <CardContent className="pt-2 pb-3 space-y-4">
 
           {/* Client principal */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between mb-1">
+          <div>
+            <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-semibold text-blue-300">Client principal</p>
-              <RepresentantButton myKey="primary" />
+              <RepresentantCheckbox myKey="primary" />
             </div>
             <div className="grid grid-cols-[70%_30%] gap-4">
               <div className="space-y-2 border-r-2 border-blue-500/30 pr-4">
@@ -235,59 +286,44 @@ export default function ClientStepForm({
                   disabled={disabled}
                 />
               </div>
-              <div className="pl-3">
-                <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClients.length})</p>
-                <div className="max-h-[100px] overflow-y-auto space-y-1">
-                  {filteredClients.length > 0 ? (
-                    filteredClients.slice(0, 15).map((client) => {
-                      const isSelected = selectedClientIds.includes(client.id);
-                      return (
-                        <div key={client.id} onClick={() => !disabled && handleClientClick(client, isSelected)}
-                          className={`px-2 py-1.5 rounded text-xs ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'}`}
-                          style={!isSelected ? { backgroundColor: 'rgba(45, 45, 45, 0.15)' } : {}}>
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium truncate">{client.prenom} {client.nom}</span>
-                            <div className="flex items-center gap-1">
-                              {isSelected && (
-                                <button type="button" onClick={(e) => { e.stopPropagation(); setRepresentant(representantKey === client.id ? "primary" : client.id); }}
-                                  className="transition-colors" title="Représentant">
-                                  <Star className={`w-3 h-3 ${representantKey === client.id ? 'text-yellow-400 fill-yellow-400' : 'text-slate-500 hover:text-yellow-400'}`} />
-                                </button>
-                              )}
-                              {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                            </div>
-                          </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
-                            {getCurrentPhone(client) && <p>📞 <a href={`tel:${getCurrentPhone(client).replace(/\D/g, '')}`} onClick={(e) => e.stopPropagation()} className="text-blue-400 hover:text-blue-300">{getCurrentPhone(client)}</a></p>}
-                            {getCurrentEmail(client) && <p className="truncate">✉️ {getCurrentEmail(client)}</p>}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
-                  )}
-                </div>
-              </div>
+              <ClientExistantsList
+                clients={clients}
+                data={{ prenom: clientForm.prenom, nom: clientForm.nom, telephone: clientForm.telephone, courriel: clientForm.courriel }}
+                onSelectClient={handlePrimaryClientClick}
+                isSelectedId={(id) => selectedClientIds.includes(id)}
+                disabled={disabled}
+              />
             </div>
           </div>
 
           {/* Clients supplémentaires */}
           {extraClients.map((extra, index) => (
-            <div key={index} className="space-y-2">
-              <div className="border-t border-slate-600/50 pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs text-slate-400">Client {index + 2}</p>
-                  <div className="flex items-center gap-2">
-                    <RepresentantButton myKey={`extra_${index}`} />
-                    {!disabled && (
-                      <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
+            <div key={index} className="border-t border-slate-600/50 pt-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-slate-400">Client {index + 2}</p>
+                <div className="flex items-center gap-3">
+                  <RepresentantCheckbox myKey={`extra_${index}`} />
+                  {!disabled && (
+                    <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
-                <ClientInfoFields data={extra} onChange={(newData) => updateExtraClient(index, newData)} disabled={disabled} />
+              </div>
+              <div className="grid grid-cols-[70%_30%] gap-4">
+                <div className="space-y-2 border-r-2 border-blue-500/30 pr-4">
+                  <ClientInfoFields data={extra} onChange={(newData) => updateExtraClient(index, newData)} disabled={disabled} />
+                </div>
+                <ClientExistantsList
+                  clients={clients}
+                  data={extra}
+                  onSelectClient={(client) => handleExtraClientClick(index, client)}
+                  isSelectedId={(id) => {
+                    const c = clients.find(cl => cl.id === id);
+                    return c ? (extra.prenom === c.prenom && extra.nom === c.nom) : false;
+                  }}
+                  disabled={disabled}
+                />
               </div>
             </div>
           ))}
