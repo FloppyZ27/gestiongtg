@@ -125,8 +125,8 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // Synchroniser quand resetKey change ET quand extra_clients arrive du parent
-  // (cas: ouverture d'un mandat existant — les extra_clients sont chargés async après le montage)
+  // Synchroniser quand resetKey change OU quand extra_clients arrive depuis le parent
+  // (cas: ouverture d'un mandat existant — les extra_clients sont chargés puis setClientInfo est appelé)
   const prevResetKey = useRef(resetKey);
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -135,13 +135,11 @@ export default function ClientStepForm({
       prevResetKey.current = resetKey;
       return;
     }
-    // Toujours resync si resetKey change
     const keyChanged = resetKey !== prevResetKey.current;
     prevResetKey.current = resetKey;
-    // Aussi resync si des extra_clients arrivent depuis le parent mais qu'on n'en a pas localement
-    const parentHasExtra = (clientInfo.extra_clients || []).length > 0;
-    const localHasExtra = (clientForm.extra_clients || []).length > 0;
-    if (keyChanged || (parentHasExtra && !localHasExtra)) {
+
+    // Resync si le resetKey a changé (nouveau mandat ouvert)
+    if (keyChanged) {
       setClientForm({
         prenom: clientInfo.prenom || "",
         nom: clientInfo.nom || "",
@@ -151,6 +149,24 @@ export default function ClientStepForm({
         extra_clients: clientInfo.extra_clients || [],
         representant_key: clientInfo.representant_key || null
       });
+      return;
+    }
+
+    // Resync si le parent a des extra_clients mais pas l'état local
+    // (les données arrivent du serveur après le montage)
+    const parentExtra = clientInfo.extra_clients || [];
+    const localExtra = clientForm.extra_clients || [];
+    if (parentExtra.length > 0 && localExtra.length === 0) {
+      setClientForm(prev => ({
+        ...prev,
+        prenom: clientInfo.prenom || prev.prenom,
+        nom: clientInfo.nom || prev.nom,
+        telephone: clientInfo.telephone || prev.telephone,
+        type_telephone: clientInfo.type_telephone || prev.type_telephone,
+        courriel: clientInfo.courriel || prev.courriel,
+        extra_clients: parentExtra,
+        representant_key: clientInfo.representant_key || prev.representant_key
+      }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, clientInfo.extra_clients]);
