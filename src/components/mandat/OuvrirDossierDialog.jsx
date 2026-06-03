@@ -112,6 +112,15 @@ export default function OuvrirDossierDialog({
     if (clientInfo) {
       if (clientInfo.telephone) recapLines.push(`📞 Téléphone: ${clientInfo.telephone}${clientInfo.type_telephone ? ` (${clientInfo.type_telephone})` : ''}`);
       if (clientInfo.courriel) recapLines.push(`✉️ Courriel: ${clientInfo.courriel}`);
+      // Clients supplémentaires saisis manuellement
+      (clientInfo.extra_clients || []).forEach((ec, i) => {
+        const ecName = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+        if (ecName && !allClientNames.includes(ecName)) {
+          recapLines.push(`👤 Client ${i + 2}: ${ecName}`);
+          if (ec.telephone) recapLines.push(`📞 Téléphone: ${ec.telephone}${ec.type_telephone ? ` (${ec.type_telephone})` : ''}`);
+          if (ec.courriel) recapLines.push(`✉️ Courriel: ${ec.courriel}`);
+        }
+      });
     }
 
     // Représentants — combiner IDs + texte manuel

@@ -134,7 +134,7 @@ export default function ClientStepForm({
       extra_clients: clientInfo.extra_clients || [],
       representant_key: clientInfo.representant_key || null
     });
-  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone]);
+  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone, JSON.stringify(clientInfo.extra_clients), clientInfo.representant_key]);
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
@@ -198,6 +198,8 @@ export default function ClientStepForm({
           courriel: getCurrentEmail(client)
         };
     updateExtraClient(index, newData);
+    // Aussi toggle dans clients_ids pour sauvegarder le lien
+    onSelectClient(client.id);
   };
 
   const setRepresentant = (key) => {
