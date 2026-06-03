@@ -121,7 +121,7 @@ export default function ClientStepForm({
     type_telephone: clientInfo.type_telephone || "Cellulaire",
     courriel: clientInfo.courriel || "",
     extra_clients: clientInfo.extra_clients || [],
-    representant_key: clientInfo.representant_key || "primary"
+    representant_key: clientInfo.representant_key || null
   });
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function ClientStepForm({
       type_telephone: clientInfo.type_telephone || "Cellulaire",
       courriel: clientInfo.courriel || "",
       extra_clients: clientInfo.extra_clients || [],
-      representant_key: clientInfo.representant_key || "primary"
+      representant_key: clientInfo.representant_key || null
     });
   }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone]);
 
