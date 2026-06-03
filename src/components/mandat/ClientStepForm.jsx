@@ -125,29 +125,37 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // Synchroniser UNIQUEMENT quand resetKey change (reset complet ou chargement d'un mandat)
-  // Jamais sur les re-renders ordinaires du parent, ce qui évite d'écraser extra_clients.
+  // Synchroniser quand clientInfo change depuis le parent (chargement d'un mandat existant)
+  // On utilise une ref pour tracker la dernière valeur "externe" et éviter les boucles
+  const lastExternalClientInfo = useRef(null);
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      lastExternalClientInfo.current = JSON.stringify(clientInfo);
       return;
     }
-    // resetKey a changé = le parent demande explicitement une réinitialisation
-    setClientForm({
-      prenom: clientInfo.prenom || "",
-      nom: clientInfo.nom || "",
-      telephone: clientInfo.telephone || "",
-      type_telephone: clientInfo.type_telephone || "Cellulaire",
-      courriel: clientInfo.courriel || "",
-      extra_clients: clientInfo.extra_clients || [],
-      representant_key: clientInfo.representant_key || null
-    });
+    const serialized = JSON.stringify(clientInfo);
+    // Ne synchroniser que si le parent change réellement (pas les mises à jour locales déjà propagées)
+    if (serialized !== lastExternalClientInfo.current) {
+      lastExternalClientInfo.current = serialized;
+      setClientForm({
+        prenom: clientInfo.prenom || "",
+        nom: clientInfo.nom || "",
+        telephone: clientInfo.telephone || "",
+        type_telephone: clientInfo.type_telephone || "Cellulaire",
+        courriel: clientInfo.courriel || "",
+        extra_clients: clientInfo.extra_clients || [],
+        representant_key: clientInfo.representant_key || null
+      });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetKey]);
+  }, [clientInfo]);
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
+    // Mettre à jour la ref pour que le useEffect ne re-synchro pas depuis le parent
+    lastExternalClientInfo.current = JSON.stringify(newForm);
     if (onClientInfoChange) onClientInfoChange(newForm);
   };
 
