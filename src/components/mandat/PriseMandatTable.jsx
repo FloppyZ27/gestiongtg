@@ -189,9 +189,17 @@ export default function PriseMandatTable({
                 )}
               </TableCell>
               <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                {pm.client_info?.prenom || pm.client_info?.nom 
-                  ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
-                  : getClientsNames(pm.clients_ids)}
+                {(() => {
+                  const names = [];
+                  const primaryName = `${pm.client_info?.prenom || ''} ${pm.client_info?.nom || ''}`.trim();
+                  if (primaryName) names.push(primaryName);
+                  (pm.client_info?.extra_clients || []).forEach(ec => {
+                    const n = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+                    if (n) names.push(n);
+                  });
+                  if (names.length === 0) return getClientsNames(pm.clients_ids);
+                  return names.join(', ');
+                })()}
               </TableCell>
               <TableCell className="text-slate-300 text-xs max-w-xs truncate">
                 {pm.adresse_travaux?.numeros_civiques?.[0] || pm.adresse_travaux?.rue

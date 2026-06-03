@@ -262,7 +262,25 @@ export default function ClientStepForm({
               <Users className="w-3.5 h-3.5 text-blue-400" />
             </div>
             <CardTitle className="text-blue-300 text-base">Client</CardTitle>
-            {selectedClientIds.length > 0 && selectedClientIds.map(clientId => {
+            {/* Client 1 */}
+            {(clientForm.prenom || clientForm.nom) && (
+              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
+                {representantKey === "primary" && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
+                {`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
+              </Badge>
+            )}
+            {/* Clients supplémentaires */}
+            {extraClients.map((ec, i) => {
+              const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+              return name ? (
+                <Badge key={i} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
+                  {representantKey === `extra_${i}` && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
+                  {name}
+                </Badge>
+              ) : null;
+            })}
+            {/* Clients via IDs (si aucun client saisi manuellement) */}
+            {!clientForm.prenom && !clientForm.nom && extraClients.length === 0 && selectedClientIds.map(clientId => {
               const client = clients.find(c => c.id === clientId);
               return client ? (
                 <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
