@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -124,17 +124,27 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
+  // Clé de reset externe : on détecte quand le parent veut vraiment réinitialiser
+  // (ex: ouverture d'un nouveau mandat ou chargement d'un mandat existant)
+  const initRef = useRef(clientInfo);
   useEffect(() => {
-    setClientForm({
-      prenom: clientInfo.prenom || "",
-      nom: clientInfo.nom || "",
-      telephone: clientInfo.telephone || "",
-      type_telephone: clientInfo.type_telephone || "Cellulaire",
-      courriel: clientInfo.courriel || "",
-      extra_clients: clientInfo.extra_clients || [],
-      representant_key: clientInfo.representant_key || null
-    });
-  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone, JSON.stringify(clientInfo.extra_clients), clientInfo.representant_key]);
+    // Ne synchroniser que si le parent change radicalement (reset complet ou chargement)
+    const prev = initRef.current;
+    const isReset = !clientInfo.prenom && !clientInfo.nom && !clientInfo.telephone && !clientInfo.courriel && !(clientInfo.extra_clients?.length);
+    const isLoad = (clientInfo.prenom !== prev.prenom || clientInfo.nom !== prev.nom) && (clientInfo.prenom || clientInfo.nom);
+    if (isReset || isLoad) {
+      setClientForm({
+        prenom: clientInfo.prenom || "",
+        nom: clientInfo.nom || "",
+        telephone: clientInfo.telephone || "",
+        type_telephone: clientInfo.type_telephone || "Cellulaire",
+        courriel: clientInfo.courriel || "",
+        extra_clients: clientInfo.extra_clients || [],
+        representant_key: clientInfo.representant_key || null
+      });
+    }
+    initRef.current = clientInfo;
+  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone]);
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
