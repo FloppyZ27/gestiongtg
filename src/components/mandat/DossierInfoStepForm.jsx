@@ -6,6 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, FolderOpen } from "lucide-react";
 
+const PLACE_AFFAIRE_DEFAULT = {
+  "Samuel Guay": "Alma",
+  "Dany Gaboury": "Saguenay",
+  "Pierre-Luc Pilote": "Alma",
+  "Benjamin Larouche": "Alma",
+  "Frédéric Gilbert": "Alma"
+};
+
 const ARPENTEURS = [
   "Samuel Guay",
   "Dany Gaboury",
@@ -59,7 +67,7 @@ export default function DossierInfoStepForm({
             <div className="grid grid-cols-3 gap-1">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
-                <Select value={arpenteurGeometre} onValueChange={onArpenteurChange} disabled={disabled}>
+                <Select value={arpenteurGeometre} onValueChange={(val) => { onArpenteurChange(val); if (!placeAffaire && PLACE_AFFAIRE_DEFAULT[val]) onPlaceAffaireChange(PLACE_AFFAIRE_DEFAULT[val]); }} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
