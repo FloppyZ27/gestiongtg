@@ -124,15 +124,26 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // Clé de reset externe : on détecte quand le parent veut vraiment réinitialiser
-  // (ex: ouverture d'un nouveau mandat ou chargement d'un mandat existant)
-  const initRef = useRef(clientInfo);
+  // On synchronise UNIQUEMENT lors d'un reset complet ou d'un chargement initial externe.
+  // On utilise une ref pour savoir si le dernier changement vient de nous-mêmes (interne)
+  // afin d'éviter d'écraser les extra_clients quand le parent re-render après onClientInfoChange.
+  const internalChangeRef = useRef(false);
+  const prevClientInfoRef = useRef(clientInfo);
+
   useEffect(() => {
-    // Ne synchroniser que si le parent change radicalement (reset complet ou chargement)
-    const prev = initRef.current;
+    // Si le changement vient de nous-mêmes, on ignore
+    if (internalChangeRef.current) {
+      internalChangeRef.current = false;
+      prevClientInfoRef.current = clientInfo;
+      return;
+    }
+    const prev = prevClientInfoRef.current;
+    prevClientInfoRef.current = clientInfo;
+
     const isReset = !clientInfo.prenom && !clientInfo.nom && !clientInfo.telephone && !clientInfo.courriel && !(clientInfo.extra_clients?.length);
-    const isLoad = (clientInfo.prenom !== prev.prenom || clientInfo.nom !== prev.nom) && (clientInfo.prenom || clientInfo.nom);
-    if (isReset || isLoad) {
+    const isExternalLoad = (clientInfo.prenom !== prev.prenom || clientInfo.nom !== prev.nom) && (clientInfo.prenom || clientInfo.nom);
+
+    if (isReset || isExternalLoad) {
       setClientForm({
         prenom: clientInfo.prenom || "",
         nom: clientInfo.nom || "",
@@ -143,10 +154,10 @@ export default function ClientStepForm({
         representant_key: clientInfo.representant_key || null
       });
     }
-    initRef.current = clientInfo;
-  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone]);
+  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone, clientInfo.extra_clients, clientInfo.representant_key]);
 
   const updateClientForm = (newForm) => {
+    internalChangeRef.current = true;
     setClientForm(newForm);
     if (onClientInfoChange) onClientInfoChange(newForm);
   };
