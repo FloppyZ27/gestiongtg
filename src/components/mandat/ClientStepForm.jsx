@@ -275,7 +275,7 @@ export default function ClientStepForm({
           {/* Client principal */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-blue-300">Client principal</p>
+              <p className="text-xs font-semibold text-blue-300">Client 1</p>
               <RepresentantCheckbox myKey="primary" />
             </div>
             <div className="grid grid-cols-[70%_30%] gap-4">
@@ -304,7 +304,7 @@ export default function ClientStepForm({
                 <div className="flex items-center gap-3">
                   <RepresentantCheckbox myKey={`extra_${index}`} />
                   {!disabled && (
-                    <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors">
+                    <button type="button" onClick={() => removeExtraClient(index)} className="text-red-400 hover:text-red-300 transition-colors scale-75">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
