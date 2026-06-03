@@ -1,11 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-// Unregister stale service workers in dev to prevent caching old React copies
+// Unregister stale service workers and clear caches to prevent duplicate React copies
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((sw) => sw.unregister());
   });
+}
+if (typeof caches !== 'undefined') {
   caches.keys().then((keys) => {
     keys.forEach((key) => caches.delete(key));
   });
