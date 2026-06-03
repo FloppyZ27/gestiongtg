@@ -2383,9 +2383,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                   <div id="section-dossier-info"><DossierInfoStepForm
                     disabled={isLocked}
                     arpenteurGeometre={formData.arpenteur_geometre}
-                    onArpenteurChange={(value) => {
+                    onArpenteurAndPlaceChange={(value, place) => {
                       if (isLocked) return;
-                      setFormData({...formData, arpenteur_geometre: value});
+                      setFormData(prev => ({...prev, arpenteur_geometre: value, placeAffaire: place}));
                       setHasFormChanges(true);
                     }}
                     statut={formData.statut}
