@@ -259,12 +259,7 @@ export default function ClientStepForm({
                 </Badge>
               ) : null;
             })}
-            {representantKey && getRepresentantLabel() && (
-              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs flex items-center gap-1">
-                <Star className="w-2.5 h-2.5 fill-yellow-400" />
-                Représentant: {getRepresentantLabel()}
-              </Badge>
-            )}
+
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
