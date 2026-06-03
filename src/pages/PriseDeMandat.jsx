@@ -273,13 +273,8 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     province: "QC",
     code_postal: ""
   });
-  const [clientInfo, setClientInfo] = useState({
-    prenom: "",
-    nom: "",
-    telephone: "",
-    type_telephone: "Cellulaire",
-    courriel: ""
-  });
+  const [clientInfo, setClientInfo] = useState({ prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" });
+  const clientInfoRef = React.useRef(clientInfo);
   const [mandatsInfo, setMandatsInfo] = useState([{
     type_mandat: "",
     echeance_souhaitee: "",
@@ -527,13 +522,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
       numero_lot: ""
     });
     
-    setClientInfo(pm.client_info || {
-      prenom: "",
-      nom: "",
-      telephone: "",
-      type_telephone: "Cellulaire",
-      courriel: ""
-    });
+    const loadedClientInfo = pm.client_info || { prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" };
+    setClientInfo(loadedClientInfo);
+    clientInfoRef.current = loadedClientInfo;
     
     setProfessionnelInfo(pm.professionnel_info || {
       notaire: "",
@@ -722,7 +713,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
       notaires_ids: formData.notaires_ids || [],
       courtiers_ids: formData.courtiers_ids || [],
       compagnies_ids: formData.compagnies_ids || [],
-      client_info: clientInfo,
+      client_info: clientInfoRef.current,
       professionnel_info: professionnelInfo,
       adresse_travaux: overrideAddress || workAddress,
       mandats: mandatsToSave,
@@ -2410,7 +2401,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
                     clientInfo={clientInfo}
-                    onClientInfoChange={(info) => { setClientInfo(info); setHasFormChanges(true); }}
+                    onClientInfoChange={(info) => { setClientInfo(info); setHasFormChanges(true); clientInfoRef.current = info; }}
                   /></div>
 
                   {/* Étape 2: Professionnel */}
