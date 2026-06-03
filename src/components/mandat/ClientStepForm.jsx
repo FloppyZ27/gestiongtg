@@ -112,7 +112,8 @@ export default function ClientStepForm({
   onToggleCollapse,
   clientInfo = {},
   onClientInfoChange,
-  disabled = false
+  disabled = false,
+  resetKey = 0
 }) {
   const [clientForm, setClientForm] = useState({
     prenom: clientInfo.prenom || "",
@@ -124,40 +125,28 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // On synchronise UNIQUEMENT lors d'un reset complet ou d'un chargement initial externe.
-  // On utilise une ref pour savoir si le dernier changement vient de nous-mêmes (interne)
-  // afin d'éviter d'écraser les extra_clients quand le parent re-render après onClientInfoChange.
-  const internalChangeRef = useRef(false);
-  const prevClientInfoRef = useRef(clientInfo);
-
+  // Synchroniser UNIQUEMENT quand resetKey change (reset complet ou chargement d'un mandat)
+  // Jamais sur les re-renders ordinaires du parent, ce qui évite d'écraser extra_clients.
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    // Si le changement vient de nous-mêmes, on ignore
-    if (internalChangeRef.current) {
-      internalChangeRef.current = false;
-      prevClientInfoRef.current = clientInfo;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
       return;
     }
-    const prev = prevClientInfoRef.current;
-    prevClientInfoRef.current = clientInfo;
-
-    const isReset = !clientInfo.prenom && !clientInfo.nom && !clientInfo.telephone && !clientInfo.courriel && !(clientInfo.extra_clients?.length);
-    const isExternalLoad = (clientInfo.prenom !== prev.prenom || clientInfo.nom !== prev.nom) && (clientInfo.prenom || clientInfo.nom);
-
-    if (isReset || isExternalLoad) {
-      setClientForm({
-        prenom: clientInfo.prenom || "",
-        nom: clientInfo.nom || "",
-        telephone: clientInfo.telephone || "",
-        type_telephone: clientInfo.type_telephone || "Cellulaire",
-        courriel: clientInfo.courriel || "",
-        extra_clients: clientInfo.extra_clients || [],
-        representant_key: clientInfo.representant_key || null
-      });
-    }
-  }, [clientInfo.prenom, clientInfo.nom, clientInfo.telephone, clientInfo.courriel, clientInfo.type_telephone, clientInfo.extra_clients, clientInfo.representant_key]);
+    // resetKey a changé = le parent demande explicitement une réinitialisation
+    setClientForm({
+      prenom: clientInfo.prenom || "",
+      nom: clientInfo.nom || "",
+      telephone: clientInfo.telephone || "",
+      type_telephone: clientInfo.type_telephone || "Cellulaire",
+      courriel: clientInfo.courriel || "",
+      extra_clients: clientInfo.extra_clients || [],
+      representant_key: clientInfo.representant_key || null
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
 
   const updateClientForm = (newForm) => {
-    internalChangeRef.current = true;
     setClientForm(newForm);
     if (onClientInfoChange) onClientInfoChange(newForm);
   };

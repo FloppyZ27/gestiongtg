@@ -2402,26 +2402,15 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
                   {/* Étape 1: Informations du client */}
                   <div id="section-client"><ClientStepForm
+                    key={`csf-${editingPriseMandat?.id||"new"}`}
                     disabled={isLocked}
                     clients={clientsReguliers}
                     selectedClientIds={formData.clients_ids}
-                    onSelectClient={(clientId) => {
-                      if (isLocked) return;
-                      setFormData(prev => ({
-                        ...prev,
-                        clients_ids: prev.clients_ids.includes(clientId)
-                          ? prev.clients_ids.filter(id => id !== clientId)
-                          : [...prev.clients_ids, clientId]
-                      }));
-                      setHasFormChanges(true);
-                    }}
+                    onSelectClient={(clientId) => { if(isLocked)return; setFormData(prev=>({...prev,clients_ids:prev.clients_ids.includes(clientId)?prev.clients_ids.filter(id=>id!==clientId):[...prev.clients_ids,clientId]})); setHasFormChanges(true); }}
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
                     clientInfo={clientInfo}
-                    onClientInfoChange={(info) => {
-                      setClientInfo(info);
-                      setHasFormChanges(true);
-                    }}
+                    onClientInfoChange={(info) => { setClientInfo(info); setHasFormChanges(true); }}
                   /></div>
 
                   {/* Étape 2: Professionnel */}
