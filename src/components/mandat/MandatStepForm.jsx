@@ -132,6 +132,11 @@ export default function MandatStepForm({
     }
   };
 
+  const getWeeksFromEcheance = (echeance) => {
+    const match = echeance?.match(/^(\d+)\s+semaine/);
+    return match ? parseInt(match[1]) : null;
+  };
+
   const handleSharedInfoChange = (field, value) => {
     const newInfo = { ...sharedInfo, [field]: value };
     
@@ -139,6 +144,16 @@ export default function MandatStepForm({
     if (field === 'echeance_souhaitee' && value !== "Date précise") {
       newInfo.date_signature = "";
       newInfo.date_debut_travaux = "";
+    }
+
+    // Auto-calculer la date de livraison en fonction du nombre de semaines
+    if (field === 'echeance_souhaitee') {
+      const weeks = getWeeksFromEcheance(value);
+      if (weeks !== null) {
+        const today = new Date();
+        today.setDate(today.getDate() + weeks * 7);
+        newInfo.date_livraison = today.toISOString().split('T')[0];
+      }
     }
     
     // Mettre à jour tous les mandats avec les nouvelles infos partagées (copie profonde)
