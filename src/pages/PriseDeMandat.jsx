@@ -39,7 +39,7 @@ import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 import HistoriquePanel from "../components/mandat/HistoriquePanel";
-import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import MandatDialogTitle from "../components/mandat/MandatDialogTitle";import PremiumButton from "../components/CommunicationClients/PremiumButton";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";import PriseMandatAlertDialogs from "../components/mandat/PriseMandatAlertDialogs";import LotEditDialog from "../components/lots/LotEditDialog";import LotSelectorDialog from "../components/mandat/LotSelectorDialog";import ViewDossierDialog from "../components/mandat/ViewDossierDialog";import ClientSelectorDialogs from "../components/mandat/ClientSelectorDialogs";
+import OuvrirDossierDialog from "../components/mandat/OuvrirDossierDialog";import MandatDialogTitle from "../components/mandat/MandatDialogTitle";import PremiumButton from "../components/CommunicationClients/PremiumButton";import StatutChangeConfirmDialog from "../components/mandat/StatutChangeConfirmDialog";import ConfirmDeleteDialog from "../components/shared/ConfirmDeleteDialog";import PriseMandatFilters from "../components/mandat/PriseMandatFilters";import PriseMandatTable from "../components/mandat/PriseMandatTable";import PriseMandatAlertDialogs from "../components/mandat/PriseMandatAlertDialogs";import LotEditDialog from "../components/lots/LotEditDialog";import LotSelectorDialog from "../components/mandat/LotSelectorDialog";import ViewDossierDialog from "../components/mandat/ViewDossierDialog";import ClientSelectorDialogs from "../components/mandat/ClientSelectorDialogs";import PriseMandatDialogs from "../components/mandat/PriseMandatDialogs";import PriseMandatListSection from "../components/mandat/PriseMandatListSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2351,12 +2351,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                       }
                       setHasFormChanges(true);
                     }}
-                    numeroDossier={formData.numero_dossier}
-                    onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
-                    dateOuverture={formData.date_ouverture}
-                    onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
-                    placeAffaire={formData.placeAffaire}
-                    onPlaceAffaireChange={(value) => setFormData({...formData, placeAffaire: value})}
+                    numeroDossier={formData.numero_dossier} onNumeroDossierChange={(value) => { setFormData(p=>({...p,numero_dossier:value})); setHasFormChanges(true); }} numeroDossierError={formData.numero_dossier&&formData.arpenteur_geometre&&numeroDossierExiste(formData.arpenteur_geometre,formData.numero_dossier,editingPriseMandat?.id)?`N° déjà utilisé pour ${formData.arpenteur_geometre}`:null}
+                    dateOuverture={formData.date_ouverture} onDateOuvertureChange={(value) => setFormData(p=>({...p,date_ouverture:value}))}
+                    placeAffaire={formData.placeAffaire} onPlaceAffaireChange={(value) => setFormData(p=>({...p,placeAffaire:value}))}
                     isCollapsed={dossierInfoStepCollapsed}
                     onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
                   /></div>
@@ -2556,65 +2553,18 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
 
         </div>
 
-        {/* Dialog de confirmation de changement de statut */}
-        <StatutChangeConfirmDialog
-          open={showStatutChangeConfirm}
-          onOpenChange={(open) => { setShowStatutChangeConfirm(open); if (!open) setPendingStatutChange(null); }}
-          pendingStatutChange={pendingStatutChange}
-          formData={formData}
-          clientInfo={clientInfo}
-          professionnelInfo={professionnelInfo}
-          workAddress={workAddress}
-          mandatsInfo={mandatsInfo}
-          historique={historique}
-          setHistorique={setHistorique}
-          user={user}
-          editingPriseMandat={editingPriseMandat}
-          isLocked={isLocked}
-          updatePriseMandatMutation={updatePriseMandatMutation} newNumeroDossier={pendingStatutChange==="Mandats à ouvrir"?calculerProchainNumeroDossier(formData.arpenteur_geometre,editingPriseMandat?.id):null}
-          onConfirm={(newFormData) => { setFormData(newFormData); setShowStatutChangeConfirm(false); setPendingStatutChange(null); setHasDocuments(false); }}
-        />
-
-        {/* Dialogs annulation/unsaved - partagent la même logique */}
-        {[{open:showCancelConfirm,close:()=>setShowCancelConfirm(false)},{open:showUnsavedWarning,close:()=>setShowUnsavedWarning(false)}].map((d,i)=>(
-          <Dialog key={i} open={d.open} onOpenChange={d.close}>
-            <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{background:'none'}}>
-              <DialogHeader><DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3"><span className="text-2xl">⚠️</span>Attention<span className="text-2xl">⚠️</span></DialogTitle></DialogHeader>
-              <motion.div className="space-y-4" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.15}}>
-                <p className="text-slate-300 text-center">Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.</p>
-                <div className="flex justify-center gap-3 pt-4">
-                  <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 border-none" onClick={async()=>{if(editingPriseMandat&&!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...editingPriseMandat,locked_by:null,locked_at:null});queryClient.invalidateQueries({queryKey:['priseMandats']});}resetFullForm();setIsLocked(false);setLockedBy("");d.close();setIsDialogOpen(false);}}>Abandonner</Button>
-                  <Button type="button" onClick={d.close} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">Continuer l'édition</Button>
-                </div>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
-        ))}
-
-        {/* Dialog Ouvrir Dossier */}
-        <OuvrirDossierDialog
-          open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}
-          dossierForm={nouveauDossierForm} commentaires={commentairesTemporairesDossier}
+        <PriseMandatDialogs
+          showStatutChangeConfirm={showStatutChangeConfirm} setShowStatutChangeConfirm={setShowStatutChangeConfirm} pendingStatutChange={pendingStatutChange} setPendingStatutChange={setPendingStatutChange}
+          formData={formData} clientInfo={clientInfo} professionnelInfo={professionnelInfo} workAddress={workAddress} mandatsInfo={mandatsInfo} historique={historique} setHistorique={setHistorique}
+          user={user} editingPriseMandat={editingPriseMandat} isLocked={isLocked} updatePriseMandatMutation={updatePriseMandatMutation} calculerProchainNumeroDossier={calculerProchainNumeroDossier}
+          setFormData={setFormData} setHasDocuments={setHasDocuments}
+          showCancelConfirm={showCancelConfirm} setShowCancelConfirm={setShowCancelConfirm} showUnsavedWarning={showUnsavedWarning} setShowUnsavedWarning={setShowUnsavedWarning}
+          resetFullForm={resetFullForm} setIsLocked={setIsLocked} setLockedBy={setLockedBy} setIsDialogOpen={setIsDialogOpen} commentairesTemporaires={commentairesTemporaires}
+          isOuvrirDossierDialogOpen={isOuvrirDossierDialogOpen} setIsOuvrirDossierDialogOpen={setIsOuvrirDossierDialogOpen} nouveauDossierForm={nouveauDossierForm} commentairesTemporairesDossier={commentairesTemporairesDossier}
           clients={clients} lots={lots} users={users}
-          editingPriseMandat={editingPriseMandat}
-          onSuccess={() => { setIsOuvrirDossierDialogOpen(false); setIsDialogOpen(false); resetFullForm(); }}
-        />
-
-        {/* Alert dialogs groupés */}
-
-        {/* Dialog de succès d'import .d01 */}
-        <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader><DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3"><span className="text-2xl">✅</span>Succès<span className="text-2xl">✅</span></DialogTitle></DialogHeader>
-            <div className="space-y-4 p-2">
-              <p className="text-slate-300 text-center">Données importées avec succès depuis le fichier .d01</p>
-              <div className="flex justify-center pt-4"><Button type="button" onClick={() => setShowD01ImportSuccess(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600 border-none">OK</Button></div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <PriseMandatAlertDialogs
-          showDeleteMandatConfirm={showDeleteMandatConfirm} setShowDeleteMandatConfirm={setShowDeleteMandatConfirm} mandatIndexToDelete={mandatIndexToDelete} setMandatIndexToDelete={setMandatIndexToDelete} setNouveauDossierForm={setNouveauDossierForm} setActiveTabMandatDossier={setActiveTabMandatDossier}
+          showD01ImportSuccess={showD01ImportSuccess} setShowD01ImportSuccess={setShowD01ImportSuccess}
+          showDeleteMandatConfirm={showDeleteMandatConfirm} setShowDeleteMandatConfirm={setShowDeleteMandatConfirm} mandatIndexToDelete={mandatIndexToDelete} setMandatIndexToDelete={setMandatIndexToDelete}
+          setNouveauDossierForm={setNouveauDossierForm} setActiveTabMandatDossier={setActiveTabMandatDossier}
           showMissingUserWarning={showMissingUserWarning} setShowMissingUserWarning={setShowMissingUserWarning}
           showArpenteurRequiredDialog={showArpenteurRequiredDialog} setShowArpenteurRequiredDialog={setShowArpenteurRequiredDialog}
           showDeleteConcordanceConfirm={showDeleteConcordanceConfirm} setShowDeleteConcordanceConfirm={setShowDeleteConcordanceConfirm} concordanceIndexToDelete={concordanceIndexToDelete} setConcordanceIndexToDelete={setConcordanceIndexToDelete} setNewLotForm={setNewLotForm}
@@ -2622,242 +2572,54 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
           showLotExistsWarning={showLotExistsWarning} setShowLotExistsWarning={setShowLotExistsWarning} newLotForm={newLotForm}
           showLotMissingFieldsWarning={showLotMissingFieldsWarning} setShowLotMissingFieldsWarning={setShowLotMissingFieldsWarning}
           showConcordanceWarning={showConcordanceWarning} setShowConcordanceWarning={setShowConcordanceWarning}
-        />
-        <ConfirmDeleteDialog
-          open={showDeletePriseMandatConfirm}
-          onOpenChange={(open) => { setShowDeletePriseMandatConfirm(open); if (!open) setPriseMandatIdToDelete(null); }}
-          onConfirm={() => { if(priseMandatIdToDelete)deletePriseMandatMutation.mutate(priseMandatIdToDelete); }}
-          message="Êtes-vous sûr de vouloir supprimer cette prise de mandat ? Cette action est irréversible."
-        />
-
-
-        {/* Dialog pour ajouter une minute - inline compact */}
-        {isAddMinuteDialogOpen && <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}><DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50"><DialogHeader><DialogTitle className="text-xl">Ajouter une minute</DialogTitle></DialogHeader><div className="space-y-4"><div className="space-y-2"><Label>Minute <span className="text-red-400">*</span></Label><Input value={newMinuteForm.minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })} placeholder="Ex: 12345" className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Date de minute <span className="text-red-400">*</span></Label><Input type="date" value={newMinuteForm.date_minute} onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })} className="bg-slate-800 border-slate-700" /></div><div className="space-y-2"><Label>Type de minute <span className="text-red-400">*</span></Label><Select value={newMinuteForm.type_minute} onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}><SelectTrigger className="bg-slate-800 border-slate-700 text-white"><SelectValue placeholder="Type" /></SelectTrigger><SelectContent className="bg-slate-800 border-slate-700"><SelectItem value="Initiale" className="text-white">Initiale</SelectItem><SelectItem value="Remplace" className="text-white">Remplace</SelectItem><SelectItem value="Corrige" className="text-white">Corrige</SelectItem></SelectContent></Select></div><div className="flex justify-end gap-3 pt-4 border-t border-slate-800"><Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button><Button type="button" onClick={handleAddMinuteFromDialog} disabled={!newMinuteForm.minute || !newMinuteForm.date_minute} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ajouter</Button></div></div></DialogContent></Dialog>}
-
-        <ClientSelectorDialogs
-          isClientSelectorOpen={isClientSelectorOpen} setIsClientSelectorOpen={setIsClientSelectorOpen}
-          isNotaireSelectorOpen={isNotaireSelectorOpen} setIsNotaireSelectorOpen={setIsNotaireSelectorOpen}
+          showDeletePriseMandatConfirm={showDeletePriseMandatConfirm} setShowDeletePriseMandatConfirm={setShowDeletePriseMandatConfirm} priseMandatIdToDelete={priseMandatIdToDelete} setPriseMandatIdToDelete={setPriseMandatIdToDelete} deletePriseMandatMutation={deletePriseMandatMutation}
+          isAddMinuteDialogOpen={isAddMinuteDialogOpen} setIsAddMinuteDialogOpen={setIsAddMinuteDialogOpen} newMinuteForm={newMinuteForm} setNewMinuteForm={setNewMinuteForm} handleAddMinuteFromDialog={handleAddMinuteFromDialog}
+          isClientSelectorOpen={isClientSelectorOpen} setIsClientSelectorOpen={setIsClientSelectorOpen} isNotaireSelectorOpen={isNotaireSelectorOpen} setIsNotaireSelectorOpen={setIsNotaireSelectorOpen}
           isCourtierSelectorOpen={isCourtierSelectorOpen} setIsCourtierSelectorOpen={setIsCourtierSelectorOpen}
-          clientSearchTerm={clientSearchTerm} setClientSearchTerm={setClientSearchTerm}
-          notaireSearchTerm={notaireSearchTerm} setNotaireSearchTerm={setNotaireSearchTerm}
+          clientSearchTerm={clientSearchTerm} setClientSearchTerm={setClientSearchTerm} notaireSearchTerm={notaireSearchTerm} setNotaireSearchTerm={setNotaireSearchTerm}
           courtierSearchTerm={courtierSearchTerm} setCourtierSearchTerm={setCourtierSearchTerm}
-          filteredClients={filteredClientsForSelector} filteredNotaires={filteredNotairesForSelector} filteredCourtiers={filteredCourtiersForSelector}
-          clientsIds={formData.clients_ids} notairesIds={formData.notaires_ids || []} courtiersIds={formData.courtiers_ids || []}
-          onToggleClient={(id) => toggleClient(id, 'clients')} onToggleNotaire={(id) => toggleClient(id, 'notaires')} onToggleCourtier={(id) => toggleClient(id, 'courtiers')}
-          openClientFormDialog={openClientFormDialog}
-        />
-                      {/* ClientFormDialog */}
-        <ClientFormDialog
-          key={`cf-${isClientFormDialogOpen}-${clientFormInitialData?.prenom}-${clientFormInitialData?.nom}`}
-          open={isClientFormDialogOpen}
-          onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) { setEditingClientForForm(null); setClientFormInitialData(null); } }}
-          editingClient={editingClientForForm}
-          defaultType={clientTypeForForm}
-          initialData={clientFormInitialData}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
-            // Optionally re-open the selector if creating from there
-            if (clientTypeForForm === "Client" && !isOuvrirDossierDialogOpen) {
-              setIsClientSelectorOpen(true);
-            }
-            if (clientTypeForForm === "Notaire" && !isOuvrirDossierDialogOpen) {
-              setIsNotaireSelectorOpen(true);
-            }
-            if (clientTypeForForm === "Courtier immobilier" && !isOuvrirDossierDialogOpen) {
-              setIsCourtierSelectorOpen(true);
-            }
-          }}
-        />
-
-        <LotSelectorDialog
-          isOpen={isLotSelectorOpen}
-          onOpenChange={setIsLotSelectorOpen}
-          lots={lots}
-          lotSearchTerm={lotSearchTerm} setLotSearchTerm={setLotSearchTerm}
-          lotCirconscriptionFilter={lotCirconscriptionFilter} setLotCirconscriptionFilter={setLotCirconscriptionFilter}
-          lotCadastreFilter={lotCadastreFilter} setLotCadastreFilter={setLotCadastreFilter}
-          currentMandatIndex={currentMandatIndex}
-          formDataMandats={formData.mandats}
-          onAddLot={addLotToCurrentMandat}
-          onNewLot={() => setIsNewLotDialogOpen(true)}
-        />
-
-        <LotEditDialog
-          isOpen={isNewLotDialogOpen}
-          onOpenChange={(open) => { if (!open) { setIsNewLotDialogOpen(false); if (!editingLot) resetLotForm(); } else setIsNewLotDialogOpen(true); }}
-          editingLot={editingLot}
-          newLotForm={newLotForm} setNewLotForm={setNewLotForm}
-          availableCadastresForNewLot={availableCadastresForNewLot}
-          handleLotCirconscriptionChange={handleLotCirconscriptionChange}
-          lotInfoCollapsed={lotInfoCollapsed} setLotInfoCollapsed={setLotInfoCollapsed}
-          typesOperationCollapsed={typesOperationCollapsed} setTypesOperationCollapsed={setTypesOperationCollapsed}
-          lotDocumentsCollapsed={lotDocumentsCollapsed} setLotDocumentsCollapsed={setLotDocumentsCollapsed}
-          CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
-          allLots={lots}
-          commentairesTemporairesLot={commentairesTemporairesLot} setCommentairesTemporairesLot={setCommentairesTemporairesLot}
-          lotActionLogs={lotActionLogs} setLotActionLogs={setLotActionLogs}
-          sidebarTabLot={sidebarTabLot} setSidebarTabLot={setSidebarTabLot}
-          sidebarCollapsedLot={sidebarCollapsedLot} setSidebarCollapsedLot={setSidebarCollapsedLot}
-          resetLotForm={resetLotForm}
-          showCancelLotConfirm={showCancelLotConfirm} setShowCancelLotConfirm={setShowCancelLotConfirm}
+          filteredClientsForSelector={filteredClientsForSelector} filteredNotairesForSelector={filteredNotairesForSelector} filteredCourtiersForSelector={filteredCourtiersForSelector}
+          openClientFormDialog={openClientFormDialog} toggleClient={toggleClient}
+          isClientFormDialogOpen={isClientFormDialogOpen} setIsClientFormDialogOpen={setIsClientFormDialogOpen} editingClientForForm={editingClientForForm} setEditingClientForForm={setEditingClientForForm}
+          clientTypeForForm={clientTypeForForm} clientFormInitialData={clientFormInitialData} setClientFormInitialData={setClientFormInitialData} isOuvrirDossierDialogOpen2={isOuvrirDossierDialogOpen}
+          isLotSelectorOpen={isLotSelectorOpen} setIsLotSelectorOpen={setIsLotSelectorOpen} lotSearchTerm={lotSearchTerm} setLotSearchTerm={setLotSearchTerm}
+          lotCirconscriptionFilter={lotCirconscriptionFilter} setLotCirconscriptionFilter={setLotCirconscriptionFilter} lotCadastreFilter={lotCadastreFilter} setLotCadastreFilter={setLotCadastreFilter}
+          currentMandatIndex={currentMandatIndex} addLotToCurrentMandat={addLotToCurrentMandat}
+          isNewLotDialogOpen={isNewLotDialogOpen} editingLot={editingLot} availableCadastresForNewLot={availableCadastresForNewLot} handleLotCirconscriptionChange={handleLotCirconscriptionChange}
+          lotInfoCollapsed={lotInfoCollapsed} setLotInfoCollapsed={setLotInfoCollapsed} typesOperationCollapsed={typesOperationCollapsed} setTypesOperationCollapsed={setTypesOperationCollapsed}
+          lotDocumentsCollapsed={lotDocumentsCollapsed} setLotDocumentsCollapsed={setLotDocumentsCollapsed} CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+          commentairesTemporairesLot={commentairesTemporairesLot} setCommentairesTemporairesLot={setCommentairesTemporairesLot} lotActionLogs={lotActionLogs} setLotActionLogs={setLotActionLogs}
+          sidebarTabLot={sidebarTabLot} setSidebarTabLot={setSidebarTabLot} sidebarCollapsedLot={sidebarCollapsedLot} setSidebarCollapsedLot={setSidebarCollapsedLot}
+          isDragOverD01={isDragOverD01} handleD01DragOver={handleD01DragOver} handleD01DragLeave={handleD01DragLeave} handleD01Drop={handleD01Drop} isImportingD01={isImportingD01} handleD01FileSelect={handleD01FileSelect}
           handleNewLotSubmit={handleNewLotSubmit}
-          isDragOverD01={isDragOverD01} handleD01DragOver={handleD01DragOver} handleD01DragLeave={handleD01DragLeave} handleD01Drop={handleD01Drop}
-          isImportingD01={isImportingD01} handleD01FileSelect={handleD01FileSelect}
-          lots={lots} user={user} users={users}
-        />
-
-        {viewingClientDetails && <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}><DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50"><DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0"><DialogTitle className="text-2xl">Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}</DialogTitle></DialogHeader><motion.div className="flex-1 overflow-hidden p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}><ClientDetailView client={viewingClientDetails} onClose={() => setViewingClientDetails(null)} onViewDossier={(dossier) => { setViewingClientDetails(null); setViewingDossier(dossier); setIsViewDialogOpen(true); }} /></motion.div></DialogContent></Dialog>}
-
-        <ViewDossierDialog
-          isOpen={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
-          viewingDossier={viewingDossier}
-          users={users}
-          getArpenteurInitials={getArpenteurInitials}
-          getStatutBadgeColor={getStatutBadgeColor}
-          getClientById={getClientById}
-          setViewingClientDetails={setViewingClientDetails}
-          onEdit={handleEditFromView}
+          viewingClientDetails={viewingClientDetails} setViewingClientDetails={setViewingClientDetails}
+          isViewDialogOpen={isViewDialogOpen} setIsViewDialogOpen={setIsViewDialogOpen} viewingDossier={viewingDossier} setViewingDossier={setViewingDossier}
+          getArpenteurInitials={getArpenteurInitials} getStatutBadgeColor={getStatutBadgeColor} getClientById={getClientById} handleEditFromView={handleEditFromView}
         />
 
 
         {/* Table des prises de mandat */}
-        <div>
-          <div className="pb-1 pt-0">
-            <div className="flex flex-col gap-2">
-              
-              {/* Tabs pour les statuts - style tabs pleine largeur */}
-              <div className="flex w-full">
-               <button
-                 role="tab"
-                 onClick={() => setActiveListTab("nouveau")}
-                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                   activeListTab === "nouveau"
-                     ? "border-cyan-500 text-cyan-400 bg-cyan-500/70"
-                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
-                 }`}
-               >
-                 <FileQuestion className="w-4 h-4" />
-                 Nouveau mandat / Demande d'informations
-                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "nouveau" ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {applyFilters(priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information")).length}
-                 </Badge>
-               </button>
-               <button
-                 role="tab"
-                 onClick={() => setActiveListTab("ouvrir")}
-                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                   activeListTab === "ouvrir"
-                     ? "border-purple-500 text-purple-400 bg-purple-500/70"
-                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
-                 }`}
-               >
-                 <FolderOpen className="w-4 h-4" />
-                 Mandat à ouvrir
-                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "ouvrir" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {applyFilters(priseMandats.filter(pm => pm.statut === "Mandats à ouvrir")).length}
-                 </Badge>
-               </button>
-               <button
-                 role="tab"
-                 onClick={() => setActiveListTab("non-octroye")}
-                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
-                   activeListTab === "non-octroye"
-                     ? "border-red-500 text-red-400 bg-red-500/70"
-                     : "border-transparent text-slate-500 bg-slate-500/10 hover:text-slate-400"
-                 }`}
-               >
-                 <XCircle className="w-4 h-4" />
-                 Mandat non-octroyé
-                 <Badge className={`ml-1 pointer-events-none ${activeListTab === "non-octroye" ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-slate-700 text-slate-400 border-slate-600"}`}>
-                   {applyFilters(priseMandats.filter(pm => pm.statut === "Mandat non octroyé")).length}
-                 </Badge>
-               </button>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                    />
-                  </div>
-
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                  >
-                    <Filter className="w-4 h-4 mr-2" />
-                    <span className="text-sm">Filtres</span>
-                    {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0 || filterDateStart || filterDateEnd) && (
-                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500/20 text-red-400 border-red-500/30 text-xs">
-                        {filterArpenteur.length + filterVille.length + filterTypeMandat.length + filterUrgence.length + (filterDateStart ? 1 : 0) + (filterDateEnd ? 1 : 0)}
-                      </Badge>
-                    )}
-                    {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                  </Button>
-                </div>
-
-                <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                   <CollapsibleContent>
-                     <PriseMandatFilters
-                       filterArpenteur={filterArpenteur} setFilterArpenteur={setFilterArpenteur}
-                       filterVille={filterVille} setFilterVille={setFilterVille}
-                       filterTypeMandat={filterTypeMandat} setFilterTypeMandat={setFilterTypeMandat}
-                       filterUrgence={filterUrgence} setFilterUrgence={setFilterUrgence}
-                       filterDateStart={filterDateStart} setFilterDateStart={setFilterDateStart}
-                       filterDateEnd={filterDateEnd} setFilterDateEnd={setFilterDateEnd}
-                       isFiltersOpen={isFiltersOpen}
-                       allVilles={allVilles}
-                     />
-                   </CollapsibleContent>
-                 </Collapsible>
-              </div>
-            </div>
-          </div>
-          <div className="p-0">
-           <PriseMandatTable
-             activeListTab={activeListTab}
-             priseMandats={priseMandats}
-             searchTerm={searchTerm}
-             filterArpenteur={filterArpenteur}
-             filterVille={filterVille}
-             filterTypeMandat={filterTypeMandat}
-             filterUrgence={filterUrgence}
-             filterDateStart={filterDateStart}
-             filterDateEnd={filterDateEnd}
-             filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipeExternal}
-             sortField={sortField}
-             sortDirection={sortDirection}
-             onSort={handleSort}
-             onEdit={handleEditPriseMandat}
-             onDelete={(id) => {
-               setPriseMandatIdToDelete(id);
-               setShowDeletePriseMandatConfirm(true);
-             }}
-             getArpenteurColor={getArpenteurColor}
-             getArpenteurInitials={getArpenteurInitials}
-             getClientsNames={getClientsNames}
-             formatAdresse={formatAdresse}
-             getMandatColor={getMandatColor}
-             getAbbreviatedMandatType={getAbbreviatedMandatType}
-             getClientById={getClientById}
-             onOpenDossier={(pm) => {
-               const commentsForDossier = pm.commentaires || [];
-               const dossierFormData = {numero_dossier: pm.numero_dossier, arpenteur_geometre: pm.arpenteur_geometre, place_affaire: pm.place_affaire, date_ouverture: new Date().toISOString().split('T')[0], statut: "Ouvert", ttl: "Non", clients_ids: pm.clients_ids, notaires_ids: pm.notaires_ids || [], courtiers_ids: pm.courtiers_ids || [], compagnies_ids: pm.compagnies_ids || [], mandats: pm.mandats.filter(m => m.type_mandat).map(m => ({type_mandat: m.type_mandat, adresse_travaux: pm.adresse_travaux, prix_estime: m.prix_estime || 0, rabais: m.rabais || 0, taxes_incluses: m.taxes_incluses || false, date_signature: m.date_signature || "", date_debut_travaux: m.date_debut_travaux || "", date_livraison: m.date_livraison || "", lots: [], tache_actuelle: "Ouverture", utilisateur_assigne: "", minute: "", date_minute: "", type_minute: "Initiale", minutes_list: [], terrain: {date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: ""}, factures: [], notes: ""}))};
-                               setNouveauDossierForm({...dossierFormData, _clientInfo: pm.client_info || null, _professionnelInfo: pm.professionnel_info || null});
-               setCommentairesTemporairesDossier(commentsForDossier);
-               setIsOuvrirDossierDialogOpen(true);
-             }}
-           />
-          </div>
-        </div>
+        <PriseMandatListSection
+          activeListTab={activeListTab} setActiveListTab={setActiveListTab}
+          priseMandats={priseMandats} applyFilters={applyFilters} searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+          isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen}
+          filterArpenteur={filterArpenteur} setFilterArpenteur={setFilterArpenteur}
+          filterVille={filterVille} setFilterVille={setFilterVille}
+          filterTypeMandat={filterTypeMandat} setFilterTypeMandat={setFilterTypeMandat}
+          filterUrgence={filterUrgence} setFilterUrgence={setFilterUrgence}
+          filterDateStart={filterDateStart} setFilterDateStart={setFilterDateStart}
+          filterDateEnd={filterDateEnd} setFilterDateEnd={setFilterDateEnd}
+          filterPlaceAffaire={filterPlaceAffaire} filterEquipeExternal={filterEquipeExternal}
+          allVilles={allVilles} sortField={sortField} sortDirection={sortDirection} handleSort={handleSort}
+          handleEditPriseMandat={handleEditPriseMandat}
+          setPriseMandatIdToDelete={setPriseMandatIdToDelete} setShowDeletePriseMandatConfirm={setShowDeletePriseMandatConfirm}
+          getArpenteurColor={getArpenteurColor} getArpenteurInitials={getArpenteurInitials}
+          getClientsNames={getClientsNames} formatAdresse={formatAdresse}
+          getMandatColor={getMandatColor} getAbbreviatedMandatType={getAbbreviatedMandatType}
+          getClientById={getClientById}
+          setNouveauDossierForm={setNouveauDossierForm} setCommentairesTemporairesDossier={setCommentairesTemporairesDossier}
+          setIsOuvrirDossierDialogOpen={setIsOuvrirDossierDialogOpen}
+        />
       </div>
     </>
   );

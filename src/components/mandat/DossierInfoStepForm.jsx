@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, FolderOpen } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, AlertCircle } from "lucide-react";
 
 const PLACE_AFFAIRE_DEFAULT = {
   "Samuel Guay": "Alma",
@@ -42,7 +42,8 @@ export default function DossierInfoStepForm({
   onPlaceAffaireChange,
   isCollapsed,
   onToggleCollapse,
-  disabled = false
+  disabled = false,
+  numeroDossierError = null
 }) {
   return (
     <Card className="border-0 bg-slate-800/30" style={{border: 'none', boxShadow: 'none'}}>
@@ -66,6 +67,7 @@ export default function DossierInfoStepForm({
           <div className="space-y-[3px]">
             {/* Ligne 1: Arpenteur-géomètre, Place d'affaire et Statut */}
             <div className="grid grid-cols-3 gap-1">
+
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                 <Select value={arpenteurGeometre} onValueChange={(val) => { const p=PLACE_AFFAIRE_DEFAULT[val]||""; if(onArpenteurAndPlaceChange){onArpenteurAndPlaceChange(val,p);}else{onArpenteurChange(val);onPlaceAffaireChange(p);} }} disabled={disabled}>
@@ -123,6 +125,27 @@ export default function DossierInfoStepForm({
               </div>
             </div>
 
+            {/* Ligne 2: N° de dossier */}
+            <div className="grid grid-cols-3 gap-1 mt-1">
+              <div className="space-y-0.5">
+                <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                <div className="relative">
+                  <Input
+                    value={numeroDossier || ""}
+                    onChange={(e) => onNumeroDossierChange && onNumeroDossierChange(e.target.value)}
+                    placeholder={statut === "Mandats à ouvrir" ? "Auto-généré" : "—"}
+                    disabled={disabled}
+                    className={`bg-slate-700 border-slate-600 text-white h-6 text-sm ${numeroDossierError ? 'border-red-500 focus:border-red-500' : ''}`}
+                  />
+                  {numeroDossierError && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <AlertCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
+                      <span className="text-[10px] text-red-400">{numeroDossierError}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
           </div>
         </CardContent>
