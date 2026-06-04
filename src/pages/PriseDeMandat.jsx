@@ -523,8 +523,6 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     });
     
     const loadedClientInfo = pm.client_info || { prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" };
-    console.log("[LOAD] client_info BD:", JSON.stringify(loadedClientInfo));
-    console.log("[LOAD] extra_clients:", loadedClientInfo.extra_clients);
     setClientInfo(loadedClientInfo);
     clientInfoRef.current = loadedClientInfo;
     setProfessionnelInfo(pm.professionnel_info || { notaire: "", courtier: "", compagnie: "" });
@@ -1405,7 +1403,6 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
         taxes_incluses: m.taxes_incluses || false
       }));
 
-    console.log("[SUBMIT] clientInfo:", JSON.stringify(clientInfo));
     const m0=mandatsInfo[0];
     const dataToSubmit = {arpenteur_geometre:formData.arpenteur_geometre,place_affaire:formData.placeAffaire,numero_dossier:formData.numero_dossier,date_ouverture:formData.date_ouverture,clients_ids:formData.clients_ids,notaires_ids:formData.notaires_ids||[],courtiers_ids:formData.courtiers_ids||[],compagnies_ids:formData.compagnies_ids||[],client_info:clientInfo,professionnel_info:professionnelInfo,adresse_travaux:workAddress,mandats:mandatsToSave,echeance_souhaitee:m0?.echeance_souhaitee||"",date_signature:m0?.date_signature||"",date_debut_travaux:m0?.date_debut_travaux||"",date_livraison:m0?.date_livraison||"",urgence_percue:m0?.urgence_percue||"",statut:formData.statut};
 
@@ -2299,7 +2296,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                 mandatsInfo.some(m => m.type_mandat) ||
                 (commentairesTemporaires?.length ?? 0) > 0;
               
-              if(editingPriseMandat){const _pm=await handleAutoSave();if(!isLocked){await base44.entities.PriseMandat.update(editingPriseMandat.id,{...(_pm||editingPriseMandat),locked_by:null,locked_at:null});}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");return;}
+              if(editingPriseMandat){const ci=clientInfoRef.current;const fm=mandatsInfo.filter(m=>m.type_mandat).map(m=>({type_mandat:m.type_mandat,prix_estime:m.prix_estime||0,prix_premier_lot:m.prix_premier_lot||0,prix_autres_lots:m.prix_autres_lots||0,rabais:m.rabais||0,taxes_incluses:m.taxes_incluses||false}));const fd={arpenteur_geometre:formData.arpenteur_geometre,place_affaire:formData.placeAffaire,numero_dossier:formData.numero_dossier,date_ouverture:formData.date_ouverture,clients_ids:formData.clients_ids,notaires_ids:formData.notaires_ids||[],courtiers_ids:formData.courtiers_ids||[],compagnies_ids:formData.compagnies_ids||[],client_info:ci,professionnel_info:professionnelInfo,adresse_travaux:workAddress,mandats:fm,echeance_souhaitee:mandatsInfo[0]?.echeance_souhaitee||"",date_signature:mandatsInfo[0]?.date_signature||"",date_debut_travaux:mandatsInfo[0]?.date_debut_travaux||"",date_livraison:mandatsInfo[0]?.date_livraison||"",urgence_percue:mandatsInfo[0]?.urgence_percue||"",statut:formData.statut,commentaires:commentairesTemporaires.map(c=>({contenu:c.contenu,utilisateur_email:c.utilisateur_email,utilisateur_nom:c.utilisateur_nom,date:c.created_date||new Date().toISOString()})),historique,locked_by:null,locked_at:null};await base44.entities.PriseMandat.update(editingPriseMandat.id,fd);queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");return;}
               if(hasChanges&&!showCancelConfirm&&!showUnsavedWarning){setShowCancelConfirm(true);return;}
               queryClient.invalidateQueries({queryKey:['priseMandats']});
               setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");
