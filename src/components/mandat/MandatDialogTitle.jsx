@@ -54,16 +54,9 @@ export default function MandatDialogTitle({ formData, clientInfo, getClientById 
     <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${getArpenteurColor(formData.arpenteur_geometre)}`}>
       {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
       {allClients.length > 0 && (
-        <span className="flex items-center gap-1.5 flex-wrap">
-          <span>-</span>
-          {allClients.map((c, i) => (
-            <span key={i} className="flex items-center gap-1">
-              {i > 0 && <span className="text-slate-400">,</span>}
-              {c.name}
-              {c.isRep && <span className="text-[10px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1 font-normal">Représentant</span>}
-            </span>
-          ))}
-        </span>
+        <span>- {allClients.map((c, i) => (
+          <span key={i}>{i > 0 && ', '}{c.isRep ? `(${c.name})` : c.name}</span>
+        ))}</span>
       )}
     </div>
   );

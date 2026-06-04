@@ -208,13 +208,9 @@ export default function PriseMandatTable({
                   });
                   if (clients.length === 0) return <span className="truncate">{getClientsNames(pm.clients_ids)}</span>;
                   return (
-                    <span className="flex flex-wrap gap-x-1 items-center">
+                    <span>
                       {clients.map((c, i) => (
-                        <span key={i} className="flex items-center gap-0.5">
-                          {i > 0 && <span className="text-slate-500">,</span>}
-                          <span className="truncate">{c.name}</span>
-                          {c.isRep && <span className="text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1 whitespace-nowrap">Rép.</span>}
-                        </span>
+                        <span key={i}>{i > 0 && ', '}{c.isRep ? `(${c.name})` : c.name}</span>
                       ))}
                     </span>
                   );

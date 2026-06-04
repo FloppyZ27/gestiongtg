@@ -277,18 +277,18 @@ export default function ClientStepForm({
             <CardTitle className="text-blue-300 text-base">Client</CardTitle>
             {/* Client 1 */}
             {(clientForm.prenom || clientForm.nom) && (
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                {`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
-                {representantKey === "primary" && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
+              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                {representantKey === "primary"
+                  ? `(${`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()})`
+                  : `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
               </Badge>
             )}
             {/* Clients supplémentaires */}
             {extraClients.map((ec, i) => {
               const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
               return name ? (
-                <Badge key={i} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                  {name}
-                  {representantKey === `extra_${i}` && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
+                <Badge key={i} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                  {representantKey === `extra_${i}` ? `(${name})` : name}
                 </Badge>
               ) : null;
             })}
@@ -296,9 +296,8 @@ export default function ClientStepForm({
             {!clientForm.prenom && !clientForm.nom && extraClients.length === 0 && selectedClientIds.map(clientId => {
               const client = clients.find(c => c.id === clientId);
               return client ? (
-                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                  {client.prenom} {client.nom}
-                  {representantKey === clientId && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
+                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                  {representantKey === clientId ? `(${client.prenom} ${client.nom})` : `${client.prenom} ${client.nom}`}
                 </Badge>
               ) : null;
             })}
