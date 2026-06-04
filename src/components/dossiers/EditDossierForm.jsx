@@ -511,6 +511,10 @@ export default function EditDossierForm({
                           <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
                         </div>
                         <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                          <Input value={formData.numero_dossier || ""} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} placeholder="—" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                        </div>
+                        <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Statut</Label>
                           <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value, date_fermeture: value === 'Fermé' ? (formData.date_fermeture || new Date().toISOString().split('T')[0]) : formData.date_fermeture})}>
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
