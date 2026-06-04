@@ -75,9 +75,37 @@
         },
         "courriel": {
           "type": "string"
+        },
+        "extra_clients": {
+          "type": "array",
+          "description": "Clients suppl\u00e9mentaires",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prenom": {
+                "type": "string"
+              },
+              "nom": {
+                "type": "string"
+              },
+              "telephone": {
+                "type": "string"
+              },
+              "type_telephone": {
+                "type": "string"
+              },
+              "courriel": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "representant_key": {
+          "type": "string",
+          "description": "Cl\u00e9 du client repr\u00e9sentant (primary, extra_0, extra_1, ...)"
         }
       },
-      "description": "Informations du client saisies dans le formulaire"
+      "description": "Informations du client principal et des clients suppl\u00e9mentaires"
     },
     "professionnel_info": {
       "type": "object",
