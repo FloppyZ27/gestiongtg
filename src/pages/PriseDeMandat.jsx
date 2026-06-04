@@ -273,7 +273,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     province: "QC",
     code_postal: ""
   });
-  const [clientInfo, setClientInfo] = useState({ prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" });
+  const [clientInfo, setClientInfo] = useState({ prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "", extra_clients: [], representant_key: null });
   const clientInfoRef = React.useRef(clientInfo);
   const [mandatsInfo, setMandatsInfo] = useState([{
     type_mandat: "",
@@ -522,7 +522,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
       numero_lot: ""
     });
     
-    const loadedClientInfo = pm.client_info || { prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" };
+    const loadedClientInfo = { prenom: pm.client_info?.prenom||"", nom: pm.client_info?.nom||"", telephone: pm.client_info?.telephone||"", type_telephone: pm.client_info?.type_telephone||"Cellulaire", courriel: pm.client_info?.courriel||"", extra_clients: pm.client_info?.extra_clients||[], representant_key: pm.client_info?.representant_key||null };
     setClientInfo(loadedClientInfo);
     clientInfoRef.current = loadedClientInfo;
     setProfessionnelInfo(pm.professionnel_info || { notaire: "", courtier: "", compagnie: "" });
@@ -1728,13 +1728,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     });
     
     // Reset des infos client
-    setClientInfo({
-      prenom: "",
-      nom: "",
-      telephone: "",
-      type_telephone: "Cellulaire",
-      courriel: ""
-    });
+    setClientInfo({ prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "", extra_clients: [], representant_key: null });
     
     // Reset des mandats
     setMandatsInfo([{
@@ -2377,7 +2371,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
                     clientInfo={clientInfo}
-                    onClientInfoChange={(info) => { setClientInfo(info); setHasFormChanges(true); clientInfoRef.current = info; }}
+                    onClientInfoChange={(info) => { const fullInfo = { ...info, extra_clients: info.extra_clients || [], representant_key: info.representant_key ?? null }; setClientInfo(fullInfo); clientInfoRef.current = fullInfo; setHasFormChanges(true); }}
                   /></div>
 
                   {/* Étape 2: Professionnel */}

@@ -154,8 +154,14 @@ export default function ClientStepForm({
   }, [clientInfoSignature]);
 
   const updateClientForm = (newForm) => {
-    setClientForm(newForm);
-    if (onClientInfoChange) onClientInfoChange(newForm);
+    // S'assurer que extra_clients est toujours inclus
+    const formWithExtras = {
+      ...newForm,
+      extra_clients: newForm.extra_clients || [],
+      representant_key: newForm.representant_key ?? null
+    };
+    setClientForm(formWithExtras);
+    if (onClientInfoChange) onClientInfoChange(formWithExtras);
   };
 
   const getCurrentPhone = (client) => {
