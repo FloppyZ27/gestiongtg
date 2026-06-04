@@ -275,32 +275,29 @@ export default function ClientStepForm({
               <Users className="w-3.5 h-3.5 text-blue-400" />
             </div>
             <CardTitle className="text-blue-300 text-base">Client</CardTitle>
-            {/* Client 1 */}
-            {(clientForm.prenom || clientForm.nom) && (
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                {representantKey === "primary"
-                  ? `(${`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()})`
-                  : `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
-              </Badge>
-            )}
-            {/* Clients supplémentaires */}
-            {extraClients.map((ec, i) => {
-              const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
-              return name ? (
+            {/* Badges clients : non-représentants d'abord, représentant en dernier */}
+            {(() => {
+              const allBadges = [];
+              const primaryName = `${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim();
+              if (primaryName) allBadges.push({ name: primaryName, isRep: representantKey === "primary" });
+              extraClients.forEach((ec, i) => {
+                const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+                if (name) allBadges.push({ name, isRep: representantKey === `extra_${i}` });
+              });
+              if (allBadges.length === 0 && selectedClientIds.length > 0) {
+                selectedClientIds.forEach(id => {
+                  const c = clients.find(cl => cl.id === id);
+                  if (c) allBadges.push({ name: `${c.prenom} ${c.nom}`, isRep: representantKey === id });
+                });
+              }
+              const nonRep = allBadges.filter(b => !b.isRep);
+              const rep = allBadges.find(b => b.isRep);
+              return [...nonRep, ...(rep ? [rep] : [])].map((b, i) => (
                 <Badge key={i} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                  {representantKey === `extra_${i}` ? `(${name})` : name}
+                  {b.isRep ? `(${b.name})` : b.name}
                 </Badge>
-              ) : null;
-            })}
-            {/* Clients via IDs (si aucun client saisi manuellement) */}
-            {!clientForm.prenom && !clientForm.nom && extraClients.length === 0 && selectedClientIds.map(clientId => {
-              const client = clients.find(c => c.id === clientId);
-              return client ? (
-                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                  {representantKey === clientId ? `(${client.prenom} ${client.nom})` : `${client.prenom} ${client.nom}`}
-                </Badge>
-              ) : null;
-            })}
+              ));
+            })()}
 
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}

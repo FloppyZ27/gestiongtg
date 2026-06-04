@@ -207,11 +207,12 @@ export default function PriseMandatTable({
                     if (n) clients.push({ name: n, isRep: repKey === `extra_${i}` });
                   });
                   if (clients.length === 0) return <span className="truncate">{getClientsNames(pm.clients_ids)}</span>;
+                  const nonRep = clients.filter(c => !c.isRep);
+                  const rep = clients.find(c => c.isRep);
                   return (
                     <span>
-                      {clients.map((c, i) => (
-                        <span key={i}>{i > 0 && ', '}{c.isRep ? `(${c.name})` : c.name}</span>
-                      ))}
+                      {nonRep.map((c, i) => <span key={i}>{i > 0 && ', '}{c.name}</span>)}
+                      {rep && <span>{nonRep.length > 0 && ' '}({rep.name})</span>}
                     </span>
                   );
                 })()}

@@ -53,11 +53,16 @@ export default function MandatDialogTitle({ formData, clientInfo, getClientById 
   return (
     <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${getArpenteurColor(formData.arpenteur_geometre)}`}>
       {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-      {allClients.length > 0 && (
-        <span>- {allClients.map((c, i) => (
-          <span key={i}>{i > 0 && ', '}{c.isRep ? `(${c.name})` : c.name}</span>
-        ))}</span>
-      )}
+      {allClients.length > 0 && (() => {
+        const nonRep = allClients.filter(c => !c.isRep);
+        const rep = allClients.find(c => c.isRep);
+        const sorted = rep ? [...nonRep, rep] : nonRep;
+        return (
+          <span>- {nonRep.map((c, i) => (
+            <span key={i}>{i > 0 && ', '}{c.name}</span>
+          ))}{rep && <span>{nonRep.length > 0 && ' '}({rep.name})</span>}</span>
+        );
+      })()}
     </div>
   );
 }
