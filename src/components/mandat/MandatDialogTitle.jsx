@@ -26,37 +26,45 @@ export default function MandatDialogTitle({ formData, clientInfo, getClientById 
   if (!formData.statut === "Mandats à ouvrir" || !formData.arpenteur_geometre || !formData.numero_dossier) return null;
 
   const repKey = clientInfo.representant_key;
-  const allClientNames = [];
 
-  // Client 1 (primary) — exclure si c'est le représentant
-  if (repKey !== "primary") {
-    const primaryName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
-    if (primaryName) allClientNames.push(primaryName);
-  }
+  // Construire la liste de tous les clients avec indication du représentant
+  const allClients = [];
 
-  // Clients via IDs — exclure si leur id est representant_key
+  const primaryName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+  if (primaryName) allClients.push({ name: primaryName, isRep: repKey === "primary" });
+
   (formData.clients_ids || []).forEach((id) => {
-    if (repKey !== id) {
-      const c = getClientById(id);
-      if (c) {
-        const name = `${c.prenom} ${c.nom}`.trim();
-        if (name && !allClientNames.includes(name)) allClientNames.push(name);
+    const c = getClientById(id);
+    if (c) {
+      const name = `${c.prenom} ${c.nom}`.trim();
+      if (name && !allClients.find(x => x.name === name)) {
+        allClients.push({ name, isRep: repKey === id });
       }
     }
   });
 
-  // Extra clients — exclure si extra_{index} est representant_key
   (clientInfo.extra_clients || []).forEach((ec, i) => {
-    if (repKey !== `extra_${i}`) {
-      const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
-      if (name && !allClientNames.includes(name)) allClientNames.push(name);
+    const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+    if (name && !allClients.find(x => x.name === name)) {
+      allClients.push({ name, isRep: repKey === `extra_${i}` });
     }
   });
 
   return (
-    <div className={`text-lg font-semibold ${getArpenteurColor(formData.arpenteur_geometre)}`}>
+    <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${getArpenteurColor(formData.arpenteur_geometre)}`}>
       {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-      {allClientNames.length > 0 && <span> - {allClientNames.join(', ')}</span>}
+      {allClients.length > 0 && (
+        <span className="flex items-center gap-1.5 flex-wrap">
+          <span>-</span>
+          {allClients.map((c, i) => (
+            <span key={i} className="flex items-center gap-1">
+              {i > 0 && <span className="text-slate-400">,</span>}
+              {c.name}
+              {c.isRep && <span className="text-[10px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1 font-normal">Représentant</span>}
+            </span>
+          ))}
+        </span>
+      )}
     </div>
   );
 }

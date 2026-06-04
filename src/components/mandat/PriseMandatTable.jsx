@@ -196,17 +196,28 @@ export default function PriseMandatTable({
                   </Badge>
                 )}
               </TableCell>
-              <TableCell className="text-slate-300 text-xs max-w-xs truncate">
+              <TableCell className="text-slate-300 text-xs max-w-xs">
                 {(() => {
-                  const names = [];
+                  const repKey = pm.client_info?.representant_key;
+                  const clients = [];
                   const primaryName = `${pm.client_info?.prenom || ''} ${pm.client_info?.nom || ''}`.trim();
-                  if (primaryName) names.push(primaryName);
-                  (pm.client_info?.extra_clients || []).forEach(ec => {
+                  if (primaryName) clients.push({ name: primaryName, isRep: repKey === "primary" });
+                  (pm.client_info?.extra_clients || []).forEach((ec, i) => {
                     const n = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
-                    if (n) names.push(n);
+                    if (n) clients.push({ name: n, isRep: repKey === `extra_${i}` });
                   });
-                  if (names.length === 0) return getClientsNames(pm.clients_ids);
-                  return names.join(', ');
+                  if (clients.length === 0) return <span className="truncate">{getClientsNames(pm.clients_ids)}</span>;
+                  return (
+                    <span className="flex flex-wrap gap-x-1 items-center">
+                      {clients.map((c, i) => (
+                        <span key={i} className="flex items-center gap-0.5">
+                          {i > 0 && <span className="text-slate-500">,</span>}
+                          <span className="truncate">{c.name}</span>
+                          {c.isRep && <span className="text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1 whitespace-nowrap">Rép.</span>}
+                        </span>
+                      ))}
+                    </span>
+                  );
                 })()}
               </TableCell>
               <TableCell className="text-slate-300 text-xs max-w-xs truncate">
