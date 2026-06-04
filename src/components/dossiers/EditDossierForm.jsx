@@ -466,7 +466,7 @@ export default function EditDossierForm({
           <div className="flex-1 overflow-y-auto p-6 pb-24">
 
             {/* Section Informations */}
-            <form id="edit-dossier-form" onSubmit={(e) => { if (!editingDossier) { onSubmit(e); } else { e.preventDefault(); } }}>
+            <form id="edit-dossier-form" onSubmit={(e) => { if (!editingDossier) { const numError = formData.numero_dossier && formData.arpenteur_geometre && (allDossiers || []).some(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier === formData.numero_dossier); if (numError) { e.preventDefault(); return; } onSubmit(e); } else { e.preventDefault(); } }}>
               <Card className="border-0 bg-transparent mb-3" data-section="infos">
                 <CardHeader
                   className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
