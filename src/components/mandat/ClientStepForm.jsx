@@ -125,6 +125,19 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
+  // DEBUG: log à chaque render pour surveiller l'état
+  console.log("[CLIENT-FORM] render - clientInfo parent:", {
+    prenom: clientInfo.prenom,
+    nom: clientInfo.nom,
+    extra_clients_count: (clientInfo.extra_clients || []).length,
+    extra_clients: clientInfo.extra_clients
+  });
+  console.log("[CLIENT-FORM] render - clientForm local:", {
+    prenom: clientForm.prenom,
+    nom: clientForm.nom,
+    extra_clients_count: (clientForm.extra_clients || []).length
+  });
+
   // Signature stable du clientInfo parent pour détecter les changements réels
   const clientInfoSignature = `${clientInfo.prenom||""}|${clientInfo.nom||""}|${clientInfo.telephone||""}|${clientInfo.courriel||""}|${(clientInfo.extra_clients||[]).length}|${(clientInfo.extra_clients||[]).map(e=>`${e.prenom||""}${e.nom||""}`).join(",")}`;
 
@@ -138,8 +151,16 @@ export default function ClientStepForm({
     const parentName = `${clientInfo.prenom || ""}${clientInfo.nom || ""}`;
     const localName = `${clientForm.prenom || ""}${clientForm.nom || ""}`;
 
+    console.log("[CLIENT-FORM] signature changée - resync check:", {
+      parentName, localName,
+      parentExtra_count: parentExtra.length,
+      localExtra_count: localExtra.length,
+      willResync: parentName !== localName || parentExtra.length > localExtra.length
+    });
+
     // Resync si le parent apporte de nouvelles données absentes localement
     if (parentName !== localName || parentExtra.length > localExtra.length) {
+      console.log("[CLIENT-FORM] RESYNC depuis parent - extra_clients:", parentExtra);
       setClientForm({
         prenom: clientInfo.prenom || "",
         nom: clientInfo.nom || "",
@@ -155,6 +176,13 @@ export default function ClientStepForm({
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
+    // DEBUG: log avant propagation au parent
+    console.log("[CLIENT-FORM] updateClientForm appelé:", {
+      prenom: newForm.prenom,
+      nom: newForm.nom,
+      extra_clients_count: (newForm.extra_clients || []).length,
+      extra_clients: newForm.extra_clients
+    });
     if (onClientInfoChange) onClientInfoChange(newForm);
   };
 

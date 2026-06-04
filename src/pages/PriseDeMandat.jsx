@@ -523,15 +523,11 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
     });
     
     const loadedClientInfo = pm.client_info || { prenom: "", nom: "", telephone: "", type_telephone: "Cellulaire", courriel: "" };
+    console.log("[LOAD] client_info BD:", JSON.stringify(loadedClientInfo));
+    console.log("[LOAD] extra_clients:", loadedClientInfo.extra_clients);
     setClientInfo(loadedClientInfo);
     clientInfoRef.current = loadedClientInfo;
-    
-    setProfessionnelInfo(pm.professionnel_info || {
-      notaire: "",
-      courtier: "",
-      compagnie: ""
-    });
-    
+    setProfessionnelInfo(pm.professionnel_info || { notaire: "", courtier: "", compagnie: "" });
     // Reconstruire les mandatsInfo à partir des mandats stockés
     const mandatsFromDb = (pm.mandats || []).map(m => ({
       type_mandat: m.type_mandat || "",
@@ -1409,26 +1405,9 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
         taxes_incluses: m.taxes_incluses || false
       }));
 
-    const dataToSubmit = {
-      arpenteur_geometre: formData.arpenteur_geometre,
-      place_affaire: formData.placeAffaire,
-      numero_dossier: formData.numero_dossier,
-      date_ouverture: formData.date_ouverture,
-      clients_ids: formData.clients_ids,
-      notaires_ids: formData.notaires_ids || [],
-      courtiers_ids: formData.courtiers_ids || [],
-      compagnies_ids: formData.compagnies_ids || [],
-      client_info: clientInfo,
-      professionnel_info: professionnelInfo,
-      adresse_travaux: workAddress,
-      mandats: mandatsToSave,
-      echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
-      date_signature: mandatsInfo[0]?.date_signature || "",
-      date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
-      date_livraison: mandatsInfo[0]?.date_livraison || "",
-      urgence_percue: mandatsInfo[0]?.urgence_percue || "",
-      statut: formData.statut
-    };
+    console.log("[SUBMIT] clientInfo:", JSON.stringify(clientInfo));
+    const m0=mandatsInfo[0];
+    const dataToSubmit = {arpenteur_geometre:formData.arpenteur_geometre,place_affaire:formData.placeAffaire,numero_dossier:formData.numero_dossier,date_ouverture:formData.date_ouverture,clients_ids:formData.clients_ids,notaires_ids:formData.notaires_ids||[],courtiers_ids:formData.courtiers_ids||[],compagnies_ids:formData.compagnies_ids||[],client_info:clientInfo,professionnel_info:professionnelInfo,adresse_travaux:workAddress,mandats:mandatsToSave,echeance_souhaitee:m0?.echeance_souhaitee||"",date_signature:m0?.date_signature||"",date_debut_travaux:m0?.date_debut_travaux||"",date_livraison:m0?.date_livraison||"",urgence_percue:m0?.urgence_percue||"",statut:formData.statut};
 
     if (editingPriseMandat) {
       // Détecter les changements et créer des entrées d'historique
