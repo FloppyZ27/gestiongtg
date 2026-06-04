@@ -43,6 +43,12 @@ export default function OuvrirDossierDialog({
     queryFn: () => base44.auth.me()
   });
 
+  const { data: allDossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: []
+  });
+
 
 
   // Sync formData when dossierForm changes or dialog opens
@@ -440,6 +446,7 @@ export default function OuvrirDossierDialog({
               return (maxDossier + 1).toString();
             }}
             editingDossier={null}
+            allDossiers={allDossiers}
             hideSections={['terrain', 'minutes', 'entree-temps', 'retour-appel']}
             commentairesTemporaires={internalCommentaires}
             onCommentairesTemporairesChange={(newComments) => {

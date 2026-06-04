@@ -506,13 +506,19 @@ export default function EditDossierForm({
                           </Select>
                         </div>
                         <PlaceAffaireSelect value={formData.place_affaire} onChange={(val) => setFormData(prev => ({...prev, place_affaire: val}))} dossierKey={editingDossier?.id} />
+                        {(() => {
+                          const numError = !editingDossier && formData.numero_dossier && formData.arpenteur_geometre && (allDossiers || []).some(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier === formData.numero_dossier);
+                          return (
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                              <Input value={formData.numero_dossier || ""} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} placeholder="—" className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${numError ? 'border-red-500' : ''}`} />
+                              {numError && <span className="text-[10px] text-red-400">N° déjà utilisé pour {formData.arpenteur_geometre}</span>}
+                            </div>
+                          );
+                        })()}
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
                           <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">N° de dossier</Label>
-                          <Input value={formData.numero_dossier || ""} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} placeholder="—" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Statut</Label>
