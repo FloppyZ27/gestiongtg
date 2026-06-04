@@ -126,7 +126,7 @@ export default function DossierInfoStepForm({
             </div>
 
             {/* Ligne 2: N° de dossier */}
-            <div className="grid grid-cols-3 gap-1 mt-0">
+            {statut === "Mandats à ouvrir" && <div className="grid grid-cols-3 gap-1 mt-0">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">N° de dossier</Label>
                 <div className="relative">
@@ -145,7 +145,7 @@ export default function DossierInfoStepForm({
                   )}
                 </div>
               </div>
-            </div>
+            </div>}
 
           </div>
         </CardContent>
