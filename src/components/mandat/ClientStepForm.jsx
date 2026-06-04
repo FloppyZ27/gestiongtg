@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Users, Check, Plus, Trash2, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, Users, Check, Plus, Trash2 } from "lucide-react";
 
 const formatPhoneNumber = (value) => {
   const cleaned = value.replace(/\D/g, '');
@@ -278,8 +278,8 @@ export default function ClientStepForm({
             {/* Client 1 */}
             {(clientForm.prenom || clientForm.nom) && (
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                {representantKey === "primary" && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
                 {`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
+                {representantKey === "primary" && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
               </Badge>
             )}
             {/* Clients supplémentaires */}
@@ -287,8 +287,8 @@ export default function ClientStepForm({
               const name = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
               return name ? (
                 <Badge key={i} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                  {representantKey === `extra_${i}` && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
                   {name}
+                  {representantKey === `extra_${i}` && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
                 </Badge>
               ) : null;
             })}
@@ -297,8 +297,8 @@ export default function ClientStepForm({
               const client = clients.find(c => c.id === clientId);
               return client ? (
                 <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs flex items-center gap-1">
-                  {representantKey === clientId && <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />}
                   {client.prenom} {client.nom}
+                  {representantKey === clientId && <span className="ml-1 text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded px-1">Représentant</span>}
                 </Badge>
               ) : null;
             })}
