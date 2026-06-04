@@ -37,12 +37,20 @@ export default function PriseMandatTable({
   const applyFilters = (priseMandatsList) => {
     return priseMandatsList.filter(pm => {
       const searchLower = searchTerm.toLowerCase();
-      const clientName = pm.client_info?.prenom || pm.client_info?.nom 
-        ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
-        : getClientsNames(pm.clients_ids).toLowerCase();
+      // Construire tous les noms de clients (principal + extras) pour la recherche
+      const allClientNames = [];
+      const primaryName = `${pm.client_info?.prenom || ''} ${pm.client_info?.nom || ''}`.trim();
+      if (primaryName) allClientNames.push(primaryName);
+      (pm.client_info?.extra_clients || []).forEach(ec => {
+        const n = `${ec.prenom || ''} ${ec.nom || ''}`.trim();
+        if (n) allClientNames.push(n);
+      });
+      if (allClientNames.length === 0) allClientNames.push(getClientsNames(pm.clients_ids));
+      const clientNamesStr = allClientNames.join(', ').toLowerCase();
+
       const matchesSearch = (
         pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-        clientName.includes(searchLower) ||
+        clientNamesStr.includes(searchLower) ||
         formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
         pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
       );

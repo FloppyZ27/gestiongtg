@@ -125,51 +125,53 @@ export default function ClientStepForm({
     representant_key: clientInfo.representant_key || null
   });
 
-  // Synchroniser quand resetKey change OU quand extra_clients arrive depuis le parent
-  // (cas: ouverture d'un mandat existant — les extra_clients sont chargés puis setClientInfo est appelé)
-  const prevResetKey = useRef(resetKey);
+  // Clé de signature du parent pour détecter un rechargement complet depuis la BD
+  const parentSignature = JSON.stringify({
+    prenom: clientInfo.prenom || "",
+    nom: clientInfo.nom || "",
+    telephone: clientInfo.telephone || "",
+    courriel: clientInfo.courriel || "",
+    extra_clients: clientInfo.extra_clients || [],
+    representant_key: clientInfo.representant_key || null,
+    resetKey
+  });
+
+  const prevSignature = useRef(parentSignature);
   const isFirstRender = useRef(true);
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      prevResetKey.current = resetKey;
+      prevSignature.current = parentSignature;
       return;
     }
-    const keyChanged = resetKey !== prevResetKey.current;
-    prevResetKey.current = resetKey;
 
-    // Resync si le resetKey a changé (nouveau mandat ouvert)
-    if (keyChanged) {
+    if (parentSignature === prevSignature.current) return;
+    prevSignature.current = parentSignature;
+
+    // Le parent a changé (nouveau mandat ouvert, ou données chargées depuis la BD)
+    // On resync l'état local SEULEMENT si le local ne contient pas plus d'infos que le parent
+    // (évite d'écraser les saisies en cours de l'utilisateur)
+    const parentExtra = clientInfo.extra_clients || [];
+    const localExtra = clientForm.extra_clients || [];
+    const parentHasMoreExtra = parentExtra.length > localExtra.length;
+    const parentHasPrimaryClient = !!(clientInfo.prenom || clientInfo.nom);
+    const localHasPrimaryClient = !!(clientForm.prenom || clientForm.nom);
+
+    // Resync si le parent a des données que le local n'a pas encore
+    if (parentHasMoreExtra || (parentHasPrimaryClient && !localHasPrimaryClient)) {
       setClientForm({
         prenom: clientInfo.prenom || "",
         nom: clientInfo.nom || "",
         telephone: clientInfo.telephone || "",
         type_telephone: clientInfo.type_telephone || "Cellulaire",
         courriel: clientInfo.courriel || "",
-        extra_clients: clientInfo.extra_clients || [],
+        extra_clients: parentExtra,
         representant_key: clientInfo.representant_key || null
       });
-      return;
-    }
-
-    // Resync si le parent a des extra_clients mais pas l'état local
-    // (les données arrivent du serveur après le montage)
-    const parentExtra = clientInfo.extra_clients || [];
-    const localExtra = clientForm.extra_clients || [];
-    if (parentExtra.length > 0 && localExtra.length === 0) {
-      setClientForm(prev => ({
-        ...prev,
-        prenom: clientInfo.prenom || prev.prenom,
-        nom: clientInfo.nom || prev.nom,
-        telephone: clientInfo.telephone || prev.telephone,
-        type_telephone: clientInfo.type_telephone || prev.type_telephone,
-        courriel: clientInfo.courriel || prev.courriel,
-        extra_clients: parentExtra,
-        representant_key: clientInfo.representant_key || prev.representant_key
-      }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetKey, clientInfo.extra_clients]);
+  }, [parentSignature]);
 
   const updateClientForm = (newForm) => {
     setClientForm(newForm);
