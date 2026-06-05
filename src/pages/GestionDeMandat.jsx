@@ -253,6 +253,16 @@ export default function GestionDeMandat() {
     return clientIds.map(id => { const c = clients.find(cl => cl.id === id); return c ? `${c.prenom} ${c.nom}` : ""; }).filter(n => n).join(", ");
   };
 
+  const getClientsDisplay = (dossier) => {
+    const allClients = clients.filter(c => dossier.clients_ids?.includes(c.id));
+    const rep = dossier.representant_id ? allClients.find(c => c.id === dossier.representant_id) : null;
+    const others = allClients.filter(c => c.id !== dossier.representant_id);
+    const othersStr = others.map(c => `${c.prenom} ${c.nom}`).join(', ');
+    const repStr = rep ? `(${rep.prenom} ${rep.nom})` : '';
+    if (!othersStr && !repStr) return getClientsNames(dossier.clients_ids);
+    return [othersStr, repStr].filter(Boolean).join(' ');
+  };
+
   const getUserTeam = (user) => {
     if (user.email === "non-assigne") return null;
     return user.equipe || USER_TEAM_MAP[user.email] || null;
@@ -706,7 +716,7 @@ export default function GestionDeMandat() {
         </div>
         <div className="flex items-center gap-1 mb-1">
           <User className="w-3 h-3 text-white flex-shrink-0" />
-          <span className="text-xs text-white font-medium truncate">{getClientsNames(displayCard.dossier.clients_ids)}</span>
+          <span className="text-xs text-white font-medium truncate">{getClientsDisplay(displayCard.dossier)}</span>
         </div>
         {displayCard.mandat.adresse_travaux && formatAdresse(displayCard.mandat.adresse_travaux) && (
           <div className="flex items-center gap-1 mb-1">

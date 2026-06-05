@@ -354,6 +354,16 @@ export default function TableauDeBord() {
     }).filter(name => name).join(", ") || "-";
   };
 
+  const getClientsDisplay = (dossier) => {
+    const allClients = clients.filter(c => dossier.clients_ids?.includes(c.id));
+    const rep = dossier.representant_id ? allClients.find(c => c.id === dossier.representant_id) : null;
+    const others = allClients.filter(c => c.id !== dossier.representant_id);
+    const othersStr = others.map(c => `${c.prenom} ${c.nom}`).join(', ');
+    const repStr = rep ? `(${rep.prenom} ${rep.nom})` : '';
+    if (!othersStr && !repStr) return getClientsNames(dossier.clients_ids);
+    return [othersStr, repStr].filter(Boolean).join(' ');
+  };
+
   const getEquipeTerrain = (dossier) => {
     const mandat = dossier.mandats?.[0];
     return mandat?.equipe_assignee || "Non assignée";
@@ -735,7 +745,7 @@ export default function TableauDeBord() {
                               </div>
                               <div className="flex items-center gap-1 mb-1">
                                 <User className="w-3 h-3 text-white flex-shrink-0" />
-                                <span className="text-xs text-white font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</span>
+                                <span className="text-xs text-white font-medium truncate">{getClientsDisplay(card.dossier)}</span>
                               </div>
                               {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
                                 <div className="flex items-center gap-1 mb-1">
@@ -832,7 +842,7 @@ export default function TableauDeBord() {
                             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>{getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}</Badge>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span></div>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{getClientsDisplay(dossier)}</span></div>
                         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && <div className="flex items-start gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span></div>}
                         {mandat?.date_livraison && <div className="flex items-center gap-1 mb-1"><Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span></div>}
                         {terrain?.date_limite_leve && (
@@ -981,7 +991,7 @@ export default function TableauDeBord() {
                             <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs font-bold">{joursRetard} jours</Badge>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsDisplay(dossier)}</span></div>
                         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
                           <div className="flex items-center gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" /><span className="text-xs text-slate-400 truncate">{formatAdresse(mandat.adresse_travaux)}</span></div>
                         )}
