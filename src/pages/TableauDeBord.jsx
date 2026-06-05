@@ -913,7 +913,7 @@ export default function TableauDeBord() {
                             <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs font-bold">{joursRetard} jours</Badge>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span></div>
+                        <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium truncate">{getClientsDisplay(dossier)}</span></div>
                         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
                           <div className="flex items-center gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" /><span className="text-xs text-slate-400 truncate">{formatAdresse(mandat.adresse_travaux)}</span></div>
                         )}
