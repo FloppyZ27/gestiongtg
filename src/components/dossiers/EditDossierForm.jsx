@@ -427,7 +427,10 @@ export default function EditDossierForm({
                   const clientName = (formData.clients_ids && formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-")
                     ? getClientsNames(formData.clients_ids)
                     : (formData.clients_texte || "");
-                  return clientName && clientName.trim() ? <span> - {clientName}</span> : null;
+                  const rep = formData.representant_id && (clients || []).find(c => c.id === formData.representant_id);
+                  return clientName && clientName.trim() ? (
+                    <span> - {clientName}{rep ? <span className="opacity-70"> ({rep.prenom} {rep.nom})</span> : null}</span>
+                  ) : null;
                 })()}
               </span>
               {formData.mandats && formData.mandats.length > 0 && (

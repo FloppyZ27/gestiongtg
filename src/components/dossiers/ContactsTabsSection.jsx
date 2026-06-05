@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Star } from "lucide-react";
+import { User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp } from "lucide-react";
 import ClientSelectionCard from "@/components/mandat/ClientSelectionCard";
 
 export default function ContactsTabsSection({
@@ -92,6 +92,10 @@ export default function ContactsTabsSection({
         <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
           <User className="w-3 h-3" />
           Clients {formData.clients_ids.length > 0 && `(${formData.clients_ids.length})`}
+          {formData.representant_id && formData.clients_ids.includes(formData.representant_id) && (() => {
+            const rep = clients.find(c => c.id === formData.representant_id);
+            return rep ? <span className="text-yellow-400/80 font-normal"> ({rep.prenom} {rep.nom})</span> : null;
+          })()}
         </TabsTrigger>
         <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
           <FileText className="w-3 h-3" />
@@ -113,13 +117,6 @@ export default function ContactsTabsSection({
             <div className="flex items-center justify-between mb-2">
               <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                 {formData.clients_ids.length > 0 ? (
-                  <>
-                  {formData.representant_id && formData.clients_ids.includes(formData.representant_id) && (
-                    <div className="flex items-center gap-1 mb-1.5 text-[10px] text-yellow-400/80">
-                      <Star className="w-2.5 h-2.5 fill-yellow-400" />
-                      <span>Représentant: {(() => { const c = clients.find(cl => cl.id === formData.representant_id); return c ? `${c.prenom} ${c.nom}` : ""; })()}</span>
-                    </div>
-                  )}
                   <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                     {formData.clients_ids.map(clientId => {
                       const client = clients.find(c => c.id === clientId);
@@ -132,22 +129,28 @@ export default function ContactsTabsSection({
                             textColor: isRep ? "text-yellow-400" : "text-blue-400",
                             hoverColor: isRep ? "hover:bg-yellow-500/30" : "hover:bg-blue-500/30"
                           })}
-                          <button
-                            type="button"
+                          <div
+                            className="absolute top-1 right-1 flex items-center gap-1 cursor-pointer"
                             title={isRep ? "Retirer comme représentant" : "Désigner comme représentant"}
                             onClick={(e) => {
                               e.stopPropagation();
                               setFormData(prev => ({ ...prev, representant_id: isRep ? null : clientId }));
                             }}
-                            className={`absolute top-1 right-1 p-0.5 rounded transition-colors ${isRep ? 'text-yellow-400 bg-yellow-500/20' : 'text-slate-500 hover:text-yellow-400 bg-transparent hover:bg-yellow-500/10'}`}
                           >
-                            <Star className={`w-3 h-3 ${isRep ? 'fill-yellow-400' : ''}`} />
-                          </button>
+                            <span className="text-[9px] text-slate-400">Rep.</span>
+                            <Checkbox
+                              checked={isRep}
+                              className="w-3 h-3 border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
+                              onCheckedChange={(checked) => {
+                                setFormData(prev => ({ ...prev, representant_id: checked ? clientId : null }));
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
                         </div>
                       );
                     })}
                   </div>
-                  </>
                 ) : (formData.clients_texte && (formData.trello === "Oui" || formData.ttl === "Oui")) ? (
                   <div className="flex flex-wrap gap-1.5 p-1">
                     {formData.clients_texte.split(',').map((nom, i) => nom.trim() && (
