@@ -398,7 +398,7 @@ export default function OuvrirDossierDialog({
           onInteractOutside={(e) => { if (isNewLotDialogOpen || isClientFormOpen) e.preventDefault(); }}
         >
           <DialogHeader className="sr-only">
-            <DialogTitle>Ouvrir le dossier</DialogTitle>
+            <DialogTitle>Nouveau mandat</DialogTitle>
           </DialogHeader>
 
           <EditDossierForm

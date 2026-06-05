@@ -2541,7 +2541,7 @@ const PriseDeMandat = React.forwardRef(({ filterPlaceAffaire = "tous", filterEqu
                       </div>
                       {!editingPriseMandat && <div className="flex justify-end gap-3 px-6 py-4 bg-slate-900 flex-shrink-0">
                         <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async()=>{const h=formData.arpenteur_geometre||formData.clients_ids.length>0||clientInfo.prenom||clientInfo.nom||workAddress.rue||workAddress.ville||mandatsInfo.some(m=>m.type_mandat)||commentairesTemporaires.length>0;if(h){setShowCancelConfirm(true);return;}queryClient.invalidateQueries({queryKey:['priseMandats']});setIsDialogOpen(false);resetFullForm();setIsLocked(false);setLockedBy("");}}>Annuler</Button>
-                        <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Ouvrir</Button>
+                        <Button type="submit" form="dossier-form" disabled={isLocked||createPriseMandatMutation?.isPending} className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
                        </div>}
                       </motion.div>
                       </DialogContent>
