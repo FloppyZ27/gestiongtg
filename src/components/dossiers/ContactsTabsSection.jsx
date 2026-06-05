@@ -91,15 +91,7 @@ export default function ContactsTabsSection({
       <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
         <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
           <User className="w-3 h-3" />
-          Clients
-          {(() => {
-            const rep = formData.representant_id && formData.clients_ids.includes(formData.representant_id)
-              ? clients.find(c => c.id === formData.representant_id)
-              : null;
-            if (rep) return <span className="text-yellow-400/80 font-normal"> ({rep.prenom} {rep.nom})</span>;
-            if (formData.clients_ids.length > 0) return <span> ({formData.clients_ids.length})</span>;
-            return null;
-          })()}
+          Clients {formData.clients_ids.length > 0 && `(${formData.clients_ids.length})`}
         </TabsTrigger>
         <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
           <FileText className="w-3 h-3" />
@@ -141,7 +133,7 @@ export default function ContactsTabsSection({
                               setFormData(prev => ({ ...prev, representant_id: isRep ? null : clientId }));
                             }}
                           >
-                            <span className="text-[9px] text-slate-400">Rep.</span>
+                            <span className="text-[9px] text-slate-400">Représentant</span>
                             <Checkbox
                               checked={isRep}
                               className="w-3 h-3 border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
