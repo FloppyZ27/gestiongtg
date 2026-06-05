@@ -162,7 +162,15 @@ export function DossierCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{clients?.filter(c => dossier.clients_ids?.includes(c.id)).map(c => `${c.prenom} ${c.nom}`).join(', ') || '-'}</span></div>
+      <div className="flex items-center gap-1 mb-1"><User className="w-3 h-3 text-white flex-shrink-0" /><span className="text-xs text-white font-medium">{(() => {
+        const allClients = clients?.filter(c => dossier.clients_ids?.includes(c.id)) || [];
+        const rep = dossier.representant_id ? allClients.find(c => c.id === dossier.representant_id) : null;
+        const others = allClients.filter(c => c.id !== dossier.representant_id);
+        const othersStr = others.map(c => `${c.prenom} ${c.nom}`).join(', ');
+        const repStr = rep ? `(${rep.prenom} ${rep.nom})` : '';
+        if (!othersStr && !repStr) return '-';
+        return [othersStr, repStr].filter(Boolean).join(' ');
+      })()}</span></div>
       {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && <div className="flex items-start gap-1 mb-1"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span></div>}
       {mandat?.date_livraison && <div className="flex items-center gap-1 mb-1"><Calendar className="w-3 h-3 text-emerald-400 flex-shrink-0" /><span className="text-xs text-emerald-300">Livraison: {format(new Date(mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr })}</span></div>}
 
