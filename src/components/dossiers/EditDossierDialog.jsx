@@ -95,7 +95,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     ttl: "Non",
     trello: "Non",
     mandats: [],
-    description: ""
+    description: "",
+    representant_id: null
   });
 
   const lastDossierIdRef = React.useRef(null);
@@ -144,6 +145,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         clients_texte: dossier.clients_texte || "",
         ttl: dossier.ttl || "Non",
         trello: dossier.trello || "Non",
+        representant_id: dossier.representant_id || null,
         mandats: dossier.mandats?.map((m) => ({
           ...m,
           date_ouverture: m.date_ouverture || "",
