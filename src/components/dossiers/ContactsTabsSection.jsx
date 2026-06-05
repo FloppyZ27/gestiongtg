@@ -91,10 +91,14 @@ export default function ContactsTabsSection({
       <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
         <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
           <User className="w-3 h-3" />
-          Clients {formData.clients_ids.length > 0 && `(${formData.clients_ids.length})`}
-          {formData.representant_id && formData.clients_ids.includes(formData.representant_id) && (() => {
-            const rep = clients.find(c => c.id === formData.representant_id);
-            return rep ? <span className="text-yellow-400/80 font-normal"> ({rep.prenom} {rep.nom})</span> : null;
+          Clients
+          {(() => {
+            const rep = formData.representant_id && formData.clients_ids.includes(formData.representant_id)
+              ? clients.find(c => c.id === formData.representant_id)
+              : null;
+            if (rep) return <span className="text-yellow-400/80 font-normal"> ({rep.prenom} {rep.nom})</span>;
+            if (formData.clients_ids.length > 0) return <span> ({formData.clients_ids.length})</span>;
+            return null;
           })()}
         </TabsTrigger>
         <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
@@ -192,21 +196,22 @@ export default function ContactsTabsSection({
             <div className="max-h-[200px] overflow-y-auto space-y-1">
               {filteredClientsForSelector.length > 0 ? (
                 filteredClientsForSelector.slice(0, 15).map((client) => {
-                  const isSelected = formData.clients_ids.includes(client.id);
-                  const clientPhone = client.telephones?.[0]?.telephone || '';
-                  const clientEmail = client.courriels?.[0]?.courriel || '';
-                  return (
-                    <div key={client.id} onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        clients_ids: prev.clients_ids.includes(client.id)
-                          ? prev.clients_ids.filter(id => id !== client.id)
-                          : [...prev.clients_ids, client.id]
-                      }));
-                    }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium">{client.prenom} {client.nom}</span>
+                 const isSelected = formData.clients_ids.includes(client.id);
+                 const isRep = formData.representant_id === client.id;
+                 const clientPhone = client.telephones?.[0]?.telephone || '';
+                 const clientEmail = client.courriels?.[0]?.courriel || '';
+                 return (
+                   <div key={client.id} onClick={() => {
+                     setFormData(prev => ({
+                       ...prev,
+                       clients_ids: prev.clients_ids.includes(client.id)
+                         ? prev.clients_ids.filter(id => id !== client.id)
+                         : [...prev.clients_ids, client.id]
+                     }));
+                   }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+                     <div className="flex items-center justify-between">
+                       <div className="flex-1 min-w-0">
+                         <span className="font-medium">{client.prenom} {client.nom}</span>{isRep && <span className="text-yellow-400/80 ml-1">(représentant)</span>}
                           {(clientPhone || clientEmail) && (
                             <div className="text-slate-500 text-[11px] space-y-0.5">
                               {clientPhone && (
