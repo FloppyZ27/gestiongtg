@@ -774,7 +774,7 @@ export default function EditDossierForm({
                       </div>
                       {!newTerrainFormCollapsed && (
                         <div className="p-4 border-t border-purple-500/30 space-y-3">
-                          <div className="grid grid-cols-6 gap-3">
+                          <div className="grid grid-cols-5 gap-3">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                               <Select value={newTerrainForm.mandatIndex?.toString() || ""} onValueChange={(value) => setNewTerrainForm({...newTerrainForm, mandatIndex: parseInt(value)})}>
@@ -786,16 +786,7 @@ export default function EditDossierForm({
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Statut terrain</Label>
-                              <Select value={newTerrainForm.statut_terrain || "en_verification"} onValueChange={(value) => setNewTerrainForm({...newTerrainForm, statut_terrain: value})}>
-                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  <SelectItem value="en_verification" className="text-white text-xs">En vérification</SelectItem>
-                                  <SelectItem value="a_ceduler" className="text-white text-xs">À cédule</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
+
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Temps prévu</Label>
                               <Input placeholder="Ex: 2h30" value={newTerrainForm.temps_prevu || ""} onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})} className="bg-slate-700 border-slate-600 text-white h-8 text-xs" />
@@ -891,7 +882,7 @@ export default function EditDossierForm({
                               if (!updatedMandats[newTerrainForm.mandatIndex].terrains_list) updatedMandats[newTerrainForm.mandatIndex].terrains_list = [];
                               updatedMandats[newTerrainForm.mandatIndex].terrains_list.push({ date_limite_leve: newTerrainForm.date_limite_leve || "", instruments_requis: newTerrainForm.instruments_requis || "", donneur: newTerrainForm.donneur || "", technicien: newTerrainForm.technicien || "", temps_prevu: newTerrainForm.temps_prevu || "", a_rendez_vous: newTerrainForm.a_rendez_vous || false, date_rendez_vous: newTerrainForm.date_rendez_vous || "", heure_rendez_vous: newTerrainForm.heure_rendez_vous || "", dossier_simultane: newTerrainForm.dossier_simultane || "" });
                               updatedMandats[newTerrainForm.mandatIndex].terrain = { ...updatedMandats[newTerrainForm.mandatIndex].terrain, date_limite_leve: newTerrainForm.date_limite_leve || "", instruments_requis: newTerrainForm.instruments_requis || "", donneur: newTerrainForm.donneur || "", technicien: newTerrainForm.technicien || "", temps_prevu: newTerrainForm.temps_prevu || "", a_rendez_vous: newTerrainForm.a_rendez_vous || false, date_rendez_vous: newTerrainForm.date_rendez_vous || "", heure_rendez_vous: newTerrainForm.heure_rendez_vous || "", dossier_simultane: newTerrainForm.dossier_simultane || "" };
-                              updatedMandats[newTerrainForm.mandatIndex].statut_terrain = newTerrainForm.statut_terrain || "en_verification";
+                              updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "a_ceduler";
                               updatedMandats[newTerrainForm.mandatIndex].tache_actuelle = "Cédule";
                               setFormData({...formData, mandats: updatedMandats});
                               addActionLog("Terrain ajouté", `Terrain ajouté pour le mandat: ${formData.mandats[newTerrainForm.mandatIndex]?.type_mandat || 'Mandat ' + (newTerrainForm.mandatIndex + 1)}`);
