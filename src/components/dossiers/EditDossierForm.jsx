@@ -1065,17 +1065,17 @@ export default function EditDossierForm({
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-3 bg-slate-900 border-t border-slate-700">
-        <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none text-white font-semibold" onClick={onCancel}>
-          {editingDossier ? "Fermer" : "Annuler"}
-        </Button>
-        {!editingDossier && (
+      {/* Footer - seulement pour la création */}
+      {!editingDossier && (
+        <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-3 bg-slate-900 border-t border-slate-700">
+          <Button type="button" className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none text-white font-semibold" onClick={onCancel}>
+            Annuler
+          </Button>
           <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none text-white font-semibold">
             Créer
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </motion.div>
 
     <>
