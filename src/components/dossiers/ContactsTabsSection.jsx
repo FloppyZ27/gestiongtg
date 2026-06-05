@@ -128,10 +128,6 @@ export default function ContactsTabsSection({
                           <div
                             className="absolute top-1 right-1 flex items-center gap-1 cursor-pointer"
                             title={isRep ? "Retirer comme représentant" : "Désigner comme représentant"}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFormData(prev => ({ ...prev, representant_id: isRep ? null : clientId }));
-                            }}
                           >
                             <span className="text-[9px] text-slate-400">Représentant</span>
                             <Checkbox
