@@ -31,6 +31,7 @@ import MinutesSection from "./MinutesSection";
 import DossierHistoriquePanel from "./DossierHistoriquePanel";
 import EntreeTempsSection from "./EntreeTempsSection";
 import MandatTabContent from "./MandatTabContent";
+import OctrChecklist from "./OctrChecklist";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -152,6 +153,7 @@ export default function EditDossierForm({
   const [sameDatesForAllMandats, setSameDatesForAllMandats] = useState(false);
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
+  const [octrCollapsed, setOctrCollapsed] = useState(false);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
   const [minutesCollapsed, setMinutesCollapsed] = useState(true);
@@ -707,6 +709,16 @@ export default function EditDossierForm({
                 </CardContent>
               )}
             </Card>
+
+            {/* Section OCTR Checklist - visible seulement si un mandat OCTR existe */}
+            {formData.mandats?.some(m => m.type_mandat === "OCTR") && (
+              <OctrChecklist
+                formData={formData}
+                setFormData={setFormData}
+                isCollapsed={octrCollapsed}
+                onToggleCollapse={() => setOctrCollapsed(!octrCollapsed)}
+              />
+            )}
 
             {/* Section Tarification */}
             <div className="mt-3" data-section="tarification">
