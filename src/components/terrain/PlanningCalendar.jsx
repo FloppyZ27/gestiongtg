@@ -395,7 +395,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         const existingIds = new Set(existing.map(eq => eq.id));
 
         for (const { dateStr, equipe } of changed) {
-          const data = { date_terrain: dateStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: equipe.techniciens || [], vehicules: equipe.vehicules || [], equipements: equipe.equipements || [], mandats: equipe.mandats || [] };
+          const capPlace = (p) => p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : "Alma";
+          const data = { date_terrain: dateStr, nom: equipe.nom, place_affaire: capPlace(equipe.place_affaire || placeAffaire), techniciens: equipe.techniciens || [], vehicules: equipe.vehicules || [], equipements: equipe.equipements || [], mandats: equipe.mandats || [] };
           if (existingIds.has(equipe.id)) await base44.entities.EquipeTerrain.update(equipe.id, data);
           else await base44.entities.EquipeTerrain.create(data);
         }
@@ -570,10 +571,11 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
   const addEquipe = (dateStr) => { setCreateTeamDateStr(dateStr); setIsCreateTeamDialogOpen(true); };
   const handleCreateTeam = async (newEquipe) => {
     const dateStr = createTeamDateStr;
+    const capitalizePlaceAffaire = (p) => p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : "";
     const data = {
       date_terrain: dateStr,
       nom: newEquipe.nom,
-      place_affaire: newEquipe.place_affaire || placeAffaire || "",
+      place_affaire: newEquipe.place_affaire || capitalizePlaceAffaire(placeAffaire) || "Alma",
       techniciens: newEquipe.techniciens || [],
       vehicules: newEquipe.vehicules || [],
       equipements: newEquipe.equipements || [],
@@ -612,7 +614,8 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
     const alreadyExists = (ne[nextStr] || []).some(e => e.nom === equipe.nom);
     if (alreadyExists) { setEquipeExistanteWarning({ equipeNom: generateTeamDisplayName(equipe), targetDate: nextStr }); return; }
     // Créer directement en BD pour avoir un vrai ID
-    const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: equipe.place_affaire || placeAffaire, techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
+    const capP = (p) => p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : "Alma";
+    const data = { date_terrain: nextStr, nom: equipe.nom, place_affaire: capP(equipe.place_affaire || placeAffaire), techniciens: [...equipe.techniciens], vehicules: [...equipe.vehicules], equipements: [...equipe.equipements], mandats: [] };
     const created = await base44.entities.EquipeTerrain.create(data);
     const copy = { id: created.id, ...data };
     if (!ne[nextStr]) ne[nextStr] = [];
