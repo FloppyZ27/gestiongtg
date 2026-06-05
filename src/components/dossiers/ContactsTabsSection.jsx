@@ -132,8 +132,7 @@ export default function ContactsTabsSection({
                             <span className="text-[9px] text-slate-400">Représentant</span>
                             <Checkbox
                               checked={isRep}
-                              className="w-3 h-3 border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
-                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'scale(0.75)' }}
+                              className="w-3 h-3 border-slate-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500 [&>span]:flex [&>span]:items-center [&>span]:justify-center"
                               onCheckedChange={(checked) => {
                                 setFormData(prev => ({ ...prev, representant_id: checked ? clientId : null }));
                               }}
