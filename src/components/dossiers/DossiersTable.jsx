@@ -59,6 +59,17 @@ const getAbbreviatedMandatType = (type) => {
     return abbreviations[type] || type;
   };
 
+const getClientsWithRepresentant = (dossier, clients) => {
+  if (dossier.ttl === "Oui") return dossier.clients_texte || "-";
+  const allClients = (clients || []).filter(c => dossier.clients_ids?.includes(c.id));
+  const rep = dossier.representant_id ? allClients.find(c => c.id === dossier.representant_id) : null;
+  const others = allClients.filter(c => c.id !== dossier.representant_id);
+  const othersStr = others.map(c => `${c.prenom} ${c.nom}`).join(', ');
+  const repStr = rep ? `(${rep.prenom} ${rep.nom})` : '';
+  const result = [othersStr, repStr].filter(Boolean).join(' ');
+  return result || dossier.clients_texte || "-";
+};
+
 const DossiersTable = ({ 
     sortedDossiers, 
     handleEdit, 
@@ -67,6 +78,7 @@ const DossiersTable = ({
     sortField,
     sortDirection,
     getClientsNames,
+    clients,
     lots,
     getFirstAdresseTravaux,
     formatAdresse
@@ -110,7 +122,7 @@ const DossiersTable = ({
                   <TableCell className="font-medium text-white">
                     <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                   </TableCell>
-                  <TableCell className="text-slate-300">{(dossier.ttl === "Oui" ? dossier.clients_texte : getClientsNames(dossier.clients_ids) !== "-" ? getClientsNames(dossier.clients_ids) : dossier.clients_texte) || "-"}</TableCell>
+                  <TableCell className="text-slate-300">{getClientsWithRepresentant(dossier, clients)}</TableCell>
                   <TableCell className="text-slate-300">
                     {dossier.allMandats && dossier.allMandats.length > 0 ? (
                       <div className="flex flex-wrap gap-1">

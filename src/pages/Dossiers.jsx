@@ -186,6 +186,7 @@ export default function Dossiers() {
                                 sortField={sortField}
                                 sortDirection={sortDirection}
                                 getClientsNames={getClientsNames}
+                                clients={clients}
                                 lots={lots}
                                 getFirstAdresseTravaux={getFirstAdresseTravaux}
                                 formatAdresse={formatAdresse}
