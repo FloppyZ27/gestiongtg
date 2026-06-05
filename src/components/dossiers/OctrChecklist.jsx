@@ -50,20 +50,20 @@ export default function OctrChecklist({ formData, setFormData, isCollapsed, onTo
   return (
     <Card className="border-0 bg-transparent mt-3" data-section="octr">
       <CardHeader
-        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
+        className="cursor-pointer hover:bg-pink-900/40 transition-colors rounded-t-lg py-1.5 bg-pink-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-              <ClipboardCheck className="w-3.5 h-3.5 text-purple-400" />
+            <div className="w-6 h-6 rounded-full bg-pink-500/30 flex items-center justify-center">
+              <ClipboardCheck className="w-3.5 h-3.5 text-pink-400" />
             </div>
-            <CardTitle className="text-purple-300 text-base">OCTR</CardTitle>
+            <CardTitle className="text-pink-300 text-base">OCTR</CardTitle>
             <span className="text-xs text-slate-400">{completedCount}/{OCTR_ITEMS.length} complétés</span>
             {completedCount > 0 && (
               <div className="h-1.5 w-24 bg-slate-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-500 rounded-full transition-all duration-300"
+                  className="h-full bg-pink-500 rounded-full transition-all duration-300"
                   style={{ width: `${(completedCount / OCTR_ITEMS.length) * 100}%` }}
                 />
               </div>
@@ -85,7 +85,7 @@ export default function OctrChecklist({ formData, setFormData, isCollapsed, onTo
                 <Checkbox
                   checked={!!checklist[item]}
                   onCheckedChange={() => toggleItem(item)}
-                  className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                  className="border-slate-500 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
                 />
                 <Label
                   className={`text-sm cursor-pointer select-none transition-colors ${

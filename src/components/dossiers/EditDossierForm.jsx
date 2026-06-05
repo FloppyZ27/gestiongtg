@@ -360,9 +360,12 @@ export default function EditDossierForm({
     return clientIds.map(id => { const client = getClientById(id); return client ? `${client.prenom} ${client.nom}` : "Client inconnu"; }).join(", ");
   };
 
+  const hasOctr = formData.mandats?.some(m => m.type_mandat === "OCTR");
+
   const sections = [
     { id: "infos", label: "Informations", icon: FolderOpen, color: "text-blue-400" },
     { id: "mandats", label: "Mandats", icon: FileText, color: "text-orange-400" },
+    ...(hasOctr ? [{ id: "octr", label: "OCTR", icon: CheckCircle2, color: "text-pink-400" }] : []),
     { id: "tarification", label: "Tarification", icon: Receipt, color: "text-purple-400" },
     { id: "terrain", label: "Terrain", icon: MapPin, color: "text-amber-400" },
     { id: "minutes", label: "Minutes", icon: FileText, color: "text-cyan-400" },
@@ -374,6 +377,7 @@ export default function EditDossierForm({
   const scrollToSection = (sectionId) => {
     setInfoDossierCollapsed(sectionId !== "infos");
     setMandatStepCollapsed(sectionId !== "mandats");
+    setOctrCollapsed(sectionId !== "octr");
     setTarificationStepCollapsed(sectionId !== "tarification");
     setTerrainCollapsed(sectionId !== "terrain");
     setDocumentsCollapsed(sectionId !== "documents");
