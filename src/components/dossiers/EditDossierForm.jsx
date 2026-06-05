@@ -424,13 +424,20 @@ export default function EditDossierForm({
               <span>
                 {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
                 {(() => {
-                  const clientName = (formData.clients_ids && formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-")
-                    ? getClientsNames(formData.clients_ids)
-                    : (formData.clients_texte || "");
                   const rep = formData.representant_id && (clients || []).find(c => c.id === formData.representant_id);
-                  return clientName && clientName.trim() ? (
-                    <span> - {clientName}{rep ? <span className="opacity-70"> ({rep.prenom} {rep.nom})</span> : null}</span>
-                  ) : null;
+                  // Clients sans le représentant
+                  const otherIds = (formData.clients_ids || []).filter(id => id !== formData.representant_id);
+                  const clientName = otherIds.length > 0
+                    ? getClientsNames(otherIds)
+                    : (formData.clients_texte || "");
+                  const hasClients = clientName && clientName !== "-" && clientName.trim();
+                  if (!hasClients && !rep) return null;
+                  return (
+                    <span>
+                      {hasClients ? ` - ${clientName}` : ""}
+                      {rep ? <span className="opacity-70">{hasClients ? " " : " - "}({rep.prenom} {rep.nom})</span> : null}
+                    </span>
+                  );
                 })()}
               </span>
               {formData.mandats && formData.mandats.length > 0 && (
