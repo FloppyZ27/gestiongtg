@@ -543,7 +543,12 @@ export default function PlanningCalendar({ dossiers, techniciens, allTechniciens
         });
       });
 
-      return needsUpdate ? updated : prev;
+      if (needsUpdate) {
+        // Synchroniser prevEquipesRef pour éviter que le debounce save considère ce nettoyage comme un changement
+        prevEquipesRef.current = JSON.parse(JSON.stringify(updated));
+        return updated;
+      }
+      return prev;
     });
   }, [dossiers]);
 
